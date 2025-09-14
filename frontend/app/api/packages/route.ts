@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { withCache } from '@/lib/cache';
+import { PrismaClient } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
+  const prisma = new PrismaClient();
+  
   try {
     console.log('🔍 GET /api/packages - Fetching active packages...');
     console.log('🌍 Environment:', process.env.NODE_ENV);
@@ -10,56 +11,49 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const activeOnly = searchParams.get('active') === 'true';
-    const cacheKey = `packages_${activeOnly ? 'active' : 'all'}`;
 
-    // Use caching for packages data
-    const packages = await withCache(
-      cacheKey,
-      async () => {
-        return await prisma.packageDefinition.findMany({
+    // Fetch packages directly without cache for now
+    const packages = await prisma.packageDefinition.findMany({
+      where: {
+        isActive: activeOnly ? true : undefined
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        sessionsCount: true,
+        packageType: true,
+        maxGroupSize: true,
+        isPopular: true,
+        packagePrices: {
           where: {
-            isActive: activeOnly ? true : undefined
+            isActive: true
           },
           select: {
-            id: true,
-            name: true,
-            description: true,
-            sessionsCount: true,
-            packageType: true,
-            maxGroupSize: true,
-            isPopular: true,
-            packagePrices: {
-              where: {
-                isActive: true
-              },
+            price: true,
+            currency: {
               select: {
-                price: true,
-                currency: {
-                  select: {
-                    code: true,
-                    symbol: true
-                  }
-                }
-              },
-              orderBy: {
-                price: 'asc'
-              },
-              take: 1 // Get the cheapest price for display
-            },
-            sessionDuration: {
-              select: {
-                name: true,
-                duration_minutes: true
+                code: true,
+                symbol: true
               }
             }
           },
           orderBy: {
-            displayOrder: 'asc'
+            price: 'asc'
+          },
+          take: 1 // Get the cheapest price for display
+        },
+        sessionDuration: {
+          select: {
+            name: true,
+            duration_minutes: true
           }
-        });
+        }
       },
-      5 * 60 * 1000 // Cache for 5 minutes (packages change occasionally)
-    );
+      orderBy: {
+        displayOrder: 'asc'
+      }
+    });
 
     // Transform the data to match the expected format
     const transformedPackages = packages.map(pkg => {
@@ -90,26 +84,13 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('❌ Error in GET /api/packages:', error);
     
-    // Check if it's a database connection error
-    if (error instanceof Error) {
-      console.error('❌ Error details:', error.message);
-      console.error('❌ Error stack:', error.stack);
-      
-      if (error.message.includes('connect') || error.message.includes('ECONNREFUSED')) {
-        return NextResponse.json({
-          success: false,
-          error: 'Database connection failed',
-          message: 'Unable to connect to the database. Please check your database configuration.',
-          details: process.env.NODE_ENV === 'development' ? error.message : 'Database connection error'
-        }, { status: 503 });
-      }
-    }
-    
     return NextResponse.json({
       success: false,
       error: 'Failed to fetch packages',
       message: 'An error occurred while fetching packages',
       details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : 'Unknown error') : 'Internal server error'
     }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }

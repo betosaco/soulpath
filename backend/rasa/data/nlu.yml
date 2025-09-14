@@ -609,3 +609,121 @@ nlu:
     - essentially
     - basically
     - fundamentally
+
+# ============================================================================
+# TEXT-TO-SPEECH INTENTS
+# ============================================================================
+
+- intent: enable_tts
+  examples: |
+    - habla conmigo
+    - quiero que hables
+    - activa la voz
+    - enciende el audio
+    - quiero escucharte
+    - habla en voz alta
+    - pon voz
+    - activa el sonido
+    - quiero audio
+    - speak to me
+    - turn on voice
+    - enable audio
+    - I want to hear you
+    - speak out loud
+    - turn on sound
+    - enable sound
+    - I want audio
+    - can you speak?
+    - do you have voice?
+    - make it talk
+    - use voice
+    - activate voice
+    - turn on TTS
+    - enable TTS
+
+- intent: disable_tts
+  examples: |
+    - desactiva la voz
+    - apaga el audio
+    - no quiero que hables
+    - quita la voz
+    - silencia
+    - sin sonido
+    - solo texto
+    - desactiva el sonido
+    - no audio
+    - turn off voice
+    - disable audio
+    - I don't want you to speak
+    - remove voice
+    - silence
+    - no sound
+    - text only
+    - disable sound
+    - no audio
+    - turn off TTS
+    - disable TTS
+    - stop speaking
+
+- intent: change_voice
+  examples: |
+    - cambia la voz
+    - quiero otra voz
+    - voz femenina
+    - voz masculina
+    - voz en español
+    - voz en inglés
+    - cambia el tono
+    - otra voz
+    - voz mexicana
+    - voz americana
+    - change voice
+    - I want another voice
+    - female voice
+    - male voice
+    - Spanish voice
+    - English voice
+    - change tone
+    - another voice
+    - Mexican voice
+    - American voice
+    - different voice
+    - new voice
+
+- intent: speak_this
+  examples: |
+    - di esto
+    - habla esto
+    - lee esto
+    - pronuncia esto
+    - di en voz alta
+    - habla en voz alta
+    - lee en voz alta
+    - say this
+    - speak this
+    - read this
+    - pronounce this
+    - say out loud
+    - speak out loud
+    - read out loud
+    - tell me this
+    - voice this
+
+- intent: test_voice
+  examples: |
+    - prueba la voz
+    - test de voz
+    - prueba el audio
+    - test de audio
+    - ¿funciona la voz?
+    - ¿puedes hablar?
+    - prueba de sonido
+    - test voice
+    - voice test
+    - test audio
+    - audio test
+    - does voice work?
+    - can you speak?
+    - sound test
+    - test TTS
+    - TTS test

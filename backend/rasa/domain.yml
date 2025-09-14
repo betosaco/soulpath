@@ -32,6 +32,11 @@ intents:
   - select_timeslot
   - confirm_booking
   - nlu_fallback
+  - enable_tts
+  - disable_tts
+  - change_voice
+  - speak_this
+  - test_voice
 
 entities:
   - name
@@ -45,6 +50,8 @@ entities:
   - email
   - package_name
   - package_id
+  - voice_preference
+  - text_to_speak
 
 slots:
   name:
@@ -103,6 +110,20 @@ slots:
     type: text
     mappings:
     - type: from_text
+  tts_enabled:
+    type: bool
+    mappings:
+    - type: from_text
+  tts_voice:
+    type: text
+    mappings:
+    - type: from_entity
+      entity: voice_preference
+  text_to_speak:
+    type: text
+    mappings:
+    - type: from_entity
+      entity: text_to_speak
 
 responses:
   utter_greet:
@@ -251,6 +272,27 @@ responses:
     - text: "Entiendo que ahora mismo no es el mejor momento. ¿Hay algo más en lo que pueda ayudarte?"
     - text: "No hay problema. ¿Te gustaría información sobre nuestros servicios o tienes alguna otra pregunta?"
 
+  # TTS Responses
+  utter_tts_enabled:
+    - text: "🔊 ¡Perfecto! He activado la función de voz. Ahora te hablaré en mis respuestas."
+    - text: "🎤 ¡Excelente! La función de voz está activada. Podrás escucharme hablar."
+
+  utter_tts_disabled:
+    - text: "🔇 He desactivado la función de voz. Solo te enviaré texto a partir de ahora."
+    - text: "🔇 La función de voz está desactivada. Te enviaré solo mensajes de texto."
+
+  utter_voice_changed:
+    - text: "🎤 ¡Perfecto! He cambiado la voz. Ahora usaré esta nueva voz para hablarte."
+    - text: "🎵 ¡Excelente! La voz ha sido actualizada. ¿Te gusta cómo suena?"
+
+  utter_voice_test:
+    - text: "🎤 ¡Hola! Esta es una prueba de voz. ¿Puedes escucharme claramente?"
+    - text: "🔊 Probando la función de voz... ¿Cómo sueno?"
+
+  utter_tts_error:
+    - text: "⚠️ Lo siento, hay un problema con la función de voz. Te enviaré solo texto por ahora."
+    - text: "🔧 Hay un error técnico con el audio. Continuaré con mensajes de texto."
+
 actions:
   - action_default_fallback
   - action_handle_name_provision
@@ -263,6 +305,10 @@ actions:
   - action_save_user_info
   - action_fetch_packages
   - action_fetch_package_details
+  - action_text_to_speech
+  - action_speak_response
+  - action_toggle_tts
+  - action_set_voice
 
 session_config:
   session_expiration_time: 60

@@ -264,3 +264,60 @@ stories:
   - action: action_check_availability
   - intent: confirm_booking
   - action: utter_booking_confirmation
+
+# ============================================================================
+# TEXT-TO-SPEECH FLOWS
+# ============================================================================
+
+- story: enable TTS flow
+  steps:
+  - intent: enable_tts
+  - action: action_toggle_tts
+  - intent: test_voice
+  - action: action_text_to_speech
+
+- story: disable TTS flow
+  steps:
+  - intent: disable_tts
+  - action: action_toggle_tts
+
+- story: change voice flow
+  steps:
+  - intent: change_voice
+  - action: action_set_voice
+  - intent: test_voice
+  - action: action_text_to_speech
+
+- story: test voice flow
+  steps:
+  - intent: test_voice
+  - action: action_text_to_speech
+
+- story: speak specific text flow
+  steps:
+  - intent: speak_this
+  - action: action_text_to_speech
+
+- story: TTS with package info flow
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: enable_tts
+  - action: action_toggle_tts
+  - intent: ask_packages
+  - action: utter_ask_packages
+  - action: action_fetch_packages
+  - action: action_speak_response
+
+- story: TTS with booking flow
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: enable_tts
+  - action: action_toggle_tts
+  - intent: book_reading
+  - action: utter_book_session
+  - action: action_speak_response
+  - intent: confirm_booking
+  - action: utter_booking_confirmation
+  - action: action_speak_response

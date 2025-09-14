@@ -3,6 +3,8 @@ Custom actions for the wellness astrology chatbot
 """
 import logging
 import os
+import base64
+import io
 from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
@@ -12,6 +14,7 @@ import requests
 import json
 from datetime import datetime, timedelta
 import re
+from tts_config import TTS_CONFIG
 
 logger = logging.getLogger(__name__)
 
@@ -520,3 +523,176 @@ class ActionFetchPackageDetails(Action):
         message += "💫 **¿Te gustaría reservar este paquete?**"
 
         return message
+
+class ActionTextToSpeech(Action):
+    """Convert text to speech using OpenAI Edge TTS service"""
+
+    def name(self) -> Text:
+        return "action_text_to_speech"
+
+    async def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+
+        # Get the text to convert to speech
+        text_to_speak = tracker.get_slot("text_to_speak")
+        if not text_to_speak:
+            # Try to get from the last bot message
+            events = tracker.events
+            for event in reversed(events):
+                if event.get("event") == "bot" and event.get("text"):
+                    text_to_speak = event.get("text")
+                    break
+
+        if not text_to_speak:
+            text_to_speak = "Hola, soy tu asistente de astrología. ¿En qué puedo ayudarte?"
+
+        try:
+            # TTS Service configuration from config file
+            tts_url = TTS_CONFIG["service_url"]
+            api_key = TTS_CONFIG["api_key"]
+            
+            # Voice mapping for Spanish/English
+            voice = tracker.get_slot("tts_voice") or TTS_CONFIG["default_voice"]
+            
+            # Prepare the request payload
+            payload = {
+                "model": "tts-1",
+                "input": text_to_speak,
+                "voice": voice,
+                "response_format": TTS_CONFIG["response_format"],
+                "speed": TTS_CONFIG["speed"]
+            }
+
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {api_key}"
+            }
+
+            # Make the TTS request
+            response = requests.post(tts_url, json=payload, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                # Get the audio data
+                audio_data = response.content
+                
+                # Convert to base64 for sending via dispatcher
+                audio_base64 = base64.b64encode(audio_data).decode('utf-8')
+                
+                # Send the audio message
+                dispatcher.utter_message(
+                    text=f"🔊 {text_to_speak}",
+                    attachment={
+                        "type": "audio",
+                        "payload": {
+                            "src": f"data:audio/mp3;base64,{audio_base64}",
+                            "title": "Respuesta de voz"
+                        }
+                    }
+                )
+                
+                logger.info(f"TTS successful for text: {text_to_speak[:50]}...")
+                
+            else:
+                logger.error(f"TTS request failed with status {response.status_code}: {response.text}")
+                # Fallback to text only
+                dispatcher.utter_message(text=text_to_speak)
+                
+        except requests.exceptions.RequestException as e:
+            logger.error(f"TTS request error: {e}")
+            # Fallback to text only
+            dispatcher.utter_message(text=text_to_speak)
+        except Exception as e:
+            logger.error(f"Unexpected TTS error: {e}")
+            # Fallback to text only
+            dispatcher.utter_message(text=text_to_speak)
+
+        return []
+
+class ActionSpeakResponse(Action):
+    """Speak the bot's response using TTS"""
+
+    def name(self) -> Text:
+        return "action_speak_response"
+
+    async def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+
+        # Get the last bot message
+        events = tracker.events
+        last_bot_message = None
+        for event in reversed(events):
+            if event.get("event") == "bot" and event.get("text"):
+                last_bot_message = event.get("text")
+                break
+
+        if last_bot_message:
+            # Set the text to speak and trigger TTS
+            return [SlotSet("text_to_speak", last_bot_message), ActionExecuted("action_text_to_speech")]
+        
+        return []
+
+class ActionToggleTTS(Action):
+    """Toggle TTS on/off for the user"""
+
+    def name(self) -> Text:
+        return "action_toggle_tts"
+
+    async def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+
+        current_tts_status = tracker.get_slot("tts_enabled")
+        new_status = not current_tts_status if current_tts_status is not None else True
+        
+        if new_status:
+            dispatcher.utter_message(text="🔊 He activado la función de voz. Ahora te hablaré en mis respuestas.")
+        else:
+            dispatcher.utter_message(text="🔇 He desactivado la función de voz. Solo te enviaré texto.")
+
+        return [SlotSet("tts_enabled", new_status)]
+
+class ActionSetVoice(Action):
+    """Set the TTS voice preference"""
+
+    def name(self) -> Text:
+        return "action_set_voice"
+
+    async def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+
+        # Get voice preference from entities or slots
+        entities = tracker.latest_message.get('entities', [])
+        voice_entity = next((e for e in entities if e['entity'] == 'voice_preference'), None)
+        
+        if voice_entity:
+            voice = voice_entity['value']
+            # Use voice mapping from config
+            voice_mapping = TTS_CONFIG["voice_mapping"]
+            selected_voice = voice_mapping.get(voice.lower(), TTS_CONFIG["default_voice"])
+            
+            dispatcher.utter_message(
+                text=f"🎤 Perfecto, he configurado la voz {voice}. Ahora usaré esta voz para hablarte."
+            )
+            
+            return [SlotSet("tts_voice", selected_voice)]
+        else:
+            dispatcher.utter_message(
+                text="🎤 ¿Qué tipo de voz prefieres? Puedo usar voz femenina o masculina, en español o inglés."
+            )
+
+        return []
