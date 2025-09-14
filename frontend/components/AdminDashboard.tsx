@@ -19,7 +19,6 @@ import {
   Database,
   Bug,
   User,
-  Star,
   Video,
   Zap,
   Brain,
@@ -44,7 +43,6 @@ import { SettingsManagement } from './SettingsManagement';
 import { BugReportManagement, BugReportManagementRef } from './BugReportManagement';
 import { BugReportSystem } from './BugReportSystem';
 
-import { AstrologyManagement } from './AstrologyManagement';
 import { LiveSessionConfigManagement } from './LiveSessionConfigManagement';
 import { ExternalAPIManagement } from './ExternalAPIManagement';
 import { RasaMonitoring } from './RasaMonitoring';
@@ -156,7 +154,6 @@ export function AdminDashboard({ onClose, isModal = true, children }: AdminDashb
           
           <div className="space-y-1">
             {[
-              { key: 'astrology', icon: Star, label: 'Astrology Charts' },
               { key: 'rasa-monitoring', icon: Brain, label: 'Rasa AI Monitoring' },
               { key: 'rasa-tuning', icon: Settings, label: 'Model Tuning' },
               { key: 'conversation-logs', icon: MessageSquare, label: 'Conversation Logs' },
@@ -177,20 +174,12 @@ export function AdminDashboard({ onClose, isModal = true, children }: AdminDashb
               { key: 'settings', icon: Database, label: 'Settings' },
               { key: 'bug-reports', icon: Bug, label: 'Bug Reports' },
             ].map(({ key, icon: Icon, label }) => {
-              // Special styling for astrology button
-              const isAstrology = key === 'astrology';
               const isActive = activeTab === key;
               
-              const buttonClasses = isAstrology 
-                ? `w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                    isActive 
-                      ? 'bg-purple-600 text-white' 
-                      : 'bg-purple-600 text-white hover:bg-orange-500'
-                  }`
-                : combineStyles(
-                    sidebarButtonStyles.base,
-                    isActive ? sidebarButtonStyles.variants.active : sidebarButtonStyles.variants.inactive
-                  );
+              const buttonClasses = combineStyles(
+                sidebarButtonStyles.base,
+                isActive ? sidebarButtonStyles.variants.active : sidebarButtonStyles.variants.inactive
+              );
               
               return (
                 <button
@@ -237,7 +226,6 @@ export function AdminDashboard({ onClose, isModal = true, children }: AdminDashb
                   {activeTab === 'settings' && <SettingsManagement />}
                   {activeTab === 'bug-reports' && <BugReportManagement ref={bugReportManagementRef} />}
 
-                  {activeTab === 'astrology' && <AstrologyManagement />}
                   {activeTab === 'rasa-monitoring' && <RasaMonitoring />}
                   {activeTab === 'rasa-tuning' && <RasaModelTuning />}
                   {activeTab === 'conversation-logs' && <ConversationLogsManagement />}

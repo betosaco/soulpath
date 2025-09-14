@@ -219,10 +219,10 @@ function ClientModal({ client, isOpen, mode, onClose, onSave }: ClientModalProps
               </div>
             </div>
 
-            {/* Astrology Chart Information Section */}
+            {/* Birth Information Section */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-white border-b border-[#2a2a4a] pb-2">
-                Astrology Chart Information
+                Birth Information
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -917,7 +917,7 @@ export function ClientManagement() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-heading text-white mb-2">Client Management</h2>
-          <p className="text-gray-400">Manage your astrology consultation clients</p>
+          <p className="text-gray-400">Manage your consultation clients</p>
         </div>
         <BaseButton
           onClick={handleCreateClient}
