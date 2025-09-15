@@ -63,12 +63,12 @@ export default function PackagesPage() {
   const [packages, setPackages] = useState<PackagePrice[]>([
     {
       id: 1,
-      price: 50,
+      price: 900,
       packageDefinition: {
         id: 1,
-        name: "24 MATPASS",
+        name: "01 MATPASS",
         description: "All classes are 60 minutes",
-        sessionsCount: 24,
+        sessionsCount: 1,
         isActive: true
       },
       currency: {
@@ -80,12 +80,12 @@ export default function PackagesPage() {
     },
     {
       id: 2,
-      price: 210,
+      price: 320,
       packageDefinition: {
         id: 2,
-        name: "12 MATPASS",
+        name: "04 MATPASS",
         description: "All classes are 60 minutes",
-        sessionsCount: 12,
+        sessionsCount: 4,
         isActive: true
       },
       currency: {
@@ -114,12 +114,12 @@ export default function PackagesPage() {
     },
     {
       id: 4,
-      price: 320,
+      price: 210,
       packageDefinition: {
         id: 4,
-        name: "04 MATPASS",
+        name: "12 MATPASS",
         description: "All classes are 60 minutes",
-        sessionsCount: 4,
+        sessionsCount: 12,
         isActive: true
       },
       currency: {
@@ -131,12 +131,12 @@ export default function PackagesPage() {
     },
     {
       id: 5,
-      price: 900,
+      price: 50,
       packageDefinition: {
         id: 5,
-        name: "01 MATPASS",
+        name: "24 MATPASS",
         description: "All classes are 60 minutes",
-        sessionsCount: 1,
+        sessionsCount: 24,
         isActive: true
       },
       currency: {
