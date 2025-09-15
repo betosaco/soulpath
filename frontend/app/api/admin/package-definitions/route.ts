@@ -142,7 +142,7 @@ export async function GET(request: NextRequest) {
 
     console.log('🔍 Executing database query...');
     
-    let queryOptions: any = {
+    const queryOptions: any = {
       where,
       skip: offset,
       take: limit,

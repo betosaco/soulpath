@@ -12,11 +12,23 @@ export interface ApiResponse<T = any> {
   message?: string;
 }
 
-export interface ApiError {
-  message: string;
+export class ApiError extends Error {
   status: number;
   statusText: string;
   isJsonError: boolean;
+
+  constructor({ message, status, statusText, isJsonError }: {
+    message: string;
+    status: number;
+    statusText: string;
+    isJsonError: boolean;
+  }) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.statusText = statusText;
+    this.isJsonError = isJsonError;
+  }
 }
 
 /**

@@ -37,7 +37,7 @@ export function useAuth() {
       .then(data => {
         if (data.success) {
           const userData = {
-            ...data.user,
+            ...data.data,
             access_token: token
           };
           console.log('🔐 useAuth: User authenticated from token:', userData);
@@ -74,10 +74,10 @@ export function useAuth() {
       
       if (data.success) {
         // Store token in localStorage
-        localStorage.setItem('auth_token', data.user.access_token);
+        localStorage.setItem('auth_token', data.data.access_token);
         
-        console.log('🔐 useAuth: Sign in successful:', data.user);
-        setUser(data.user);
+        console.log('🔐 useAuth: Sign in successful:', data.data);
+        setUser(data.data);
         
         return { data, error: null };
       } else {

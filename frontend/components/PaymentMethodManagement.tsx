@@ -23,6 +23,17 @@ interface PaymentMethodFormData {
   icon: string;
   requiresConfirmation: boolean;
   autoAssignPackage: boolean;
+  izipayConfig?: {
+    merchantId: string;
+    username: string;
+    password: string;
+    publicKey: string;
+    currency: string;
+    environment: 'sandbox' | 'production';
+    supportedCountries: string[];
+    returnUrl: string;
+    cancelUrl: string;
+  };
 }
 
 interface StripeConfig {
@@ -265,8 +276,8 @@ const PaymentMethodManagement: React.FC = () => {
     // Set configuration based on payment method type
     if (method.type === 'stripe' && method.stripeConfig) {
       setStripeConfig(method.stripeConfig);
-    } else if (method.type === 'izipay' && method.providerConfig) {
-      setIzipayConfig(method.providerConfig);
+    } else if (method.type === 'izipay' && method.izipayConfig) {
+      setIzipayConfig(method.izipayConfig);
     } else {
       setStripeConfig(null);
       setIzipayConfig(null);
@@ -579,19 +590,19 @@ const PaymentMethodManagement: React.FC = () => {
                       </div>
                     </div>
                     
-                    {formData.providerConfig && 'merchantId' in formData.providerConfig ? (
+                    {formData.izipayConfig && 'merchantId' in formData.izipayConfig ? (
                       <div className="space-y-2">
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <Label className="text-xs text-[var(--color-accent-700)]">Merchant ID</Label>
                             <p className="text-sm text-[var(--color-accent-900)] font-mono">
-                              {formData.providerConfig.merchantId || 'Not set'}
+                              {formData.izipayConfig.merchantId || 'Not set'}
                             </p>
                           </div>
                           <div>
                             <Label className="text-xs text-[var(--color-accent-700)]">Environment</Label>
                             <p className="text-sm text-[var(--color-accent-900)]">
-                              {formData.providerConfig.environment || 'sandbox'}
+                              {formData.izipayConfig.environment || 'sandbox'}
                             </p>
                           </div>
                         </div>
@@ -599,14 +610,14 @@ const PaymentMethodManagement: React.FC = () => {
                           <div>
                             <Label className="text-xs text-[var(--color-accent-700)]">Currency</Label>
                             <p className="text-sm text-[var(--color-accent-900)]">
-                              {formData.providerConfig.currency || 'PEN'}
+                              {formData.izipayConfig.currency || 'PEN'}
                             </p>
                           </div>
                           <div>
                             <Label className="text-xs text-[var(--color-accent-700)]">Supported Countries</Label>
                             <p className="text-sm text-[var(--color-accent-900)]">
-                              {Array.isArray(formData.providerConfig.supportedCountries) 
-                                ? formData.providerConfig.supportedCountries.join(', ') 
+                              {Array.isArray(formData.izipayConfig.supportedCountries) 
+                                ? formData.izipayConfig.supportedCountries.join(', ') 
                                 : 'PE'}
                             </p>
                           </div>

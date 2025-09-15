@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
       where.capacity = { not: null }; // Has capacity limit
     }
 
-    // Base select fields
+    // Base select fields for non-enhanced mode
     const baseSelect = {
       id: true,
       scheduleTemplateId: true,
@@ -114,62 +114,66 @@ export async function GET(request: NextRequest) {
       }
     };
 
-    // For enhanced mode, we'll use include instead of select due to Prisma limitations
-    const queryOptions = enhanced === 'true' ? {
-      include: {
-        scheduleTemplate: {
-          select: {
-            id: true,
-            dayOfWeek: true,
-            startTime: true,
-            endTime: true,
-            capacity: true,
-            sessionDuration: {
-              select: {
-                id: true,
-                name: true,
-                duration_minutes: true
-              }
+    // Enhanced mode with include for bookings and _count
+    const enhancedInclude = {
+      scheduleTemplate: {
+        select: {
+          id: true,
+          dayOfWeek: true,
+          startTime: true,
+          endTime: true,
+          capacity: true,
+          sessionDuration: {
+            select: {
+              id: true,
+              name: true,
+              duration_minutes: true
             }
-          }
-        },
-        bookings: {
-          take: 5,
-          orderBy: { createdAt: 'desc' as const },
-          select: {
-            id: true,
-            sessionType: true,
-            status: true,
-            createdAt: true,
-            user: {
-              select: {
-                id: true,
-                email: true,
-                fullName: true
-              }
-            }
-          }
-        },
-        _count: {
-          select: {
-            bookings: true
           }
         }
+      },
+      bookings: {
+        take: 5,
+        orderBy: { createdAt: 'desc' as const },
+        select: {
+          id: true,
+          sessionType: true,
+          status: true,
+          createdAt: true,
+          user: {
+            select: {
+              id: true,
+              email: true,
+              fullName: true
+            }
+          }
+        }
+      },
+      _count: {
+        select: {
+          bookings: true
+        }
       }
-    } : {
-      select: baseSelect
     };
 
     console.log('🔍 Executing database query...');
     
     const [scheduleSlots, totalCount] = await Promise.all([
-      prisma.scheduleSlot.findMany({
-        where,
-        ...queryOptions,
-        skip: offset,
-        take: limit,
-        orderBy: { startTime: 'asc' }
-      }),
+      enhanced === 'true' 
+        ? prisma.scheduleSlot.findMany({
+            where,
+            include: enhancedInclude,
+            skip: offset,
+            take: limit,
+            orderBy: { startTime: 'asc' }
+          })
+        : prisma.scheduleSlot.findMany({
+            where,
+            select: baseSelect,
+            skip: offset,
+            take: limit,
+            orderBy: { startTime: 'asc' }
+          }),
       prisma.scheduleSlot.count({ where })
     ]);
 
