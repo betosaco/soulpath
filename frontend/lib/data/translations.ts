@@ -8,7 +8,7 @@ export const defaultTranslations = {
       apply: 'Book Now'
     },
     hero: {
-      title: 'SOULPATH',
+      title: 'MatMax Yoga Studio',
       tagline: 'Transform your life through spiritual guidance and healing',
       description: 'Experience profound transformation through personalized spiritual sessions, energy healing, and guidance on your journey to inner peace and self-discovery.',
       ctaPrimary: 'Book Your Session',
@@ -43,7 +43,7 @@ export const defaultTranslations = {
       ctaText: 'Ready to begin your transformation?'
     },
     session: {
-      title: 'The Soul Compass Session',
+      title: 'Yoga Classes',
       price: '$130 USD',
       description: 'A confidential, 90-minute deep-dive consultation and subsequent written analysis to provide you with profound strategic clarity.',
       deliverables: [
@@ -67,9 +67,9 @@ export const defaultTranslations = {
       benefit3Description: 'Develop deeper self-awareness and spiritual connection.'
     },
     about: {
-      title: 'About SOULPATH',
-      text: 'SOULPATH was founded with a simple yet profound mission: to help people find their true selves and live authentic, fulfilling lives. Through spiritual guidance, energy healing, and compassionate counseling, we\'ve helped hundreds of individuals transform their lives and discover their purpose.',
-      description: 'SOULPATH was founded with a simple yet profound mission: to help people find their true selves and live authentic, fulfilling lives. Through spiritual guidance, energy healing, and compassionate counseling, we\'ve helped hundreds of individuals transform their lives and discover their purpose.',
+      title: 'About MatMax Yoga Studio',
+      text: 'MatMax Yoga Studio is dedicated to helping people build strength, flexibility, and inner peace through mindful movement and breath. Our classes support wellbeing and balance for all levels.',
+      description: 'MatMax Yoga Studio is dedicated to helping people build strength, flexibility, and inner peace through mindful movement and breath. Our classes support wellbeing and balance for all levels.',
       statsClients: 'Clients Helped',
       statsYears: 'Years Experience',
       statsSessions: 'Sessions Completed',
@@ -121,7 +121,7 @@ export const defaultTranslations = {
       apply: 'Reserva Ahora'
     },
     hero: {
-      title: 'SOULPATH',
+      title: 'MatMax Yoga Studio',
       tagline: 'Transforma tu vida a través de la guía espiritual y la sanación',
       description: 'Experimenta una transformación profunda a través de sesiones espirituales personalizadas, sanación energética y guía en tu camino hacia la paz interior y el autodescubrimiento.',
       ctaPrimary: 'Reserva tu Sesión',
@@ -180,9 +180,9 @@ export const defaultTranslations = {
       benefit3Description: 'Desarrolla una mayor autoconciencia y conexión espiritual.'
     },
     about: {
-      title: 'Acerca de SOULPATH',
-      text: 'SOULPATH fue fundado con una misión simple pero profunda: ayudar a las personas a encontrar su verdadero ser y vivir vidas auténticas y satisfactorias. A través de la guía espiritual, la sanación energética y el asesoramiento compasivo, hemos ayudado a cientos de individuos a transformar sus vidas y descubrir su propósito.',
-      description: 'SOULPATH fue fundado con una misión simple pero profunda: ayudar a las personas a encontrar su verdadero ser y vivir vidas auténticas y satisfactorias. A través de la guía espiritual, la sanación energética y el asesoramiento compasivo, hemos ayudado a cientos de individuos a transformar sus vidas y descubrir su propósito.',
+      title: 'Acerca de MatMax Yoga Studio',
+      text: 'MatMax Yoga Studio está dedicado a ayudarte a construir fuerza, flexibilidad y paz interior a través del movimiento consciente y la respiración. Nuestras clases apoyan el bienestar y el equilibrio para todos los niveles.',
+      description: 'MatMax Yoga Studio está dedicado a ayudarte a construir fuerza, flexibilidad y paz interior a través del movimiento consciente y la respiración. Nuestras clases apoyan el bienestar y el equilibrio para todos los niveles.',
       statsClients: 'Clientes Ayudados',
       statsYears: 'Años de Experiencia',
       statsSessions: 'Sesiones Completadas',

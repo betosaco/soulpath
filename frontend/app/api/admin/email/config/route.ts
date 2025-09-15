@@ -32,8 +32,8 @@ export async function GET(request: NextRequest) {
         smtp_port: 587,
         smtp_user: '',
         smtp_pass: '',
-        from_email: 'noreply@soulpath.lat',
-        from_name: 'SOULPATH',
+        from_email: 'noreply@matmax.store',
+        from_name: 'MatMax Yoga Studio',
         brevo_api_key: '',
         sender_email: '',
         sender_name: '',
@@ -42,13 +42,13 @@ export async function GET(request: NextRequest) {
         sms_provider: 'labsmobile',
         labsmobile_username: '',
         labsmobile_token: '',
-        sms_sender_name: 'SoulPath',
+        sms_sender_name: 'MatMax Yoga Studio',
         sms_enabled: false,
         // SMS Templates
-        sms_otp_template_en: 'Your SoulPath verification code is: {{otpCode}}. This code expires in 10 minutes.',
-        sms_otp_template_es: 'Su código de verificación de SoulPath es: {{otpCode}}. Este código expira en 10 minutos.',
-        sms_booking_template_en: 'Your SoulPath session is confirmed for {{bookingDate}} at {{bookingTime}}. We look forward to seeing you!',
-        sms_booking_template_es: 'Su sesión de SoulPath está confirmada para el {{bookingDate}} a las {{bookingTime}}. ¡Esperamos verte!'
+        sms_otp_template_en: 'Your MatMax Yoga Studio verification code is: {{otpCode}}. This code expires in 10 minutes.',
+        sms_otp_template_es: 'Su código de verificación de MatMax Yoga Studio es: {{otpCode}}. Este código expira en 10 minutos.',
+        sms_booking_template_en: 'Your MatMax Yoga Studio class is confirmed for {{bookingDate}} at {{bookingTime}}. We look forward to seeing you!',
+        sms_booking_template_es: 'Su clase en MatMax Yoga Studio está confirmada para el {{bookingDate}} a las {{bookingTime}}. ¡Esperamos verte!'
       };
       
       console.log('✅ Returning default email config');

@@ -12,7 +12,7 @@ export const EMAIL_PLACEHOLDERS: Record<string, Placeholder[]> = {
     { key: '{{userEmail}}', description: 'User\'s email address', category: 'basic', example: 'john@example.com' },
     { key: '{{bookingId}}', description: 'Unique booking ID', category: 'basic', example: 'BK-12345' },
     { key: '{{language}}', description: 'Session language', category: 'basic', example: 'English' },
-    { key: '{{adminEmail}}', description: 'Admin contact email', category: 'basic', example: 'admin@soulpath.lat' },
+    { key: '{{adminEmail}}', description: 'Admin contact email', category: 'basic', example: 'admin@matmax.store' },
     { key: '{{submissionDate}}', description: 'When the booking was submitted', category: 'basic', example: '2024-01-15' }
   ],
   booking: [

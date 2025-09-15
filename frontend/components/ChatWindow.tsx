@@ -57,8 +57,8 @@ export function ChatWindow({ isOpen = false, onToggle, className = '' }: ChatWin
       const welcomeMessage: Message = {
         id: 'welcome',
         content: language === 'es'
-          ? '🌟 ¡Hola! Soy tu asistente personal de SoulPath Wellness\n\nEstoy aquí para ayudarte a explorar el fascinante mundo de la astrología con Jose Garfias. ¿Qué te gustaría hacer hoy?\n\n✨ **Descubre tu camino espiritual**\n🔮 **Lecturas personalizadas**\n📚 **Información sobre paquetes**\n💫 **Preguntas sobre astrología**'
-          : '🌟 Hello! I\'m your SoulPath Wellness assistant\n\nI\'m here to help you explore the fascinating world of astrology with Jose Garfias. What would you like to do today?\n\n✨ **Discover your spiritual path**\n🔮 **Personalized readings**\n📚 **Package information**\n💫 **Questions about astrology**',
+          ? '🌟 ¡Hola! Soy tu asistente de MatMax Yoga Studio. ¿En qué puedo ayudarte hoy?\n\n✨ **Clases para todos los niveles**\n🧘 **Fortaleza y flexibilidad**\n🫶 **Bienestar y equilibrio**\n📅 **Horarios y reservas**'
+          : '🌟 Hello! I\'m your MatMax Yoga Studio assistant. How can I help you today?\n\n✨ **Classes for all levels**\n🧘 **Strength and flexibility**\n🫶 **Wellbeing and balance**\n📅 **Schedules and bookings**',
         sender: 'assistant',
         timestamp: new Date(),
         // Buttons removed for natural conversation
@@ -142,8 +142,8 @@ export function ChatWindow({ isOpen = false, onToggle, className = '' }: ChatWin
       const fallbackMessage: Message = {
         id: `fallback_${fallbackMessageId}`,
         content: language === 'es'
-          ? '¡Hola! Soy tu asistente de astrología de SoulPath. ¿En qué puedo ayudarte hoy?\n\nPuedes preguntarme sobre:\n• 📅 Agendar una lectura\n• 📦 Información de paquetes\n• 💳 Precios y pagos\n• 📊 Estado de citas\n• ❓ Preguntas generales sobre astrología'
-          : 'Hello! I\'m your SoulPath astrology assistant. How can I help you today?\n\nYou can ask me about:\n• 📅 Schedule a reading\n• 📦 Package information\n• 💳 Pricing and payments\n• 📊 Appointment status\n• ❓ General questions about astrology',
+          ? '¡Hola! Soy tu asistente de MatMax Yoga Studio. ¿En qué puedo ayudarte hoy?\n\nPuedes preguntarme sobre:\n• 📅 Reservar clases\n• 🧘 Tipos de clases\n• 💳 Precios y pagos\n• 🗓️ Horarios disponibles\n• ❓ Preguntas generales'
+          : 'Hello! I\'m your MatMax Yoga Studio assistant. How can I help you today?\n\nYou can ask me about:\n• 📅 Booking classes\n• 🧘 Class types\n• 💳 Pricing and payments\n• 🗓️ Available schedules\n• ❓ General questions',
         sender: 'assistant',
         timestamp: new Date(),
         // Buttons removed for natural conversation

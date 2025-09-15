@@ -1,9 +1,9 @@
 
-  # Full-Page Scroll Website
+  # MatMax Yoga Studio Frontend
 
-  This is a code bundle for Full-Page Scroll Website. The original project is available at https://www.figma.com/design/DwchAEignMYUjHJFTozVV1/Full-Page-Scroll-Website.
+  This is the Next.js frontend for MatMax Yoga Studio.
 
-  ## Running the code
+  ## Running the app
 
   Run `npm i` to install the dependencies.
 

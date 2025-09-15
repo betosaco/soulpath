@@ -24,9 +24,9 @@ function createSupabaseClient() {
 // Default logo configuration when table doesn't exist
 const defaultLogo = {
   id: 1,
-  type: 'text',
-  text: 'SOULPATH',
-  imageUrl: null,
+  type: 'image',
+  text: 'MatMax Yoga Studio',
+  imageUrl: '/logo_matmax.png',
   isActive: true,
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString()

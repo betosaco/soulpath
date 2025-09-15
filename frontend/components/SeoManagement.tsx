@@ -53,24 +53,24 @@ interface SeoSettings {
 }
 
 const defaultSeoSettings: SeoSettings = {
-  title: 'SoulPath - Professional Astrology Consultations with José Garfias',
-  description: 'Discover your cosmic blueprint with personalized astrology readings. Professional consultations with certified astrologer José Garfias. Book your session today.',
-  keywords: 'astrology, birth chart, horoscope, zodiac, natal chart, astrology reading, astrology consultation, cosmic guidance, spiritual guidance',
-  author: 'José Garfias',
+  title: 'MatMax Yoga Studio',
+  description: 'Yoga classes for all levels. Build strength, flexibility, and inner peace with MatMax Yoga Studio.',
+  keywords: 'yoga, yoga classes, wellness, meditation, flexibility, strength, balance',
+  author: 'MatMax Yoga Studio',
   
-  ogTitle: 'SoulPath - Professional Astrology Consultations',
-  ogDescription: 'Discover your cosmic blueprint with personalized astrology readings. Professional consultations with certified astrologer José Garfias.',
+  ogTitle: 'MatMax Yoga Studio',
+  ogDescription: 'Yoga classes for all levels. Build strength, flexibility, and inner peace with MatMax Yoga Studio.',
   
-  twitterTitle: 'SoulPath - Professional Astrology Consultations',
-  twitterDescription: 'Discover your cosmic blueprint with personalized astrology readings. Professional consultations with certified astrologer José Garfias.',
+  twitterTitle: 'MatMax Yoga Studio',
+  twitterDescription: 'Yoga classes for all levels. Build strength, flexibility, and inner peace with MatMax Yoga Studio.',
   
   robots: 'index, follow',
-  canonical: 'https://soulpath.lat',
+  canonical: 'https://matmax.store',
   language: 'en',
   
-  organizationName: 'SoulPath Astrology',
-  organizationType: 'ProfessionalService',
-  contactEmail: 'info@soulpath.lat',
+  organizationName: 'MatMax Yoga Studio',
+  organizationType: 'HealthAndBeautyBusiness',
+  contactEmail: 'info@matmax.store',
   contactPhone: '',
   address: ''
 };
@@ -588,7 +588,7 @@ export function SeoManagement() {
                         id="canonical"
                         value={seoSettings.canonical}
                         onChange={(e) => updateSetting('canonical', e.target.value)}
-                        placeholder="https://soulpath.lat"
+                        placeholder="https://matmax.store"
                         className="bg-[var(--color-surface-secondary)] border-[var(--color-border-500)] text-[var(--color-text-primary)]"
                       />
                     </div>
@@ -675,7 +675,7 @@ export function SeoManagement() {
                         id="organizationName"
                         value={seoSettings.organizationName}
                         onChange={(e) => updateSetting('organizationName', e.target.value)}
-                        placeholder="SoulPath Astrology"
+                        placeholder="MatMax Yoga Studio"
                         className="bg-[var(--color-surface-secondary)] border-[var(--color-border-500)] text-[var(--color-text-primary)]"
                       />
                     </div>
@@ -697,7 +697,7 @@ export function SeoManagement() {
                         id="contactEmail"
                         value={seoSettings.contactEmail}
                         onChange={(e) => updateSetting('contactEmail', e.target.value)}
-                        placeholder="info@soulpath.lat"
+                        placeholder="info@matmax.store"
                         className="bg-[var(--color-surface-secondary)] border-[var(--color-border-500)] text-[var(--color-text-primary)]"
                       />
                     </div>

@@ -35,10 +35,11 @@ export async function GET() {
 
   } catch (error) {
     console.error('❌ Error fetching payment methods:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
       { 
         error: 'Failed to fetch payment methods',
-        details: error.message 
+        details: message 
       },
       { status: 500 }
     );

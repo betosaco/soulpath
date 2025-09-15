@@ -96,8 +96,8 @@ export const DEFAULT_SECTIONS: SectionConfig[] = [
   {
     id: 'about',
     type: 'content',
-    title: 'About SoulPath',
-    description: 'Information about José and SoulPath',
+    title: 'About MatMax Yoga Studio',
+    description: 'Information about MatMax Yoga Studio and our approach',
     icon: 'User',
     component: 'AboutSection',
     order: 3,

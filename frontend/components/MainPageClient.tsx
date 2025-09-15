@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { AdminDashboard } from '@/components/AdminDashboard';
 import LoginModal from '@/components/LoginModal';
 import { BookingSection } from '@/components/BookingSection';
+import { themeClasses } from '@/lib/theme/theme-utils';
 
 
 
@@ -45,7 +46,7 @@ function Header({
     <motion.header 
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className="fixed top-0 left-0 right-0 z-[9997] bg-black/20 backdrop-blur-md border-b border-white/10"
+      className={`fixed top-0 left-0 right-0 z-[9997] ${themeClasses.background.surface}/80 backdrop-blur-md ${themeClasses.border.light} border-b`}
     >
       <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center justify-between">
@@ -55,8 +56,8 @@ function Header({
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <span className="font-heading text-lg sm:text-xl md:text-2xl text-[#FFD700]">
-              SOULPATH
+            <span className={`font-heading text-lg sm:text-xl md:text-2xl ${themeClasses.text.accent}`}>
+              MatMax
             </span>
           </motion.div>
           
@@ -66,8 +67,8 @@ function Header({
                 onClick={() => setLanguage('en')}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 ${
                   language === 'en'
-                    ? 'bg-[#FFD700] text-[#0A0A23] shadow-lg'
-                    : 'text-[#C0C0C0] hover:text-[#FFD700] hover:bg-[#FFD700]/10'
+                    ? themeClasses.button.primary
+                    : `${themeClasses.text.secondary} hover:${themeClasses.text.accent} ${themeClasses.button.ghost}`
                 }`}
               >
                 EN
@@ -76,8 +77,8 @@ function Header({
                 onClick={() => setLanguage('es')}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 ${
                   language === 'es'
-                    ? 'bg-[#FFD700] text-[#0A0A23] shadow-lg'
-                    : 'text-[#C0C0C0] hover:text-[#FFD700] hover:bg-[#FFD700]/10'
+                    ? themeClasses.button.primary
+                    : `${themeClasses.text.secondary} hover:${themeClasses.text.accent} ${themeClasses.button.ghost}`
                 }`}
               >
                 ES
@@ -86,7 +87,7 @@ function Header({
             
             <button
               onClick={onLoginClick}
-              className="px-4 py-2 bg-[#FFD700] text-[#0A0A23] rounded-lg font-medium hover:bg-[#FFD700]/90 transition-all duration-300 shadow-lg hover:shadow-xl"
+              className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-xl ${themeClasses.button.primary}`}
             >
               {typeof t?.admin === 'object' && t.admin?.login || 'Login'}
             </button>
@@ -111,25 +112,25 @@ function HeroSection({ t }: TranslationProps) {
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.8 }}
-          className="text-5xl sm:text-6xl md:text-7xl font-heading text-[#EAEAEA] mb-6 leading-tight"
+          className={`text-5xl sm:text-6xl md:text-7xl font-heading ${themeClasses.text.primary} mb-6 leading-tight`}
         >
-          {typeof t?.hero === 'object' && t.hero?.title || 'SOULPATH'}
+          {typeof t?.hero === 'object' && t.hero?.title || 'MatMax Yoga Studio'}
         </motion.h1>
         
         <motion.p
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5, duration: 0.8 }}
-          className="text-xl sm:text-2xl text-[#C0C0C0] mb-8 max-w-2xl mx-auto leading-relaxed"
+          className={`text-xl sm:text-2xl ${themeClasses.text.primary} mb-8 max-w-2xl mx-auto leading-relaxed`}
         >
-          {typeof t?.hero === 'object' && t.hero?.subtitle || 'Transform your life through spiritual guidance and healing'}
+          {typeof t?.hero === 'object' && t.hero?.subtitle || 'Tu camino al bienestar comienza aquí'}
         </motion.p>
         
         <motion.div
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.7, duration: 0.8 }}
-          className="text-sm text-[#C0C0C0]/70"
+          className={`text-sm ${themeClasses.text.secondary}`}
         >
           {typeof t?.hero === 'object' && t.hero?.scrollHint || 'Scroll to explore'}
         </motion.div>
@@ -152,7 +153,7 @@ function ApproachSection({ t }: TranslationProps) {
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.8 }}
-          className="text-4xl sm:text-5xl font-heading text-[#FFD700] mb-12"
+          className={`text-4xl sm:text-5xl font-heading ${themeClasses.text.primary} mb-12`}
         >
           {typeof t?.approach === 'object' && t.approach?.title || 'Our Approach'}
         </motion.h2>
@@ -164,12 +165,12 @@ function ApproachSection({ t }: TranslationProps) {
               initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.5 + i * 0.1, duration: 0.8 }}
-              className="bg-black/20 backdrop-blur-md rounded-2xl p-6 border border-white/10"
+              className={`rounded-2xl p-6 ${themeClasses.card.default}`}
             >
-              <h3 className="text-xl font-heading text-[#EAEAEA] mb-4">
+              <h3 className={`text-xl font-heading ${themeClasses.text.primary} mb-4`}>
                 {typeof t?.approach === 'object' && t.approach?.[`step${i}Title`] || `Step ${i}`}
               </h3>
-              <p className="text-[#C0C0C0] leading-relaxed">
+              <p className={`${themeClasses.text.secondary} leading-relaxed`}>
                 {typeof t?.approach === 'object' && t.approach?.[`step${i}Description`] || `Description for step ${i}`}
               </p>
             </motion.div>
@@ -194,7 +195,7 @@ function SessionSection({ t, scrollToSection }: SessionSectionProps) {
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.8 }}
-          className="text-4xl sm:text-5xl font-heading text-[#FFD700] mb-8"
+          className={`text-4xl sm:text-5xl font-heading ${themeClasses.text.primary} mb-8`}
         >
           {typeof t?.session === 'object' && t.session?.title || 'Book Your Session'}
         </motion.h2>
@@ -203,7 +204,7 @@ function SessionSection({ t, scrollToSection }: SessionSectionProps) {
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5, duration: 0.8 }}
-          className="text-xl text-[#C0C0C0] mb-8 leading-relaxed"
+          className={`text-xl ${themeClasses.text.secondary} mb-8 leading-relaxed`}
         >
           {typeof t?.session === 'object' && t.session?.description || 'Ready to begin your spiritual journey?'}
         </motion.p>
@@ -213,7 +214,7 @@ function SessionSection({ t, scrollToSection }: SessionSectionProps) {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.7, duration: 0.8 }}
           onClick={() => scrollToSection('apply')}
-          className="px-8 py-4 bg-[#FFD700] text-[#0A0A23] rounded-lg font-medium hover:bg-[#FFD700]/90 transition-all duration-300 shadow-lg hover:shadow-xl text-lg"
+          className={`px-8 py-4 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-xl text-lg ${themeClasses.button.primary}`}
         >
           {typeof t?.session === 'object' && t.session?.cta || 'Get Started'}
         </motion.button>
@@ -236,7 +237,7 @@ function AboutSection({ t }: TranslationProps) {
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.8 }}
-          className="text-4xl sm:text-5xl font-heading text-[#FFD700] mb-8"
+          className={`text-4xl sm:text-5xl font-heading ${themeClasses.text.primary} mb-8`}
         >
           {typeof t?.about === 'object' && t.about?.title || 'About Us'}
         </motion.h2>
@@ -245,7 +246,7 @@ function AboutSection({ t }: TranslationProps) {
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5, duration: 0.8 }}
-          className="text-xl text-[#C0C0C0] mb-8 leading-relaxed"
+          className={`text-xl ${themeClasses.text.secondary} mb-8 leading-relaxed`}
         >
           {typeof t?.about === 'object' && t.about?.description || 'Learn more about our mission and approach to spiritual healing.'}
         </motion.p>
@@ -374,18 +375,18 @@ export default function MainPageClient({
 
   if (isLoadingTranslations) {
     return (
-      <div className="h-screen overflow-hidden bg-gradient-to-b from-[#191970] to-[#0A0A23] text-[#EAEAEA] flex items-center justify-center">
+      <div className={`h-screen overflow-hidden ${themeClasses.background.primary} ${themeClasses.text.primary} flex items-center justify-center`}>
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-4 border-[#FFD700] border-t-transparent rounded-full"
+          className="w-12 h-12 border-4 border-[var(--color-primary-main)] border-t-transparent rounded-full"
         />
       </div>
     );
   }
 
   return (
-    <div className="h-screen overflow-hidden bg-gradient-to-b from-[#191970] to-[#0A0A23] text-[#EAEAEA] mobile-container">
+    <div className={`h-screen overflow-hidden ${themeClasses.background.primary} ${themeClasses.text.primary} mobile-container`}>
       <ConstellationBackground />
       
       <Header
@@ -426,8 +427,8 @@ export default function MainPageClient({
             whileTap={{ scale: 0.9 }}
             className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full border-2 transition-all duration-300 touch-manipulation relative ${
               currentSection === index
-                ? 'bg-[#FFD700] border-[#FFD700] cosmic-glow shadow-lg shadow-[#FFD700]/30'
-                : 'bg-transparent border-[#C0C0C0]/50 hover:border-[#FFD700] hover:bg-[#FFD700]/10'
+                ? 'bg-[var(--color-primary-main)] border-[var(--color-primary-main)] shadow-lg shadow-[var(--color-primary-main)]/30'
+                : 'bg-transparent border-[var(--color-primary-main)]/50 hover:border-[var(--color-primary-main)] hover:bg-[var(--color-primary-main)]/10'
             }`}
             title={section}
             aria-label={`Go to ${section} section`}
@@ -445,7 +446,7 @@ export default function MainPageClient({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => scrollToSectionByIndex(currentSection + 1)}
-            className="fixed bottom-6 right-6 w-12 h-12 rounded-full border-2 border-[#C0C0C0]/30 bg-black/20 backdrop-blur-md flex items-center justify-center text-[#C0C0C0] hover:text-[#FFD700] hover:border-[#FFD700]/50 transition-all duration-300 z-[9995] navigation-arrow touch-manipulation"
+            className="fixed bottom-6 right-6 w-12 h-12 rounded-full border-2 border-[var(--color-text-secondary)]/30 bg-[var(--color-surface-primary)]/80 backdrop-blur-md flex items-center justify-center text-[var(--color-text-secondary)] hover:text-[var(--color-primary-main)] hover:border-[var(--color-primary-main)]/50 transition-all duration-300 z-[9995] navigation-arrow touch-manipulation"
             aria-label="Next section"
           >
             <ChevronRight size={20} />

@@ -115,7 +115,7 @@ export function EmailManagement() {
   const defaultTemplates: Record<string, EmailTemplate> = useMemo(() => ({
     userBookingConfirmation: {
       en: {
-        subject: 'Booking Confirmation - SoulPath Astrology Reading',
+        subject: 'Booking Confirmation - MatMax Yoga Studio',
         html: `<!DOCTYPE html>
 <html>
 <head>
@@ -139,7 +139,7 @@ export function EmailManagement() {
 <body>
     <div class="container">
         <div class="header">
-            <h1>✨ SoulPath Astrology ✨</h1>
+            <h1>✨ MatMax Yoga Studio ✨</h1>
             <p>Your cosmic journey begins here</p>
         </div>
         <div class="content">
@@ -177,7 +177,7 @@ export function EmailManagement() {
             <p>If you have any questions, please don't hesitate to contact us at {{adminEmail}}.</p>
         </div>
         <div class="footer">
-            <p>© 2024 SoulPath Astrology - José Garfias<br>
+            <p>© 2024 MatMax Yoga Studio<br>
             Guiding souls through the wisdom of the stars</p>
         </div>
     </div>
@@ -190,7 +190,7 @@ export function EmailManagement() {
         }
       },
       es: {
-        subject: 'Confirmación de Cita - Lectura Astrológica SoulPath',
+        subject: 'Confirmación de Reserva - MatMax Yoga Studio',
         html: `<!DOCTYPE html>
 <html>
 <head>
@@ -214,7 +214,7 @@ export function EmailManagement() {
 <body>
     <div class="container">
         <div class="header">
-            <h1>✨ SoulPath Astrología ✨</h1>
+            <h1>✨ MatMax Yoga Studio ✨</h1>
             <p>Tu viaje cósmico comienza aquí</p>
         </div>
         <div class="content">
@@ -252,7 +252,7 @@ export function EmailManagement() {
             <p>Si tienes alguna pregunta, no dudes en contactarnos en {{adminEmail}}.</p>
         </div>
         <div class="footer">
-            <p>© 2024 SoulPath Astrología - José Garfias<br>
+            <p>© 2024 MatMax Yoga Studio<br>
             Guiando almas a través de la sabiduría de las estrellas</p>
         </div>
     </div>
@@ -267,7 +267,7 @@ export function EmailManagement() {
     },
     bookingReminder: {
       en: {
-        subject: 'Reminder: Your SoulPath Astrology Reading',
+        subject: 'Reminder: Your MatMax Yoga Class',
         html: `<!DOCTYPE html>
 <html>
 <head>
@@ -332,7 +332,7 @@ export function EmailManagement() {
             <p>If you need to reschedule or have any questions, please contact us at {{adminEmail}}.</p>
         </div>
         <div class="footer">
-            <p>© 2024 SoulPath Astrology - José Garfias<br>
+            <p>© 2024 MatMax Yoga Studio<br>
             Reminder sent on {{reminderDate}}</p>
         </div>
     </div>
@@ -345,7 +345,7 @@ export function EmailManagement() {
         }
       },
       es: {
-        subject: 'Recordatorio: Tu Lectura Astrológica SoulPath',
+        subject: 'Recordatorio: Tu Clase en MatMax Yoga Studio',
         html: `<!DOCTYPE html>
 <html>
 <head>
@@ -410,7 +410,7 @@ export function EmailManagement() {
             <p>Si necesitas reprogramar o tienes alguna pregunta, por favor contáctanos en {{adminEmail}}.</p>
         </div>
         <div class="footer">
-            <p>© 2024 SoulPath Astrología - José Garfias<br>
+            <p>© 2024 MatMax Yoga Studio<br>
             Recordatorio enviado el {{reminderDate}}</p>
         </div>
     </div>
@@ -425,7 +425,7 @@ export function EmailManagement() {
     },
     adminBookingNotification: {
       en: {
-        subject: 'New Booking Received - SoulPath Astrology',
+        subject: 'New Booking Received - MatMax Yoga Studio',
         html: `<!DOCTYPE html>
 <html>
 <head>
@@ -449,7 +449,7 @@ export function EmailManagement() {
     <div class="container">
         <div class="header">
             <h1>🔔 New Booking Alert</h1>
-            <p>SoulPath Astrology - Admin Notification</p>
+            <p>MatMax Yoga Studio - Admin Notification</p>
         </div>
         <div class="content">
             <div class="alert">
@@ -485,7 +485,7 @@ export function EmailManagement() {
             <p>Login to the admin dashboard to manage this booking.</p>
         </div>
         <div class="footer">
-            <p>© 2024 SoulPath Astrology - Admin System<br>
+            <p>© 2024 MatMax Yoga Studio - Admin System<br>
             Booking notification sent automatically</p>
         </div>
     </div>
@@ -498,7 +498,7 @@ export function EmailManagement() {
         }
       },
       es: {
-        subject: 'Nueva Reserva Recibida - SoulPath Astrología',
+        subject: 'Nueva Reserva Recibida - MatMax Yoga Studio',
         html: `<!DOCTYPE html>
 <html>
 <head>
@@ -522,7 +522,7 @@ export function EmailManagement() {
     <div class="container">
         <div class="header">
             <h1>🔔 Nueva Alerta de Reserva</h1>
-            <p>SoulPath Astrología - Notificación Admin</p>
+            <p>MatMax Yoga Studio - Notificación Admin</p>
         </div>
         <div class="content">
             <div class="alert">
@@ -558,7 +558,7 @@ export function EmailManagement() {
             <p>Inicia sesión en el panel administrativo para gestionar esta reserva.</p>
         </div>
         <div class="footer">
-            <p>© 2024 SoulPath Astrología - Sistema Admin<br>
+            <p>© 2024 MatMax Yoga Studio - Sistema Admin<br>
             Notificación de reserva enviada automáticamente</p>
         </div>
     </div>

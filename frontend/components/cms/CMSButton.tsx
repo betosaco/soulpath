@@ -25,11 +25,11 @@ export const CMSButton: React.FC<CMSButtonProps> = ({
   const baseClasses = 'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
   
   const variantClasses = {
-    primary: 'bg-[#FFD700] text-[#0A0A23] hover:bg-[#FFD700]/90 focus:ring-[#FFD700]/50 shadow-lg',
-    secondary: 'bg-[#1A1A2E] text-[#EAEAEA] hover:bg-[#1A1A2E]/80 focus:ring-[#1A1A2E]/50 border border-[#2A2A3E]',
-    outline: 'bg-transparent text-[#EAEAEA] hover:bg-[#1A1A2E] focus:ring-[#1A1A2E]/50 border border-[#2A2A3E]',
+    primary: 'bg-[var(--color-primary-500)] text-[var(--color-background-primary)] hover:bg-[var(--color-primary-600)] focus:ring-[var(--color-primary-500)]/50 shadow-lg',
+    secondary: 'bg-[var(--color-surface-secondary)] text-[var(--color-text-primary)] hover:bg-[var(--color-surface-tertiary)] focus:ring-[var(--color-surface-secondary)]/50 border border-[var(--color-border-300)]',
+    outline: 'bg-transparent text-[var(--color-text-primary)] hover:bg-[var(--color-surface-secondary)] focus:ring-[var(--color-surface-secondary)]/50 border border-[var(--color-border-300)]',
     danger: 'bg-[#DC2626] text-white hover:bg-[#DC2626]/90 focus:ring-[#DC2626]/50',
-    success: 'bg-[#059669] text-white hover:bg-[#059669]/90 focus:ring-[#059669]/50'
+    success: 'bg-[var(--color-primary-500)] text-white hover:bg-[var(--color-primary-600)] focus:ring-[var(--color-primary-500)]/50'
   };
   
   const sizeClasses = {

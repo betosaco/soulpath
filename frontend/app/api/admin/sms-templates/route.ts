@@ -28,10 +28,10 @@ export async function GET(request: NextRequest) {
       
       // Return default SMS templates if table doesn't exist
       const defaultTemplates = {
-        sms_otp_template_en: 'Your SoulPath verification code is: {{otpCode}}. This code expires in 10 minutes.',
-        sms_otp_template_es: 'Su código de verificación de SoulPath es: {{otpCode}}. Este código expira en 10 minutos.',
-        sms_booking_template_en: 'Your SoulPath session is confirmed for {{bookingDate}} at {{bookingTime}}. We look forward to seeing you!',
-        sms_booking_template_es: 'Su sesión de SoulPath está confirmada para el {{bookingDate}} a las {{bookingTime}}. ¡Esperamos verte!'
+        sms_otp_template_en: 'Your MatMax Yoga Studio verification code is: {{otpCode}}. This code expires in 10 minutes.',
+        sms_otp_template_es: 'Su código de verificación de MatMax Yoga Studio es: {{otpCode}}. Este código expira en 10 minutos.',
+        sms_booking_template_en: 'Your MatMax Yoga Studio class is confirmed for {{bookingDate}} at {{bookingTime}}. We look forward to seeing you!',
+        sms_booking_template_es: 'Su clase en MatMax Yoga Studio está confirmada para el {{bookingDate}} a las {{bookingTime}}. ¡Esperamos verte!'
       };
       
       console.log('✅ Returning default SMS templates');

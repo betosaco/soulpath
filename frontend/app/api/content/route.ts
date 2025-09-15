@@ -25,7 +25,7 @@ function transformFlatContentToNested(flatContent: Record<string, string>): Tran
   if (flatContent) {
     // Hero section
     nestedContent.en.hero = {
-      title: flatContent.heroTitleEn || 'SOULPATH',
+      title: flatContent.heroTitleEn || 'MatMax Yoga Studio',
       tagline: 'Transform your life through spiritual guidance and healing',
       description: 'Experience profound transformation through personalized spiritual sessions, energy healing, and guidance on your journey to inner peace and self-discovery.',
       ctaPrimary: 'Book Your Session',
@@ -33,7 +33,7 @@ function transformFlatContentToNested(flatContent: Record<string, string>): Tran
       subtitle: flatContent.heroSubtitleEn || 'Your journey to wellness starts here'
     };
     nestedContent.es.hero = {
-      title: flatContent.heroTitleEs || 'SOULPATH',
+      title: flatContent.heroTitleEs || 'MatMax Yoga Studio',
       tagline: 'Transforma tu vida a través de la guía espiritual y la sanación',
       description: 'Experimenta una transformación profunda a través de sesiones espirituales personalizadas, sanación energética y guía en tu camino hacia la paz interior y el autodescubrimiento.',
       ctaPrimary: 'Reserva tu Sesión',
@@ -43,9 +43,9 @@ function transformFlatContentToNested(flatContent: Record<string, string>): Tran
 
     // About section
     nestedContent.en.about = {
-      title: flatContent.aboutTitleEn || 'About SOULPATH',
-      text: flatContent.aboutContentEn || 'SOULPATH was founded with a simple yet profound mission: to help people find their true selves and live authentic, fulfilling lives. Through spiritual guidance, energy healing, and compassionate counseling, we\'ve helped hundreds of individuals transform their lives and discover their purpose.',
-      description: flatContent.aboutContentEn || 'SOULPATH was founded with a simple yet profound mission: to help people find their true selves and live authentic, fulfilling lives. Through spiritual guidance, energy healing, and compassionate counseling, we\'ve helped hundreds of individuals transform their lives and discover their purpose.',
+      title: flatContent.aboutTitleEn || 'About MatMax Yoga Studio',
+      text: flatContent.aboutContentEn || 'MatMax Yoga Studio is dedicated to helping people build strength, flexibility, and inner peace through mindful movement and breath. Our classes support wellbeing and balance for all levels.',
+      description: flatContent.aboutContentEn || 'MatMax Yoga Studio is dedicated to helping people build strength, flexibility, and inner peace through mindful movement and breath. Our classes support wellbeing and balance for all levels.',
       statsClients: 'Clients Helped',
       statsYears: 'Years Experience',
       statsSessions: 'Sessions Completed',
@@ -61,9 +61,9 @@ function transformFlatContentToNested(flatContent: Record<string, string>): Tran
       storyText: 'My journey began over 15 years ago when I experienced a profound spiritual awakening that changed my life forever. Since then, I\'ve dedicated myself to helping others find their own path to spiritual growth and personal transformation. Through years of study, practice, and working with clients from around the world, I\'ve developed a unique approach that combines traditional spiritual wisdom with modern understanding of human psychology and energy work.'
     };
     nestedContent.es.about = {
-      title: flatContent.aboutTitleEs || 'Acerca de SOULPATH',
-      text: flatContent.aboutContentEs || 'SOULPATH fue fundado con una misión simple pero profunda: ayudar a las personas a encontrar su verdadero ser y vivir vidas auténticas y satisfactorias. A través de la guía espiritual, la sanación energética y el asesoramiento compasivo, hemos ayudado a cientos de individuos a transformar sus vidas y descubrir su propósito.',
-      description: flatContent.aboutContentEs || 'SOULPATH fue fundado con una misión simple pero profunda: ayudar a las personas a encontrar su verdadero ser y vivir vidas auténticas y satisfactorias. A través de la guía espiritual, la sanación energética y el asesoramiento compasivo, hemos ayudado a cientos de individuos a transformar sus vidas y descubrir su propósito.',
+      title: flatContent.aboutTitleEs || 'Acerca de MatMax Yoga Studio',
+      text: flatContent.aboutContentEs || 'MatMax Yoga Studio está dedicado a ayudarte a construir fuerza, flexibilidad y paz interior a través del movimiento consciente y la respiración. Nuestras clases apoyan el bienestar y el equilibrio para todos los niveles.',
+      description: flatContent.aboutContentEs || 'MatMax Yoga Studio está dedicado a ayudarte a construir fuerza, flexibilidad y paz interior a través del movimiento consciente y la respiración. Nuestras clases apoyan el bienestar y el equilibrio para todos los niveles.',
       statsClients: 'Clientes Ayudados',
       statsYears: 'Años de Experiencia',
       statsSessions: 'Sesiones Completadas',
@@ -161,38 +161,82 @@ export async function GET() {
     const transformedContent = await withCache(
       'content',
       async () => {
-        // Get content from the Content table using Prisma
-        const content = await prisma.content.findFirst();
+        try {
+          // Try to get content from the Content table using Prisma
+          const content = await prisma.content.findFirst();
 
-        if (!content) {
-          console.log('No content found, creating default content');
-          // Create default content if none exists
-          const defaultContent = await prisma.content.create({
-            data: {
-              heroTitleEn: 'Welcome to SOULPATH',
-              heroTitleEs: 'Bienvenido a SOULPATH',
-              heroSubtitleEn: 'Your journey to wellness starts here',
-              heroSubtitleEs: 'Tu camino al bienestar comienza aquí',
-              aboutTitleEn: 'About Us',
-              aboutTitleEs: 'Sobre Nosotros',
-              aboutContentEn: 'We are dedicated to helping you achieve your wellness goals.',
-              aboutContentEs: 'Estamos dedicados a ayudarte a alcanzar tus metas de bienestar.',
-              approachTitleEn: 'Our Approach',
-              approachTitleEs: 'Nuestro Enfoque',
-              approachContentEn: 'We use a holistic approach to wellness.',
-              approachContentEs: 'Usamos un enfoque holístico para el bienestar.',
-              servicesTitleEn: 'Our Services',
-              servicesTitleEs: 'Nuestros Servicios',
-              servicesContentEn: 'Professional wellness services in a peaceful environment.',
-              servicesContentEs: 'Servicios profesionales de bienestar en un ambiente pacífico.'
+          if (!content) {
+            console.log('No content found, attempting to create default content');
+            try {
+              const defaultContent = await prisma.content.create({
+                data: {
+                  heroTitleEn: 'MatMax Yoga Studio',
+                  heroTitleEs: 'MatMax Yoga Studio',
+                  heroSubtitleEn: 'Your journey to wellness starts here',
+                  heroSubtitleEs: 'Tu camino al bienestar comienza aquí',
+                  aboutTitleEn: 'About Us',
+                  aboutTitleEs: 'Sobre Nosotros',
+                  aboutContentEn: 'We are dedicated to helping you achieve your wellness goals.',
+                  aboutContentEs: 'Estamos dedicados a ayudarte a alcanzar tus metas de bienestar.',
+                  approachTitleEn: 'Our Approach',
+                  approachTitleEs: 'Nuestro Enfoque',
+                  approachContentEn: 'We use a holistic approach to wellness.',
+                  approachContentEs: 'Usamos un enfoque holístico para el bienestar.',
+                  servicesTitleEn: 'Our Services',
+                  servicesTitleEs: 'Nuestros Servicios',
+                  servicesContentEn: 'Professional wellness services in a peaceful environment.',
+                  servicesContentEs: 'Servicios profesionales de bienestar en un ambiente pacífico.'
+                }
+              });
+              return transformFlatContentToNested(defaultContent as unknown as Record<string, string>);
+            } catch (createError) {
+              console.warn('Could not create default content, using in-memory defaults:', createError);
+              const defaultContent: Record<string, string> = {
+                heroTitleEn: 'MatMax Yoga Studio',
+                heroTitleEs: 'MatMax Yoga Studio',
+                heroSubtitleEn: 'Your journey to wellness starts here',
+                heroSubtitleEs: 'Tu camino al bienestar comienza aquí',
+                aboutTitleEn: 'About Us',
+                aboutTitleEs: 'Sobre Nosotros',
+                aboutContentEn: 'We are dedicated to helping you achieve your wellness goals.',
+                aboutContentEs: 'Estamos dedicados a ayudarte a alcanzar tus metas de bienestar.',
+                approachTitleEn: 'Our Approach',
+                approachTitleEs: 'Nuestro Enfoque',
+                approachContentEn: 'We use a holistic approach to wellness.',
+                approachContentEs: 'Usamos un enfoque holístico para el bienestar.',
+                servicesTitleEn: 'Our Services',
+                servicesTitleEs: 'Nuestros Servicios',
+                servicesContentEn: 'Professional wellness services in a peaceful environment.',
+                servicesContentEs: 'Servicios profesionales de bienestar en un ambiente pacífico.'
+              };
+              return transformFlatContentToNested(defaultContent);
             }
-          });
+          }
 
-          return transformFlatContentToNested(defaultContent as unknown as Record<string, string>);
+          // Transform flat content to nested structure
+          return transformFlatContentToNested(content as unknown as Record<string, string>);
+        } catch (dbError) {
+          console.warn('Content table not available, using in-memory defaults');
+          const defaultContent: Record<string, string> = {
+            heroTitleEn: 'MatMax Yoga Studio',
+            heroTitleEs: 'MatMax Yoga Studio',
+            heroSubtitleEn: 'Your journey to wellness starts here',
+            heroSubtitleEs: 'Tu camino al bienestar comienza aquí',
+            aboutTitleEn: 'About Us',
+            aboutTitleEs: 'Sobre Nosotros',
+            aboutContentEn: 'We are dedicated to helping you achieve your wellness goals.',
+            aboutContentEs: 'Estamos dedicados a ayudarte a alcanzar tus metas de bienestar.',
+            approachTitleEn: 'Our Approach',
+            approachTitleEs: 'Nuestro Enfoque',
+            approachContentEn: 'We use a holistic approach to wellness.',
+            approachContentEs: 'Usamos un enfoque holístico para el bienestar.',
+            servicesTitleEn: 'Our Services',
+            servicesTitleEs: 'Nuestros Servicios',
+            servicesContentEn: 'Professional wellness services in a peaceful environment.',
+            servicesContentEs: 'Servicios profesionales de bienestar en un ambiente pacífico.'
+          };
+          return transformFlatContentToNested(defaultContent);
         }
-
-        // Transform flat content to nested structure
-        return transformFlatContentToNested(content as unknown as Record<string, string>);
       },
       15 * 60 * 1000 // Cache for 15 minutes (content changes less frequently)
     );
@@ -200,8 +244,28 @@ export async function GET() {
     console.log('✅ Content loaded from cache/database and transformed');
     return NextResponse.json({ content: transformedContent });
   } catch (error) {
-    console.error('Error fetching content:', error);
-    return NextResponse.json({ error: 'Failed to fetch content' }, { status: 500 });
+    console.error('Error fetching content (final fallback):', error);
+    // Final in-memory fallback to avoid 500s
+    const defaultContent: Record<string, string> = {
+      heroTitleEn: 'MatMax Yoga Studio',
+      heroTitleEs: 'MatMax Yoga Studio',
+      heroSubtitleEn: 'Your journey to wellness starts here',
+      heroSubtitleEs: 'Tu camino al bienestar comienza aquí',
+      aboutTitleEn: 'About Us',
+      aboutTitleEs: 'Sobre Nosotros',
+      aboutContentEn: 'We are dedicated to helping you achieve your wellness goals.',
+      aboutContentEs: 'Estamos dedicados a ayudarte a alcanzar tus metas de bienestar.',
+      approachTitleEn: 'Our Approach',
+      approachTitleEs: 'Nuestro Enfoque',
+      approachContentEn: 'We use a holistic approach to wellness.',
+      approachContentEs: 'Usamos un enfoque holístico para el bienestar.',
+      servicesTitleEn: 'Our Services',
+      servicesTitleEs: 'Nuestros Servicios',
+      servicesContentEn: 'Professional wellness services in a peaceful environment.',
+      servicesContentEs: 'Servicios profesionales de bienestar en un ambiente pacífico.'
+    };
+    const transformedContent = transformFlatContentToNested(defaultContent);
+    return NextResponse.json({ content: transformedContent });
   }
 }
 

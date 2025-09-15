@@ -40,10 +40,10 @@ export async function POST(request: NextRequest) {
     console.log('🔍 Search email:', email.toLowerCase());
     let user;
     try {
-      // First, let's test a simple query to see if Prisma is working
-      console.log('🔍 Testing Prisma connection with simple query...');
-      const userCount = await prisma.user.count();
-      console.log('✅ Prisma connection working, user count:', userCount);
+      // Ensure Prisma is connected before making queries
+      console.log('🔍 Ensuring Prisma connection...');
+      await prisma.$connect();
+      console.log('✅ Prisma connected successfully');
       
       // Now try the specific user query
       console.log('🔍 Executing user findUnique query...');

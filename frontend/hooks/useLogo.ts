@@ -15,9 +15,9 @@ interface LogoSettings {
 export function useLogo() {
   const [logoSettings, setLogoSettings] = useState<LogoSettings>({
     id: 1,
-    type: 'text',
-    text: 'SOULPATH',
-    imageUrl: null,
+    type: 'image',
+    text: 'MatMax Yoga Studio',
+    imageUrl: '/logo_matmax.png',
     isActive: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()

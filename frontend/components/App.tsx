@@ -139,8 +139,8 @@ export function App() {
   // Only check for essential translations to avoid endless loading
   if (!t || !t.hero || !t.nav) {
     return (
-      <div className="min-h-screen bg-[#0A0A23] flex items-center justify-center">
-        <div className="text-[#FFD700] text-xl">Loading...</div>
+      <div className="min-h-screen bg-[#f4eeed] text-[#383838] flex items-center justify-center">
+        <div className="text-[#383838] text-xl">Loading...</div>
       </div>
     );
   }
@@ -160,7 +160,7 @@ export function App() {
   }
 
   return (
-    <div className="h-screen overflow-hidden bg-gradient-to-b from-[#191970] to-[#0A0A23] text-[#EAEAEA] mobile-container">
+    <div className="h-screen overflow-hidden bg-[#f4eeed] text-[#383838] mobile-container">
       <ConstellationBackground />
       
       <Header 

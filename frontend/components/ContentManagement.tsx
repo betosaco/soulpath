@@ -24,8 +24,8 @@ interface ContentManagementProps {
 
 // Default content structure that matches the API response format
 const DEFAULT_CONTENT: ContentStructure = {
-  heroTitleEn: 'Welcome to SOULPATH',
-  heroTitleEs: 'Bienvenido a SOULPATH',
+  heroTitleEn: 'MatMax Yoga Studio',
+  heroTitleEs: 'MatMax Yoga Studio',
   heroSubtitleEn: 'Your journey to wellness starts here',
   heroSubtitleEs: 'Tu camino al bienestar comienza aquí',
   aboutTitleEn: 'About Us',

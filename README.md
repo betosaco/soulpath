@@ -1,6 +1,6 @@
-# Wellness Platform Monorepo
+# MatMax Yoga Studio Monorepo
 
-A comprehensive wellness platform with Rasa conversational AI backend and Next.js frontend.
+A comprehensive platform for MatMax Yoga Studio with Rasa conversational AI backend and Next.js frontend.
 
 ## Structure
 

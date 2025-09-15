@@ -1,6 +1,6 @@
-# Rasa Configuration for Conversational Orchestrator
+# Rasa Configuration for MatMax Yoga Studio Orchestrator
 
-Esta carpeta contiene la configuración completa de Rasa para el orquestador conversacional de astrología.
+Esta carpeta contiene la configuración completa de Rasa para el orquestador conversacional de MatMax Yoga Studio.
 
 ## 📁 Estructura de Archivos
 
@@ -311,5 +311,5 @@ Para problemas específicos de Rasa:
 
 ---
 
-**Nota**: Esta configuración está optimizada para el sistema de astrología. Para otros dominios, ajustar los intents y entities según sea necesario.
+**Nota**: Esta configuración está optimizada para MatMax Yoga Studio. Para otros dominios, ajustar los intents y entities según sea necesario.
 

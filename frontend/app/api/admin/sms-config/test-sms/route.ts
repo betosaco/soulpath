@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     
     const smsData = {
       message,
-      tpoa: senderName || 'SoulPath',
+      tpoa: senderName || 'MatMax Yoga Studio',
       recipient: [
         {
           msisdn: phoneNumber

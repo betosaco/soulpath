@@ -294,6 +294,7 @@ model PaymentMethodConfig {
   isActive             Boolean?  @default(true) @map("is_active")
   createdAt            DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt            DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  providerConfig       Json?     @map("provider_config")
 
   @@index([isActive], map: "idx_payment_method_configs_active")
   @@index([name], map: "idx_payment_method_configs_name")
@@ -518,7 +519,7 @@ model kv_store_f839855f {
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model soultpath {
+model MatMax {
   id         BigInt    @id @default(autoincrement())
   created_at DateTime? @default(now()) @db.Timestamptz(6)
 }

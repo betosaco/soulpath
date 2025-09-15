@@ -24,9 +24,9 @@ import {
   Brain,
   MessageSquare
 } from 'lucide-react';
+import { Bot } from 'lucide-react';
 
 import { useAuth } from '../hooks/useAuth';
-import { sidebarButtonStyles, combineStyles } from '@/lib/styles/common';
 import { ClientManagement } from './ClientManagement';
 import BookingsManagement from './BookingsManagement';
 import ScheduleManagement from './ScheduleManagement';
@@ -49,6 +49,16 @@ import { RasaMonitoring } from './RasaMonitoring';
 import { RasaModelTuning } from './RasaModelTuning';
 import ConversationLogsManagement from './admin/ConversationLogsManagement';
 import Link from 'next/link';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarProvider
+} from '@/components/ui/sidebar';
 
 interface AdminDashboardProps {
   onClose?: () => void;
@@ -86,17 +96,17 @@ export function AdminDashboard({ onClose, isModal = true, children }: AdminDashb
   return (
     <div className={containerClasses}>
       {/* Header */}
-      <header className="bg-[var(--color-sidebar-800)] border-b border-[var(--color-border-500)] p-4">
+      <header className="bg-[var(--admin-header-bg)] border-b border-[var(--admin-border)] p-4 text-[var(--admin-text-inverse)]">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="w-10 h-10 bg-[var(--color-accent-500)] rounded-full flex items-center justify-center">
-              <Settings size={20} className="text-black" />
+              <Settings size={20} className="text-[var(--admin-text-inverse)]" />
             </div>
             <div>
-              <h1 className="text-[var(--font-size-2xl)] font-[var(--font-weight-bold)] text-[var(--color-text-primary)]">
+              <h1 className="text-[var(--font-size-2xl)] font-[var(--font-weight-bold)] text-[var(--admin-text-inverse)]">
                 Admin Dashboard
               </h1>
-              <p className="text-[var(--color-text-secondary)]">Welcome back, {user.email}</p>
+              <p className="text-gray-300">Welcome back, {user.email}</p>
             </div>
           </div>
           
@@ -148,52 +158,63 @@ export function AdminDashboard({ onClose, isModal = true, children }: AdminDashb
         </div>
       </header>
 
+      <SidebarProvider>
       <div className="flex h-[calc(100vh-80px)]">
-        {/* Sidebar Navigation */}
-        <nav className="w-56 bg-[var(--color-sidebar-800)] border-r border-[var(--color-border-500)] p-3 overflow-y-auto">e
-          
-          <div className="space-y-1">
-            {[
-              { key: 'rasa-monitoring', icon: Brain, label: 'Rasa AI Monitoring' },
-              { key: 'rasa-tuning', icon: Settings, label: 'Model Tuning' },
-              { key: 'conversation-logs', icon: MessageSquare, label: 'Conversation Logs' },
-              { key: 'clients', icon: Users, label: 'Client Management' },
-              { key: 'bookings', icon: Calendar, label: 'Bookings Management' },
-              { key: 'schedules', icon: Clock, label: 'Schedule Management' },
-              { key: 'packages', icon: Package, label: 'Packages & Pricing' },
-              { key: 'content', icon: FileText, label: 'Content Management' },
-              { key: 'email', icon: Mail, label: 'Communication Settings' },
-              { key: 'live-session', icon: Video, label: 'Live Session Config' },
-              { key: 'images', icon: ImageIcon, label: 'Image Management' },
-              { key: 'external-apis', icon: Zap, label: 'External APIs' },
-              // { key: 'logo', icon: Type, label: 'Logo Management' },
-              { key: 'seo', icon: Search, label: 'SEO Management' },
-              { key: 'payment-methods', icon: CreditCard, label: 'Payment Methods' },
-              { key: 'payment-records', icon: Receipt, label: 'Payment Records' },
-              { key: 'purchase-history', icon: History, label: 'Purchase History' },
-              { key: 'settings', icon: Database, label: 'Settings' },
-              { key: 'bug-reports', icon: Bug, label: 'Bug Reports' },
-            ].map(({ key, icon: Icon, label }) => {
-              const isActive = activeTab === key;
-              
-              const buttonClasses = combineStyles(
-                sidebarButtonStyles.base,
-                isActive ? sidebarButtonStyles.variants.active : sidebarButtonStyles.variants.inactive
-              );
-              
-              return (
-                <button
-                  key={key}
-                  onClick={() => setActiveTab(key)}
-                  className={buttonClasses}
-                >
-                  <Icon size={18} className={sidebarButtonStyles.icon} />
-                  <span className={sidebarButtonStyles.label}>{label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </nav>
+        {/* Sidebar Navigation using shared UI */}
+        <Sidebar collapsible="none" side="left" className="w-56 bg-[var(--admin-sidebar-bg)] text-[var(--admin-text-inverse)] border-r border-[var(--admin-border)] p-3 overflow-y-auto">
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupLabel className="text-[var(--admin-text-inverse)] flex items-center gap-2">
+                <Bot size={16} /> Chatbot
+              </SidebarGroupLabel>
+              <SidebarMenu>
+                {[
+                  { key: 'rasa-monitoring', icon: Brain, label: 'Rasa AI Monitoring' },
+                  { key: 'rasa-tuning', icon: Settings, label: 'Model Tuning' },
+                  { key: 'conversation-logs', icon: MessageSquare, label: 'Conversation Logs' }
+                ].map(({ key, icon: Icon, label }) => (
+                  <SidebarMenuItem key={key}>
+                    <SidebarMenuButton isActive={activeTab === key} onClick={() => setActiveTab(key)}>
+                      <Icon />
+                      <span>{label}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroup>
+
+            <SidebarGroup>
+              <SidebarGroupLabel className="text-[var(--admin-text-inverse)]">Administration</SidebarGroupLabel>
+              <SidebarMenu>
+                {[
+                  { key: 'clients', icon: Users, label: 'Client Management' },
+                  { key: 'bookings', icon: Calendar, label: 'Bookings Management' },
+                  { key: 'schedules', icon: Clock, label: 'Schedule Management' },
+                  { key: 'packages', icon: Package, label: 'Packages & Pricing' },
+                  { key: 'content', icon: FileText, label: 'Content Management' },
+                  { key: 'email', icon: Mail, label: 'Communication Settings' },
+                  { key: 'live-session', icon: Video, label: 'Live Session Config' },
+                  { key: 'images', icon: ImageIcon, label: 'Image Management' },
+                  { key: 'external-apis', icon: Zap, label: 'External APIs' },
+                  // { key: 'logo', icon: Type, label: 'Logo Management' },
+                  { key: 'seo', icon: Search, label: 'SEO Management' },
+                  { key: 'payment-methods', icon: CreditCard, label: 'Payment Methods' },
+                  { key: 'payment-records', icon: Receipt, label: 'Payment Records' },
+                  { key: 'purchase-history', icon: History, label: 'Purchase History' },
+                  { key: 'settings', icon: Database, label: 'Settings' },
+                  { key: 'bug-reports', icon: Bug, label: 'Bug Reports' },
+                ].map(({ key, icon: Icon, label }) => (
+                  <SidebarMenuItem key={key}>
+                    <SidebarMenuButton isActive={activeTab === key} onClick={() => setActiveTab(key)}>
+                      <Icon />
+                      <span>{label}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroup>
+          </SidebarContent>
+        </Sidebar>
 
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto bg-[var(--color-background-primary)]">
@@ -235,6 +256,7 @@ export function AdminDashboard({ onClose, isModal = true, children }: AdminDashb
           </div>
         </main>
       </div>
+      </SidebarProvider>
     </div>
   );
 }

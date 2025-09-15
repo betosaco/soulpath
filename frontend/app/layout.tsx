@@ -3,6 +3,7 @@ import { cormorantGaramond, lato } from './fonts';
 import './globals.css';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { cn } from '@/lib/utils';
+import { ThemeProvider } from '@/lib/theme/ThemeProvider';
 
 // Fetch SEO data on the server
 async function getSeoData() {
@@ -35,18 +36,18 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   return {
-    title: seo?.title || 'SoulPath - Wellness Platform',
+    title: seo?.title || 'MatMax Yoga Studio',
     description: seo?.description || 'Strategic astrological counsel to navigate your life\'s most pivotal moments.',
     keywords: seo?.keywords || ['astrology', 'counseling', 'spiritual guidance'],
     openGraph: {
-      title: seo?.ogTitle || seo?.title || 'SoulPath - Wellness Platform',
+      title: seo?.ogTitle || seo?.title || 'MatMax Yoga Studio',
       description: seo?.ogDescription || seo?.description || 'Strategic astrological counsel to navigate your life\'s most pivotal moments.',
       images: seo?.ogImage ? [seo.ogImage] : [],
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
-      title: seo?.ogTitle || seo?.title || 'SoulPath - Wellness Platform',
+      title: seo?.ogTitle || seo?.title || 'MatMax Yoga Studio',
       description: seo?.ogDescription || seo?.description || 'Strategic astrological counsel to navigate your life\'s most pivotal moments.',
       images: seo?.ogImage ? [seo.ogImage] : [],
     },
@@ -73,7 +74,9 @@ export default function RootLayout({
         cormorantGaramond.variable,
         lato.variable
       )}>
-        {children}
+        <ThemeProvider initialTheme="light">
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

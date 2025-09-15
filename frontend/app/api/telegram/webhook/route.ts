@@ -100,9 +100,7 @@ function getBaseUrl(): string {
   
   // If PORT is not set, try to detect from the request or use common ports
   if (!process.env.PORT) {
-    // Try common development ports
-    const commonPorts = [3000, 3001, 3002, 3003];
-    // For now, let's use 3001 since we know that's what Next.js is using
+    // Use 3001 since we know that's what Next.js is using
     port = 3001;
   }
   

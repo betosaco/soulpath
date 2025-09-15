@@ -43,7 +43,7 @@ interface StripeConfigData {
 }
 
 const PaymentMethodManagement: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethodConfig[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastLoaded, setLastLoaded] = useState<Date | null>(null);
@@ -51,6 +51,7 @@ const PaymentMethodManagement: React.FC = () => {
   const [showStripeConfig, setShowStripeConfig] = useState(false);
   const [editingMethod, setEditingMethod] = useState<PaymentMethodConfig | null>(null);
   const [stripeConfig, setStripeConfig] = useState<StripeConfig | StripeConfigData | null>(null);
+  const [izipayConfig, setIzipayConfig] = useState<any>(null);
     const [formData, setFormData] = useState<PaymentMethodFormData>({
     name: '',
     type: 'cash',
@@ -97,6 +98,10 @@ const PaymentMethodManagement: React.FC = () => {
 
   const fetchAllData = useCallback(async () => {
     try {
+      if (authLoading) {
+        console.log('🔍 fetchAllData deferred: auth is loading');
+        return;
+      }
       console.log('🔍 fetchAllData called, user:', user);
       console.log('🔍 access_token exists:', !!user?.access_token);
       console.log('🔍 access_token length:', user?.access_token?.length);
@@ -118,7 +123,7 @@ const PaymentMethodManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, fetchPaymentMethods]);
+  }, [user, authLoading, fetchPaymentMethods]);
 
   // Add a manual refresh function that can be called from parent components
   const refreshPaymentMethodsData = useCallback(() => {
@@ -129,20 +134,23 @@ const PaymentMethodManagement: React.FC = () => {
   }, [user?.access_token, fetchAllData]);
 
   useEffect(() => {
+    if (authLoading) {
+      console.log('Auth loading — deferring payment methods effect');
+      return;
+    }
     if (user?.access_token) {
       console.log('User authenticated, loading payment methods data...');
       fetchAllData();
     } else {
-      console.log('User not authenticated, clearing payment methods data...');
-      setPaymentMethods([]);
+      console.log('User not authenticated — skipping data fetch (keeping current data)');
       setLoading(false);
     }
-  }, [user?.access_token, fetchAllData]);
+  }, [user?.access_token, authLoading, fetchAllData]);
 
   // Refresh data when component becomes visible
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && user?.access_token && paymentMethods.length === 0) {
+      if (document.visibilityState === 'visible' && !authLoading && user?.access_token && paymentMethods.length === 0) {
         console.log('Component became visible, refreshing payment methods data...');
         fetchAllData();
       }
@@ -150,7 +158,7 @@ const PaymentMethodManagement: React.FC = () => {
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [user?.access_token, paymentMethods.length, fetchAllData]);
+  }, [user?.access_token, authLoading, paymentMethods.length, fetchAllData]);
 
   // Additional effect to handle component mounting/navigation
   useEffect(() => {
@@ -176,7 +184,7 @@ const PaymentMethodManagement: React.FC = () => {
     const handleNavigation = () => {
       // Small delay to ensure the component is fully mounted
       setTimeout(() => {
-        if (user?.access_token && paymentMethods.length === 0) {
+        if (!authLoading && user?.access_token && paymentMethods.length === 0) {
           console.log('Navigation detected, refreshing payment methods data...');
           fetchAllData();
         }
@@ -185,7 +193,7 @@ const PaymentMethodManagement: React.FC = () => {
 
     window.addEventListener('popstate', handleNavigation);
     return () => window.removeEventListener('popstate', handleNavigation);
-  }, [user?.access_token, paymentMethods.length, fetchAllData]);
+  }, [user?.access_token, authLoading, paymentMethods.length, fetchAllData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,8 +217,17 @@ const PaymentMethodManagement: React.FC = () => {
       
       const method = editingMethod ? 'PUT' : 'POST';
       const body = editingMethod 
-        ? { id: editingMethod.id, ...formData, stripeConfig: formData.type === 'stripe' ? stripeConfig : undefined }
-        : { ...formData, stripeConfig: formData.type === 'stripe' ? stripeConfig : undefined };
+        ? { 
+            id: editingMethod.id, 
+            ...formData, 
+            stripeConfig: formData.type === 'stripe' ? stripeConfig : undefined,
+            izipayConfig: formData.type === 'izipay' ? izipayConfig : undefined
+          }
+        : { 
+            ...formData, 
+            stripeConfig: formData.type === 'stripe' ? stripeConfig : undefined,
+            izipayConfig: formData.type === 'izipay' ? izipayConfig : undefined
+          };
 
       const response = await fetch(url, {
         method,
@@ -244,7 +261,16 @@ const PaymentMethodManagement: React.FC = () => {
       requiresConfirmation: method.requiresConfirmation,
       autoAssignPackage: method.autoAssignPackage
     });
-    setStripeConfig(method.stripeConfig || null);
+    
+    // Set configuration based on payment method type
+    if (method.type === 'stripe' && method.stripeConfig) {
+      setStripeConfig(method.stripeConfig);
+    } else if (method.type === 'izipay' && method.providerConfig) {
+      setIzipayConfig(method.providerConfig);
+    } else {
+      setStripeConfig(null);
+      setIzipayConfig(null);
+    }
     setShowCreateModal(true);
   };
 
@@ -286,6 +312,7 @@ const PaymentMethodManagement: React.FC = () => {
       autoAssignPackage: true
     });
     setStripeConfig(null);
+    setIzipayConfig(null);
   };
 
   const handleStripeConfigSave = (config: StripeConfig) => {
@@ -295,9 +322,12 @@ const PaymentMethodManagement: React.FC = () => {
 
   const handleTypeChange = (type: PaymentMethod) => {
     setFormData(prev => ({ ...prev, type }));
-    // Reset Stripe config if changing from Stripe type
+    // Reset configurations when changing type
     if (type !== 'stripe') {
       setStripeConfig(null);
+    }
+    if (type !== 'izipay') {
+      setIzipayConfig(null);
     }
   };
 
@@ -308,6 +338,7 @@ const PaymentMethodManagement: React.FC = () => {
       case 'qr_payment': return <QrCode className="h-4 w-4" />;
       case 'credit_card': return <CreditCard className="h-4 w-4" />;
       case 'stripe': return <Zap className="h-4 w-4" />;
+      case 'izipay': return <CreditCard className="h-4 w-4" />;
       case 'crypto': return <Bitcoin className="h-4 w-4" />;
       case 'pay_later': return <Clock className="h-4 w-4" />;
       default: return <Wallet className="h-4 w-4" />;
@@ -321,13 +352,14 @@ const PaymentMethodManagement: React.FC = () => {
       case 'qr_payment': return 'QR Payment';
       case 'credit_card': return 'Credit Card';
       case 'stripe': return 'Stripe (Credit Card)';
+      case 'izipay': return 'Izipay (Perú)';
       case 'crypto': return 'Cryptocurrency';
       case 'pay_later': return 'Pay Later';
       default: return type;
     }
   };
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
@@ -494,6 +526,7 @@ const PaymentMethodManagement: React.FC = () => {
                       <SelectItem value="qr_payment" className="dashboard-dropdown-item">QR Payment</SelectItem>
                       <SelectItem value="credit_card" className="dashboard-dropdown-item">Credit Card</SelectItem>
                       <SelectItem value="stripe" className="dashboard-dropdown-item">Stripe (Credit Card)</SelectItem>
+                      <SelectItem value="izipay" className="dashboard-dropdown-item">Izipay (Perú)</SelectItem>
                       <SelectItem value="crypto" className="dashboard-dropdown-item">Cryptocurrency</SelectItem>
                       <SelectItem value="pay_later" className="dashboard-dropdown-item">Pay Later</SelectItem>
                     </SelectContent>
@@ -530,6 +563,60 @@ const PaymentMethodManagement: React.FC = () => {
                         <p className="text-[var(--color-text-primary)] font-medium">⚠️ Stripe configuration required</p>
                         <p className="text-xs text-[var(--color-accent-700)] mt-1">
                           Click &ldquo;Configure Stripe&rdquo; to set up your payment gateway
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Izipay Configuration Section */}
+                {formData.type === 'izipay' && (
+                  <div className="space-y-4 p-4 border border-[var(--color-accent-200)] rounded-lg bg-[var(--color-accent-50)]">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <CreditCard className="w-5 h-5 text-[var(--color-accent-600)]" />
+                        <h4 className="text-sm font-medium text-[var(--color-accent-900)]">Izipay Configuration</h4>
+                      </div>
+                    </div>
+                    
+                    {formData.providerConfig && 'merchantId' in formData.providerConfig ? (
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label className="text-xs text-[var(--color-accent-700)]">Merchant ID</Label>
+                            <p className="text-sm text-[var(--color-accent-900)] font-mono">
+                              {formData.providerConfig.merchantId || 'Not set'}
+                            </p>
+                          </div>
+                          <div>
+                            <Label className="text-xs text-[var(--color-accent-700)]">Environment</Label>
+                            <p className="text-sm text-[var(--color-accent-900)]">
+                              {formData.providerConfig.environment || 'sandbox'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label className="text-xs text-[var(--color-accent-700)]">Currency</Label>
+                            <p className="text-sm text-[var(--color-accent-900)]">
+                              {formData.providerConfig.currency || 'PEN'}
+                            </p>
+                          </div>
+                          <div>
+                            <Label className="text-xs text-[var(--color-accent-700)]">Supported Countries</Label>
+                            <p className="text-sm text-[var(--color-accent-900)]">
+                              {Array.isArray(formData.providerConfig.supportedCountries) 
+                                ? formData.providerConfig.supportedCountries.join(', ') 
+                                : 'PE'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-4">
+                        <p className="text-[var(--color-text-primary)] font-medium">⚠️ Izipay configuration required</p>
+                        <p className="text-xs text-[var(--color-accent-700)] mt-1">
+                          Izipay configuration will be set up automatically with default values
                         </p>
                       </div>
                     )}

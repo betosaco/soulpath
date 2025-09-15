@@ -14,6 +14,15 @@ import { Plus, Edit, Trash2, CreditCard, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
 import { colors, spacing, typography } from '@/lib/design-system';
 
+function safeParseJSON(value: string) {
+  try {
+    const parsed = JSON.parse(value);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
 
 interface PaymentMethod {
   id: number;
@@ -26,6 +35,7 @@ interface PaymentMethod {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  providerConfig?: any;
 }
 
 export default function PaymentMethodsPage() {
@@ -45,6 +55,7 @@ export default function PaymentMethodsPage() {
     autoAssignPackage: true,
     isActive: true
   });
+  const [providerConfig, setProviderConfig] = useState<string>('{}');
 
   // Fetch payment methods
   useEffect(() => {
@@ -75,7 +86,10 @@ export default function PaymentMethodsPage() {
       const response = await fetch('/api/admin/payment-methods', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          providerConfig: safeParseJSON(providerConfig)
+        })
       });
 
       const result = await response.json();
@@ -101,7 +115,10 @@ export default function PaymentMethodsPage() {
       const response = await fetch(`/api/admin/payment-methods?id=${editingPaymentMethod.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          providerConfig: safeParseJSON(providerConfig)
+        })
       });
 
       const result = await response.json();
@@ -153,6 +170,7 @@ export default function PaymentMethodsPage() {
       autoAssignPackage: true,
       isActive: true
     });
+    setProviderConfig('{}');
   };
 
   const openEditModal = (paymentMethod: PaymentMethod) => {
@@ -166,6 +184,7 @@ export default function PaymentMethodsPage() {
       autoAssignPackage: paymentMethod.autoAssignPackage,
       isActive: paymentMethod.isActive
     });
+    setProviderConfig(JSON.stringify(paymentMethod.providerConfig || {}, null, 2));
     setIsEditModalOpen(true);
   };
 
@@ -312,6 +331,9 @@ export default function PaymentMethodsPage() {
                   <SelectItem value="stripe" className={`text-[${colors.text.primary}] hover:bg-[${colors.semantic.surface.tertiary}]`}>
                     Stripe
                   </SelectItem>
+                  <SelectItem value="izipay" className={`text-[${colors.text.primary}] hover:bg-[${colors.semantic.surface.tertiary}]`}>
+                    Izipay (Peru)
+                  </SelectItem>
                   <SelectItem value="paypal" className={`text-[${colors.text.primary}] hover:bg-[${colors.semantic.surface.tertiary}]`}>
                     PayPal
                   </SelectItem>
@@ -399,6 +421,26 @@ export default function PaymentMethodsPage() {
                 Active
               </Label>
             </div>
+
+            {/* Provider Config JSON for Create */}
+            <div>
+              <Label htmlFor="providerConfig" className={`text-[${typography.fontSize.sm}] font-[${typography.fontWeight.medium}] text-[${colors.text.secondary}]`}>
+                Provider Config (JSON)
+              </Label>
+              <Textarea
+                id="providerConfig"
+                value={providerConfig}
+                onChange={(e) => setProviderConfig(e.target.value)}
+                placeholder='{"merchantId":"...","username":"...","password":"...","publicKey":"...","currency":"PEN","environment":"sandbox","supportedCountries":["PE"],"returnUrl":"/payment/success","cancelUrl":"/payment/cancel"}'
+                className={`bg-[${colors.semantic.surface.primary}] border-[${colors.border[500]}] text-[${colors.text.primary}] placeholder:text-[${colors.text.tertiary}]`}
+                rows={6}
+              />
+              {formData.type === 'izipay' && (
+                <p className={`text-[${colors.text.tertiary}] text-[${typography.fontSize.xs}] mt-1`}>
+                  Required keys for Izipay: merchantId, username, password, publicKey, currency (PEN), environment (sandbox|production), supportedCountries, returnUrl, cancelUrl
+                </p>
+              )}
+            </div>
           </div>
         </BaseModal.Content>
 
@@ -453,6 +495,9 @@ export default function PaymentMethodsPage() {
                 <SelectContent className={`bg-[${colors.semantic.surface.secondary}] border-[${colors.border[500]}]`}>
                   <SelectItem value="stripe" className={`text-[${colors.text.primary}] hover:bg-[${colors.semantic.surface.tertiary}]`}>
                     Stripe
+                  </SelectItem>
+                  <SelectItem value="izipay" className={`text-[${colors.text.primary}] hover:bg-[${colors.semantic.surface.tertiary}]`}>
+                    Izipay (Peru)
                   </SelectItem>
                   <SelectItem value="paypal" className={`text-[${colors.text.primary}] hover:bg-[${colors.semantic.surface.tertiary}]`}>
                     PayPal
@@ -540,6 +585,26 @@ export default function PaymentMethodsPage() {
               <Label htmlFor="edit-isActive" className={`text-[${typography.fontSize.sm}] font-[${typography.fontWeight.medium}] text-[${colors.text.secondary}]`}>
                 Active
               </Label>
+            </div>
+
+            {/* Provider Config JSON for Edit */}
+            <div>
+              <Label htmlFor="edit-providerConfig" className={`text-[${typography.fontSize.sm}] font-[${typography.fontWeight.medium}] text-[${colors.text.secondary}]`}>
+                Provider Config (JSON)
+              </Label>
+              <Textarea
+                id="edit-providerConfig"
+                value={providerConfig}
+                onChange={(e) => setProviderConfig(e.target.value)}
+                placeholder='{"merchantId":"...","username":"...","password":"...","publicKey":"...","currency":"PEN","environment":"sandbox","supportedCountries":["PE"],"returnUrl":"/payment/success","cancelUrl":"/payment/cancel"}'
+                className={`bg-[${colors.semantic.surface.primary}] border-[${colors.border[500]}] text-[${colors.text.primary}] placeholder:text-[${colors.text.tertiary}]`}
+                rows={6}
+              />
+              {formData.type === 'izipay' && (
+                <p className={`text-[${colors.text.tertiary}] text-[${typography.fontSize.xs}] mt-1`}>
+                  Required keys for Izipay: merchantId, username, password, publicKey, currency (PEN), environment (sandbox|production), supportedCountries, returnUrl, cancelUrl
+                </p>
+              )}
             </div>
           </div>
         </BaseModal.Content>

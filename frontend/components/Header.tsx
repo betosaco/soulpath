@@ -89,19 +89,19 @@ export function Header({
           {logoSettings.isActive ? (
             logoSettings.type === 'text' ? (
               <span className="font-heading text-lg sm:text-xl md:text-2xl text-[#FFD700]">
-                {logoSettings.text || 'SOULPATH'}
+                {logoSettings.text || 'MatMax'}
               </span>
             ) : logoSettings.imageUrl ? (
               <img 
                 src={logoSettings.imageUrl} 
-                alt="SoulPath Logo" 
+                alt="MatMax Yoga Studio Logo" 
                 className="h-6 sm:h-8 md:h-10 object-contain"
               />
             ) : (
-              <span className="font-heading text-lg sm:text-xl md:text-2xl text-[#FFD700]">SOULPATH</span>
+              <span className="font-heading text-lg sm:text-xl md:text-2xl text-[#FFD700]">MatMax</span>
             )
           ) : (
-            <span className="font-heading text-lg sm:text-xl md:text-2xl text-[#FFD700]">SOULPATH</span>
+            <span className="font-heading text-lg sm:text-xl md:text-2xl text-[#FFD700]">MatMax</span>
           )}
         </motion.div>
         

@@ -14,14 +14,14 @@ async function main() {
     create: {
       email_enabled: true,
       brevo_api_key: '',
-      sender_email: 'noreply@soulpath.lat',
-      sender_name: 'SOULPATH',
-      admin_email: 'admin@soulpath.lat',
+      sender_email: 'noreply@matmax.store',
+      sender_name: 'MatMax Yoga Studio',
+      admin_email: 'admin@matmax.store',
       sms_enabled: false,
       sms_provider: 'labsmobile',
       labsmobile_username: '',
       labsmobile_token: '',
-      sms_sender_name: 'SoulPath'
+      sms_sender_name: 'MatMax Yoga Studio'
     }
   });
   console.log('✅ Communication config created:', communicationConfig.id);
@@ -45,13 +45,13 @@ async function main() {
           create: [
             {
               language: 'en',
-              subject: 'Booking Confirmation - SOULPATH',
-              content: '<h1>Your session has been confirmed!</h1><p>Dear {{clientName}},</p><p>Your {{sessionType}} session is scheduled for {{sessionDate}} at {{sessionTime}}.</p><p>We look forward to seeing you at SOULPATH!</p><p>Best regards,<br>SOULPATH Team</p>'
+              subject: 'Booking Confirmation - MatMax Yoga Studio',
+              content: '<h1>Your class has been confirmed!</h1><p>Dear {{clientName}},</p><p>Your {{sessionType}} class is scheduled for {{sessionDate}} at {{sessionTime}}.</p><p>We look forward to seeing you at MatMax Yoga Studio!</p><p>Best regards,<br>MatMax Yoga Studio Team</p>'
             },
             {
               language: 'es',
-              subject: 'Confirmación de Reserva - SOULPATH',
-              content: '<h1>¡Tu sesión ha sido confirmada!</h1><p>Estimado {{clientName}},</p><p>Tu sesión de {{sessionType}} está programada para el {{sessionDate}} a las {{sessionTime}}.</p><p>¡Esperamos verte en SOULPATH!</p><p>Atentamente,<br>Equipo SOULPATH</p>'
+              subject: 'Confirmación de Reserva - MatMax Yoga Studio',
+              content: '<h1>¡Tu clase ha sido confirmada!</h1><p>Estimado {{clientName}},</p><p>Tu clase de {{sessionType}} está programada para el {{sessionDate}} a las {{sessionTime}}.</p><p>¡Esperamos verte en MatMax Yoga Studio!</p><p>Atentamente,<br>Equipo MatMax Yoga Studio</p>'
             }
           ]
         }
@@ -74,13 +74,13 @@ async function main() {
           create: [
             {
               language: 'en',
-              subject: 'Session Reminder - SOULPATH',
-              content: '<h1>Session Reminder</h1><p>Dear {{clientName}},</p><p>This is a reminder for your {{sessionType}} session tomorrow at {{sessionTime}}.</p><p>Please arrive 10 minutes early for your appointment.</p><p>Best regards,<br>SOULPATH Team</p>'
+              subject: 'Reminder: Your MatMax Yoga Class',
+              content: '<h1>Class Reminder</h1><p>Dear {{clientName}},</p><p>This is a reminder for your {{sessionType}} class tomorrow at {{sessionTime}}.</p><p>Please arrive 10 minutes early.</p><p>Best regards,<br>MatMax Yoga Studio Team</p>'
             },
             {
               language: 'es',
-              subject: 'Recordatorio de Sesión - SOULPATH',
-              content: '<h1>Recordatorio de Sesión</h1><p>Estimado {{clientName}},</p><p>Este es un recordatorio para tu sesión de {{sessionType}} mañana a las {{sessionTime}}.</p><p>Por favor llega 10 minutos antes a tu cita.</p><p>Atentamente,<br>Equipo SOULPATH</p>'
+              subject: 'Recordatorio: Tu Clase en MatMax Yoga Studio',
+              content: '<h1>Recordatorio de Clase</h1><p>Estimado {{clientName}},</p><p>Este es un recordatorio para tu clase de {{sessionType}} mañana a las {{sessionTime}}.</p><p>Por favor llega 10 minutos antes.</p><p>Atentamente,<br>Equipo MatMax Yoga Studio</p>'
             }
           ]
         }
@@ -103,13 +103,13 @@ async function main() {
           create: [
             {
               language: 'en',
-              subject: 'Welcome to SOULPATH',
-              content: '<h1>Welcome to SOULPATH!</h1><p>Dear {{clientName}},</p><p>Thank you for choosing SOULPATH. We are excited to be part of your wellness journey.</p><p>Discover our services and book your first session today.</p><p>Best regards,<br>SOULPATH Team</p>'
+              subject: 'Welcome to MatMax Yoga Studio',
+              content: '<h1>Welcome to MatMax Yoga Studio!</h1><p>Dear {{clientName}},</p><p>Thank you for choosing MatMax. We are excited to support your yoga journey.</p><p>Explore our classes and book your first session today.</p><p>Best regards,<br>MatMax Yoga Studio Team</p>'
             },
             {
               language: 'es',
-              subject: 'Bienvenido a SOULPATH',
-              content: '<h1>¡Bienvenido a SOULPATH!</h1><p>Estimado {{clientName}},</p><p>Gracias por elegir SOULPATH. Estamos emocionados de ser parte de tu camino al bienestar.</p><p>Descubre nuestros servicios y reserva tu primera sesión hoy.</p><p>Atentamente,<br>Equipo SOULPATH</p>'
+              subject: 'Bienvenido a MatMax Yoga Studio',
+              content: '<h1>¡Bienvenido a MatMax Yoga Studio!</h1><p>Estimado {{clientName}},</p><p>Gracias por elegir MatMax. Estamos emocionados de acompañarte en tu práctica de yoga.</p><p>Explora nuestras clases y reserva tu primera sesión hoy.</p><p>Atentamente,<br>Equipo MatMax Yoga Studio</p>'
             }
           ]
         }
@@ -132,11 +132,11 @@ async function main() {
           create: [
             {
               language: 'en',
-              content: 'Your SOULPATH verification code is {{otpCode}}. This code expires in {{expiryTime}} minutes.'
+              content: 'Your MatMax Yoga Studio verification code is {{otpCode}}. This code expires in {{expiryTime}} minutes.'
             },
             {
               language: 'es',
-              content: 'Tu código de verificación de SOULPATH es {{otpCode}}. Este código expira en {{expiryTime}} minutos.'
+              content: 'Tu código de verificación de MatMax Yoga Studio es {{otpCode}}. Este código expira en {{expiryTime}} minutos.'
             }
           ]
         }
@@ -159,11 +159,11 @@ async function main() {
           create: [
             {
               language: 'en',
-              content: 'Payment confirmed! Your {{packageName}} package has been activated. Amount: ${{amount}}. Thank you for choosing SOULPATH!'
+              content: 'Payment confirmed! Your {{packageName}} has been activated. Amount: ${{amount}}. Thank you for choosing MatMax Yoga Studio!'
             },
             {
               language: 'es',
-              content: '¡Pago confirmado! Tu paquete {{packageName}} ha sido activado. Monto: ${{amount}}. ¡Gracias por elegir SOULPATH!'
+              content: '¡Pago confirmado! Tu {{packageName}} ha sido activado. Monto: ${{amount}}. ¡Gracias por elegir MatMax Yoga Studio!'
             }
           ]
         }
@@ -186,13 +186,13 @@ async function main() {
           create: [
             {
               language: 'en',
-              subject: 'Appointment Cancelled - SOULPATH',
-              content: '<h1>Appointment Cancelled</h1><p>Dear {{clientName}},</p><p>Your {{sessionType}} session scheduled for {{sessionDate}} at {{sessionTime}} has been cancelled.</p><p>You can reschedule at any time through your dashboard.</p><p>Best regards,<br>SOULPATH Team</p>'
+              subject: 'Class Cancelled - MatMax Yoga Studio',
+              content: '<h1>Class Cancelled</h1><p>Dear {{clientName}},</p><p>Your {{sessionType}} class scheduled for {{sessionDate}} at {{sessionTime}} has been cancelled.</p><p>You can reschedule at any time through your dashboard.</p><p>Best regards,<br>MatMax Yoga Studio Team</p>'
             },
             {
               language: 'es',
-              subject: 'Cita Cancelada - SOULPATH',
-              content: '<h1>Cita Cancelada</h1><p>Estimado {{clientName}},</p><p>Tu sesión de {{sessionType}} programada para el {{sessionDate}} a las {{sessionTime}} ha sido cancelada.</p><p>Puedes reprogramar en cualquier momento a través de tu panel de control.</p><p>Atentamente,<br>Equipo SOULPATH</p>'
+              subject: 'Clase Cancelada - MatMax Yoga Studio',
+              content: '<h1>Clase Cancelada</h1><p>Estimado {{clientName}},</p><p>Tu clase de {{sessionType}} programada para el {{sessionDate}} a las {{sessionTime}} ha sido cancelada.</p><p>Puedes reprogramar en cualquier momento a través de tu panel.</p><p>Atentamente,<br>Equipo MatMax Yoga Studio</p>'
             }
           ]
         }
@@ -207,8 +207,8 @@ async function main() {
     where: { id: 1 },
     update: {},
     create: {
-      heroTitleEn: 'Welcome to SOULPATH',
-      heroTitleEs: 'Bienvenido a SOULPATH',
+      heroTitleEn: 'MatMax Yoga Studio',
+      heroTitleEs: 'MatMax Yoga Studio',
       heroSubtitleEn: 'Your journey to wellness starts here',
       heroSubtitleEs: 'Tu camino al bienestar comienza aquí',
       aboutTitleEn: 'About Us',
@@ -233,9 +233,9 @@ async function main() {
     where: { id: 1 },
     update: {},
     create: {
-      type: 'text',
-      text: 'SOULPATH',
-      imageUrl: null
+      type: 'image',
+      text: 'MatMax Yoga Studio',
+      imageUrl: '/logo_matmax.png'
     }
   });
   console.log('✅ Logo settings created:', logoSettings.id);
@@ -246,9 +246,9 @@ async function main() {
     where: { id: 1 },
     update: {},
     create: {
-      title: 'SOULPATH - Wellness & Healing',
-      description: 'Your journey to wellness starts here. Professional wellness services in a peaceful environment.',
-      keywords: 'wellness, healing, therapy, meditation, soulpath',
+      title: 'MatMax Yoga Studio',
+      description: 'Yoga classes for all levels. Build strength, flexibility, and inner peace.',
+      keywords: 'yoga, wellness, meditation, flexibility, strength, balance',
       ogImage: null
     }
   });
@@ -299,6 +299,17 @@ async function main() {
         symbol: 'C$',
         is_default: false,
         exchange_rate: 1.350000
+      }
+    }),
+    prisma.currency.upsert({
+      where: { code: 'PEN' },
+      update: {},
+      create: {
+        code: 'PEN',
+        name: 'Peruvian Sol',
+        symbol: 'S/',
+        is_default: false,
+        exchange_rate: 3.750000
       }
     })
   ]);
@@ -414,17 +425,25 @@ async function main() {
   ]);
   console.log('✅ Rates created:', rates.length);
 
-  // 9. Create package definitions
-  console.log('📦 Creating package definitions...');
+  // 9. Create package definitions (MATPASS)
+  console.log('📦 Creating MATPASS package definitions...');
   const packageDefinitions = await Promise.all([
     prisma.packageDefinition.upsert({
       where: { id: 1 },
-      update: {},
+      update: {
+        name: '01 MATPASS',
+        description: 'All classes are 60 minutes',
+        sessionsCount: 1,
+        sessionDurationId: 2,
+        packageType: 'individual',
+        maxGroupSize: 1,
+        isActive: true
+      },
       create: {
-        name: 'Starter Package',
-        description: 'Perfect for beginners',
-        sessionsCount: 3,
-        sessionDurationId: 2, // 60 minutes
+        name: '01 MATPASS',
+        description: 'All classes are 60 minutes',
+        sessionsCount: 1,
+        sessionDurationId: 2,
         packageType: 'individual',
         maxGroupSize: 1,
         isActive: true
@@ -432,12 +451,20 @@ async function main() {
     }),
     prisma.packageDefinition.upsert({
       where: { id: 2 },
-      update: {},
+      update: {
+        name: '04 MATPASS',
+        description: 'All classes are 60 minutes',
+        sessionsCount: 4,
+        sessionDurationId: 2,
+        packageType: 'individual',
+        maxGroupSize: 1,
+        isActive: true
+      },
       create: {
-        name: 'Wellness Package',
-        description: 'Comprehensive wellness program',
-        sessionsCount: 6,
-        sessionDurationId: 2, // 60 minutes
+        name: '04 MATPASS',
+        description: 'All classes are 60 minutes',
+        sessionsCount: 4,
+        sessionDurationId: 2,
         packageType: 'individual',
         maxGroupSize: 1,
         isActive: true
@@ -445,58 +472,162 @@ async function main() {
     }),
     prisma.packageDefinition.upsert({
       where: { id: 3 },
-      update: {},
+      update: {
+        name: '08 MATPASS',
+        description: 'All classes are 60 minutes',
+        sessionsCount: 8,
+        sessionDurationId: 2,
+        packageType: 'individual',
+        maxGroupSize: 1,
+        isActive: true
+      },
       create: {
-        name: 'Group Wellness',
-        description: 'Group wellness sessions',
-        sessionsCount: 4,
-        sessionDurationId: 2, // 60 minutes
-        packageType: 'group',
-        maxGroupSize: 5,
+        name: '08 MATPASS',
+        description: 'All classes are 60 minutes',
+        sessionsCount: 8,
+        sessionDurationId: 2,
+        packageType: 'individual',
+        maxGroupSize: 1,
+        isActive: true
+      }
+    }),
+    prisma.packageDefinition.upsert({
+      where: { id: 4 },
+      update: {
+        name: '12 MATPASS',
+        description: 'All classes are 60 minutes',
+        sessionsCount: 12,
+        sessionDurationId: 2,
+        packageType: 'individual',
+        maxGroupSize: 1,
+        isActive: true
+      },
+      create: {
+        name: '12 MATPASS',
+        description: 'All classes are 60 minutes',
+        sessionsCount: 12,
+        sessionDurationId: 2,
+        packageType: 'individual',
+        maxGroupSize: 1,
+        isActive: true
+      }
+    }),
+    prisma.packageDefinition.upsert({
+      where: { id: 5 },
+      update: {
+        name: '24 MATPASS',
+        description: 'All classes are 60 minutes',
+        sessionsCount: 24,
+        sessionDurationId: 2,
+        packageType: 'individual',
+        maxGroupSize: 1,
+        isActive: true
+      },
+      create: {
+        name: '24 MATPASS',
+        description: 'All classes are 60 minutes',
+        sessionsCount: 24,
+        sessionDurationId: 2,
+        packageType: 'individual',
+        maxGroupSize: 1,
         isActive: true
       }
     })
   ]);
-  console.log('✅ Package definitions created:', packageDefinitions.length);
+  console.log('✅ MATPASS package definitions created:', packageDefinitions.length);
 
-  // 10. Create package prices
-  console.log('💲 Creating package prices...');
+  // 10. Create package prices (PEN)
+  console.log('💲 Creating MATPASS package prices in PEN...');
+  const penCurrency = await prisma.currency.findUnique({ where: { code: 'PEN' } });
+  const penCurrencyId = penCurrency?.id ?? 5;
   const packagePrices = await Promise.all([
     prisma.packagePrice.upsert({
       where: { id: 1 },
-      update: {},
+      update: {
+        packageDefinitionId: 1,
+        currencyId: penCurrencyId,
+        price: 50.00,
+        pricingMode: 'custom',
+        isActive: true
+      },
       create: {
-        packageDefinitionId: 1, // Starter Package
-        currencyId: 1, // USD
-        price: 200.00,
+        packageDefinitionId: 1,
+        currencyId: penCurrencyId,
+        price: 50.00,
         pricingMode: 'custom',
         isActive: true
       }
     }),
     prisma.packagePrice.upsert({
       where: { id: 2 },
-      update: {},
+      update: {
+        packageDefinitionId: 2,
+        currencyId: penCurrencyId,
+        price: 210.00,
+        pricingMode: 'custom',
+        isActive: true
+      },
       create: {
-        packageDefinitionId: 2, // Wellness Package
-        currencyId: 1, // USD
+        packageDefinitionId: 2,
+        currencyId: penCurrencyId,
+        price: 210.00,
+        pricingMode: 'custom',
+        isActive: true
+      }
+    }),
+    prisma.packagePrice.upsert({
+      where: { id: 3 },
+      update: {
+        packageDefinitionId: 3,
+        currencyId: penCurrencyId,
+        price: 320.00,
+        pricingMode: 'custom',
+        isActive: true
+      },
+      create: {
+        packageDefinitionId: 3,
+        currencyId: penCurrencyId,
+        price: 320.00,
+        pricingMode: 'custom',
+        isActive: true
+      }
+    }),
+    prisma.packagePrice.upsert({
+      where: { id: 4 },
+      update: {
+        packageDefinitionId: 4,
+        currencyId: penCurrencyId,
+        price: 400.00,
+        pricingMode: 'custom',
+        isActive: true
+      },
+      create: {
+        packageDefinitionId: 4,
+        currencyId: penCurrencyId,
         price: 400.00,
         pricingMode: 'custom',
         isActive: true
       }
     }),
     prisma.packagePrice.upsert({
-      where: { id: 3 },
-      update: {},
+      where: { id: 5 },
+      update: {
+        packageDefinitionId: 5,
+        currencyId: penCurrencyId,
+        price: 900.00,
+        pricingMode: 'custom',
+        isActive: true
+      },
       create: {
-        packageDefinitionId: 3, // Group Wellness
-        currencyId: 1, // USD
-        price: 180.00,
+        packageDefinitionId: 5,
+        currencyId: penCurrencyId,
+        price: 900.00,
         pricingMode: 'custom',
         isActive: true
       }
     })
   ]);
-  console.log('✅ Package prices created:', packagePrices.length);
+  console.log('✅ MATPASS package prices created:', packagePrices.length);
 
   // 11. Create schedule templates
   console.log('📅 Creating schedule templates...');
@@ -814,46 +945,46 @@ async function main() {
   // 16.5. Create admin client profile
   console.log('👤 Creating admin client profile...');
   const adminClient = await prisma.user.upsert({
-    where: { email: 'coco@soulpath.lat' },
+    where: { email: 'coco@matmax.store' },
     update: {},
     create: {
-      email: 'coco@soulpath.lat',
+      email: 'coco@matmax.store',
       fullName: 'Coco Admin',
       phone: '+1234567890',
       status: 'active',
       birthDate: new Date('1990-01-15'),
       birthTime: new Date('1990-01-15T10:30:00'),
       birthPlace: 'New York, USA',
-      question: 'How can I help manage the SOULPATH wellness system?',
+      question: 'How can I help manage the MatMax Yoga Studio system?',
       language: 'en'
     }
   });
   console.log('✅ Admin client profile created:', adminClient.id);
 
   // 16.6. Create new admin user with password
-  console.log('👤 Creating new admin user (beto@soulpath.lat)...');
+  console.log('👤 Creating new admin user (admin@matmax.store)...');
   const hashedPassword = await bcrypt.hash('soulpath', 12);
   const newAdminUser = await prisma.user.upsert({
-    where: { email: 'beto@soulpath.lat' },
+    where: { email: 'admin@matmax.store' },
     update: {},
     create: {
-      email: 'beto@soulpath.lat',
+      email: 'admin@matmax.store',
       password: hashedPassword,
-      fullName: 'Beto Admin',
+      fullName: 'MatMax Admin',
       role: 'admin',
       phone: '+1234567890',
       status: 'active',
       birthDate: new Date('1990-01-15'),
       birthTime: new Date('1990-01-15T10:30:00'),
       birthPlace: 'New York, USA',
-      question: 'How can I help manage the SOULPATH wellness system?',
+      question: 'How can I help manage the MatMax Yoga Studio system?',
       language: 'en',
       adminNotes: 'System administrator with full access'
     }
   });
   console.log('✅ New admin user created:', newAdminUser.email);
 
-  // 17. Create test purchases first
+  // 17. Create test purchases first (PEN)
   console.log('💳 Creating test purchases...');
   const purchases = await Promise.all([
     prisma.purchase.upsert({
@@ -861,12 +992,12 @@ async function main() {
       update: {},
       create: {
         userId: clients[0].id,
-        totalAmount: 200.00,
-        currencyCode: 'USD',
+        totalAmount: 50.00,
+        currencyCode: 'PEN',
         paymentMethod: 'stripe',
         paymentStatus: 'confirmed',
         transactionId: 'txn_test_123',
-        notes: 'Test purchase for John Doe',
+        notes: 'Test purchase for John Doe - 01 MATPASS',
         purchasedAt: new Date(),
         confirmedAt: new Date()
       }
@@ -876,12 +1007,12 @@ async function main() {
       update: {},
       create: {
         userId: clients[1].id,
-        totalAmount: 360.00,
-        currencyCode: 'USD',
+        totalAmount: 210.00,
+        currencyCode: 'PEN',
         paymentMethod: 'cash',
         paymentStatus: 'confirmed',
         transactionId: 'txn_test_456',
-        notes: 'Test purchase for Maria Garcia',
+        notes: 'Test purchase for Maria Garcia - 04 MATPASS',
         purchasedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
         confirmedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
       }
@@ -951,7 +1082,7 @@ async function main() {
   ]);
   console.log('✅ Test bookings created:', bookings.length);
 
-  // 19. Create comprehensive payment records and purchase history
+  // 19. Create comprehensive payment records and purchase history (PEN)
   console.log('💳 Creating comprehensive payment records...');
   const paymentRecords = await Promise.all([
     // John Doe's payment history
@@ -961,12 +1092,12 @@ async function main() {
       create: {
         userId: clients[0].id,
         purchaseId: 1,
-        amount: 200.00,
-        currencyCode: 'USD',
+        amount: 50.00,
+        currencyCode: 'PEN',
         paymentMethod: 'stripe',
         paymentStatus: 'confirmed',
         transactionId: 'txn_123456789',
-        notes: 'Starter package payment - Credit card',
+        notes: '01 MATPASS payment - Credit card',
         paymentDate: new Date(),
         confirmedAt: new Date()
       }
@@ -978,12 +1109,12 @@ async function main() {
       create: {
         userId: clients[1].id,
         purchaseId: 2,
-        amount: 360.00,
-        currencyCode: 'USD',
+        amount: 210.00,
+        currencyCode: 'PEN',
         paymentMethod: 'cash',
         paymentStatus: 'confirmed',
         transactionId: null,
-        notes: 'Wellness package payment - Cash',
+        notes: '04 MATPASS payment - Cash',
         paymentDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
         confirmedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
       }
@@ -1002,7 +1133,7 @@ async function main() {
     create: {
       key: 'hero_profile',
       url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
-      altText: 'Jose Profile - SOULPATH Wellness'
+      altText: 'Jose Profile - MatMax Yoga Studio'
     }
   });
   console.log('✅ Profile image created:', profileImage.id);
@@ -1137,12 +1268,12 @@ async function main() {
   console.log(`   🐛 Test bug reports: ${bugReports.length}`);
   console.log(`   💬 Test bug comments: ${bugComments.length}`);
   console.log('');
-  console.log('🚀 Your SOULPATH system is now fully seeded and ready for testing!');
+  console.log('🚀 Your MatMax Yoga Studio system is now fully seeded and ready for testing!');
   console.log('');
   console.log('🔑 Test Credentials:');
-  console.log('   Admin: admin@soulpath.lat');
-  console.log('   Admin: coco@soulpath.lat (password: soulpath2025!)');
-  console.log('   Admin: beto@soulpath.lat (password: soulpath)');
+  console.log('   Admin: admin@matmax.store');
+  console.log('   Admin: coco@matmax.store (password: soulpath2025!)');
+  console.log('   Admin: admin@matmax.store (password: soulpath)');
   console.log('   Client 1: john.doe@example.com');
   console.log('   Client 2: maria.garcia@example.com');
   console.log('   Client 3: test@example.com');

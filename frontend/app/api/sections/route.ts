@@ -76,8 +76,8 @@ export async function GET() {
       {
         id: 'about',
         type: 'content',
-        title: 'About SoulPath',
-        description: 'Information about José and SoulPath',
+        title: 'About MatMax Yoga Studio',
+        description: 'Information about MatMax Yoga Studio and our approach',
         icon: 'User',
         component: 'AboutSection',
         order: 3,
@@ -121,22 +121,27 @@ export async function GET() {
       sections = await withCache(
         'sections',
         async () => {
-          return await prisma.section.findMany({
-            where: { enabled: true },
-            orderBy: { order: 'asc' },
-            select: {
-              sectionId: true,
-              type: true,
-              title: true,
-              description: true,
-              icon: true,
-              component: true,
-              order: true,
-              enabled: true,
-              mobileConfig: true,
-              desktopConfig: true
-            }
-          });
+          try {
+            return await prisma.section.findMany({
+              where: { enabled: true },
+              orderBy: { order: 'asc' },
+              select: {
+                sectionId: true,
+                type: true,
+                title: true,
+                description: true,
+                icon: true,
+                component: true,
+                order: true,
+                enabled: true,
+                mobileConfig: true,
+                desktopConfig: true
+              }
+            });
+          } catch (innerError) {
+            console.warn('Sections table not available, returning empty array');
+            return [] as any[];
+          }
         },
         10 * 60 * 1000 // Cache for 10 minutes
       );
@@ -169,7 +174,7 @@ export async function GET() {
         });
       }
     } catch (dbError) {
-      console.error('❌ Database error loading sections:', dbError);
+      console.warn('⚠️ Database unavailable for sections; using defaults');
       // Continue to fallback
     }
 

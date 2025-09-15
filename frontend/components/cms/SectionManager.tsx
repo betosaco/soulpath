@@ -6,6 +6,7 @@ import { SectionConfig } from '@/lib/content-config';
 import { CMSButton } from './CMSButton';
 import { CMSInput } from './CMSInput';
 import { useToast } from './Toast';
+import { useAuth } from '@/hooks/useAuth';
 
 interface SectionManagerProps {
   sections: SectionConfig[];
@@ -14,6 +15,7 @@ interface SectionManagerProps {
 
 export function SectionManager({ sections, onSectionsChange }: SectionManagerProps) {
   const { showSuccess, showError } = useToast();
+  const { user, isLoading: authLoading } = useAuth();
   const [localSections, setLocalSections] = useState<SectionConfig[]>(sections);
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [editingData, setEditingData] = useState<Partial<SectionConfig>>({});
@@ -88,13 +90,17 @@ export function SectionManager({ sections, onSectionsChange }: SectionManagerPro
   const deleteSection = async (sectionId: string) => {
     if (window.confirm('Are you sure you want to delete this section? This action cannot be undone.')) {
       try {
+        if (authLoading || !user?.access_token) {
+          showError('Auth Required', 'Please sign in to modify sections.', 2000);
+          return;
+        }
         // Remove from database by updating all sections except the deleted one
         const updatedSections = localSections.filter(section => section.id !== sectionId);
         
         const response = await fetch('/api/admin/sections', {
           method: 'PUT',
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            'Authorization': `Bearer ${user.access_token}`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({ 
@@ -136,6 +142,11 @@ export function SectionManager({ sections, onSectionsChange }: SectionManagerPro
       return;
     }
 
+    if (authLoading || !user?.access_token) {
+      showError('Auth Required', 'Please sign in to add sections.', 2000);
+      return;
+    }
+
     const section: SectionConfig = {
       id: newSection.id,
       type: newSection.type || 'content',
@@ -162,7 +173,7 @@ export function SectionManager({ sections, onSectionsChange }: SectionManagerPro
       const response = await fetch('/api/admin/sections', {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          'Authorization': `Bearer ${user.access_token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ 
@@ -202,10 +213,14 @@ export function SectionManager({ sections, onSectionsChange }: SectionManagerPro
 
   const saveAllChanges = async () => {
     try {
+      if (authLoading || !user?.access_token) {
+        showError('Auth Required', 'Please sign in to save sections.', 2000);
+        return;
+      }
       const response = await fetch('/api/admin/sections', {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          'Authorization': `Bearer ${user.access_token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ 

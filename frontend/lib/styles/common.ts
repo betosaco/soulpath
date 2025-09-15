@@ -67,7 +67,7 @@ export const buttonStyles = {
 export const sidebarButtonStyles = {
   base: 'w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors',
   variants: {
-    active: 'bg-[var(--color-accent-500)] text-black',
+    active: 'bg-[var(--color-accent-500)] text-[var(--color-text-inverse)]',
     inactive: 'text-[var(--color-text-secondary)] hover:bg-[var(--color-sidebar-700)] hover:text-[var(--color-text-primary)]',
   },
   icon: 'w-5 h-5',

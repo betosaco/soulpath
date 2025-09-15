@@ -164,7 +164,7 @@ export function ContentEditor({
               <CMSInput
                 value={typeof localContent.heroTitleEn === 'string' ? localContent.heroTitleEn : ''}
                 onChange={(value) => handleFieldChange('heroTitle', value, 'en')}
-                placeholder="Welcome to SOULPATH"
+                placeholder="MatMax Yoga Studio"
               />
             </div>
             
@@ -173,7 +173,7 @@ export function ContentEditor({
               <CMSInput
                 value={typeof localContent.heroTitleEs === 'string' ? localContent.heroTitleEs : ''}
                 onChange={(value) => handleFieldChange('heroTitle', value, 'es')}
-                placeholder="Bienvenido a SOULPATH"
+                placeholder="MatMax Yoga Studio"
               />
             </div>
             
@@ -356,7 +356,7 @@ export function ContentEditor({
             <div>
               <h4 className="text-md font-medium text-[#EAEAEA] mb-3">English Version</h4>
               <div className="space-y-2 text-sm">
-                <p><strong>Hero:</strong> {typeof localContent.heroTitleEn === 'string' ? localContent.heroTitleEn || 'Welcome to SOULPATH' : 'Welcome to SOULPATH'}</p>
+                <p><strong>Hero:</strong> {typeof localContent.heroTitleEn === 'string' ? localContent.heroTitleEn || 'MatMax Yoga Studio' : 'MatMax Yoga Studio'}</p>
                 <p><strong>Subtitle:</strong> {typeof localContent.heroSubtitleEn === 'string' ? localContent.heroSubtitleEn || 'Your journey to wellness starts here' : 'Your journey to wellness starts here'}</p>
                 <p><strong>About:</strong> {typeof localContent.aboutTitleEn === 'string' ? localContent.aboutTitleEn || 'About Us' : 'About Us'}</p>
                 <p><strong>Approach:</strong> {typeof localContent.approachTitleEn === 'string' ? localContent.approachTitleEn || 'Our Approach' : 'Our Approach'}</p>
@@ -366,7 +366,7 @@ export function ContentEditor({
             <div>
               <h4 className="text-md font-medium text-[#EAEAEA] mb-3">Spanish Version</h4>
               <div className="space-y-2 text-sm">
-                <p><strong>Hero:</strong> {typeof localContent.heroTitleEs === 'string' ? localContent.heroTitleEs || 'Bienvenido a SOULPATH' : 'Bienvenido a SOULPATH'}</p>
+                <p><strong>Hero:</strong> {typeof localContent.heroTitleEs === 'string' ? localContent.heroTitleEs || 'MatMax Yoga Studio' : 'MatMax Yoga Studio'}</p>
                 <p><strong>Subtitle:</strong> {typeof localContent.heroSubtitleEs === 'string' ? localContent.heroSubtitleEs || 'Tu camino al bienestar comienza aquí' : 'Tu camino al bienestar comienza aquí'}</p>
                 <p><strong>About:</strong> {typeof localContent.aboutTitleEs === 'string' ? localContent.aboutTitleEs || 'Sobre Nosotros' : 'Sobre Nosotros'}</p>
                 <p><strong>Approach:</strong> {typeof localContent.approachTitleEs === 'string' ? localContent.approachTitleEs || 'Nuestro Enfoque' : 'Nuestro Enfoque'}</p>

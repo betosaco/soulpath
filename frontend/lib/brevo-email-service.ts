@@ -117,7 +117,7 @@ export async function createEmailService(): Promise<BrevoEmailService | null> {
         config = {
           apiKey: emailConfig.brevo_api_key || process.env.BREVO_API_KEY || '',
           senderEmail: emailConfig.sender_email || process.env.BREVO_SENDER_EMAIL || 'info@matmax.store',
-          senderName: emailConfig.sender_name || process.env.BREVO_SENDER_NAME || 'SoulPath'
+          senderName: emailConfig.sender_name || process.env.BREVO_SENDER_NAME || 'MatMax Yoga Studio'
         };
       }
     } catch (_dbError) {
@@ -129,7 +129,7 @@ export async function createEmailService(): Promise<BrevoEmailService | null> {
       config = {
         apiKey: process.env.BREVO_API_KEY || '',
         senderEmail: process.env.BREVO_SENDER_EMAIL || 'info@matmax.store',
-        senderName: process.env.BREVO_SENDER_NAME || 'SoulPath'
+        senderName: process.env.BREVO_SENDER_NAME || 'MatMax Yoga Studio'
       };
     }
 

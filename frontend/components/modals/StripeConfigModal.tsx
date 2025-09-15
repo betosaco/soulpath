@@ -36,6 +36,7 @@ const CURRENCIES = [
   { code: 'jpy', name: 'Japanese Yen (¥)' },
   { code: 'mxn', name: 'Mexican Peso (MXN$)' },
   { code: 'brl', name: 'Brazilian Real (R$)' },
+  { code: 'pen', name: 'Peruvian Sol (S/)' },
 ];
 
 const COUNTRIES = [

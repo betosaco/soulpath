@@ -136,7 +136,7 @@ export class PerformanceMiddleware {
 
     // Add performance headers
     response.headers.set('x-response-time', Date.now().toString());
-    response.headers.set('x-powered-by', 'SOULPATH-API');
+    response.headers.set('x-powered-by', 'MATMAX-API');
 
     return response;
   }

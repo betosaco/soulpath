@@ -49496,7 +49496,7 @@ model kv_store_f839855f {
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model soultpath {
+model MatMax {
   id         BigInt    @id @default(autoincrement())
   created_at DateTime? @default(now()) @db.Timestamptz(6)
 }
@@ -52916,8 +52916,8 @@ CREATE TABLE IF NOT EXISTS kv_store_f839855f (
   value JSONB NOT NULL
 );
 
--- 6. Add soultpath table (if not exists)
-CREATE TABLE IF NOT EXISTS soultpath (
+-- 6. Add MatMax table (if not exists)
+CREATE TABLE IF NOT EXISTS MatMax (
   id BIGSERIAL PRIMARY KEY,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -80693,7 +80693,7 @@ model kv_store_f839855f {
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model soultpath {
+model MatMax {
   id         BigInt    @id @default(autoincrement())
   created_at DateTime? @default(now()) @db.Timestamptz(6)
 }

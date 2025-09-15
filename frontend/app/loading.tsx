@@ -10,7 +10,7 @@ export default function Loading() {
           <div className="w-16 h-16 border-4 border-[#FFD700]/20 border-t-[#FFD700] rounded-full animate-spin" />
           <div className="mt-4 text-center">
             <div className="w-2 h-2 bg-[#FFD700] rounded-full animate-bounce mx-auto mb-2" />
-            <p className="text-[#FFD700] text-lg font-semibold">Loading SoulPath...</p>
+            <p className="text-[#FFD700] text-lg font-semibold">Loading MatMax Yoga Studio...</p>
           </div>
         </div>
       </div>

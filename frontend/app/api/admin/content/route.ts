@@ -78,8 +78,8 @@ export async function GET(request: NextRequest) {
     console.log('⚠️ No content found or database error, creating/returning default content...');
 
     const defaultContent = {
-      heroTitleEn: 'Welcome to SOULPATH',
-      heroTitleEs: 'Bienvenido a SOULPATH',
+      heroTitleEn: 'MatMax Yoga Studio',
+      heroTitleEs: 'MatMax Yoga Studio',
       heroSubtitleEn: 'Your journey to wellness starts here',
       heroSubtitleEs: 'Tu camino al bienestar comienza aquí',
       aboutTitleEn: 'About Us',

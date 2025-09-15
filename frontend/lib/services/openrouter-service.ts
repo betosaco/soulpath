@@ -147,7 +147,7 @@ export class OpenRouterService {
       specialties: string[];
     };
   }): Promise<string> {
-    const systemPrompt = `You are a knowledgeable and empathetic assistant for SoulPath Wellness, representing ${context.brandContext.astrologerName}.
+    const systemPrompt = `You are a knowledgeable and empathetic assistant for MatMax Yoga Studio.
     
     About our services:
     - ${context.brandContext.services.join('\n- ')}
@@ -207,8 +207,8 @@ export class OpenRouterService {
   }
 
   private buildSystemPrompt(context: any): string {
-    const basePrompt = `You are an empathetic, intuitive, and spiritually aware astrology booking assistant for SoulPath Wellness. 
-    You help users book readings with Jose Garfias, a renowned astrologer.
+    const basePrompt = `You are an empathetic, welcoming yoga studio assistant for MatMax Yoga Studio.
+    You help users book yoga classes and find the right offerings.
     
     Your personality:
     - Warm and welcoming
@@ -221,7 +221,7 @@ export class OpenRouterService {
     Missing details: ${context.missingDetails.join(', ')}
     
     Your goal is to gently guide the user through the booking process while maintaining a spiritual, 
-    empathetic tone that reflects the transformative nature of astrology readings.`;
+    empathetic tone that reflects the benefits of yoga practice.`;
 
     if (context.persona === 'spiritual') {
       return basePrompt + `\n\nEmphasize the spiritual and transformative aspects of the reading. 
@@ -318,7 +318,7 @@ Please ask a clarifying question to help the user get the assistance they need.`
     apiData: any,
     conversationHistory: any[]
   ): Promise<string> {
-    const systemPrompt = `You are a helpful astrology booking assistant for SoulPath Wellness. Help users book readings with Jose Garfias.
+    const systemPrompt = `You are a helpful assistant for MatMax Yoga Studio. Help users book yoga classes and find the right offerings.
 
 Intent: ${intent}
 Entities: ${JSON.stringify(entities)}
@@ -348,7 +348,7 @@ IMPORTANT: Keep responses SHORT and CONCISE (1-2 sentences max). Be warm but bri
       temperature: 0.7
     });
 
-    return response.choices[0]?.message?.content || 'I\'m here to help you with your astrology reading needs. How can I assist you today?';
+    return response.choices[0]?.message?.content || 'I\'m here to help you with yoga classes at MatMax. How can I assist you today?';
   }
 
   /**
@@ -382,7 +382,7 @@ IMPORTANT: Keep responses SHORT and CONCISE (1-2 sentences max). Be warm but bri
         'Authorization': `Bearer ${this.apiKey}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 3000}`,
-        'X-Title': 'SoulPath Wellness Platform'
+        'X-Title': 'MatMax Yoga Studio Platform'
       },
       body: JSON.stringify(request)
     });

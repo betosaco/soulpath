@@ -40,14 +40,14 @@ export function CommunicationConfig() {
   const [config, setConfig] = useState<CommunicationConfigData>({
     email_enabled: true,
     brevo_api_key: '',
-    sender_email: 'noreply@soulpath.lat',
-    sender_name: 'SOULPATH',
-    admin_email: 'admin@soulpath.lat',
+    sender_email: 'noreply@matmax.store',
+    sender_name: 'MatMax Yoga Studio',
+    admin_email: 'admin@matmax.store',
     sms_enabled: false,
     sms_provider: 'labsmobile',
     labsmobile_username: '',
     labsmobile_token: '',
-    sms_sender_name: 'SoulPath'
+    sms_sender_name: 'MatMax Yoga Studio'
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -56,7 +56,7 @@ export function CommunicationConfig() {
   const [showSmsToken, setShowSmsToken] = useState(false);
   const [testEmail, setTestEmail] = useState('');
   const [testPhone, setTestPhone] = useState('');
-  const [testMessage, setTestMessage] = useState('Test message from SoulPath');
+  const [testMessage, setTestMessage] = useState('Test message from MatMax Yoga Studio');
   const [isTestingEmail, setIsTestingEmail] = useState(false);
   const [isTestingSms, setIsTestingSms] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -121,7 +121,7 @@ export function CommunicationConfig() {
         body: JSON.stringify({
           type: 'email',
           to: testEmail,
-          subject: 'Test Email from SoulPath',
+          subject: 'Test Email from MatMax Yoga Studio',
           content: '<p>This is a test email to verify your email configuration.</p>'
         })
       });

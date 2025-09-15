@@ -63,7 +63,7 @@ export function MobileMenu({
             >
               <div className="flex flex-col h-full p-6">
                 <div className="flex items-center justify-between mb-8">
-                  <span className="font-heading text-xl text-[#FFD700]">SOULPATH</span>
+                  <span className="font-heading text-xl text-[#FFD700]">MatMax</span>
                   <button 
                     onClick={onClose}
                     className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#C0C0C0]/10 text-[#C0C0C0] hover:text-[#FFD700] transition-colors"

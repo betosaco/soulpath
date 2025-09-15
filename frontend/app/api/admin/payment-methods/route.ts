@@ -10,17 +10,27 @@ interface PaymentMethodUpdateData {
   requiresConfirmation?: boolean;
   autoAssignPackage?: boolean;
   isActive?: boolean;
+  providerConfig?: any;
 }
 
 // GET - List all payment methods
 export async function GET(request: NextRequest) {
   try {
+    console.log('🔍 Admin payment methods API called');
     const user = await requireAuth(request);
+    console.log('🔍 Auth result:', user ? 'authenticated' : 'not authenticated');
     if (!user) {
+      console.log('❌ User not authenticated');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Ensure Prisma is connected before making queries
+    console.log('🔍 Ensuring Prisma connection...');
+    await prisma.$connect();
+    console.log('✅ Prisma connected successfully');
+    
     // Fetch all payment methods using Prisma (same as booking flow)
+    console.log('🔍 Fetching payment methods from database...');
     const paymentMethods = await prisma.paymentMethodConfig.findMany({
       select: {
         id: true,
@@ -31,6 +41,7 @@ export async function GET(request: NextRequest) {
         requiresConfirmation: true,
         autoAssignPackage: true,
         isActive: true,
+        providerConfig: true,
         createdAt: true,
         updatedAt: true
       },
@@ -39,14 +50,23 @@ export async function GET(request: NextRequest) {
       }
     });
 
+    console.log('✅ Payment methods fetched:', paymentMethods.length, 'items');
     return NextResponse.json({
       success: true,
       data: paymentMethods
     });
 
   } catch (error) {
-    console.error('Error in GET /api/admin/payment-methods:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('❌ Error in GET /api/admin/payment-methods:', error);
+    console.error('❌ Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined
+    });
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 }
 
@@ -75,7 +95,8 @@ export async function POST(request: NextRequest) {
         icon: body.icon || null,
         requiresConfirmation: body.requiresConfirmation !== undefined ? body.requiresConfirmation : false,
         autoAssignPackage: body.autoAssignPackage !== undefined ? body.autoAssignPackage : true,
-        isActive: body.isActive !== undefined ? body.isActive : true
+        isActive: body.isActive !== undefined ? body.isActive : true,
+        providerConfig: body.providerConfig || null
       }
     });
 
@@ -100,7 +121,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { id, name, type, description, icon, requiresConfirmation, autoAssignPackage, isActive } = body;
+    const { id, name, type, description, icon, requiresConfirmation, autoAssignPackage, isActive, providerConfig } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'ID is required' }, { status: 400 });
@@ -114,6 +135,7 @@ export async function PUT(request: NextRequest) {
     if (requiresConfirmation !== undefined) updateData.requiresConfirmation = requiresConfirmation;
     if (autoAssignPackage !== undefined) updateData.autoAssignPackage = autoAssignPackage;
     if (isActive !== undefined) updateData.isActive = isActive;
+    if (providerConfig !== undefined) updateData.providerConfig = providerConfig;
 
     const updatedPaymentMethod = await prisma.paymentMethodConfig.update({
       where: { id: parseInt(id) },

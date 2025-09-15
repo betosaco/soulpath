@@ -70,7 +70,7 @@ export class ConversationalOrchestrator {
           );
         } catch (error) {
           // Fallback response when OpenRouter is not available
-          clarificationResponse = "I'm not sure I understand. Could you please rephrase your question? I'm here to help with SoulPath wellness services!";
+          clarificationResponse = "I'm not sure I understand. Could you please rephrase your question? I'm here to help with MatMax Yoga Studio!";
         }
         
         return this.createSuccessResponse({

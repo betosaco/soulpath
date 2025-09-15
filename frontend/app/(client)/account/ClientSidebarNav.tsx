@@ -14,6 +14,7 @@ import {
   VideoIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { sidebarButtonStyles, combineStyles } from '@/lib/styles/common';
 import { createClient } from '@/lib/supabase/client';
 
 interface User {
@@ -88,10 +89,10 @@ export default function ClientSidebarNav({ user }: ClientSidebarNavProps) {
   };
 
   return (
-    <div className="flex w-64 flex-col bg-[#1a1a3a] border-r border-[#2a2a4a]">
+    <div className="flex w-64 flex-col bg-[var(--color-sidebar-800)] border-r border-[var(--color-border-500)]">
       {/* Logo/Brand */}
-      <div className="flex h-16 items-center justify-center border-b border-[#2a2a4a]">
-        <h1 className="text-xl font-bold text-white">SOULPATH</h1>
+      <div className="flex h-16 items-center justify-center border-b border-[var(--color-border-500)]">
+        <h1 className="text-xl font-bold text-[var(--color-text-inverse)]">MatMax</h1>
       </div>
 
       {/* Navigation */}
@@ -102,16 +103,15 @@ export default function ClientSidebarNav({ user }: ClientSidebarNavProps) {
             <Link
               key={item.name}
               href={item.href}
-              className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                item.current
-                  ? 'bg-[#3a3a5a] text-white border-l-4 border-[#ffd700]'
-                  : 'text-[#c0c0c0] hover:bg-[#2a2a4a] hover:text-white'
-              }`}
+              className={combineStyles(
+                'group',
+                sidebarButtonStyles.base,
+                item.current ? sidebarButtonStyles.variants.active : sidebarButtonStyles.variants.inactive,
+                'text-[var(--color-text-inverse)]'
+              )}
             >
               <Icon
-                className={`mr-3 h-5 w-5 flex-shrink-0 ${
-                  item.current ? 'text-[#ffd700]' : 'text-[#808080] group-hover:text-[#c0c0c0]'
-                }`}
+                className={combineStyles('mr-3 h-5 w-5 flex-shrink-0', sidebarButtonStyles.icon)}
               />
               {item.name}
             </Link>
@@ -120,16 +120,16 @@ export default function ClientSidebarNav({ user }: ClientSidebarNavProps) {
       </nav>
 
       {/* User Info & Sign Out */}
-      <div className="border-t border-[#2a2a4a] p-4">
+      <div className="border-t border-[var(--color-border-500)] p-4">
         <div className="mb-4">
-          <p className="text-sm text-[#c0c0c0]">Signed in as</p>
-          <p className="text-sm font-medium text-white truncate">{user.email}</p>
+          <p className="text-sm text-[var(--color-text-secondary)]">Signed in as</p>
+          <p className="text-sm font-medium text-[var(--color-text-inverse)] truncate">{user.email}</p>
         </div>
         <Button
           onClick={handleSignOut}
           variant="outline"
           size="sm"
-          className="w-full border-[#2a2a4a] text-[#c0c0c0] hover:bg-[#2a2a4a] hover:text-white"
+          className="w-full border-[var(--color-border-500)] text-[var(--color-text-secondary)] hover:bg-[var(--color-sidebar-700)] hover:text-[var(--color-text-inverse)]"
         >
           <LogOutIcon className="mr-2 h-4 w-4" />
           Sign Out

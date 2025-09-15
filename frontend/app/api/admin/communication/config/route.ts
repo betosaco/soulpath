@@ -30,14 +30,14 @@ export async function GET(request: NextRequest) {
       const defaultConfig = {
         email_enabled: true,
         brevo_api_key: '',
-        sender_email: 'noreply@soulpath.lat',
-        sender_name: 'SOULPATH',
-        admin_email: 'admin@soulpath.lat',
+        sender_email: 'noreply@matmax.store',
+        sender_name: 'MatMax Yoga Studio',
+        admin_email: 'admin@matmax.store',
         sms_enabled: false,
         sms_provider: 'labsmobile',
         labsmobile_username: '',
         labsmobile_token: '',
-        sms_sender_name: 'SoulPath'
+        sms_sender_name: 'MatMax Yoga Studio'
       };
       
       console.log('✅ Returning default communication config');

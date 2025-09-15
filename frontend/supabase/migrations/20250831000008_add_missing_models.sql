@@ -79,8 +79,8 @@ CREATE TABLE IF NOT EXISTS kv_store_f839855f (
   value JSONB NOT NULL
 );
 
--- 6. Add soultpath table (if not exists)
-CREATE TABLE IF NOT EXISTS soultpath (
+-- 6. Add MatMax table (if not exists)
+CREATE TABLE IF NOT EXISTS MatMax (
   id BIGSERIAL PRIMARY KEY,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

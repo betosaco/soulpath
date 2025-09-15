@@ -116,7 +116,7 @@ export class LabsMobileSmsService {
   async sendSms(phoneNumber: string, message: string): Promise<LabsMobileResponse> {
     const body = {
       message,
-      tpoa: this.config?.senderName || 'SoulPath',
+      tpoa: this.config?.senderName || 'MatMax Yoga Studio',
       recipient: [
         {
           msisdn: phoneNumber
@@ -144,14 +144,14 @@ export class LabsMobileSmsService {
 
       // Fallback to default message if template not found
       const defaultMessage = language === 'es' 
-        ? `Su código de verificación de SoulPath es: ${otpCode}. Este código expira en 10 minutos.`
-        : `Your SoulPath verification code is: ${otpCode}. This code expires in 10 minutes.`;
+        ? `Su código de verificación de MatMax Yoga Studio es: ${otpCode}. Este código expira en 10 minutos.`
+        : `Your MatMax Yoga Studio verification code is: ${otpCode}. This code expires in 10 minutes.`;
       
       return this.sendSms(phoneNumber, defaultMessage);
     } catch (error) {
       console.error('Error sending OTP SMS with template:', error);
       // Fallback to default message
-      const defaultMessage = `Your SoulPath verification code is: ${otpCode}. This code expires in 10 minutes.`;
+      const defaultMessage = `Your MatMax Yoga Studio verification code is: ${otpCode}. This code expires in 10 minutes.`;
       return this.sendSms(phoneNumber, defaultMessage);
     }
   }
