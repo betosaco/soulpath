@@ -225,24 +225,35 @@ export default function PackagesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0A0A23] via-[#1a1a2e] to-[#16213e] flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#FFD700] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-[#FFD700] text-lg font-semibold">Loading packages...</p>
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p 
+            className="text-primary text-lg font-semibold"
+            style={{ fontFamily: 'var(--font-heading)' }}
+          >
+            Loading packages...
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0A0A23] via-[#1a1a2e] to-[#16213e] text-white">
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-[#FFD700]">
+          <h1 
+            className="text-4xl md:text-6xl font-bold mb-6 text-primary"
+            style={{ fontFamily: 'var(--font-heading)' }}
+          >
             Choose Your Package
           </h1>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+          <p 
+            className="text-xl text-muted max-w-3xl mx-auto"
+            style={{ fontFamily: 'var(--font-body)' }}
+          >
             Select the perfect package for your spiritual journey and book your session
           </p>
         </div>
@@ -255,7 +266,7 @@ export default function PackagesPage() {
                 <div key={step.id} className="flex items-center">
                   <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
                     currentStep >= step.id 
-                      ? 'bg-[#FFD700] border-[#FFD700] text-[#0A0A23]' 
+                      ? 'bg-primary border-primary text-white' 
                       : 'border-gray-400 text-gray-400'
                   }`}>
                     {currentStep > step.id ? (
@@ -266,7 +277,7 @@ export default function PackagesPage() {
                   </div>
                   <div className="ml-3">
                     <p className={`font-semibold ${
-                      currentStep >= step.id ? 'text-[#FFD700]' : 'text-gray-400'
+                      currentStep >= step.id ? 'text-primary' : 'text-gray-400'
                     }`}>
                       {step.name}
                     </p>
@@ -292,40 +303,51 @@ export default function PackagesPage() {
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             >
               {packages.map((pkg) => (
-                <Card key={pkg.id} className="bg-white/10 backdrop-blur-lg border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105">
+                <Card key={pkg.id} className="card-base card-hover hover-scale">
                   <CardHeader className="text-center">
-                    <div className="w-16 h-16 bg-[#FFD700] rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Package className="w-8 h-8 text-[#0A0A23]" />
+                    <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Package className="w-8 h-8 text-white" />
                     </div>
-                    <CardTitle className="text-2xl text-[#FFD700]">{pkg.packageDefinition.name}</CardTitle>
-                    <div className="text-3xl font-bold text-white">
+                    <CardTitle 
+                      className="text-2xl text-primary"
+                      style={{ fontFamily: 'var(--font-heading)' }}
+                    >
+                      {pkg.packageDefinition.name}
+                    </CardTitle>
+                    <div 
+                      className="text-3xl font-bold text-black"
+                      style={{ fontFamily: 'var(--font-heading)' }}
+                    >
                       {pkg.currency.symbol}{pkg.price}
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-300 mb-6 text-center">
+                    <p 
+                      className="text-muted mb-6 text-center"
+                      style={{ fontFamily: 'var(--font-body)' }}
+                    >
                       {pkg.packageDefinition.description}
                     </p>
                     <div className="space-y-3 mb-6">
                       <div className="flex items-center text-sm">
-                        <Users className="w-4 h-4 mr-2 text-[#FFD700]" />
-                        <span>{pkg.packageDefinition.sessionsCount} Sessions</span>
+                        <Users className="w-4 h-4 mr-2 text-primary" />
+                        <span className="text-muted">{pkg.packageDefinition.sessionsCount} Sessions</span>
                       </div>
                       <div className="flex items-center text-sm">
-                        <Clock className="w-4 h-4 mr-2 text-[#FFD700]" />
-                        <span>60 minutes each</span>
+                        <Clock className="w-4 h-4 mr-2 text-primary" />
+                        <span className="text-muted">60 minutes each</span>
                       </div>
                       <div className="flex items-center text-sm">
-                        <Star className="w-4 h-4 mr-2 text-[#FFD700]" />
-                        <span>Personalized guidance</span>
+                        <Star className="w-4 h-4 mr-2 text-primary" />
+                        <span className="text-muted">Personalized guidance</span>
                       </div>
                     </div>
-                    <Button
+                    <button
                       onClick={() => handlePackageSelect(pkg)}
-                      className="w-full bg-[#FFD700] text-[#0A0A23] hover:bg-[#FFD700]/90 font-semibold"
+                      className="btn-primary w-full"
                     >
                       Select Package
-                    </Button>
+                    </button>
                   </CardContent>
                 </Card>
               ))}
@@ -340,30 +362,35 @@ export default function PackagesPage() {
               exit={{ opacity: 0, x: -20 }}
               className="max-w-2xl mx-auto"
             >
-              <Card className="bg-white/10 backdrop-blur-lg border-white/20">
+              <Card className="card-base">
                 <CardHeader>
-                  <CardTitle className="text-2xl text-[#FFD700] text-center">Personal Information</CardTitle>
+                  <CardTitle 
+                    className="text-2xl text-primary text-center"
+                    style={{ fontFamily: 'var(--font-heading)' }}
+                  >
+                    Personal Information
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="clientName" className="text-white">Full Name *</Label>
+                      <Label htmlFor="clientName" className="text-black">Full Name *</Label>
                       <Input
                         id="clientName"
                         value={formData.clientName}
                         onChange={(e) => setFormData(prev => ({ ...prev, clientName: e.target.value }))}
-                        className="bg-white/20 border-white/30 text-white placeholder-gray-400"
+                        className="border-gray-300 text-black placeholder-gray-400"
                         placeholder="Enter your full name"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="clientEmail" className="text-white">Email *</Label>
+                      <Label htmlFor="clientEmail" className="text-black">Email *</Label>
                       <Input
                         id="clientEmail"
                         type="email"
                         value={formData.clientEmail}
                         onChange={(e) => setFormData(prev => ({ ...prev, clientEmail: e.target.value }))}
-                        className="bg-white/20 border-white/30 text-white placeholder-gray-400"
+                        className="border-gray-300 text-black placeholder-gray-400"
                         placeholder="Enter your email"
                       />
                     </div>
@@ -371,90 +398,89 @@ export default function PackagesPage() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="clientPhone" className="text-white">Phone</Label>
+                      <Label htmlFor="clientPhone" className="text-black">Phone</Label>
                       <Input
                         id="clientPhone"
                         value={formData.clientPhone}
                         onChange={(e) => setFormData(prev => ({ ...prev, clientPhone: e.target.value }))}
-                        className="bg-white/20 border-white/30 text-white placeholder-gray-400"
+                        className="border-gray-300 text-black placeholder-gray-400"
                         placeholder="Enter your phone number"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="birthDate" className="text-white">Birth Date *</Label>
+                      <Label htmlFor="birthDate" className="text-black">Birth Date *</Label>
                       <Input
                         id="birthDate"
                         type="date"
                         value={formData.birthDate}
                         onChange={(e) => setFormData(prev => ({ ...prev, birthDate: e.target.value }))}
-                        className="bg-white/20 border-white/30 text-white"
+                        className="border-gray-300 text-black"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="birthTime" className="text-white">Birth Time</Label>
+                      <Label htmlFor="birthTime" className="text-black">Birth Time</Label>
                       <Input
                         id="birthTime"
                         type="time"
                         value={formData.birthTime}
                         onChange={(e) => setFormData(prev => ({ ...prev, birthTime: e.target.value }))}
-                        className="bg-white/20 border-white/30 text-white"
+                        className="border-gray-300 text-black"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="birthPlace" className="text-white">Birth Place</Label>
+                      <Label htmlFor="birthPlace" className="text-black">Birth Place</Label>
                       <Input
                         id="birthPlace"
                         value={formData.birthPlace}
                         onChange={(e) => setFormData(prev => ({ ...prev, birthPlace: e.target.value }))}
-                        className="bg-white/20 border-white/30 text-white placeholder-gray-400"
+                        className="border-gray-300 text-black placeholder-gray-400"
                         placeholder="City, Country"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="question" className="text-white">Your Question or Focus</Label>
+                    <Label htmlFor="question" className="text-black">Your Question or Focus</Label>
                     <Textarea
                       id="question"
                       value={formData.question}
                       onChange={(e) => setFormData(prev => ({ ...prev, question: e.target.value }))}
-                      className="bg-white/20 border-white/30 text-white placeholder-gray-400"
+                      className="border-gray-300 text-black placeholder-gray-400"
                       placeholder="What would you like guidance on?"
                       rows={3}
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="specialRequests" className="text-white">Special Requests</Label>
+                    <Label htmlFor="specialRequests" className="text-black">Special Requests</Label>
                     <Textarea
                       id="specialRequests"
                       value={formData.specialRequests}
                       onChange={(e) => setFormData(prev => ({ ...prev, specialRequests: e.target.value }))}
-                      className="bg-white/20 border-white/30 text-white placeholder-gray-400"
+                      className="border-gray-300 text-black placeholder-gray-400"
                       placeholder="Any special requests or preferences"
                       rows={2}
                     />
                   </div>
 
                   <div className="flex justify-between pt-4">
-                    <Button
-                      variant="outline"
+                    <button
                       onClick={() => setCurrentStep(0)}
-                      className="border-white/30 text-white hover:bg-white/10"
+                      className="btn-outline"
                     >
                       <ArrowLeft className="w-4 h-4 mr-2" />
                       Back
-                    </Button>
-                    <Button
+                    </button>
+                    <button
                       onClick={() => setCurrentStep(2)}
-                      className="bg-[#FFD700] text-[#0A0A23] hover:bg-[#FFD700]/90"
+                      className="btn-primary"
                     >
                       Continue
                       <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
+                    </button>
                   </div>
                 </CardContent>
               </Card>
@@ -469,10 +495,18 @@ export default function PackagesPage() {
               exit={{ opacity: 0, x: -20 }}
               className="max-w-4xl mx-auto"
             >
-              <Card className="bg-white/10 backdrop-blur-lg border-white/20">
+              <Card className="card-base">
                 <CardHeader>
-                  <CardTitle className="text-2xl text-[#FFD700] text-center">Schedule Your Session</CardTitle>
-                  <p className="text-gray-300 text-center">
+                  <CardTitle 
+                    className="text-2xl text-primary text-center"
+                    style={{ fontFamily: 'var(--font-heading)' }}
+                  >
+                    Schedule Your Session
+                  </CardTitle>
+                  <p 
+                    className="text-muted text-center"
+                    style={{ fontFamily: 'var(--font-body)' }}
+                  >
                     Choose a time that works for you, or skip to book later
                   </p>
                 </CardHeader>
@@ -483,8 +517,8 @@ export default function PackagesPage() {
                         key={slot.id}
                         className={`cursor-pointer transition-all duration-300 ${
                           slot.isAvailable && slot.bookedCount < slot.capacity
-                            ? 'bg-white/20 hover:bg-white/30 border-[#FFD700]'
-                            : 'bg-gray-600/20 border-gray-500 opacity-50 cursor-not-allowed'
+                            ? 'card-base card-hover border-primary'
+                            : 'bg-gray-100 border-gray-300 opacity-50 cursor-not-allowed'
                         }`}
                         onClick={() => {
                           if (slot.isAvailable && slot.bookedCount < slot.capacity) {
@@ -493,16 +527,19 @@ export default function PackagesPage() {
                         }}
                       >
                         <CardContent className="p-4 text-center">
-                          <div className="text-sm text-gray-300">
+                          <div className="text-sm text-muted">
                             {new Date(slot.startTime).toLocaleDateString()}
                           </div>
-                          <div className="font-semibold text-white">
+                          <div 
+                            className="font-semibold text-black"
+                            style={{ fontFamily: 'var(--font-heading)' }}
+                          >
                             {new Date(slot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </div>
-                          <div className="text-xs text-gray-400">
+                          <div className="text-xs text-muted">
                             {slot.scheduleTemplate.sessionDuration.duration_minutes} min
                           </div>
-                          <div className="text-xs text-gray-400">
+                          <div className="text-xs text-muted">
                             {slot.bookedCount}/{slot.capacity} booked
                           </div>
                         </CardContent>
@@ -511,21 +548,19 @@ export default function PackagesPage() {
                   </div>
 
                   <div className="text-center">
-                    <Button
+                    <button
                       onClick={handleSkipBooking}
-                      variant="outline"
-                      className="border-white/30 text-white hover:bg-white/10 mr-4"
+                      className="btn-outline mr-4"
                     >
                       Skip for Now
-                    </Button>
-                    <Button
+                    </button>
+                    <button
                       onClick={() => setCurrentStep(1)}
-                      variant="outline"
-                      className="border-white/30 text-white hover:bg-white/10"
+                      className="btn-outline"
                     >
                       <ArrowLeft className="w-4 h-4 mr-2" />
                       Back
-                    </Button>
+                    </button>
                   </div>
                 </CardContent>
               </Card>
@@ -540,35 +575,45 @@ export default function PackagesPage() {
               exit={{ opacity: 0, x: -20 }}
               className="max-w-2xl mx-auto"
             >
-              <Card className="bg-white/10 backdrop-blur-lg border-white/20">
+              <Card className="card-base">
                 <CardHeader>
-                  <CardTitle className="text-2xl text-[#FFD700] text-center">Complete Your Purchase</CardTitle>
+                  <CardTitle 
+                    className="text-2xl text-primary text-center"
+                    style={{ fontFamily: 'var(--font-heading)' }}
+                  >
+                    Complete Your Purchase
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {/* Order Summary */}
-                  <div className="bg-white/10 rounded-lg p-4 mb-6">
-                    <h3 className="text-lg font-semibold text-white mb-3">Order Summary</h3>
+                  <div className="bg-light rounded-lg p-4 mb-6">
+                    <h3 
+                      className="text-lg font-semibold text-black mb-3"
+                      style={{ fontFamily: 'var(--font-heading)' }}
+                    >
+                      Order Summary
+                    </h3>
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-gray-300">Package:</span>
-                        <span className="text-white">{formData.selectedPackage?.packageDefinition.name}</span>
+                        <span className="text-muted">Package:</span>
+                        <span className="text-black">{formData.selectedPackage?.packageDefinition.name}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-300">Sessions:</span>
-                        <span className="text-white">{formData.selectedPackage?.packageDefinition.sessionsCount}</span>
+                        <span className="text-muted">Sessions:</span>
+                        <span className="text-black">{formData.selectedPackage?.packageDefinition.sessionsCount}</span>
                       </div>
                       {formData.selectedScheduleSlot && (
                         <div className="flex justify-between">
-                          <span className="text-gray-300">First Session:</span>
-                          <span className="text-white">
+                          <span className="text-muted">First Session:</span>
+                          <span className="text-black">
                             {new Date(formData.selectedScheduleSlot.startTime).toLocaleDateString()} at{' '}
                             {new Date(formData.selectedScheduleSlot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
                       )}
-                      <div className="flex justify-between text-lg font-semibold border-t border-white/20 pt-2">
-                        <span className="text-[#FFD700]">Total:</span>
-                        <span className="text-[#FFD700]">
+                      <div className="flex justify-between text-lg font-semibold border-t border-gray-200 pt-2">
+                        <span className="text-primary">Total:</span>
+                        <span className="text-primary">
                           {formData.selectedPackage?.currency.symbol}{formData.selectedPackage?.price}
                         </span>
                       </div>
@@ -602,14 +647,13 @@ export default function PackagesPage() {
                   )}
 
                   <div className="flex justify-between pt-4">
-                    <Button
-                      variant="outline"
+                    <button
                       onClick={() => setCurrentStep(2)}
-                      className="border-white/30 text-white hover:bg-white/10"
+                      className="btn-outline"
                     >
                       <ArrowLeft className="w-4 h-4 mr-2" />
                       Back
-                    </Button>
+                    </button>
                   </div>
                 </CardContent>
               </Card>

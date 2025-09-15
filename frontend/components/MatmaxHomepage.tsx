@@ -73,6 +73,17 @@ export function MatmaxHomepage() {
             >
               Learn About MatPass
             </button>
+            <a 
+              href="/packages"
+              className="btn-secondary"
+              style={{ 
+                color: 'var(--matmax-white)', 
+                backgroundColor: 'var(--matmax-teal)',
+                borderColor: 'var(--matmax-teal)'
+              }}
+            >
+              View Packages
+            </a>
           </div>
         </div>
       </section>
