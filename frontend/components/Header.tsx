@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { Menu, X, LogIn, Settings, User } from 'lucide-react';
+import { Menu, X, LogIn, Settings, User, Package } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -157,6 +157,18 @@ export function Header({
             </button>
           </div>
           
+          {/* Packages Link */}
+          <Link href="/packages">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="hidden sm:flex items-center space-x-1 header-button-account"
+            >
+              <Package size={14} />
+              <span>Packages</span>
+            </motion.button>
+          </Link>
+
           {/* User Account Access */}
           {user && !isAdmin && (
             <Link href="/account">
