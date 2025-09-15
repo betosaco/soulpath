@@ -501,7 +501,7 @@
 }
 
 .header-button-language-inactive:hover {
-  background-color: var(--color-primary-500);
+  background-color: #6ea058;
   color: var(--color-text-inverse);
 }
 

@@ -63,16 +63,12 @@ export function MatmaxHomepage() {
             Daily Vinyasa, Hatha, and Restorative Yoga for all levels.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="btn-primary">View Class Schedule</button>
-            <button 
-              className="btn-outline"
-              style={{ 
-                color: 'var(--matmax-white)', 
-                borderColor: 'var(--matmax-white)' 
-              }}
+            <a 
+              href="/account/book"
+              className="btn-primary"
             >
-              Learn About MatPass
-            </button>
+              View Class Schedule
+            </a>
             <a 
               href="/packages"
               className="btn-secondary"

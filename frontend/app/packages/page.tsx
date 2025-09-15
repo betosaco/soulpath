@@ -179,7 +179,6 @@ export default function PackagesPage() {
     { code: '+61', flag: '🇦🇺', name: 'Australia', country: 'AU' }
   ];
 
-  const selectedCountry = countries.find(c => c.code === formData.countryCode) || countries[0];
   const { t } = useTranslations();
   const translations = t as Record<string, string | Record<string, string>>;
 
@@ -193,6 +192,8 @@ export default function PackagesPage() {
     selectedScheduleSlot: null,
     skipBooking: false
   });
+
+  const selectedCountry = countries.find(c => c.code === formData.countryCode) || countries[0];
 
   const steps = [
     { id: 0, name: 'Select Package', description: 'Choose your package' },
