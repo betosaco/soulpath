@@ -220,7 +220,6 @@ export default function PackagesPage() {
     { code: '+49', flag: '🇩🇪', name: 'Germany', country: 'DE' },
     { code: '+44', flag: '🇬🇧', name: 'United Kingdom', country: 'GB' },
     { code: '+39', flag: '🇮🇹', name: 'Italy', country: 'IT' },
-    { code: '+34', flag: '🇪🇸', name: 'Spain', country: 'ES' },
     { code: '+86', flag: '🇨🇳', name: 'China', country: 'CN' },
     { code: '+81', flag: '🇯🇵', name: 'Japan', country: 'JP' },
     { code: '+82', flag: '🇰🇷', name: 'South Korea', country: 'KR' },

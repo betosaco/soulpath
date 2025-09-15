@@ -146,7 +146,7 @@ export function Header({
             >
               EN
             </button>
-            <span className="text-[#C0C0C0]/50">|</span>
+            <span className="text-gray-400">|</span>
             <button 
               onClick={() => setLanguage('es')}
               className={`touch-manipulation px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 min-h-[36px] min-w-[36px] flex items-center justify-center ${
