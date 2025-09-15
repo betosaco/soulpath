@@ -9,9 +9,16 @@ interface User {
   access_token: string;
 }
 
-interface LoginResponse {
+interface LoginApiResponse {
   success: boolean;
   user?: User;
+  message?: string;
+  error?: string;
+}
+
+interface VerifyApiResponse {
+  success: boolean;
+  user?: Omit<User, 'access_token'>;
   message?: string;
   error?: string;
 }
@@ -37,14 +44,14 @@ export function useAuth() {
     
     if (token) {
       // Verify token with our API using safe API call
-      safeApiCall('/api/auth/verify', {
+      safeApiCall<VerifyApiResponse>('/api/auth/verify', {
         method: 'POST',
         body: JSON.stringify({ token })
       })
-      .then(data => {
-        if (data.success && data.data && typeof data.data === 'object') {
+      .then(response => {
+        if (response.success && response.data && response.data.user && typeof response.data.user === 'object') {
           const userData = {
-            ...data.data,
+            ...response.data.user,
             access_token: token
           } as User;
           console.log('🔐 useAuth: User authenticated from token:', userData);
@@ -74,22 +81,22 @@ export function useAuth() {
     console.log('🔐 useAuth: Attempting sign in for:', email);
     
     try {
-      const data = await safeApiCall<LoginResponse>('/api/auth/login', {
+      const response = await safeApiCall<LoginApiResponse>('/api/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password })
       });
       
-      if (data.success && data.user && typeof data.user === 'object') {
+      if (response.success && response.data && response.data.user && typeof response.data.user === 'object') {
         // Store token in localStorage
-        localStorage.setItem('auth_token', data.user.access_token);
+        localStorage.setItem('auth_token', response.data.user.access_token);
         
-        console.log('🔐 useAuth: Sign in successful:', data.user);
-        setUser(data.user);
+        console.log('🔐 useAuth: Sign in successful:', response.data.user);
+        setUser(response.data.user);
         
-        return { data: data.user, error: null };
+        return { data: response.data.user, error: null };
       } else {
-        console.error('🔐 useAuth: Sign in error:', data.message || data.error || 'Unknown error');
-        return { data: null, error: { message: data.message || 'Login failed' } };
+        console.error('🔐 useAuth: Sign in error:', response.message || response.error || 'Unknown error');
+        return { data: null, error: { message: response.message || 'Login failed' } };
       }
     } catch (error) {
       console.error('🔐 useAuth: Sign in error:', error);
