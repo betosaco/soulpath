@@ -24,7 +24,7 @@ export function useLanguage() {
   return { language, setLanguage: changeLanguage };
 }
 
-export function useTranslations(initialContent?: any, language?: 'en' | 'es') {
+export function useTranslations(initialContent?: Record<string, unknown>, language?: 'en' | 'es') {
   const [content, setContent] = useState(initialContent || defaultTranslations);
   const [isLoading, setIsLoading] = useState(false); // Changed from true to false
   
@@ -113,7 +113,7 @@ export function useTranslations(initialContent?: any, language?: 'en' | 'es') {
     }
   }, [initialContent, currentLanguage]); // Only depend on these two values
 
-  const updateContent = async (newContent: any) => {
+  const updateContent = async (newContent: Record<string, unknown>) => {
     try {
       setIsLoading(true);
       

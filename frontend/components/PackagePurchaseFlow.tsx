@@ -77,7 +77,6 @@ export function PackagePurchaseFlow() {
   const [processing, setProcessing] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [showPaymentMethodDropdown, setShowPaymentMethodDropdown] = useState(false);
-  const [paymentToken, setPaymentToken] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<PurchaseFormData>({
     selectedPackage: null,
@@ -249,7 +248,13 @@ export function PackagePurchaseFlow() {
     setProcessing(true);
 
     try {
-      const requestBody: any = {
+      const requestBody: {
+        packagePriceId: number;
+        paymentMethodId: number;
+        quantity: number;
+        notes: string;
+        paymentToken?: string;
+      } = {
         packagePriceId: formData.selectedPackage.id,
         paymentMethodId: formData.selectedPaymentMethod.id,
         quantity: formData.quantity,
@@ -282,7 +287,6 @@ export function PackagePurchaseFlow() {
           quantity: 1,
           notes: ''
         }));
-        setPaymentToken(null);
         setCurrentStep(0);
       } else {
         toast.error(result.message || 'Failed to complete purchase');
@@ -596,7 +600,6 @@ export function PackagePurchaseFlow() {
                         amountInCents={formData.selectedPackage ? Math.round(formData.selectedPackage.price * formData.quantity * 100) : 0}
                         currency={formData.selectedPackage?.currency.code || 'PEN'}
                         onSuccess={(token) => {
-                          setPaymentToken(token);
                           toast.success('Payment token created successfully!');
                           handlePurchase(token);
                         }}

@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import Script from 'next/script';
 import { Button } from '@/components/ui/button';
 import { Loader2, CreditCard, Shield, AlertCircle } from 'lucide-react';
-import { toast } from 'sonner';
 
 interface IzipayFormProps {
   publicKey: string;
@@ -19,10 +18,10 @@ declare global {
   interface Window {
     KR: {
       init: (publicKey: string) => void;
-      setFormConfig: (config: any) => void;
-      createToken: () => Promise<{
-        'kr-answer': string;
-      }>;
+      setFormConfig: (config: Record<string, unknown>) => void;
+      createToken: () => Promise<{ 'kr-answer': string }>;
+      addForm: (selector: string) => void;
+      on: (event: string, callback: (event: Record<string, unknown>) => void) => void;
     };
   }
 }
@@ -152,15 +151,15 @@ export const IzipayForm: React.FC<IzipayFormProps> = ({
       } else {
         throw new Error('Respuesta inválida del procesador de pagos');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating payment token:', error);
       
       let errorMessage = 'Error al procesar el pago';
       
-      if (error.message) {
+      if (error instanceof Error && error.message) {
         errorMessage = error.message;
-      } else if (error.errorMessage) {
-        errorMessage = error.errorMessage;
+      } else if (typeof error === 'object' && error !== null && 'errorMessage' in error) {
+        errorMessage = String((error as Record<string, unknown>).errorMessage);
       } else if (typeof error === 'string') {
         errorMessage = error;
       }

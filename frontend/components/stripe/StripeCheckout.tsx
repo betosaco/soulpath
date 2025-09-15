@@ -32,7 +32,7 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
   className = '',
 }) => {
   const [loading, setLoading] = useState(false);
-  const [stripe, setStripe] = useState<unknown>(null);
+  const [stripe, setStripe] = useState<import('@stripe/stripe-js').Stripe | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

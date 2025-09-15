@@ -66,15 +66,15 @@ export async function POST(request: NextRequest) {
     // Handle the event
     switch (event.type) {
       case 'checkout.session.completed':
-        await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session, supabase as any);
+        await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session, supabase);
         break;
       
       case 'payment_intent.succeeded':
-        await handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent, supabase as any);
+        await handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent, supabase);
         break;
       
       case 'payment_intent.payment_failed':
-        await handlePaymentIntentFailed(event.data.object as Stripe.PaymentIntent, supabase as any);
+        await handlePaymentIntentFailed(event.data.object as Stripe.PaymentIntent, supabase);
         break;
       
       case 'invoice.payment_succeeded':
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, supabase: ReturnType<typeof createClient>) {
+async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, supabase: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
   try {
     console.log('Processing checkout session completed:', session.id);
 
@@ -117,7 +117,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
     const totalAmount = parseFloat(metadata.total_amount || '0');
 
     // Update purchase record to completed
-    const { error: purchaseUpdateError } = await (supabase as any)
+    const { error: purchaseUpdateError } = await supabase
       .from('purchases')
       .update({
         status: 'completed',
@@ -136,7 +136,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
     }
 
     // Get package details
-    const { data: packageData, error: packageError } = await (supabase as any)
+    const { data: packageData, error: packageError } = await supabase
       .from('package_definitions')
       .select(`
         id,
@@ -156,7 +156,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
     }
 
     // Create purchase record
-    const { data: purchaseData, error: purchaseError } = await (supabase as any)
+    const { data: purchaseData, error: purchaseError } = await supabase
       .from('purchases')
       .insert({
         user_id: customerId,
@@ -181,7 +181,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
     // Create user packages for each quantity
     for (let i = 0; i < quantity; i++) {
       // First get the package price for this package definition
-      const { data: packagePrice, error: priceError } = await (supabase as any)
+      const { data: packagePrice, error: priceError } = await supabase
         .from('package_prices')
         .select('id')
         .eq('package_definition_id', packageId)
@@ -192,7 +192,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
         continue;
       }
 
-      const { error: userPackageError } = await (supabase as any)
+      const { error: userPackageError } = await supabase
         .from('user_packages')
         .insert({
           user_id: customerId,
@@ -219,12 +219,12 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
   }
 }
 
-async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent, supabase: ReturnType<typeof createClient>) {
+async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent, supabase: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
   try {
     console.log('Processing payment intent succeeded:', paymentIntent.id);
 
     // Update any pending purchases with this payment intent
-    const { error: updateError } = await (supabase as any)
+    const { error: updateError } = await supabase
       .from('purchases')
       .update({
         status: 'completed',
@@ -243,12 +243,12 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent,
   }
 }
 
-async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent, supabase: ReturnType<typeof createClient>) {
+async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent, supabase: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
   try {
     console.log('Processing payment intent failed:', paymentIntent.id);
 
     // Update purchase record to failed
-    const { error: updateError } = await (supabase as any)
+    const { error: updateError } = await supabase
       .from('purchases')
       .update({
         status: 'failed',

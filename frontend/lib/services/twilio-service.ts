@@ -15,7 +15,7 @@ export class TwilioService {
       this.client = twilio(config.accountSid, config.authToken);
     } else {
       console.warn('Twilio credentials not configured, WhatsApp messaging disabled');
-      this.client = null as unknown as typeof twilio;
+      this.client = null as any; // eslint-disable-line @typescript-eslint/no-explicit-any
     }
   }
 
@@ -98,12 +98,12 @@ export class TwilioService {
       }
 
       return {
-        from: from.replace('whatsapp:', ''),
-        to: to.replace('whatsapp:', ''),
-        body: message,
-        messageId,
-        timestamp,
-        profileName
+        from: String(from).replace('whatsapp:', ''),
+        to: String(to).replace('whatsapp:', ''),
+        body: String(message),
+        messageId: String(messageId),
+        timestamp: String(timestamp),
+        profileName: String(profileName || '')
       };
     } catch (error) {
       console.error('Error parsing WhatsApp webhook:', error);

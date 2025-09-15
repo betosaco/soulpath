@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Settings,
   Play,
@@ -130,12 +130,7 @@ export function RasaModelTuning() {
     }
   };
 
-  useEffect(() => {
-    loadCurrentConfig();
-    loadModelComparisons();
-  }, []);
-
-  const loadCurrentConfig = async () => {
+  const loadCurrentConfig = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/rasa?action=model-info');
       const data = await response.json();
@@ -147,7 +142,7 @@ export function RasaModelTuning() {
     } catch (error) {
       console.error('Error loading config:', error);
     }
-  };
+  }, [predefinedConfigs.balanced.config]);
 
   const loadModelComparisons = async () => {
     // Mock data for demonstration
@@ -168,6 +163,11 @@ export function RasaModelTuning() {
       }
     ]);
   };
+
+  useEffect(() => {
+    loadCurrentConfig();
+    loadModelComparisons();
+  }, [loadCurrentConfig]);
 
   const startTraining = async () => {
     setTrainingProgress({

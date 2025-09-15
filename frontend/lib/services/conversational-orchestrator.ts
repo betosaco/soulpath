@@ -11,7 +11,8 @@ import {
   IntentActionMapping,
   OrchestratorResponse,
   ErrorResponse,
-  SuccessResponse
+  SuccessResponse,
+  APICallResult
 } from '@/lib/types/conversational-orchestrator';
 
 export class ConversationalOrchestrator {
@@ -65,7 +66,7 @@ export class ConversationalOrchestrator {
             text,
             'low_confidence',
             {},
-            null,
+            {},
             []
           );
         } catch {
@@ -90,8 +91,8 @@ export class ConversationalOrchestrator {
           generalResponse = await this.openRouterService.generateContextualResponse(
             text,
             intent,
-            rasaResponse.entities || {},
-            null,
+            this.convertEntitiesToRecord(rasaResponse.entities || []),
+            {},
             []
           );
         } catch {
@@ -110,7 +111,7 @@ export class ConversationalOrchestrator {
       // 6. Ejecutar acción específica
       let actionResult: APICallResult[] | null = null;
       if (actionMapping.apiEndpoint) {
-        actionResult = await this.apiService.executeAction(actionMapping.action, rasaResponse.entities || []);
+        actionResult = await this.apiService.executeAction(actionMapping.action, this.convertEntitiesToRecord(rasaResponse.entities || []));
       }
 
       // 7. Generar respuesta final
@@ -125,8 +126,8 @@ export class ConversationalOrchestrator {
           finalResponse = await this.openRouterService.generateContextualResponse(
             text,
             intent,
-            rasaResponse.entities || {},
-            actionResult,
+            this.convertEntitiesToRecord(rasaResponse.entities || []),
+            {},
             []
           );
         } catch {
@@ -136,7 +137,7 @@ export class ConversationalOrchestrator {
       }
 
       // 8. Actualizar contexto de conversación
-      this.updateConversationContext(conversationContext, text, finalResponse, intent, rasaResponse.entities || []);
+      this.updateConversationContext(conversationContext, text, finalResponse, intent, this.convertEntitiesToRecord(rasaResponse.entities || []));
 
       // 9. Log de la interacción
       if (this.config.logging.enabled) {
@@ -158,7 +159,12 @@ export class ConversationalOrchestrator {
           intent: intent,
           entities: rasaResponse.entities || [],
           action: actionMapping?.action || 'none',
-          apiCalls: actionResult ? [actionResult] : [],
+          apiCalls: actionResult ? actionResult.map(result => ({
+            success: result.success,
+            data: result.data,
+            error: result.error,
+            statusCode: result.statusCode
+          })) : [],
           processingTime: Date.now() - startTime,
           success: true
         });
@@ -264,7 +270,7 @@ export class ConversationalOrchestrator {
       }
 
       // 9. Actualizar contexto de conversación
-      this.updateConversationContext(context, userMessage, llmResponse, intent, entities);
+      this.updateConversationContext(context, userMessage, llmResponse, intent, this.convertEntitiesToRecord(Array.isArray(entities) ? entities : []));
 
       // 10. Registrar la interacción
       const processingTime = Date.now() - startTime;
@@ -286,7 +292,12 @@ export class ConversationalOrchestrator {
         intent,
         entities: rasaResponse.entities || [],
         action: this.intentActionMapping[intent]?.action || 'unknown',
-        apiCalls: apiResults,
+        apiCalls: apiResults.map(result => ({
+          success: result.success,
+          data: result.data,
+          error: result.error,
+          statusCode: result.statusCode
+        })),
         processingTime,
         success: true
       });
@@ -359,16 +370,21 @@ export class ConversationalOrchestrator {
     try {
       // Combinar datos de todas las llamadas a API exitosas
       const apiData = apiResults
-        .filter(result => result.success)
+        .filter(result => result.success && result.data)
         .map(result => result.data)
-        .reduce((acc, data) => ({ ...acc, ...data }), {});
+        .filter((data): data is Record<string, unknown> => data != null && typeof data === 'object')
+        .reduce((acc, data) => ({ ...acc, ...data }), {} as Record<string, unknown>);
 
       return await this.openRouterService.generateContextualResponse(
         userMessage,
         intent,
         entities,
-        apiData,
-        context.conversationHistory
+        apiData as Record<string, unknown>,
+        context.conversationHistory.map(msg => ({
+          role: msg.role,
+          content: msg.message,
+          timestamp: msg.timestamp
+        }))
       );
     } catch (error) {
       console.error('Error generating LLM response');
@@ -408,6 +424,20 @@ export class ConversationalOrchestrator {
     }
 
     return this.conversationContexts.get(userId)!;
+  }
+
+  /**
+   * Convierte array de entidades a Record para compatibilidad
+   */
+  private convertEntitiesToRecord(entities: unknown[]): Record<string, unknown> {
+    const result: Record<string, unknown> = {};
+    entities.forEach(entity => {
+      if (entity && typeof entity === 'object' && entity !== null && 'entity' in entity && 'value' in entity) {
+        const entityObj = entity as Record<string, unknown>;
+        result[String(entityObj.entity)] = entityObj.value;
+      }
+    });
+    return result;
   }
 
   /**

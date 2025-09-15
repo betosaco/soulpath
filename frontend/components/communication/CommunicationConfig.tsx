@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { BaseButton } from '../ui/BaseButton';
 import { BaseInput } from '../ui/BaseInput';
@@ -61,13 +61,7 @@ export function CommunicationConfig() {
   const [isTestingSms, setIsTestingSms] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  useEffect(() => {
-    if (user?.access_token) {
-      loadConfiguration();
-    }
-  }, [user?.access_token]);
-
-  const loadConfiguration = async () => {
+  const loadConfiguration = useCallback(async () => {
     if (!user?.access_token) {
       console.log('❌ No access token available for communication config');
       return;
@@ -94,7 +88,13 @@ export function CommunicationConfig() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user?.access_token]);
+
+  useEffect(() => {
+    if (user?.access_token) {
+      loadConfiguration();
+    }
+  }, [user?.access_token, loadConfiguration]);
 
   const saveConfiguration = async () => {
     setIsSaving(true);

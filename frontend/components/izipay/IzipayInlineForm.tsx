@@ -5,7 +5,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, CreditCard, AlertCircle, CheckCircle } from 'lucide-react';
@@ -28,7 +28,13 @@ interface IzipayInlineFormProps {
 
 declare global {
   interface Window {
-    KR?: Record<string, unknown>;
+    KR: {
+      init: (publicKey: string) => void;
+      setFormConfig: (config: Record<string, unknown>) => void;
+      createToken: () => Promise<{ 'kr-answer': string }>;
+      addForm: (selector: string) => void;
+      on: (event: string, callback: (event: Record<string, unknown>) => void) => void;
+    };
   }
 }
 
@@ -49,7 +55,7 @@ export function IzipayInlineForm({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Token is used immediately to initialize the form; no need to store it in state
-  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
+  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error' | 'valid' | 'invalid' | 'completed' | 'failed'>('idle');
   const formRef = useRef<HTMLDivElement>(null);
 
   // Load Izipay JavaScript SDK
@@ -73,14 +79,72 @@ export function IzipayInlineForm({
     });
   }, []);
 
-  // Create form token when component mounts
-  useEffect(() => {
-    if (customerEmail && amount > 0) {
-      createFormToken();
+  const initializePaymentForm = useCallback((token: string) => {
+    if (!window.KR || !formRef.current) {
+      console.error('Izipay SDK not loaded or form container not available');
+      return;
     }
-  }, [customerEmail, amount, currency]);
 
-  const createFormToken = async () => {
+    try {
+      // Initialize Izipay payment form
+      window.KR.setFormConfig({
+        'kr-public-key': process.env.NEXT_PUBLIC_IZIPAY_PUBLIC_KEY,
+        'kr-form-token': token,
+      });
+
+      // Create the payment form
+      window.KR.addForm('#izipay-payment-form');
+      console.log('✅ Izipay form initialized');
+      
+      // Handle form events
+      window.KR!.on('kr-error', (event: Record<string, unknown>) => {
+        console.error('❌ Izipay form error:', event);
+        setPaymentStatus('error');
+        const errorMessage = (event?.error as Record<string, unknown>)?.message || 'Payment form error';
+        setError(String(errorMessage));
+        if (onError) {
+          onError(String(errorMessage));
+        }
+      });
+
+      window.KR!.on('kr-form-valid', () => {
+        console.log('✅ Izipay form is valid');
+        setPaymentStatus('valid');
+      });
+
+      window.KR!.on('kr-form-invalid', () => {
+        console.log('❌ Izipay form is invalid');
+        setPaymentStatus('invalid');
+      });
+
+      window.KR!.on('kr-payment-completed', (event: Record<string, unknown>) => {
+        console.log('✅ Payment completed:', event);
+        setPaymentStatus('completed');
+        if (onSuccess) {
+          onSuccess(event);
+        }
+      });
+
+      window.KR!.on('kr-payment-failed', (event: Record<string, unknown>) => {
+        console.error('❌ Payment failed:', event);
+        setPaymentStatus('failed');
+        const errorMessage = (event?.error as Record<string, unknown>)?.message || 'Payment failed';
+        setError(String(errorMessage));
+        if (onError) {
+          onError(String(errorMessage));
+        }
+      });
+
+    } catch (error) {
+      console.error('❌ Error initializing Izipay form:', error);
+      setError('Failed to initialize payment form');
+      if (onError) {
+        onError('Failed to initialize payment form');
+      }
+    }
+  }, [onError, onSuccess]);
+
+  const createFormToken = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -128,71 +192,14 @@ export function IzipayInlineForm({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [customerEmail, amount, currency, customerName, description, initializePaymentForm, metadata, onError, packagePriceId, quantity]);
 
-  const initializePaymentForm = (token: string) => {
-    if (!window.KR || !formRef.current) {
-      console.error('Izipay SDK not loaded or form container not available');
-      return;
+  // Create form token when component mounts
+  useEffect(() => {
+    if (customerEmail && amount > 0) {
+      createFormToken();
     }
-
-    try {
-      // Initialize Izipay payment form
-      window.KR.setFormConfig({
-        'kr-public-key': process.env.NEXT_PUBLIC_IZIPAY_PUBLIC_KEY,
-        'kr-form-token': token,
-      });
-
-      // Create the payment form
-      window.KR.addForm('#izipay-payment-form')
-        .then(() => {
-          console.log('✅ Izipay form initialized');
-          
-          // Handle form events
-          window.KR!.on('kr-error', (event: Record<string, unknown>) => {
-            console.error('❌ Izipay form error:', event);
-            setPaymentStatus('error');
-            setError(event.error.message || 'Payment form error');
-            
-            if (onError) {
-              onError(event.error.message || 'Payment form error');
-            }
-          });
-
-          window.KR!.on('kr-payment-created', (event: Record<string, unknown>) => {
-            console.log('🔄 Payment created:', event);
-            setPaymentStatus('processing');
-          });
-
-          window.KR!.on('kr-payment-success', (event: Record<string, unknown>) => {
-            console.log('✅ Payment successful:', event);
-            setPaymentStatus('success');
-            
-            if (onSuccess) {
-              onSuccess(event);
-            }
-          });
-
-          window.KR!.on('kr-payment-error', (event: Record<string, unknown>) => {
-            console.error('❌ Payment error:', event);
-            setPaymentStatus('error');
-            setError(event.error.message || 'Payment failed');
-            
-            if (onError) {
-              onError(event.error.message || 'Payment failed');
-            }
-          });
-        })
-        .catch((error: unknown) => {
-          console.error('❌ Failed to initialize Izipay form:', error);
-          setError('Failed to initialize payment form');
-        });
-
-    } catch (error) {
-      console.error('❌ Error initializing payment form:', error);
-      setError('Failed to initialize payment form');
-    }
-  };
+  }, [customerEmail, amount, currency, createFormToken]);
 
   const formatAmount = (amount: number, currency: string) => {
     const formatter = new Intl.NumberFormat('es-PE', {

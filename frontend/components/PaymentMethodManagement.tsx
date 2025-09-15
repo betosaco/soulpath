@@ -254,7 +254,7 @@ const PaymentMethodManagement: React.FC = () => {
       setEditingMethod(null);
       resetForm();
       fetchPaymentMethods();
-    } catch (error) {
+    } catch {
       toast.error('Failed to save payment method');
     }
   };
@@ -268,11 +268,11 @@ const PaymentMethodManagement: React.FC = () => {
       icon: method.icon || '',
       requiresConfirmation: method.requiresConfirmation,
       autoAssignPackage: method.autoAssignPackage,
-      izipayConfig: method.providerConfig?.izipayConfig || {
+      izipayConfig: method.izipayConfig || {
         username: '', password: '', publicKey: '', hmacKey: '', environment: 'TEST',
       },
     });
-    setStripeConfig(method.providerConfig?.stripeConfig || null);
+    setStripeConfig(method.stripeConfig || null);
     setShowCreateModal(true);
   };
 

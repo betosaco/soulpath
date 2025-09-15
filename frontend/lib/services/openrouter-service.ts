@@ -218,7 +218,7 @@ export class OpenRouterService {
     - Encouraging and supportive
     
     Current booking state: ${JSON.stringify(context.bookingState, null, 2)}
-    Missing details: ${context.missingDetails.join(', ')}
+    Missing details: ${Array.isArray(context.missingDetails) ? context.missingDetails.join(', ') : 'None'}
     
     Your goal is to gently guide the user through the booking process while maintaining a spiritual, 
     empathetic tone that reflects the benefits of yoga practice.`;
@@ -237,7 +237,7 @@ export class OpenRouterService {
   private buildUserPrompt(context: Record<string, unknown>): string {
     let prompt = `User message: "${context.userMessage}"\n\n`;
     
-    if (context.missingDetails.length > 0) {
+    if (Array.isArray(context.missingDetails) && context.missingDetails.length > 0) {
       prompt += `The user still needs to provide: ${context.missingDetails.join(', ')}\n\n`;
     }
     
@@ -334,7 +334,7 @@ IMPORTANT: Keep responses SHORT and CONCISE (1-2 sentences max). Be warm but bri
     conversationHistory.slice(-10).forEach(msg => {
       messages.push({
         role: (msg.role === 'user' ? 'user' : 'assistant') as 'user' | 'assistant' | 'system',
-        content: msg.message || msg.content
+        content: String((msg as Record<string, unknown>).message || msg.content || '')
       });
     });
 

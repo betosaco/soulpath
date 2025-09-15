@@ -423,8 +423,8 @@ export function ExternalAPIManagement() {
                       )}
                       <span className="font-medium">Resultado del Test</span>
                     </div>
-                    <p className="text-sm mt-1">{testResult.message}</p>
-                    {testResult.details && (
+                    <p className="text-sm mt-1">{String(testResult.message || '')}</p>
+                    {Boolean(testResult.details) && (
                       <pre className="text-xs mt-2 bg-black/30 p-2 rounded overflow-x-auto">
                         {JSON.stringify(testResult.details, null, 2)}
                       </pre>

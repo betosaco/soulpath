@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { 
@@ -53,14 +53,7 @@ export function TelegramConfigManagement() {
     is_active: false
   });
 
-  // Load configuration
-  useEffect(() => {
-    if (user?.access_token) {
-      loadConfig();
-    }
-  }, [user?.access_token]);
-
-  const loadConfig = async () => {
+  const loadConfig = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch('/api/admin/telegram-config', {
@@ -86,7 +79,14 @@ export function TelegramConfigManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.access_token]);
+
+  // Load configuration
+  useEffect(() => {
+    if (user?.access_token) {
+      loadConfig();
+    }
+  }, [user?.access_token, loadConfig]);
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));

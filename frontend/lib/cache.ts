@@ -32,7 +32,7 @@ class Cache {
     }
 
     cacheMetrics.recordHit();
-    return entry.data;
+    return entry.data as T;
   }
 
   set<T>(key: string, data: T, ttlMs: number = 5 * 60 * 1000): void {

@@ -74,7 +74,7 @@ export function useAuth() {
       
       if (data.success && data.data && typeof data.data === 'object') {
         // Store token in localStorage
-        localStorage.setItem('auth_token', (data.data as any).access_token);
+        localStorage.setItem('auth_token', (data.data as { access_token: string }).access_token);
         
         console.log('🔐 useAuth: Sign in successful:', data.data);
         setUser(data.data as User);

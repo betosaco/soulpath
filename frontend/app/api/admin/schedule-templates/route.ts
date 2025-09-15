@@ -133,13 +133,10 @@ export async function GET(request: NextRequest) {
     };
 
     // Enhanced mode includes slot information
-    let enhancedSelect: any = select;
+    let enhancedSelect = select;
     if (enhanced === 'true') {
       enhancedSelect = {
         ...select,
-        _count: {
-          scheduleSlots: true
-        },
         scheduleSlots: {
           take: 10,
           orderBy: { startTime: 'desc' },

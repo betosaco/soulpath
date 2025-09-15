@@ -86,7 +86,7 @@ const ScheduleManagement: React.FC = () => {
   const [showCreateTemplateModal, setShowCreateTemplateModal] = useState(false);
   const [showEditTemplateModal, setShowEditTemplateModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<ScheduleTemplate | null>(null);
+  const [selectedItem, setSelectedItem] = useState<ScheduleTemplate | ScheduleSlot | null>(null);
   const [deleteType, setDeleteType] = useState<'template' | 'slot'>('template');
 
   // Slot generation
@@ -895,7 +895,7 @@ const ScheduleManagement: React.FC = () => {
                               variant="outline"
                               className="dashboard-button-danger"
                               onClick={() => {
-                                setSelectedItem(slot as Record<string, unknown>);
+                                setSelectedItem(slot);
                                 setDeleteType('slot');
                                 setShowDeleteModal(true);
                               }}
@@ -927,7 +927,7 @@ const ScheduleManagement: React.FC = () => {
         isOpen={showEditTemplateModal}
         onClose={() => setShowEditTemplateModal(false)}
         onSubmit={handleEditTemplate}
-        scheduleTemplate={selectedItem}
+        scheduleTemplate={selectedItem && 'dayOfWeek' in selectedItem ? selectedItem : null}
         sessionDurations={sessionDurations}
         mode="edit"
       />

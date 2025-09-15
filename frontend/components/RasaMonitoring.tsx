@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Activity,
   Brain,
@@ -84,7 +84,7 @@ export function RasaMonitoring() {
     to: new Date().toISOString().split('T')[0]
   });
 
-  const fetchData = async (action: string, params?: Record<string, string>) => {
+  const fetchData = useCallback(async (action: string, params?: Record<string, string>) => {
     try {
       setLoading(true);
       const queryParams = new URLSearchParams({
@@ -122,9 +122,9 @@ export function RasaMonitoring() {
       setLoading(false);
       setLastRefresh(new Date());
     }
-  };
+  }, [dateRange]);
 
-  const refreshAll = async () => {
+  const refreshAll = useCallback(async () => {
     await Promise.all([
       fetchData('health'),
       fetchData('stats'),
@@ -132,11 +132,11 @@ export function RasaMonitoring() {
       fetchData('error-analysis'),
       fetchData('performance-metrics')
     ]);
-  };
+  }, [fetchData]);
 
   useEffect(() => {
     refreshAll();
-  }, [dateRange]);
+  }, [dateRange, refreshAll]);
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },

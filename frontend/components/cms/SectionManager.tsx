@@ -355,7 +355,7 @@ export function SectionManager({ sections, onSectionsChange }: SectionManagerPro
               <label className="block text-sm font-medium text-[#EAEAEA] mb-2">Type</label>
               <select
                 value={newSection.type || 'content'}
-                onChange={(e) => setNewSection({ ...newSection, type: e.target.value as 'hero' | 'content' | 'form' | 'gallery' | 'testimonial' | 'cta' })}
+                onChange={(e) => setNewSection({ ...newSection, type: e.target.value as 'hero' | 'content' | 'form' | 'gallery' | 'testimonial' })}
                 className="w-full px-3 py-2 bg-[#2D2D44] border border-[#3D3D54] rounded-md text-[#EAEAEA] focus:outline-none focus:ring-2 focus:ring-[#FFD700] focus:border-transparent"
               >
                 <option value="hero">Hero</option>
@@ -442,7 +442,7 @@ export function SectionManager({ sections, onSectionsChange }: SectionManagerPro
                     <label className="block text-sm font-medium text-[#EAEAEA] mb-2">Type</label>
                     <select
                       value={editingData.type || 'content'}
-                      onChange={(e) => setEditingData({ ...editingData, type: e.target.value as 'hero' | 'content' | 'form' | 'gallery' | 'testimonial' | 'cta' })}
+                      onChange={(e) => setEditingData({ ...editingData, type: e.target.value as 'hero' | 'content' | 'form' | 'gallery' | 'testimonial' })}
                       className="w-full px-3 py-2 bg-[#2D2D44] border border-[#3D3D54] rounded-md text-[#EAEAEA] focus:outline-none focus:ring-2 focus:ring-[#FFD700] focus:border-transparent"
                     >
                       <option value="hero">Hero</option>

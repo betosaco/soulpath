@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { ThemeColors, currentTheme, darkTheme, applyTheme } from './theme-config';
 
 export type ThemeName = 'light' | 'dark' | 'custom';
@@ -21,11 +21,11 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children, initialTheme = 'light' }: ThemeProviderProps) {
-  const availableThemes: Record<ThemeName, ThemeColors> = {
+  const availableThemes: Record<ThemeName, ThemeColors> = useMemo(() => ({
     light: currentTheme,
     dark: darkTheme,
     custom: currentTheme, // Default to current theme, can be overridden
-  };
+  }), []);
 
   const [theme, setThemeState] = useState<ThemeColors>(availableThemes[initialTheme]);
   const [themeName, setThemeName] = useState<ThemeName>(initialTheme);
@@ -44,7 +44,7 @@ export function ThemeProvider({ children, initialTheme = 'light' }: ThemeProvide
         setThemeName(savedTheme);
       }
     }
-  }, []);
+  }, [availableThemes]);
 
   const setTheme = (newTheme: ThemeColors, name: ThemeName = 'custom') => {
     setThemeState(newTheme);

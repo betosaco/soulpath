@@ -315,16 +315,16 @@ export class MLPipelineService {
 
     for (const intent of intents) {
       const intentLogs = logs.filter(log => log.rasaIntent === intent);
-      const highConfidenceLogs = intentLogs.filter(log => log.rasaConfidence && log.rasaConfidence > 0.7);
+      const highConfidenceLogs = intentLogs.filter(log => log.rasaConfidence && Number(log.rasaConfidence) > 0.7);
       
       // Simplified calculation - in reality you'd need true positives, false positives, etc.
       const precision = intentLogs.length > 0 ? highConfidenceLogs.length / intentLogs.length : 0;
       const recall = precision; // Simplified
       const f1Score = precision > 0 ? 2 * (precision * recall) / (precision + recall) : 0;
 
-      metrics.precision[intent] = precision;
-      metrics.recall[intent] = recall;
-      metrics.f1Score[intent] = f1Score;
+      metrics.precision[intent as string] = precision;
+      metrics.recall[intent as string] = recall;
+      metrics.f1Score[intent as string] = f1Score;
     }
 
     return metrics;

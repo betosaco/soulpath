@@ -229,15 +229,15 @@ export const defaultTranslations = {
 
 // Utility functions for nested object manipulation
 export function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
-  return path.split('.').reduce((current, key) => current?.[key], obj);
+  return path.split('.').reduce((current: Record<string, unknown>, key: string) => current?.[key] as Record<string, unknown>, obj);
 }
 
 export function setNestedValue(obj: Record<string, unknown>, path: string, value: unknown): Record<string, unknown> {
   const keys = path.split('.');
   const lastKey = keys.pop()!;
-  const target = keys.reduce((current, key) => {
+  const target = keys.reduce((current: Record<string, unknown>, key: string) => {
     if (!current[key]) current[key] = {};
-    return current[key];
+    return current[key] as Record<string, unknown>;
   }, obj);
   target[lastKey] = value;
   return obj;

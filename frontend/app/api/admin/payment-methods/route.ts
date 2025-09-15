@@ -135,10 +135,11 @@ export async function PUT(request: NextRequest) {
     if (requiresConfirmation !== undefined) updateData.requiresConfirmation = requiresConfirmation;
     if (autoAssignPackage !== undefined) updateData.autoAssignPackage = autoAssignPackage;
     if (isActive !== undefined) updateData.isActive = isActive;
-    if (providerConfig !== undefined) updateData.providerConfig = providerConfig as any;
+    if (providerConfig !== undefined) updateData.providerConfig = providerConfig;
 
     const updatedPaymentMethod = await prisma.paymentMethodConfig.update({
       where: { id: parseInt(id) },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data: updateData as any
     });
 

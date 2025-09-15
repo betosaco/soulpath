@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
 
           throw new Error(izipayResult.errorMessage || 'Payment processing failed');
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('❌ Izipay payment error:', error);
         
         // Update purchase status to failed
@@ -206,14 +206,14 @@ export async function POST(request: NextRequest) {
           where: { id: purchase.id },
           data: {
             paymentStatus: 'failed',
-            notes: `Payment error: ${error.message}`
+            notes: `Payment error: ${error instanceof Error ? error.message : 'Unknown error'}`
           }
         });
 
         return NextResponse.json({
           success: false,
           error: 'Payment failed',
-          message: error.message || 'Payment processing failed'
+          message: error instanceof Error ? error.message : 'Payment processing failed'
         }, { status: 400 });
       }
     }

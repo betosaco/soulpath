@@ -140,17 +140,17 @@ export function ImageManagement() {
   }, [user?.access_token, loadImages]);
 
   const handleEdit = (image: Record<string, unknown>) => {
-    setEditingImage(image);
+    setEditingImage(image as { id: string; name: string; url: string; alt?: string; category?: string });
     setEditFormData({
-      name: image.name || '',
-      alt: image.alt || '',
-      category: image.category || 'general'
+      name: String(image.name || ''),
+      alt: String(image.alt || ''),
+      category: String(image.category || 'general')
     });
     setShowEditModal(true);
   };
 
   const handleDelete = (image: Record<string, unknown>) => {
-    setDeletingImage(image);
+    setDeletingImage(image as { id: string; name: string; url: string; alt?: string; category?: string });
     setShowDeleteModal(true);
   };
 
@@ -235,6 +235,7 @@ export function ImageManagement() {
     return (
       <div className={`text-center py-[${spacing[12]}]`}>
         <div className={`w-24 h-24 bg-[${colors.semantic.surface.secondary}] rounded-full flex items-center justify-center mx-auto mb-[${spacing[4]}]`}>
+          {/* eslint-disable-next-line jsx-a11y/alt-text */}
           <Image className={`w-12 h-12 text-[${colors.text.secondary}]`} />
         </div>
         <h3 className={`text-[${typography.fontSize.xl}] font-[${typography.fontWeight.semibold}] text-[${colors.text.primary}] mb-[${spacing[2]}]`}>
@@ -300,6 +301,7 @@ export function ImageManagement() {
             <CardTitle className={`text-[${typography.fontSize.sm}] font-[${typography.fontWeight.medium}] text-[${colors.text.secondary}]`}>
               Total Images
             </CardTitle>
+            {/* eslint-disable-next-line jsx-a11y/alt-text */}
             <Image className={`h-4 w-4 text-[${colors.text.tertiary}]`} />
           </CardHeader>
           <CardContent>
@@ -507,12 +509,13 @@ export function ImageManagement() {
                   </div>
                   
                   <div className={`h-32 bg-[${colors.semantic.surface.tertiary}] rounded-[${borders.radius.md}] mb-[${spacing[3]}] flex items-center justify-center`}>
+                    {/* eslint-disable-next-line jsx-a11y/alt-text */}
                     <Image className={`w-8 h-8 text-[${colors.text.tertiary}]`} />
                   </div>
                   
                   <div className={`space-y-[${spacing[2]}]`}>
                     <span className={`text-[${colors.text.primary}] font-[${typography.fontWeight.medium}] truncate block`}>
-                      {image.name}
+                      {String(image.name || '')}
                     </span>
                     
                     <div className={`flex space-x-[${spacing[2]}]`}>
@@ -536,7 +539,7 @@ export function ImageManagement() {
                     </div>
                     
                     <div className={`text-[${typography.fontSize.xs}] text-[${colors.text.tertiary}]`}>
-                      {image.uploadedAt && `Uploaded: ${formatDate(image.uploadedAt)}`}
+                      {Boolean(image.uploadedAt) && String(`Uploaded: ${formatDate(String(image.uploadedAt))}`)}
                     </div>
                   </div>
                 </div>
@@ -547,6 +550,7 @@ export function ImageManagement() {
           {!isLoading && Object.keys(images).length === 0 && (
             <div className={`text-center py-[${spacing[12]}]`}>
               <div className={`w-16 h-16 bg-[${colors.semantic.surface.secondary}] rounded-full flex items-center justify-center mx-auto mb-[${spacing[4]}]`}>
+                {/* eslint-disable-next-line jsx-a11y/alt-text */}
                 <Image className={`w-8 h-8 text-[${colors.text.tertiary}]`} />
               </div>
               <p className={`text-[${colors.text.secondary}]`}>No images found</p>

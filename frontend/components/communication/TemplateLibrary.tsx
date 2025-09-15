@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { BaseButton } from '../ui/BaseButton';
 import { Badge } from '../ui/badge';
@@ -55,7 +55,7 @@ export function TemplateLibrary({ type }: TemplateLibraryProps) {
 
 
 
-  const loadTemplates = async () => {
+  const loadTemplates = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await fetch(`/api/admin/communication/templates?type=${type}`);
@@ -68,11 +68,11 @@ export function TemplateLibrary({ type }: TemplateLibraryProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [type]);
 
   useEffect(() => {
     loadTemplates();
-  }, [type]);
+  }, [type, loadTemplates]);
 
   const filteredTemplates = templates.filter(template => {
     const matchesSearch = template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

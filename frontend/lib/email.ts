@@ -126,10 +126,10 @@ export async function sendBookingConfirmation(
     let html = template.html;
     
     // Replace placeholders with actual data
-    html = html.replace('{{clientName}}', scheduleData.clientName || 'Client');
-    html = html.replace('{{date}}', scheduleData.date);
-    html = html.replace('{{time}}', scheduleData.time);
-    html = html.replace('{{duration}}', scheduleData.duration);
+    html = html.replace('{{clientName}}', String(scheduleData.clientName || 'Client'));
+    html = html.replace('{{date}}', String(scheduleData.date || ''));
+    html = html.replace('{{time}}', String(scheduleData.time || ''));
+    html = html.replace('{{duration}}', String(scheduleData.duration || ''));
     
     // Add video conference link if enabled
     if (template.videoConferenceLink?.isActive && template.videoConferenceLink?.includeInTemplate) {

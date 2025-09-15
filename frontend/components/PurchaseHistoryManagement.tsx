@@ -139,7 +139,99 @@ const PurchaseHistoryManagement: React.FC = () => {
     paymentStatus: 'all'
   });
 
+  const fetchUserPackages = useCallback(async () => {
+    try {
+      const params = new URLSearchParams();
+      if (filters.clientId !== 'all') params.append('client_id', filters.clientId);
+      if (filters.packageType !== 'all') params.append('package_type', filters.packageType);
+      if (filters.status !== 'all') params.append('is_active', filters.status === 'active' ? 'true' : 'false');
+      if (filters.dateFrom) params.append('date_from', filters.dateFrom);
+      if (filters.dateTo) params.append('date_to', filters.dateTo);
 
+      const response = await fetch(`/api/admin/user-packages?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${user!.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setUserPackages(data.data);
+      } else {
+        toast.error('Failed to fetch user packages');
+      }
+    } catch (error) {
+      console.error('Error fetching user packages:', error);
+    }
+  }, [user, filters]);
+
+  const fetchBookings = useCallback(async () => {
+    try {
+      const params = new URLSearchParams();
+      if (filters.clientId !== 'all') params.append('client_id', filters.clientId);
+      if (filters.packageType !== 'all') params.append('package_type', filters.packageType);
+      if (filters.status !== 'all') params.append('is_active', filters.status === 'active' ? 'true' : 'false');
+      if (filters.dateFrom) params.append('date_from', filters.dateFrom);
+      if (filters.dateTo) params.append('date_to', filters.dateTo);
+
+      const response = await fetch(`/api/admin/bookings?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${user!.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setBookings(data.data);
+      } else {
+        toast.error('Failed to fetch bookings');
+      }
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
+    }
+  }, [user, filters]);
+
+  const fetchClients = useCallback(async () => {
+    try {
+      const response = await fetch('/api/admin/clients', {
+        headers: {
+          'Authorization': `Bearer ${user!.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setClients(data.data);
+      } else {
+        toast.error('Failed to fetch clients');
+      }
+    } catch (error) {
+      console.error('Error fetching clients:', error);
+    }
+  }, [user]);
+
+  const fetchStats = useCallback(async () => {
+    try {
+      const response = await fetch('/api/admin/stats', {
+        headers: {
+          'Authorization': `Bearer ${user!.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setStats(data.data);
+      } else {
+        toast.error('Failed to fetch stats');
+      }
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  }, [user]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -170,7 +262,7 @@ const PurchaseHistoryManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, filters]);
+  }, [user, fetchBookings, fetchClients, fetchStats, fetchUserPackages]);
 
   // Add a manual refresh function that can be called from parent components
   const refreshPurchaseHistoryData = useCallback(() => {
@@ -241,95 +333,6 @@ const PurchaseHistoryManagement: React.FC = () => {
     window.addEventListener('popstate', handleNavigation);
     return () => window.removeEventListener('popstate', handleNavigation);
   }, [user?.access_token, userPackages.length, fetchData]);
-
-  const fetchUserPackages = async () => {
-    try {
-      const params = new URLSearchParams();
-      if (filters.clientId !== 'all') params.append('client_id', filters.clientId);
-      if (filters.packageType !== 'all') params.append('package_type', filters.packageType);
-      if (filters.status !== 'all') params.append('is_active', filters.status === 'active' ? 'true' : 'false');
-      if (filters.dateFrom) params.append('date_from', filters.dateFrom);
-      if (filters.dateTo) params.append('date_to', filters.dateTo);
-
-      const response = await fetch(`/api/admin/user-packages?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${user!.access_token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        setUserPackages(data.data);
-      } else {
-        toast.error('Failed to fetch user packages');
-      }
-    } catch (error) {
-      console.error('Error fetching user packages:', error);
-    }
-  };
-
-  const fetchBookings = async () => {
-    try {
-      const params = new URLSearchParams();
-      if (filters.clientId !== 'all') params.append('client_id', filters.clientId);
-      if (filters.status !== 'all') params.append('status', filters.status);
-      if (filters.dateFrom) params.append('date_from', filters.dateFrom);
-      if (filters.dateTo) params.append('date_to', filters.dateTo);
-
-      const response = await fetch(`/api/admin/bookings?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${user!.access_token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        setBookings(data.data);
-      } else {
-        toast.error('Failed to fetch bookings');
-      }
-    } catch (error) {
-      console.error('Error fetching bookings:', error);
-    }
-  };
-
-  const fetchClients = async () => {
-    try {
-      const response = await fetch('/api/admin/users', {
-        headers: {
-          'Authorization': `Bearer ${user!.access_token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        setClients(data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching clients:', error);
-    }
-  };
-
-  const fetchStats = async () => {
-    try {
-      const response = await fetch('/api/admin/bookings/stats', {
-        headers: {
-          'Authorization': `Bearer ${user!.access_token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        setStats(data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching stats:', error);
-    }
-  };
 
   const getPackageTypeBadge = (type: string) => {
     const variants = {

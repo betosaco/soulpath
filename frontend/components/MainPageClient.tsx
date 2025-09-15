@@ -284,7 +284,8 @@ export default function MainPageClient({
   initialProfileImage
 }: MainPageClientProps) {
   const { language, setLanguage } = useLanguage();
-  const { t, isLoading: isLoadingTranslations } = useTranslations(initialContent);
+  const { t, isLoading: isLoadingTranslations } = useTranslations(initialContent || {});
+  const translations = t as Record<string, string | Record<string, string>>;
   const { } = useProfileImage(initialProfileImage);
 
   const { signIn } = useAuth();
@@ -392,7 +393,7 @@ export default function MainPageClient({
       <Header
         language="en"
         setLanguage={setLanguage}
-        t={t}
+        t={translations}
         onLoginClick={handleLoginClick}
       />
       
@@ -401,19 +402,19 @@ export default function MainPageClient({
         style={{ transform: `translateY(-${currentSection * 100}vh)` }}
       >
         <section id="invitation">
-          <HeroSection t={t} />
+          <HeroSection t={translations} />
         </section>
         <section id="approach">
-          <ApproachSection t={t} />
+          <ApproachSection t={translations} />
         </section>
         <section id="session">
-          <SessionSection t={t} scrollToSection={scrollToSection} />
+          <SessionSection t={translations} scrollToSection={scrollToSection} />
         </section>
         <section id="about">
-          <AboutSection t={t} />
+          <AboutSection t={translations} />
         </section>
         <section id="apply">
-          <BookingSection t={t} language={language} />
+          <BookingSection t={translations} language={language} />
         </section>
       </div>
       

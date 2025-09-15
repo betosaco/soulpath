@@ -1,7 +1,7 @@
 declare module 'ephemeris' {
   export interface EphemerisData {
     // Add specific types as needed
-    [key: string]: any;
+    [key: string]: unknown; // eslint-disable-line @typescript-eslint/no-explicit-any
   }
 
   export function calculate(

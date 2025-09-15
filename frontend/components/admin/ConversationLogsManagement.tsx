@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { 
   ConversationLog, 
-  ConversationStats, 
-  ConversationLogsResponse 
+  ConversationStats
 } from '@/lib/types/conversational-orchestrator';
 import { badgeStyles } from '@/lib/styles/common';
 import { Button } from '@/components/ui/button';
@@ -55,7 +54,7 @@ import {
 export default function ConversationLogsManagement() {
   const { user, isLoading, isAdmin } = useAuth();
   const [logs, setLogs] = useState<ConversationLog[]>([]);
-  const [stats, setStats] = useState<ConversationStats | null>(null);
+  const [stats] = useState<ConversationStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedLogs, setSelectedLogs] = useState<(string | number)[]>([]);
   const [selectedLog, setSelectedLog] = useState<ConversationLog | null>(null);
@@ -81,12 +80,64 @@ export default function ConversationLogsManagement() {
     hasPrev: false
   });
 
+  const fetchConversationLogs = useCallback(async () => {
+    if (!user?.access_token) {
+      console.error('No authentication token available - user not authenticated');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value) params.append(key, value.toString());
+      });
+
+      const response = await fetch(`/api/admin/conversation-logs?${params.toString()}`, {
+        headers: {
+          'Authorization': `Bearer ${user.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setLogs(data.logs || []);
+        setPagination({
+          page: data.pagination?.page || 1,
+          limit: 50,
+          totalPages: data.pagination?.totalPages || 1,
+          total: data.pagination?.totalItems || 0,
+          hasNext: data.pagination?.hasNext || false,
+          hasPrev: data.pagination?.hasPrev || false
+        });
+      } else {
+        throw new Error(data.error || 'Failed to fetch conversation logs');
+      }
+    } catch (error) {
+      console.error('Error fetching conversation logs:', error);
+      console.error('Error details:', {
+        error: error,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [user?.access_token, filters]);
+
   // Move useEffect before any conditional returns
   useEffect(() => {
     if (user?.access_token) {
       fetchConversationLogs();
     }
-  }, [filters, user?.access_token]);
+  }, [filters, user?.access_token, fetchConversationLogs]);
 
   // Show loading state while authentication is being verified
   if (isLoading) {
@@ -134,69 +185,6 @@ export default function ConversationLogsManagement() {
       </div>
     );
   }
-
-  const fetchConversationLogs = async () => {
-    if (!user?.access_token) {
-      console.error('No authentication token available - user not authenticated');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value) params.append(key, value.toString());
-      });
-
-      console.log('🔍 Fetching conversation logs with params:', params.toString());
-      console.log('🔍 Auth token available:', !!user.access_token);
-
-      const response = await fetch(`/api/admin/conversation-logs?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${user.access_token}`,
-        },
-      });
-
-      console.log('🔍 Response status:', response.status);
-      console.log('🔍 Response headers:', Object.fromEntries(response.headers.entries()));
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ API Error Response:', {
-          status: response.status,
-          statusText: response.statusText,
-          body: errorText
-        });
-        return;
-      }
-
-      const data: ConversationLogsResponse = await response.json();
-      console.log('🔍 API Response data:', data);
-
-      if (data.success) {
-        setLogs(data.data);
-        setStats(data.statistics);
-        setPagination(data.pagination);
-        console.log('✅ Successfully loaded conversation logs:', data.data.length);
-      } else {
-        console.error('❌ Failed to fetch conversation logs:', {
-          success: data.success,
-          error: data.error,
-          message: data.message,
-          fullResponse: data
-        });
-      }
-    } catch (error) {
-      console.error('❌ Network/Parse error fetching conversation logs:', {
-        error: error,
-        message: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters(prev => ({
@@ -414,9 +402,9 @@ export default function ConversationLogsManagement() {
   const getFeedbackIcon = (feedback?: Record<string, unknown>) => {
     if (!feedback) return <XCircle className="h-4 w-4 text-[var(--color-text-tertiary)]" />;
     
-    if (feedback.rating >= 4) {
+    if (Number(feedback.rating) >= 4) {
       return <CheckCircle className="h-4 w-4 text-[var(--color-status-success)]" />;
-    } else if (feedback.rating >= 2) {
+    } else if (Number(feedback.rating) >= 2) {
       return <AlertTriangle className="h-4 w-4 text-[var(--color-status-warning)]" />;
     } else {
       return <XCircle className="h-4 w-4 text-[var(--color-status-error)]" />;
@@ -694,7 +682,7 @@ export default function ConversationLogsManagement() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {getFeedbackIcon(log.feedback?.[0])}
+                        {getFeedbackIcon(log.feedback?.[0] as unknown as Record<string, unknown>)}
                       </TableCell>
                       <TableCell>
                         <Dialog>
@@ -761,7 +749,7 @@ export default function ConversationLogsManagement() {
                                     <div className="flex flex-wrap gap-2">
                                       {selectedLog.rasaEntities.map((entity, index) => (
                                         <Badge key={index} variant="secondary">
-                                          {entity.entity}: {entity.value}
+                                          {String(entity.entity)}: {String(entity.value)}
                                         </Badge>
                                       ))}
                                     </div>

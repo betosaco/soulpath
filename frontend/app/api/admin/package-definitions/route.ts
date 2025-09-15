@@ -185,6 +185,7 @@ export async function GET(request: NextRequest) {
     };
     
     const [packageDefinitions, totalCount] = await Promise.all([
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       prisma.packageDefinition.findMany(queryOptions as any),
       prisma.packageDefinition.count({ where })
     ]);

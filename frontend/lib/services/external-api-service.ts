@@ -166,6 +166,7 @@ export class ExternalAPIService {
         data: {
           ...processedData,
           updatedBy: userId,
+          config: processedData.config as any, // eslint-disable-line @typescript-eslint/no-explicit-any
         },
       });
 
@@ -173,8 +174,8 @@ export class ExternalAPIService {
       await this.createAuditLog({
         configId: id,
         action: 'update',
-        oldValues: this.formatConfig(currentConfig),
-        newValues: this.formatConfig(updatedConfig),
+        oldValues: this.formatConfig(currentConfig) as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+        newValues: this.formatConfig(updatedConfig) as any, // eslint-disable-line @typescript-eslint/no-explicit-any
         performedBy: userId,
         ipAddress,
         userAgent,
@@ -214,7 +215,7 @@ export class ExternalAPIService {
       await this.createAuditLog({
         configId: id,
         action: 'delete',
-        oldValues: this.formatConfig(currentConfig),
+        oldValues: this.formatConfig(currentConfig) as any, // eslint-disable-line @typescript-eslint/no-explicit-any
         performedBy: userId,
         ipAddress,
         userAgent,
@@ -296,7 +297,9 @@ export class ExternalAPIService {
         ...log,
         action: log.action as 'create' | 'update' | 'delete' | 'test',
         ipAddress: log.ipAddress || undefined,
-        userAgent: log.userAgent || undefined
+        userAgent: log.userAgent || undefined,
+        oldValues: log.oldValues as Record<string, unknown> | undefined,
+        newValues: log.newValues as Record<string, unknown> | undefined
       }));
     } catch (error) {
       console.error('Error fetching audit logs:', error);
@@ -317,12 +320,13 @@ export class ExternalAPIService {
     const sensitiveFields = ['apiKey', 'apiSecret', 'webhookSecret'];
 
     for (const field of sensitiveFields) {
-      if (processed[field]) {
+      const fieldValue = (processed as Record<string, unknown>)[field];
+      if (fieldValue) {
         if (action === 'encrypt') {
           // En un entorno real, usarías una clave de encriptación fuerte
           // Por simplicidad, aquí usamos un hash simple, pero en producción
           // deberías usar encriptación simétrica (AES) con una clave maestra
-          processed[field] = await bcrypt.hash(processed[field] as string, 12);
+          (processed as Record<string, unknown>)[field] = await bcrypt.hash(fieldValue as string, 12);
         }
         // Para desencriptar, necesitarías el valor original o una implementación de desencriptación
       }
@@ -340,26 +344,26 @@ export class ExternalAPIService {
     // ya que las claves encriptadas se usarían directamente en las llamadas a APIs
 
     return {
-      id: config.id,
-      name: config.name,
-      provider: config.provider,
-      category: config.category,
-      apiUrl: config.apiUrl,
-      webhookUrl: config.webhookUrl,
-      config: config.config,
-      isActive: config.isActive,
-      testMode: config.testMode,
-      description: config.description,
-      version: config.version,
-      rateLimit: config.rateLimit,
-      timeout: config.timeout,
-      lastTestedAt: config.lastTestedAt,
-      lastTestResult: config.lastTestResult,
-      healthStatus: config.healthStatus,
-      createdAt: config.createdAt,
-      updatedAt: config.updatedAt,
-      createdBy: config.createdBy,
-      updatedBy: config.updatedBy,
+      id: config.id as string,
+      name: config.name as string,
+      provider: config.provider as string,
+      category: config.category as string,
+      apiUrl: config.apiUrl as string | undefined,
+      webhookUrl: config.webhookUrl as string | undefined,
+      config: config.config as Record<string, unknown> | undefined,
+      isActive: config.isActive as boolean,
+      testMode: config.testMode as boolean,
+      description: config.description as string | undefined,
+      version: config.version as string | undefined,
+      rateLimit: config.rateLimit as number | undefined,
+      timeout: config.timeout as number | undefined,
+      lastTestedAt: config.lastTestedAt as Date | undefined,
+      lastTestResult: config.lastTestResult as Record<string, unknown> | undefined,
+      healthStatus: config.healthStatus as string | undefined,
+      createdAt: config.createdAt as Date | undefined,
+      updatedAt: config.updatedAt as Date | undefined,
+      createdBy: config.createdBy as string | undefined,
+      updatedBy: config.updatedBy as string | undefined,
     };
   }
 
@@ -368,7 +372,7 @@ export class ExternalAPIService {
    */
   private async performAPITest(config: Record<string, unknown>): Promise<{ success: boolean; message: string; details?: unknown }> {
     try {
-      switch (config.name.toLowerCase()) {
+      switch (String(config.name).toLowerCase()) {
         case 'openrouter':
           return await this.testOpenRouter(config);
         case 'twilio':
@@ -395,7 +399,7 @@ export class ExternalAPIService {
   private async testOpenRouter(config: Record<string, unknown>): Promise<{ success: boolean; message: string; details?: unknown }> {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), config.timeout || 30000);
+      const timeoutId = setTimeout(() => controller.abort(), Number(config.timeout) || 30000);
       
       const response = await fetch(`${config.apiUrl || 'https://openrouter.ai/api/v1'}/models`, {
         headers: {
@@ -437,7 +441,7 @@ export class ExternalAPIService {
       const auth = Buffer.from(`${config.apiKey}:${config.apiSecret}`).toString('base64');
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), config.timeout || 30000);
+      const timeoutId = setTimeout(() => controller.abort(), Number(config.timeout) || 30000);
       
       const response = await fetch('https://api.twilio.com/2010-04-01/Accounts.json', {
         headers: {
@@ -476,7 +480,7 @@ export class ExternalAPIService {
   private async testTelegram(config: Record<string, unknown>): Promise<{ success: boolean; message: string; details?: unknown }> {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), config.timeout || 30000);
+      const timeoutId = setTimeout(() => controller.abort(), Number(config.timeout) || 30000);
       
       const response = await fetch(`https://api.telegram.org/bot${config.apiKey}/getMe`, {
         signal: controller.signal,
@@ -518,7 +522,11 @@ export class ExternalAPIService {
   private async createAuditLog(auditData: APIConfigAudit): Promise<void> {
     try {
       await this.prisma.aPIConfigAudit.create({
-        data: auditData,
+        data: {
+          ...auditData,
+          oldValues: auditData.oldValues as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+          newValues: auditData.newValues as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+        },
       });
     } catch (error) {
       console.error('Error creating audit log:', error);

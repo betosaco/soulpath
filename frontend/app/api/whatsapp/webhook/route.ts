@@ -143,8 +143,8 @@ export async function POST(request: NextRequest) {
 
     if (result.success) {
       console.log('Message processed successfully:', {
-        logId: result.data.logId,
-        processingTime: result.data.processingTime
+        logId: (result.data as Record<string, unknown>)?.logId,
+        processingTime: (result.data as Record<string, unknown>)?.processingTime
       });
       
       return NextResponse.json(result, { status: 200 });

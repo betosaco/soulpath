@@ -257,10 +257,10 @@ export class LoggingService {
           botResponse: log.botResponse || log.llmResponse || log.rasaResponse || 'No response generated',
           rasaIntent: log.rasaIntent || log.intent,
           rasaConfidence: log.rasaConfidence || log.confidence || 0.5,
-          rasaEntities: log.rasaEntities || log.entities || [],
+          rasaEntities: (log.rasaEntities || log.entities || []) as any, // eslint-disable-line @typescript-eslint/no-explicit-any
           responseGenerator: log.responseGenerator || log.action || 'unknown',
           bookingStep: log.bookingStep || null,
-          bookingDataSnapshot: log.bookingDataSnapshot || log.bookingData || null,
+          bookingDataSnapshot: (log.bookingDataSnapshot || log.bookingData || null) as any, // eslint-disable-line @typescript-eslint/no-explicit-any
           modelVersion: log.modelVersion || '1.0.0'
         }
       });

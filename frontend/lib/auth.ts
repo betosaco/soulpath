@@ -36,7 +36,7 @@ export async function requireAuth(request: NextRequest): Promise<AuthenticatedUs
 
     // Get user from database
     const user = await prisma.user.findUnique({
-      where: { id: decoded.userId }
+      where: { id: String(decoded.userId) }
     });
 
     if (!user) {

@@ -16,7 +16,7 @@ import {
   Plus,
   AlertCircle
 } from 'lucide-react';
-import { getPlaceholdersGrouped, validatePlaceholders } from '../../lib/communication/placeholders';
+import { getPlaceholdersGrouped, validatePlaceholders, Placeholder } from '../../lib/communication/placeholders';
 
 interface Template {
   id?: number;
@@ -203,7 +203,7 @@ export function TemplateEditor({ template, type, onSave, onClose }: TemplateEdit
       acc[category] = filtered;
     }
     return acc;
-  }, {} as Record<string, Array<{ name: string; description: string; example: string }>>);
+  }, {} as Record<string, Placeholder[]>);
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
