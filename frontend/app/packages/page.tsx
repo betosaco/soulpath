@@ -52,11 +52,6 @@ interface BookingFormData {
   clientName: string;
   clientEmail: string;
   clientPhone: string;
-  birthDate: string;
-  birthTime: string;
-  birthPlace: string;
-  question: string;
-  specialRequests: string;
   language: 'en' | 'es';
   selectedPackage: PackagePrice | null;
   selectedScheduleSlot: ScheduleSlot | null;
@@ -79,11 +74,6 @@ export default function PackagesPage() {
     clientName: '',
     clientEmail: '',
     clientPhone: '',
-    birthDate: '',
-    birthTime: '',
-    birthPlace: '',
-    question: '',
-    specialRequests: '',
     language: 'en',
     selectedPackage: null,
     selectedScheduleSlot: null,
@@ -121,51 +111,49 @@ export default function PackagesPage() {
   }, []);
 
   const loadData = async () => {
+    console.log('🔄 Starting loadData...');
+    setLoading(true);
+    
     try {
-      setLoading(true);
-      console.log('🔄 Loading packages data...');
-      
       // Load packages
+      console.log('📦 Fetching packages...');
       const packagesResponse = await fetch('/api/packages?active=true&currency=PEN');
-      console.log('📦 Packages response status:', packagesResponse.status);
       const packagesData = await packagesResponse.json();
-      console.log('📦 Packages data:', packagesData);
+      console.log('📦 Packages response:', packagesData);
       
       if (packagesData.success && packagesData.data) {
-        console.log('✅ Setting packages:', packagesData.data);
         setPackages(packagesData.data);
+        console.log('✅ Packages loaded:', packagesData.data.length);
       } else {
-        console.error('❌ Packages API error:', packagesData);
-        toast.error('Failed to load packages');
-        setPackages([]); // Set empty array to prevent infinite loading
-      }
-
-      // Load available schedule slots (optional)
-      try {
-        const scheduleResponse = await fetch('/api/schedule-slots');
-        console.log('📅 Schedule response status:', scheduleResponse.status);
-        const scheduleData = await scheduleResponse.json();
-        console.log('📅 Schedule data:', scheduleData);
-        
-        if (scheduleData.success) {
-          setScheduleSlots(scheduleData.slots || scheduleData.data || []);
-        } else {
-          console.warn('⚠️ Schedule API error:', scheduleData);
-          setScheduleSlots([]); // Set empty array
-        }
-      } catch (scheduleError) {
-        console.warn('⚠️ Schedule API failed:', scheduleError);
-        setScheduleSlots([]); // Set empty array
+        console.error('❌ Packages API failed:', packagesData);
+        setPackages([]);
       }
     } catch (error) {
-      console.error('❌ Error loading data:', error);
-      toast.error('Failed to load packages and schedules');
-      setPackages([]); // Set empty array to prevent infinite loading
-      setScheduleSlots([]);
-    } finally {
-      console.log('✅ Loading complete, setting loading to false');
-      setLoading(false);
+      console.error('❌ Error loading packages:', error);
+      setPackages([]);
     }
+    
+    try {
+      // Load schedule slots
+      console.log('📅 Fetching schedule slots...');
+      const scheduleResponse = await fetch('/api/schedule-slots');
+      const scheduleData = await scheduleResponse.json();
+      console.log('📅 Schedule response:', scheduleData);
+      
+      if (scheduleData.success) {
+        setScheduleSlots(scheduleData.slots || scheduleData.data || []);
+        console.log('✅ Schedule slots loaded:', scheduleData.slots?.length || 0);
+      } else {
+        console.warn('⚠️ Schedule API failed:', scheduleData);
+        setScheduleSlots([]);
+      }
+    } catch (error) {
+      console.warn('⚠️ Error loading schedule slots:', error);
+      setScheduleSlots([]);
+    }
+    
+    console.log('✅ LoadData complete, setting loading to false');
+    setLoading(false);
   };
 
   const handlePackageSelect = (pkg: PackagePrice) => {
@@ -199,11 +187,6 @@ export default function PackagesPage() {
           clientName: formData.clientName,
           clientEmail: formData.clientEmail,
           clientPhone: formData.clientPhone,
-          birthDate: formData.birthDate,
-          birthTime: formData.birthTime,
-          birthPlace: formData.birthPlace,
-          question: formData.question,
-          specialRequests: formData.specialRequests,
           language: formData.language,
           paymentMethod: 'izipay',
           paymentData: paymentData
@@ -244,11 +227,6 @@ export default function PackagesPage() {
           clientName: '',
           clientEmail: '',
           clientPhone: '',
-          birthDate: '',
-          birthTime: '',
-          birthPlace: '',
-          question: '',
-          specialRequests: '',
           language: 'en',
           selectedPackage: null,
           selectedScheduleSlot: null,
@@ -468,6 +446,7 @@ export default function PackagesPage() {
                         onChange={(e) => setFormData(prev => ({ ...prev, clientName: e.target.value }))}
                         className="border-gray-300 text-black placeholder-gray-400"
                         placeholder="Enter your full name"
+                        required
                       />
                     </div>
                     <div>
@@ -479,78 +458,27 @@ export default function PackagesPage() {
                         onChange={(e) => setFormData(prev => ({ ...prev, clientEmail: e.target.value }))}
                         className="border-gray-300 text-black placeholder-gray-400"
                         placeholder="Enter your email"
+                        required
                       />
                     </div>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="clientPhone" className="text-black">Phone</Label>
+                      <Label htmlFor="clientPhone" className="text-black">Phone *</Label>
                       <Input
                         id="clientPhone"
+                        type="tel"
                         value={formData.clientPhone}
                         onChange={(e) => setFormData(prev => ({ ...prev, clientPhone: e.target.value }))}
                         className="border-gray-300 text-black placeholder-gray-400"
                         placeholder="Enter your phone number"
+                        required
                       />
                     </div>
                     <div>
-                      <Label htmlFor="birthDate" className="text-black">Birth Date *</Label>
-                      <Input
-                        id="birthDate"
-                        type="date"
-                        value={formData.birthDate}
-                        onChange={(e) => setFormData(prev => ({ ...prev, birthDate: e.target.value }))}
-                        className="border-gray-300 text-black"
-                      />
+                      {/* Empty div to maintain grid layout */}
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="birthTime" className="text-black">Birth Time</Label>
-                      <Input
-                        id="birthTime"
-                        type="time"
-                        value={formData.birthTime}
-                        onChange={(e) => setFormData(prev => ({ ...prev, birthTime: e.target.value }))}
-                        className="border-gray-300 text-black"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="birthPlace" className="text-black">Birth Place</Label>
-                      <Input
-                        id="birthPlace"
-                        value={formData.birthPlace}
-                        onChange={(e) => setFormData(prev => ({ ...prev, birthPlace: e.target.value }))}
-                        className="border-gray-300 text-black placeholder-gray-400"
-                        placeholder="City, Country"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="question" className="text-black">Your Question or Focus</Label>
-                    <Textarea
-                      id="question"
-                      value={formData.question}
-                      onChange={(e) => setFormData(prev => ({ ...prev, question: e.target.value }))}
-                      className="border-gray-300 text-black placeholder-gray-400"
-                      placeholder="What would you like guidance on?"
-                      rows={3}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="specialRequests" className="text-black">Special Requests</Label>
-                    <Textarea
-                      id="specialRequests"
-                      value={formData.specialRequests}
-                      onChange={(e) => setFormData(prev => ({ ...prev, specialRequests: e.target.value }))}
-                      className="border-gray-300 text-black placeholder-gray-400"
-                      placeholder="Any special requests or preferences"
-                      rows={2}
-                    />
                   </div>
 
                   <div className="flex justify-between pt-4">
@@ -719,11 +647,6 @@ export default function PackagesPage() {
                       quantity={1}
                       metadata={{
                         clientPhone: formData.clientPhone,
-                        birthDate: formData.birthDate,
-                        birthTime: formData.birthTime,
-                        birthPlace: formData.birthPlace,
-                        question: formData.question,
-                        specialRequests: formData.specialRequests,
                         language: formData.language,
                         scheduleSlotId: formData.selectedScheduleSlot?.id
                       }}
