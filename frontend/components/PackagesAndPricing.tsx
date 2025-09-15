@@ -124,7 +124,7 @@ const PackagesAndPricing: React.FC = () => {
         if (value && value !== 'all') params.append(key, value);
       });
 
-      const response = await fetch(`/api/admin/package-definitions?${params}`, {
+      const response = await fetch(`/api/admin/package-definitions?${params}&enhanced=true`, {
         headers: {
           'Authorization': `Bearer ${user.access_token}`,
           'Content-Type': 'application/json'
@@ -133,6 +133,7 @@ const PackagesAndPricing: React.FC = () => {
       const data = await response.json();
 
       if (data.success) {
+        console.log('🔍 Package definitions data received:', data.data);
         setPackageDefinitions(data.data);
       } else {
         toast.error('Failed to fetch package definitions');
@@ -910,9 +911,34 @@ const PackagesAndPricing: React.FC = () => {
                         <td>{pkg.sessionDuration?.name || 'N/A'}</td>
                         <td>{pkg.maxGroupSize || '-'}</td>
                         <td>
-                          <Badge className="dashboard-badge">
-                            {pkg.packagePrices?.length || 0} prices
-                          </Badge>
+                          <div className="space-y-1">
+                            {pkg.packagePrices && pkg.packagePrices.filter(p => p.isActive).length > 0 ? (
+                              pkg.packagePrices
+                                .filter(p => p.isActive)
+                                .slice(0, 3)
+                                .map((price, index) => (
+                                <div key={index} className="text-sm">
+                                  <span className="font-mono">
+                                    {price.currency?.symbol || ''}
+                                    {typeof price.price === 'number' && !isNaN(price.price)
+                                      ? price.price.toFixed(2)
+                                      : price.price || 'N/A'
+                                    }
+                                  </span>
+                                  <span className="text-dashboard-text-secondary ml-1">
+                                    {price.currency?.code || 'N/A'}
+                                  </span>
+                                </div>
+                              ))
+                            ) : (
+                              <span className="text-dashboard-text-secondary text-sm">No prices</span>
+                            )}
+                            {pkg.packagePrices && pkg.packagePrices.filter(p => p.isActive).length > 3 && (
+                              <div className="text-xs text-dashboard-text-secondary">
+                                +{pkg.packagePrices.filter(p => p.isActive).length - 3} more
+                              </div>
+                            )}
+                          </div>
                         </td>
                         <td>
                           <Badge className={pkg.isActive ? 'dashboard-badge-success' : 'dashboard-badge-error'}>

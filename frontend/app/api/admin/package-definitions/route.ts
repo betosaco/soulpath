@@ -31,6 +31,9 @@ interface PackageDefinitionSelectClause {
     };
   };
   packagePrices?: {
+    where?: {
+      isActive: boolean;
+    };
     select: {
       id: boolean;
       price: boolean;
@@ -42,6 +45,9 @@ interface PackageDefinitionSelectClause {
         };
       };
     };
+  };
+  _count?: {
+    packagePrices: boolean;
   };
 }
 
@@ -134,41 +140,60 @@ export async function GET(request: NextRequest) {
       }
     };
 
+    console.log('🔍 Executing database query...');
+    
+    let queryOptions: any = {
+      where,
+      skip: offset,
+      take: limit,
+      orderBy: { createdAt: 'desc' }
+    };
+
     // Enhanced mode includes pricing information
     if (enhanced === 'true') {
-      (select as any).packagePrices = {
-        where: { isActive: true },
-        select: {
-          id: true,
-          price: true,
-          currency: {
-            select: {
-              id: true,
-              code: true,
-              symbol: true
+      queryOptions.include = {
+        sessionDuration: {
+          select: {
+            id: true,
+            name: true,
+            duration_minutes: true
+          }
+        },
+        packagePrices: {
+          select: {
+            id: true,
+            price: true,
+            isActive: true,
+            currency: {
+              select: {
+                id: true,
+                code: true,
+                symbol: true
+              }
             }
+          }
+        },
+        _count: {
+          select: {
+            packagePrices: true
           }
         }
       };
-      (select as unknown as Record<string, unknown>)._count = {
-        packagePrices: true
-      };
+    } else {
+      queryOptions.select = select;
     }
-
-    console.log('🔍 Executing database query...');
     
     const [packageDefinitions, totalCount] = await Promise.all([
-      prisma.packageDefinition.findMany({
-        where,
-        select,
-        skip: offset,
-        take: limit,
-        orderBy: { createdAt: 'desc' }
-      }),
+      prisma.packageDefinition.findMany(queryOptions),
       prisma.packageDefinition.count({ where })
     ]);
 
     console.log('✅ Database query successful, found', packageDefinitions.length, 'package definitions');
+    
+    // Debug: Log the first package definition to see if pricing data is included
+    if (packageDefinitions.length > 0) {
+      console.log('🔍 First package definition data:', JSON.stringify(packageDefinitions[0], null, 2));
+    }
 
     const totalPages = Math.ceil(totalCount / limit);
 
