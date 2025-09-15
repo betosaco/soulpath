@@ -4,8 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import { Menu, X, Users, Heart, Star } from 'lucide-react';
 import { Header } from './Header';
-import { useLanguage } from '../hooks/useLanguage';
-import { useTranslations } from '../hooks/useTranslations';
+import { useTranslations, useLanguage } from '@/hooks/useTranslations';
 
 export function MatmaxHomepage() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
