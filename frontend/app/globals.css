@@ -481,8 +481,8 @@
 }
 
 .header-button-language-active {
-  background-color: var(--color-primary-500);
-  color: var(--color-text-inverse);
+  background-color: #6ea058;
+  color: white;
   border-radius: var(--border-radius-md);
   padding: var(--spacing-1) var(--spacing-2);
   font-size: var(--font-size-sm);
@@ -1889,12 +1889,23 @@ html, body {
   .mobile-gesture-feedback:active {
     transform: scale(0.98);
   }
+}
 
-  /* Mobile scroll improvements */
-  .mobile-scroll-smooth {
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
-  }
+/* Mobile scroll improvements */
+.mobile-scroll-smooth {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Packages page scrolling fix */
+.packages-page {
+  overflow: auto !important;
+}
+
+.packages-page body {
+  overflow: auto !important;
+  position: static !important;
+  height: auto !important;
 }
 
 /* ===========================================

@@ -454,7 +454,7 @@ export default function PackagesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-white" style={{ overflow: 'auto' }}>
         <Header
           language={language}
           setLanguage={setLanguage}
@@ -482,7 +482,7 @@ export default function PackagesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white packages-page" style={{ overflow: 'auto' }}>
       <Header
         language={language}
         setLanguage={setLanguage}
@@ -496,7 +496,7 @@ export default function PackagesPage() {
       />
       
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8 pt-24">
+      <div className="container mx-auto px-4 py-8 pt-24" style={{ overflow: 'visible' }}>
         <div className="text-center mb-12">
           <h1 
             className="text-4xl md:text-6xl font-bold mb-6 text-primary"

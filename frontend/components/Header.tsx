@@ -117,7 +117,7 @@ export function Header({
               onClick={() => setLanguage('en')}
               className={`px-2 py-1 text-xs font-medium rounded-md transition-all duration-200 touch-manipulation min-h-[32px] min-w-[32px] flex items-center justify-center ${
                 language === 'en' 
-                  ? 'bg-[#FFD700] text-[#0A0A23] shadow-sm' 
+                  ? 'bg-[#6ea058] text-white shadow-sm' 
                   : 'text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10'
               }`}
             >
@@ -128,7 +128,7 @@ export function Header({
               onClick={() => setLanguage('es')}
               className={`px-2 py-1 text-xs font-medium rounded-md transition-all duration-200 touch-manipulation min-h-[32px] min-w-[32px] flex items-center justify-center ${
                 language === 'es' 
-                  ? 'bg-[#FFD700] text-[#0A0A23] shadow-sm' 
+                  ? 'bg-[#6ea058] text-white shadow-sm' 
                   : 'text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10'
               }`}
             >
@@ -345,7 +345,7 @@ export function Header({
                       className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                         language === 'en' 
                           ? 'bg-[#6ea058] text-white' 
-                          : 'text-gray-600 hover:text-[#6ea058] hover:bg-[#6ea058]/10'
+                          : 'text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10'
                       }`}
                     >
                       EN
@@ -356,7 +356,7 @@ export function Header({
                       className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                         language === 'es' 
                           ? 'bg-[#6ea058] text-white' 
-                          : 'text-gray-600 hover:text-[#6ea058] hover:bg-[#6ea058]/10'
+                          : 'text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10'
                       }`}
                     >
                       ES
