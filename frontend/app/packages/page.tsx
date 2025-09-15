@@ -2,13 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Package, Calendar, CreditCard, CheckCircle, ArrowRight, ArrowLeft, Clock, Users, Star } from 'lucide-react';
+import { Package, CheckCircle, ArrowRight, ArrowLeft, Clock, Users, Star } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
 import { IzipayPaymentMethod } from '@/components/izipay/IzipayPaymentMethod';
 import { Header } from '@/components/Header';
 import { useTranslations, useLanguage } from '@/hooks/useTranslations';
@@ -39,6 +36,7 @@ interface ScheduleSlot {
   capacity: number;
   bookedCount: number;
   isAvailable: boolean;
+  instructorName?: string;
   scheduleTemplate: {
     dayOfWeek: string;
     sessionDuration: {
@@ -57,6 +55,7 @@ interface BookingFormData {
   selectedPackage: PackagePrice | null;
   selectedScheduleSlot: ScheduleSlot | null;
   skipBooking: boolean;
+  specialRequests?: string;
 }
 
 export default function PackagesPage() {
@@ -199,7 +198,6 @@ export default function PackagesPage() {
   ]);
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [processing, setProcessing] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   
@@ -328,51 +326,6 @@ export default function PackagesPage() {
     }
   }, [currentStep]);
 
-  const loadData = async () => {
-    console.log('🔄 Starting loadData...');
-    setLoading(true);
-    
-    try {
-      // Load packages
-      console.log('📦 Fetching packages...');
-      const packagesResponse = await fetch('/api/packages?active=true&currency=PEN');
-      const packagesData = await packagesResponse.json();
-      console.log('📦 Packages response:', packagesData);
-      
-      if (packagesData.success && packagesData.data) {
-        setPackages(packagesData.data);
-        console.log('✅ Packages loaded:', packagesData.data.length);
-      } else {
-        console.error('❌ Packages API failed:', packagesData);
-        setPackages([]);
-      }
-    } catch (error) {
-      console.error('❌ Error loading packages:', error);
-      setPackages([]);
-    }
-    
-    try {
-      // Load schedule slots
-      console.log('📅 Fetching schedule slots...');
-      const scheduleResponse = await fetch('/api/schedule-slots');
-      const scheduleData = await scheduleResponse.json();
-      console.log('📅 Schedule response:', scheduleData);
-      
-      if (scheduleData.success) {
-        setScheduleSlots(scheduleData.slots || scheduleData.data || []);
-        console.log('✅ Schedule slots loaded:', scheduleData.slots?.length || 0);
-      } else {
-        console.warn('⚠️ Schedule API failed:', scheduleData);
-        setScheduleSlots([]);
-      }
-    } catch (error) {
-      console.warn('⚠️ Error loading schedule slots:', error);
-      setScheduleSlots([]);
-    }
-    
-    console.log('✅ LoadData complete, setting loading to false');
-    setLoading(false);
-  };
 
   const handlePackageSelect = (pkg: PackagePrice) => {
     setFormData(prev => ({ ...prev, selectedPackage: pkg }));

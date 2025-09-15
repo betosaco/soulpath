@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { Menu, X, Users, Heart, Star } from 'lucide-react';
+import { Users, Heart, Star } from 'lucide-react';
 import { Header } from './Header';
 import { useTranslations, useLanguage } from '@/hooks/useTranslations';
 
@@ -13,8 +13,8 @@ export function MatmaxHomepage() {
   const translations = t as Record<string, string | Record<string, string>>;
 
   const handleLoginClick = () => {
-    // Add login functionality here
-    console.log('Login clicked');
+    // Login functionality is now handled by the Header component modal
+    console.log('Login clicked - handled by Header modal');
   };
 
   const scrollToSection = (section: string) => {
@@ -50,6 +50,18 @@ export function MatmaxHomepage() {
 
         {/* Hero Content */}
         <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
+          {/* Logo */}
+          <div className="mb-8 flex justify-center">
+            <Image
+              src="/logo_matmax.png"
+              alt="MatMax Yoga Studio Logo"
+              width={200}
+              height={200}
+              className="h-32 w-32 md:h-40 md:w-40 lg:h-48 lg:w-48 object-contain drop-shadow-2xl"
+              priority
+            />
+          </div>
+          
           <h1 
             className="text-4xl md:text-6xl font-bold mb-6 leading-tight"
             style={{ fontFamily: 'var(--font-heading)' }}

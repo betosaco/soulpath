@@ -5,6 +5,7 @@ import { Menu, X, LogIn, Settings, User, Package, Calendar } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 import { useLogo } from '../hooks/useLogo';
 import LoginModal from './LoginModal';
@@ -35,6 +36,7 @@ export function Header({
 }: HeaderProps) {
   const { logoSettings, isLoading } = useLogo();
   const { signIn } = useAuth();
+  const router = useRouter();
   const [showLoginModal, setShowLoginModal] = useState(false);
   
   // Handle touch gestures for closing menu
@@ -384,10 +386,16 @@ export function Header({
               console.error('Login error:', error);
               return false;
             }
-            if (data) {
+            if (data && data.data) {
               setShowLoginModal(false);
-              // Call the original onLoginClick to handle post-login logic
-              onLoginClick();
+              
+              // Check if user is admin and redirect accordingly
+              if (data.data.role === 'admin') {
+                router.push('/admin');
+              } else {
+                router.push('/account');
+              }
+              
               return true;
             }
             return false;

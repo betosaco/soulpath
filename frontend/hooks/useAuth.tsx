@@ -81,8 +81,8 @@ export function useAuth() {
         
         return { data, error: null };
       } else {
-        console.error('🔐 useAuth: Sign in error:', data.error);
-        return { data: null, error: { message: data.message } };
+        console.error('🔐 useAuth: Sign in error:', data.message || data.error || 'Unknown error');
+        return { data: null, error: { message: data.message || 'Login failed' } };
       }
     } catch (error) {
       console.error('🔐 useAuth: Sign in error:', error);
