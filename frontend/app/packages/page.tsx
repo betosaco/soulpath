@@ -147,7 +147,56 @@ export default function PackagesPage() {
       }
     }
   ]);
-  const [scheduleSlots, setScheduleSlots] = useState<ScheduleSlot[]>([]);
+  const [scheduleSlots, setScheduleSlots] = useState<ScheduleSlot[]>([
+    {
+      id: 1,
+      startTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Tomorrow
+      endTime: new Date(Date.now() + 24 * 60 * 60 * 1000 + 60 * 60 * 1000).toISOString(), // Tomorrow + 1 hour
+      capacity: 10,
+      bookedCount: 3,
+      isAvailable: true,
+      scheduleTemplate: {
+        dayOfWeek: 'Monday',
+        sessionDuration: {
+          name: '60 Minutes',
+          duration_minutes: 60
+        }
+      },
+      instructorName: 'Sarah Johnson'
+    },
+    {
+      id: 2,
+      startTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), // Day after tomorrow
+      endTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 60 * 60 * 1000).toISOString(), // Day after tomorrow + 1 hour
+      capacity: 8,
+      bookedCount: 1,
+      isAvailable: true,
+      scheduleTemplate: {
+        dayOfWeek: 'Tuesday',
+        sessionDuration: {
+          name: '60 Minutes',
+          duration_minutes: 60
+        }
+      },
+      instructorName: 'Mike Chen'
+    },
+    {
+      id: 3,
+      startTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days from now
+      endTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000 + 60 * 60 * 1000).toISOString(), // 3 days from now + 1 hour
+      capacity: 12,
+      bookedCount: 5,
+      isAvailable: true,
+      scheduleTemplate: {
+        dayOfWeek: 'Wednesday',
+        sessionDuration: {
+          name: '60 Minutes',
+          duration_minutes: 60
+        }
+      },
+      instructorName: 'Emma Wilson'
+    }
+  ]);
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [processing, setProcessing] = useState(false);
@@ -214,8 +263,45 @@ export default function PackagesPage() {
 
   useEffect(() => {
     console.log('🔄 useEffect triggered');
-    // Packages are now set in initial state
+    // Load schedule slots from database
+    loadScheduleSlots();
   }, []);
+
+  const loadScheduleSlots = async () => {
+    try {
+      console.log('🔄 Loading schedule slots...');
+      const response = await fetch('/api/schedule-slots');
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log('✅ Schedule slots loaded:', data.slots);
+        // Transform the API response to match the expected interface
+        const transformedSlots = data.slots.map((slot: any) => ({
+          id: slot.id,
+          startTime: new Date(`${slot.date}T${slot.time}`).toISOString(),
+          endTime: new Date(new Date(`${slot.date}T${slot.time}`).getTime() + (slot.duration * 60000)).toISOString(),
+          capacity: slot.capacity,
+          bookedCount: slot.bookedCount,
+          isAvailable: slot.isAvailable,
+          scheduleTemplate: {
+            dayOfWeek: new Date(slot.date).toLocaleDateString('en-US', { weekday: 'long' }),
+            sessionDuration: {
+              name: slot.sessionType,
+              duration_minutes: slot.duration
+            }
+          },
+          instructorName: 'Available'
+        }));
+        setScheduleSlots(transformedSlots);
+      } else {
+        console.error('❌ Schedule slots API failed:', data);
+        setScheduleSlots([]);
+      }
+    } catch (error) {
+      console.error('❌ Error loading schedule slots:', error);
+      setScheduleSlots([]);
+    }
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -285,15 +371,6 @@ export default function PackagesPage() {
     setCurrentStep(1);
   };
 
-  const handleSkipBooking = () => {
-    setFormData(prev => ({ ...prev, skipBooking: true }));
-    setCurrentStep(3);
-  };
-
-  const handleScheduleSelect = (slot: ScheduleSlot) => {
-    setFormData(prev => ({ ...prev, selectedScheduleSlot: slot }));
-    setCurrentStep(3);
-  };
 
   const handlePaymentSuccess = async (paymentData: any) => {
     try {
@@ -689,55 +766,102 @@ export default function PackagesPage() {
                   </p>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                    {scheduleSlots.slice(0, 6).map((slot) => (
-                      <Card
-                        key={slot.id}
-                        className={`cursor-pointer transition-all duration-300 ${
-                          slot.isAvailable && slot.bookedCount < slot.capacity
-                            ? 'card-base card-hover border-primary'
-                            : 'bg-gray-100 border-gray-300 opacity-50 cursor-not-allowed'
-                        }`}
-                        onClick={() => {
-                          if (slot.isAvailable && slot.bookedCount < slot.capacity) {
-                            handleScheduleSelect(slot);
-                          }
-                        }}
-                      >
-                        <CardContent className="p-4 text-center">
-                          <div className="text-sm text-muted">
-                            {new Date(slot.startTime).toLocaleDateString()}
-                          </div>
-                          <div 
-                            className="font-semibold text-black"
-                            style={{ fontFamily: 'var(--font-heading)' }}
-                          >
-                            {new Date(slot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </div>
-                          <div className="text-xs text-muted">
-                            {slot.scheduleTemplate.sessionDuration.duration_minutes} min
-                          </div>
-                          <div className="text-xs text-muted">
-                            {slot.bookedCount}/{slot.capacity} booked
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                  {/* Skip Booking Option */}
+                  <div className="mb-6">
+                    <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-lg">
+                      <input
+                        type="checkbox"
+                        id="skipBooking"
+                        checked={formData.skipBooking}
+                        onChange={(e) => setFormData(prev => ({ ...prev, skipBooking: e.target.checked, selectedScheduleSlot: null }))}
+                        className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                      />
+                      <label htmlFor="skipBooking" className="text-sm text-gray-700 cursor-pointer">
+                        Skip booking for now - I'll book later from my account
+                      </label>
+                    </div>
                   </div>
+
+                  {/* Available Time Slots */}
+                  {!formData.skipBooking && (
+                    <div>
+                      <h4 className="text-lg font-semibold text-black mb-4" style={{ fontFamily: 'var(--font-heading)' }}>
+                        Available Time Slots
+                      </h4>
+                      {scheduleSlots.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                          {scheduleSlots.slice(0, 12).map((slot) => (
+                            <Card
+                              key={slot.id}
+                              className={`cursor-pointer transition-all duration-300 ${
+                                slot.isAvailable && slot.bookedCount < slot.capacity
+                                  ? formData.selectedScheduleSlot?.id === slot.id
+                                    ? 'border-primary bg-primary/10'
+                                    : 'card-base card-hover border-gray-300 hover:border-primary'
+                                  : 'bg-gray-100 border-gray-300 opacity-50 cursor-not-allowed'
+                              }`}
+                              onClick={() => {
+                                if (slot.isAvailable && slot.bookedCount < slot.capacity) {
+                                  setFormData(prev => ({ ...prev, selectedScheduleSlot: slot }));
+                                }
+                              }}
+                            >
+                              <CardContent className="p-4 text-center">
+                                <div className="text-sm text-muted">
+                                  {new Date(slot.startTime).toLocaleDateString('en-US', { 
+                                    weekday: 'short', 
+                                    month: 'short', 
+                                    day: 'numeric' 
+                                  })}
+                                </div>
+                                <div 
+                                  className="font-semibold text-black"
+                                  style={{ fontFamily: 'var(--font-heading)' }}
+                                >
+                                  {new Date(slot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </div>
+                                <div className="text-xs text-muted">
+                                  {slot.scheduleTemplate?.sessionDuration?.duration_minutes || 60} min
+                                </div>
+                                <div className="text-xs text-muted">
+                                  {slot.instructorName || 'Available'}
+                                </div>
+                                <div className="text-xs text-muted">
+                                  {slot.bookedCount}/{slot.capacity} booked
+                                </div>
+                                {formData.selectedScheduleSlot?.id === slot.id && (
+                                  <div className="text-xs text-primary font-medium mt-1">
+                                    ✓ Selected
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-gray-500">
+                          <div className="text-sm">No available time slots</div>
+                          <div className="text-xs mt-1">Please try again later or skip to book later</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   <div className="text-center">
                     <button
-                      onClick={handleSkipBooking}
-                      className="btn-outline mr-4"
-                    >
-                      Skip for Now
-                    </button>
-                    <button
                       onClick={() => setCurrentStep(1)}
-                      className="btn-outline"
+                      className="btn-outline mr-4"
                     >
                       <ArrowLeft className="w-4 h-4 mr-2" />
                       Back
+                    </button>
+                    <button
+                      onClick={() => setCurrentStep(3)}
+                      className="btn-primary"
+                      disabled={!formData.skipBooking && !formData.selectedScheduleSlot}
+                    >
+                      Continue to Payment
+                      <ArrowRight className="w-4 h-4 ml-2" />
                     </button>
                   </div>
                 </CardContent>

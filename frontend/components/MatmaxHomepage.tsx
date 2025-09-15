@@ -306,7 +306,7 @@ export function MatmaxHomepage() {
                 Your sanctuary for wellness, growth, and transformation. Join our community and discover the power of yoga.
               </p>
               <div className="flex space-x-4">
-                <button className="btn-primary">Get Started</button>
+                <a href="/account/book" className="btn-primary">Get Started</a>
               </div>
             </div>
 
