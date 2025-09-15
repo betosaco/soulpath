@@ -3,11 +3,13 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import { AdminDashboard } from '@/components/AdminDashboard';
+// AdminDashboard is rendered in the layout, not needed here
 
 export default function AdminPage() {
   const { isAdmin, isLoading } = useAuth();
   const router = useRouter();
+
+  // Debug logging removed for production
 
   useEffect(() => {
     // If not loading and user is not admin, redirect to home
@@ -43,6 +45,6 @@ export default function AdminPage() {
 
   // The AdminDashboard is already rendered in the layout
   // This page component is just for routing and auth checks
-  // The layout will render the AdminDashboard with the appropriate content
+  // Return null so AdminDashboard renders its default content
   return null;
 }

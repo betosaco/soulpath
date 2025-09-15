@@ -10,11 +10,11 @@ const supabase = createClient(
 export async function GET(request: NextRequest) {
   try {
     const user = await requireAuth(request);
-    if (!user) {
+    if (!user || user.role !== 'admin') {
       return NextResponse.json({ 
         success: false,
         error: 'Unauthorized',
-        message: 'Authentication required'
+        message: 'Admin access required'
       }, { status: 401 });
     }
 

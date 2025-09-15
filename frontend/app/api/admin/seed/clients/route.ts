@@ -29,11 +29,11 @@ const seedClientsSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth(request);
-    if (!user) {
+    if (!user || user.role !== 'admin') {
       return NextResponse.json({ 
         success: false,
         error: 'Unauthorized',
-        message: 'Authentication required',
+        message: 'Admin access required',
         toast: {
           type: 'error',
           title: 'Authentication Failed',

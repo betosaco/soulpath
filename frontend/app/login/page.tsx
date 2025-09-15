@@ -39,10 +39,10 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const { data, error: signInError } = await signIn(email, password);
+      const { error: signInError } = await signIn(email, password);
       
       if (signInError) {
-        setError((signInError as any)?.message || 'Login failed');
+        setError((signInError as Error)?.message || 'Login failed');
         return;
       }
 

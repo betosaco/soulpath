@@ -166,7 +166,8 @@ export function ImageManagement() {
         }
       });
 
-      if (response.ok) {
+      const data = await response.json();
+      if (data.success) {
         setSuccess('Image deleted successfully');
         loadImages();
         setShowDeleteModal(false);
@@ -194,7 +195,8 @@ export function ImageManagement() {
         body: JSON.stringify(editFormData)
       });
 
-      if (response.ok) {
+      const data = await response.json();
+      if (data.success) {
         setSuccess('Image updated successfully');
         loadImages();
         setShowEditModal(false);

@@ -47,8 +47,8 @@ const supabase = createClient(
 export async function GET(request: NextRequest) {
   try {
     const user = await requireAuth(request);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const { data, error } = await supabase
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Error fetching email templates:', error);
-      return NextResponse.json({ error: 'Failed to fetch email templates' }, { status: 500 });
+      return NextResponse.json({ success: false, error: 'Failed to fetch email templates' }, { status: 500 });
     }
 
     // Transform the data to match the expected format
@@ -91,22 +91,22 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ templates: transformedData });
   } catch (error) {
     console.error('Unexpected error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }
 
 export async function PUT(request: NextRequest) {
   try {
     const user = await requireAuth(request);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
     const { templates } = body;
     
     if (!templates) {
-      return NextResponse.json({ error: 'Templates data is required' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'Templates data is required' }, { status: 400 });
     }
 
     // Convert the nested structure to flat rows for the email_templates table
@@ -136,7 +136,7 @@ export async function PUT(request: NextRequest) {
 
     if (deleteError) {
       console.error('Error deleting existing templates:', deleteError);
-      return NextResponse.json({ error: 'Failed to update email templates' }, { status: 500 });
+      return NextResponse.json({ success: false, error: 'Failed to update email templates' }, { status: 500 });
     }
 
     if (templateRows.length > 0) {
@@ -147,13 +147,13 @@ export async function PUT(request: NextRequest) {
 
       if (insertError) {
         console.error('Error inserting new templates:', insertError);
-        return NextResponse.json({ error: 'Failed to update email templates' }, { status: 500 });
+        return NextResponse.json({ success: false, error: 'Failed to update email templates' }, { status: 500 });
       }
     }
 
     return NextResponse.json({ success: true, message: 'Templates updated successfully' });
   } catch (error) {
     console.error('Unexpected error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

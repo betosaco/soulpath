@@ -10,13 +10,13 @@ export async function GET(request: NextRequest) {
     const user = await requireAuth(request);
     if (!user) {
       console.log('❌ Unauthorized access attempt');
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     // Check admin permissions
     if (user.role !== 'admin') {
       console.log('❌ Admin access required');
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+      return NextResponse.json({ success: false, error: 'Admin access required' }, { status: 403 });
     }
 
     console.log('✅ User authenticated:', user.email);
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('❌ Unexpected error in GET /api/admin/telegram-config:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json({ error: 'Internal server error', details: errorMessage }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Internal server error', details: errorMessage }, { status: 500 });
   }
 }
 
@@ -66,13 +66,13 @@ export async function POST(request: NextRequest) {
     const user = await requireAuth(request);
     if (!user) {
       console.log('❌ Unauthorized access attempt');
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     // Check admin permissions
     if (user.role !== 'admin') {
       console.log('❌ Admin access required');
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+      return NextResponse.json({ success: false, error: 'Admin access required' }, { status: 403 });
     }
 
     const body = await request.json();
@@ -97,15 +97,13 @@ export async function POST(request: NextRequest) {
           console.log('✅ Bot token validated successfully');
         } else {
           console.log('❌ Bot token validation failed:', testResult.message);
-          return NextResponse.json({ 
-            error: 'Invalid bot token', 
+          return NextResponse.json({ success: false, error: 'Invalid bot token', 
             details: testResult.message 
           }, { status: 400 });
         }
       } catch (error) {
         console.log('❌ Error validating bot token:', error);
-        return NextResponse.json({ 
-          error: 'Failed to validate bot token', 
+        return NextResponse.json({ success: false, error: 'Failed to validate bot token', 
           details: error instanceof Error ? error.message : 'Unknown error' 
         }, { status: 400 });
       }
@@ -160,8 +158,7 @@ export async function POST(request: NextRequest) {
 
       if (error) {
         console.error('❌ Error updating Telegram config:', error);
-        return NextResponse.json({ 
-          error: 'Failed to update configuration', 
+        return NextResponse.json({ success: false, error: 'Failed to update configuration', 
           details: error.message 
         }, { status: 500 });
       }
@@ -181,8 +178,7 @@ export async function POST(request: NextRequest) {
 
       if (error) {
         console.error('❌ Error creating Telegram config:', error);
-        return NextResponse.json({ 
-          error: 'Failed to create configuration', 
+        return NextResponse.json({ success: false, error: 'Failed to create configuration', 
           details: error.message 
         }, { status: 500 });
       }
@@ -200,8 +196,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('❌ Unexpected error in POST /api/admin/telegram-config:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json({ 
-      error: 'Internal server error', 
+    return NextResponse.json({ success: false, error: 'Internal server error', 
       details: errorMessage 
     }, { status: 500 });
   }
@@ -214,13 +209,13 @@ export async function DELETE(request: NextRequest) {
     const user = await requireAuth(request);
     if (!user) {
       console.log('❌ Unauthorized access attempt');
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     // Check admin permissions
     if (user.role !== 'admin') {
       console.log('❌ Admin access required');
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+      return NextResponse.json({ success: false, error: 'Admin access required' }, { status: 403 });
     }
 
     const supabase = createAdminClient();
@@ -250,8 +245,7 @@ export async function DELETE(request: NextRequest) {
 
     if (error) {
       console.error('❌ Error deleting Telegram config:', error);
-      return NextResponse.json({ 
-        error: 'Failed to delete configuration', 
+      return NextResponse.json({ success: false, error: 'Failed to delete configuration', 
         details: error.message 
       }, { status: 500 });
     }
@@ -265,8 +259,7 @@ export async function DELETE(request: NextRequest) {
   } catch (error) {
     console.error('❌ Unexpected error in DELETE /api/admin/telegram-config:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json({ 
-      error: 'Internal server error', 
+    return NextResponse.json({ success: false, error: 'Internal server error', 
       details: errorMessage 
     }, { status: 500 });
   }

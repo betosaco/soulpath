@@ -17,8 +17,7 @@ export async function PATCH(
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
     if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
+      return NextResponse.json({ success: false, error: 'Unauthorized' },
         { status: 401 }
       );
     }
@@ -31,8 +30,7 @@ export async function PATCH(
       .single();
 
     if (profile?.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Admin access required' },
+      return NextResponse.json({ success: false, error: 'Admin access required' },
         { status: 403 }
       );
     }
@@ -42,8 +40,7 @@ export async function PATCH(
     const { status } = body;
 
     if (!status) {
-      return NextResponse.json(
-        { error: 'Status is required' },
+      return NextResponse.json({ success: false, error: 'Status is required' },
         { status: 400 }
       );
     }
@@ -65,8 +62,7 @@ export async function PATCH(
 
     if (error) {
       console.error('Error updating bug report status:', error);
-      return NextResponse.json(
-        { error: 'Failed to update bug report status' },
+      return NextResponse.json({ success: false, error: 'Failed to update bug report status' },
         { status: 500 }
       );
     }
@@ -79,8 +75,7 @@ export async function PATCH(
 
   } catch (error) {
     console.error('Error in update bug status API:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
+    return NextResponse.json({ success: false, error: 'Internal server error' },
       { status: 500 }
     );
   }

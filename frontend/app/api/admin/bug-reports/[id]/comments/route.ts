@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth';
 import { createServerClient } from '@/lib/supabase/server';
 
 export async function POST(
@@ -6,14 +7,22 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    const user = await requireAuth(request);
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ 
+        success: false,
+        error: 'Unauthorized',
+        message: 'Admin access required'
+      }, { status: 401 });
+    }
+
     const supabase = await createServerClient();
     
     // Get the current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const { data: { user: supabaseUser }, error: authError } = await supabase.auth.getUser();
     
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
+    if (authError || !supabaseUser) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' },
         { status: 401 }
       );
     }
@@ -26,8 +35,7 @@ export async function POST(
       .single();
 
     if (profile?.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Admin access required' },
+      return NextResponse.json({ success: false, error: 'Admin access required' },
         { status: 403 }
       );
     }
@@ -37,8 +45,7 @@ export async function POST(
     const { content } = body;
 
     if (!content || !content.trim()) {
-      return NextResponse.json(
-        { error: 'Comment content is required' },
+      return NextResponse.json({ success: false, error: 'Comment content is required' },
         { status: 400 }
       );
     }
@@ -59,8 +66,7 @@ export async function POST(
 
     if (error) {
       console.error('Error inserting comment:', error);
-      return NextResponse.json(
-        { error: 'Failed to add comment' },
+      return NextResponse.json({ success: false, error: 'Failed to add comment' },
         { status: 500 }
       );
     }
@@ -73,8 +79,7 @@ export async function POST(
 
   } catch (error) {
     console.error('Error in add comment API:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
+    return NextResponse.json({ success: false, error: 'Internal server error' },
       { status: 500 }
     );
   }

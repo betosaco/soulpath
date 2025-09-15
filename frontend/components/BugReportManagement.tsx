@@ -112,8 +112,8 @@ export const BugReportManagement = forwardRef<BugReportManagementRef>((_, ref) =
         },
       });
 
-      if (response.ok) {
-        const data = await response.json();
+      const data = await response.json();
+      if (data.success) {
         setBugReports(data.bugReports || []);
       } else {
         toast.error('Failed to fetch bug reports');
@@ -149,7 +149,8 @@ export const BugReportManagement = forwardRef<BugReportManagementRef>((_, ref) =
         body: JSON.stringify({ status }),
       });
 
-      if (response.ok) {
+      const data = await response.json();
+      if (data.success) {
         toast.success('Bug status updated successfully');
         fetchBugReports();
       } else {
@@ -172,7 +173,8 @@ export const BugReportManagement = forwardRef<BugReportManagementRef>((_, ref) =
         body: JSON.stringify({ assigneeId }),
       });
 
-      if (response.ok) {
+      const data = await response.json();
+      if (data.success) {
         toast.success('Bug assignment updated successfully');
         fetchBugReports();
       } else {
@@ -197,7 +199,8 @@ export const BugReportManagement = forwardRef<BugReportManagementRef>((_, ref) =
         body: JSON.stringify({ content: newComment }),
       });
 
-      if (response.ok) {
+      const data = await response.json();
+      if (data.success) {
         toast.success('Comment added successfully');
         setNewComment('');
         setIsCommentModalOpen(false);
@@ -222,7 +225,8 @@ export const BugReportManagement = forwardRef<BugReportManagementRef>((_, ref) =
         },
       });
 
-      if (response.ok) {
+      const data = await response.json();
+      if (data.success) {
         toast.success('Bug report archived successfully');
         fetchBugReports();
       } else {

@@ -19,9 +19,9 @@ export async function GET(request: NextRequest) {
     console.log('🔍 Admin payment methods API called');
     const user = await requireAuth(request);
     console.log('🔍 Auth result:', user ? 'authenticated' : 'not authenticated');
-    if (!user) {
+    if (!user || user.role !== 'admin') {
       console.log('❌ User not authenticated');
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     // Ensure Prisma is connected before making queries
@@ -63,8 +63,7 @@ export async function GET(request: NextRequest) {
       stack: error instanceof Error ? error.stack : undefined,
       name: error instanceof Error ? error.name : undefined
     });
-    return NextResponse.json({ 
-      error: 'Internal server error',
+    return NextResponse.json({ success: false, error: 'Internal server error',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
@@ -74,8 +73,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth(request);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     // Get the request body
@@ -83,7 +82,7 @@ export async function POST(request: NextRequest) {
     
     // Validate required fields
     if (!body.name) {
-      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'Name is required' }, { status: 400 });
     }
 
     // Create new payment method using Prisma
@@ -108,7 +107,7 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Error in POST /api/admin/payment-methods:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -116,15 +115,15 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const user = await requireAuth(request);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
     const { id, name, type, description, icon, requiresConfirmation, autoAssignPackage, isActive, providerConfig } = body;
 
     if (!id) {
-      return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'ID is required' }, { status: 400 });
     }
 
     const updateData: PaymentMethodUpdateData = {};
@@ -151,7 +150,7 @@ export async function PUT(request: NextRequest) {
 
   } catch (error) {
     console.error('Error in PUT /api/admin/payment-methods:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -159,15 +158,15 @@ export async function PUT(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const user = await requireAuth(request);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'ID is required' }, { status: 400 });
     }
 
     await prisma.paymentMethodConfig.delete({
@@ -181,6 +180,6 @@ export async function DELETE(request: NextRequest) {
 
   } catch (error) {
     console.error('Error in DELETE /api/admin/payment-methods:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

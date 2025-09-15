@@ -589,8 +589,8 @@ export function EmailManagement() {
         }
       });
 
-      if (response.ok) {
-        const data = await response.json();
+      const data = await response.json();
+      if (data.success) {
         console.log('Email config loaded successfully:', data);
         setEmailConfig(data.config || emailConfig);
       } else {
@@ -617,8 +617,8 @@ export function EmailManagement() {
         }
       });
 
-      if (response.ok) {
-        const data = await response.json();
+      const data = await response.json();
+      if (data.success) {
         console.log('Email templates loaded successfully:', data);
 
         // Merge loaded templates with defaults, preferring loaded ones

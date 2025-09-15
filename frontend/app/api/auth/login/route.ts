@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as bcrypt from 'bcryptjs';
-import * as jwt from 'jsonwebtoken';
+import { SignJWT } from 'jose';
 import { prisma } from '@/lib/prisma';
 
 // JWT secret - should be in environment variables
@@ -123,15 +123,16 @@ export async function POST(request: NextRequest) {
     let token;
     try {
       console.log('🎫 Generating JWT token...');
-      token = jwt.sign(
-        { 
-          userId: user.id, 
-          email: user.email, 
-          role: user.role 
-        },
-        JWT_SECRET,
-        { expiresIn: '7d' }
-      );
+      const secret = new TextEncoder().encode(JWT_SECRET);
+      token = await new SignJWT({ 
+        userId: user.id, 
+        email: user.email, 
+        role: user.role 
+      })
+        .setProtectedHeader({ alg: 'HS256' })
+        .setExpirationTime('7d')
+        .setIssuedAt()
+        .sign(secret);
       console.log('🎫 JWT token generated successfully');
     } catch (jwtError) {
       console.error('❌ JWT generation failed:', jwtError);
@@ -146,12 +147,14 @@ export async function POST(request: NextRequest) {
     // Return user data and token
     return NextResponse.json({
       success: true,
-      user: {
-        id: user.id,
-        email: user.email,
-        fullName: user.fullName,
-        role: user.role,
-        access_token: token
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+          fullName: user.fullName,
+          role: user.role,
+          access_token: token
+        }
       },
       message: 'Login successful'
     });

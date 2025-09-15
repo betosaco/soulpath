@@ -179,6 +179,104 @@ export const scheduleFilterSchema = z.object({
   }).optional(),
 });
 
+// Package-related validation schemas
+export const packageDefinitionSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(255, 'Name too long'),
+  description: z.string().optional(),
+  sessionsCount: z.number().int().positive('Sessions count must be positive'),
+  sessionDurationId: z.number().int().positive('Session duration ID must be positive'),
+  packageType: z.string().min(1, 'Package type is required').max(20, 'Package type too long'),
+  maxGroupSize: z.number().int().positive('Max group size must be positive').optional(),
+  isActive: z.boolean().default(true),
+  isPopular: z.boolean().default(false),
+  displayOrder: z.number().int().default(0),
+  featured: z.boolean().default(false)
+});
+
+export const packageDefinitionCreateSchema = packageDefinitionSchema.extend({
+  initialPrices: z.array(z.object({
+    currencyId: z.number().int().positive('Currency ID must be positive'),
+    price: z.number().positive('Price must be positive'),
+    pricingMode: z.enum(['custom', 'calculated']).default('calculated'),
+    isActive: z.boolean().default(true)
+  })).optional()
+});
+
+export const packageDefinitionUpdateSchema = packageDefinitionSchema.partial().extend({
+  id: z.number().int().positive('Package definition ID must be positive')
+});
+
+export const packagePriceSchema = z.object({
+  packageDefinitionId: z.number().int().positive('Package definition ID must be positive'),
+  currencyId: z.number().int().positive('Currency ID must be positive'),
+  price: z.number().positive('Price must be positive'),
+  pricingMode: z.enum(['custom', 'calculated']).default('calculated'),
+  isActive: z.boolean().default(true)
+});
+
+export const packagePriceCreateSchema = packagePriceSchema;
+export const packagePriceUpdateSchema = packagePriceSchema.partial().extend({
+  id: z.number().int().positive('Package price ID must be positive')
+});
+
+export const sessionDurationSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(100, 'Name too long'),
+  duration_minutes: z.number().int().min(15, 'Duration must be at least 15 minutes').max(480, 'Duration cannot exceed 8 hours'),
+  description: z.string().optional(),
+  is_active: z.boolean().default(true)
+});
+
+export const sessionDurationCreateSchema = sessionDurationSchema;
+export const sessionDurationUpdateSchema = sessionDurationSchema.partial().extend({
+  id: z.number().int().positive('Session duration ID must be positive')
+});
+
+export const currencySchema = z.object({
+  code: z.string().length(3, 'Currency code must be 3 characters').toUpperCase(),
+  name: z.string().min(1, 'Currency name is required').max(100, 'Name too long'),
+  symbol: z.string().min(1, 'Currency symbol is required').max(10, 'Symbol too long'),
+  isDefault: z.boolean().default(false),
+  exchangeRate: z.number().positive('Exchange rate must be positive').default(1)
+});
+
+export const currencyCreateSchema = currencySchema;
+export const currencyUpdateSchema = currencySchema.partial().extend({
+  id: z.number().int().positive('Currency ID must be positive')
+});
+
+// Purchase validation schemas
+export const purchaseCreateSchema = z.object({
+  userId: z.string().cuid('Invalid user ID format'),
+  packages: z.array(z.object({
+    packagePriceId: z.number().int().positive('Package price ID must be positive'),
+    quantity: z.number().int().positive('Quantity must be positive').default(1)
+  })).min(1, 'At least one package must be specified'),
+  paymentMethod: z.string().min(1, 'Payment method is required'),
+  currencyCode: z.string().length(3, 'Currency code must be 3 characters'),
+  transactionId: z.string().optional(),
+  notes: z.string().optional()
+});
+
+export const purchaseUpdateSchema = z.object({
+  paymentStatus: z.enum(['pending', 'completed', 'failed', 'refunded']).optional(),
+  transactionId: z.string().optional(),
+  notes: z.string().optional(),
+  confirmedAt: z.string().datetime().optional()
+});
+
+// Common query parameter schemas
+export const commonQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  search: z.string().optional(),
+  sortBy: z.string().optional(),
+  sortOrder: z.enum(['asc', 'desc']).default('desc')
+});
+
+export const idParamSchema = z.object({
+  id: z.string().min(1, 'ID is required')
+});
+
 // Export types
 // Client type is now imported from @/lib/types
 export type ClientCreate = z.infer<typeof clientCreateSchema>;
@@ -222,3 +320,26 @@ export type AdminUserCreate = z.infer<typeof adminUserCreateSchema>;
 export type Pagination = z.infer<typeof paginationSchema>;
 export type ClientFilter = z.infer<typeof clientFilterSchema>;
 export type ScheduleFilter = z.infer<typeof scheduleFilterSchema>;
+
+// Package-related types
+export type PackageDefinition = z.infer<typeof packageDefinitionSchema>;
+export type PackageDefinitionCreate = z.infer<typeof packageDefinitionCreateSchema>;
+export type PackageDefinitionUpdate = z.infer<typeof packageDefinitionUpdateSchema>;
+
+export type PackagePrice = z.infer<typeof packagePriceSchema>;
+export type PackagePriceCreate = z.infer<typeof packagePriceCreateSchema>;
+export type PackagePriceUpdate = z.infer<typeof packagePriceUpdateSchema>;
+
+export type SessionDuration = z.infer<typeof sessionDurationSchema>;
+export type SessionDurationCreate = z.infer<typeof sessionDurationCreateSchema>;
+export type SessionDurationUpdate = z.infer<typeof sessionDurationUpdateSchema>;
+
+export type Currency = z.infer<typeof currencySchema>;
+export type CurrencyCreate = z.infer<typeof currencyCreateSchema>;
+export type CurrencyUpdate = z.infer<typeof currencyUpdateSchema>;
+
+export type PurchaseCreate = z.infer<typeof purchaseCreateSchema>;
+export type PurchaseUpdate = z.infer<typeof purchaseUpdateSchema>;
+
+export type CommonQuery = z.infer<typeof commonQuerySchema>;
+export type IdParam = z.infer<typeof idParamSchema>;

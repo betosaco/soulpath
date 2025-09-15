@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth';
 import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 
@@ -18,8 +19,17 @@ const seedContentSchema = z.object({
   content: z.record(z.string(), z.any())
 });
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
+    const user = await requireAuth(request);
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ 
+        success: false,
+        error: 'Unauthorized',
+        message: 'Admin access required'
+      }, { status: 401 });
+    }
+
     // Default content structure
     const defaultContent = {
       hero: {

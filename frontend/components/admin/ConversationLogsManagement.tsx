@@ -289,7 +289,7 @@ export default function ConversationLogsManagement() {
   //       },
   //     });
 
-  //     const data = await response.json();
+  //     const data = response.data;
   //     console.log('🔍 Health check response:', data);
       
   //     if (data.success) {
@@ -307,7 +307,7 @@ export default function ConversationLogsManagement() {
   //   try {
   //     console.log('🔍 Testing database...');
   //     const response = await fetch('/api/test/db');
-  //     const data = await response.json();
+  //     const data = response.data;
   //     console.log('🔍 Database test response:', data);
       
   //     if (data.success) {
@@ -356,7 +356,7 @@ export default function ConversationLogsManagement() {
   //       body: JSON.stringify({ email, password, fullName, role })
   //     });
 
-  //     const data = await response.json();
+  //     const data = response.data;
   //     console.log('🔍 User creation response:', data);
       
   //     if (data.success) {
@@ -374,7 +374,7 @@ export default function ConversationLogsManagement() {
   //   try {
   //     console.log('🔍 Testing Prisma client...');
   //     const response = await fetch('/api/test/prisma');
-  //     const data = await response.json();
+  //     const data = response.data;
   //     console.log('🔍 Prisma test response:', data);
       
   //     if (data.success) {

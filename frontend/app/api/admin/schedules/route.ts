@@ -31,11 +31,11 @@ const scheduleUpdateSchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     const user = await requireAuth(request);
-    if (!user) {
+    if (!user || user.role !== 'admin') {
       return NextResponse.json({
         success: false,
         error: 'Unauthorized',
-        message: 'Authentication required',
+        message: 'Admin access required',
         toast: {
           type: 'error',
           title: 'Authentication Failed',
@@ -111,11 +111,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth(request);
-    if (!user) {
+    if (!user || user.role !== 'admin') {
       return NextResponse.json({
         success: false,
         error: 'Unauthorized',
-        message: 'Authentication required',
+        message: 'Admin access required',
         toast: {
           type: 'error',
           title: 'Authentication Failed',
@@ -225,11 +225,11 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const user = await requireAuth(request);
-    if (!user) {
+    if (!user || user.role !== 'admin') {
       return NextResponse.json({
         success: false,
         error: 'Unauthorized',
-        message: 'Authentication required',
+        message: 'Admin access required',
         toast: {
           type: 'error',
           title: 'Authentication Failed',
@@ -352,11 +352,11 @@ export async function PUT(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const user = await requireAuth(request);
-    if (!user) {
+    if (!user || user.role !== 'admin') {
       return NextResponse.json({
         success: false,
         error: 'Unauthorized',
-        message: 'Authentication required',
+        message: 'Admin access required',
         toast: {
           type: 'error',
           title: 'Authentication Failed',

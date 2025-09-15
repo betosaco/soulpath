@@ -121,8 +121,8 @@ export function ExternalAPIManagement() {
         },
       });
 
-      if (response.ok) {
-        const data = await response.json();
+      const data = await response.json();
+      if (data.success) {
         setConfigs(data.data || []);
       }
     } catch (error) {
@@ -169,7 +169,8 @@ export function ExternalAPIManagement() {
         body: JSON.stringify(action ? { action, data: payload } : payload),
       });
 
-      if (response.ok) {
+      const data = await response.json();
+      if (data.success) {
         await loadConfigs();
         setShowForm(false);
         setEditingConfig(null);
@@ -215,7 +216,8 @@ export function ExternalAPIManagement() {
         },
       });
 
-      if (response.ok) {
+      const data = await response.json();
+      if (data.success) {
         await loadConfigs();
       }
     } catch (error) {

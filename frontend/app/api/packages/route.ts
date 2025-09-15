@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
             id: true,
             price: true,
             pricingMode: true,
+            isActive: true,
             currency: {
               select: {
                 id: true,
@@ -81,7 +82,13 @@ export async function GET(request: NextRequest) {
           name: pkg.name,
           description: pkg.description || '',
           sessionsCount: pkg.sessionsCount,
-          isActive: true
+          isActive: true,
+          packageType: pkg.packageType,
+          maxGroupSize: pkg.maxGroupSize,
+          isPopular: pkg.isPopular,
+          featured: pkg.featured,
+          displayOrder: pkg.displayOrder,
+          sessionDuration: pkg.sessionDuration
         },
         currency: {
           id: price.currency.id,
@@ -89,11 +96,8 @@ export async function GET(request: NextRequest) {
           symbol: price.currency.symbol,
           name: price.currency.name
         },
-        sessionDuration: pkg.sessionDuration,
-        packageType: pkg.packageType,
-        maxGroupSize: pkg.maxGroupSize,
-        isPopular: pkg.isPopular,
-        featured: pkg.featured
+        pricingMode: price.pricingMode,
+        isActive: price.isActive
       };
     }).filter(Boolean); // Remove null entries
 

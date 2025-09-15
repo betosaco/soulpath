@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth';
 import { z } from 'zod';
 
 const testConfigSchema = z.object({
@@ -8,6 +9,15 @@ const testConfigSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await requireAuth(request);
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ 
+        success: false,
+        error: 'Unauthorized',
+        message: 'Admin access required'
+      }, { status: 401 });
+    }
+
     const body = await request.json();
     const { username, tokenApi } = testConfigSchema.parse(body);
 
@@ -36,14 +46,12 @@ export async function POST(request: NextRequest) {
     console.error('Test SMS config error:', error);
     
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid request data', details: error.issues },
+      return NextResponse.json({ success: false, error: 'Invalid request data', details: error.issues },
         { status: 400 }
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to test SMS configuration' },
+    return NextResponse.json({ success: false, error: 'Failed to test SMS configuration' },
       { status: 500 }
     );
   }

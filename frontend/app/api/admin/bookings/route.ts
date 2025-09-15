@@ -508,8 +508,8 @@ export async function POST(request: NextRequest) {
           birthTime: targetUser.birthTime?.toString().substring(0, 5) || '',
           birthPlace: targetUser.birthPlace || '',
           clientQuestion: notes || 'No specific question provided',
-          bookingDate: completeBooking.scheduleSlot.scheduleTemplate.dayOfWeek,
-          bookingTime: completeBooking.scheduleSlot.startTime,
+          bookingDate: completeBooking.scheduleSlot?.scheduleTemplate?.dayOfWeek || 'N/A',
+          bookingTime: completeBooking.scheduleSlot?.startTime || 'N/A',
           sessionType: sessionType
         };
 

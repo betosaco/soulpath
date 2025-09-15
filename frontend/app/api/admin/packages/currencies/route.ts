@@ -2,28 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { 
+  currencyCreateSchema, 
+  currencyUpdateSchema,
+  commonQuerySchema 
+} from '@/lib/validations';
 
-// Zod schemas for session duration validation
-const createSessionDurationSchema = z.object({
-  name: z.string().min(1, 'Name is required').max(100, 'Name too long'),
-  duration_minutes: z.number().int().min(15, 'Duration must be at least 15 minutes').max(480, 'Duration cannot exceed 8 hours'),
-  description: z.string().optional(),
-  is_active: z.boolean().default(true)
-});
-
-const updateSessionDurationSchema = createSessionDurationSchema.partial().extend({
-  id: z.number().int().positive('Session duration ID must be positive')
-});
-
-const querySchema = z.object({
-  is_active: z.enum(['true', 'false']).optional(),
-  page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(20)
+const querySchema = commonQuerySchema.extend({
+  isDefault: z.enum(['true', 'false']).optional()
 });
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔍 GET /api/admin/session-durations - Starting request...');
+    console.log('🔍 GET /api/admin/packages/currencies - Starting request...');
     
     const user = await requireAuth(request);
     if (!user || user.role !== 'admin') {
@@ -49,34 +40,37 @@ export async function GET(request: NextRequest) {
       }, { status: 400 });
     }
 
-    const { is_active, page, limit } = validation.data;
+    const { isDefault, page, limit } = validation.data;
     const offset = (page - 1) * limit;
 
-    console.log('🔍 Query parameters:', { is_active, page, limit });
+    console.log('🔍 Query parameters:', { isDefault, page, limit });
 
     // Build the query
-    const where: Record<string, unknown> = {};
-    if (is_active !== undefined) where.is_active = is_active === 'true';
+    const where: { is_default?: boolean } = {};
+    if (isDefault !== undefined) where.is_default = isDefault === 'true';
 
     console.log('🔍 Executing database query...');
     
-    const [sessionDurations, totalCount] = await Promise.all([
-      prisma.sessionDuration.findMany({
+    const [currencies, totalCount] = await Promise.all([
+      prisma.currency.findMany({
         where,
         skip: offset,
         take: limit,
-        orderBy: { duration_minutes: 'asc' }
+        orderBy: [
+          { is_default: 'desc' },
+          { code: 'asc' }
+        ]
       }),
-      prisma.sessionDuration.count({ where })
+      prisma.currency.count({ where })
     ]);
 
-    console.log('✅ Database query successful, found', sessionDurations.length, 'session durations');
+    console.log('✅ Database query successful, found', currencies.length, 'currencies');
 
     const totalPages = Math.ceil(totalCount / limit);
 
     return NextResponse.json({
       success: true,
-      data: sessionDurations,
+      data: currencies,
       pagination: {
         page,
         limit,
@@ -86,7 +80,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('❌ Unexpected error in session-durations API:', error);
+    console.error('❌ Unexpected error in currencies API:', error);
     return NextResponse.json({ 
       success: false,
       error: 'Internal server error',
@@ -110,49 +104,57 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const validation = createSessionDurationSchema.safeParse(body);
+    const validation = createCurrencySchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json({
         success: false,
         error: 'Validation failed',
-        message: 'Invalid session duration data',
+        message: 'Invalid currency data',
         details: validation.error.issues
       }, { status: 400 });
     }
 
-    const durationData = validation.data;
+    const currencyData = validation.data;
 
-    // Check if session duration with same name already exists
-    const existingDuration = await prisma.sessionDuration.findFirst({
-      where: { name: durationData.name }
+    // Check if currency with same code already exists
+    const existingCurrency = await prisma.currency.findUnique({
+      where: { code: currencyData.code }
     });
 
-    if (existingDuration) {
+    if (existingCurrency) {
       return NextResponse.json({
         success: false,
-        error: 'Session duration already exists',
-        message: 'A session duration with this name already exists'
+        error: 'Currency already exists',
+        message: 'A currency with this code already exists'
       }, { status: 409 });
     }
 
-    // Create the session duration
-    const newSessionDuration = await prisma.sessionDuration.create({
-      data: durationData
+    // If this is being set as default, unset other defaults
+    if (currencyData.isDefault) {
+      await prisma.currency.updateMany({
+        where: { is_default: true },
+        data: { is_default: false }
+      });
+    }
+
+    // Create the currency
+    const newCurrency = await prisma.currency.create({
+      data: currencyData
     });
 
     return NextResponse.json({
       success: true,
-      message: 'Session duration created successfully',
-      data: newSessionDuration
+      message: 'Currency created successfully',
+      data: newCurrency
     }, { status: 201 });
 
   } catch (error) {
-    console.error('❌ Error creating session duration:', error);
+    console.error('❌ Error creating currency:', error);
     return NextResponse.json({ 
       success: false,
       error: 'Internal server error',
-      message: 'Failed to create session duration',
+      message: 'Failed to create currency',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   } finally {
@@ -172,68 +174,79 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const validation = updateSessionDurationSchema.safeParse(body);
+    const validation = updateCurrencySchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json({
         success: false,
         error: 'Validation failed',
-        message: 'Invalid session duration update data',
+        message: 'Invalid currency update data',
         details: validation.error.issues
       }, { status: 400 });
     }
 
     const { id, ...updateData } = validation.data;
 
-    // Check if session duration exists
-    const existingDuration = await prisma.sessionDuration.findUnique({
+    // Check if currency exists
+    const existingCurrency = await prisma.currency.findUnique({
       where: { id }
     });
 
-    if (!existingDuration) {
+    if (!existingCurrency) {
       return NextResponse.json({
         success: false,
-        error: 'Session duration not found',
-        message: 'Session duration with this ID does not exist'
+        error: 'Currency not found',
+        message: 'Currency with this ID does not exist'
       }, { status: 404 });
     }
 
-    // Check for name conflicts if name is being updated
-    if (updateData.name && updateData.name !== existingDuration.name) {
-      const nameConflict = await prisma.sessionDuration.findFirst({
+    // Check for code conflicts if code is being updated
+    if (updateData.code && updateData.code !== existingCurrency.code) {
+      const codeConflict = await prisma.currency.findFirst({
         where: { 
-          name: updateData.name,
+          code: updateData.code,
           id: { not: id }
         }
       });
 
-      if (nameConflict) {
+      if (codeConflict) {
         return NextResponse.json({
           success: false,
-          error: 'Name conflict',
-          message: 'A session duration with this name already exists'
+          error: 'Code conflict',
+          message: 'A currency with this code already exists'
         }, { status: 409 });
       }
     }
 
-    // Update the session duration
-    const updatedSessionDuration = await prisma.sessionDuration.update({
+    // If this is being set as default, unset other defaults
+    if (updateData.isDefault) {
+      await prisma.currency.updateMany({
+        where: {
+          is_default: true,
+          id: { not: id }
+        },
+        data: { is_default: false }
+      });
+    }
+
+    // Update the currency
+    const updatedCurrency = await prisma.currency.update({
       where: { id },
       data: updateData
     });
 
     return NextResponse.json({
       success: true,
-      message: 'Session duration updated successfully',
-      data: updatedSessionDuration
+      message: 'Currency updated successfully',
+      data: updatedCurrency
     });
 
   } catch (error) {
-    console.error('❌ Error updating session duration:', error);
+    console.error('❌ Error updating currency:', error);
     return NextResponse.json({ 
       success: false,
       error: 'Internal server error',
-      message: 'Failed to update session duration',
+      message: 'Failed to update currency',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   } finally {
@@ -253,68 +266,77 @@ export async function DELETE(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const durationId = searchParams.get('id');
+    const currencyId = searchParams.get('id');
 
-    if (!durationId) {
+    if (!currencyId) {
       return NextResponse.json({
         success: false,
         error: 'Missing ID',
-        message: 'Session duration ID is required'
+        message: 'Currency ID is required'
       }, { status: 400 });
     }
 
-    const id = parseInt(durationId);
+    const id = parseInt(currencyId);
     if (isNaN(id)) {
       return NextResponse.json({
         success: false,
         error: 'Invalid ID',
-        message: 'Session duration ID must be a number'
+        message: 'Currency ID must be a number'
       }, { status: 400 });
     }
 
-    // Check if session duration exists and has no active schedule templates
-    const existingDuration = await prisma.sessionDuration.findUnique({
+    // Check if currency exists and has no active package prices
+    const existingCurrency = await prisma.currency.findUnique({
       where: { id },
       include: {
-        scheduleTemplates: {
-          where: { isAvailable: true }
+        packagePrices: {
+          where: { isActive: true }
         }
       }
     });
 
-    if (!existingDuration) {
+    if (!existingCurrency) {
       return NextResponse.json({
         success: false,
-        error: 'Session duration not found',
-        message: 'Session duration with this ID does not exist'
+        error: 'Currency not found',
+        message: 'Currency with this ID does not exist'
       }, { status: 404 });
     }
 
-    // Check if there are active schedule templates using this duration
-    if (existingDuration.scheduleTemplates.length > 0) {
+    // Check if there are active package prices using this currency
+    if (existingCurrency.packagePrices.length > 0) {
       return NextResponse.json({
         success: false,
-        error: 'Cannot delete session duration',
-        message: 'Session duration is being used by active schedule templates and cannot be deleted'
+        error: 'Cannot delete currency',
+        message: 'Currency is being used by active package prices and cannot be deleted'
       }, { status: 400 });
     }
 
-    // Delete the session duration
-    await prisma.sessionDuration.delete({
+    // Don't allow deletion of default currency
+    if (existingCurrency.is_default) {
+      return NextResponse.json({
+        success: false,
+        error: 'Cannot delete default currency',
+        message: 'Default currency cannot be deleted'
+      }, { status: 400 });
+    }
+
+    // Delete the currency
+    await prisma.currency.delete({
       where: { id }
     });
 
     return NextResponse.json({
       success: true,
-      message: 'Session duration deleted successfully'
+      message: 'Currency deleted successfully'
     });
 
   } catch (error) {
-    console.error('❌ Error deleting session duration:', error);
+    console.error('❌ Error deleting currency:', error);
     return NextResponse.json({ 
       success: false,
       error: 'Internal server error',
-      message: 'Failed to delete session duration',
+      message: 'Failed to delete currency',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   } finally {

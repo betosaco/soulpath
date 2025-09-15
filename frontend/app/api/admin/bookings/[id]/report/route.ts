@@ -8,8 +8,8 @@ export async function POST(
 ) {
   try {
     const user = await requireAuth(request);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const supabase = await createServerClient();
@@ -22,7 +22,7 @@ export async function POST(
       .single();
 
     if (bookingError || !booking) {
-      return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
+      return NextResponse.json({ success: false, error: 'Booking not found' }, { status: 404 });
     }
 
     // Parse form data
@@ -31,18 +31,18 @@ export async function POST(
     const notes = formData.get('notes') as string;
 
     if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'No file provided' }, { status: 400 });
     }
 
     // Validate file type
     const allowedTypes = ['application/pdf', 'text/plain', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
     if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json({ error: 'Invalid file type. Only PDF, DOC, DOCX, and TXT files are allowed.' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'Invalid file type. Only PDF, DOC, DOCX, and TXT files are allowed.' }, { status: 400 });
     }
 
     // Validate file size (5MB limit)
     if (file.size > 5 * 1024 * 1024) {
-      return NextResponse.json({ error: 'File size too large. Maximum size is 5MB.' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'File size too large. Maximum size is 5MB.' }, { status: 400 });
     }
 
     // Generate unique filename
@@ -59,7 +59,7 @@ export async function POST(
 
     if (uploadError) {
       console.error('Error uploading file:', uploadError);
-      return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
+      return NextResponse.json({ success: false, error: 'Failed to upload file' }, { status: 500 });
     }
 
     // Get public URL
@@ -85,7 +85,7 @@ export async function POST(
 
     if (reportError) {
       console.error('Error creating report record:', reportError);
-      return NextResponse.json({ error: 'Failed to create report record' }, { status: 500 });
+      return NextResponse.json({ success: false, error: 'Failed to create report record' }, { status: 500 });
     }
 
     // Update booking status if needed
@@ -108,6 +108,6 @@ export async function POST(
 
   } catch (error) {
     console.error('Error in POST /api/admin/bookings/[id]/report:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

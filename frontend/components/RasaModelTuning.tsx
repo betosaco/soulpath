@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { adminApi } from '@/lib/api/admin';
 import {
   Settings,
   Play,
@@ -133,7 +134,7 @@ export function RasaModelTuning() {
   const loadCurrentConfig = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/rasa?action=model-info');
-      const data = await response.json();
+      const data = response.data;
       if (data.success && data.data.currentModel) {
         // This would need to be implemented to fetch actual config
         setConfig(predefinedConfigs.balanced.config);

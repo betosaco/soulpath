@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
@@ -19,8 +20,17 @@ const adminUserSchema = z.object({
   adminNotes: z.string().optional()
 });
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
+    const user = await requireAuth(request);
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ 
+        success: false,
+        error: 'Unauthorized',
+        message: 'Admin access required'
+      }, { status: 401 });
+    }
+
     // Validate admin user data
     const adminData = {
       email: 'admin@soulpath.lat',
@@ -61,7 +71,7 @@ export async function POST() {
     const hashedPassword = await bcrypt.hash(adminData.password, 12);
 
     // Create admin user using Prisma
-    const user = await prisma.user.create({
+    const newUser = await prisma.user.create({
       data: {
         email: adminData.email,
         password: hashedPassword,
@@ -78,16 +88,16 @@ export async function POST() {
       }
     });
 
-    console.log('✅ Admin user created successfully:', user.email);
+    console.log('✅ Admin user created successfully:', newUser.email);
 
     return NextResponse.json({
       success: true,
       message: 'Admin user created successfully',
       user: {
-        id: user.id,
-        email: user.email,
-        fullName: user.fullName,
-        role: user.role
+        id: newUser.id,
+        email: newUser.email,
+        fullName: newUser.fullName,
+        role: newUser.role
       },
       toast: {
         type: 'success',

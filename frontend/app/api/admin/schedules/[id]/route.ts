@@ -13,8 +13,8 @@ export async function PUT(
 ) {
   try {
     const user = await requireAuth(request);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const { id } = params;
@@ -32,7 +32,7 @@ export async function PUT(
 
     if (error) {
       console.error('Error updating schedule:', error);
-      return NextResponse.json({ error: 'Failed to update schedule' }, { status: 500 });
+      return NextResponse.json({ success: false, error: 'Failed to update schedule' }, { status: 500 });
     }
 
     return NextResponse.json({ 
@@ -43,7 +43,7 @@ export async function PUT(
 
   } catch (error) {
     console.error('Unexpected error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -53,8 +53,8 @@ export async function DELETE(
 ) {
   try {
     const user = await requireAuth(request);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const { id } = params;
@@ -66,7 +66,7 @@ export async function DELETE(
 
     if (error) {
       console.error('Error deleting schedule:', error);
-      return NextResponse.json({ error: 'Failed to delete schedule' }, { status: 500 });
+      return NextResponse.json({ success: false, error: 'Failed to delete schedule' }, { status: 500 });
     }
 
     return NextResponse.json({ 
@@ -76,6 +76,6 @@ export async function DELETE(
 
   } catch (error) {
     console.error('Unexpected error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -190,9 +190,9 @@ const PaymentRecordsManagement: React.FC = () => {
         }
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        setUsers(result.data || []);
+      const data = await response.json();
+      if (data.success) {
+        setUsers(data.data || []);
       }
     } catch (error) {
       console.error('Error fetching users:', error);

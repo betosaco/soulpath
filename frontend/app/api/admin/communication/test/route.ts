@@ -30,9 +30,9 @@ export async function POST(request: NextRequest) {
     console.log('🔍 POST /api/admin/communication/test - Starting request...');
     
     const user = await requireAuth(request);
-    if (!user) {
+    if (!user || user.role !== 'admin') {
       console.log('❌ Unauthorized access attempt');
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     console.log('✅ User authenticated:', user.email);
@@ -44,15 +44,14 @@ export async function POST(request: NextRequest) {
     } else if (type === 'sms') {
       return await testSms(request, body);
     } else {
-      return NextResponse.json({
-        error: 'Invalid test type',
+      return NextResponse.json({ success: false, error: 'Invalid test type',
         message: 'Type must be either "email" or "sms"'
       }, { status: 400 });
     }
   } catch (error) {
     console.error('❌ Unexpected error in POST /api/admin/communication/test:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json({ error: 'Internal server error', details: errorMessage }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Internal server error', details: errorMessage }, { status: 500 });
   }
 }
 
@@ -61,8 +60,7 @@ async function testEmail(_request: NextRequest, body: TestEmailData) {
     // Validate request body
     const validation = testEmailSchema.safeParse(body);
     if (!validation.success) {
-      return NextResponse.json({
-        error: 'Validation failed',
+      return NextResponse.json({ success: false, error: 'Validation failed',
         details: validation.error.issues
       }, { status: 400 });
     }
@@ -77,8 +75,7 @@ async function testEmail(_request: NextRequest, body: TestEmailData) {
       .single();
 
     if (configError || !config?.brevo_api_key) {
-      return NextResponse.json({
-        error: 'Email configuration not found',
+      return NextResponse.json({ success: false, error: 'Email configuration not found',
         message: 'Please configure your Brevo API key first'
       }, { status: 400 });
     }
@@ -106,8 +103,7 @@ async function testEmail(_request: NextRequest, body: TestEmailData) {
     if (!response.ok) {
       const errorData = await response.json();
       console.error('Brevo API error:', errorData);
-      return NextResponse.json({
-        error: 'Failed to send test email',
+      return NextResponse.json({ success: false, error: 'Failed to send test email',
         details: errorData.message || 'Unknown error from Brevo API'
       }, { status: 500 });
     }
@@ -122,8 +118,7 @@ async function testEmail(_request: NextRequest, body: TestEmailData) {
     });
   } catch (error) {
     console.error('❌ Error sending test email:', error);
-    return NextResponse.json({
-      error: 'Failed to send test email',
+    return NextResponse.json({ success: false, error: 'Failed to send test email',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
@@ -134,8 +129,7 @@ async function testSms(_request: NextRequest, body: TestSmsData) {
     // Validate request body
     const validation = testSmsSchema.safeParse(body);
     if (!validation.success) {
-      return NextResponse.json({
-        error: 'Validation failed',
+      return NextResponse.json({ success: false, error: 'Validation failed',
         details: validation.error.issues
       }, { status: 400 });
     }
@@ -150,8 +144,7 @@ async function testSms(_request: NextRequest, body: TestSmsData) {
       .single();
 
     if (configError || !config?.labsmobile_username || !config?.labsmobile_token) {
-      return NextResponse.json({
-        error: 'SMS configuration not found',
+      return NextResponse.json({ success: false, error: 'SMS configuration not found',
         message: 'Please configure your Labsmobile credentials first'
       }, { status: 400 });
     }
@@ -177,8 +170,7 @@ async function testSms(_request: NextRequest, body: TestSmsData) {
     if (!response.ok) {
       const errorData = await response.json();
       console.error('Labsmobile API error:', errorData);
-      return NextResponse.json({
-        error: 'Failed to send test SMS',
+      return NextResponse.json({ success: false, error: 'Failed to send test SMS',
         details: errorData.message || 'Unknown error from Labsmobile API'
       }, { status: 500 });
     }
@@ -193,8 +185,7 @@ async function testSms(_request: NextRequest, body: TestSmsData) {
     });
   } catch (error) {
     console.error('❌ Error sending test SMS:', error);
-    return NextResponse.json({
-      error: 'Failed to send test SMS',
+    return NextResponse.json({ success: false, error: 'Failed to send test SMS',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }

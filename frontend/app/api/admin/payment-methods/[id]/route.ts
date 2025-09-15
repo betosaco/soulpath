@@ -13,7 +13,7 @@ export async function GET(
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     // Check if user is admin
@@ -24,7 +24,7 @@ export async function GET(
       .single();
 
     if (adminError || adminCheck?.status !== 'active') {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+      return NextResponse.json({ success: false, error: 'Admin access required' }, { status: 403 });
     }
 
     const { data: paymentMethod, error } = await supabase
@@ -43,11 +43,11 @@ export async function GET(
 
     if (error) {
       console.error('Error fetching payment method:', error);
-      return NextResponse.json({ error: 'Failed to fetch payment method' }, { status: 500 });
+      return NextResponse.json({ success: false, error: 'Failed to fetch payment method' }, { status: 500 });
     }
 
     if (!paymentMethod) {
-      return NextResponse.json({ error: 'Payment method not found' }, { status: 404 });
+      return NextResponse.json({ success: false, error: 'Payment method not found' }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -57,7 +57,7 @@ export async function GET(
 
   } catch (error) {
     console.error('Error in GET /api/admin/payment-methods/[id]:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -68,8 +68,8 @@ export async function PUT(
 ) {
   try {
     const user = await requireAuth(request);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const supabase = await createServerClient();
@@ -78,8 +78,7 @@ export async function PUT(
     const { name, description, is_active, currency_id } = body;
 
     if (!name || !currency_id) {
-      return NextResponse.json(
-        { error: 'Name and currency are required' },
+      return NextResponse.json({ success: false, error: 'Name and currency are required' },
         { status: 400 }
       );
     }
@@ -108,8 +107,7 @@ export async function PUT(
 
     if (error) {
       console.error('Error updating payment method:', error);
-      return NextResponse.json(
-        { error: 'Failed to update payment method' },
+      return NextResponse.json({ success: false, error: 'Failed to update payment method' },
         { status: 500 }
       );
     }
@@ -121,8 +119,7 @@ export async function PUT(
     });
   } catch (error) {
     console.error('Error in payment methods PUT:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
+    return NextResponse.json({ success: false, error: 'Internal server error' },
       { status: 500 }
     );
   }
@@ -139,7 +136,7 @@ export async function DELETE(
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     // Check if user is admin
@@ -150,7 +147,7 @@ export async function DELETE(
       .single();
 
     if (adminError || adminCheck?.status !== 'active') {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+      return NextResponse.json({ success: false, error: 'Admin access required' }, { status: 403 });
     }
 
     // Check if payment method is being used
@@ -162,15 +159,13 @@ export async function DELETE(
 
     if (usageError) {
       console.error('Error checking payment method usage:', usageError);
-      return NextResponse.json(
-        { error: 'Failed to check payment method usage' },
+      return NextResponse.json({ success: false, error: 'Failed to check payment method usage' },
         { status: 500 }
       );
     }
 
     if (usageData && usageData.length > 0) {
-      return NextResponse.json(
-        { error: 'Cannot delete payment method that is being used' },
+      return NextResponse.json({ success: false, error: 'Cannot delete payment method that is being used' },
         { status: 400 }
       );
     }
@@ -182,8 +177,7 @@ export async function DELETE(
 
     if (error) {
       console.error('Error deleting payment method:', error);
-      return NextResponse.json(
-        { error: 'Failed to delete payment method' },
+      return NextResponse.json({ success: false, error: 'Failed to delete payment method' },
         { status: 500 }
       );
     }
@@ -191,8 +185,7 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error in payment methods DELETE:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
+    return NextResponse.json({ success: false, error: 'Internal server error' },
       { status: 500 }
     );
   }

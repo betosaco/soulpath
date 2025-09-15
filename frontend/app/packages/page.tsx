@@ -2,32 +2,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Package, CheckCircle, ArrowRight, ArrowLeft, Clock, Users, Star } from 'lucide-react';
+import { Package, CheckCircle, ArrowRight, ArrowLeft, Clock, Users, Star, Loader2, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { IzipayPaymentMethod } from '@/components/izipay/IzipayPaymentMethod';
 import { Header } from '@/components/Header';
 import { useTranslations, useLanguage } from '@/hooks/useTranslations';
+import { usePackages, PackagePrice } from '@/hooks/usePackages';
 import { toast } from 'sonner';
 
-interface PackagePrice {
-  id: number;
-  price: number;
-  packageDefinition: {
-    id: number;
-    name: string;
-    description: string;
-    sessionsCount: number;
-    isActive: boolean;
-  };
-  currency: {
-    id: number;
-    code: string;
-    symbol: string;
-    name: string;
-  };
-}
+// PackagePrice interface is now imported from usePackages hook
 
 interface ScheduleSlot {
   id: number;
@@ -59,93 +44,8 @@ interface BookingFormData {
 }
 
 export default function PackagesPage() {
-  const [packages] = useState<PackagePrice[]>([
-    {
-      id: 1,
-      price: 900,
-      packageDefinition: {
-        id: 1,
-        name: "01 MATPASS",
-        description: "All classes are 60 minutes",
-        sessionsCount: 1,
-        isActive: true
-      },
-      currency: {
-        id: 2,
-        code: "PEN",
-        symbol: "S/",
-        name: "Peruvian Sol"
-      }
-    },
-    {
-      id: 2,
-      price: 320,
-      packageDefinition: {
-        id: 2,
-        name: "04 MATPASS",
-        description: "All classes are 60 minutes",
-        sessionsCount: 4,
-        isActive: true
-      },
-      currency: {
-        id: 2,
-        code: "PEN",
-        symbol: "S/",
-        name: "Peruvian Sol"
-      }
-    },
-    {
-      id: 3,
-      price: 400,
-      packageDefinition: {
-        id: 3,
-        name: "08 MATPASS",
-        description: "All classes are 60 minutes",
-        sessionsCount: 8,
-        isActive: true
-      },
-      currency: {
-        id: 2,
-        code: "PEN",
-        symbol: "S/",
-        name: "Peruvian Sol"
-      }
-    },
-    {
-      id: 4,
-      price: 210,
-      packageDefinition: {
-        id: 4,
-        name: "12 MATPASS",
-        description: "All classes are 60 minutes",
-        sessionsCount: 12,
-        isActive: true
-      },
-      currency: {
-        id: 2,
-        code: "PEN",
-        symbol: "S/",
-        name: "Peruvian Sol"
-      }
-    },
-    {
-      id: 5,
-      price: 50,
-      packageDefinition: {
-        id: 5,
-        name: "24 MATPASS",
-        description: "All classes are 60 minutes",
-        sessionsCount: 24,
-        isActive: true
-      },
-      currency: {
-        id: 2,
-        code: "PEN",
-        symbol: "S/",
-        name: "Peruvian Sol"
-      }
-    }
-  ]);
+  // Fetch packages from database
+  const { packages, loading, error, refetch } = usePackages('PEN');
   const [scheduleSlots, setScheduleSlots] = useState<ScheduleSlot[]>([
     {
       id: 1,
@@ -196,7 +96,6 @@ export default function PackagesPage() {
       instructorName: 'Emma Wilson'
     }
   ]);
-  const [loading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
@@ -411,35 +310,6 @@ export default function PackagesPage() {
   // Debug logging
   console.log('🔍 Packages page render - loading:', loading, 'packages count:', packages.length);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-white" style={{ overflow: 'auto' }}>
-        <Header
-          language={language}
-          setLanguage={setLanguage}
-          scrollToSection={scrollToSection}
-          t={translations}
-          isMenuOpen={isMenuOpen}
-          setIsMenuOpen={setIsMenuOpen}
-          onLoginClick={handleLoginClick}
-          user={null}
-          isAdmin={false}
-        />
-        <div className="flex items-center justify-center pt-24">
-          <div className="text-center">
-            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p 
-              className="text-primary text-lg font-semibold"
-              style={{ fontFamily: 'var(--font-heading)' }}
-            >
-              Loading packages...
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-white packages-page inner-page mobile-scrollable">
       <Header
@@ -515,14 +385,31 @@ export default function PackagesPage() {
               exit={{ opacity: 0, x: -20 }}
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             >
-              {packages.length === 0 ? (
+              {loading ? (
                 <div className="col-span-full text-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+                  <p className="text-muted text-lg">Loading packages...</p>
+                </div>
+              ) : error ? (
+                <div className="col-span-full text-center py-12">
+                  <AlertCircle className="w-8 h-8 mx-auto mb-4 text-red-500" />
+                  <p className="text-red-600 text-lg mb-4">Error loading packages: {error}</p>
+                  <button 
+                    onClick={refetch} 
+                    className="btn-primary"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              ) : packages.length === 0 ? (
+                <div className="col-span-full text-center py-12">
+                  <Package className="w-8 h-8 mx-auto mb-4 text-muted" />
                   <p className="text-muted text-lg">No packages available at the moment.</p>
                   <button 
-                    onClick={() => window.location.reload()} 
+                    onClick={refetch} 
                     className="btn-primary mt-4"
                   >
-                    Refresh Page
+                    Refresh
                   </button>
                 </div>
               ) : (
@@ -559,7 +446,7 @@ export default function PackagesPage() {
                       </div>
                       <div className="flex items-center text-sm">
                         <Clock className="w-4 h-4 mr-2 text-primary" />
-                        <span className="text-muted">60 minutes each</span>
+                        <span className="text-muted">{pkg.packageDefinition.sessionDuration.duration_minutes} minutes each</span>
                       </div>
                       <div className="flex items-center text-sm">
                         <Star className="w-4 h-4 mr-2 text-primary" />

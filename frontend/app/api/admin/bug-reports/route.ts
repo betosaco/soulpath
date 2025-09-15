@@ -1,54 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { requireAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-
-
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
 export async function GET(request: NextRequest) {
   try {
-    // Extract JWT token from Authorization header
-    const authHeader = request.headers.get('authorization');
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Unauthorized - No token provided' },
-        { status: 401 }
-      );
-    }
-
-    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
-
-    // Verify JWT token
-    let decoded: { userId: string };
-    try {
-      decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
-    } catch {
-      return NextResponse.json(
-        { error: 'Unauthorized - Invalid token' },
-        { status: 401 }
-      );
-    }
-
-    // Get user from database
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId }
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized - User not found' },
-        { status: 401 }
-      );
-    }
-
-    // Check if user is admin
-    if (user.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Admin access required' },
-        { status: 403 }
-      );
+    const user = await requireAuth(request);
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ 
+        success: false,
+        error: 'Unauthorized',
+        message: 'Admin access required'
+      }, { status: 401 });
     }
 
     // Get query parameters
@@ -114,8 +76,7 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('Error in admin bug reports API:', error);
-    return NextResponse.json(
-      { error: 'Internal server error: ' + (error instanceof Error ? error.message : 'Unknown error') },
+    return NextResponse.json({ success: false, error: 'Internal server error: ' + (error instanceof Error ? error.message : 'Unknown error') },
       { status: 500 }
     );
   } finally {

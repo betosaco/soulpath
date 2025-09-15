@@ -75,7 +75,8 @@ export function CommunicationConfig() {
           'Content-Type': 'application/json'
         }
       });
-      if (response.ok) {
+      const data = await response.json();
+      if (data.success) {
         const data = await response.json();
         setConfig(data.config);
       } else {
@@ -108,7 +109,8 @@ export function CommunicationConfig() {
         body: JSON.stringify(config)
       });
 
-      if (response.ok) {
+      const data = await response.json();
+      if (data.success) {
         setMessage({ type: 'success', text: 'Configuration saved successfully!' });
       } else {
         const errorData = await response.json();
@@ -141,7 +143,8 @@ export function CommunicationConfig() {
         })
       });
 
-      if (response.ok) {
+      const data = await response.json();
+      if (data.success) {
         setMessage({ type: 'success', text: 'Test email sent successfully!' });
       } else {
         const errorData = await response.json();
@@ -173,7 +176,8 @@ export function CommunicationConfig() {
         })
       });
 
-      if (response.ok) {
+      const data = await response.json();
+      if (data.success) {
         setMessage({ type: 'success', text: 'Test SMS sent successfully!' });
       } else {
         const errorData = await response.json();

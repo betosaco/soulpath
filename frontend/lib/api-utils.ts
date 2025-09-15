@@ -90,7 +90,7 @@ export async function safeApiCall<T = unknown>(
       ...options
     });
 
-    const data = await safeJsonParse<T>(response);
+    const data = await safeJsonParse<ApiResponse<T>>(response);
     
     if (!response.ok) {
       return {
@@ -100,9 +100,10 @@ export async function safeApiCall<T = unknown>(
       };
     }
     
+    // Handle both nested data structure and direct response structure
     return {
       success: true,
-      data: data
+      data: data.data !== undefined ? data.data : (data as T)
     };
   } catch (error) {
     if (error instanceof ApiError) {

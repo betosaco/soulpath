@@ -57,8 +57,8 @@ export function SmsConfiguration() {
   const loadConfiguration = async () => {
     try {
       const response = await fetch('/api/admin/sms-config');
-      if (response.ok) {
-        const data = await response.json();
+      const data = await response.json();
+      if (data.success) {
         if (data.config) {
           setConfig(data.config);
         }
@@ -79,7 +79,8 @@ export function SmsConfiguration() {
         body: JSON.stringify(config),
       });
 
-      if (response.ok) {
+      const data = await response.json();
+      if (data.success) {
         toast.showSuccess(
           'SMS Configuration Saved',
           'Your SMS settings have been updated successfully.'
@@ -118,8 +119,7 @@ export function SmsConfiguration() {
       });
 
       const data = await response.json();
-
-      if (response.ok) {
+      if (data.success) {
         setBalance(data.balance);
         toast.showSuccess(
           'Connection Successful',
@@ -168,8 +168,7 @@ export function SmsConfiguration() {
       });
 
       const data = await response.json();
-
-      if (response.ok) {
+      if (data.success) {
         toast.showSuccess(
           'Test SMS Sent',
           `SMS sent successfully to ${testPhone}`

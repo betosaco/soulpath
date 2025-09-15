@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Users, Plus, Edit, Clock, User, Search, Calendar, Grid, List, 
-  RefreshCw, Eye, CheckCircle, History, Download, Star, ArrowUpDown, Trash2
+  RefreshCw, Eye, CheckCircle, History, Download, Star, ArrowUpDown, Trash2, X
 } from 'lucide-react';
 import { BaseButton } from './ui/BaseButton';
 import { BaseInput } from './ui/BaseInput';
@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { formatDate } from '@/lib/utils';
 
 import { useAuth } from '../hooks/useAuth';
+import { adminApi } from '@/lib/api/admin';
 import CreateBookingModal from './modals/CreateBookingModal';
 
 
@@ -106,32 +107,43 @@ function ClientModal({ client, isOpen, mode, onClose, onSave }: ClientModalProps
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-[#0a0a0a] flex items-center justify-center z-50 p-4">
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        className="dashboard-card rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.9, opacity: 0, y: 20 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+        className="bg-[#1a1a2e] border-2 border-[#FFD700] rounded-xl max-w-4xl w-full max-h-[95vh] overflow-hidden shadow-2xl shadow-[#FFD700]/30"
       >
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="dashboard-text-primary text-xl font-semibold">
-                {mode === 'create' ? 'Add New Client' : mode === 'edit' ? 'Edit Client' : 'Client Details'}
-              </h2>
-              <p className="dashboard-text-secondary text-sm mt-1">
-                {mode === 'create' ? 'Enter client information' : mode === 'edit' ? 'Update client details' : 'View client information'}
-              </p>
+        <div className="bg-gradient-to-r from-[#1a1a2e] to-[#16213e] border-b border-[#2a2a4a] p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-[#FFD700]/20 rounded-lg flex items-center justify-center">
+                <User size={24} className="text-[#FFD700]" />
+              </div>
+              <div>
+                <h2 className="text-white text-2xl font-bold">
+                  {mode === 'create' ? 'Add New Client' : mode === 'edit' ? 'Edit Client' : 'Client Details'}
+                </h2>
+                <p className="text-gray-300 text-sm mt-1">
+                  {mode === 'create' ? 'Enter client information to create a new consultation client' : 
+                   mode === 'edit' ? 'Update client details and information' : 
+                   'View complete client information and history'}
+                </p>
+              </div>
             </div>
             <BaseButton
               variant="outline"
               size="sm"
               onClick={onClose}
-              className="dashboard-button-outline"
+              className="bg-[#1a1a2e] text-white border border-red-500 hover:bg-red-500 hover:text-white transition-all duration-200"
             >
-              ✕
+              <X size={16} />
             </BaseButton>
           </div>
+        </div>
+        
+        <div className="p-6 overflow-y-auto max-h-[calc(95vh-120px)]">
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Information Section */}
@@ -302,21 +314,23 @@ function ClientModal({ client, isOpen, mode, onClose, onSave }: ClientModalProps
             </div>
 
             {mode !== 'view' && (
-              <div className="flex justify-end space-x-3">
-                <BaseButton
-                  type="button"
-                  variant="outline"
-                  onClick={onClose}
-                  className="dashboard-button-outline"
-                >
-                  Cancel
-                </BaseButton>
-                <BaseButton
-                  type="submit"
-                  className="dashboard-button-primary"
-                >
-                  {mode === 'create' ? 'Add Client' : 'Save Changes'}
-                </BaseButton>
+              <div className="bg-[#0a0a0a] border-t border-[#2a2a4a] p-6 -mx-6 -mb-6">
+                <div className="flex justify-end space-x-4">
+                  <BaseButton
+                    type="button"
+                    variant="outline"
+                    onClick={onClose}
+                    className="bg-[#1a1a2e] text-white border border-gray-500 hover:bg-gray-500 hover:text-white transition-all duration-200"
+                  >
+                    Cancel
+                  </BaseButton>
+                  <BaseButton
+                    type="submit"
+                    className="bg-[#1a1a2e] text-white border-2 border-[#FFD700] hover:bg-[#FFD700] hover:text-black transition-all duration-200 font-semibold"
+                  >
+                    {mode === 'create' ? 'Add Client' : 'Save Changes'}
+                  </BaseButton>
+                </div>
               </div>
             )}
           </form>
@@ -385,30 +399,39 @@ function BookingHistoryModal({ client, isOpen, onClose }: BookingHistoryModalPro
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-[#0a0a0a] flex items-center justify-center z-50 p-4">
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        className="dashboard-card rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.9, opacity: 0, y: 20 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+        className="bg-[#1a1a2e] border-2 border-[#FFD700] rounded-xl max-w-4xl w-full max-h-[95vh] overflow-hidden shadow-2xl shadow-[#FFD700]/30"
       >
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="dashboard-text-primary text-xl font-semibold">Booking History</h2>
-              <p className="dashboard-text-secondary text-sm mt-1">
-                All bookings for {client?.fullName} ({client?.email})
-              </p>
+        <div className="bg-gradient-to-r from-[#1a1a2e] to-[#16213e] border-b border-[#2a2a4a] p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-[#FFD700]/20 rounded-lg flex items-center justify-center">
+                <History size={24} className="text-[#FFD700]" />
+              </div>
+              <div>
+                <h2 className="text-white text-2xl font-bold">Booking History</h2>
+                <p className="text-gray-300 text-sm mt-1">
+                  All bookings for {client?.fullName} ({client?.email})
+                </p>
+              </div>
             </div>
             <BaseButton
               variant="outline"
               size="sm"
               onClick={onClose}
-              className="dashboard-button-outline"
+              className="bg-[#1a1a2e] text-white border border-red-500 hover:bg-red-500 hover:text-white transition-all duration-200"
             >
-              ✕
+              <X size={16} />
             </BaseButton>
           </div>
+        </div>
+        
+        <div className="p-6 overflow-y-auto max-h-[calc(95vh-120px)]">
 
           {isLoading ? (
             <div className="flex items-center justify-center h-64">
@@ -509,7 +532,11 @@ export function ClientManagement() {
   const { user } = useAuth();
   const [clients, setClients] = useState<Client[]>([]);
 
-  console.log('ClientManagement component rendered, user:', user?.email, 'clients count:', clients.length);
+  console.log('🔍 ClientManagement component rendered');
+  console.log('🔍 User object:', user);
+  console.log('🔍 User email:', user?.email);
+  console.log('🔍 User access_token exists:', !!user?.access_token);
+  console.log('🔍 Clients count:', clients.length);
   const [filteredClients, setFilteredClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -530,38 +557,29 @@ export function ClientManagement() {
 
   const loadClients = useCallback(async () => {
     try {
-      console.log('🔍 loadClients called, user:', user);
+      console.log('🔍 loadClients called');
+      console.log('🔍 User object:', user);
       console.log('🔍 access_token exists:', !!user?.access_token);
-      console.log('🔍 access_token length:', user?.access_token?.length);
 
       if (!user?.access_token) {
         console.log('❌ No access token, cannot load clients');
+        console.log('❌ User object details:', JSON.stringify(user, null, 2));
         toast.error('Please log in to access this feature');
         return;
       }
 
       setIsLoading(true);
-      console.log('Loading clients...');
+      console.log('Loading clients using adminApi...');
 
-      const response = await fetch(
-        `/api/admin/users?enhanced=true`,
-        {
-          headers: {
-            'Authorization': `Bearer ${user.access_token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+        const response = await adminApi.getUsers({ 
+          limit: 100 
+        });
 
-      console.log('🔍 API response status:', response.status);
-      console.log('🔍 API response headers:', Object.fromEntries(response.headers.entries()));
+      console.log('🔍 AdminApi response:', response);
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log('API Response:', data);
-        const loadedClients = data.data || [];
+      if (response.success && response.data) {
+        const loadedClients = Array.isArray(response.data) ? response.data : [];
         console.log('Loaded clients:', loadedClients);
-        console.log('Client statuses:', loadedClients.map((c: { name: string; status: string }) => ({ name: c.name, status: c.status })));
         setClients(loadedClients);
         setLastLoaded(new Date());
 
@@ -571,10 +589,8 @@ export function ClientManagement() {
           toast.info('No clients found');
         }
       } else {
-        const errorText = await response.text();
-        console.error('❌ Failed to load clients:', response.status, response.statusText);
-        console.error('❌ Error response body:', errorText);
-        toast.error('Failed to load clients');
+        console.error('❌ Failed to load clients:', response.error);
+        toast.error(response.error || 'Failed to load clients');
       }
     } catch (error) {
       console.error('Error loading clients:', error);
@@ -582,7 +598,7 @@ export function ClientManagement() {
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, [user?.access_token]);
 
   // Add a manual refresh function that can be called from parent components
   const refreshClients = useCallback(() => {
@@ -914,94 +930,153 @@ export function ClientManagement() {
   return (
     <div className="dashboard-container p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between border-b border-[#2a2a4a] pb-6">
         <div>
-          <h1 className="dashboard-text-primary text-3xl font-bold">Client Management</h1>
-          <p className="dashboard-text-secondary">Manage your consultation clients</p>
+          <h1 className="dashboard-text-primary text-3xl font-bold flex items-center">
+            <Users size={32} className="mr-3 text-[#FFD700]" />
+            Client Management
+          </h1>
+          <p className="dashboard-text-secondary mt-2">Manage your consultation clients and their booking history</p>
         </div>
-        <BaseButton
-          onClick={handleCreateClient}
-          className="dashboard-button-primary"
-        >
-          <Plus size={16} className="mr-2" />
-          Add Client
-        </BaseButton>
+        <div className="flex items-center space-x-4">
+          <BaseButton
+            variant="outline"
+            onClick={loadClients}
+            className="dashboard-button-outline hover:bg-blue-500/20 hover:border-blue-500/50 transition-all duration-200 group"
+            disabled={isLoading}
+          >
+            <RefreshCw 
+              size={18} 
+              className={`mr-2 transition-transform duration-200 ${isLoading ? 'animate-spin' : 'group-hover:rotate-180'}`} 
+            />
+            <span className="font-medium">Refresh</span>
+            {lastLoaded && (
+              <span className="ml-2 text-xs opacity-70">
+                {lastLoaded.toLocaleTimeString()}
+              </span>
+            )}
+          </BaseButton>
+          <BaseButton
+            onClick={handleCreateClient}
+            className="bg-[#1a1a2e] text-white border-2 border-[#FFD700] hover:bg-[#FFD700] hover:text-black hover:shadow-lg hover:shadow-[#FFD700]/25 transition-all duration-200 group font-semibold"
+          >
+            <Plus size={18} className="mr-2 group-hover:rotate-90 transition-transform duration-200" />
+            <span className="font-semibold">Add Client</span>
+          </BaseButton>
+        </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
-        <Card className="dashboard-card">
-          <CardContent className="p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <Card className="dashboard-card hover:border-[#FFD700]/30 transition-all duration-200">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="dashboard-stats-label">Total Clients</p>
-                <p className="dashboard-stats-value">{stats.total}</p>
+                <p className="dashboard-stats-label text-sm font-medium">Total Clients</p>
+                <p className="dashboard-stats-value text-2xl font-bold">{stats.total}</p>
+                <p className="dashboard-text-muted text-xs mt-1">All registered clients</p>
               </div>
-              <Users size={24} className="text-dashboard-accent" />
+              <div className="w-12 h-12 bg-[#FFD700]/10 rounded-lg flex items-center justify-center">
+                <Users size={24} className="text-[#FFD700]" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="dashboard-card">
-          <CardContent className="p-4">
+        <Card className="dashboard-card hover:border-yellow-500/30 transition-all duration-200">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="dashboard-stats-label">Pending</p>
-                <p className="dashboard-stats-value">{stats.pending}</p>
+                <p className="dashboard-stats-label text-sm font-medium">Pending</p>
+                <p className="dashboard-stats-value text-2xl font-bold text-yellow-500">{stats.pending}</p>
+                <p className="dashboard-text-muted text-xs mt-1">Awaiting confirmation</p>
               </div>
-              <Clock size={24} className="text-dashboard-accent" />
+              <div className="w-12 h-12 bg-yellow-500/10 rounded-lg flex items-center justify-center">
+                <Clock size={24} className="text-yellow-500" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="dashboard-card">
-          <CardContent className="p-4">
+        <Card className="dashboard-card hover:border-blue-500/30 transition-all duration-200">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="dashboard-stats-label">Confirmed</p>
-                <p className="dashboard-stats-value">{stats.confirmed}</p>
+                <p className="dashboard-stats-label text-sm font-medium">Confirmed</p>
+                <p className="dashboard-stats-value text-2xl font-bold text-blue-500">{stats.confirmed}</p>
+                <p className="dashboard-text-muted text-xs mt-1">Ready for sessions</p>
               </div>
-              <CheckCircle size={24} className="text-dashboard-accent" />
+              <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center">
+                <CheckCircle size={24} className="text-blue-500" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="dashboard-card">
-          <CardContent className="p-4">
+        <Card className="dashboard-card hover:border-green-500/30 transition-all duration-200">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="dashboard-stats-label">Completed</p>
-                <p className="dashboard-stats-value">{stats.completed}</p>
+                <p className="dashboard-stats-label text-sm font-medium">Completed</p>
+                <p className="dashboard-stats-value text-2xl font-bold text-green-500">{stats.completed}</p>
+                <p className="dashboard-text-muted text-xs mt-1">Sessions finished</p>
               </div>
-              <CheckCircle size={24} className="text-dashboard-accent" />
+              <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center">
+                <CheckCircle size={24} className="text-green-500" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="dashboard-card">
-          <CardContent className="p-4">
+        <Card className="dashboard-card hover:border-purple-500/30 transition-all duration-200">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="dashboard-stats-label">Recurrent</p>
-                <p className="dashboard-stats-value">{stats.recurrent}</p>
+                <p className="dashboard-stats-label text-sm font-medium">Recurrent</p>
+                <p className="dashboard-stats-value text-2xl font-bold text-purple-500">{stats.recurrent}</p>
+                <p className="dashboard-text-muted text-xs mt-1">Returning clients</p>
               </div>
-              <Star size={24} className="text-dashboard-accent" />
+              <div className="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center">
+                <Star size={24} className="text-purple-500" />
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Filters and Search */}
-      <Card className="dashboard-card">
-        <CardContent className="p-4">
-          <div className="grid grid-cols-1 lg:grid-cols-7 gap-4 items-end">
+      <Card className="dashboard-card border-[#2a2a4a]">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="dashboard-text-primary text-lg font-semibold flex items-center">
+              <Search size={20} className="mr-2 text-[#FFD700]" />
+              Search & Filters
+            </h3>
+            <div className="flex items-center space-x-2">
+              <BaseButton
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearchQuery('');
+                  setStatusFilter('all');
+                  setLanguageFilter('all');
+                  setDateFilter('all');
+                }}
+                className="dashboard-button-outline hover:bg-red-500/20 hover:border-red-500/50 transition-all duration-200 group"
+              >
+                <X size={14} className="mr-2 group-hover:rotate-90 transition-transform duration-200" />
+                <span className="font-medium">Clear All</span>
+              </BaseButton>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-6 gap-4 items-end">
             {/* Search */}
             <div className="lg:col-span-2">
-              <Label className="dashboard-label">Search</Label>
+              <Label className="dashboard-label text-sm font-medium">Search Clients</Label>
               <div className="relative">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400/50" />
                 <BaseInput
-                  placeholder="Search clients..."
+                  placeholder="Search by name, email, or phone..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10 dashboard-input"
@@ -1077,21 +1152,30 @@ export function ClientManagement() {
             </div>
 
             {/* Sort Order & View Mode */}
-            <div className="flex space-x-2">
+            <div className="flex space-x-3">
               <BaseButton
                 variant="outline"
                 size="sm"
                 onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                className="dashboard-button-outline"
+                className="dashboard-button-outline hover:bg-purple-500/20 hover:border-purple-500/50 transition-all duration-200 group"
+                title={`Sort ${sortOrder === 'asc' ? 'Descending' : 'Ascending'}`}
               >
-                <ArrowUpDown size={16} />
+                <ArrowUpDown 
+                  size={16} 
+                  className={`transition-transform duration-200 ${sortOrder === 'desc' ? 'rotate-180' : ''}`} 
+                />
               </BaseButton>
-              <div className="flex dashboard-card rounded-lg">
+              <div className="flex bg-[#1a1a2e] border border-[#2a2a4a] rounded-lg p-1">
                 <BaseButton
                   variant="ghost"
                   size="sm"
                   onClick={() => setViewMode('list')}
-                  className={viewMode === 'list' ? 'dashboard-button-toggle-active' : 'dashboard-button-toggle-inactive'}
+                  className={`px-3 py-2 rounded-md transition-all duration-200 ${
+                    viewMode === 'list' 
+                      ? 'bg-[#FFD700] text-black shadow-lg' 
+                      : 'text-gray-400 hover:text-white hover:bg-[#FFD700]/10'
+                  }`}
+                  title="List View"
                 >
                   <List size={16} />
                 </BaseButton>
@@ -1099,7 +1183,12 @@ export function ClientManagement() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setViewMode('grid')}
-                  className={viewMode === 'grid' ? 'dashboard-button-toggle-active' : 'dashboard-button-toggle-inactive'}
+                  className={`px-3 py-2 rounded-md transition-all duration-200 ${
+                    viewMode === 'grid' 
+                      ? 'bg-[#FFD700] text-black shadow-lg' 
+                      : 'text-gray-400 hover:text-white hover:bg-[#FFD700]/10'
+                  }`}
+                  title="Grid View"
                 >
                   <Grid size={16} />
                 </BaseButton>
@@ -1124,10 +1213,14 @@ export function ClientManagement() {
         <BaseButton
           size="sm"
           onClick={loadClients}
-          className="dashboard-button-reload"
+          className="dashboard-button-outline hover:bg-blue-500/20 hover:border-blue-500/50 transition-all duration-200 group"
+          disabled={isLoading}
         >
-          <RefreshCw size={16} className="mr-2" />
-          Refresh
+          <RefreshCw 
+            size={16} 
+            className={`mr-2 transition-transform duration-200 ${isLoading ? 'animate-spin' : 'group-hover:rotate-180'}`} 
+          />
+          <span className="font-medium">Refresh</span>
         </BaseButton>
       </div>
 
@@ -1148,88 +1241,95 @@ export function ClientManagement() {
 
       {/* Client List/Grid */}
       {!isLoading && filteredClients.length === 0 ? (
-        <Card className="dashboard-card">
+        <Card className="dashboard-card border-[#2a2a4a]">
           <CardContent className="p-12 text-center">
-            <Users size={48} className="mx-auto text-gray-400/50 mb-4" />
-            <h3 className="dashboard-text-primary text-lg font-semibold mb-2">No clients found</h3>
-            <p className="dashboard-text-secondary mb-4">
+            <div className="w-20 h-20 bg-[#FFD700]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Users size={40} className="text-[#FFD700]" />
+            </div>
+            <h3 className="dashboard-text-primary text-xl font-semibold mb-3">No clients found</h3>
+            <p className="dashboard-text-secondary mb-6 max-w-md mx-auto">
               {searchQuery || statusFilter !== 'all' || languageFilter !== 'all' || dateFilter !== 'all'
-                ? 'Try adjusting your filters or search terms.'
-                : 'Get started by adding your first client.'}
+                ? 'Try adjusting your filters or search terms to find what you\'re looking for.'
+                : 'Get started by adding your first client to begin managing consultations.'}
             </p>
             {!searchQuery && statusFilter === 'all' && languageFilter === 'all' && dateFilter === 'all' && (
               <BaseButton
                 onClick={handleCreateClient}
-                className="dashboard-button-primary"
+                className="bg-[#1a1a2e] text-white border-2 border-[#FFD700] hover:bg-[#FFD700] hover:text-black hover:shadow-lg hover:shadow-[#FFD700]/25 transition-all duration-200 group px-8 py-3"
               >
-                <Plus size={16} className="mr-2" />
-                Add First Client
+                <Plus size={20} className="mr-3 group-hover:rotate-90 transition-transform duration-200" />
+                <span className="font-semibold text-lg">Add First Client</span>
               </BaseButton>
             )}
           </CardContent>
         </Card>
       ) : viewMode === 'list' ? (
-        <Card className="dashboard-card">
+        <Card className="dashboard-card border-[#2a2a4a] overflow-hidden">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
-              <table className="dashboard-table">
-                <thead className="dashboard-table-header">
-                  <tr className="text-left">
-                    <th className="dashboard-table-header th">Client</th>
-                    <th className="dashboard-table-header th">Contact</th>
-                    <th className="dashboard-table-header th">Status</th>
-                    <th className="dashboard-table-header th">Bookings</th>
-                    <th className="dashboard-table-header th">Created</th>
-                    <th className="dashboard-table-header th">Actions</th>
+              <table className="w-full">
+                <thead className="bg-[#1a1a2e] border-b border-[#2a2a4a]">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-[#FFD700] border-r border-[#2a2a4a]">Client</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-[#FFD700] border-r border-[#2a2a4a]">Contact</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-[#FFD700] border-r border-[#2a2a4a]">Status</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-[#FFD700] border-r border-[#2a2a4a]">Bookings</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-[#FFD700] border-r border-[#2a2a4a]">Created</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-[#FFD700]">Actions</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {filteredClients.map((client) => (
-                    <tr key={client.id} className="dashboard-table-row">
-                      <td className="dashboard-table-row td">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-[#FFD700]/20 rounded-full flex items-center justify-center">
-                            <User size={16} className="text-[#FFD700]" />
+                <tbody className="divide-y divide-[#2a2a4a]">
+                  {filteredClients.map((client, index) => (
+                    <tr key={client.id} className={`hover:bg-[#1a1a2e]/50 transition-colors ${index % 2 === 0 ? 'bg-[#0a0a0a]/30' : 'bg-[#0a0a0a]/10'}`}>
+                      <td className="px-6 py-4 border-r border-[#2a2a4a]">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-12 h-12 bg-gradient-to-br from-[#FFD700]/20 to-[#FFD700]/10 rounded-full flex items-center justify-center border border-[#FFD700]/20">
+                            <User size={18} className="text-[#FFD700]" />
                           </div>
                           <div>
-                            <p className="dashboard-text-primary font-medium">{client.fullName}</p>
-                            <p className="dashboard-text-secondary text-sm">
-                              {client.language === 'en' ? '🇺🇸' : '🇪🇸'} {client.birthPlace}
+                            <p className="dashboard-text-primary font-semibold text-base">{client.fullName}</p>
+                            <p className="dashboard-text-secondary text-sm flex items-center">
+                              <span className="mr-1">{client.language === 'en' ? '🇺🇸' : '🇪🇸'}</span>
+                              {client.birthPlace}
                             </p>
                           </div>
                         </div>
                       </td>
-                      <td className="dashboard-table-row td">
+                      <td className="px-6 py-4 border-r border-[#2a2a4a]">
                         <div>
-                          <p className="dashboard-text-primary">{client.email}</p>
+                          <p className="dashboard-text-primary font-medium">{client.email}</p>
                           <p className="dashboard-text-secondary text-sm">
                             Born: {formatDate(client.birthDate)}
                           </p>
                         </div>
                       </td>
-                      <td className="dashboard-table-row td">
+                      <td className="px-6 py-4 border-r border-[#2a2a4a]">
                         {getStatusBadge(client.status)}
                       </td>
-                      <td className="dashboard-table-row td">
+                      <td className="px-6 py-4 border-r border-[#2a2a4a]">
                         <div className="flex items-center space-x-2">
-                          <span className="dashboard-text-primary">{client.totalBookings || 0}</span>
+                          <span className="dashboard-text-primary font-semibold text-lg">{client.totalBookings || 0}</span>
                           {client.isRecurrent && (
-                            <Star size={14} className="text-[#FFD700]" />
+                            <div className="flex items-center space-x-1">
+                              <Star size={14} className="text-[#FFD700]" />
+                              <span className="text-xs text-[#FFD700] font-medium">Recurrent</span>
+                            </div>
                           )}
                         </div>
                       </td>
-                      <td className="dashboard-table-row td">
-                        <p className="dashboard-text-primary">
+                      <td className="px-6 py-4 border-r border-[#2a2a4a]">
+                        <p className="dashboard-text-primary font-medium">
                           {formatDate(client.createdAt)}
                         </p>
                       </td>
-                      <td className="dashboard-table-row td">
-                        <div className="flex items-center space-x-2">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center space-x-1">
                           <BaseButton
                             variant="outline"
                             size="sm"
                             onClick={() => handleViewClient(client)}
-                            className="dashboard-button-outline"
+                            className="dashboard-button-outline hover:bg-blue-500/20 hover:border-blue-500/50"
+                            title="View Details"
                           >
                             <Eye size={14} />
                           </BaseButton>
@@ -1237,16 +1337,27 @@ export function ClientManagement() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleEditClient(client)}
-                            className="dashboard-button-outline"
+                            className="dashboard-button-outline hover:bg-green-500/20 hover:border-green-500/50"
+                            title="Edit Client"
                           >
                             <Edit size={14} />
+                          </BaseButton>
+                          <BaseButton
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleCreateBooking(client)}
+                            className="dashboard-button-outline hover:bg-purple-500/20 hover:border-purple-500/50"
+                            title="Create Booking"
+                          >
+                            <Calendar size={14} />
                           </BaseButton>
                           {(client.totalBookings || 0) > 0 && (
                             <BaseButton
                               variant="outline"
                               size="sm"
                               onClick={() => handleViewHistory(client)}
-                              className="dashboard-button-outline"
+                              className="dashboard-button-outline hover:bg-orange-500/20 hover:border-orange-500/50"
+                              title="View History"
                             >
                               <History size={14} />
                             </BaseButton>
@@ -1255,7 +1366,8 @@ export function ClientManagement() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleDeleteClient(client)}
-                            className="dashboard-button-danger"
+                            className="dashboard-button-danger hover:bg-red-500/20 hover:border-red-500/50"
+                            title="Delete Client"
                           >
                             <Trash2 size={14} />
                           </BaseButton>
@@ -1271,54 +1383,58 @@ export function ClientManagement() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredClients.map((client) => (
-            <Card key={client.id} className="dashboard-card hover:border-[#ffd700]/30 transition-colors">
+            <Card key={client.id} className="dashboard-card hover:border-[#FFD700]/30 transition-all duration-200 hover:shadow-lg hover:shadow-[#FFD700]/10">
               <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-[#FFD700]/20 rounded-full flex items-center justify-center">
-                      <User size={20} className="text-[#FFD700]" />
+                <div className="flex items-start justify-between mb-6">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-14 h-14 bg-gradient-to-br from-[#FFD700]/20 to-[#FFD700]/10 rounded-full flex items-center justify-center border border-[#FFD700]/20">
+                      <User size={22} className="text-[#FFD700]" />
                     </div>
                     <div>
-                      <h3 className="dashboard-text-primary font-medium">{client.fullName}</h3>
-                      <p className="dashboard-text-secondary text-sm">
-                        {client.language === 'en' ? '🇺🇸' : '🇪🇸'} {client.email}
+                      <h3 className="dashboard-text-primary font-semibold text-lg">{client.fullName}</h3>
+                      <p className="dashboard-text-secondary text-sm flex items-center">
+                        <span className="mr-2">{client.language === 'en' ? '🇺🇸' : '🇪🇸'}</span>
+                        {client.email}
                       </p>
                     </div>
                   </div>
                   {client.isRecurrent && (
-                    <Star size={16} className="text-[#FFD700]" />
-                  )}
-                </div>
-
-                <div className="space-y-3 mb-4">
-                  <div className="flex items-center justify-between">
-                    <span className="dashboard-text-secondary text-sm">Status:</span>
-                    {getStatusBadge(client.status)}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="dashboard-text-secondary text-sm">Bookings:</span>
-                    <span className="dashboard-text-primary">{client.totalBookings || 0}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="dashboard-text-secondary text-sm">Birth Date:</span>
-                    <span className="dashboard-text-primary">
-                      {formatDate(client.birthDate)}
-                    </span>
-                  </div>
-                  {client.birthPlace && (
-                    <div className="flex items-center justify-between">
-                      <span className="dashboard-text-secondary text-sm">Birth Place:</span>
-                      <span className="dashboard-text-primary text-sm">{client.birthPlace}</span>
+                    <div className="flex items-center space-x-1 bg-[#FFD700]/10 px-2 py-1 rounded-full">
+                      <Star size={14} className="text-[#FFD700]" />
+                      <span className="text-xs text-[#FFD700] font-medium">Recurrent</span>
                     </div>
                   )}
                 </div>
 
-                <div className="flex items-center space-x-2">
+                <div className="space-y-4 mb-6">
+                  <div className="flex items-center justify-between py-2 border-b border-[#2a2a4a]">
+                    <span className="dashboard-text-secondary text-sm font-medium">Status</span>
+                    {getStatusBadge(client.status)}
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b border-[#2a2a4a]">
+                    <span className="dashboard-text-secondary text-sm font-medium">Bookings</span>
+                    <span className="dashboard-text-primary font-semibold text-lg">{client.totalBookings || 0}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b border-[#2a2a4a]">
+                    <span className="dashboard-text-secondary text-sm font-medium">Birth Date</span>
+                    <span className="dashboard-text-primary font-medium">
+                      {formatDate(client.birthDate)}
+                    </span>
+                  </div>
+                  {client.birthPlace && (
+                    <div className="flex items-center justify-between py-2">
+                      <span className="dashboard-text-secondary text-sm font-medium">Birth Place</span>
+                      <span className="dashboard-text-primary text-sm font-medium">{client.birthPlace}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
                   <BaseButton
                     variant="outline"
                     size="sm"
                     onClick={() => handleViewClient(client)}
-                    className="flex-1 dashboard-button-outline"
+                    className="dashboard-button-outline hover:bg-blue-500/20 hover:border-blue-500/50"
                   >
                     <Eye size={14} className="mr-2" />
                     View
@@ -1327,7 +1443,7 @@ export function ClientManagement() {
                     variant="outline"
                     size="sm"
                     onClick={() => handleCreateBooking(client)}
-                    className="dashboard-button-outline"
+                    className="bg-[#1a1a2e] text-white border border-[#FFD700] hover:bg-[#FFD700] hover:text-black transition-all duration-200"
                   >
                     <Calendar size={14} className="mr-2" />
                     Book
@@ -1336,29 +1452,46 @@ export function ClientManagement() {
                     variant="outline"
                     size="sm"
                     onClick={() => handleEditClient(client)}
-                    className="dashboard-button-outline"
+                    className="dashboard-button-outline hover:bg-green-500/20 hover:border-green-500/50"
                   >
-                    <Edit size={14} />
+                    <Edit size={14} className="mr-2" />
+                    Edit
                   </BaseButton>
-                  {(client.totalBookings || 0) > 0 && (
+                  {(client.totalBookings || 0) > 0 ? (
                     <BaseButton
                       variant="outline"
                       size="sm"
                       onClick={() => handleViewHistory(client)}
-                      className="dashboard-button-outline"
+                      className="dashboard-button-outline hover:bg-orange-500/20 hover:border-orange-500/50"
                     >
-                      <History size={14} />
+                      <History size={14} className="mr-2" />
+                      History
+                    </BaseButton>
+                  ) : (
+                    <BaseButton
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeleteClient(client)}
+                      className="dashboard-button-danger hover:bg-red-500/20 hover:border-red-500/50"
+                    >
+                      <Trash2 size={14} className="mr-2" />
+                      Delete
                     </BaseButton>
                   )}
-                  <BaseButton
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDeleteClient(client)}
-                    className="dashboard-button-danger"
-                  >
-                    <Trash2 size={14} />
-                  </BaseButton>
                 </div>
+                {(client.totalBookings || 0) > 0 && (
+                  <div className="mt-3 pt-3 border-t border-[#2a2a4a]">
+                    <BaseButton
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeleteClient(client)}
+                      className="w-full dashboard-button-danger hover:bg-red-500/20 hover:border-red-500/50"
+                    >
+                      <Trash2 size={14} className="mr-2" />
+                      Delete Client
+                    </BaseButton>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}

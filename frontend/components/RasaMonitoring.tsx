@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { adminApi } from '@/lib/api/admin';
 import {
   Activity,
   Brain,
@@ -95,7 +96,7 @@ export function RasaMonitoring() {
       });
 
       const response = await fetch(`/api/admin/rasa?${queryParams}`);
-      const data = await response.json();
+      const data = response.data;
 
       if (data.success) {
         switch (action) {

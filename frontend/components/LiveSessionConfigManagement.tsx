@@ -104,9 +104,8 @@ export function LiveSessionConfigManagement() {
         }
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
+      const data = await response.json();
+      if (data.success) {
           setConfig(data.data);
           setFormData({
             name: data.data.name || '',
@@ -132,7 +131,6 @@ export function LiveSessionConfigManagement() {
             scope: data.data.weeblySettings?.scope || ['read:site', 'write:site']
           });
         }
-      }
     } catch (error) {
       console.error('Error loading live session config:', error);
       toast.error('Failed to load configuration');

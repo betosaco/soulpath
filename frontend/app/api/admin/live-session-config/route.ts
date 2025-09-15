@@ -37,12 +37,12 @@ export async function GET(request: NextRequest) {
     console.log('🔍 GET /api/admin/live-session-config - Starting request...');
     
     const user = await requireAuth(request);
-    if (!user) {
+    if (!user || user.role !== 'admin') {
       console.log('❌ Unauthorized access attempt');
       return NextResponse.json({ 
         success: false,
         error: 'Unauthorized',
-        message: 'Authentication required'
+        message: 'Admin access required'
       }, { status: 401 });
     }
 
@@ -103,12 +103,12 @@ export async function POST(request: NextRequest) {
     console.log('🔍 POST /api/admin/live-session-config - Starting request...');
     
     const user = await requireAuth(request);
-    if (!user) {
+    if (!user || user.role !== 'admin') {
       console.log('❌ Unauthorized access attempt');
       return NextResponse.json({ 
         success: false,
         error: 'Unauthorized',
-        message: 'Authentication required'
+        message: 'Admin access required'
       }, { status: 401 });
     }
 

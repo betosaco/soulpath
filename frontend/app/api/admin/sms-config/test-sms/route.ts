@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth';
 import { z } from 'zod';
 
 const testSmsSchema = z.object({
@@ -11,6 +12,15 @@ const testSmsSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await requireAuth(request);
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ 
+        success: false,
+        error: 'Unauthorized',
+        message: 'Admin access required'
+      }, { status: 401 });
+    }
+
     const body = await request.json();
     const { phoneNumber, message, username, tokenApi, senderName } = testSmsSchema.parse(body);
 
@@ -50,14 +60,12 @@ export async function POST(request: NextRequest) {
     console.error('Test SMS send error:', error);
     
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid request data', details: error.issues },
+      return NextResponse.json({ success: false, error: 'Invalid request data', details: error.issues },
         { status: 400 }
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to send test SMS' },
+    return NextResponse.json({ success: false, error: 'Failed to send test SMS' },
       { status: 500 }
     );
   }

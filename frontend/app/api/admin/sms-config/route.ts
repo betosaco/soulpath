@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
@@ -10,8 +11,17 @@ const smsConfigSchema = z.object({
   isActive: z.boolean().default(true),
 });
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const user = await requireAuth(request);
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ 
+        success: false,
+        error: 'Unauthorized',
+        message: 'Admin access required'
+      }, { status: 401 });
+    }
+
     const config = await prisma.smsConfiguration.findFirst({
       where: { provider: 'labsmobile' },
       orderBy: { createdAt: 'desc' }
@@ -22,8 +32,7 @@ export async function GET() {
     });
   } catch (error) {
     console.error('Get SMS config error:', error);
-    return NextResponse.json(
-      { error: 'Failed to load SMS configuration' },
+    return NextResponse.json({ success: false, error: 'Failed to load SMS configuration' },
       { status: 500 }
     );
   }
@@ -31,6 +40,15 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await requireAuth(request);
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ 
+        success: false,
+        error: 'Unauthorized',
+        message: 'Admin access required'
+      }, { status: 401 });
+    }
+
     const body = await request.json();
     const validatedData = smsConfigSchema.parse(body);
 
@@ -64,14 +82,12 @@ export async function POST(request: NextRequest) {
     console.error('Save SMS config error:', error);
     
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid request data', details: error.issues },
+      return NextResponse.json({ success: false, error: 'Invalid request data', details: error.issues },
         { status: 400 }
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to save SMS configuration' },
+    return NextResponse.json({ success: false, error: 'Failed to save SMS configuration' },
       { status: 500 }
     );
   }

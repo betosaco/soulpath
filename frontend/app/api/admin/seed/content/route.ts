@@ -10,16 +10,15 @@ const supabase = createClient(
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth(request);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
     const { content } = body;
 
     if (!content) {
-      return NextResponse.json({ 
-        error: 'Content data is required' 
+      return NextResponse.json({ success: false, error: 'Content data is required' 
       }, { status: 400 });
     }
 
@@ -31,7 +30,7 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Error seeding content:', error);
-      return NextResponse.json({ error: 'Failed to seed content' }, { status: 500 });
+      return NextResponse.json({ success: false, error: 'Failed to seed content' }, { status: 500 });
     }
 
     return NextResponse.json({ 
@@ -42,6 +41,6 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Unexpected error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -8,9 +8,9 @@ export async function GET(request: NextRequest) {
     console.log('🔍 GET /api/admin/sections - Starting request...');
     
     const user = await requireAuth(request);
-    if (!user) {
+    if (!user || user.role !== 'admin') {
       console.log('❌ Unauthorized access attempt');
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     console.log('✅ User authenticated:', user.email);
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('❌ Error in GET /api/admin/sections:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json({ error: 'Internal server error', details: errorMessage }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Internal server error', details: errorMessage }, { status: 500 });
   }
 }
 
@@ -35,9 +35,9 @@ export async function PUT(request: NextRequest) {
     console.log('🔍 PUT /api/admin/sections - Starting request...');
     
     const user = await requireAuth(request);
-    if (!user) {
+    if (!user || user.role !== 'admin') {
       console.log('❌ Unauthorized access attempt');
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     console.log('✅ User authenticated:', user.email);
@@ -47,7 +47,7 @@ export async function PUT(request: NextRequest) {
     const { sections, action = 'replace' } = body;
 
     if (!Array.isArray(sections)) {
-      return NextResponse.json({ error: 'Sections array is required' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'Sections array is required' }, { status: 400 });
     }
 
     let result;
@@ -121,7 +121,7 @@ export async function PUT(request: NextRequest) {
       );
       console.log('✅ Sections added/updated successfully:', result.length);
     } else {
-      return NextResponse.json({ error: 'Invalid action. Use "replace" or "add"' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'Invalid action. Use "replace" or "add"' }, { status: 400 });
     }
 
     // Trigger revalidation
@@ -132,7 +132,7 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     console.error('❌ Error in PUT /api/admin/sections:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json({ error: 'Internal server error', details: errorMessage }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Internal server error', details: errorMessage }, { status: 500 });
   }
 }
 

@@ -15,13 +15,14 @@ export async function GET(request: NextRequest) {
       setTimeout(() => reject(new Error('Authentication timeout')), 5000)
     );
 
-    const user = await Promise.race([authPromise, timeoutPromise]) as { email?: string } | null;
+    const user = await Promise.race([authPromise, timeoutPromise]) as { email?: string; role?: string } | null;
 
-    if (!user) {
+    if (!user || user.role !== 'admin') {
       console.log('❌ Unauthorized access attempt');
       return NextResponse.json({
+        success: false,
         error: 'Unauthorized',
-        message: 'Authentication required'
+        message: 'Admin access required'
       }, { status: 401 });
     }
 
@@ -122,8 +123,7 @@ export async function GET(request: NextRequest) {
 
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
-    return NextResponse.json({
-      error: 'Internal server error',
+    return NextResponse.json({ success: false, error: 'Internal server error',
       message: errorMessage,
       timestamp: new Date().toISOString(),
       processingTime: `${processingTime}ms`
@@ -143,13 +143,14 @@ export async function PUT(request: NextRequest) {
       setTimeout(() => reject(new Error('Authentication timeout')), 5000)
     );
 
-    const user = await Promise.race([authPromise, timeoutPromise]) as { email?: string } | null;
+    const user = await Promise.race([authPromise, timeoutPromise]) as { email?: string; role?: string } | null;
 
-    if (!user) {
+    if (!user || user.role !== 'admin') {
       console.log('❌ Unauthorized access attempt');
       return NextResponse.json({
+        success: false,
         error: 'Unauthorized',
-        message: 'Authentication required'
+        message: 'Admin access required'
       }, { status: 401 });
     }
 
@@ -161,8 +162,7 @@ export async function PUT(request: NextRequest) {
       body = await request.json();
     } catch (parseError) {
       console.error('❌ Invalid JSON in request body:', parseError);
-      return NextResponse.json({
-        error: 'Invalid request format',
+      return NextResponse.json({ success: false, error: 'Invalid request format',
         message: 'Request body must be valid JSON'
       }, { status: 400 });
     }
@@ -171,8 +171,7 @@ export async function PUT(request: NextRequest) {
     console.log('📝 Processing content update...');
 
     if (!content || typeof content !== 'object') {
-      return NextResponse.json({
-        error: 'Invalid content data',
+      return NextResponse.json({ success: false, error: 'Invalid content data',
         message: 'Content must be a valid object'
       }, { status: 400 });
     }
@@ -188,8 +187,7 @@ export async function PUT(request: NextRequest) {
     const missingFields = requiredFields.filter(field => !content[field] || typeof content[field] !== 'string');
     if (missingFields.length > 0) {
       console.log('❌ Missing or invalid required fields:', missingFields);
-      return NextResponse.json({
-        error: 'Missing or invalid required fields',
+      return NextResponse.json({ success: false, error: 'Missing or invalid required fields',
         missingFields,
         message: 'All content fields must be non-empty strings'
       }, { status: 400 });
@@ -295,8 +293,7 @@ export async function PUT(request: NextRequest) {
 
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
-    return NextResponse.json({
-      error: 'Internal server error',
+    return NextResponse.json({ success: false, error: 'Internal server error',
       message: errorMessage,
       timestamp: new Date().toISOString(),
       processingTime: `${processingTime}ms`

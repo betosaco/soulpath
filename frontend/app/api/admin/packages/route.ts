@@ -2,83 +2,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { 
+  packageDefinitionCreateSchema, 
+  packageDefinitionUpdateSchema,
+  commonQuerySchema 
+} from '@/lib/validations';
 
-interface PackageDefinitionWhereClause {
-  packageType?: string;
-  isActive?: boolean;
-  sessionDurationId?: number;
-}
-
-interface PackageDefinitionSelectClause {
-  id: boolean;
-  name: boolean;
-  description: boolean;
-  sessionsCount: boolean;
-  sessionDurationId: boolean;
-  packageType: boolean;
-  maxGroupSize: boolean;
-  isActive: boolean;
-  isPopular: boolean;
-  displayOrder: boolean;
-  featured: boolean;
-  createdAt: boolean;
-  updatedAt: boolean;
-  sessionDuration?: {
-    select: {
-      id: boolean;
-      name: boolean;
-      duration_minutes: boolean;
-    };
-  };
-  packagePrices?: {
-    where?: {
-      isActive: boolean;
-    };
-    select: {
-      id: boolean;
-      price: boolean;
-      currency: {
-        select: {
-          id: boolean;
-          code: boolean;
-          symbol: boolean;
-        };
-      };
-    };
-  };
-  _count?: {
-    packagePrices: boolean;
-  };
-}
-
-
-// Zod schemas for package definition validation
-const createPackageDefinitionSchema = z.object({
-  name: z.string().min(1, 'Name is required').max(255, 'Name too long'),
-  description: z.string().optional(),
-  sessionsCount: z.number().int().positive('Sessions count must be positive'),
-  sessionDurationId: z.number().int().positive('Session duration ID must be positive'),
-  packageType: z.string().min(1, 'Package type is required').max(20, 'Package type too long'),
-  maxGroupSize: z.number().int().positive('Max group size must be positive').optional(),
-  isActive: z.boolean().default(true)
-});
-
-const updatePackageDefinitionSchema = createPackageDefinitionSchema.partial().extend({
-  id: z.number().int().positive('Package definition ID must be positive')
-});
-
-const querySchema = z.object({
+const querySchema = commonQuerySchema.extend({
   packageType: z.string().optional(),
   isActive: z.enum(['true', 'false']).optional(),
   sessionDurationId: z.coerce.number().int().positive().optional(),
-  page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(20),
-  enhanced: z.enum(['true', 'false']).optional()
+  include: z.enum(['prices', 'all']).optional()
 });
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔍 GET /api/admin/package-definitions - Starting request...');
+    console.log('🔍 GET /api/admin/packages - Starting request...');
     
     const user = await requireAuth(request);
     if (!user || user.role !== 'admin') {
@@ -104,20 +43,20 @@ export async function GET(request: NextRequest) {
       }, { status: 400 });
     }
 
-    const { packageType, isActive, sessionDurationId, page, limit, enhanced } = validation.data;
+    const { packageType, isActive, sessionDurationId, include, page, limit } = validation.data;
     const offset = (page - 1) * limit;
 
-    console.log('🔍 Query parameters:', { packageType, isActive, sessionDurationId, page, limit, enhanced });
+    console.log('🔍 Query parameters:', { packageType, isActive, sessionDurationId, include, page, limit });
 
     // Build the query with proper relationships
-    const where: PackageDefinitionWhereClause = {};
+    const where: Record<string, unknown> = {};
 
     if (packageType) where.packageType = packageType;
     if (isActive !== undefined) where.isActive = isActive === 'true';
     if (sessionDurationId) where.sessionDurationId = sessionDurationId;
 
     // Base select fields
-    const select: PackageDefinitionSelectClause = {
+    const select: Record<string, unknown> = {
       id: true,
       name: true,
       description: true,
@@ -140,62 +79,50 @@ export async function GET(request: NextRequest) {
       }
     };
 
-    console.log('🔍 Executing database query...');
-    
-    // Enhanced mode includes pricing information
-    const queryOptions = enhanced === 'true' ? {
-      where,
-      skip: offset,
-      take: limit,
-      orderBy: { createdAt: 'desc' as const },
-      include: {
-        sessionDuration: {
-          select: {
-            id: true,
-            name: true,
-            duration_minutes: true
-          }
-        },
-        packagePrices: {
-          select: {
-            id: true,
-            price: true,
-            isActive: true,
-            currency: {
-              select: {
-                id: true,
-                code: true,
-                symbol: true
-              }
+    // Include pricing information if requested
+    if (include === 'prices' || include === 'all') {
+      select.packagePrices = {
+        where: { isActive: true },
+        select: {
+          id: true,
+          price: true,
+          pricingMode: true,
+          isActive: true,
+          currency: {
+            select: {
+              id: true,
+              code: true,
+              symbol: true,
+              name: true
             }
           }
-        },
-        _count: {
-          select: {
-            packagePrices: true
-          }
         }
-      }
-    } : {
-      where,
-      skip: offset,
-      take: limit,
-      orderBy: { createdAt: 'desc' as const },
-      select
-    };
+      };
+    }
+
+    // Include usage statistics if requested
+    if (include === 'all') {
+      select._count = {
+        select: {
+          packagePrices: true
+        }
+      };
+    }
+
+    console.log('🔍 Executing database query...');
     
     const [packageDefinitions, totalCount] = await Promise.all([
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      prisma.packageDefinition.findMany(queryOptions as any),
+      prisma.packageDefinition.findMany({
+        where,
+        select,
+        skip: offset,
+        take: limit,
+        orderBy: { createdAt: 'desc' }
+      }),
       prisma.packageDefinition.count({ where })
     ]);
 
     console.log('✅ Database query successful, found', packageDefinitions.length, 'package definitions');
-    
-    // Debug: Log the first package definition to see if pricing data is included
-    if (packageDefinitions.length > 0) {
-      console.log('🔍 First package definition data:', JSON.stringify(packageDefinitions[0], null, 2));
-    }
 
     const totalPages = Math.ceil(totalCount / limit);
 
@@ -211,7 +138,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('❌ Unexpected error in package-definitions API:', error);
+    console.error('❌ Unexpected error in packages API:', error);
     return NextResponse.json({ 
       success: false,
       error: 'Internal server error',
@@ -246,7 +173,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    const packageData = validation.data;
+    const { initialPrices, ...packageData } = validation.data;
 
     // Verify session duration exists
     const sessionDuration = await prisma.sessionDuration.findUnique({
@@ -274,25 +201,69 @@ export async function POST(request: NextRequest) {
       }, { status: 409 });
     }
 
-    // Create the package definition
-    const newPackageDefinition = await prisma.packageDefinition.create({
-      data: packageData,
-      include: {
-        sessionDuration: {
-          select: {
-            id: true,
-            name: true,
-            duration_minutes: true,
-            description: true
+    // Create package definition and initial prices in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Create the package definition
+      const newPackageDefinition = await tx.packageDefinition.create({
+        data: packageData,
+        include: {
+          sessionDuration: {
+            select: {
+              id: true,
+              name: true,
+              duration_minutes: true,
+              description: true
+            }
           }
         }
+      });
+
+      // Create initial prices if provided
+      let packagePrices: any[] = [];
+      if (initialPrices && initialPrices.length > 0) {
+        // Verify all currencies exist
+        const currencyIds = initialPrices.map(price => price.currencyId);
+        const currencies = await tx.currency.findMany({
+          where: { id: { in: currencyIds } }
+        });
+
+        if (currencies.length !== currencyIds.length) {
+          throw new Error('Some currencies were not found');
+        }
+
+        // Create package prices
+        packagePrices = await Promise.all(
+          initialPrices.map(priceData => 
+            tx.packagePrice.create({
+              data: {
+                ...priceData,
+                packageDefinitionId: newPackageDefinition.id
+              },
+              include: {
+                currency: {
+                  select: {
+                    id: true,
+                    code: true,
+                    symbol: true,
+                    name: true
+                  }
+                }
+              }
+            })
+          )
+        );
       }
+
+      return { newPackageDefinition, packagePrices };
     });
 
     return NextResponse.json({
       success: true,
       message: 'Package definition created successfully',
-      data: newPackageDefinition
+      data: {
+        ...result.newPackageDefinition,
+        packagePrices: result.packagePrices
+      }
     }, { status: 201 });
 
   } catch (error) {

@@ -27,48 +27,50 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Admin email list - can be extended for multiple admin users
-  const ADMIN_EMAILS = [
-    'admin@soulpath.lat',
-    'coco@soulpath.lat',
-    'admin@matmax.world',
-    'alberto@matmax.world'
-  ];
-
-  // Calculate isAdmin reactively
-  const isAdmin = Boolean(user?.email && (ADMIN_EMAILS.includes(user.email) || user.role === 'admin'));
+  // Calculate isAdmin reactively - only based on database role
+  const isAdmin = Boolean(user?.role === 'admin');
   
   useEffect(() => {
-    // Check for existing token in localStorage
-    const token = localStorage.getItem('auth_token');
+    console.log('🔐 useAuth: useEffect triggered');
+    // Check for existing token in localStorage (only on client side)
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    console.log('🔐 useAuth: Token found:', !!token);
     
     if (token) {
+      console.log('🔐 useAuth: Verifying token...');
       // Verify token with our API using safe API call
       safeApiCall<VerifyApiResponse>('/api/auth/verify', {
         method: 'POST',
         body: JSON.stringify({ token })
       })
       .then(response => {
-        if (response.success && response.data && response.data.user && typeof response.data.user === 'object') {
-          const userData = {
-            ...response.data.user,
+        console.log('🔐 useAuth: Token verification response:', response);
+        // Handle both nested and direct response structures
+        const userData = response.data?.user;
+        if (response.success && userData && typeof userData === 'object') {
+          const user = {
+            ...userData,
             access_token: token
           } as User;
-          console.log('🔐 useAuth: User authenticated from token:', userData);
-          setUser(userData);
+          console.log('🔐 useAuth: User authenticated from token:', user);
+          setUser(user);
+          setIsLoading(false); // Set loading to false immediately after setting user
         } else {
           console.log('🔐 useAuth: Invalid token, clearing storage');
-          localStorage.removeItem('auth_token');
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('auth_token');
+          }
           setUser(null);
+          setIsLoading(false); // Set loading to false immediately after clearing user
         }
       })
       .catch(error => {
         console.error('🔐 useAuth: Token verification error:', error);
-        localStorage.removeItem('auth_token');
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('auth_token');
+        }
         setUser(null);
-      })
-      .finally(() => {
-        setIsLoading(false);
+        setIsLoading(false); // Set loading to false immediately after error
       });
     } else {
       console.log('🔐 useAuth: No token found');
@@ -87,19 +89,26 @@ export function useAuth() {
       });
       
       if (response.success && response.data && response.data.user && typeof response.data.user === 'object') {
-        // Store token in localStorage
-        localStorage.setItem('auth_token', response.data.user.access_token);
+        // Store token in localStorage and cookie (only on client side)
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('auth_token', response.data.user.access_token);
+          // Also store in cookie for middleware access
+          document.cookie = `auth_token=${response.data.user.access_token}; path=/; max-age=${7 * 24 * 60 * 60}; secure; samesite=strict`;
+        }
         
         console.log('🔐 useAuth: Sign in successful:', response.data.user);
         setUser(response.data.user);
+        setIsLoading(false);
         
         return { data: response.data.user, error: null };
       } else {
         console.error('🔐 useAuth: Sign in error:', response.message || response.error || 'Unknown error');
+        setIsLoading(false);
         return { data: null, error: { message: response.message || 'Login failed' } };
       }
     } catch (error) {
       console.error('🔐 useAuth: Sign in error:', error);
+      setIsLoading(false);
       return { data: null, error };
     }
   };
@@ -107,19 +116,18 @@ export function useAuth() {
   const signOut = async () => {
     console.log('🔐 useAuth: Signing out');
     
-    // Remove token from localStorage
-    localStorage.removeItem('auth_token');
+    // Remove token from localStorage and cookie (only on client side)
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth_token');
+      // Clear the cookie
+      document.cookie = 'auth_token=; path=/; max-age=0';
+    }
     setUser(null);
     
     return { error: null };
   };
 
-  console.log('🔐 useAuth: Current state:', {
-    user: user ? 'authenticated' : null,
-    userEmail: user?.email || 'none',
-    isAdmin,
-    isLoading
-  });
+  // Debug logging removed for production
 
   return {
     user,

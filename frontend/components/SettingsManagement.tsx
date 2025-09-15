@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { adminApi } from '@/lib/api/admin';
 import { motion } from 'framer-motion';
 import { 
   Database, 
@@ -48,7 +49,7 @@ export function SettingsManagement() {
         },
       });
 
-      if (response.ok) {
+      if (response.success) {
         await response.json();
         setSeedStatus('success');
         setSeedMessage('Homepage content seeded successfully!');
@@ -97,7 +98,7 @@ export function SettingsManagement() {
         },
       });
 
-      if (response.ok) {
+      if (response.success) {
         await response.json();
         setSeedCustomersStatus('success');
         setSeedCustomersMessage(clearExisting 
@@ -141,7 +142,7 @@ export function SettingsManagement() {
         },
       });
 
-      if (response.ok) {
+      if (response.success) {
         await response.json();
         setSeedSchedulesStatus('success');
         setSeedSchedulesMessage('Sample schedules seeded successfully!');

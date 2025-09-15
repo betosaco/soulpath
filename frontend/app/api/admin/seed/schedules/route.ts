@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth';
 import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 
@@ -21,8 +22,17 @@ const seedSchedulesSchema = z.object({
   schedules: z.array(sampleScheduleSchema)
 });
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
+    const user = await requireAuth(request);
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ 
+        success: false,
+        error: 'Unauthorized',
+        message: 'Admin access required'
+      }, { status: 401 });
+    }
+
     // Sample schedule data for the next 30 days
     const sampleSchedules = [];
     const today = new Date();

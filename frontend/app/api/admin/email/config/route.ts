@@ -7,9 +7,9 @@ export async function GET(request: NextRequest) {
     console.log('🔍 GET /api/admin/email/config - Starting request...');
     
     const user = await requireAuth(request);
-    if (!user) {
+    if (!user || user.role !== 'admin') {
       console.log('❌ Unauthorized access attempt');
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     console.log('✅ User authenticated:', user.email);
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('❌ Unexpected error in GET /api/admin/email/config:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json({ error: 'Internal server error', details: errorMessage }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Internal server error', details: errorMessage }, { status: 500 });
   }
 }
 
@@ -69,9 +69,9 @@ export async function PUT(request: NextRequest) {
     console.log('🔍 PUT /api/admin/email/config - Starting request...');
     
     const user = await requireAuth(request);
-    if (!user) {
+    if (!user || user.role !== 'admin') {
       console.log('❌ Unauthorized access attempt');
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     console.log('✅ User authenticated:', user.email);
@@ -89,8 +89,7 @@ export async function PUT(request: NextRequest) {
 
     if (error) {
       console.log('⚠️ email_config table might not exist, cannot update:', error.message);
-      return NextResponse.json({ 
-        error: 'Email configuration table does not exist. Please run the database setup first.',
+      return NextResponse.json({ success: false, error: 'Email configuration table does not exist. Please run the database setup first.',
         details: error.message 
       }, { status: 500 });
     }
@@ -100,6 +99,6 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     console.error('❌ Unexpected error in PUT /api/admin/email/config:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json({ error: 'Internal server error', details: errorMessage }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Internal server error', details: errorMessage }, { status: 500 });
   }
 }
