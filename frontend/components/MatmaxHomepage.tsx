@@ -72,7 +72,7 @@ export function MatmaxHomepage() {
             className="text-xl mb-8 leading-relaxed"
             style={{ fontFamily: 'var(--font-body)' }}
           >
-            Daily Vinyasa, Hatha, and Restorative Yoga for all levels.
+            Daily Vinyasa and Hatha Yoga for all levels.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a 
