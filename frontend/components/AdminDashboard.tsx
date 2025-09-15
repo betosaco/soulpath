@@ -217,7 +217,7 @@ export function AdminDashboard({ onClose, isModal = true, children }: AdminDashb
         </Sidebar>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto bg-[var(--color-background-primary)]">
+        <main className="flex-1 overflow-y-auto bg-[var(--color-background-primary)] ml-56">
           <div className="p-6">
             {children ? (
               children
