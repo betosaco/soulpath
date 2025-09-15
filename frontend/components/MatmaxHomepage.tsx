@@ -3,65 +3,39 @@
 import React from 'react';
 import Image from 'next/image';
 import { Menu, X, Users, Heart, Star } from 'lucide-react';
+import { Header } from './Header';
+import { useLanguage } from '../hooks/useLanguage';
+import { useTranslations } from '../hooks/useTranslations';
 
 export function MatmaxHomepage() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const { language, setLanguage } = useLanguage();
+  const { t } = useTranslations();
+  const translations = t as Record<string, string | Record<string, string>>;
+
+  const handleLoginClick = () => {
+    // Add login functionality here
+    console.log('Login clicked');
+  };
+
+  const scrollToSection = (section: string) => {
+    // Add scroll functionality here
+    console.log('Scroll to section:', section);
+  };
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header & Navigation */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <div className="flex-shrink-0">
-              <h1 className="text-2xl font-bold text-black" style={{ fontFamily: 'var(--font-heading)' }}>
-                Matmax Yoga
-              </h1>
-            </div>
-
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex space-x-8">
-              <a href="#home" className="nav-link">Home</a>
-              <a href="#about" className="nav-link">About</a>
-              <a href="#classes" className="nav-link">Classes</a>
-              <a href="#schedule" className="nav-link">Schedule</a>
-              <a href="#contact" className="nav-link">Contact</a>
-            </nav>
-
-            {/* CTA Button */}
-            <div className="hidden md:flex">
-              <button className="btn-primary">Sign Up</button>
-            </div>
-
-            {/* Mobile menu button */}
-            <div className="md:hidden">
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="text-gray-600 hover:text-gray-900"
-              >
-                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden bg-white border-t border-gray-200">
-            <div className="px-2 pt-2 pb-3 space-y-1">
-              <a href="#home" className="nav-link block px-3 py-2">Home</a>
-              <a href="#about" className="nav-link block px-3 py-2">About</a>
-              <a href="#classes" className="nav-link block px-3 py-2">Classes</a>
-              <a href="#schedule" className="nav-link block px-3 py-2">Schedule</a>
-              <a href="#contact" className="nav-link block px-3 py-2">Contact</a>
-              <div className="px-3 py-2">
-                <button className="btn-primary w-full">Sign Up</button>
-              </div>
-            </div>
-          </div>
-        )}
-      </header>
+      <Header
+        language={language}
+        setLanguage={setLanguage}
+        scrollToSection={scrollToSection}
+        t={translations}
+        isMenuOpen={isMenuOpen}
+        setIsMenuOpen={setIsMenuOpen}
+        onLoginClick={handleLoginClick}
+        user={null}
+        isAdmin={false}
+      />
 
       {/* Hero Section */}
       <section id="home" className="relative h-screen flex items-center justify-center">

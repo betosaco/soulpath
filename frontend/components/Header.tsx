@@ -31,7 +31,11 @@ export function Header({
   user,
   isAdmin
 }: HeaderProps) {
-  const { logoSettings } = useLogo();
+  const { logoSettings, isLoading } = useLogo();
+  
+  // Debug logging
+  console.log('Header Debug - logoSettings:', logoSettings);
+  console.log('Header Debug - isLoading:', isLoading);
   
   // Handle touch gestures for closing menu
   useEffect(() => {
@@ -87,7 +91,9 @@ export function Header({
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          {logoSettings.isActive ? (
+          {isLoading ? (
+            <div className="h-7 sm:h-8 md:h-9 lg:h-10 w-10 bg-gray-300 animate-pulse rounded"></div>
+          ) : logoSettings.isActive ? (
             logoSettings.type === 'text' ? (
               <span className="font-heading text-base sm:text-lg md:text-xl lg:text-2xl text-[#FFD700] font-semibold">
                 {logoSettings.text || 'MatMax'}
