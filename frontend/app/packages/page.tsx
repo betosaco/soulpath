@@ -52,6 +52,7 @@ interface BookingFormData {
   clientName: string;
   clientEmail: string;
   clientPhone: string;
+  countryCode: string;
   language: 'en' | 'es';
   selectedPackage: PackagePrice | null;
   selectedScheduleSlot: ScheduleSlot | null;
@@ -151,8 +152,34 @@ export default function PackagesPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [processing, setProcessing] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   
   const { language, setLanguage } = useLanguage();
+
+  const countries = [
+    { code: '+51', flag: '🇵🇪', name: 'Peru', country: 'PE' },
+    { code: '+1', flag: '🇺🇸', name: 'United States', country: 'US' },
+    { code: '+1', flag: '🇨🇦', name: 'Canada', country: 'CA' },
+    { code: '+52', flag: '🇲🇽', name: 'Mexico', country: 'MX' },
+    { code: '+54', flag: '🇦🇷', name: 'Argentina', country: 'AR' },
+    { code: '+55', flag: '🇧🇷', name: 'Brazil', country: 'BR' },
+    { code: '+56', flag: '🇨🇱', name: 'Chile', country: 'CL' },
+    { code: '+57', flag: '🇨🇴', name: 'Colombia', country: 'CO' },
+    { code: '+58', flag: '🇻🇪', name: 'Venezuela', country: 'VE' },
+    { code: '+34', flag: '🇪🇸', name: 'Spain', country: 'ES' },
+    { code: '+33', flag: '🇫🇷', name: 'France', country: 'FR' },
+    { code: '+49', flag: '🇩🇪', name: 'Germany', country: 'DE' },
+    { code: '+44', flag: '🇬🇧', name: 'United Kingdom', country: 'GB' },
+    { code: '+39', flag: '🇮🇹', name: 'Italy', country: 'IT' },
+    { code: '+34', flag: '🇪🇸', name: 'Spain', country: 'ES' },
+    { code: '+86', flag: '🇨🇳', name: 'China', country: 'CN' },
+    { code: '+81', flag: '🇯🇵', name: 'Japan', country: 'JP' },
+    { code: '+82', flag: '🇰🇷', name: 'South Korea', country: 'KR' },
+    { code: '+91', flag: '🇮🇳', name: 'India', country: 'IN' },
+    { code: '+61', flag: '🇦🇺', name: 'Australia', country: 'AU' }
+  ];
+
+  const selectedCountry = countries.find(c => c.code === formData.countryCode) || countries[0];
   const { t } = useTranslations();
   const translations = t as Record<string, string | Record<string, string>>;
 
@@ -160,6 +187,7 @@ export default function PackagesPage() {
     clientName: '',
     clientEmail: '',
     clientPhone: '',
+    countryCode: '+51',
     language: 'en',
     selectedPackage: null,
     selectedScheduleSlot: null,
@@ -187,6 +215,23 @@ export default function PackagesPage() {
     console.log('🔄 useEffect triggered');
     // Packages are now set in initial state
   }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isCountryDropdownOpen) {
+        const target = event.target as Element;
+        if (!target.closest('.country-dropdown')) {
+          setIsCountryDropdownOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isCountryDropdownOpen]);
 
   const loadData = async () => {
     console.log('🔄 Starting loadData...');
@@ -264,7 +309,7 @@ export default function PackagesPage() {
           quantity: 1,
           clientName: formData.clientName,
           clientEmail: formData.clientEmail,
-          clientPhone: `+51${formData.clientPhone}`,
+          clientPhone: `${formData.countryCode}${formData.clientPhone}`,
           language: formData.language,
           paymentMethod: 'izipay',
           paymentData: paymentData
@@ -305,6 +350,7 @@ export default function PackagesPage() {
           clientName: '',
           clientEmail: '',
           clientPhone: '',
+          countryCode: '+51',
           language: 'en',
           selectedPackage: null,
           selectedScheduleSlot: null,
@@ -545,15 +591,48 @@ export default function PackagesPage() {
                     <div>
                       <Label htmlFor="clientPhone" className="text-black">Phone *</Label>
                       <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <span className="text-gray-500 text-sm">🇵🇪 +51</span>
+                        {/* Country Code Dropdown */}
+                        <div className="absolute inset-y-0 left-0 z-10 country-dropdown">
+                          <button
+                            type="button"
+                            onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
+                            className="h-full px-3 flex items-center space-x-1 border-r border-gray-300 bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                          >
+                            <span className="text-sm">{selectedCountry.flag}</span>
+                            <span className="text-sm text-gray-700">{selectedCountry.code}</span>
+                            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </button>
+                          
+                          {/* Dropdown Menu */}
+                          {isCountryDropdownOpen && (
+                            <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-gray-300 rounded-md shadow-lg z-20 max-h-60 overflow-y-auto">
+                              {countries.map((country) => (
+                                <button
+                                  key={country.country}
+                                  type="button"
+                                  onClick={() => {
+                                    setFormData(prev => ({ ...prev, countryCode: country.code }));
+                                    setIsCountryDropdownOpen(false);
+                                  }}
+                                  className="w-full px-3 py-2 text-left hover:bg-gray-100 flex items-center space-x-3"
+                                >
+                                  <span className="text-sm">{country.flag}</span>
+                                  <span className="text-sm text-gray-700">{country.code}</span>
+                                  <span className="text-sm text-gray-500">{country.name}</span>
+                                </button>
+                              ))}
+                            </div>
+                          )}
                         </div>
+                        
                         <Input
                           id="clientPhone"
                           type="tel"
                           value={formData.clientPhone}
                           onChange={(e) => setFormData(prev => ({ ...prev, clientPhone: e.target.value }))}
-                          className="border-gray-300 text-black placeholder-gray-400 pl-16"
+                          className="border-gray-300 text-black placeholder-gray-400 pl-20"
                           placeholder="987654321"
                           required
                         />
@@ -729,7 +808,7 @@ export default function PackagesPage() {
                       packagePriceId={formData.selectedPackage.id}
                       quantity={1}
                       metadata={{
-                        clientPhone: `+51${formData.clientPhone}`,
+                        clientPhone: `${formData.countryCode}${formData.clientPhone}`,
                         language: formData.language,
                         scheduleSlotId: formData.selectedScheduleSlot?.id
                       }}
