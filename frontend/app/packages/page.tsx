@@ -59,7 +59,7 @@ interface BookingFormData {
 }
 
 export default function PackagesPage() {
-  const [packages, setPackages] = useState<PackagePrice[]>([
+  const [packages] = useState<PackagePrice[]>([
     {
       id: 1,
       price: 900,
@@ -196,7 +196,7 @@ export default function PackagesPage() {
       instructorName: 'Emma Wilson'
     }
   ]);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
@@ -335,7 +335,6 @@ export default function PackagesPage() {
 
   const handlePaymentSuccess = async (paymentData: any) => {
     try {
-      setProcessing(true);
       
       // Create the purchase
       const purchaseResponse = await fetch('/api/client/purchase', {
@@ -402,8 +401,6 @@ export default function PackagesPage() {
     } catch (error) {
       console.error('Error completing purchase:', error);
       toast.error('Failed to complete purchase');
-    } finally {
-      setProcessing(false);
     }
   };
 
