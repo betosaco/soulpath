@@ -80,15 +80,15 @@ export function Header({
   
   return (
     <header className="fixed top-0 left-0 right-0 z-[9997] bg-white shadow-sm border-b border-gray-200 safe-padding">
-      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 flex items-center justify-between header-container">
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-1 sm:py-1.5 lg:py-2 flex items-center justify-between header-container">
         <motion.div 
-          className="flex items-center space-x-2 cursor-pointer touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
+          className="flex items-center space-x-2 cursor-pointer touch-manipulation min-h-[32px] min-w-[32px] flex items-center justify-center"
           onClick={() => scrollToSection('invitation')}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
           {isLoading ? (
-            <div className="h-12 sm:h-14 md:h-16 lg:h-18 w-16 bg-gray-300 animate-pulse rounded"></div>
+            <div className="h-16 sm:h-20 md:h-24 lg:h-28 w-20 bg-gray-300 animate-pulse rounded"></div>
           ) : logoSettings.isActive ? (
             logoSettings.type === 'text' ? (
               <span className="font-heading text-base sm:text-lg md:text-xl lg:text-2xl text-gray-800 font-semibold">
@@ -98,9 +98,9 @@ export function Header({
               <Image 
                 src={logoSettings.imageUrl} 
                 alt="MatMax Yoga Studio Logo" 
-                width={80}
-                height={80}
-                className="h-12 sm:h-14 md:h-16 lg:h-18 object-contain"
+                width={120}
+                height={120}
+                className="h-16 sm:h-20 md:h-24 lg:h-28 object-contain"
               />
             ) : (
               <span className="font-heading text-base sm:text-lg md:text-xl lg:text-2xl text-gray-800 font-semibold">MatMax</span>
