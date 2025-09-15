@@ -116,7 +116,7 @@ export default function PackagesPage() {
       setLoading(true);
       
       // Load packages
-      const packagesResponse = await fetch('/api/client/packages');
+      const packagesResponse = await fetch('/api/packages?active=true&currency=PEN');
       const packagesData = await packagesResponse.json();
       
       if (packagesData.success) {
