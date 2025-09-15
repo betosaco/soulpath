@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { adminApi } from '@/lib/api/admin';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { Save, Search, Globe, RefreshCw, Eye, EyeOff, Upload, Trash2 } from 'lucide-react';
@@ -110,8 +109,8 @@ export function SeoManagement() {
         }
       });
 
-      if (response.success) {
-        const data = response.data;
+      const data = await response.json();
+      if (data.success) {
         
         // If no settings exist in database, use default
         const loadedSettings = { ...defaultSeoSettings, ...data.seo };
@@ -187,7 +186,7 @@ export function SeoManagement() {
         throw new Error('Failed to upload image');
       }
       
-      const data = response.data;
+      const data = await response.json();
       
       if (type === 'og') {
         setSeoSettings(prev => ({

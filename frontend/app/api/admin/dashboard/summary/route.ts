@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     ] = await Promise.all([
       // Total users count
       prisma.user.count({
-        where: { role: 'client' }
+        where: { role: 'USER' }
       }),
       
       // Total bookings count
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       
       // Total revenue from completed purchases
       prisma.purchase.aggregate({
-        where: { paymentStatus: 'completed' },
+        where: { paymentStatus: 'COMPLETED' },
         _sum: { totalAmount: true }
       }),
       
@@ -53,6 +53,16 @@ export async function GET(request: NextRequest) {
         take: 10,
         orderBy: { createdAt: 'desc' },
         include: {
+          scheduleSlot: {
+            select: {
+              startTime: true
+            }
+          },
+          teacherScheduleSlot: {
+            select: {
+              startTime: true
+            }
+          },
           user: {
             select: {
               id: true,
@@ -126,20 +136,22 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Calculate additional metrics
-    const totalRevenueAmount = totalRevenue._sum.totalAmount || 0;
+    const totalRevenueAmount = Number(totalRevenue._sum?.totalAmount || 0);
     const averageBookingValue = totalBookings > 0 ? totalRevenueAmount / totalBookings : 0;
     
     // Process monthly revenue data
     const monthlyRevenueData = Array.isArray(monthlyRevenue) 
-      ? monthlyRevenue.map((item: any) => ({
+      ? monthlyRevenue.map((item: { month: Date; revenue: string | number }) => ({
           month: item.month,
-          revenue: parseFloat(item.revenue) || 0
+          revenue: parseFloat(String(item.revenue)) || 0
         }))
       : [];
 
     // Process booking statistics
     const bookingStatsData = bookingStats.reduce((acc: Record<string, number>, stat) => {
-      acc[stat.status] = stat._count.status;
+      if (stat.status) {
+        acc[stat.status] = stat._count.status;
+      }
       return acc;
     }, {});
 
@@ -159,8 +171,8 @@ export async function GET(request: NextRequest) {
         recentBookings: recentBookings.map(booking => ({
           id: booking.id,
           user: booking.user,
-          sessionDate: booking.sessionDate,
-          sessionTime: booking.sessionTime,
+          sessionDate: booking.createdAt,
+          sessionTime: booking.scheduleSlot?.startTime || booking.teacherScheduleSlot?.startTime,
           status: booking.status,
           packageName: booking.userPackage?.packagePrice?.packageDefinition?.name || 'N/A',
           packageType: booking.userPackage?.packagePrice?.packageDefinition?.packageType || 'N/A',

@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, 
@@ -25,8 +26,6 @@ import {
   CheckCircle,
   ExternalLink,
   BookOpen,
-  Wrench,
-  GraduationCap,
   User,
   CalendarDays
 } from 'lucide-react';
@@ -138,21 +137,21 @@ interface Teacher {
     slug?: string;
     featured: boolean;
   }>;
-  reviews: any[];
+  reviews: Array<{ id: string; rating: number; comment: string; user: { name: string } }>;
 }
 
 interface TeacherProfilePageProps {
   teacherId?: string;
-  onBook?: (teacher: Teacher, serviceType?: any) => void;
+  onBook?: (teacher: Teacher, serviceType?: { id: number; name: string; category: string }) => void;
   onFavorite?: (teacher: Teacher) => void;
   onShare?: (teacher: Teacher) => void;
 }
 
-const CATEGORY_ICONS = {
-  class: BookOpen,
-  workshop: Wrench,
-  training_program: GraduationCap
-};
+// const _CATEGORY_ICONS = {
+//   class: BookOpen,
+//   workshop: Wrench,
+//   training_program: GraduationCap
+// };
 
 export function TeacherProfilePage({ 
   teacherId, 
@@ -173,7 +172,7 @@ export function TeacherProfilePage({
   const currentTeacherId = teacherId || params?.id;
 
   // Fetch teacher profile
-  const fetchTeacher = async () => {
+  const fetchTeacher = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/teachers/${currentTeacherId}`);
@@ -190,15 +189,15 @@ export function TeacherProfilePage({
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentTeacherId]);
 
   useEffect(() => {
     if (currentTeacherId) {
       fetchTeacher();
     }
-  }, [currentTeacherId]);
+  }, [currentTeacherId, fetchTeacher]);
 
-  const handleBook = (teacher: Teacher, serviceType?: any) => {
+  const handleBook = (teacher: Teacher, serviceType?: { id: number; name: string; category: string }) => {
     onBook?.(teacher, serviceType);
     console.log('Booking with teacher:', teacher.name, serviceType);
   };
@@ -299,9 +298,11 @@ export function TeacherProfilePage({
           {/* Cover Image */}
           {teacher.coverImage && (
             <div className="teacher-hero__cover">
-              <img 
+              <Image 
                 src={teacher.coverImage} 
                 alt={`${teacher.name} cover`}
+                width={1200}
+                height={400}
                 className="teacher-hero__cover-image"
               />
               <div className="teacher-hero__overlay">
@@ -327,9 +328,11 @@ export function TeacherProfilePage({
           <div className="teacher-hero__info">
             <div className="teacher-hero__avatar">
               {teacher.avatarUrl ? (
-                <img 
+                <Image 
                   src={teacher.avatarUrl} 
                   alt={teacher.name}
+                  width={120}
+                  height={120}
                   className="teacher-hero__avatar-image"
                 />
               ) : (
@@ -633,7 +636,7 @@ export function TeacherProfilePage({
                   <div className="teacher-schedule__empty">
                     <Calendar size={48} />
                     <h3>No Schedule Available</h3>
-                    <p>This teacher doesn't have any scheduled classes yet.</p>
+                    <p>This teacher doesn&apos;t have any scheduled classes yet.</p>
                   </div>
                 ) : (
                   <div className="teacher-schedule__grid">
@@ -738,7 +741,7 @@ export function TeacherProfilePage({
                   <div className="teacher-certifications__empty">
                     <Award size={48} />
                     <h3>No Certifications Listed</h3>
-                    <p>This teacher hasn't added any certifications yet.</p>
+                    <p>This teacher hasn&apos;t added any certifications yet.</p>
                   </div>
                 ) : (
                   <div className="certifications-grid">
@@ -807,7 +810,7 @@ export function TeacherProfilePage({
                   <div className="teacher-gallery__empty">
                     <Play size={48} />
                     <h3>No Media Available</h3>
-                    <p>This teacher hasn't added any photos or videos yet.</p>
+                    <p>This teacher hasn&apos;t added any photos or videos yet.</p>
                   </div>
                 ) : (
                   <div className="teacher-gallery__content">
@@ -818,9 +821,11 @@ export function TeacherProfilePage({
                         <div className="video-container">
                           {!isVideoPlaying ? (
                             <div className="video-thumbnail" onClick={() => setIsVideoPlaying(true)}>
-                              <img 
-                                src={teacher.thumbnailUrl || teacher.coverImage} 
+                              <Image 
+                                src={teacher.thumbnailUrl || teacher.coverImage || ''} 
                                 alt="Video thumbnail"
+                                width={400}
+                                height={225}
                               />
                               <button className="video-play-button">
                                 <Play size={48} />
@@ -844,9 +849,11 @@ export function TeacherProfilePage({
                         <h3>Photos</h3>
                         <div className="image-gallery">
                           <div className="image-gallery__main">
-                            <img 
-                              src={images[currentImageIndex]} 
+                            <Image 
+                              src={images[currentImageIndex] || ''} 
                               alt={`${teacher.name} photo ${currentImageIndex + 1}`}
+                              width={600}
+                              height={400}
                               className="gallery-main-image"
                             />
                             {images.length > 1 && (
@@ -874,7 +881,7 @@ export function TeacherProfilePage({
                                   className={`gallery-thumbnail ${index === currentImageIndex ? 'active' : ''}`}
                                   onClick={() => setCurrentImageIndex(index)}
                                 >
-                                  <img src={image} alt={`Thumbnail ${index + 1}`} />
+                                  <Image src={image || ''} alt={`Thumbnail ${index + 1}`} width={80} height={60} />
                                 </button>
                               ))}
                             </div>
@@ -908,9 +915,11 @@ export function TeacherProfilePage({
                 >
                   <div className="related-teacher-card__avatar">
                     {relatedTeacher.avatarUrl ? (
-                      <img 
+                      <Image 
                         src={relatedTeacher.avatarUrl} 
                         alt={relatedTeacher.name}
+                        width={60}
+                        height={60}
                       />
                     ) : (
                       <div className="related-teacher-card__avatar-placeholder">

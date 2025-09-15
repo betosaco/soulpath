@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { adminApi } from '@/lib/api/admin';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { 
@@ -63,8 +62,8 @@ export function TelegramConfigManagement() {
         },
       });
 
-      if (response.success) {
-        const result = await response.json();
+      const result = await response.json();
+      if (result.success) {
         setConfig(result.config);
         setFormData({
           bot_token: result.config.bot_token || '',

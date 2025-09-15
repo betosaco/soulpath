@@ -37,28 +37,33 @@ nlu:
     - farewell
     - see you around
 
-- intent: book_reading
+- intent: book_yoga_class
   examples: |
-    - I want to book a reading
-    - I'd like to schedule a reading
-    - Can I book an astrology reading?
-    - I want to book with Jose
-    - I need a reading
-    - I want to schedule a session
-    - Can I get a reading?
-    - I want to book a natal chart reading
-    - I'd like to book a session
+    - I want to book a yoga class
+    - I'd like to schedule a yoga class
+    - Can I book a yoga session?
+    - I want to book a class
+    - I need a yoga class
+    - I want to schedule a class
+    - Can I get a yoga class?
+    - I want to book a Hatha class
+    - I'd like to book a Vinyasa class
     - I want to make an appointment
-    - I need to book a reading
-    - I want to schedule an astrology session
-    - Can I book a consultation?
-    - I'd like to book a reading with Jose Garfias
-    - I want to get a reading
-    - I need to schedule a reading
-    - I want to book a spiritual reading
+    - I need to book a yoga class
+    - I want to schedule a yoga session
+    - Can I book a class?
+    - I'd like to book a class with Maria
+    - I want to get a yoga class
+    - I need to schedule a yoga class
+    - I want to book a beginner class
     - Can I make a booking?
-    - I'd like to schedule a consultation
+    - I'd like to schedule a yoga class
     - I want to book an appointment
+    - I want to reserve a class
+    - Can I reserve a yoga class?
+    - I'd like to reserve a spot
+    - I want to sign up for a class
+    - Can I sign up for yoga?
 
 - intent: provide_info
   examples: |
@@ -69,8 +74,8 @@ nlu:
     - Email: [sarah@gmail.com](email_address)
     - My phone is [555-123-4567](phone_number)
     - Phone number: [+1-555-987-6543](phone_number)
-    - I was born on [January 15, 1990](birth_date)
-    - Birth date: [March 22, 1985](birth_date)
+    - I'm a [beginner](skill_level)
+    - My level is [intermediate](skill_level)
     - My birth time is [2:30 PM](birth_time)
     - I was born at [3:45 AM](birth_time)
     - Birth place: [New York City](birth_place)
@@ -129,7 +134,7 @@ nlu:
     - How much are your services?
     - What do you charge for sessions?
     - What's the cost of a consultation?
-    - How much for astrology reading?
+    - How much for yoga classes?
     - cost
     - costs
     - rate
@@ -282,10 +287,10 @@ nlu:
     - I want to see reading packages
     - Display reading packages
     - List reading packages
-    - Show me astrology packages
-    - I want to see astrology packages
-    - Display astrology packages
-    - List astrology packages
+    - Show me yoga packages
+    - I want to see yoga packages
+    - Display yoga packages
+    - List yoga packages
     - Dame los paquetes
     - Quiero ver los paquetes
     - Muéstrame los paquetes
@@ -312,9 +317,9 @@ nlu:
     - Show me your readings
     - Display your readings
     - List your readings
-    - Show me your astrology services
-    - Display your astrology services
-    - List your astrology services
+    - Show me your yoga services
+    - Display your yoga services
+    - List your yoga services
 
 - intent: package_details
   examples: |
@@ -360,19 +365,24 @@ nlu:
     - ¿Cómo te llamas?
     - ¿Quién eres?
 
-- intent: ask_session_types
+- intent: ask_class_types
   examples: |
-    - What types of sessions do you offer?
-    - What services are available?
+    - What types of yoga classes do you offer?
+    - What yoga styles are available?
     - What can you help me with?
     - What do you offer?
-    - Tell me about your services
-    - What kinds of readings do you do?
-    - ¿Qué tipos de sesiones ofreces?
-    - ¿Qué servicios están disponibles?
+    - Tell me about your classes
+    - What kinds of yoga do you teach?
+    - ¿Qué tipos de clases de yoga ofreces?
+    - ¿Qué estilos de yoga están disponibles?
     - ¿Con qué puedes ayudarme?
     - ¿Qué ofreces?
-    - Cuéntame sobre tus servicios
+    - Cuéntame sobre tus clases
+    - What yoga classes do you have?
+    - What styles of yoga do you teach?
+    - Do you have Hatha yoga?
+    - Do you offer Vinyasa classes?
+    - What beginner classes do you have?
 
 - intent: ask_payment
   examples: |
@@ -387,18 +397,82 @@ nlu:
     - ¿Qué métodos de pago aceptas?
     - ¿Cómo pago por la sesión?
 
-- intent: provide_birth_date
+- intent: ask_teachers
   examples: |
-    - My birth date is [January 15, 1990](date)
-    - I was born on [March 22, 1985](date)
-    - My birthday is [January 15](date)
-    - Born [1990](date)
-    - My date of birth is [15/03/1990](date)
-    - Mi fecha de nacimiento es [15 de enero de 1990](date)
-    - Nací el [22 de marzo de 1985](date)
-    - Mi cumpleaños es [15 de enero](date)
-    - Nací en [1990](date)
-    - Fecha de nacimiento [15/03/1990](date)
+    - Who are your yoga teachers?
+    - Tell me about your instructors
+    - What teachers do you have?
+    - Who teaches the classes?
+    - Can I see your teacher profiles?
+    - Who is available to teach?
+    - ¿Quiénes son tus profesores de yoga?
+    - Cuéntame sobre tus instructores
+    - ¿Qué profesores tienes?
+    - ¿Quién enseña las clases?
+    - ¿Puedo ver los perfiles de los profesores?
+    - ¿Quién está disponible para enseñar?
+    - I want to know about the teachers
+    - Show me the instructors
+    - Who can I book with?
+
+- intent: teacher_info
+  examples: |
+    - Tell me about [Maria](teacher_name)
+    - Who is [Carlos](teacher_name)?
+    - What does [Ana](teacher_name) teach?
+    - I want to know about [teacher name](teacher_name)
+    - Tell me about [instructor name](teacher_name)
+    - Cuéntame sobre [María](teacher_name)
+    - ¿Quién es [Carlos](teacher_name)?
+    - ¿Qué enseña [Ana](teacher_name)?
+    - Quiero saber sobre [nombre del profesor](teacher_name)
+    - Cuéntame sobre [nombre del instructor](teacher_name)
+
+- intent: class_schedule
+  examples: |
+    - What's the class schedule?
+    - When are the classes?
+    - Show me the schedule
+    - What times are classes available?
+    - When is the next class?
+    - ¿Cuál es el horario de clases?
+    - ¿Cuándo son las clases?
+    - Muéstrame el horario
+    - ¿A qué horas hay clases disponibles?
+    - ¿Cuándo es la próxima clase?
+    - I want to see the schedule
+    - What classes are today?
+    - What's available tomorrow?
+
+- intent: ask_skill_level
+  examples: |
+    - What's my skill level?
+    - How do I know my level?
+    - What level am I?
+    - How experienced am I?
+    - ¿Cuál es mi nivel?
+    - ¿Cómo sé mi nivel?
+    - ¿Qué nivel tengo?
+    - ¿Qué tan experimentado soy?
+
+- intent: provide_skill_level
+  examples: |
+    - I'm a [beginner](skill_level)
+    - I'm [intermediate](skill_level)
+    - I'm [advanced](skill_level)
+    - I'm a [novice](skill_level)
+    - I'm [experienced](skill_level)
+    - I'm [new to yoga](skill_level)
+    - I've been practicing for [2 years](skill_level)
+    - I'm [just starting](skill_level)
+    - Soy [principiante](skill_level)
+    - Soy [intermedio](skill_level)
+    - Soy [avanzado](skill_level)
+    - Soy [novato](skill_level)
+    - Soy [experimentado](skill_level)
+    - Soy [nuevo en yoga](skill_level)
+    - He estado practicando por [2 años](skill_level)
+    - Estoy [empezando](skill_level)
 
 - intent: select_package
   examples: |
@@ -513,16 +587,16 @@ nlu:
 
 - intent: chitchat
   examples: |
-    - What is astrology?
-    - How does a natal chart work?
-    - What can you tell me about Jose?
-    - Who is Jose Garfias?
+    - What is yoga?
+    - How does yoga work?
+    - What can you tell me about the studio?
+    - Who owns this studio?
     - What makes you different?
-    - How long have you been doing this?
+    - How long have you been open?
     - What should I expect?
-    - Is this accurate?
+    - Is yoga good for beginners?
     - How does this work?
-    - What is a reading like?
+    - What is a yoga class like?
     - Tell me about yourself
     - What do you do?
     - How are you?
@@ -533,16 +607,16 @@ nlu:
     - Do you have a website?
     - Can I call you?
     - What's your phone number?
-    - ¿Qué es la astrología?
-    - ¿Cómo funciona una carta natal?
-    - ¿Qué me puedes contar sobre José?
-    - ¿Quién es José Garfias?
+    - ¿Qué es el yoga?
+    - ¿Cómo funciona el yoga?
+    - ¿Qué me puedes contar sobre el estudio?
+    - ¿Quién es el dueño de este estudio?
     - ¿Qué te hace diferente?
-    - ¿Cuánto tiempo llevas haciendo esto?
+    - ¿Cuánto tiempo llevan abiertos?
     - ¿Qué debo esperar?
-    - ¿Es esto preciso?
+    - ¿Es bueno el yoga para principiantes?
     - ¿Cómo funciona esto?
-    - ¿Cómo es una lectura?
+    - ¿Cómo es una clase de yoga?
     - Cuéntame sobre ti
     - ¿Qué haces?
     - ¿Cómo estás?
@@ -553,11 +627,11 @@ nlu:
     - ¿Tienen un sitio web?
     - ¿Puedo llamarte?
     - ¿Cuál es tu número de teléfono?
-    - ¿Qué opinas sobre mi signo?
-    - ¿Cómo es el horóscopo de hoy?
-    - ¿Qué significa mi ascendente?
-    - ¿Qué planetas están retrógrados?
-    - ¿Cuándo es mi próximo retorno solar?
+    - ¿Qué opinas sobre el yoga?
+    - ¿Cómo es el yoga para principiantes?
+    - ¿Qué significa Hatha yoga?
+    - ¿Qué es Vinyasa?
+    - ¿Cuándo es la próxima clase?
 
 - intent: nlu_fallback
   examples: |

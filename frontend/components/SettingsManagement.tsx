@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { adminApi } from '@/lib/api/admin';
 import { motion } from 'framer-motion';
 import { 
   Database, 
@@ -49,14 +48,13 @@ export function SettingsManagement() {
         },
       });
 
-      if (response.success) {
-        await response.json();
+      const data = await response.json();
+      if (data.success) {
         setSeedStatus('success');
         setSeedMessage('Homepage content seeded successfully!');
       } else {
-        const error = await response.json();
         setSeedStatus('error');
-        setSeedMessage(error.message || 'Failed to seed content');
+        setSeedMessage(data.message || 'Failed to seed content');
       }
     } catch {
       setSeedStatus('error');
@@ -98,17 +96,16 @@ export function SettingsManagement() {
         },
       });
 
-      if (response.success) {
-        await response.json();
+      const data = await response.json();
+      if (data.success) {
         setSeedCustomersStatus('success');
         setSeedCustomersMessage(clearExisting 
           ? 'Sample customers cleared and reseeded successfully!' 
           : 'Sample customers seeded successfully!'
         );
       } else {
-        const error = await response.json();
         setSeedCustomersStatus('error');
-        setSeedCustomersMessage(error.message || 'Failed to seed customers');
+        setSeedCustomersMessage(data.message || 'Failed to seed customers');
       }
     } catch {
       setSeedCustomersStatus('error');
@@ -142,14 +139,13 @@ export function SettingsManagement() {
         },
       });
 
-      if (response.success) {
-        await response.json();
+      const data = await response.json();
+      if (data.success) {
         setSeedSchedulesStatus('success');
         setSeedSchedulesMessage('Sample schedules seeded successfully!');
       } else {
-        const error = await response.json();
         setSeedSchedulesStatus('error');
-        setSeedSchedulesMessage(error.message || 'Failed to seed schedules');
+        setSeedSchedulesMessage(data.message || 'Failed to seed schedules');
       }
     } catch {
       setSeedSchedulesStatus('error');

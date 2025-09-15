@@ -67,7 +67,7 @@ export async function requireAuth(request: NextRequest): Promise<AuthenticatedUs
       return null;
     }
 
-    if (user.status !== 'active') {
+    if (user.status !== 'ACTIVE') {
       console.log('Auth: User account is not active');
       return null;
     }

@@ -17,38 +17,38 @@ stories:
 - story: test_booking_inquiry
   steps:
   - user: |
-      hola, quiero agendar una cita
+      hola, quiero agendar una clase
   - intent: greet
   - action: utter_greet
   - user: |
-      quiero reservar una sesión de astrología
-  - intent: book_session
-  - action: utter_book_session
+      quiero reservar una clase de yoga
+  - intent: book_yoga_class
+  - action: utter_book_class
 
 # Test story: Pricing inquiry flow
 - story: test_pricing_inquiry
   steps:
   - user: |
-      cuánto cuesta una sesión
+      cuánto cuesta una clase
   - intent: ask_pricing
   - action: utter_ask_packages
   - action: action_fetch_packages
   - user: |
-      me interesa la astrología
-  - intent: book_session
-  - action: utter_book_session
+      me interesa el yoga
+  - intent: book_yoga_class
+  - action: utter_book_class
 
-# Test story: Astrology question flow
-- story: test_astrology_question
+# Test story: Class types question flow
+- story: test_class_types_question
   steps:
   - user: |
-      soy Leo y quiero saber sobre mi signo
-  - intent: astrology_question
-  - action: utter_astrology_question
+      qué tipos de yoga ofrecen
+  - intent: ask_class_types
+  - action: utter_class_types
   - user: |
-      me gustaría agendar una consulta
-  - intent: book_session
-  - action: utter_book_session
+      me gustaría agendar una clase
+  - intent: book_yoga_class
+  - action: utter_book_class
 
 # Test story: Help request flow
 - story: test_help_request
@@ -59,8 +59,8 @@ stories:
   - action: utter_help
   - user: |
       qué servicios ofrecen
-  - intent: ask_session_types
-  - action: utter_session_types
+  - intent: ask_class_types
+  - action: utter_class_types
 
 # Test story: Contact inquiry flow
 - story: test_contact_inquiry
@@ -94,18 +94,18 @@ stories:
   - intent: greet
   - action: utter_greet
   - user: |
-      qué tipos de sesiones tienen
-  - intent: ask_session_types
-  - action: utter_session_types
+      qué tipos de clases tienen
+  - intent: ask_class_types
+  - action: utter_class_types
   - user: |
-      cuánto cuesta la astrología
+      cuánto cuesta el yoga
   - intent: ask_pricing
   - action: utter_ask_packages
   - action: action_fetch_packages
   - user: |
-      me interesa agendar una cita
-  - intent: book_session
-  - action: utter_book_session
+      me interesa agendar una clase
+  - intent: book_yoga_class
+  - action: utter_book_class
 
 # Test story: English pricing inquiry
 - story: test_english_pricing
@@ -116,9 +116,9 @@ stories:
   - action: utter_ask_packages
   - action: action_fetch_packages
   - user: |
-      I want to book a session
-  - intent: book_session
-  - action: utter_book_session
+      I want to book a class
+  - intent: book_yoga_class
+  - action: utter_book_class
 
 # Test story: Spanish pricing inquiry
 - story: test_spanish_pricing
@@ -129,6 +129,6 @@ stories:
   - action: utter_ask_packages
   - action: action_fetch_packages
   - user: |
-      quiero reservar una sesión
-  - intent: book_session
-  - action: utter_book_session
+      quiero reservar una clase
+  - intent: book_yoga_class
+  - action: utter_book_class

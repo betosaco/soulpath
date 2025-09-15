@@ -91,7 +91,6 @@ export async function GET(request: NextRequest) {
           id: true,
           name: true,
           email: true,
-          specialties: true,
           languages: true,
           experience: true,
           isActive: true
@@ -260,7 +259,6 @@ export async function POST(request: NextRequest) {
         endTime: true,
         isAvailable: true,
         maxBookings: true,
-        specialties: true,
         createdAt: true,
         updatedAt: true
       }
@@ -403,7 +401,6 @@ export async function PUT(request: NextRequest) {
         endTime: true,
         isAvailable: true,
         maxBookings: true,
-        specialties: true,
         createdAt: true,
         updatedAt: true
       }

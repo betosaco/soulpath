@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
           totalAmount: amount,
           currencyCode: currency.toUpperCase(),
           paymentMethod: 'izipay',
-          paymentStatus: 'pending',
+          paymentStatus: 'PENDING',
           transactionId: paymentResult.transactionId,
           notes: `Izipay payment - Order: ${orderId}`,
         }

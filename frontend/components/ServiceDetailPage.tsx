@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { ServiceDisplay } from './ServiceDisplay';
 import { 
@@ -9,13 +10,7 @@ import {
   Calendar, 
   Clock, 
   Users, 
-  MapPin,
-  Star,
-  Share2,
-  Heart,
-  BookOpen,
-  Wrench,
-  GraduationCap
+  MapPin
 } from 'lucide-react';
 
 interface ServiceType {
@@ -31,7 +26,13 @@ interface ServiceType {
   benefits: string[];
   difficulty?: string;
   price?: number;
-  currency?: string;
+  currencyId?: number;
+  currency?: {
+    id: number;
+    code: string;
+    name: string;
+    symbol: string;
+  };
   isActive: boolean;
   featured: boolean;
   color?: string;
@@ -92,7 +93,7 @@ export function ServiceDetailPage({
   const currentServiceId = serviceId || params?.id;
 
   // Fetch service details
-  const fetchService = async () => {
+  const fetchService = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/services/${currentServiceId}`);
@@ -109,7 +110,7 @@ export function ServiceDetailPage({
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentServiceId]);
 
   // Fetch related services
   const fetchRelatedServices = async (category: string, excludeId: number) => {
@@ -129,7 +130,7 @@ export function ServiceDetailPage({
     if (currentServiceId) {
       fetchService();
     }
-  }, [currentServiceId]);
+  }, [currentServiceId, fetchService]);
 
   useEffect(() => {
     if (service) {
@@ -237,9 +238,12 @@ export function ServiceDetailPage({
                 >
                   {relatedService.coverImage && (
                     <div className="related-service-card__image">
-                      <img 
+                      <Image 
                         src={relatedService.coverImage} 
                         alt={relatedService.name}
+                        width={300}
+                        height={200}
+                        className="related-service-card__image"
                       />
                     </div>
                   )}
@@ -275,7 +279,7 @@ export function ServiceDetailPage({
                         {relatedService.price 
                           ? new Intl.NumberFormat('en-US', {
                               style: 'currency',
-                              currency: relatedService.currency || 'USD'
+                              currency: typeof relatedService.currency === 'string' ? relatedService.currency : relatedService.currency?.code || 'USD'
                             }).format(relatedService.price)
                           : 'Contact for pricing'
                         }

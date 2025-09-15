@@ -10,10 +10,7 @@ import {
   Trash2, 
   MapPin, 
   Users, 
-  Clock,
   Star,
-  Eye,
-  EyeOff,
   Check,
   X
 } from 'lucide-react';

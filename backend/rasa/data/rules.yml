@@ -22,15 +22,15 @@ rules:
   - intent: provide_name
   - action: action_handle_name_provision
 
-- rule: Handle astrology sign
+- rule: Handle teacher info requests
   steps:
-  - intent: astrology_sign
-  - action: utter_astrology_sign
+  - intent: ask_teachers
+  - action: action_get_teachers_info
 
-- rule: Handle birth date
+- rule: Handle class schedule requests
   steps:
-  - intent: birth_date
-  - action: utter_birth_date
+  - intent: class_schedule
+  - action: action_get_class_schedule
 
 # Ensure pricing goes straight to packages API
 - rule: Pricing triggers packages fetch
@@ -38,3 +38,17 @@ rules:
   - intent: ask_pricing
   - action: utter_ask_packages
   - action: action_fetch_packages
+
+# Handle class types requests
+- rule: Handle class types requests
+  steps:
+  - intent: ask_class_types
+  - action: utter_class_types
+
+# Handle skill level provision
+- rule: Handle skill level provision
+  steps:
+  - intent: provide_skill_level
+  - action: action_recommend_class
+
+# Handle yoga class booking - let stories handle this flow

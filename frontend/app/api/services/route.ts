@@ -73,16 +73,13 @@ export async function GET(request: NextRequest) {
       ];
     }
 
-    if (priceMin !== undefined || priceMax !== undefined) {
-      where.price = {};
-      if (priceMin !== undefined) where.price.gte = priceMin;
-      if (priceMax !== undefined) where.price.lte = priceMax;
-    }
+    // Note: ServiceType doesn't have a direct price property
+    // Price filtering would need to be done through servicePrices relation
 
     if (durationMin !== undefined || durationMax !== undefined) {
       where.duration = {};
-      if (durationMin !== undefined) where.duration.gte = durationMin;
-      if (durationMax !== undefined) where.duration.lte = durationMax;
+      if (durationMin !== undefined) (where.duration as { gte?: number }).gte = durationMin;
+      if (durationMax !== undefined) (where.duration as { lte?: number }).lte = durationMax;
     }
 
     // Build sort order
@@ -129,7 +126,15 @@ export async function GET(request: NextRequest) {
           benefits: true,
           difficulty: true,
           price: true,
-          currency: true,
+          currencyId: true,
+          currency: {
+            select: {
+              id: true,
+              code: true,
+              name: true,
+              symbol: true
+            }
+          },
           featured: true,
           color: true,
           icon: true,

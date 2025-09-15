@@ -147,17 +147,17 @@ export async function POST(request: NextRequest) {
     switch (transactionStatus) {
       case 'PAID':
       case 'AUTHORISED':
-        newPaymentStatus = 'completed';
+        newPaymentStatus = 'COMPLETED';
         notes = `Payment confirmed via webhook. Transaction ID: ${transactionId}`;
         break;
       case 'UNPAID':
       case 'REFUSED':
       case 'CANCELLED':
-        newPaymentStatus = 'failed';
+        newPaymentStatus = 'FAILED';
         notes = `Payment failed via webhook. Status: ${transactionStatus}. Transaction ID: ${transactionId}`;
         break;
       case 'PENDING':
-        newPaymentStatus = 'pending';
+        newPaymentStatus = 'PENDING';
         notes = `Payment pending via webhook. Transaction ID: ${transactionId}`;
         break;
       default:
@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
         paymentStatus: newPaymentStatus,
         transactionId: transactionId || purchase.transactionId,
         notes: notes,
-        ...(newPaymentStatus === 'completed' && !purchase.purchasedAt && {
+        ...(newPaymentStatus === 'COMPLETED' && !purchase.purchasedAt && {
           purchasedAt: new Date()
         })
       }
@@ -186,7 +186,7 @@ export async function POST(request: NextRequest) {
     });
 
     // If payment is completed, ensure user package is created
-    if (newPaymentStatus === 'completed') {
+    if (newPaymentStatus === 'COMPLETED') {
       console.log('✅ Payment completed, user package creation would happen here');
       // TODO: Implement user package creation logic
     }

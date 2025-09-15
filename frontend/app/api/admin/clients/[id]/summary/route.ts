@@ -74,6 +74,11 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
                     }
                   }
                 }
+              },
+              currency: {
+                select: {
+                  code: true
+                }
               }
             }
           }
@@ -104,6 +109,11 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
                     }
                   }
                 }
+              },
+              currency: {
+                select: {
+                  code: true
+                }
               }
             }
           }
@@ -118,6 +128,16 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         take: 5,
         orderBy: { createdAt: 'desc' },
         include: {
+          scheduleSlot: {
+            select: {
+              startTime: true
+            }
+          },
+          teacherScheduleSlot: {
+            select: {
+              startTime: true
+            }
+          },
           userPackage: {
             include: {
               packagePrice: {
@@ -126,6 +146,11 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
                     select: {
                       name: true,
                       packageType: true
+                    }
+                  },
+                  currency: {
+                    select: {
+                      code: true
                     }
                   }
                 }
@@ -139,7 +164,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       prisma.purchase.aggregate({
         where: {
           userId: clientId,
-          paymentStatus: 'completed'
+          paymentStatus: 'COMPLETED'
         },
         _sum: { totalAmount: true }
       }),
@@ -149,10 +174,20 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         where: {
           userId: clientId,
           status: { in: ['confirmed', 'pending'] },
-          sessionDate: { gte: new Date() }
+          createdAt: { gte: new Date() }
         },
-        orderBy: { sessionDate: 'asc' },
+        orderBy: { createdAt: 'asc' },
         include: {
+          scheduleSlot: {
+            select: {
+              startTime: true
+            }
+          },
+          teacherScheduleSlot: {
+            select: {
+              startTime: true
+            }
+          },
           userPackage: {
             include: {
               packagePrice: {
@@ -161,6 +196,11 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
                     select: {
                       name: true,
                       packageType: true
+                    }
+                  },
+                  currency: {
+                    select: {
+                      code: true
                     }
                   }
                 }
@@ -181,8 +221,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
     // Calculate additional metrics
     const totalSpent = totalPurchaseAmount._sum.totalAmount || 0;
-    const totalSessionsUsed = activePackages.reduce((sum, pkg) => sum + pkg.sessionsUsed, 0);
-    const totalSessionsAvailable = activePackages.reduce((sum, pkg) => sum + (pkg.quantity * pkg.packagePrice.packageDefinition.sessionsCount), 0);
+    const totalSessionsUsed = activePackages.reduce((sum, pkg) => sum + (pkg.sessionsUsed || 0), 0);
+    const totalSessionsAvailable = activePackages.reduce((sum, pkg) => sum + ((pkg.quantity || 0) * pkg.packagePrice.packageDefinition.sessionsCount), 0);
     const sessionsRemaining = totalSessionsAvailable - totalSessionsUsed;
 
     // Process packages data
@@ -191,8 +231,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       packageName: pkg.packagePrice.packageDefinition.name,
       packageType: pkg.packagePrice.packageDefinition.packageType,
       sessionsCount: pkg.packagePrice.packageDefinition.sessionsCount,
-      sessionsUsed: pkg.sessionsUsed,
-      sessionsRemaining: (pkg.quantity * pkg.packagePrice.packageDefinition.sessionsCount) - pkg.sessionsUsed,
+      sessionsUsed: pkg.sessionsUsed || 0,
+      sessionsRemaining: ((pkg.quantity || 0) * pkg.packagePrice.packageDefinition.sessionsCount) - (pkg.sessionsUsed || 0),
       quantity: pkg.quantity,
       price: pkg.packagePrice.price,
       currencyCode: pkg.packagePrice.currency?.code || 'USD',
@@ -216,8 +256,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     // Process bookings data
     const processedRecentBookings = recentBookings.map(booking => ({
       id: booking.id,
-      sessionDate: booking.sessionDate,
-      sessionTime: booking.sessionTime,
+      sessionDate: booking.createdAt,
+      sessionTime: booking.scheduleSlot?.startTime || booking.teacherScheduleSlot?.startTime,
       status: booking.status,
       packageName: booking.userPackage?.packagePrice?.packageDefinition?.name || 'N/A',
       packageType: booking.userPackage?.packagePrice?.packageDefinition?.packageType || 'N/A',
@@ -226,8 +266,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
     const processedUpcomingBookings = upcomingBookings.map(booking => ({
       id: booking.id,
-      sessionDate: booking.sessionDate,
-      sessionTime: booking.sessionTime,
+      sessionDate: booking.createdAt,
+      sessionTime: booking.scheduleSlot?.startTime || booking.teacherScheduleSlot?.startTime,
       status: booking.status,
       packageName: booking.userPackage?.packagePrice?.packageDefinition?.name || 'N/A',
       packageType: booking.userPackage?.packagePrice?.packageDefinition?.packageType || 'N/A'

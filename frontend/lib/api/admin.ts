@@ -5,7 +5,7 @@ import { safeApiCall, ApiResponse } from '@/lib/api-utils';
  * All methods automatically include authentication headers
  */
 
-type AdminApiResponse<T = any> = ApiResponse<T>;
+type AdminApiResponse<T = unknown> = ApiResponse<T>;
 
 /**
  * Get authentication token from localStorage
@@ -46,7 +46,7 @@ export class AdminApiClient {
     });
 
     // safeApiCall returns the parsed JSON response, so we return it directly
-    return response;
+    return response as AdminApiResponse<T>;
   }
 
   // User Management
@@ -78,14 +78,14 @@ export class AdminApiClient {
     return this.makeRequest('/api/admin/package-definitions');
   }
 
-  async createPackageDefinition(data: any) {
+  async createPackageDefinition(data: Record<string, unknown>) {
     return this.makeRequest('/api/admin/package-definitions', {
       method: 'POST',
       body: JSON.stringify(data)
     });
   }
 
-  async updatePackageDefinition(id: number, data: any) {
+  async updatePackageDefinition(id: number, data: Record<string, unknown>) {
     return this.makeRequest(`/api/admin/package-definitions/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data)
@@ -146,7 +146,7 @@ export class AdminApiClient {
     return this.makeRequest('/api/admin/content');
   }
 
-  async updateContent(data: any) {
+  async updateContent(data: Record<string, unknown>) {
     return this.makeRequest('/api/admin/content', {
       method: 'PUT',
       body: JSON.stringify(data)
@@ -158,7 +158,7 @@ export class AdminApiClient {
     return this.makeRequest('/api/admin/communication/config');
   }
 
-  async updateCommunicationConfig(data: any) {
+  async updateCommunicationConfig(data: Record<string, unknown>) {
     return this.makeRequest('/api/admin/communication/config', {
       method: 'PUT',
       body: JSON.stringify(data)
@@ -207,7 +207,7 @@ export class AdminApiClient {
     return this.makeRequest('/api/admin/external-apis');
   }
 
-  async updateExternalApiConfig(configId: string, data: any) {
+  async updateExternalApiConfig(configId: string, data: Record<string, unknown>) {
     return this.makeRequest(`/api/admin/external-apis/${configId}`, {
       method: 'PUT',
       body: JSON.stringify(data)

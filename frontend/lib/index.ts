@@ -56,12 +56,13 @@ export * from './supabase/server';
 // ============================================================================
 
 export * from './types';
+export type { Currency as ValidationCurrency, SessionDuration as ValidationSessionDuration } from './validations';
 
 // ============================================================================
 // VALIDATIONS
 // ============================================================================
 
-export * from './validations';
+// export * from './validations'; // Commented out due to conflicts with types
 
 // ============================================================================
 // EMAIL

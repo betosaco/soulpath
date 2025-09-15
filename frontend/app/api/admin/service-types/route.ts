@@ -207,7 +207,7 @@ export async function POST(request: NextRequest) {
     const existingServiceType = await prisma.serviceType.findFirst({
       where: { 
         name: serviceTypeData.name,
-        category: serviceTypeData.category
+        category: serviceTypeData.category.toUpperCase() as 'CLASS' | 'WORKSHOP' | 'TRAINING_PROGRAM'
       }
     });
 
@@ -222,6 +222,7 @@ export async function POST(request: NextRequest) {
     const serviceType = await prisma.serviceType.create({
       data: {
         ...serviceTypeData,
+        category: serviceTypeData.category.toUpperCase() as 'CLASS' | 'WORKSHOP' | 'TRAINING_PROGRAM',
         maxParticipants: serviceTypeData.maxParticipants || null
       },
       select: {
@@ -305,7 +306,7 @@ export async function PUT(request: NextRequest) {
       const nameExists = await prisma.serviceType.findFirst({
         where: { 
           name: updateData.name,
-          category: updateData.category || existingServiceType.category,
+          category: updateData.category ? updateData.category.toUpperCase() as 'CLASS' | 'WORKSHOP' | 'TRAINING_PROGRAM' : existingServiceType.category,
           id: { not: id }
         }
       });
@@ -323,6 +324,7 @@ export async function PUT(request: NextRequest) {
       where: { id },
       data: {
         ...updateData,
+        category: updateData.category ? updateData.category.toUpperCase() as 'CLASS' | 'WORKSHOP' | 'TRAINING_PROGRAM' : undefined,
         maxParticipants: updateData.maxParticipants || null
       },
       select: {

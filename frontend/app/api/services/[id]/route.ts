@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -43,7 +43,15 @@ export async function GET(
         benefits: true,
         difficulty: true,
         price: true,
-        currency: true,
+        currencyId: true,
+        currency: {
+          select: {
+            id: true,
+            code: true,
+            name: true,
+            symbol: true
+          }
+        },
         featured: true,
         color: true,
         icon: true,
@@ -54,7 +62,7 @@ export async function GET(
         content: true,
         highlights: true,
         testimonials: true,
-        faq: true,
+        faqs: true,
         metaTitle: true,
         metaDescription: true,
         slug: true,
@@ -124,7 +132,15 @@ export async function GET(
         maxParticipants: true,
         minParticipants: true,
         price: true,
-        currency: true,
+        currencyId: true,
+        currency: {
+          select: {
+            id: true,
+            code: true,
+            name: true,
+            symbol: true
+          }
+        },
         coverImage: true,
         slug: true,
         featured: true

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -96,7 +96,6 @@ export async function GET(
             startTime: true,
             endTime: true,
             maxBookings: true,
-            specialties: true,
             serviceType: {
               select: {
                 id: true,
@@ -140,8 +139,7 @@ export async function GET(
         isActive: true,
         id: { not: teacher.id },
         OR: [
-          { venueId: teacher.venue?.id },
-          { specialties: { hasSome: teacher.specialties } }
+          { venueId: teacher.venue?.id }
         ]
       },
       select: {
@@ -208,7 +206,7 @@ export async function GET(
 
     // Get teacher's recent reviews/testimonials (if you have a reviews system)
     // For now, we'll return empty array
-    const reviews = [];
+    const reviews: Array<{ id: string; rating: number; comment: string; user: { name: string } }> = [];
 
     return NextResponse.json({
       success: true,

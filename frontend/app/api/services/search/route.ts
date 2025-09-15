@@ -42,8 +42,8 @@ export async function GET(request: NextRequest) {
     // Parse and validate query parameters
     const queryParams = {
       search: searchParams.get('search') || undefined,
-      category: searchParams.get('category') as any,
-      difficulty: searchParams.get('difficulty') as any,
+      category: searchParams.get('category') as 'CLASS' | 'WORKSHOP' | 'TRAINING_PROGRAM' | null,
+      difficulty: searchParams.get('difficulty') as 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | null,
       amenityIds: searchParams.get('amenityIds')?.split(',').map(Number).filter(Boolean),
       specialtyIds: searchParams.get('specialtyIds')?.split(',').map(Number).filter(Boolean),
       languageIds: searchParams.get('languageIds')?.split(',').map(Number).filter(Boolean),
@@ -52,13 +52,13 @@ export async function GET(request: NextRequest) {
       minPrice: searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : undefined,
       maxPrice: searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : undefined,
       currency: searchParams.get('currency') || undefined,
-      dayOfWeek: searchParams.get('dayOfWeek') as any,
+      dayOfWeek: searchParams.get('dayOfWeek') as 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY' | 'SATURDAY' | 'SUNDAY' | null,
       timeFrom: searchParams.get('timeFrom') || undefined,
       timeTo: searchParams.get('timeTo') || undefined,
       page: Number(searchParams.get('page')) || 1,
       limit: Number(searchParams.get('limit')) || 12,
-      sortBy: (searchParams.get('sortBy') as any) || 'featured',
-      sortOrder: (searchParams.get('sortOrder') as any) || 'desc'
+      sortBy: (searchParams.get('sortBy') as 'featured' | 'name' | 'price' | 'duration' | 'createdAt' | null) || 'featured',
+      sortOrder: (searchParams.get('sortOrder') as 'asc' | 'desc' | null) || 'desc'
     };
 
     const validatedParams = ServiceSearchSchema.parse(queryParams);
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Build complex where clause using new relationships
-    const where: any = {
+    const where: Record<string, unknown> = {
       isActive: true
     };
 
@@ -176,7 +176,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build orderBy clause
-    const orderBy: any = {};
+    const orderBy: Record<string, unknown> = {};
     if (sortBy === 'featured') {
       orderBy.featured = 'desc';
     } else if (sortBy === 'price') {
@@ -334,7 +334,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { error: 'Validation error', details: error.issues },
         { status: 400 }
       );
     }

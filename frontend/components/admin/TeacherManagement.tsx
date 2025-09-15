@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
@@ -527,7 +528,7 @@ export function TeacherManagement() {
                 <div className="teacher-card__header">
                   <div className="teacher-card__avatar">
                     {teacher.avatarUrl ? (
-                      <img src={teacher.avatarUrl} alt={teacher.name} />
+                      <Image src={teacher.avatarUrl} alt={teacher.name} width={60} height={60} />
                     ) : (
                       <div className="teacher-card__avatar-placeholder">
                         {teacher.name.charAt(0).toUpperCase()}

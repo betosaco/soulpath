@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 
 // GET /api/admin/languages - List all languages
 export async function GET(request: NextRequest) {
@@ -7,7 +8,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const isActive = searchParams.get('isActive');
 
-    const where: any = {};
+    const where: Prisma.LanguageWhereInput = {};
     if (isActive !== null) {
       where.isActive = isActive === 'true';
     }

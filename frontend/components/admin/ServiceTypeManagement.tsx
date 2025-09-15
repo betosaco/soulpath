@@ -14,8 +14,6 @@ import {
   Star,
   Check,
   X,
-  Palette,
-  Image,
   BookOpen,
   GraduationCap,
   Wrench
@@ -30,6 +28,14 @@ interface ServiceType {
   maxParticipants?: number;
   minParticipants: number;
   requirements: string[];
+  price?: number;
+  currencyId?: number;
+  currency?: {
+    id: number;
+    code: string;
+    name: string;
+    symbol: string;
+  };
   isActive: boolean;
   displayOrder: number;
   featured: boolean;
@@ -544,7 +550,7 @@ export function ServiceTypeManagement() {
                     <label className="admin-form-label">Category *</label>
                     <select
                       value={formData.category}
-                      onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as any }))}
+                      onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as 'class' | 'workshop' | 'training_program' }))}
                       className="admin-form-select"
                       required
                     >

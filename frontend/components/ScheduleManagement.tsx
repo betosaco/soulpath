@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { adminApi } from '@/lib/api/admin';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BaseButton } from '@/components/ui/BaseButton';
 import { BaseInput } from '@/components/ui/BaseInput';

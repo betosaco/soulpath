@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
-import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { purchaseUpdateSchema } from '@/lib/validations';
 
@@ -27,7 +26,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     }
 
     const body = await request.json();
-    const validation = updatePurchaseSchema.safeParse(body);
+    const validation = purchaseUpdateSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json({
@@ -60,6 +59,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         where: { id: purchaseId },
         data: {
           ...updateData,
+          paymentStatus: updateData.paymentStatus ? updateData.paymentStatus.toUpperCase() as 'PENDING' | 'COMPLETED' | 'FAILED' | 'CANCELLED' : undefined,
           confirmedAt: updateData.confirmedAt ? new Date(updateData.confirmedAt) : undefined
         }
       });
@@ -69,7 +69,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         await tx.paymentRecord.updateMany({
           where: { purchaseId: purchaseId },
           data: {
-            paymentStatus: updateData.paymentStatus,
+            paymentStatus: updateData.paymentStatus.toUpperCase() as 'PENDING' | 'COMPLETED' | 'FAILED' | 'CANCELLED',
             confirmedAt: updateData.paymentStatus === 'completed' ? new Date() : null
           }
         });

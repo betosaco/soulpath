@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
       totalSpent,
       nextUpcomingSession,
       recentBookings,
-      packageUsageStats
+      // packageUsageStats
     ] = await Promise.all([
       // Active packages
       prisma.userPackage.findMany({
@@ -50,6 +50,11 @@ export async function GET(request: NextRequest) {
                     }
                   }
                 }
+              },
+              currency: {
+                select: {
+                  code: true
+                }
               }
             }
           }
@@ -62,45 +67,20 @@ export async function GET(request: NextRequest) {
         where: {
           userId: user.id,
           status: { in: ['confirmed', 'pending'] },
-          sessionDate: { gte: new Date() }
+          createdAt: { gte: new Date() }
         },
-        orderBy: { sessionDate: 'asc' },
+        orderBy: { createdAt: 'asc' },
         include: {
-          userPackage: {
-            include: {
-              packagePrice: {
-                include: {
-                  packageDefinition: {
-                    select: {
-                      name: true,
-                      packageType: true
-                    }
-                  }
-                }
-              }
+          scheduleSlot: {
+            select: {
+              startTime: true
             }
-          }
-        }
-      }),
-      
-      // Total spent
-      prisma.purchase.aggregate({
-        where: {
-          userId: user.id,
-          paymentStatus: 'completed'
-        },
-        _sum: { totalAmount: true }
-      }),
-      
-      // Next upcoming session
-      prisma.booking.findFirst({
-        where: {
-          userId: user.id,
-          status: { in: ['confirmed', 'pending'] },
-          sessionDate: { gte: new Date() }
-        },
-        orderBy: { sessionDate: 'asc' },
-        include: {
+          },
+          teacherScheduleSlot: {
+            select: {
+              startTime: true
+            }
+          },
           userPackage: {
             include: {
               packagePrice: {
@@ -116,6 +96,67 @@ export async function GET(request: NextRequest) {
                         }
                       }
                     }
+                  },
+                  currency: {
+                    select: {
+                      code: true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }),
+      
+      // Total spent
+      prisma.purchase.aggregate({
+        where: {
+          userId: user.id,
+          paymentStatus: 'COMPLETED'
+        },
+        _sum: { totalAmount: true }
+      }),
+      
+      // Next upcoming session
+      prisma.booking.findFirst({
+        where: {
+          userId: user.id,
+          status: { in: ['confirmed', 'pending'] },
+          createdAt: { gte: new Date() }
+        },
+        orderBy: { createdAt: 'asc' },
+        include: {
+          scheduleSlot: {
+            select: {
+              startTime: true
+            }
+          },
+          teacherScheduleSlot: {
+            select: {
+              startTime: true
+            }
+          },
+          userPackage: {
+            include: {
+              packagePrice: {
+                include: {
+                  packageDefinition: {
+                    select: {
+                      name: true,
+                      packageType: true,
+                      sessionDuration: {
+                        select: {
+                          name: true,
+                          duration_minutes: true
+                        }
+                      }
+                    }
+                  },
+                  currency: {
+                    select: {
+                      code: true
+                    }
                   }
                 }
               }
@@ -130,6 +171,16 @@ export async function GET(request: NextRequest) {
         take: 5,
         orderBy: { createdAt: 'desc' },
         include: {
+          scheduleSlot: {
+            select: {
+              startTime: true
+            }
+          },
+          teacherScheduleSlot: {
+            select: {
+              startTime: true
+            }
+          },
           userPackage: {
             include: {
               packagePrice: {
@@ -137,7 +188,18 @@ export async function GET(request: NextRequest) {
                   packageDefinition: {
                     select: {
                       name: true,
-                      packageType: true
+                      packageType: true,
+                      sessionDuration: {
+                        select: {
+                          name: true,
+                          duration_minutes: true
+                        }
+                      }
+                    }
+                  },
+                  currency: {
+                    select: {
+                      code: true
                     }
                   }
                 }
@@ -164,9 +226,9 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Calculate metrics
-    const totalSpentAmount = totalSpent._sum.totalAmount || 0;
-    const totalSessionsUsed = activePackages.reduce((sum, pkg) => sum + pkg.sessionsUsed, 0);
-    const totalSessionsAvailable = activePackages.reduce((sum, pkg) => sum + (pkg.quantity * pkg.packagePrice.packageDefinition.sessionsCount), 0);
+    const totalSpentAmount = totalSpent._sum?.totalAmount || 0;
+    const totalSessionsUsed = activePackages.reduce((sum, pkg) => sum + (pkg.sessionsUsed || 0), 0);
+    const totalSessionsAvailable = activePackages.reduce((sum, pkg) => sum + ((pkg.quantity || 0) * pkg.packagePrice.packageDefinition.sessionsCount), 0);
     const sessionsRemaining = totalSessionsAvailable - totalSessionsUsed;
 
     // Process active packages
@@ -175,22 +237,22 @@ export async function GET(request: NextRequest) {
       packageName: pkg.packagePrice.packageDefinition.name,
       packageType: pkg.packagePrice.packageDefinition.packageType,
       sessionsCount: pkg.packagePrice.packageDefinition.sessionsCount,
-      sessionsUsed: pkg.sessionsUsed,
-      sessionsRemaining: (pkg.quantity * pkg.packagePrice.packageDefinition.sessionsCount) - pkg.sessionsUsed,
+      sessionsUsed: pkg.sessionsUsed || 0,
+      sessionsRemaining: ((pkg.quantity || 0) * pkg.packagePrice.packageDefinition.sessionsCount) - (pkg.sessionsUsed || 0),
       quantity: pkg.quantity,
       price: pkg.packagePrice.price,
       currencyCode: pkg.packagePrice.currency?.code || 'USD',
       expiresAt: pkg.expiresAt,
       progressPercentage: pkg.packagePrice.packageDefinition.sessionsCount > 0 
-        ? Math.round((pkg.sessionsUsed / (pkg.quantity * pkg.packagePrice.packageDefinition.sessionsCount)) * 100)
+        ? Math.round(((pkg.sessionsUsed || 0) / ((pkg.quantity || 0) * pkg.packagePrice.packageDefinition.sessionsCount)) * 100)
         : 0
     }));
 
     // Process upcoming bookings
     const processedUpcomingBookings = upcomingBookings.map(booking => ({
       id: booking.id,
-      sessionDate: booking.sessionDate,
-      sessionTime: booking.sessionTime,
+      createdAt: booking.createdAt,
+      sessionTime: booking.scheduleSlot?.startTime || booking.teacherScheduleSlot?.startTime,
       status: booking.status,
       packageName: booking.userPackage?.packagePrice?.packageDefinition?.name || 'N/A',
       packageType: booking.userPackage?.packagePrice?.packageDefinition?.packageType || 'N/A',
@@ -200,19 +262,18 @@ export async function GET(request: NextRequest) {
     // Process recent bookings
     const processedRecentBookings = recentBookings.map(booking => ({
       id: booking.id,
-      sessionDate: booking.sessionDate,
-      sessionTime: booking.sessionTime,
+      createdAt: booking.createdAt,
+      sessionTime: booking.scheduleSlot?.startTime || booking.teacherScheduleSlot?.startTime,
       status: booking.status,
       packageName: booking.userPackage?.packagePrice?.packageDefinition?.name || 'N/A',
-      packageType: booking.userPackage?.packagePrice?.packageDefinition?.packageType || 'N/A',
-      createdAt: booking.createdAt
+      packageType: booking.userPackage?.packagePrice?.packageDefinition?.packageType || 'N/A'
     }));
 
     // Process next upcoming session
     const processedNextSession = nextUpcomingSession ? {
       id: nextUpcomingSession.id,
-      sessionDate: nextUpcomingSession.sessionDate,
-      sessionTime: nextUpcomingSession.sessionTime,
+      createdAt: nextUpcomingSession.createdAt,
+      sessionTime: nextUpcomingSession.scheduleSlot?.startTime || nextUpcomingSession.teacherScheduleSlot?.startTime,
       status: nextUpcomingSession.status,
       packageName: nextUpcomingSession.userPackage?.packagePrice?.packageDefinition?.name || 'N/A',
       packageType: nextUpcomingSession.userPackage?.packagePrice?.packageDefinition?.packageType || 'N/A',

@@ -402,8 +402,8 @@ export async function POST(request: NextRequest) {
             birthTime: userDetails.birthTime?.toString().substring(0, 5) || '',
             birthPlace: userDetails.birthPlace || '',
             clientQuestion: notes || 'No specific question provided',
-            bookingDate: result.scheduleSlot.startTime.toISOString().split('T')[0],
-            bookingTime: result.scheduleSlot.startTime.toTimeString().substring(0, 5),
+            bookingDate: result.scheduleSlot?.startTime.toISOString().split('T')[0] || '',
+            bookingTime: result.scheduleSlot?.startTime.toTimeString().substring(0, 5) || '',
             sessionType: sessionType
           };
 

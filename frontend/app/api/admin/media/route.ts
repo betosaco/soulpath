@@ -48,7 +48,6 @@ export async function GET(request: NextRequest) {
     }
 
     const { serviceTypeId, category, type, page, limit } = validation.data;
-    const offset = (page - 1) * limit;
 
     console.log('🔍 Query parameters:', { serviceTypeId, category, type, page, limit });
 
@@ -168,7 +167,7 @@ export async function POST(request: NextRequest) {
     let parsedMetadata;
     try {
       parsedMetadata = metadata ? JSON.parse(metadata) : {};
-    } catch (error) {
+    } catch {
       return NextResponse.json({
         success: false,
         error: 'Invalid metadata',

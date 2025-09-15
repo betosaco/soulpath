@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     ] = await Promise.all([
       // User statistics
       prisma.user.count(),
-      prisma.user.count({ where: { status: 'active' } }),
+      prisma.user.count({ where: { status: 'ACTIVE' } }),
       
       // Booking statistics
       prisma.booking.count(),
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
       // Revenue statistics
       prisma.purchase.aggregate({
         _sum: { totalAmount: true },
-        where: { paymentStatus: 'confirmed' }
+        where: { paymentStatus: 'COMPLETED' }
       }),
       
       // Recent bookings (last 7 days)

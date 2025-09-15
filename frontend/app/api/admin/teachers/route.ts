@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 
 // Validation schemas for the new schema
 const CreateTeacherSchema = z.object({
@@ -54,7 +55,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Build where clause with new relationships
-    const where: any = {};
+    const where: Prisma.TeacherWhereInput = {};
 
     if (search) {
       where.OR = [
@@ -224,7 +225,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { error: 'Validation error', details: error.issues },
         { status: 400 }
       );
     }
@@ -260,7 +261,7 @@ export async function PUT(request: NextRequest) {
     } = validatedData;
 
     // Update teacher with relationships
-    const updateData: any = { ...teacherData };
+    const updateData: Prisma.TeacherUpdateInput = { ...teacherData };
 
     if (specialtyIds !== undefined) {
       // Replace existing specialties
@@ -311,7 +312,7 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { error: 'Validation error', details: error.issues },
         { status: 400 }
       );
     }

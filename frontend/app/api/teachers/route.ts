@@ -181,11 +181,12 @@ export async function GET(request: NextRequest) {
     console.log(`✅ Found ${teachers.length} teachers (total: ${totalCount})`);
 
     // Get filter options
-    const specialtyCounts = await prisma.teacher.groupBy({
-      by: ['specialties'],
-      where: { isActive: true },
-      _count: { specialties: true }
-    });
+    // Note: specialties is not a scalar field, so we can't group by it
+    // const specialtyCounts = await prisma.teacher.groupBy({
+    //   by: ['specialties'],
+    //   where: { isActive: true },
+    //   _count: { specialties: true }
+    // });
 
     const venueCounts = await prisma.teacher.groupBy({
       by: ['venueId'],
@@ -195,9 +196,7 @@ export async function GET(request: NextRequest) {
       },
       _count: { venueId: true },
       _max: {
-        venue: {
-          select: { name: true }
-        }
+        venueId: true
       }
     });
 
@@ -215,9 +214,9 @@ export async function GET(request: NextRequest) {
           specialties: Array.from(new Set(teachers.flatMap(t => t.specialties))),
           venues: venueCounts.map(v => ({
             id: v.venueId,
-            name: v._max.venue?.name,
+            name: `Venue ${v.venueId}`,
             count: v._count.venueId
-          })).filter(v => v.name)
+          }))
         }
       }
     });

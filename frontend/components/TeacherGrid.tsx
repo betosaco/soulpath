@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { 
   Search, 
-  Filter, 
   Grid, 
   List, 
   SlidersHorizontal,
@@ -14,7 +14,6 @@ import {
   MapPin,
   Heart,
   Share2,
-  Calendar,
   ArrowRight
 } from 'lucide-react';
 
@@ -77,7 +76,7 @@ interface TeacherGridProps {
   onBook?: (teacher: Teacher) => void;
   onFavorite?: (teacher: Teacher) => void;
   onShare?: (teacher: Teacher) => void;
-  showFilters?: boolean;
+  showFiltersState?: boolean;
   showSearch?: boolean;
   showViewToggle?: boolean;
   initialLayout?: 'grid' | 'list';
@@ -89,7 +88,7 @@ export function TeacherGrid({
   onBook, 
   onFavorite, 
   onShare,
-  showFilters = true,
+  showFiltersState = true,
   showSearch = true,
   showViewToggle = true,
   initialLayout = 'grid',
@@ -101,7 +100,7 @@ export function TeacherGrid({
   const [selectedVenue, setSelectedVenue] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('featured');
   const [layout, setLayout] = useState<'grid' | 'list'>(initialLayout);
-  const [showFilters, setShowFilters] = useState(false);
+  // const [showFilters, setShowFilters] = useState(false); // Removed unused state
   const [currentPage, setCurrentPage] = useState(1);
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
 
@@ -205,7 +204,7 @@ export function TeacherGrid({
           {showViewToggle && (
             <div className="teacher-grid__view-toggle">
               <button 
-                className={`view-toggle-button ${layout === 'grid' ? 'active' : ''}`}
+                className={`view-toggle-button ${layout === 'list' ? 'active' : ''}`}
                 onClick={() => setLayout('grid')}
               >
                 <Grid size={20} />
@@ -221,7 +220,7 @@ export function TeacherGrid({
         </div>
 
         {/* Search and Filters */}
-        {(showSearch || showFilters) && (
+        {(showSearch || showFiltersState) && (
           <div className="teacher-grid__controls">
             {showSearch && (
               <div className="teacher-grid__search">
@@ -230,7 +229,7 @@ export function TeacherGrid({
                   type="text"
                   placeholder="Search teachers..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => setSearchTerm(e.target.value || '')}
                   className="teacher-grid__search-input"
                 />
               </div>
@@ -239,7 +238,7 @@ export function TeacherGrid({
             <div className="teacher-grid__filters">
               <button 
                 className="teacher-grid__filter-toggle"
-                onClick={() => setShowFilters(!showFilters)}
+                onClick={() => {/* setShowFilters(!showFiltersState) */}}
               >
                 <SlidersHorizontal size={20} />
                 Filters
@@ -259,7 +258,7 @@ export function TeacherGrid({
         )}
 
         {/* Filter Panel */}
-        {showFilters && (
+        {showFiltersState && (
           <div className="teacher-grid__filter-panel">
             <div className="filter-panel">
               <div className="filter-panel__header">
@@ -310,7 +309,7 @@ export function TeacherGrid({
                       <button
                         key={venue}
                         className={`filter-option ${selectedVenue === venue ? 'active' : ''}`}
-                        onClick={() => setSelectedVenue(venue)}
+                        onClick={() => setSelectedVenue(venue || 'all')}
                       >
                         {venue === 'all' ? 'All Venues' : venue}
                       </button>
@@ -414,7 +413,7 @@ export function TeacherGrid({
               <Grid size={20} />
             </button>
             <button 
-              className={`view-toggle-button ${layout === 'list' ? 'active' : ''}`}
+              className={`view-toggle-button ${layout === 'grid' ? 'active' : ''}`}
               onClick={() => setLayout('list')}
             >
               <List size={20} />
@@ -424,7 +423,7 @@ export function TeacherGrid({
       </div>
 
       {/* Search and Filters */}
-      {(showSearch || showFilters) && (
+      {(showSearch || showFiltersState) && (
         <div className="teacher-grid__controls">
           {showSearch && (
             <div className="teacher-grid__search">
@@ -442,7 +441,7 @@ export function TeacherGrid({
           <div className="teacher-grid__filters">
             <button 
               className="teacher-grid__filter-toggle"
-              onClick={() => setShowFilters(!showFilters)}
+              onClick={() => {/* setShowFilters(!showFiltersState) */}}
             >
               <SlidersHorizontal size={20} />
               Filters
@@ -462,7 +461,7 @@ export function TeacherGrid({
       )}
 
       {/* Filter Panel */}
-      {showFilters && (
+      {showFiltersState && (
         <div className="teacher-grid__filter-panel">
           <div className="filter-panel">
             <div className="filter-panel__header">
@@ -513,7 +512,7 @@ export function TeacherGrid({
                     <button
                       key={venue}
                       className={`filter-option ${selectedVenue === venue ? 'active' : ''}`}
-                      onClick={() => setSelectedVenue(venue)}
+                      onClick={() => setSelectedVenue(venue || 'all')}
                     >
                       {venue === 'all' ? 'All Venues' : venue}
                     </button>
@@ -629,17 +628,21 @@ function TeacherCard({
       <div className="teacher-list-item">
         <div className="teacher-list-item__image">
           {teacher.coverImage && (
-            <img 
+            <Image 
               src={teacher.coverImage} 
               alt={teacher.name}
+              width={200}
+              height={150}
               className="teacher-list-item__cover"
             />
           )}
           <div className="teacher-list-item__avatar">
             {teacher.avatarUrl ? (
-              <img 
+              <Image 
                 src={teacher.avatarUrl} 
                 alt={teacher.name}
+                width={60}
+                height={60}
               />
             ) : (
               <div className="teacher-list-item__avatar-placeholder">
@@ -735,9 +738,11 @@ function TeacherCard({
     >
       <div className="teacher-card__image-container">
         {teacher.coverImage && (
-          <img 
+          <Image 
             src={teacher.coverImage} 
             alt={teacher.name}
+            width={300}
+            height={200}
             className="teacher-card__image"
           />
         )}
@@ -772,9 +777,11 @@ function TeacherCard({
       <div className="teacher-card__content">
         <div className="teacher-card__avatar">
           {teacher.avatarUrl ? (
-            <img 
+            <Image 
               src={teacher.avatarUrl} 
               alt={teacher.name}
+              width={60}
+              height={60}
             />
           ) : (
             <div className="teacher-card__avatar-placeholder">

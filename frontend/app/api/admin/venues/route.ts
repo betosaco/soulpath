@@ -218,9 +218,11 @@ export async function POST(request: NextRequest) {
       }, { status: 409 });
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { amenities, ...venueDataWithoutAmenities } = venueData;
     const venue = await prisma.venue.create({
       data: {
-        ...venueData,
+        ...venueDataWithoutAmenities,
         maxGroupSize: venueData.maxGroupSize || null
       },
       select: {
@@ -316,10 +318,12 @@ export async function PUT(request: NextRequest) {
       }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { amenities, ...updateDataWithoutAmenities } = updateData;
     const venue = await prisma.venue.update({
       where: { id },
       data: {
-        ...updateData,
+        ...updateDataWithoutAmenities,
         maxGroupSize: updateData.maxGroupSize || null
       },
       select: {

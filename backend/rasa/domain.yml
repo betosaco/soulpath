@@ -7,11 +7,8 @@ intents:
   - deny
   - provide_name
   - ask_name
-  - astrology_question
-  - astrology_sign
-  - birth_date
-  - book_session
-  - ask_session_types
+  - book_class
+  - ask_class_types
   - ask_pricing
   - ask_availability
   - ask_contact
@@ -24,9 +21,13 @@ intents:
   - package_details
   - select_package
   - ask_package_info
-  - book_reading
-  - provide_birth_date
+  - book_yoga_class
+  - ask_teachers
+  - teacher_info
+  - class_schedule
   - ask_payment
+  - ask_skill_level
+  - provide_skill_level
   - chitchat
   - provide_info
   - select_timeslot
@@ -40,10 +41,10 @@ intents:
 
 entities:
   - name
-  - sign
+  - class_type
   - date
   - time
-  - session_type
+  - teacher_name
   - price
   - location
   - phone
@@ -52,6 +53,8 @@ entities:
   - package_id
   - voice_preference
   - text_to_speak
+  - skill_level
+  - duration
 
 slots:
   name:
@@ -59,11 +62,11 @@ slots:
     mappings:
     - type: from_entity
       entity: name
-  sign:
+  class_type:
     type: text
     mappings:
     - type: from_entity
-      entity: sign
+      entity: class_type
   date:
     type: text
     mappings:
@@ -74,11 +77,16 @@ slots:
     mappings:
     - type: from_entity
       entity: time
-  session_type:
+  teacher_name:
     type: text
     mappings:
     - type: from_entity
-      entity: session_type
+      entity: teacher_name
+  skill_level:
+    type: text
+    mappings:
+    - type: from_entity
+      entity: skill_level
   package_name:
     type: text
     mappings:
@@ -127,14 +135,14 @@ slots:
 
 responses:
   utter_greet:
-    - text: "¡Hola! Soy tu asistente de astrología y bienestar. ¿En qué puedo ayudarte hoy?"
-    - text: "¡Buenos días! Soy tu guía cósmica. ¿Cómo puedo asistirte?"
-    - text: "¡Saludos! Estoy aquí para brindarte orientación astrológica. ¿Qué necesitas?"
+    - text: "¡Hola! Soy tu asistente del estudio de yoga. ¿En qué puedo ayudarte hoy?"
+    - text: "¡Buenos días! Bienvenido a nuestro estudio de yoga. ¿Cómo puedo asistirte?"
+    - text: "¡Saludos! Estoy aquí para ayudarte con clases de yoga y bienestar. ¿Qué necesitas?"
 
   utter_goodbye:
     - text: "¡Hasta luego! Que tengas un excelente día."
-    - text: "¡Adiós! Que las estrellas te guíen."
-    - text: "¡Nos vemos pronto! Que tengas mucha luz en tu camino."
+    - text: "¡Adiós! Que tengas una práctica maravillosa."
+    - text: "¡Nos vemos pronto! Que tengas mucha paz en tu camino."
 
   utter_happy:
     - text: "¡Excelente! Me alegra poder ayudarte."
@@ -142,37 +150,37 @@ responses:
     - text: "¡Genial! Me da mucho gusto poder asistirte."
 
   utter_ask_name:
-    - text: "¡Soy tu asistente de astrología! Puedes llamarme tu guía cósmica. ¿Cuál es tu nombre?"
-    - text: "¡Hola! Soy tu guía espiritual. ¿Cómo te llamas?"
+    - text: "¡Soy tu asistente del estudio de yoga! ¿Cuál es tu nombre?"
+    - text: "¡Hola! Bienvenido a nuestro estudio. ¿Cómo te llamas?"
     - text: "¡Saludos! ¿Cuál es tu nombre para poder dirigirme a ti personalmente?"
 
-  utter_astrology_question:
-    - text: "¡Me encantaría ayudarte con tus preguntas astrológicas! ¿Qué orientación específica buscas?"
-    - text: "¡Las estrellas tienen mucho que contarnos! ¿Qué aspecto de la astrología te interesa más?"
-    - text: "¡Perfecto! La astrología es mi especialidad. ¿Qué te gustaría saber sobre tu signo o carta natal?"
+  utter_ask_class_types:
+    - text: "¡Me encantaría ayudarte a encontrar la clase perfecta! ¿Qué tipo de yoga te interesa?"
+    - text: "¡Tenemos muchas opciones de clases! ¿Qué estilo de yoga prefieres?"
+    - text: "¡Perfecto! ¿Te gustaría probar Hatha, Vinyasa, Ashtanga, o alguna otra modalidad?"
 
-  utter_astrology_sign:
-    - text: "¡Excelente! 🌟 Para darte una lectura precisa de tu signo, necesito tu fecha de nacimiento completa (día, mes y año). ¿Podrías compartirla conmigo?"
-    - text: "¡Perfecto! Con tu signo puedo ayudarte mejor. ¿Podrías darme tu fecha de nacimiento para una lectura más precisa?"
+  utter_ask_teachers:
+    - text: "¡Excelente! 🌟 Tenemos profesores increíbles. ¿Te gustaría conocer más sobre alguno en particular?"
+    - text: "¡Perfecto! Nuestros instructores son muy experimentados. ¿Qué nivel de experiencia buscas?"
 
-  utter_birth_date:
-    - text: "¡Perfecto! 🌟 Con tu fecha de nacimiento puedo crear tu carta natal completa. ¿Te gustaría que te haga una lectura personalizada?"
-    - text: "¡Excelente! Ahora puedo darte una lectura mucho más precisa. ¿Qué aspecto de tu carta natal te interesa más?"
+  utter_ask_skill_level:
+    - text: "¡Perfecto! Para recomendarte la clase ideal, ¿cuál es tu nivel de experiencia con yoga?"
+    - text: "¡Excelente! ¿Eres principiante, intermedio o avanzado en yoga?"
 
-  utter_book_session:
-    - text: "¡Me encantaría ayudarte a agendar una sesión con José Garfias! ¿Qué tipo de lectura te interesa?"
-    - text: "¡Excelente! Puedo ayudarte a programar una consulta. ¿Qué tipo de sesión astrológica te gustaría reservar?"
-    - text: "¡Perfecto! ¿Te gustaría agendar una sesión de astrología, tarot, numerología o meditación?"
+  utter_book_class:
+    - text: "¡Me encantaría ayudarte a reservar una clase de yoga! ¿Qué tipo de clase te interesa?"
+    - text: "¡Excelente! Puedo ayudarte a programar una clase. ¿Qué estilo de yoga te gustaría practicar?"
+    - text: "¡Perfecto! ¿Te gustaría reservar Hatha, Vinyasa, Ashtanga, o alguna otra modalidad?"
 
-  utter_session_types:
-    - text: "Ofrecemos varios tipos de sesiones: 📿 Astrología y carta natal, 🔮 Lectura de tarot, 🔢 Numerología, 🧘 Meditación guiada, 💆 Terapia holística, y 🎯 Coaching espiritual. ¿Cuál te interesa más?"
-    - text: "Tenemos estas modalidades disponibles: Consultas astrológicas, lecturas de tarot, sesiones de numerología, meditación, terapia holística y coaching. ¿Qué te llama la atención?"
-    - text: "Nuestros servicios incluyen: Análisis de carta natal, lecturas de tarot, numerología, meditación, terapia y coaching espiritual. ¿Cuál prefieres?"
+  utter_class_types:
+    - text: "Ofrecemos varios tipos de clases: 🧘 Hatha Yoga, 🌊 Vinyasa Flow, 🔥 Ashtanga, 🌅 Yoga Matutino, 🌙 Yoga Nocturno, 🤸 Yoga para Principiantes, 💪 Power Yoga, y 🧘‍♀️ Meditación. ¿Cuál te interesa más?"
+    - text: "Tenemos estas modalidades disponibles: Hatha, Vinyasa, Ashtanga, Yoga Restaurativo, Hot Yoga, y Yoga para Principiantes. ¿Qué te llama la atención?"
+    - text: "Nuestros estilos incluyen: Hatha clásico, Vinyasa dinámico, Ashtanga tradicional, Yoga Restaurativo, y clases especializadas. ¿Cuál prefieres?"
 
   utter_pricing:
-    - text: "Nuestras tarifas varían según el tipo de sesión: Consultas astrológicas desde $50, lecturas de tarot desde $40, numerología desde $45, y sesiones de meditación desde $35. ¿Te interesa algún servicio específico?"
-    - text: "Los precios van desde $35 hasta $80 dependiendo del tipo de sesión y duración. También tenemos paquetes especiales. ¿Qué tipo de consulta te interesa?"
-    - text: "Tenemos diferentes opciones de inversión según el servicio. ¿Te gustaría que te dé más detalles sobre algún tipo específico de sesión?"
+    - text: "Nuestras tarifas varían según el tipo de clase: Clases individuales desde $25, clases grupales desde $15, paquetes de 10 clases desde $120, y membresía mensual desde $80. ¿Te interesa algún tipo específico?"
+    - text: "Los precios van desde $15 hasta $50 dependiendo del tipo de clase y duración. También tenemos paquetes especiales. ¿Qué tipo de clase te interesa?"
+    - text: "Tenemos diferentes opciones de inversión según tus necesidades. ¿Te gustaría que te dé más detalles sobre algún tipo específico de clase?"
 
   utter_availability:
     - text: "Estamos disponibles de lunes a viernes de 9:00 AM a 7:00 PM, y sábados de 10:00 AM a 4:00 PM. ¿Qué día te funciona mejor?"
@@ -180,22 +188,22 @@ responses:
     - text: "Trabajamos de lunes a viernes de 9 AM a 7 PM, y sábados de 10 AM a 4 PM. ¿Qué horario prefieres?"
 
   utter_contact:
-    - text: "Puedes contactarnos por WhatsApp al +52 55 1234 5678, email: info@josegarfias.com, o visitarnos en nuestra ubicación en Ciudad de México. ¿Prefieres algún método específico?"
-    - text: "Nuestros datos de contacto: 📱 WhatsApp: +52 55 1234 5678, 📧 Email: info@josegarfias.com, 📍 Ubicación: Ciudad de México. ¿Cómo te gustaría comunicarte?"
+    - text: "Puedes contactarnos por WhatsApp al +52 55 1234 5678, email: info@yogastudio.com, o visitarnos en nuestra ubicación en Ciudad de México. ¿Prefieres algún método específico?"
+    - text: "Nuestros datos de contacto: 📱 WhatsApp: +52 55 1234 5678, 📧 Email: info@yogastudio.com, 📍 Ubicación: Ciudad de México. ¿Cómo te gustaría comunicarte?"
     - text: "Te puedes comunicar con nosotros por WhatsApp, email o visitarnos. ¿Qué método prefieres para contactarte?"
 
   utter_help:
-    - text: "¡Por supuesto! Estoy aquí para ayudarte. Puedo asistirte con información sobre nuestros servicios, agendar citas, responder preguntas astrológicas, o darte información de contacto. ¿En qué específicamente necesitas ayuda?"
-    - text: "¡Claro que sí! Puedo ayudarte a: agendar sesiones, explicarte nuestros servicios, responder preguntas astrológicas, darte información de precios y horarios. ¿Qué necesitas saber?"
-    - text: "¡Por supuesto! Estoy aquí para orientarte. ¿Te gustaría saber sobre nuestros servicios, agendar una cita, o tienes alguna pregunta específica?"
+    - text: "¡Por supuesto! Estoy aquí para ayudarte. Puedo asistirte con información sobre nuestras clases, agendar reservas, responder preguntas sobre yoga, o darte información de contacto. ¿En qué específicamente necesitas ayuda?"
+    - text: "¡Claro que sí! Puedo ayudarte a: agendar clases, explicarte nuestros servicios, responder preguntas sobre yoga, darte información de precios y horarios. ¿Qué necesitas saber?"
+    - text: "¡Por supuesto! Estoy aquí para orientarte. ¿Te gustaría saber sobre nuestras clases, agendar una reserva, o tienes alguna pregunta específica?"
 
   utter_booking_confirmation:
-    - text: "¡Perfecto! He registrado tu interés en agendar una sesión. Te contactaremos pronto para confirmar la fecha y hora. ¿Hay algo más en lo que pueda ayudarte?"
-    - text: "¡Excelente! Tu solicitud de cita ha sido registrada. Nos pondremos en contacto contigo para finalizar los detalles. ¿Necesitas algo más?"
-    - text: "¡Genial! Hemos anotado tu solicitud. Te contactaremos para confirmar todos los detalles de tu sesión. ¿Hay algo más que pueda hacer por ti?"
+    - text: "¡Perfecto! He registrado tu interés en reservar una clase. Te contactaremos pronto para confirmar la fecha y hora. ¿Hay algo más en lo que pueda ayudarte?"
+    - text: "¡Excelente! Tu solicitud de clase ha sido registrada. Nos pondremos en contacto contigo para finalizar los detalles. ¿Necesitas algo más?"
+    - text: "¡Genial! Hemos anotado tu solicitud. Te contactaremos para confirmar todos los detalles de tu clase. ¿Hay algo más que pueda hacer por ti?"
 
   utter_iamabot:
-    - text: "Soy un asistente de astrología y bienestar creado con Rasa."
+    - text: "Soy un asistente del estudio de yoga creado con Rasa."
 
   utter_cheer_up:
     - text: "¡Aquí tienes algo para animarte!"
@@ -296,8 +304,8 @@ responses:
 actions:
   - action_default_fallback
   - action_handle_name_provision
-  - action_extract_astrology_info
-  - action_book_session_form
+  - action_get_teachers_info
+  - action_book_class_form
   - action_check_availability
   - action_get_pricing
   - action_sentiment_analysis
@@ -309,6 +317,8 @@ actions:
   - action_speak_response
   - action_toggle_tts
   - action_set_voice
+  - action_get_class_schedule
+  - action_recommend_class
 
 session_config:
   session_expiration_time: 60

@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const validation = createSessionDurationSchema.safeParse(body);
+    const validation = sessionDurationCreateSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json({
@@ -163,7 +163,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const validation = updateSessionDurationSchema.safeParse(body);
+    const validation = sessionDurationUpdateSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json({

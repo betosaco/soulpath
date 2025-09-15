@@ -253,6 +253,8 @@ export async function POST(request: NextRequest) {
     const newUser = await prisma.user.create({
       data: {
         ...userData,
+        role: userData.role.toUpperCase() as 'ADMIN' | 'USER',
+        status: userData.status.toUpperCase() as 'ACTIVE' | 'INACTIVE' | 'PENDING',
         birthDate: userData.birthDate ? new Date(userData.birthDate) : null,
         scheduledDate: userData.scheduledDate ? new Date(userData.scheduledDate) : null
       }
@@ -320,6 +322,8 @@ export async function PUT(request: NextRequest) {
       where: { id },
       data: {
         ...updateData,
+        role: updateData.role ? updateData.role.toUpperCase() as 'ADMIN' | 'USER' : undefined,
+        status: updateData.status ? updateData.status.toUpperCase() as 'ACTIVE' | 'INACTIVE' | 'PENDING' : undefined,
         birthDate: updateData.birthDate ? new Date(updateData.birthDate) : undefined,
         scheduledDate: updateData.scheduledDate ? new Date(updateData.scheduledDate) : undefined
       }

@@ -52,8 +52,8 @@ export async function POST(request: NextRequest) {
           birthDate: new Date(bookingData.birthDate),
           birthPlace: bookingData.birthCity,
           language: bookingData.language,
-          role: 'user',
-          status: 'active'
+          role: 'USER',
+          status: 'ACTIVE'
         }
       });
       console.log('✅ Created new user:', user.email);
@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
         totalAmount: packagePrice.price,
         currencyCode: packagePrice.currency.code,
         paymentMethod: paymentMethod.type || 'custom',
-        paymentStatus: 'confirmed'
+        paymentStatus: 'COMPLETED'
       }
     });
 
@@ -235,9 +235,9 @@ export async function POST(request: NextRequest) {
         user: booking.user,
         package: booking.userPackage.packagePrice.packageDefinition,
         schedule: {
-          date: booking.scheduleSlot.startTime.toISOString().split('T')[0],
-          time: booking.scheduleSlot.startTime.toTimeString().split(' ')[0].substring(0, 5),
-          duration: booking.scheduleSlot.scheduleTemplate.sessionDuration?.duration_minutes || 60
+          date: booking.scheduleSlot?.startTime.toISOString().split('T')[0] || '',
+          time: booking.scheduleSlot?.startTime.toTimeString().split(' ')[0].substring(0, 5) || '',
+          duration: booking.scheduleSlot?.scheduleTemplate.sessionDuration?.duration_minutes || 60
         },
         totalPrice: booking.userPackage.packagePrice.price,
         currency: booking.userPackage.packagePrice.currency.symbol

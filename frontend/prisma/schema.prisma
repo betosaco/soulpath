@@ -406,6 +406,8 @@ model ServiceType {
   requirements      String[]        @default([]) // equipment, level, etc.
   benefits          String[]        @default([]) // what users will gain
   difficulty        ServiceDifficulty?
+  price             Decimal?        @db.Decimal(10, 2) // base price for the service
+  currencyId        Int?            @map("currency_id") // reference to currency
   isActive          Boolean?        @default(true) @map("is_active")
   displayOrder      Int?            @default(0) @map("display_order")
   featured          Boolean?        @default(false) @map("featured")
@@ -426,6 +428,7 @@ model ServiceType {
   createdAt         DateTime?       @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt         DateTime?       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   // Relations
+  currency          Currency?        @relation("ServiceTypeCurrency", fields: [currencyId], references: [id], onDelete: SetNull, onUpdate: Restrict)
   teacherSchedules  TeacherSchedule[]
   packageServices   PackageService[]
   bookings          Booking[]
@@ -438,6 +441,7 @@ model ServiceType {
   @@index([displayOrder], map: "idx_service_types_order")
   @@index([featured], map: "idx_service_types_featured")
   @@index([difficulty], map: "idx_service_types_difficulty")
+  @@index([currencyId], map: "idx_service_types_currency")
   @@index([slug], map: "idx_service_types_slug")
   @@map("service_types")
 }
@@ -720,6 +724,7 @@ model Currency {
   createdAt      DateTime?         @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime?         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   packagePrices  PackagePrice[]    @relation("PackagePriceCurrency")
+  serviceTypes   ServiceType[]     @relation("ServiceTypeCurrency")
   paymentMethods payment_methods[]
   rates          Rate[]
 

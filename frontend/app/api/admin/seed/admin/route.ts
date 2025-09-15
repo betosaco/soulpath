@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
         email: adminData.email,
         password: hashedPassword,
         fullName: adminData.fullName,
-        role: adminData.role,
+        role: adminData.role.toUpperCase() as 'ADMIN' | 'USER',
         phone: adminData.phone,
         birthDate: adminData.birthDate ? new Date(adminData.birthDate) : null,
         birthTime: adminData.birthTime ? new Date(`1970-01-01T${adminData.birthTime}`) : null,
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
         question: adminData.question,
         language: adminData.language,
         adminNotes: adminData.adminNotes,
-        status: 'active'
+        status: 'ACTIVE'
       }
     });
 

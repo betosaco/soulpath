@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
   Search, 
-  Filter, 
   Edit, 
   Trash2, 
   CalendarDays, 

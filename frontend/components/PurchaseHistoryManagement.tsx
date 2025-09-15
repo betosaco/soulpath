@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { adminApi } from '@/lib/api/admin';
 import { 
   Package, Clock, DollarSign, 
   Download, RefreshCw,
@@ -156,7 +155,7 @@ const PurchaseHistoryManagement: React.FC = () => {
         }
       });
 
-      const data = response.data;
+      const data = await response.json();
       if (data.success) {
         setUserPackages(data.data);
       } else {
@@ -183,7 +182,7 @@ const PurchaseHistoryManagement: React.FC = () => {
         }
       });
 
-      const data = response.data;
+      const data = await response.json();
       if (data.success) {
         setBookings(data.data);
       } else {
@@ -203,7 +202,7 @@ const PurchaseHistoryManagement: React.FC = () => {
         }
       });
 
-      const data = response.data;
+      const data = await response.json();
       if (data.success) {
         setClients(data.data);
       } else {
@@ -223,7 +222,7 @@ const PurchaseHistoryManagement: React.FC = () => {
         }
       });
 
-      const data = response.data;
+      const data = await response.json();
       if (data.success) {
         setStats(data.data);
       } else {

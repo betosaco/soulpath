@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 
 // GET /api/admin/amenities - List all amenities
 export async function GET(request: NextRequest) {
@@ -8,7 +9,7 @@ export async function GET(request: NextRequest) {
     const isActive = searchParams.get('isActive');
     const category = searchParams.get('category');
 
-    const where: any = {};
+    const where: Prisma.AmenityWhereInput = {};
     if (isActive !== null) {
       where.isActive = isActive === 'true';
     }

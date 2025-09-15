@@ -10,20 +10,20 @@ nlu:
     - saludos
 
 # Test cases for booking
-- intent: book_session
+- intent: book_yoga_class
   examples: |
-    - quiero agendar una cita de astrología
-    - necesito reservar una sesión de tarot
-    - me gustaría programar una consulta
-    - can I book a reading session
+    - quiero agendar una clase de yoga
+    - necesito reservar una sesión de yoga
+    - me gustaría programar una clase
+    - can I book a yoga class
 
-# Test cases for astrology questions
-- intent: astrology_question
+# Test cases for class types questions
+- intent: ask_class_types
   examples: |
-    - soy Leo y quiero saber sobre mi signo
-    - cuéntame sobre mi horóscopo
-    - qué significa ser Aries
-    - I'm a Scorpio, tell me about my sign
+    - qué tipos de yoga ofrecen
+    - cuéntame sobre las clases
+    - qué significa Hatha yoga
+    - I want to know about Vinyasa classes
 
 # Test cases for pricing
 - intent: ask_pricing

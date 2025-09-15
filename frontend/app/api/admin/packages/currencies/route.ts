@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const validation = createCurrencySchema.safeParse(body);
+    const validation = currencyCreateSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json({
@@ -174,7 +174,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const validation = updateCurrencySchema.safeParse(body);
+    const validation = currencyUpdateSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json({

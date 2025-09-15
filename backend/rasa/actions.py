@@ -45,19 +45,19 @@ class ActionDefaultFallback(Action):
         elif any(word in last_message.lower() for word in ['contacto', 'teléfono', 'email', 'contact', 'phone']):
             dispatcher.utter_message(response="utter_contact")
         elif any(word in last_message.lower() for word in ['servicio', 'sesión', 'service', 'session']):
-            dispatcher.utter_message(response="utter_session_types")
+            dispatcher.utter_message(response="utter_class_types")
         elif any(word in last_message.lower() for word in ['agendar', 'cita', 'book', 'appointment']):
-            dispatcher.utter_message(response="utter_book_session")
+            dispatcher.utter_message(response="utter_book_class")
         else:
             dispatcher.utter_message(response="utter_default")
 
         return []
 
-class ActionExtractAstrologyInfo(Action):
-    """Extract astrology information from user input"""
+class ActionGetTeachersInfo(Action):
+    """Get information about yoga teachers"""
 
     def name(self) -> Text:
-        return "action_extract_astrology_info"
+        return "action_get_teachers_info"
 
     def run(
         self,
@@ -68,25 +68,57 @@ class ActionExtractAstrologyInfo(Action):
 
         # Get entities from the message
         entities = tracker.latest_message.get('entities', [])
-        sign_entity = next((e for e in entities if e['entity'] == 'sign'), None)
+        teacher_entity = next((e for e in entities if e['entity'] == 'teacher_name'), None)
 
-        if sign_entity:
-            sign = sign_entity['value']
-            dispatcher.utter_message(
-                text=f"¡Excelente! Veo que eres {sign}. Los {sign.lower()}s son conocidos por su personalidad única. ¿Te gustaría saber más sobre tu signo o agendar una consulta personalizada?"
-            )
+        teachers_info = {
+            "maria": {
+                "name": "María González",
+                "specialties": ["Hatha Yoga", "Yoga Restaurativo", "Meditación"],
+                "experience": "8 años de experiencia",
+                "description": "Especialista en yoga terapéutico y meditación mindfulness"
+            },
+            "carlos": {
+                "name": "Carlos Rodríguez",
+                "specialties": ["Vinyasa Flow", "Power Yoga", "Ashtanga"],
+                "experience": "12 años de experiencia",
+                "description": "Instructor certificado en yoga dinámico y flujo creativo"
+            },
+            "ana": {
+                "name": "Ana Martínez",
+                "specialties": ["Yoga para Principiantes", "Yoga Prenatal", "Yin Yoga"],
+                "experience": "6 años de experiencia",
+                "description": "Especialista en yoga suave y terapéutico para todos los niveles"
+            }
+        }
+
+        if teacher_entity:
+            teacher_name = teacher_entity['value'].lower()
+            if teacher_name in teachers_info:
+                teacher = teachers_info[teacher_name]
+                message = f"**{teacher['name']}**\n\n"
+                message += f"**Especialidades:** {', '.join(teacher['specialties'])}\n"
+                message += f"**Experiencia:** {teacher['experience']}\n"
+                message += f"**Descripción:** {teacher['description']}\n\n"
+                message += "¿Te gustaría reservar una clase con este instructor?"
+                dispatcher.utter_message(text=message)
+            else:
+                dispatcher.utter_message(
+                    text=f"No encontré información sobre {teacher_entity['value']}. Nuestros instructores son María, Carlos y Ana. ¿Te gustaría conocer más sobre alguno de ellos?"
+                )
         else:
-            dispatcher.utter_message(
-                text="Me encantaría ayudarte con información astrológica. ¿Cuál es tu signo zodiacal o te gustaría agendar una consulta para analizar tu carta natal?"
-            )
+            message = "**Nuestros Instructores:**\n\n"
+            for teacher in teachers_info.values():
+                message += f"• **{teacher['name']}** - {teacher['specialties'][0]}\n"
+            message += "\n¿Te gustaría conocer más detalles sobre algún instructor específico?"
+            dispatcher.utter_message(text=message)
 
         return []
 
-class ActionBookSessionForm(Action):
-    """Form for booking a session"""
+class ActionBookClassForm(Action):
+    """Form for booking a yoga class"""
 
     def name(self) -> Text:
-        return "action_book_session_form"
+        return "action_book_class_form"
 
     def run(
         self,
@@ -95,14 +127,18 @@ class ActionBookSessionForm(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
 
-        session_type = tracker.get_slot("session_type")
-        preferred_date = tracker.get_slot("preferred_date")
-        preferred_time = tracker.get_slot("preferred_time")
+        class_type = tracker.get_slot("class_type")
+        preferred_date = tracker.get_slot("date")
+        preferred_time = tracker.get_slot("time")
+        teacher_name = tracker.get_slot("teacher_name")
 
         # Here you would typically save to a database or send to a booking system
-        dispatcher.utter_message(
-            text=f"¡Perfecto! He registrado tu solicitud para una sesión de {session_type} el {preferred_date} a las {preferred_time}. Te contactaremos pronto para confirmar todos los detalles."
-        )
+        message = f"¡Perfecto! He registrado tu solicitud para una clase de {class_type}"
+        if teacher_name:
+            message += f" con {teacher_name}"
+        message += f" el {preferred_date} a las {preferred_time}. Te contactaremos pronto para confirmar todos los detalles."
+
+        dispatcher.utter_message(text=message)
 
         return []
 
@@ -151,19 +187,21 @@ class ActionGetPricing(Action):
     ) -> List[Dict[Text, Any]]:
 
         pricing_info = {
-            "astrología": "$50 - $80",
-            "tarot": "$40 - $60",
-            "numerología": "$45 - $65",
-            "meditación": "$35 - $50",
-            "terapia": "$60 - $100",
-            "coaching": "$70 - $120"
+            "hatha yoga": "$15 - $25",
+            "vinyasa flow": "$18 - $28",
+            "ashtanga": "$20 - $30",
+            "yoga restaurativo": "$12 - $20",
+            "yoga para principiantes": "$10 - $18",
+            "power yoga": "$20 - $30",
+            "yoga prenatal": "$15 - $25",
+            "meditación": "$10 - $15"
         }
 
         message = "Aquí tienes nuestros precios detallados:\n\n"
         for service, price in pricing_info.items():
             message += f"• {service.title()}: {price}\n"
 
-        message += "\nTambién ofrecemos paquetes especiales con descuentos. ¿Te interesa algún servicio específico?"
+        message += "\nTambién ofrecemos paquetes especiales con descuentos. ¿Te interesa algún tipo de clase específico?"
 
         dispatcher.utter_message(text=message)
 
@@ -694,5 +732,127 @@ class ActionSetVoice(Action):
             dispatcher.utter_message(
                 text="🎤 ¿Qué tipo de voz prefieres? Puedo usar voz femenina o masculina, en español o inglés."
             )
+
+        return []
+
+class ActionGetClassSchedule(Action):
+    """Get class schedule information"""
+
+    def name(self) -> Text:
+        return "action_get_class_schedule"
+
+    def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+
+        # Sample class schedule
+        schedule = {
+            "Lunes": [
+                "6:00 AM - Hatha Yoga (María)",
+                "9:00 AM - Vinyasa Flow (Carlos)",
+                "6:00 PM - Yoga para Principiantes (Ana)",
+                "7:30 PM - Meditación (María)"
+            ],
+            "Martes": [
+                "7:00 AM - Power Yoga (Carlos)",
+                "10:00 AM - Yoga Restaurativo (Ana)",
+                "6:00 PM - Ashtanga (Carlos)",
+                "8:00 PM - Yin Yoga (Ana)"
+            ],
+            "Miércoles": [
+                "6:00 AM - Hatha Yoga (María)",
+                "9:00 AM - Vinyasa Flow (Carlos)",
+                "6:00 PM - Yoga para Principiantes (Ana)",
+                "7:30 PM - Meditación (María)"
+            ],
+            "Jueves": [
+                "7:00 AM - Power Yoga (Carlos)",
+                "10:00 AM - Yoga Restaurativo (Ana)",
+                "6:00 PM - Ashtanga (Carlos)",
+                "8:00 PM - Yin Yoga (Ana)"
+            ],
+            "Viernes": [
+                "6:00 AM - Hatha Yoga (María)",
+                "9:00 AM - Vinyasa Flow (Carlos)",
+                "6:00 PM - Yoga para Principiantes (Ana)",
+                "7:30 PM - Meditación (María)"
+            ],
+            "Sábado": [
+                "8:00 AM - Hatha Yoga (María)",
+                "10:00 AM - Vinyasa Flow (Carlos)",
+                "12:00 PM - Yoga para Principiantes (Ana)",
+                "2:00 PM - Power Yoga (Carlos)"
+            ],
+            "Domingo": [
+                "9:00 AM - Yoga Restaurativo (Ana)",
+                "11:00 AM - Meditación (María)",
+                "4:00 PM - Yin Yoga (Ana)"
+            ]
+        }
+
+        message = "**Horario de Clases:**\n\n"
+        for day, classes in schedule.items():
+            message += f"**{day}:**\n"
+            for class_info in classes:
+                message += f"  • {class_info}\n"
+            message += "\n"
+
+        message += "¿Te gustaría reservar alguna de estas clases?"
+
+        dispatcher.utter_message(text=message)
+
+        return []
+
+class ActionRecommendClass(Action):
+    """Recommend a yoga class based on user preferences"""
+
+    def name(self) -> Text:
+        return "action_recommend_class"
+
+    def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict[Text, Any]]:
+
+        skill_level = tracker.get_slot("skill_level")
+        class_type = tracker.get_slot("class_type")
+
+        recommendations = {
+            "principiante": {
+                "classes": ["Yoga para Principiantes", "Hatha Yoga", "Yoga Restaurativo"],
+                "description": "Para principiantes, te recomendamos clases suaves que te ayuden a aprender las posturas básicas."
+            },
+            "intermedio": {
+                "classes": ["Vinyasa Flow", "Power Yoga", "Hatha Yoga"],
+                "description": "Para nivel intermedio, puedes probar clases más dinámicas que combinen fuerza y flexibilidad."
+            },
+            "avanzado": {
+                "classes": ["Ashtanga", "Power Yoga", "Vinyasa Flow"],
+                "description": "Para nivel avanzado, te recomendamos clases desafiantes que requieren más fuerza y equilibrio."
+            }
+        }
+
+        if skill_level and skill_level.lower() in recommendations:
+            rec = recommendations[skill_level.lower()]
+            message = f"**Recomendaciones para nivel {skill_level.title()}:**\n\n"
+            message += f"{rec['description']}\n\n"
+            message += "**Clases recomendadas:**\n"
+            for class_name in rec["classes"]:
+                message += f"• {class_name}\n"
+            message += "\n¿Te gustaría reservar alguna de estas clases?"
+        else:
+            message = "**Clases Populares:**\n\n"
+            message += "• **Hatha Yoga** - Perfecto para todos los niveles\n"
+            message += "• **Vinyasa Flow** - Clase dinámica y fluida\n"
+            message += "• **Yoga para Principiantes** - Ideal para empezar\n"
+            message += "• **Yoga Restaurativo** - Relajante y terapéutico\n\n"
+            message += "¿Cuál te interesa más?"
+
+        dispatcher.utter_message(text=message)
 
         return []

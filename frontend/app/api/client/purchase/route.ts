@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
         totalAmount: totalAmount,
         currencyCode: packagePrice.currency.code,
         paymentMethod: paymentMethod.name,
-        paymentStatus: 'pending',
+        paymentStatus: 'PENDING',
         notes: notes
       }
     });
@@ -179,7 +179,7 @@ export async function POST(request: NextRequest) {
           await prisma.purchase.update({
             where: { id: purchase.id },
             data: {
-              paymentStatus: 'completed',
+              paymentStatus: 'COMPLETED',
               transactionId: izipayResult.transactionId || paymentToken,
               purchasedAt: new Date()
             }
@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
           await prisma.purchase.update({
             where: { id: purchase.id },
             data: {
-              paymentStatus: 'failed',
+              paymentStatus: 'FAILED',
               notes: `Payment failed: ${izipayResult.errorMessage || 'Unknown error'}`
             }
           });
@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
         await prisma.purchase.update({
           where: { id: purchase.id },
           data: {
-            paymentStatus: 'failed',
+            paymentStatus: 'FAILED',
             notes: `Payment error: ${error instanceof Error ? error.message : 'Unknown error'}`
           }
         });

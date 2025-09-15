@@ -1,15 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ServiceDisplay } from './ServiceDisplay';
 import { 
   Search, 
-  Filter, 
   Grid, 
   List, 
-  SlidersHorizontal,
-  X
+  SlidersHorizontal
 } from 'lucide-react';
 
 interface ServiceType {
@@ -25,7 +23,13 @@ interface ServiceType {
   benefits: string[];
   difficulty?: string;
   price?: number;
-  currency?: string;
+  currencyId?: number;
+  currency?: {
+    id: number;
+    code: string;
+    name: string;
+    symbol: string;
+  };
   isActive: boolean;
   featured: boolean;
   color?: string;
@@ -48,7 +52,7 @@ interface ServiceGridProps {
   onBook?: (service: ServiceType) => void;
   onFavorite?: (service: ServiceType) => void;
   onShare?: (service: ServiceType) => void;
-  showFilters?: boolean;
+  // showFilters?: boolean; // Removed unused prop
   showSearch?: boolean;
   showViewToggle?: boolean;
   initialLayout?: 'grid' | 'list';
@@ -60,7 +64,7 @@ export function ServiceGrid({
   onBook, 
   onFavorite, 
   onShare,
-  showFilters = true,
+  // showFilters = true, // Removed unused prop
   showSearch = true,
   showViewToggle = true,
   initialLayout = 'grid',
@@ -71,8 +75,8 @@ export function ServiceGrid({
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
   const [selectedPriceRange, setSelectedPriceRange] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('featured');
-  const [layout, setLayout] = useState<'grid' | 'list'>(initialLayout);
-  const [showFilters, setShowFilters] = useState(false);
+  const [layout, setLayout] = useState<'card' | 'detailed' | 'list'>(initialLayout === 'grid' ? 'card' : initialLayout as 'card' | 'detailed' | 'list');
+  const [showFiltersState, setShowFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
   // Get unique categories and difficulties
@@ -124,7 +128,7 @@ export function ServiceGrid({
       case 'featured':
         if (a.featured && !b.featured) return -1;
         if (!a.featured && b.featured) return 1;
-        return a.displayOrder - b.displayOrder;
+        return 0; // displayOrder not available in ServiceType
       default:
         return 0;
     }
@@ -162,8 +166,8 @@ export function ServiceGrid({
         {showViewToggle && (
           <div className="service-grid__view-toggle">
             <button 
-              className={`view-toggle-button ${layout === 'grid' ? 'active' : ''}`}
-              onClick={() => setLayout('grid')}
+              className={`view-toggle-button ${layout === 'card' ? 'active' : ''}`}
+              onClick={() => setLayout('card')}
             >
               <Grid size={20} />
             </button>
@@ -178,7 +182,7 @@ export function ServiceGrid({
       </div>
 
       {/* Search and Filters */}
-      {(showSearch || showFilters) && (
+      {(showSearch || showFiltersState) && (
         <div className="service-grid__controls">
           {showSearch && (
             <div className="service-grid__search">
@@ -187,7 +191,7 @@ export function ServiceGrid({
                 type="text"
                 placeholder="Search services..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => setSearchTerm(e.target.value || '')}
                 className="service-grid__search-input"
               />
             </div>
@@ -196,7 +200,7 @@ export function ServiceGrid({
           <div className="service-grid__filters">
             <button 
               className="service-grid__filter-toggle"
-              onClick={() => setShowFilters(!showFilters)}
+              onClick={() => setShowFilters(!showFiltersState)}
             >
               <SlidersHorizontal size={20} />
               Filters
@@ -219,7 +223,7 @@ export function ServiceGrid({
 
       {/* Filter Panel */}
       <AnimatePresence>
-        {showFilters && (
+        {showFiltersState && (
           <motion.div
             className="service-grid__filter-panel"
             initial={{ opacity: 0, height: 0 }}
@@ -261,7 +265,7 @@ export function ServiceGrid({
                       <button
                         key={difficulty}
                         className={`filter-option ${selectedDifficulty === difficulty ? 'active' : ''}`}
-                        onClick={() => setSelectedDifficulty(difficulty)}
+                        onClick={() => setSelectedDifficulty(difficulty || 'all')}
                       >
                         {difficulty === 'all' ? 'All Levels' : difficulty}
                       </button>

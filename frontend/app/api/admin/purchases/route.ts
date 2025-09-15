@@ -185,7 +185,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const validation = createPurchaseSchema.safeParse(body);
+    const validation = purchaseCreateSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json({
@@ -212,7 +212,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get package prices and calculate total
-    const packagePriceIds = packages.map(pkg => pkg.packagePriceId);
+    const packagePriceIds = packages.map((pkg: { packagePriceId: number }) => pkg.packagePriceId);
     const packagePrices = await prisma.packagePrice.findMany({
       where: {
         id: { in: packagePriceIds },
@@ -267,14 +267,14 @@ export async function POST(request: NextRequest) {
           totalAmount,
           currencyCode,
           paymentMethod,
-          paymentStatus: 'pending',
+          paymentStatus: 'PENDING',
           transactionId,
           notes
         }
       });
 
       // Create user packages
-      const userPackagePromises = packages.map(pkg => {
+      const userPackagePromises = packages.map((pkg: { packagePriceId: number; quantity: number }) => {
         return tx.userPackage.create({
           data: {
             userId,
@@ -299,7 +299,7 @@ export async function POST(request: NextRequest) {
           amount: totalAmount,
           currencyCode,
           paymentMethod,
-          paymentStatus: 'pending',
+          paymentStatus: 'PENDING',
           transactionId
         }
       });

@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from 'react';
+import Image from 'next/image';
+import { motion } from 'framer-motion';
 import { 
   Clock, 
   Users, 
@@ -34,7 +35,13 @@ interface ServiceType {
   benefits: string[];
   difficulty?: string;
   price?: number;
-  currency?: string;
+  currencyId?: number;
+  currency?: {
+    id: number;
+    code: string;
+    name: string;
+    symbol: string;
+  };
   isActive: boolean;
   featured: boolean;
   color?: string;
@@ -106,7 +113,6 @@ export function ServiceDisplay({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
-  const [showFullDescription, setShowFullDescription] = useState(false);
 
   const CategoryIcon = CATEGORY_ICONS[serviceType.category];
   const categoryColor = serviceType.color || CATEGORY_COLORS[serviceType.category];
@@ -121,11 +127,12 @@ export function ServiceDisplay({
     return `${mins}m`;
   };
 
-  const formatPrice = (price?: number, currency = 'USD') => {
+  const formatPrice = (price?: number, currency?: string | { code: string; symbol: string }) => {
     if (!price) return 'Contact for pricing';
+    const currencyCode = typeof currency === 'string' ? currency : currency?.code || 'USD';
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: currency
+      currency: currencyCode
     }).format(price);
   };
 
@@ -150,9 +157,11 @@ export function ServiceDisplay({
       <div className="service-list-item">
         <div className="service-list-item__image">
           {serviceType.coverImage && (
-            <img 
+            <Image 
               src={serviceType.coverImage} 
               alt={serviceType.name}
+              width={200}
+              height={150}
               className="service-list-item__cover"
             />
           )}
@@ -220,9 +229,11 @@ export function ServiceDisplay({
         <div className="service-card__image-container">
           {images.length > 0 && (
             <>
-              <img 
-                src={images[currentImageIndex]} 
+              <Image 
+                src={images[currentImageIndex] || ''} 
                 alt={serviceType.name}
+                width={300}
+                height={200}
                 className="service-card__image"
               />
               {images.length > 1 && (
@@ -341,9 +352,11 @@ export function ServiceDisplay({
         <div className="service-detailed__media">
           {serviceType.videoUrl && !isVideoPlaying ? (
             <div className="service-detailed__video-container">
-              <img 
-                src={serviceType.thumbnailUrl || serviceType.coverImage} 
+              <Image 
+                src={serviceType.thumbnailUrl || serviceType.coverImage || ''} 
                 alt={serviceType.name}
+                width={600}
+                height={400}
                 className="service-detailed__video-thumbnail"
               />
               <button 
@@ -362,9 +375,11 @@ export function ServiceDisplay({
             />
           ) : images.length > 0 ? (
             <div className="service-detailed__image-gallery">
-              <img 
-                src={images[currentImageIndex]} 
+              <Image 
+                src={images[currentImageIndex] || ''} 
                 alt={serviceType.name}
+                width={600}
+                height={400}
                 className="service-detailed__main-image"
               />
               {images.length > 1 && (
@@ -475,7 +490,7 @@ export function ServiceDisplay({
 
           {serviceType.highlights.length > 0 && (
             <div className="service-detailed__section">
-              <h2>What You'll Learn</h2>
+              <h2>What You&apos;ll Learn</h2>
               <div className="service-detailed__highlights">
                 {serviceType.highlights.map((highlight, index) => (
                   <div key={index} className="service-highlight">

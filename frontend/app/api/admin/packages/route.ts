@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { Decimal } from '@prisma/client/runtime/library';
 import { 
   packageDefinitionCreateSchema, 
   packageDefinitionUpdateSchema,
@@ -162,7 +163,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const validation = createPackageDefinitionSchema.safeParse(body);
+    const validation = packageDefinitionCreateSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json({
@@ -219,10 +220,10 @@ export async function POST(request: NextRequest) {
       });
 
       // Create initial prices if provided
-      let packagePrices: any[] = [];
+      let packagePrices: Array<{ id: number; price: Decimal; currencyId: number; isActive: boolean | null }> = [];
       if (initialPrices && initialPrices.length > 0) {
         // Verify all currencies exist
-        const currencyIds = initialPrices.map(price => price.currencyId);
+        const currencyIds = initialPrices.map((price: { currencyId: number }) => price.currencyId);
         const currencies = await tx.currency.findMany({
           where: { id: { in: currencyIds } }
         });
@@ -233,11 +234,12 @@ export async function POST(request: NextRequest) {
 
         // Create package prices
         packagePrices = await Promise.all(
-          initialPrices.map(priceData => 
+          initialPrices.map((priceData: { price: number; currencyId: number; isActive?: boolean }) => 
             tx.packagePrice.create({
               data: {
                 ...priceData,
-                packageDefinitionId: newPackageDefinition.id
+                packageDefinitionId: newPackageDefinition.id,
+                pricingMode: 'custom'
               },
               include: {
                 currency: {
@@ -291,7 +293,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const validation = updatePackageDefinitionSchema.safeParse(body);
+    const validation = packageDefinitionUpdateSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json({

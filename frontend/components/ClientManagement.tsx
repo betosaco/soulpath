@@ -598,7 +598,7 @@ export function ClientManagement() {
     } finally {
       setIsLoading(false);
     }
-  }, [user?.access_token]);
+  }, [user]);
 
   // Add a manual refresh function that can be called from parent components
   const refreshClients = useCallback(() => {
