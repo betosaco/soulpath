@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
         },
         bookings: {
           take: 5,
-          orderBy: { createdAt: 'desc' },
+          orderBy: { createdAt: 'desc' as const },
           select: {
             id: true,
             sessionType: true,
