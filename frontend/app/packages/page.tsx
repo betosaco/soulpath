@@ -108,32 +108,62 @@ export default function PackagesPage() {
   };
 
   useEffect(() => {
+    console.log('🔄 useEffect triggered');
     loadData();
+    
+    // Fallback timeout to prevent infinite loading
+    const timeout = setTimeout(() => {
+      console.log('⏰ Loading timeout reached, forcing loading to false');
+      setLoading(false);
+    }, 10000); // 10 second timeout
+    
+    return () => clearTimeout(timeout);
   }, []);
 
   const loadData = async () => {
     try {
       setLoading(true);
+      console.log('🔄 Loading packages data...');
       
       // Load packages
       const packagesResponse = await fetch('/api/packages?active=true&currency=PEN');
+      console.log('📦 Packages response status:', packagesResponse.status);
       const packagesData = await packagesResponse.json();
+      console.log('📦 Packages data:', packagesData);
       
-      if (packagesData.success) {
+      if (packagesData.success && packagesData.data) {
+        console.log('✅ Setting packages:', packagesData.data);
         setPackages(packagesData.data);
+      } else {
+        console.error('❌ Packages API error:', packagesData);
+        toast.error('Failed to load packages');
+        setPackages([]); // Set empty array to prevent infinite loading
       }
 
-      // Load available schedule slots
-      const scheduleResponse = await fetch('/api/schedule-slots');
-      const scheduleData = await scheduleResponse.json();
-      
-      if (scheduleData.success) {
-        setScheduleSlots(scheduleData.data);
+      // Load available schedule slots (optional)
+      try {
+        const scheduleResponse = await fetch('/api/schedule-slots');
+        console.log('📅 Schedule response status:', scheduleResponse.status);
+        const scheduleData = await scheduleResponse.json();
+        console.log('📅 Schedule data:', scheduleData);
+        
+        if (scheduleData.success) {
+          setScheduleSlots(scheduleData.slots || scheduleData.data || []);
+        } else {
+          console.warn('⚠️ Schedule API error:', scheduleData);
+          setScheduleSlots([]); // Set empty array
+        }
+      } catch (scheduleError) {
+        console.warn('⚠️ Schedule API failed:', scheduleError);
+        setScheduleSlots([]); // Set empty array
       }
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('❌ Error loading data:', error);
       toast.error('Failed to load packages and schedules');
+      setPackages([]); // Set empty array to prevent infinite loading
+      setScheduleSlots([]);
     } finally {
+      console.log('✅ Loading complete, setting loading to false');
       setLoading(false);
     }
   };
@@ -240,6 +270,9 @@ export default function PackagesPage() {
     toast.error(`Payment failed: ${error}`);
   };
 
+  // Debug logging
+  console.log('🔍 Packages page render - loading:', loading, 'packages count:', packages.length);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-white">
@@ -344,7 +377,18 @@ export default function PackagesPage() {
               exit={{ opacity: 0, x: -20 }}
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             >
-              {packages.map((pkg) => (
+              {packages.length === 0 ? (
+                <div className="col-span-full text-center py-12">
+                  <p className="text-muted text-lg">No packages available at the moment.</p>
+                  <button 
+                    onClick={() => window.location.reload()} 
+                    className="btn-primary mt-4"
+                  >
+                    Refresh Page
+                  </button>
+                </div>
+              ) : (
+                packages.map((pkg) => (
                 <Card key={pkg.id} className="card-base card-hover hover-scale">
                   <CardHeader className="text-center">
                     <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
@@ -392,7 +436,8 @@ export default function PackagesPage() {
                     </button>
                   </CardContent>
                 </Card>
-              ))}
+                ))
+              )}
             </motion.div>
           )}
 

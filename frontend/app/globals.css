@@ -29,19 +29,19 @@
 
 :root {
   /* BRAND COLORS */
-  --matmax-purple: #8B5CF6;
-  --matmax-purple-light: #A78BFA;
-  --matmax-purple-dark: #7C3AED;
-  --matmax-purple-50: #F5F3FF;
-  --matmax-purple-100: #EDE9FE;
-  --matmax-purple-200: #DDD6FE;
-  --matmax-purple-300: #C4B5FD;
-  --matmax-purple-400: #A78BFA;
-  --matmax-purple-500: #8B5CF6;
-  --matmax-purple-600: #7C3AED;
-  --matmax-purple-700: #6D28D9;
-  --matmax-purple-800: #5B21B6;
-  --matmax-purple-900: #4C1D95;
+  --matmax-purple: #6ea058;
+  --matmax-purple-light: #8bc34a;
+  --matmax-purple-dark: #558b2f;
+  --matmax-purple-50: #f1f8e9;
+  --matmax-purple-100: #dcedc8;
+  --matmax-purple-200: #c5e1a5;
+  --matmax-purple-300: #aed581;
+  --matmax-purple-400: #9ccc65;
+  --matmax-purple-500: #6ea058;
+  --matmax-purple-600: #558b2f;
+  --matmax-purple-700: #4caf50;
+  --matmax-purple-800: #388e3c;
+  --matmax-purple-900: #2e7d32;
 
   --matmax-teal: #14B8A6;
   --matmax-teal-light: #5EEAD4;
