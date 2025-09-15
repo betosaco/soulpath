@@ -10,6 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { IzipayPaymentMethod } from '@/components/izipay/IzipayPaymentMethod';
+import { Header } from '@/components/Header';
+import { useTranslations, useLanguage } from '@/hooks/useTranslations';
 import { toast } from 'sonner';
 
 interface PackagePrice {
@@ -67,6 +69,11 @@ export default function PackagesPage() {
   const [loading, setLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState(0);
   const [processing, setProcessing] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  const { language, setLanguage } = useLanguage();
+  const { t } = useTranslations();
+  const translations = t as Record<string, string | Record<string, string>>;
 
   const [formData, setFormData] = useState<BookingFormData>({
     clientName: '',
@@ -89,6 +96,16 @@ export default function PackagesPage() {
     { id: 2, name: 'Booking', description: 'Schedule your session' },
     { id: 3, name: 'Payment', description: 'Complete purchase' }
   ];
+
+  const handleLoginClick = () => {
+    // Add login functionality here
+    console.log('Login clicked');
+  };
+
+  const scrollToSection = (section: string) => {
+    // Add scroll functionality here
+    console.log('Scroll to section:', section);
+  };
 
   useEffect(() => {
     loadData();
@@ -241,7 +258,19 @@ export default function PackagesPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
+      <Header
+        language={language}
+        setLanguage={setLanguage}
+        scrollToSection={scrollToSection}
+        t={translations}
+        isMenuOpen={isMenuOpen}
+        setIsMenuOpen={setIsMenuOpen}
+        onLoginClick={handleLoginClick}
+        user={null}
+        isAdmin={false}
+      />
+      
+      {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-12">
           <h1 
