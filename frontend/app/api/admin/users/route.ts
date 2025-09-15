@@ -111,6 +111,11 @@ export async function GET(request: NextRequest) {
 
     console.log('🔍 Executing database query...');
     
+    // Ensure Prisma is connected before making queries
+    console.log('🔍 Ensuring Prisma connection...');
+    await prisma.$connect();
+    console.log('✅ Prisma connected successfully');
+    
     const [users, totalCount] = await Promise.all([
       prisma.user.findMany({
         where,

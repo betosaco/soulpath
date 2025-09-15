@@ -62,16 +62,31 @@ export function CommunicationConfig() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
-    loadConfiguration();
-  }, []);
+    if (user?.access_token) {
+      loadConfiguration();
+    }
+  }, [user?.access_token]);
 
   const loadConfiguration = async () => {
+    if (!user?.access_token) {
+      console.log('❌ No access token available for communication config');
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const response = await fetch('/api/admin/communication/config');
+      const response = await fetch('/api/admin/communication/config', {
+        headers: {
+          'Authorization': `Bearer ${user.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setConfig(data.config);
+      } else {
+        console.error('Failed to load configuration:', response.status, response.statusText);
+        setMessage({ type: 'error', text: 'Failed to load configuration' });
       }
     } catch (error) {
       console.error('Failed to load configuration:', error);

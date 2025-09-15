@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Base select fields
-    const select: Record<string, unknown> = {
+    const baseSelect = {
       id: true,
       scheduleTemplateId: true,
       startTime: true,
@@ -114,36 +114,58 @@ export async function GET(request: NextRequest) {
       }
     };
 
-    // Enhanced mode includes booking information
-    if (enhanced === 'true') {
-      select._count = {
-        bookings: true
-      };
-      select.bookings = {
-        take: 5,
-        orderBy: { createdAt: 'desc' },
-        select: {
-          id: true,
-          sessionType: true,
-          status: true,
-          createdAt: true,
-          user: {
-            select: {
-              id: true,
-              email: true,
-              fullName: true
+    // For enhanced mode, we'll use include instead of select due to Prisma limitations
+    const queryOptions = enhanced === 'true' ? {
+      include: {
+        scheduleTemplate: {
+          select: {
+            id: true,
+            dayOfWeek: true,
+            startTime: true,
+            endTime: true,
+            capacity: true,
+            sessionDuration: {
+              select: {
+                id: true,
+                name: true,
+                duration_minutes: true
+              }
             }
           }
+        },
+        bookings: {
+          take: 5,
+          orderBy: { createdAt: 'desc' },
+          select: {
+            id: true,
+            sessionType: true,
+            status: true,
+            createdAt: true,
+            user: {
+              select: {
+                id: true,
+                email: true,
+                fullName: true
+              }
+            }
+          }
+        },
+        _count: {
+          select: {
+            bookings: true
+          }
         }
-      };
-    }
+      }
+    } : {
+      select: baseSelect
+    };
 
     console.log('🔍 Executing database query...');
     
     const [scheduleSlots, totalCount] = await Promise.all([
       prisma.scheduleSlot.findMany({
         where,
-        select,
+        ...queryOptions,
         skip: offset,
         take: limit,
         orderBy: { startTime: 'asc' }

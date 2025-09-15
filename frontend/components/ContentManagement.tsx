@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Settings, FileText, Globe, RefreshCw, Save, AlertCircle, Loader2, Database } from 'lucide-react';
 import { BaseButton } from './ui/BaseButton';
 import { useAuth } from '../hooks/useAuth';
@@ -57,6 +57,7 @@ export function ContentManagement({ }: ContentManagementProps) {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  const isLoadingRef = useRef(false);
 
 
 
@@ -179,6 +180,12 @@ export function ContentManagement({ }: ContentManagementProps) {
 
   // Load all data with proper error handling
   const fetchAllData = useCallback(async () => {
+    // Prevent multiple simultaneous loads
+    if (isLoadingRef.current) {
+      console.log('🔄 Data load already in progress, skipping...');
+      return;
+    }
+
     try {
       console.log('🔍 Starting data load process...');
       console.log('🔍 User authenticated:', !!user?.access_token);
@@ -190,6 +197,7 @@ export function ContentManagement({ }: ContentManagementProps) {
         return;
       }
 
+      isLoadingRef.current = true;
       setIsLoading(true);
       setError(null);
 
@@ -222,9 +230,10 @@ export function ContentManagement({ }: ContentManagementProps) {
       setError('Failed to load data');
       showError('Data Load Error', 'Failed to load content data. Please try again.', 5000);
     } finally {
+      isLoadingRef.current = false;
       setIsLoading(false);
     }
-  }, [user, loadContent, loadSections, showError]);
+  }, [user?.access_token, loadContent, loadSections, showError]);
 
   // Manual refresh function with retry logic
   const refreshContentData = useCallback(() => {
@@ -239,30 +248,26 @@ export function ContentManagement({ }: ContentManagementProps) {
 
   // Main data loading effect
   useEffect(() => {
-    if (user?.access_token && !lastLoaded) {
+    if (user?.access_token && !lastLoaded && !isLoadingRef.current) {
       console.log('🔄 Initial data load triggered');
       fetchAllData();
-    } else if (!user?.access_token) {
+    } else if (!user?.access_token && lastLoaded) {
       console.log('🚫 User not authenticated - resetting to defaults');
       setContent(DEFAULT_CONTENT);
       setSections(DEFAULT_SECTIONS);
       setIsLoading(false);
       setError('Authentication required');
+      setLastLoaded(null);
     }
   }, [user?.access_token, lastLoaded, fetchAllData]);
 
-  // Handle authentication state changes
-  useEffect(() => {
-    if (user?.access_token && !lastLoaded && !isLoading) {
-      console.log('🔐 Authentication restored - reloading data');
-      fetchAllData();
-    }
-  }, [user?.access_token, lastLoaded, isLoading, fetchAllData]);
+  // Handle authentication state changes - removed to prevent infinite loop
+  // The main data loading effect above handles this case
 
   // Visibility change handler
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && user?.access_token && lastLoaded) {
+      if (document.visibilityState === 'visible' && user?.access_token && lastLoaded && !isLoadingRef.current) {
         const timeSinceLastLoad = Date.now() - lastLoaded.getTime();
         // Refresh if data is older than 5 minutes
         if (timeSinceLastLoad > 5 * 60 * 1000) {
