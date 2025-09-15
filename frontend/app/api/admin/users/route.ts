@@ -116,6 +116,11 @@ export async function GET(request: NextRequest) {
     await prisma.$connect();
     console.log('✅ Prisma connected successfully');
     
+    // Test with a simple query first
+    console.log('🔍 Testing simple user count...');
+    const testCount = await prisma.user.count();
+    console.log('✅ Test count successful:', testCount);
+    
     const [users, totalCount] = await Promise.all([
       prisma.user.findMany({
         where,
@@ -189,6 +194,12 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('❌ Unexpected error in users API:', error);
+    console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    console.error('❌ Error details:', {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      cause: error instanceof Error ? error.cause : undefined
+    });
     return NextResponse.json({ 
       success: false,
       error: 'Internal server error',
