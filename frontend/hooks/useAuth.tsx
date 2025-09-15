@@ -86,12 +86,17 @@ export function useAuth() {
         body: JSON.stringify({ email, password })
       });
       
+      console.log('🔐 useAuth: Full response:', response);
+      console.log('🔐 useAuth: Response data:', response.data);
+      
       if (response.success && response.data && response.data.user && typeof response.data.user === 'object') {
         // Store token in localStorage
         localStorage.setItem('auth_token', response.data.user.access_token);
         
         console.log('🔐 useAuth: Sign in successful:', response.data.user);
+        console.log('🔐 useAuth: Setting user state...');
         setUser(response.data.user);
+        console.log('🔐 useAuth: User state set, current user:', user);
         
         return { data: response.data.user, error: null };
       } else {

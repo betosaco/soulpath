@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { motion } from 'framer-motion';
@@ -16,10 +16,22 @@ export default function LoginPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-  const { signIn } = useAuth();
+  const { signIn, user, isAdmin } = useAuth();
   const { language, setLanguage } = useLanguage();
   const { t } = useTranslations();
   const translations = t as Record<string, string | Record<string, string>>;
+
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (user) {
+      console.log('🔐 LoginPage: User already logged in, redirecting...', user);
+      if (isAdmin) {
+        router.push('/admin');
+      } else {
+        router.push('/account');
+      }
+    }
+  }, [user, isAdmin, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,14 +46,8 @@ export default function LoginPage() {
         return;
       }
 
-      if (data) {
-        // Check if user is admin and redirect accordingly
-        if (data.role === 'admin') {
-          router.push('/admin');
-        } else {
-          router.push('/account');
-        }
-      }
+      // The useEffect will handle the redirect based on user state
+      console.log('🔐 LoginPage: Sign in successful, user state will be updated');
     } catch (error) {
       console.error('Login failed:', error);
       setError('An unexpected error occurred');
@@ -71,8 +77,8 @@ export default function LoginPage() {
         isMenuOpen={isMenuOpen}
         setIsMenuOpen={setIsMenuOpen}
         onLoginClick={handleLoginClick}
-        user={null}
-        isAdmin={false}
+        user={user}
+        isAdmin={isAdmin}
       />
 
       {/* Login Section */}
