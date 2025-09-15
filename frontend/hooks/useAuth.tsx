@@ -72,14 +72,14 @@ export function useAuth() {
         body: JSON.stringify({ email, password })
       });
       
-      if (data.success && data.data && typeof data.data === 'object') {
+      if (data.success && data.user && typeof data.user === 'object') {
         // Store token in localStorage
-        localStorage.setItem('auth_token', (data.data as { access_token: string }).access_token);
+        localStorage.setItem('auth_token', (data.user as { access_token: string }).access_token);
         
-        console.log('🔐 useAuth: Sign in successful:', data.data);
-        setUser(data.data as User);
+        console.log('🔐 useAuth: Sign in successful:', data.user);
+        setUser(data.user as User);
         
-        return { data, error: null };
+        return { data: data.user, error: null };
       } else {
         console.error('🔐 useAuth: Sign in error:', data.message || data.error || 'Unknown error');
         return { data: null, error: { message: data.message || 'Login failed' } };
