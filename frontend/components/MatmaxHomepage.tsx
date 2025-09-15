@@ -38,20 +38,14 @@ export function MatmaxHomepage() {
 
       {/* Hero Section */}
       <section id="home" className="relative h-screen flex items-center justify-center">
-        {/* Background with MatMax Logo */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#6ea058] to-[#4a7c59]">
-          <div className="absolute inset-0 bg-black bg-opacity-20"></div>
-          {/* Large background logo */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-10">
-            <Image
-              src="/logo_matmax.png"
-              alt="MatMax Background"
-              width={800}
-              height={800}
-              className="w-full h-full object-contain"
-              priority
-            />
-          </div>
+        {/* Background Image with Overlay */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: 'url("/matmaxstudio.png")',
+          }}
+        >
+          <div className="absolute inset-0 bg-black bg-opacity-40"></div>
         </div>
 
         {/* Hero Content */}
