@@ -912,12 +912,12 @@ export function ClientManagement() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="dashboard-container p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-heading text-white mb-2">Client Management</h2>
-          <p className="text-gray-400">Manage your consultation clients</p>
+          <h1 className="dashboard-text-primary text-3xl font-bold">Client Management</h1>
+          <p className="dashboard-text-secondary">Manage your consultation clients</p>
         </div>
         <BaseButton
           onClick={handleCreateClient}
@@ -930,149 +930,149 @@ export function ClientManagement() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
-        <Card className="bg-[#1a1a2e] border-[#16213e]">
+        <Card className="dashboard-card">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-400">Total Clients</p>
-                <p className="text-2xl font-heading text-white">{stats.total}</p>
+                <p className="dashboard-stats-label">Total Clients</p>
+                <p className="dashboard-stats-value">{stats.total}</p>
               </div>
-              <Users size={24} className="text-[#ffd700]" />
+              <Users size={24} className="text-dashboard-accent" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-[#1a1a2e] border-[#16213e]">
+        <Card className="dashboard-card">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-400">Pending</p>
-                <p className="text-2xl font-heading text-yellow-400">{stats.pending}</p>
+                <p className="dashboard-stats-label">Pending</p>
+                <p className="dashboard-stats-value">{stats.pending}</p>
               </div>
-              <Clock size={24} className="text-yellow-400" />
+              <Clock size={24} className="text-dashboard-accent" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-[#1a1a2e] border-[#16213e]">
+        <Card className="dashboard-card">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-400">Confirmed</p>
-                <p className="text-2xl font-heading text-blue-400">{stats.confirmed}</p>
+                <p className="dashboard-stats-label">Confirmed</p>
+                <p className="dashboard-stats-value">{stats.confirmed}</p>
               </div>
-              <CheckCircle size={24} className="text-blue-400" />
+              <CheckCircle size={24} className="text-dashboard-accent" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-[#1a1a2e] border-[#16213e]">
+        <Card className="dashboard-card">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-400">Completed</p>
-                <p className="text-2xl font-heading text-green-400">{stats.completed}</p>
+                <p className="dashboard-stats-label">Completed</p>
+                <p className="dashboard-stats-value">{stats.completed}</p>
               </div>
-              <CheckCircle size={24} className="text-green-400" />
+              <CheckCircle size={24} className="text-dashboard-accent" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-[#1a1a2e] border-[#16213e]">
+        <Card className="dashboard-card">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-400">Recurrent</p>
-                <p className="text-2xl font-heading text-[#ffd700]">{stats.recurrent}</p>
+                <p className="dashboard-stats-label">Recurrent</p>
+                <p className="dashboard-stats-value">{stats.recurrent}</p>
               </div>
-              <Star size={24} className="text-[#ffd700]" />
+              <Star size={24} className="text-dashboard-accent" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Filters and Search */}
-      <Card className="bg-[#1a1a2e] border-[#16213e]">
+      <Card className="dashboard-card">
         <CardContent className="p-4">
           <div className="grid grid-cols-1 lg:grid-cols-7 gap-4 items-end">
             {/* Search */}
             <div className="lg:col-span-2">
-              <Label className="text-gray-400 text-sm">Search</Label>
+              <Label className="dashboard-label">Search</Label>
               <div className="relative">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400/50" />
                 <BaseInput
                   placeholder="Search clients..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-[#1a1a2e] border-[#16213e] text-white"
+                  className="pl-10 dashboard-input"
                 />
               </div>
             </div>
 
             {/* Status Filter */}
             <div>
-              <Label className="text-gray-400 text-sm">Status</Label>
+              <Label className="dashboard-label">Status</Label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="bg-[#1a1a2e] border-[#16213e] text-white">
+                <SelectTrigger className="dashboard-select">
                   <SelectValue />
                 </SelectTrigger>
-                                  <SelectContent className="dashboard-dropdown-content">
-                    <SelectItem value="all" className="dashboard-dropdown-item">All Status</SelectItem>
-                    <SelectItem value="active" className="dashboard-dropdown-item">Active</SelectItem>
-                    <SelectItem value="pending" className="dashboard-dropdown-item">Pending</SelectItem>
-                    <SelectItem value="confirmed" className="dashboard-dropdown-item">Confirmed</SelectItem>
-                    <SelectItem value="completed" className="dashboard-dropdown-item">Completed</SelectItem>
-                    <SelectItem value="cancelled" className="dashboard-dropdown-item">Cancelled</SelectItem>
-                    <SelectItem value="no-show" className="dashboard-dropdown-item">No Show</SelectItem>
-                    <SelectItem value="inactive" className="dashboard-dropdown-item">Inactive</SelectItem>
-                  </SelectContent>
+                <SelectContent className="dashboard-dropdown-content">
+                  <SelectItem value="all" className="dashboard-dropdown-item">All Status</SelectItem>
+                  <SelectItem value="active" className="dashboard-dropdown-item">Active</SelectItem>
+                  <SelectItem value="pending" className="dashboard-dropdown-item">Pending</SelectItem>
+                  <SelectItem value="confirmed" className="dashboard-dropdown-item">Confirmed</SelectItem>
+                  <SelectItem value="completed" className="dashboard-dropdown-item">Completed</SelectItem>
+                  <SelectItem value="cancelled" className="dashboard-dropdown-item">Cancelled</SelectItem>
+                  <SelectItem value="no-show" className="dashboard-dropdown-item">No Show</SelectItem>
+                  <SelectItem value="inactive" className="dashboard-dropdown-item">Inactive</SelectItem>
+                </SelectContent>
               </Select>
             </div>
 
             {/* Language Filter */}
             <div>
-              <Label className="text-gray-400 text-sm">Language</Label>
+              <Label className="dashboard-label">Language</Label>
               <Select value={languageFilter} onValueChange={setLanguageFilter}>
-                <SelectTrigger className="bg-[#1a1a2e] border-[#16213e] text-white">
+                <SelectTrigger className="dashboard-select">
                   <SelectValue />
                 </SelectTrigger>
-                                  <SelectContent className="dashboard-dropdown-content">
-                    <SelectItem value="all" className="dashboard-dropdown-item">All Languages</SelectItem>
-                    <SelectItem value="en" className="dashboard-dropdown-item">🇺🇸 English</SelectItem>
-                    <SelectItem value="es" className="dashboard-dropdown-item">🇪🇸 Español</SelectItem>
-                  </SelectContent>
+                <SelectContent className="dashboard-dropdown-content">
+                  <SelectItem value="all" className="dashboard-dropdown-item">All Languages</SelectItem>
+                  <SelectItem value="en" className="dashboard-dropdown-item">🇺🇸 English</SelectItem>
+                  <SelectItem value="es" className="dashboard-dropdown-item">🇪🇸 Español</SelectItem>
+                </SelectContent>
               </Select>
             </div>
 
             {/* Date Filter */}
             <div>
-              <Label className="text-[#C0C0C0] text-sm">Date</Label>
+              <Label className="dashboard-label">Date</Label>
               <Select value={dateFilter} onValueChange={setDateFilter}>
-                <SelectTrigger className="bg-[#1a1a2e] border-[#16213e] text-white">
+                <SelectTrigger className="dashboard-select">
                   <SelectValue />
                 </SelectTrigger>
-                                  <SelectContent className="dashboard-dropdown-content">
-                    <SelectItem value="all" className="dashboard-dropdown-item">All Time</SelectItem>
-                    <SelectItem value="today" className="dashboard-dropdown-item">Today</SelectItem>
-                    <SelectItem value="week" className="dashboard-dropdown-item">This Week</SelectItem>
-                    <SelectItem value="month" className="dashboard-dropdown-item">This Month</SelectItem>
-                  </SelectContent>
+                <SelectContent className="dashboard-dropdown-content">
+                  <SelectItem value="all" className="dashboard-dropdown-item">All Time</SelectItem>
+                  <SelectItem value="today" className="dashboard-dropdown-item">Today</SelectItem>
+                  <SelectItem value="week" className="dashboard-dropdown-item">This Week</SelectItem>
+                  <SelectItem value="month" className="dashboard-dropdown-item">This Month</SelectItem>
+                </SelectContent>
               </Select>
             </div>
 
             {/* Sort By */}
             <div>
-              <Label className="text-gray-400 text-sm">Sort By</Label>
+              <Label className="dashboard-label">Sort By</Label>
               <Select value={sortBy} onValueChange={(value: 'date' | 'name' | 'status') => setSortBy(value)}>
-                <SelectTrigger className="bg-[#1a1a2e] border-[#16213e] text-white">
+                <SelectTrigger className="dashboard-select">
                   <SelectValue />
                 </SelectTrigger>
-                                  <SelectContent className="dashboard-dropdown-content">
-                    <SelectItem value="date" className="dashboard-dropdown-item">Date Created</SelectItem>
-                    <SelectItem value="name" className="dashboard-dropdown-item">Name</SelectItem>
-                    <SelectItem value="status" className="dashboard-dropdown-item">Status</SelectItem>
-                    <SelectItem value="bookings" className="dashboard-dropdown-item">Total Bookings</SelectItem>
-                  </SelectContent>
+                <SelectContent className="dashboard-dropdown-content">
+                  <SelectItem value="date" className="dashboard-dropdown-item">Date Created</SelectItem>
+                  <SelectItem value="name" className="dashboard-dropdown-item">Name</SelectItem>
+                  <SelectItem value="status" className="dashboard-dropdown-item">Status</SelectItem>
+                  <SelectItem value="bookings" className="dashboard-dropdown-item">Total Bookings</SelectItem>
+                </SelectContent>
               </Select>
             </div>
 
@@ -1082,11 +1082,11 @@ export function ClientManagement() {
                 variant="outline"
                 size="sm"
                 onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                className="border-[#2a2a4a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white"
+                className="dashboard-button-outline"
               >
                 <ArrowUpDown size={16} />
               </BaseButton>
-              <div className="flex bg-[#1a1a2e] rounded-lg border border-[#16213e]">
+              <div className="flex dashboard-card rounded-lg">
                 <BaseButton
                   variant="ghost"
                   size="sm"
@@ -1112,11 +1112,11 @@ export function ClientManagement() {
       {/* Results */}
       <div className="flex items-center justify-between">
         <div className="flex flex-col space-y-1">
-          <p className="text-sm text-gray-400">
+          <p className="dashboard-text-secondary">
             Showing {filteredClients.length} of {clients.length} clients
           </p>
           {lastLoaded && (
-            <p className="text-xs text-gray-400/60">
+            <p className="dashboard-text-muted">
               Last loaded: {lastLoaded.toLocaleTimeString()}
             </p>
           )}
@@ -1133,26 +1133,26 @@ export function ClientManagement() {
 
       {/* Loading State */}
       {isLoading && (
-        <Card className="bg-[#1a1a2e] border-[#16213e]">
+        <Card className="dashboard-card">
           <CardContent className="p-12 text-center">
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
               className="w-12 h-12 border-4 border-[#ffd700] border-t-transparent rounded-full mx-auto mb-4"
             />
-            <h3 className="text-lg font-heading text-white mb-2">Loading clients...</h3>
-            <p className="text-gray-400">Please wait while we fetch your client data.</p>
+            <h3 className="dashboard-text-primary text-lg font-semibold mb-2">Loading clients...</h3>
+            <p className="dashboard-text-secondary">Please wait while we fetch your client data.</p>
           </CardContent>
         </Card>
       )}
 
       {/* Client List/Grid */}
       {!isLoading && filteredClients.length === 0 ? (
-        <Card className="bg-[#1a1a2e] border-[#16213e]">
+        <Card className="dashboard-card">
           <CardContent className="p-12 text-center">
             <Users size={48} className="mx-auto text-gray-400/50 mb-4" />
-            <h3 className="text-lg font-heading text-white mb-2">No clients found</h3>
-            <p className="text-gray-400 mb-4">
+            <h3 className="dashboard-text-primary text-lg font-semibold mb-2">No clients found</h3>
+            <p className="dashboard-text-secondary mb-4">
               {searchQuery || statusFilter !== 'all' || languageFilter !== 'all' || dateFilter !== 'all'
                 ? 'Try adjusting your filters or search terms.'
                 : 'Get started by adding your first client.'}
@@ -1169,67 +1169,67 @@ export function ClientManagement() {
           </CardContent>
         </Card>
       ) : viewMode === 'list' ? (
-        <Card className="bg-[#1a1a2e] border-[#16213e]">
+        <Card className="dashboard-card">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b border-[#2a2a4a]">
+              <table className="dashboard-table">
+                <thead className="dashboard-table-header">
                   <tr className="text-left">
-                    <th className="p-4 text-sm font-medium text-gray-400">Client</th>
-                    <th className="p-4 text-sm font-medium text-gray-400">Contact</th>
-                    <th className="p-4 text-sm font-medium text-gray-400">Status</th>
-                    <th className="p-4 text-sm font-medium text-gray-400">Bookings</th>
-                    <th className="p-4 text-sm font-medium text-gray-400">Created</th>
-                    <th className="p-4 text-sm font-medium text-gray-400">Actions</th>
+                    <th className="dashboard-table-header th">Client</th>
+                    <th className="dashboard-table-header th">Contact</th>
+                    <th className="dashboard-table-header th">Status</th>
+                    <th className="dashboard-table-header th">Bookings</th>
+                    <th className="dashboard-table-header th">Created</th>
+                    <th className="dashboard-table-header th">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredClients.map((client) => (
-                    <tr key={client.id} className="border-b border-[#2a2a4a]/30 hover:bg-[#1a1a2e]/50">
-                      <td className="p-4">
+                    <tr key={client.id} className="dashboard-table-row">
+                      <td className="dashboard-table-row td">
                         <div className="flex items-center space-x-3">
                           <div className="w-10 h-10 bg-[#FFD700]/20 rounded-full flex items-center justify-center">
                             <User size={16} className="text-[#FFD700]" />
                           </div>
                           <div>
-                            <p className="font-medium text-white">{client.fullName}</p>
-                            <p className="text-sm text-gray-400">
+                            <p className="dashboard-text-primary font-medium">{client.fullName}</p>
+                            <p className="dashboard-text-secondary text-sm">
                               {client.language === 'en' ? '🇺🇸' : '🇪🇸'} {client.birthPlace}
                             </p>
                           </div>
                         </div>
                       </td>
-                      <td className="p-4">
+                      <td className="dashboard-table-row td">
                         <div>
-                          <p className="text-white">{client.email}</p>
-                                                      <p className="text-sm text-gray-400">
-                              Born: {formatDate(client.birthDate)}
-                            </p>
+                          <p className="dashboard-text-primary">{client.email}</p>
+                          <p className="dashboard-text-secondary text-sm">
+                            Born: {formatDate(client.birthDate)}
+                          </p>
                         </div>
                       </td>
-                      <td className="p-4">
+                      <td className="dashboard-table-row td">
                         {getStatusBadge(client.status)}
                       </td>
-                      <td className="p-4">
+                      <td className="dashboard-table-row td">
                         <div className="flex items-center space-x-2">
-                          <span className="text-white">{client.totalBookings || 0}</span>
+                          <span className="dashboard-text-primary">{client.totalBookings || 0}</span>
                           {client.isRecurrent && (
                             <Star size={14} className="text-[#FFD700]" />
                           )}
                         </div>
                       </td>
-                      <td className="p-4">
-                        <p className="text-white">
+                      <td className="dashboard-table-row td">
+                        <p className="dashboard-text-primary">
                           {formatDate(client.createdAt)}
                         </p>
                       </td>
-                      <td className="p-4">
+                      <td className="dashboard-table-row td">
                         <div className="flex items-center space-x-2">
                           <BaseButton
                             variant="outline"
                             size="sm"
                             onClick={() => handleViewClient(client)}
-                            className="border-[#2a2a4a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white"
+                            className="dashboard-button-outline"
                           >
                             <Eye size={14} />
                           </BaseButton>
@@ -1237,7 +1237,7 @@ export function ClientManagement() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleEditClient(client)}
-                            className="border-white/30 text-white hover:bg-white/10"
+                            className="dashboard-button-outline"
                           >
                             <Edit size={14} />
                           </BaseButton>
@@ -1246,7 +1246,7 @@ export function ClientManagement() {
                               variant="outline"
                               size="sm"
                               onClick={() => handleViewHistory(client)}
-                              className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10"
+                              className="dashboard-button-outline"
                             >
                               <History size={14} />
                             </BaseButton>
@@ -1255,7 +1255,7 @@ export function ClientManagement() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleDeleteClient(client)}
-                            className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+                            className="dashboard-button-danger"
                           >
                             <Trash2 size={14} />
                           </BaseButton>
@@ -1271,7 +1271,7 @@ export function ClientManagement() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredClients.map((client) => (
-            <Card key={client.id} className="bg-[#1a1a2e] border-[#16213e] hover:border-[#ffd700]/30 transition-colors">
+            <Card key={client.id} className="dashboard-card hover:border-[#ffd700]/30 transition-colors">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-3">
@@ -1279,36 +1279,36 @@ export function ClientManagement() {
                       <User size={20} className="text-[#FFD700]" />
                     </div>
                     <div>
-                      <h3 className="font-medium text-white">{client.fullName}</h3>
-                      <p className="text-sm text-gray-400">
+                      <h3 className="dashboard-text-primary font-medium">{client.fullName}</h3>
+                      <p className="dashboard-text-secondary text-sm">
                         {client.language === 'en' ? '🇺🇸' : '🇪🇸'} {client.email}
                       </p>
                     </div>
                   </div>
                   {client.isRecurrent && (
-                                                <Star size={16} className="text-[#FFD700]" />
+                    <Star size={16} className="text-[#FFD700]" />
                   )}
                 </div>
 
                 <div className="space-y-3 mb-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-400">Status:</span>
+                    <span className="dashboard-text-secondary text-sm">Status:</span>
                     {getStatusBadge(client.status)}
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-400">Bookings:</span>
-                    <span className="text-white">{client.totalBookings || 0}</span>
+                    <span className="dashboard-text-secondary text-sm">Bookings:</span>
+                    <span className="dashboard-text-primary">{client.totalBookings || 0}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-400">Birth Date:</span>
-                    <span className="text-white">
+                    <span className="dashboard-text-secondary text-sm">Birth Date:</span>
+                    <span className="dashboard-text-primary">
                       {formatDate(client.birthDate)}
                     </span>
                   </div>
                   {client.birthPlace && (
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-400">Birth Place:</span>
-                      <span className="text-white text-sm">{client.birthPlace}</span>
+                      <span className="dashboard-text-secondary text-sm">Birth Place:</span>
+                      <span className="dashboard-text-primary text-sm">{client.birthPlace}</span>
                     </div>
                   )}
                 </div>
@@ -1318,7 +1318,7 @@ export function ClientManagement() {
                     variant="outline"
                     size="sm"
                     onClick={() => handleViewClient(client)}
-                    className="flex-1 border-[#2a2a4a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white"
+                    className="flex-1 dashboard-button-outline"
                   >
                     <Eye size={14} className="mr-2" />
                     View
@@ -1327,7 +1327,7 @@ export function ClientManagement() {
                     variant="outline"
                     size="sm"
                     onClick={() => handleCreateBooking(client)}
-                    className="border-green-500/30 text-green-400 hover:bg-green-500/10"
+                    className="dashboard-button-outline"
                   >
                     <Calendar size={14} className="mr-2" />
                     Book
@@ -1336,7 +1336,7 @@ export function ClientManagement() {
                     variant="outline"
                     size="sm"
                     onClick={() => handleEditClient(client)}
-                    className="border-white/30 text-white hover:bg-white/10"
+                    className="dashboard-button-outline"
                   >
                     <Edit size={14} />
                   </BaseButton>
@@ -1345,7 +1345,7 @@ export function ClientManagement() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleViewHistory(client)}
-                      className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10"
+                      className="dashboard-button-outline"
                     >
                       <History size={14} />
                     </BaseButton>
@@ -1354,7 +1354,7 @@ export function ClientManagement() {
                     variant="outline"
                     size="sm"
                     onClick={() => handleDeleteClient(client)}
-                    className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+                    className="dashboard-button-danger"
                   >
                     <Trash2 size={14} />
                   </BaseButton>
