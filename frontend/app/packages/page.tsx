@@ -264,7 +264,7 @@ export default function PackagesPage() {
           quantity: 1,
           clientName: formData.clientName,
           clientEmail: formData.clientEmail,
-          clientPhone: formData.clientPhone,
+          clientPhone: `+51${formData.clientPhone}`,
           language: formData.language,
           paymentMethod: 'izipay',
           paymentData: paymentData
@@ -544,15 +544,20 @@ export default function PackagesPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="clientPhone" className="text-black">Phone *</Label>
-                      <Input
-                        id="clientPhone"
-                        type="tel"
-                        value={formData.clientPhone}
-                        onChange={(e) => setFormData(prev => ({ ...prev, clientPhone: e.target.value }))}
-                        className="border-gray-300 text-black placeholder-gray-400"
-                        placeholder="Enter your phone number"
-                        required
-                      />
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <span className="text-gray-500 text-sm">🇵🇪 +51</span>
+                        </div>
+                        <Input
+                          id="clientPhone"
+                          type="tel"
+                          value={formData.clientPhone}
+                          onChange={(e) => setFormData(prev => ({ ...prev, clientPhone: e.target.value }))}
+                          className="border-gray-300 text-black placeholder-gray-400 pl-16"
+                          placeholder="987654321"
+                          required
+                        />
+                      </div>
                     </div>
                     <div>
                       {/* Empty div to maintain grid layout */}
@@ -724,7 +729,7 @@ export default function PackagesPage() {
                       packagePriceId={formData.selectedPackage.id}
                       quantity={1}
                       metadata={{
-                        clientPhone: formData.clientPhone,
+                        clientPhone: `+51${formData.clientPhone}`,
                         language: formData.language,
                         scheduleSlotId: formData.selectedScheduleSlot?.id
                       }}
