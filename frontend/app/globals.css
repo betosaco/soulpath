@@ -492,7 +492,7 @@
 
 .header-button-language-inactive {
   background-color: transparent;
-  color: var(--color-text-secondary);
+  color: black;
   border-radius: var(--border-radius-md);
   padding: var(--spacing-1) var(--spacing-2);
   font-size: var(--font-size-sm);
@@ -507,7 +507,7 @@
 
 .header-button-account {
   background-color: var(--color-primary-500);
-  color: var(--color-text-inverse);
+  color: black;
   border-radius: var(--border-radius-md);
   padding: var(--spacing-1) var(--spacing-2);
   font-size: var(--font-size-sm);
@@ -522,7 +522,7 @@
 
 .header-button-menu {
   background-color: var(--color-primary-500);
-  color: var(--color-text-inverse);
+  color: black;
   border-radius: var(--border-radius-md);
   padding: var(--spacing-2);
   transition: all var(--transition-duration-200) var(--transition-easing-in-out);

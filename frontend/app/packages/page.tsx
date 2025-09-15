@@ -674,7 +674,7 @@ export default function PackagesPage() {
                           <button
                             type="button"
                             onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
-                            className="h-full px-3 flex items-center space-x-1 border-r border-gray-300 bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            className="h-full w-24 px-3 flex items-center space-x-1 border-r border-gray-300 bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                           >
                             <span className="text-sm">{selectedCountry.flag}</span>
                             <span className="text-sm text-gray-700">{selectedCountry.code}</span>
@@ -710,7 +710,7 @@ export default function PackagesPage() {
                           type="tel"
                           value={formData.clientPhone}
                           onChange={(e) => setFormData(prev => ({ ...prev, clientPhone: e.target.value }))}
-                          className="border-gray-300 text-black placeholder-gray-400 pl-20"
+                          className="border-gray-300 text-black placeholder-gray-400 pl-24 h-10 flex items-center"
                           placeholder="987654321"
                           required
                         />
