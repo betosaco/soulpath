@@ -111,15 +111,15 @@ function ClientModal({ client, isOpen, mode, onClose, onSave }: ClientModalProps
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-[#1a1a2e] border border-[#16213e] rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        className="dashboard-card rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
       >
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-xl font-heading text-white">
+              <h2 className="dashboard-text-primary text-xl font-semibold">
                 {mode === 'create' ? 'Add New Client' : mode === 'edit' ? 'Edit Client' : 'Client Details'}
               </h2>
-              <p className="text-sm text-gray-400 mt-1">
+              <p className="dashboard-text-secondary text-sm mt-1">
                 {mode === 'create' ? 'Enter client information' : mode === 'edit' ? 'Update client details' : 'View client information'}
               </p>
             </div>
@@ -127,7 +127,7 @@ function ClientModal({ client, isOpen, mode, onClose, onSave }: ClientModalProps
               variant="outline"
               size="sm"
               onClick={onClose}
-              className="border-[#2a2a4a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white"
+              className="dashboard-button-outline"
             >
               ✕
             </BaseButton>
@@ -136,56 +136,56 @@ function ClientModal({ client, isOpen, mode, onClose, onSave }: ClientModalProps
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Information Section */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-white border-b border-[#2a2a4a] pb-2">
+              <h3 className="dashboard-text-primary text-lg font-semibold border-b border-[#2a2a4a] pb-2">
                 Basic Information
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="name" className="text-gray-400">Full Name *</Label>
+                  <Label htmlFor="name" className="dashboard-label">Full Name *</Label>
                   <BaseInput
                     id="name"
                     value={formData.fullName || ''}
-                                          onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
-                    className="bg-[#1a1a2e] border-[#16213e] text-white"
+                    onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
+                    className="dashboard-input"
                     disabled={mode === 'view'}
                     required
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="email" className="text-gray-400">Email *</Label>
+                  <Label htmlFor="email" className="dashboard-label">Email *</Label>
                   <BaseInput
                     id="email"
                     type="email"
                     value={formData.email || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    className="bg-[#1a1a2e] border-[#16213e] text-white"
+                    className="dashboard-input"
                     disabled={mode === 'view'}
                     required
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="phone" className="text-gray-400">Phone</Label>
+                  <Label htmlFor="phone" className="dashboard-label">Phone</Label>
                   <BaseInput
                     id="phone"
                     type="tel"
                     value={formData.phone || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                    className="bg-[#1a1a2e] border-[#16213e] text-white"
+                    className="dashboard-input"
                     disabled={mode === 'view'}
                     placeholder="+1 (555) 123-4567"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="language" className="text-gray-400">Language</Label>
+                  <Label htmlFor="language" className="dashboard-label">Language</Label>
                   <Select
                     value={formData.language || 'en'}
                     onValueChange={(value) => setFormData(prev => ({ ...prev, language: value }))}
                     disabled={mode === 'view'}
                   >
-                    <SelectTrigger className="bg-[#1a1a2e] border-[#16213e] text-white">
+                    <SelectTrigger className="dashboard-select">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="dashboard-dropdown-content">
@@ -196,16 +196,16 @@ function ClientModal({ client, isOpen, mode, onClose, onSave }: ClientModalProps
                 </div>
 
                 <div>
-                  <Label htmlFor="status" className="text-gray-400">Status</Label>
-                                  <Select
-                  value={formData.status || 'active'}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}
-                  disabled={mode === 'view'}
-                >
-                    <SelectTrigger className="bg-[#1a1a2e] border-[#16213e] text-white">
+                  <Label htmlFor="status" className="dashboard-label">Status</Label>
+                  <Select
+                    value={formData.status || 'active'}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}
+                    disabled={mode === 'view'}
+                  >
+                    <SelectTrigger className="dashboard-select">
                       <SelectValue />
                     </SelectTrigger>
-                                                          <SelectContent className="dashboard-dropdown-content">
+                    <SelectContent className="dashboard-dropdown-content">
                       <SelectItem value="active" className="dashboard-dropdown-item">Active</SelectItem>
                       <SelectItem value="pending" className="dashboard-dropdown-item">Pending</SelectItem>
                       <SelectItem value="confirmed" className="dashboard-dropdown-item">Confirmed</SelectItem>
@@ -221,58 +221,58 @@ function ClientModal({ client, isOpen, mode, onClose, onSave }: ClientModalProps
 
             {/* Birth Information Section */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-white border-b border-[#2a2a4a] pb-2">
+              <h3 className="dashboard-text-primary text-lg font-semibold border-b border-[#2a2a4a] pb-2">
                 Birth Information
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="birthDate" className="text-gray-400">Birth Date *</Label>
+                  <Label htmlFor="birthDate" className="dashboard-label">Birth Date *</Label>
                   <BaseInput
                     id="birthDate"
                     type="date"
                     value={formData.birthDate || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, birthDate: e.target.value }))}
-                    className="bg-[#1a1a2e] border-[#16213e] text-white"
+                    className="dashboard-input"
                     disabled={mode === 'view'}
                     required
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="birthTime" className="text-gray-400">Birth Time (Optional)</Label>
+                  <Label htmlFor="birthTime" className="dashboard-label">Birth Time (Optional)</Label>
                   <BaseInput
                     id="birthTime"
                     type="time"
                     value={formData.birthTime || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, birthTime: e.target.value }))}
-                    className="bg-[#1a1a2e] border-[#16213e] text-white"
+                    className="dashboard-input"
                     disabled={mode === 'view'}
                     placeholder="Leave empty if unknown"
                   />
-                  <p className="text-xs text-gray-400/70 mt-1">Leave empty if birth time is unknown</p>
+                  <p className="dashboard-text-muted text-xs mt-1">Leave empty if birth time is unknown</p>
                 </div>
 
                 <div className="md:col-span-2">
-                  <Label htmlFor="birthPlace" className="text-gray-400">Birth Place *</Label>
+                  <Label htmlFor="birthPlace" className="dashboard-label">Birth Place *</Label>
                   <BaseInput
                     id="birthPlace"
                     value={formData.birthPlace || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, birthPlace: e.target.value }))}
-                    className="bg-[#1a1a2e] border-[#16213e] text-white"
+                    className="dashboard-input"
                     disabled={mode === 'view'}
                     placeholder="City, Country (or just City if country unknown)"
                     required
                   />
-                  <p className="text-xs text-gray-400/70 mt-1">City and country preferred, but city alone is acceptable</p>
+                  <p className="dashboard-text-muted text-xs mt-1">City and country preferred, but city alone is acceptable</p>
                 </div>
 
                 <div className="md:col-span-2">
-                  <Label htmlFor="question" className="text-gray-400">Question/Focus Areas *</Label>
+                  <Label htmlFor="question" className="dashboard-label">Question/Focus Areas *</Label>
                   <Textarea
                     id="question"
                     value={formData.question || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, question: e.target.value }))}
-                    className="bg-[#1a1a2e] border-[#16213e] text-white min-h-[100px]"
+                    className="dashboard-input min-h-[100px]"
                     disabled={mode === 'view'}
                     placeholder="What would you like to explore in your reading?"
                     required
@@ -283,17 +283,17 @@ function ClientModal({ client, isOpen, mode, onClose, onSave }: ClientModalProps
 
             {/* Admin & CRM Section */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-white border-b border-[#2a2a4a] pb-2">
+              <h3 className="dashboard-text-primary text-lg font-semibold border-b border-[#2a2a4a] pb-2">
                 Admin & CRM
               </h3>
               <div className="grid grid-cols-1 gap-4">
                 <div>
-                  <Label htmlFor="adminNotes" className="text-gray-400">Admin Notes (CRM History)</Label>
+                  <Label htmlFor="adminNotes" className="dashboard-label">Admin Notes (CRM History)</Label>
                   <Textarea
                     id="adminNotes"
                     value={formData.adminNotes || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, adminNotes: e.target.value }))}
-                    className="bg-[#1a1a2e] border-[#16213e] text-white min-h-[100px]"
+                    className="dashboard-input min-h-[100px]"
                     disabled={mode === 'view'}
                     placeholder="Internal notes, follow-up actions, client preferences, etc."
                   />
@@ -307,7 +307,7 @@ function ClientModal({ client, isOpen, mode, onClose, onSave }: ClientModalProps
                   type="button"
                   variant="outline"
                   onClick={onClose}
-                  className="border-[#2a2a4a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white"
+                  className="dashboard-button-outline"
                 >
                   Cancel
                 </BaseButton>
@@ -390,13 +390,13 @@ function BookingHistoryModal({ client, isOpen, onClose }: BookingHistoryModalPro
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-[#1a1a2e] border border-[#16213e] rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+        className="dashboard-card rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
       >
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-xl font-heading text-white">Booking History</h2>
-              <p className="text-sm text-gray-400 mt-1">
+              <h2 className="dashboard-text-primary text-xl font-semibold">Booking History</h2>
+              <p className="dashboard-text-secondary text-sm mt-1">
                 All bookings for {client?.fullName} ({client?.email})
               </p>
             </div>
@@ -404,7 +404,7 @@ function BookingHistoryModal({ client, isOpen, onClose }: BookingHistoryModalPro
               variant="outline"
               size="sm"
               onClick={onClose}
-              className="border-[#2a2a4a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white"
+              className="dashboard-button-outline"
             >
               ✕
             </BaseButton>
@@ -421,19 +421,19 @@ function BookingHistoryModal({ client, isOpen, onClose }: BookingHistoryModalPro
           ) : bookings.length === 0 ? (
             <div className="text-center py-12">
               <Calendar size={48} className="mx-auto text-gray-400/50 mb-4" />
-              <p className="text-gray-400 text-lg mb-2">No booking history</p>
-              <p className="text-gray-400/60 text-sm">This client hasn&apos;t made any bookings yet.</p>
+              <p className="dashboard-text-secondary text-lg mb-2">No booking history</p>
+              <p className="dashboard-text-muted text-sm">This client hasn&apos;t made any bookings yet.</p>
             </div>
           ) : (
             <div className="space-y-4">
               <div className="flex items-center justify-between mb-4">
-                <p className="text-sm text-gray-400">
+                <p className="dashboard-text-secondary text-sm">
                   Total bookings: {bookings.length}
                 </p>
                 <BaseButton
                   variant="outline"
                   size="sm"
-                  className="border-[#ffd700]/30 text-[#ffd700] hover:bg-[#ffd700]/10"
+                  className="dashboard-button-outline"
                 >
                   <Download size={16} className="mr-2" />
                   Export
@@ -442,7 +442,7 @@ function BookingHistoryModal({ client, isOpen, onClose }: BookingHistoryModalPro
 
               <div className="space-y-3">
                 {bookings.map((booking) => (
-                  <Card key={booking.id} className="bg-[#1a1a2e] border-[#16213e]">
+                  <Card key={booking.id} className="dashboard-card">
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
@@ -451,14 +451,14 @@ function BookingHistoryModal({ client, isOpen, onClose }: BookingHistoryModalPro
                           </div>
                           <div>
                             <div className="flex items-center space-x-3 mb-1">
-                                                          <p className="font-medium text-white">
-                              {formatDate(booking.date)}
-                            </p>
-                            <span className="text-gray-400">•</span>
-                            <p className="text-gray-400">{booking.time}</p>
+                              <p className="dashboard-text-primary font-medium">
+                                {formatDate(booking.date)}
+                              </p>
+                              <span className="dashboard-text-secondary">•</span>
+                              <p className="dashboard-text-secondary">{booking.time}</p>
                               {getStatusBadge(booking.status)}
                             </div>
-                            <div className="flex items-center space-x-4 text-sm text-gray-400">
+                            <div className="flex items-center space-x-4 text-sm dashboard-text-secondary">
                               <span>Type: {booking.sessionType || 'Standard Reading'}</span>
                               {booking.price && <span>• ${booking.price}</span>}
                               {booking.rating && (
