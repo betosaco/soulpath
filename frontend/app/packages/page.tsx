@@ -59,9 +59,95 @@ interface BookingFormData {
 }
 
 export default function PackagesPage() {
-  const [packages, setPackages] = useState<PackagePrice[]>([]);
+  const [packages, setPackages] = useState<PackagePrice[]>([
+    {
+      id: 1,
+      price: 50,
+      packageDefinition: {
+        id: 1,
+        name: "24 MATPASS",
+        description: "All classes are 60 minutes",
+        sessionsCount: 24,
+        isActive: true
+      },
+      currency: {
+        id: 2,
+        code: "PEN",
+        symbol: "S/",
+        name: "Peruvian Sol"
+      }
+    },
+    {
+      id: 2,
+      price: 210,
+      packageDefinition: {
+        id: 2,
+        name: "12 MATPASS",
+        description: "All classes are 60 minutes",
+        sessionsCount: 12,
+        isActive: true
+      },
+      currency: {
+        id: 2,
+        code: "PEN",
+        symbol: "S/",
+        name: "Peruvian Sol"
+      }
+    },
+    {
+      id: 3,
+      price: 400,
+      packageDefinition: {
+        id: 3,
+        name: "08 MATPASS",
+        description: "All classes are 60 minutes",
+        sessionsCount: 8,
+        isActive: true
+      },
+      currency: {
+        id: 2,
+        code: "PEN",
+        symbol: "S/",
+        name: "Peruvian Sol"
+      }
+    },
+    {
+      id: 4,
+      price: 320,
+      packageDefinition: {
+        id: 4,
+        name: "04 MATPASS",
+        description: "All classes are 60 minutes",
+        sessionsCount: 4,
+        isActive: true
+      },
+      currency: {
+        id: 2,
+        code: "PEN",
+        symbol: "S/",
+        name: "Peruvian Sol"
+      }
+    },
+    {
+      id: 5,
+      price: 900,
+      packageDefinition: {
+        id: 5,
+        name: "01 MATPASS",
+        description: "All classes are 60 minutes",
+        sessionsCount: 1,
+        isActive: true
+      },
+      currency: {
+        id: 2,
+        code: "PEN",
+        symbol: "S/",
+        name: "Peruvian Sol"
+      }
+    }
+  ]);
   const [scheduleSlots, setScheduleSlots] = useState<ScheduleSlot[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [processing, setProcessing] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -99,15 +185,7 @@ export default function PackagesPage() {
 
   useEffect(() => {
     console.log('🔄 useEffect triggered');
-    loadData();
-    
-    // Fallback timeout to prevent infinite loading
-    const timeout = setTimeout(() => {
-      console.log('⏰ Loading timeout reached, forcing loading to false');
-      setLoading(false);
-    }, 10000); // 10 second timeout
-    
-    return () => clearTimeout(timeout);
+    // Packages are now set in initial state
   }, []);
 
   const loadData = async () => {
