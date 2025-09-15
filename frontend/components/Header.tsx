@@ -390,7 +390,7 @@ export function Header({
               setShowLoginModal(false);
               
               // Check if user is admin and redirect accordingly
-              const userData = data.data as any;
+              const userData = data.data as { role: string };
               if (userData.role === 'admin') {
                 router.push('/admin');
               } else {

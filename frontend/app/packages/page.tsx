@@ -273,18 +273,18 @@ export default function PackagesPage() {
       if (data.success) {
         console.log('✅ Schedule slots loaded:', data.slots);
         // Transform the API response to match the expected interface
-        const transformedSlots = data.slots.map((slot: any) => ({
+        const transformedSlots = data.slots.map((slot: Record<string, unknown>) => ({
           id: slot.id,
-          startTime: new Date(`${slot.date}T${slot.time}`).toISOString(),
-          endTime: new Date(new Date(`${slot.date}T${slot.time}`).getTime() + (slot.duration * 60000)).toISOString(),
+          startTime: new Date(`${slot.date as string}T${slot.time as string}`).toISOString(),
+          endTime: new Date(new Date(`${slot.date as string}T${slot.time as string}`).getTime() + ((slot.duration as number) * 60000)).toISOString(),
           capacity: slot.capacity,
           bookedCount: slot.bookedCount,
           isAvailable: slot.isAvailable,
           scheduleTemplate: {
-            dayOfWeek: new Date(slot.date).toLocaleDateString('en-US', { weekday: 'long' }),
+            dayOfWeek: new Date(slot.date as string).toLocaleDateString('en-US', { weekday: 'long' }),
             sessionDuration: {
-              name: slot.sessionType,
-              duration_minutes: slot.duration
+              name: slot.sessionType as string,
+              duration_minutes: slot.duration as number
             }
           },
           instructorName: 'Available'
@@ -333,7 +333,7 @@ export default function PackagesPage() {
   };
 
 
-  const handlePaymentSuccess = async (paymentData: any) => {
+  const handlePaymentSuccess = async (paymentData: Record<string, unknown>) => {
     try {
       
       // Create the purchase
@@ -735,7 +735,7 @@ export default function PackagesPage() {
                         className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
                       />
                       <label htmlFor="skipBooking" className="text-sm text-gray-700 cursor-pointer">
-                        Skip booking for now - I'll book later from my account
+                        Skip booking for now - I&apos;ll book later from my account
                       </label>
                     </div>
                   </div>
