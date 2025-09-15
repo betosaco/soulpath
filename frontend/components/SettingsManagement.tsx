@@ -159,22 +159,22 @@ export function SettingsManagement() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="dashboard-container p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white">Settings & Configuration</h2>
+        <h2 className="dashboard-text-primary text-2xl font-bold">Settings & Configuration</h2>
       </div>
 
       {/* Content Seeding Section */}
       <BaseCard variant="default" size="lg">
         <BaseCard.Header>
-          <h3 className="text-xl font-semibold text-white">Content Management</h3>
+          <h3 className="dashboard-text-primary text-xl font-semibold">Content Management</h3>
         </BaseCard.Header>
         <BaseCard.Content>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="text-lg font-medium text-white">Seed Homepage Content</h4>
-                <p className="text-gray-400">Populate the homepage with sample content and sections</p>
+                <h4 className="dashboard-text-primary text-lg font-medium">Seed Homepage Content</h4>
+                <p className="dashboard-text-secondary">Populate the homepage with sample content and sections</p>
               </div>
               <BaseButton
                 variant="primary"
@@ -211,14 +211,14 @@ export function SettingsManagement() {
       {/* Customer Seeding Section */}
       <BaseCard variant="default" size="lg">
         <BaseCard.Header>
-          <h3 className="text-xl font-semibold text-white">Customer Management</h3>
+          <h3 className="dashboard-text-primary text-xl font-semibold">Customer Management</h3>
         </BaseCard.Header>
         <BaseCard.Content>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="text-lg font-medium text-white">Seed Sample Customers</h4>
-                <p className="text-gray-400">Create sample customer records for testing</p>
+                <h4 className="dashboard-text-primary text-lg font-medium">Seed Sample Customers</h4>
+                <p className="dashboard-text-secondary">Create sample customer records for testing</p>
               </div>
               <div className="flex space-x-2">
                 <BaseButton
@@ -265,14 +265,14 @@ export function SettingsManagement() {
       {/* Schedule Seeding Section */}
       <BaseCard variant="default" size="lg">
         <BaseCard.Header>
-          <h3 className="text-xl font-semibold text-white">Schedule Management</h3>
+          <h3 className="dashboard-text-primary text-xl font-semibold">Schedule Management</h3>
         </BaseCard.Header>
         <BaseCard.Content>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="text-lg font-medium text-white">Seed Sample Schedules</h4>
-                <p className="text-gray-400">Create sample schedule templates for testing</p>
+                <h4 className="dashboard-text-primary text-lg font-medium">Seed Sample Schedules</h4>
+                <p className="dashboard-text-secondary">Create sample schedule templates for testing</p>
               </div>
               <BaseButton
                 variant="outline"
@@ -309,7 +309,7 @@ export function SettingsManagement() {
       {/* System Status Section */}
       <BaseCard variant="default" size="lg">
         <BaseCard.Header>
-          <h3 className="text-xl font-semibold text-white">System Status</h3>
+          <h3 className="dashboard-text-primary text-xl font-semibold">System Status</h3>
         </BaseCard.Header>
         <BaseCard.Content>
           <div className="space-y-6">

@@ -514,21 +514,21 @@ export function ContentManagement({ }: ContentManagementProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A23] p-6">
+    <div className="dashboard-container p-6 space-y-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-[#EAEAEA] mb-2">Content Management System</h1>
-              <p className="text-[#9CA3AF]">Manage your website content, sections, and translations with ISR support</p>
+              <h1 className="dashboard-text-primary text-3xl font-bold mb-2">Content Management System</h1>
+              <p className="dashboard-text-secondary">Manage your website content, sections, and translations with ISR support</p>
               {lastLoaded && (
-                <p className="text-sm text-gray-400 mt-1">
+                <p className="dashboard-text-muted text-sm mt-1">
                   Last loaded: {lastLoaded.toLocaleString()}
                 </p>
               )}
               {retryCount > 0 && (
-                <p className="text-sm text-yellow-400 mt-1">
+                <p className="dashboard-text-muted text-sm mt-1">
                   Retry attempts: {retryCount}
                 </p>
               )}

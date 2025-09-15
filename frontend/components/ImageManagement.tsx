@@ -310,18 +310,18 @@ export function ImageManagement() {
   }
 
   return (
-    <div className={`p-[${spacing[6]}] space-y-[${spacing[6]}]`}>
+    <div className="dashboard-container p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className={`text-[${typography.fontSize['3xl']}] font-[${typography.fontWeight.bold}] tracking-tight text-[${colors.text.primary}]`}>
+          <h2 className="dashboard-text-primary text-3xl font-bold">
             Image Management
           </h2>
-          <p className={`text-[${colors.text.secondary}]`}>
+          <p className="dashboard-text-secondary">
             Manage website images, logos, and visual assets
           </p>
           {lastLoaded && (
-            <p className="text-sm text-gray-400 mt-1">
+            <p className="dashboard-text-muted text-sm mt-1">
               Last updated: {lastLoaded.toLocaleTimeString()}
             </p>
           )}
