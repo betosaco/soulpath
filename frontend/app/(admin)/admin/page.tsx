@@ -41,11 +41,8 @@ export default function AdminPage() {
     );
   }
 
-  // Render admin dashboard in page mode
-  return (
-    <AdminDashboard 
-      isModal={false}
-      onClose={() => router.push('/')} 
-    />
-  );
+  // The AdminDashboard is already rendered in the layout
+  // This page component is just for routing and auth checks
+  // The layout will render the AdminDashboard with the appropriate content
+  return null;
 }

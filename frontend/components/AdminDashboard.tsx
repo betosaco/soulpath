@@ -219,7 +219,7 @@ export function AdminDashboard({ onClose, isModal = true, children }: AdminDashb
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto bg-[var(--color-background-primary)] mobile-scrollable">
           <div className="dashboard-container p-6 space-y-6 mobile-scrollable">
-            {children ? (
+            {children && children !== null ? (
               children
             ) : (
               <AnimatePresence mode="wait">
