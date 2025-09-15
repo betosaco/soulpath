@@ -57,7 +57,7 @@ export function MatmaxHomepage() {
               alt="MatMax Yoga Studio Logo"
               width={200}
               height={200}
-              className="h-32 w-32 md:h-40 md:w-40 lg:h-48 lg:w-48 object-contain drop-shadow-2xl"
+              className="h-32 w-32 md:h-40 md:w-40 lg:h-48 lg:w-48 object-contain drop-shadow-2xl brightness-0 invert"
               priority
             />
           </div>
