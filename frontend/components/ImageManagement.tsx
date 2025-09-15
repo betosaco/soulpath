@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+// import { motion, AnimatePresence } from 'framer-motion'; // Not used in this component
 
 import { 
   Upload, Image, HardDrive, Globe, Clock, Edit, Trash2, 
@@ -93,9 +94,9 @@ export function ImageManagement() {
       const data = await response.json();
       console.log('✅ Images loaded successfully:', Object.keys(data.images || {}).length, 'items');
       setImages(data.images || {});
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('❌ Error loading images:', err);
-      setError(`Failed to load images: ${err.message}`);
+      setError(`Failed to load images: ${(err as Error).message}`);
     } finally {
       setIsLoading(false);
     }
@@ -138,7 +139,7 @@ export function ImageManagement() {
     }
   }, [user?.access_token, loadImages]);
 
-  const handleEdit = (image: any) => {
+  const handleEdit = (image: Record<string, unknown>) => {
     setEditingImage(image);
     setEditFormData({
       name: image.name || '',
@@ -148,7 +149,7 @@ export function ImageManagement() {
     setShowEditModal(true);
   };
 
-  const handleDelete = (image: any) => {
+  const handleDelete = (image: Record<string, unknown>) => {
     setDeletingImage(image);
     setShowDeleteModal(true);
   };
@@ -173,8 +174,8 @@ export function ImageManagement() {
       } else {
         setError('Failed to delete image');
       }
-    } catch (err: any) {
-      setError(`Error deleting image: ${err.message}`);
+    } catch (err: unknown) {
+      setError(`Error deleting image: ${(err as Error).message}`);
     }
   };
 
@@ -201,8 +202,8 @@ export function ImageManagement() {
       } else {
         setError('Failed to update image');
       }
-    } catch (err: any) {
-      setError(`Error updating image: ${err.message}`);
+    } catch (err: unknown) {
+      setError(`Error updating image: ${(err as Error).message}`);
     }
   };
 
@@ -337,7 +338,7 @@ export function ImageManagement() {
           </CardHeader>
           <CardContent>
             <div className={`text-[${typography.fontSize['2xl']}] font-[${typography.fontWeight.bold}] text-[${colors.text.primary}]`}>
-              {Object.values(images).filter((img: any) => img.isPublic).length}
+              {Object.values(images).filter((img: Record<string, unknown>) => img.isPublic).length}
             </div>
             <p className={`text-[${typography.fontSize.sm}] text-[${colors.text.secondary}]`}>
               Publicly accessible
@@ -495,7 +496,7 @@ export function ImageManagement() {
             </div>
           ) : (
             <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-[${spacing[4]}]`}>
-              {Object.entries(images).map(([key, image]: [string, any]) => (
+              {Object.entries(images).map(([key, image]: [string, Record<string, unknown>]) => (
                 <div key={key} className={`bg-[${colors.semantic.surface.secondary}] rounded-[${borders.radius.lg}] p-[${spacing[4]}] border border-[${colors.border[500]}]`}>
                   <div className={`flex items-center justify-between mb-[${spacing[3]}]`}>
                     {image.isPublic ? (

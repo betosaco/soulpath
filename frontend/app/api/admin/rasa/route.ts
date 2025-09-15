@@ -155,7 +155,7 @@ async function getRasaStats(startDate: Date, endDate: Date) {
       success: true,
       data: {
         dailyStats: stats,
-        overallStats: (overallStats as any)[0],
+        overallStats: (overallStats as Record<string, unknown>[])[0],
         period: {
           start: startDate.toISOString(),
           end: endDate.toISOString()
@@ -394,7 +394,7 @@ async function getPerformanceMetrics(startDate: Date, endDate: Date) {
     return NextResponse.json({
       success: true,
       data: {
-        overallMetrics: (metrics as any)[0],
+        overallMetrics: (metrics as Record<string, unknown>[])[0],
         hourlyMetrics,
         period: {
           start: startDate.toISOString(),

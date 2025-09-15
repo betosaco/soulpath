@@ -5,8 +5,8 @@
  * Tests Redis connectivity and basic operations
  */
 
-const { createClient } = require('redis');
-const { performance } = require('perf_hooks');
+import { createClient } from 'redis';
+import { performance } from 'perf_hooks';
 
 async function testRedisConnection() {
   console.log('🔍 Testing Redis connection...\n');
@@ -123,7 +123,7 @@ async function testRedisConnection() {
         const [key, value] = line.split(':');
         console.log(`   ${key}: ${value}`);
       });
-    } catch (error) {
+    } catch {
       console.log('   Could not retrieve Redis info (may be restricted)');
     }
 

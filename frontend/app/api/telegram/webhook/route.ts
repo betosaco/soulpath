@@ -110,7 +110,7 @@ function getBaseUrl(): string {
   return baseUrl;
 }
 
-export async function GET(_request: NextRequest) {
+export async function GET() {
   try {
     console.log('🔍 GET /api/telegram/webhook - Health check');
     return NextResponse.json({ 
@@ -223,7 +223,7 @@ export async function POST(request: NextRequest) {
       }
 
       // If orchestrator also failed, use hybrid chat as final fallback
-      if (!response || !('success' in response) || !response.success || !response.data || !response.data.text) {
+      if (!response || !('success' in response) || !response.success || !response.data || !(response.data as Record<string, unknown>).text) {
         console.log('🔄 Orchestrator failed, trying hybrid chat fallback...');
         const baseUrl = getBaseUrl();
         console.log(`🔗 Using base URL for fallback: ${baseUrl}`);
@@ -260,9 +260,10 @@ export async function POST(request: NextRequest) {
       }
 
       // Enviar respuesta a Telegram
-      if (response && 'success' in response && response.success && response.data && response.data.text) {
-        await sendTelegramMessage(chatId.toString(), response.data.text);
-        console.log(`✅ Response sent to Telegram: ${response.data.text}`);
+      if (response && 'success' in response && response.success && response.data && (response.data as Record<string, unknown>).text) {
+        const responseText = (response.data as Record<string, unknown>).text as string;
+        await sendTelegramMessage(chatId.toString(), responseText);
+        console.log(`✅ Response sent to Telegram: ${responseText}`);
       } else {
         console.log('⚠️ No response text found:', response);
       }
@@ -292,9 +293,10 @@ export async function POST(request: NextRequest) {
       const response = await orchestrator.processMessage(data, conversationContext);
 
       // Enviar respuesta a Telegram
-      if (response && 'success' in response && response.success && response.data && response.data.text) {
-        await sendTelegramMessage(chatId.toString(), response.data.text);
-        console.log(`✅ Callback response sent to Telegram: ${response.data.text}`);
+      if (response && 'success' in response && response.success && response.data && (response.data as Record<string, unknown>).text) {
+        const responseText = (response.data as Record<string, unknown>).text as string;
+        await sendTelegramMessage(chatId.toString(), responseText);
+        console.log(`✅ Callback response sent to Telegram: ${responseText}`);
       } else {
         console.log('⚠️ No callback response text found:', response);
       }

@@ -36,14 +36,14 @@ export function ApproachSection({ t }: ApproachSectionProps) {
           className="text-center mb-8 sm:mb-12"
         >
           <h2 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-heading text-[#EAEAEA] mb-4 sm:mb-6 leading-tight px-2">
-            {(t.approach as Record<string, any>).title}
+            {(t.approach as Record<string, unknown>).title as string}
           </h2>
           <div className="w-16 sm:w-24 h-0.5 sm:h-1 bg-gradient-to-r from-transparent via-[#FFD700] to-transparent mx-auto"></div>
         </motion.div>
         
         {/* Three-step process */}
         <div className="grid gap-6 sm:gap-8 md:grid-cols-3 md:gap-8 lg:gap-12 max-w-6xl mx-auto">
-          {(t.approach as Record<string, any>).items.map((item: { title: string; description: string }, index: number) => {
+          {((t.approach as Record<string, unknown>).items as Array<{ title: string; description: string }>).map((item: { title: string; description: string }, index: number) => {
             const Icon = icons[index];
             
             return (

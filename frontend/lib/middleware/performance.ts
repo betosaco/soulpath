@@ -145,8 +145,7 @@ export class PerformanceMiddleware {
   static recordApiCall(
     path: string,
     method: string,
-    duration: number,
-    _statusCode: number
+    duration: number
   ): void {
     const key = `${method}:${path}`;
     const instance = PerformanceMiddleware.getInstance();
@@ -214,8 +213,7 @@ export function withApiOptimization(
       PerformanceMiddleware.recordApiCall(
         request.nextUrl.pathname,
         request.method,
-        duration,
-        response.status
+        duration
       );
 
       // Apply optimizations
@@ -226,8 +224,7 @@ export function withApiOptimization(
       PerformanceMiddleware.recordApiCall(
         request.nextUrl.pathname,
         request.method,
-        duration,
-        500
+        duration
       );
 
       console.error('API Error:', error);

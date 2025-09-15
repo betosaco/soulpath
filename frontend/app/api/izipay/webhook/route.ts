@@ -1,174 +1,218 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import crypto from 'crypto';
+
 /**
- * API Route: Izipay Webhook Handler
- * Handles payment status notifications from Izipay
+ * Izipay Webhook Handler
+ * Handles asynchronous payment status notifications from Izipay
+ * Implements HMAC signature validation for security
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { IzipayPaymentService, type IzipayWebhookPayload } from '@/lib/izipay/payment-service';
-import { prisma } from '@/lib/prisma';
-import { generateIzipaySignature } from '@/lib/izipay/config';
+export async function GET() {
+  return NextResponse.json({ 
+    error: 'Method not allowed',
+    message: 'This endpoint only accepts POST requests'
+  }, { status: 405 });
+}
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('🔔 POST /api/izipay/webhook - Received webhook notification');
+    console.log('🔍 Izipay webhook received');
 
-    const body = await request.json();
-    console.log('📝 Webhook payload:', body);
+    // Read raw request body for HMAC validation
+    const rawBody = await request.text();
+    console.log('🔍 Raw webhook body length:', rawBody.length);
 
-    // Validate webhook payload structure
-    const requiredFields = ['transactionId', 'orderId', 'status', 'amount', 'currency'];
-    const missingFields = requiredFields.filter(field => !body[field]);
-    
-    if (missingFields.length > 0) {
-      console.error('❌ Missing required webhook fields:', missingFields);
-      return NextResponse.json({
-        success: false,
-        error: 'Invalid webhook payload',
-        message: `Missing required fields: ${missingFields.join(', ')}`
+    // Get HMAC signature from headers
+    const krHash = request.headers.get('kr-hash');
+    if (!krHash) {
+      console.error('❌ Missing kr-hash header');
+      return NextResponse.json({ 
+        error: 'Unauthorized',
+        message: 'Missing signature header'
+      }, { status: 401 });
+    }
+
+    console.log('🔍 Received kr-hash:', krHash);
+
+    // Get Izipay HMAC secret from database
+    const izipayPaymentMethod = await prisma.paymentMethodConfig.findFirst({
+      where: {
+        type: 'izipay',
+        isActive: true
+      },
+      select: {
+        id: true,
+        type: true,
+        name: true,
+        description: true,
+        icon: true,
+        isActive: true,
+        requiresConfirmation: true,
+        autoAssignPackage: true,
+        providerConfig: true
+      }
+    });
+
+    if (!izipayPaymentMethod || !((izipayPaymentMethod.providerConfig as Record<string, unknown>)?.izipayConfig as Record<string, unknown>)?.hmacKey) {
+      console.error('❌ Izipay configuration not found or HMAC key missing');
+      return NextResponse.json({ 
+        error: 'Configuration error',
+        message: 'Izipay configuration not found'
+      }, { status: 500 });
+    }
+
+    const hmacSecret = ((izipayPaymentMethod.providerConfig as Record<string, unknown>)?.izipayConfig as Record<string, unknown>)?.hmacKey as string;
+    console.log('🔍 HMAC secret found, length:', hmacSecret.length);
+
+    // Calculate HMAC signature
+    const calculatedHash = crypto
+      .createHmac('sha256', hmacSecret)
+      .update(rawBody, 'utf8')
+      .digest('base64');
+
+    console.log('🔍 Calculated hash:', calculatedHash);
+
+    // Verify HMAC signature
+    if (calculatedHash !== krHash) {
+      console.error('❌ HMAC signature verification failed');
+      console.error('Expected:', calculatedHash);
+      console.error('Received:', krHash);
+      return NextResponse.json({ 
+        error: 'Unauthorized',
+        message: 'Invalid signature'
+      }, { status: 401 });
+    }
+
+    console.log('✅ HMAC signature verified successfully');
+
+    // Parse webhook data
+    const webhookData = new URLSearchParams(rawBody);
+    const krAnswer = webhookData.get('kr-answer');
+
+    if (!krAnswer) {
+      console.error('❌ Missing kr-answer in webhook data');
+      return NextResponse.json({ 
+        error: 'Bad request',
+        message: 'Missing kr-answer data'
       }, { status: 400 });
     }
 
-    const webhookPayload: IzipayWebhookPayload = {
-      transactionId: body.transactionId,
-      orderId: body.orderId,
-      status: body.status,
-      amount: body.amount,
-      currency: body.currency,
-      paymentMethod: body.paymentMethod || 'credit_card',
-      timestamp: body.timestamp || new Date().toISOString(),
-      signature: body.signature || '',
-    };
-
-    // Load Izipay provider config for signature verification
-    let overrideConfig: any = null;
+    let paymentData;
     try {
-      const izipayMethod = await prisma.paymentMethodConfig.findFirst({
-        where: { type: 'izipay', isActive: true },
-        select: { providerConfig: true }
-      });
-      overrideConfig = izipayMethod?.providerConfig || null;
-    } catch (e) {
-      console.warn('Could not load Izipay providerConfig from DB for webhook verification.');
-    }
-
-    // Process the webhook
-    console.log('🔄 Processing Izipay webhook...');
-    if (overrideConfig) {
-      // Temporarily set config for verification by calling a method that accepts override
-      // processWebhook internally calls verify with current config, so we monkey patch via getter by binding override
-      // Instead, simply verify signature here and then call processWebhook without verification
-      const verified = (() => {
-        try {
-          const { signature, ...signatureData } = webhookPayload as any;
-          const expected = generateIzipaySignature(signatureData as any, overrideConfig.publicKey);
-          return signature === expected;
-        } catch {
-          return false;
-        }
-      })();
-      if (!verified) {
-        return NextResponse.json({ success: false, error: 'Invalid signature' }, { status: 400 });
-      }
-    }
-    const webhookResult = await IzipayPaymentService.processWebhook(webhookPayload);
-
-    if (!webhookResult.success) {
-      console.error('❌ Webhook processing failed');
-      return NextResponse.json({
-        success: false,
-        error: 'Webhook processing failed'
+      paymentData = JSON.parse(krAnswer);
+      console.log('🔍 Parsed webhook data:', JSON.stringify(paymentData, null, 2));
+    } catch (parseError) {
+      console.error('❌ Failed to parse kr-answer JSON:', parseError);
+      return NextResponse.json({ 
+        error: 'Bad request',
+        message: 'Invalid JSON in kr-answer'
       }, { status: 400 });
     }
 
-    console.log('✅ Webhook processed successfully:', webhookResult);
+    // Extract payment information
+    const orderId = paymentData.orderId;
+    const transactionStatus = paymentData.transactionDetails?.status;
+    const transactionId = paymentData.transactionDetails?.transactionId || paymentData.transactionId;
 
-    // Update purchase record in database
-    try {
-      const purchase = await prisma.purchase.findFirst({
-        where: {
-          OR: [
-            { transactionId: webhookResult.transactionId },
-            { notes: { contains: webhookResult.orderId } }
-          ]
-        }
-      });
-
-      if (purchase) {
-        // Update purchase status
-        await prisma.purchase.update({
-          where: { id: purchase.id },
-          data: {
-            paymentStatus: webhookResult.status,
-            transactionId: webhookResult.transactionId,
-            updatedAt: new Date(),
-          }
-        });
-
-        console.log('✅ Purchase record updated:', purchase.id);
-
-        // Create payment record
-        await prisma.paymentRecord.create({
-          data: {
-            userId: purchase.userId,
-            purchaseId: purchase.id,
-            amount: webhookPayload.amount / 100, // Convert from cents
-            currencyCode: webhookPayload.currency,
-            paymentMethod: 'izipay',
-            paymentStatus: webhookResult.status,
-            transactionId: webhookResult.transactionId,
-            paymentDate: new Date(),
-            confirmedAt: webhookResult.status === 'completed' ? new Date() : null,
-          }
-        });
-
-        console.log('✅ Payment record created');
-
-        // If payment is completed, activate user packages
-        if (webhookResult.status === 'completed') {
-          await prisma.userPackage.updateMany({
-            where: { purchaseId: purchase.id },
-            data: { isActive: true }
-          });
-          console.log('✅ User packages activated');
-        }
-
-      } else {
-        console.warn('⚠️ Purchase record not found for transaction:', webhookResult.transactionId);
-      }
-
-    } catch (dbError) {
-      console.error('❌ Database update failed:', dbError);
-      // Don't fail the webhook response as the payment was processed
+    if (!orderId) {
+      console.error('❌ Missing orderId in webhook data');
+      return NextResponse.json({ 
+        error: 'Bad request',
+        message: 'Missing orderId'
+      }, { status: 400 });
     }
 
-    // Send success response to Izipay
-    return NextResponse.json({
+    console.log('🔍 Processing webhook for orderId:', orderId, 'status:', transactionStatus);
+
+    // Find the purchase record
+    const purchase = await prisma.purchase.findUnique({
+      where: { id: parseInt(orderId) }
+    });
+
+    if (!purchase) {
+      console.error('❌ Purchase not found for orderId:', orderId);
+      return NextResponse.json({ 
+        error: 'Not found',
+        message: 'Purchase not found'
+      }, { status: 404 });
+    }
+
+    console.log('✅ Purchase found:', purchase.id, 'current status:', purchase.paymentStatus);
+
+    // Map Izipay status to our payment status
+    let newPaymentStatus = purchase.paymentStatus;
+    let notes = purchase.notes || '';
+
+    switch (transactionStatus) {
+      case 'PAID':
+      case 'AUTHORISED':
+        newPaymentStatus = 'completed';
+        notes = `Payment confirmed via webhook. Transaction ID: ${transactionId}`;
+        break;
+      case 'UNPAID':
+      case 'REFUSED':
+      case 'CANCELLED':
+        newPaymentStatus = 'failed';
+        notes = `Payment failed via webhook. Status: ${transactionStatus}. Transaction ID: ${transactionId}`;
+        break;
+      case 'PENDING':
+        newPaymentStatus = 'pending';
+        notes = `Payment pending via webhook. Transaction ID: ${transactionId}`;
+        break;
+      default:
+        console.warn('⚠️ Unknown transaction status:', transactionStatus);
+        notes = `Webhook received with status: ${transactionStatus}. Transaction ID: ${transactionId}`;
+    }
+
+    // Update purchase record
+    const updatedPurchase = await prisma.purchase.update({
+      where: { id: purchase.id },
+      data: {
+        paymentStatus: newPaymentStatus,
+        transactionId: transactionId || purchase.transactionId,
+        notes: notes,
+        ...(newPaymentStatus === 'completed' && !purchase.purchasedAt && {
+          purchasedAt: new Date()
+        })
+      }
+    });
+
+    console.log('✅ Purchase updated:', {
+      id: updatedPurchase.id,
+      oldStatus: purchase.paymentStatus,
+      newStatus: newPaymentStatus,
+      transactionId: transactionId
+    });
+
+    // If payment is completed, ensure user package is created
+    if (newPaymentStatus === 'completed') {
+      console.log('✅ Payment completed, user package creation would happen here');
+      // TODO: Implement user package creation logic
+    }
+
+    // Log webhook processing
+    console.log('✅ Webhook processed successfully:', {
+      orderId,
+      transactionStatus,
+      newPaymentStatus,
+      transactionId
+    });
+
+    return NextResponse.json({ 
       success: true,
       message: 'Webhook processed successfully',
-      orderId: webhookResult.orderId,
-      status: webhookResult.status
+      orderId,
+      status: newPaymentStatus
     });
 
   } catch (error) {
-    console.error('❌ Error in POST /api/izipay/webhook:', error);
-    
-    // Return 200 to prevent Izipay from retrying failed webhooks
-    // Log the error but don't expose internal details
-    return NextResponse.json({
-      success: false,
-      error: 'Webhook processing error',
-      message: 'Internal server error'
-    }, { status: 200 });
+    console.error('❌ Error processing Izipay webhook:', error);
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      message: 'Failed to process webhook'
+    }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
-}
-
-// Handle GET requests for webhook verification (if needed)
-export async function GET(_request: NextRequest) {
-  console.log('🔍 GET /api/izipay/webhook - Webhook endpoint verification');
-  
-  return NextResponse.json({
-    success: true,
-    message: 'Izipay webhook endpoint is active',
-    timestamp: new Date().toISOString()
-  });
 }

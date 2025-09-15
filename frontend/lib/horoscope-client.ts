@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-let Ephemeris: any = null;
+let Ephemeris: Record<string, unknown> | null = null;
 let isInitialized = false;
 
 export const useHoroscope = () => {

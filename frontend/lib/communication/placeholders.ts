@@ -76,7 +76,7 @@ export function getPlaceholdersGrouped(type: 'email' | 'sms'): Record<string, Pl
   return type === 'email' ? EMAIL_PLACEHOLDERS : SMS_PLACEHOLDERS;
 }
 
-export function replacePlaceholders(content: string, data: Record<string, any>): string {
+export function replacePlaceholders(content: string, data: Record<string, unknown>): string {
   let result = content;
   
   // Replace simple placeholders

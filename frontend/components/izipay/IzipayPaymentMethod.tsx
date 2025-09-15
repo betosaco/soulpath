@@ -21,8 +21,8 @@ interface IzipayPaymentMethodProps {
   description?: string;
   packagePriceId?: number;
   quantity?: number;
-  metadata?: Record<string, any>;
-  onSuccess?: (result: any) => void;
+  metadata?: Record<string, unknown>;
+  onSuccess?: (result: Record<string, unknown>) => void;
   onError?: (error: string) => void;
   onCancel?: () => void;
   variant?: 'button' | 'inline' | 'card';

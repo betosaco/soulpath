@@ -895,7 +895,7 @@ const ScheduleManagement: React.FC = () => {
                               variant="outline"
                               className="dashboard-button-danger"
                               onClick={() => {
-                                setSelectedItem(slot as any);
+                                setSelectedItem(slot as Record<string, unknown>);
                                 setDeleteType('slot');
                                 setShowDeleteModal(true);
                               }}

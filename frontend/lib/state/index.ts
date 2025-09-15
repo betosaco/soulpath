@@ -25,7 +25,7 @@ export interface UseApiState<T> {
 export interface UseApiOptions {
   immediate?: boolean;
   cache?: boolean;
-  onSuccess?: (data: any) => void;
+  onSuccess?: (data: unknown) => void;
   onError?: (error: string) => void;
 }
 
@@ -99,7 +99,7 @@ export function useCreateClient() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const createClient = useCallback(async (clientData: any) => {
+  const createClient = useCallback(async (clientData: Record<string, unknown>) => {
     try {
       setLoading(true);
       setError(null);
@@ -133,7 +133,7 @@ export function useUpdateClient() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const updateClient = useCallback(async (id: string, clientData: any) => {
+  const updateClient = useCallback(async (id: string, clientData: Record<string, unknown>) => {
     try {
       setLoading(true);
       setError(null);
@@ -201,7 +201,7 @@ export function useDeleteClient() {
 // BOOKINGS STATE MANAGEMENT
 // ============================================================================
 
-export function useBookings(params?: any, options: UseApiOptions = {}) {
+export function useBookings(params?: Record<string, unknown>, options: UseApiOptions = {}) {
   return useApi(() => api.bookings.getAll(params), options);
 }
 
@@ -209,7 +209,7 @@ export function useCreateBooking() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const createBooking = useCallback(async (bookingData: any) => {
+  const createBooking = useCallback(async (bookingData: Record<string, unknown>) => {
     try {
       setLoading(true);
       setError(null);
@@ -251,7 +251,7 @@ export function useCreatePackage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const createPackage = useCallback(async (packageData: any) => {
+  const createPackage = useCallback(async (packageData: Record<string, unknown>) => {
     try {
       setLoading(true);
       setError(null);

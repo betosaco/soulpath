@@ -5,8 +5,8 @@
  * This script adds RASA_URL and OPENROUTER_API_KEY to Vercel
  */
 
-const { execSync } = require('child_process');
-const readline = require('readline');
+import { execSync } from 'child_process';
+import readline from 'readline';
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -36,7 +36,7 @@ function checkVercelCLI() {
   try {
     execSync('vercel --version', { stdio: 'pipe' });
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -45,7 +45,7 @@ function checkVercelAuth() {
   try {
     execSync('vercel whoami', { stdio: 'pipe' });
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -65,7 +65,7 @@ async function main() {
     console.log('❌ Vercel CLI not found. Installing...');
     try {
       runCommand('npm install -g vercel', 'Installing Vercel CLI');
-    } catch (error) {
+    } catch {
       console.error('❌ Failed to install Vercel CLI. Please install manually:');
       console.error('   npm install -g vercel');
       process.exit(1);
@@ -93,7 +93,7 @@ async function main() {
     for (const env of environments) {
       try {
         await addEnvironmentVariable(key, value, env);
-      } catch (error) {
+      } catch {
         console.error(`❌ Failed to add ${key} to ${env}`);
         // Continue with other environments
       }
@@ -107,7 +107,7 @@ async function main() {
   try {
     const output = runCommand('vercel env ls', 'Listing environment variables');
     console.log(output);
-  } catch (error) {
+  } catch {
     console.log('Could not list environment variables');
   }
 

@@ -4,7 +4,7 @@ import { replacePlaceholders } from './placeholders';
 const prisma = new PrismaClient();
 
 export interface TemplateData {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface TemplateResult {

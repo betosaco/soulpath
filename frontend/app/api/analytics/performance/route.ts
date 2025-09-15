@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
       },
       modelPerformance: modelPerformance.map(model => ({
         modelVersion: model.modelVersion,
-        accuracy: (model.evaluationResults as any)?.accuracy || 0,
+        accuracy: (model.evaluationResults as Record<string, unknown>)?.accuracy as number || 0,
         bookingSuccessRate: model.bookingSuccessRate || 0,
         avgConversationTurns: model.avgConversationTurns || 0,
         isActiveProduction: model.isActiveProduction,

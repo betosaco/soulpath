@@ -7,9 +7,9 @@
  * Uso: node scripts/verify-integration.js
  */
 
-const axios = require('axios');
-const path = require('path');
-const fs = require('fs');
+import axios from 'axios';
+// import path from 'path'; // Not used in this file
+import fs from 'fs';
 
 // Configuración
 const BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000/api';

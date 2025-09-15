@@ -14,80 +14,6 @@ interface BookingWhereClause {
   };
 }
 
-interface BookingSelectClause {
-  id: boolean;
-  userId: boolean;
-  userPackageId: boolean;
-  scheduleSlotId: boolean;
-  sessionType: boolean;
-  status: boolean;
-  notes: boolean;
-  cancelledAt: boolean;
-  cancelledReason: boolean;
-  reminderSent: boolean;
-  reminderSentAt: boolean;
-  createdAt: boolean;
-  updatedAt: boolean;
-  user?: {
-    select: {
-      id: boolean;
-      email: boolean;
-      fullName: boolean;
-      phone: boolean;
-    };
-  };
-  userPackage?: {
-    select: {
-      id: boolean;
-      packagePrice: {
-        select: {
-          id: boolean;
-          price: boolean;
-          pricingMode: boolean;
-          packageDefinition: {
-            select: {
-              id: boolean;
-              name: boolean;
-              description: boolean;
-              sessionsCount: boolean;
-              packageType: boolean;
-              sessionDuration: {
-                select: {
-                  name: boolean;
-                  duration_minutes: boolean;
-                };
-              };
-            };
-          };
-          currency: {
-            select: {
-              symbol: boolean;
-              code: boolean;
-            };
-          };
-        };
-      };
-    };
-  };
-  scheduleSlot?: {
-    select: {
-      id: boolean;
-      startTime: boolean;
-      endTime: boolean;
-      scheduleTemplate: {
-        select: {
-          dayOfWeek: boolean;
-          sessionDuration: {
-            select: {
-              name: boolean;
-              duration_minutes: boolean;
-            };
-          };
-        };
-      };
-    };
-  };
-}
 
 
 // Zod schemas for the refactored booking system
@@ -168,7 +94,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Base select fields
-    const select: BookingSelectClause = {
+    const select: Record<string, boolean | object> = {
       id: true,
       userId: true,
       userPackageId: true,
@@ -252,7 +178,7 @@ export async function GET(request: NextRequest) {
             }
           }
         }
-      } as any; // Prisma select object - complex nested type
+      } as Record<string, boolean | object>; // Prisma select object - complex nested type
     } else {
       select.userPackage = {
         select: {
@@ -287,7 +213,7 @@ export async function GET(request: NextRequest) {
             }
           }
         }
-      } as any; // Prisma select object - complex nested type
+      } as Record<string, boolean | object>; // Prisma select object - complex nested type
     }
 
     console.log('🔍 Executing database query...');

@@ -203,7 +203,7 @@ export function TemplateEditor({ template, type, onSave, onClose }: TemplateEdit
       acc[category] = filtered;
     }
     return acc;
-  }, {} as Record<string, any[]>);
+  }, {} as Record<string, Array<{ name: string; description: string; example: string }>>);
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">

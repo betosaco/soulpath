@@ -93,7 +93,7 @@ export class MLPipelineService {
           });
 
           const entities = Object.entries(entityExtraction.entities)
-            .filter(([_, value]) => value && typeof value === 'string')
+            .filter(([, value]) => value && typeof value === 'string')
             .map(([entity, value]) => ({
               entity,
               value: value as string,
@@ -298,7 +298,7 @@ export class MLPipelineService {
     });
   }
 
-  private async calculateIntentMetrics(logs: any[]): Promise<{
+  private async calculateIntentMetrics(logs: Record<string, unknown>[]): Promise<{
     precision: Record<string, number>;
     recall: Record<string, number>;
     f1Score: Record<string, number>;

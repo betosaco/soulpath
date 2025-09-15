@@ -153,7 +153,7 @@ export function BookingSection({ t, language }: BookingSectionProps) {
             </div>
             
             <h2 className="text-2xl sm:text-3xl font-heading text-[#EAEAEA]">
-              {(t.apply as Record<string, any>).form?.thankYou || 'Thank You!'}
+              {((t.apply as Record<string, unknown>).form as Record<string, unknown>)?.thankYou as string || 'Thank You!'}
             </h2>
             
             <div className="bg-gradient-to-br from-[#191970]/30 to-[#0A0A23]/30 p-6 rounded-2xl border border-[#FFD700]/20">

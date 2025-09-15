@@ -361,7 +361,7 @@ export function ContentManagement({ }: ContentManagementProps) {
     } finally {
       setIsSaving(false);
     }
-  }, [user?.access_token, content, showError, showSuccess, showWarning]);
+  }, [user?.access_token, content, showError, showSuccess]);
 
   // Handle content changes
   const handleContentChange = useCallback((newContent: ContentStructure) => {

@@ -5,14 +5,13 @@
  * Uso: node scripts/check-ready.js
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
 
 // Colores
 const green = '\x1b[32m';
 const red = '\x1b[31m';
 const yellow = '\x1b[33m';
-const blue = '\x1b[34m';
+// const blue = '\x1b[34m'; // Not used
 const reset = '\x1b[0m';
 
 function log(color, icon, message) {
@@ -81,7 +80,7 @@ try {
     log(red, '❌', 'ChatWindow NO renderizado en App.tsx');
     integrationOk = false;
   }
-} catch (error) {
+} catch {
   log(red, '❌', 'Error verificando App.tsx');
   integrationOk = false;
 }
@@ -106,7 +105,7 @@ try {
     log(yellow, '⚠️ ', 'Rasa: Sin responses configuradas');
     rasaOk = false;
   }
-} catch (error) {
+} catch {
   log(red, '❌', 'Error verificando configuración Rasa');
   rasaOk = false;
 }

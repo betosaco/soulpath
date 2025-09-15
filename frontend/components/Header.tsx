@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import { Menu, X, LogIn, Settings, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 
 import { useLogo } from '../hooks/useLogo';
 
@@ -78,38 +79,66 @@ export function Header({
   }, [isMenuOpen, setIsMenuOpen]);
   
   return (
-    <header className="fixed top-0 left-0 right-0 z-[9997] bg-black/20 backdrop-blur-md border-b border-white/10">
-      <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between header-container">
+    <header className="fixed top-0 left-0 right-0 z-[9997] bg-black/30 backdrop-blur-lg border-b border-white/20 safe-padding">
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 flex items-center justify-between header-container">
         <motion.div 
-          className="flex items-center space-x-2 cursor-pointer touch-manipulation"
+          className="flex items-center space-x-2 cursor-pointer touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
           onClick={() => scrollToSection('invitation')}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
           {logoSettings.isActive ? (
             logoSettings.type === 'text' ? (
-              <span className="font-heading text-lg sm:text-xl md:text-2xl text-[#FFD700]">
+              <span className="font-heading text-base sm:text-lg md:text-xl lg:text-2xl text-[#FFD700] font-semibold">
                 {logoSettings.text || 'MatMax'}
               </span>
             ) : logoSettings.imageUrl ? (
-              <img 
+              <Image 
                 src={logoSettings.imageUrl} 
                 alt="MatMax Yoga Studio Logo" 
-                className="h-6 sm:h-8 md:h-10 object-contain"
+                width={40}
+                height={40}
+                className="h-7 sm:h-8 md:h-9 lg:h-10 object-contain"
               />
             ) : (
-              <span className="font-heading text-lg sm:text-xl md:text-2xl text-[#FFD700]">MatMax</span>
+              <span className="font-heading text-base sm:text-lg md:text-xl lg:text-2xl text-[#FFD700] font-semibold">MatMax</span>
             )
           ) : (
-            <span className="font-heading text-lg sm:text-xl md:text-2xl text-[#FFD700]">MatMax</span>
+            <span className="font-heading text-base sm:text-lg md:text-xl lg:text-2xl text-[#FFD700] font-semibold">MatMax</span>
           )}
         </motion.div>
         
-        <div className="flex items-center space-x-4 sm:space-x-6">
+        <div className="flex items-center space-x-2 sm:space-x-4 lg:space-x-6">
+          {/* Mobile Language Selector */}
+          <div className="flex sm:hidden items-center space-x-1">
+            <button 
+              onClick={() => setLanguage('en')}
+              className={`px-2 py-1 text-xs font-medium rounded-md transition-all duration-200 touch-manipulation min-h-[32px] min-w-[32px] flex items-center justify-center ${
+                language === 'en' 
+                  ? 'bg-[#FFD700] text-[#0A0A23] shadow-sm' 
+                  : 'text-[#C0C0C0] hover:text-[#FFD700] hover:bg-[#FFD700]/10'
+              }`}
+            >
+              EN
+            </button>
+            <span className="text-[#C0C0C0]/30 text-xs">|</span>
+            <button 
+              onClick={() => setLanguage('es')}
+              className={`px-2 py-1 text-xs font-medium rounded-md transition-all duration-200 touch-manipulation min-h-[32px] min-w-[32px] flex items-center justify-center ${
+                language === 'es' 
+                  ? 'bg-[#FFD700] text-[#0A0A23] shadow-sm' 
+                  : 'text-[#C0C0C0] hover:text-[#FFD700] hover:bg-[#FFD700]/10'
+              }`}
+            >
+              ES
+            </button>
+          </div>
+
+          {/* Desktop Language Selector */}
           <div className="hidden sm:flex items-center space-x-2">
             <button 
               onClick={() => setLanguage('en')}
-              className={`touch-manipulation ${
+              className={`touch-manipulation px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 min-h-[36px] min-w-[36px] flex items-center justify-center ${
                 language === 'en' ? 'header-button-language-active' : 'header-button-language-inactive'
               }`}
             >
@@ -118,7 +147,7 @@ export function Header({
             <span className="text-[#C0C0C0]/50">|</span>
             <button 
               onClick={() => setLanguage('es')}
-              className={`touch-manipulation ${
+              className={`touch-manipulation px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 min-h-[36px] min-w-[36px] flex items-center justify-center ${
                 language === 'es' ? 'header-button-language-active' : 'header-button-language-inactive'
               }`}
             >
@@ -167,14 +196,22 @@ export function Header({
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center justify-center rounded-lg header-button-menu touch-manipulation focus-visible px-3 py-2 sm:px-2 sm:py-2"
+            className="flex items-center justify-center rounded-lg header-button-menu touch-manipulation focus-visible px-3 py-2 sm:px-3 sm:py-2 min-h-[44px] min-w-[44px] relative overflow-hidden"
             aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={isMenuOpen}
           >
-            {/* Mobile: Show "Menu" text */}
-            <span className="sm:hidden text-sm font-medium">
-              {isMenuOpen ? 'Close' : 'Menu'}
-            </span>
+            {/* Mobile: Show "Menu" text with icon */}
+            <div className="flex sm:hidden items-center space-x-2">
+              <span className="text-sm font-medium">
+                {isMenuOpen ? 'Close' : 'Menu'}
+              </span>
+              <motion.div
+                animate={{ rotate: isMenuOpen ? 180 : 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {isMenuOpen ? <X size={16} /> : <Menu size={16} />}
+              </motion.div>
+            </div>
             
             {/* Desktop: Show hamburger icon */}
             <motion.div
@@ -184,6 +221,14 @@ export function Header({
             >
               {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </motion.div>
+
+            {/* Ripple effect for mobile */}
+            <motion.div
+              className="absolute inset-0 bg-white/10 rounded-lg"
+              initial={{ scale: 0, opacity: 0 }}
+              whileTap={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.2 }}
+            />
           </motion.button>
         </div>
       </div>

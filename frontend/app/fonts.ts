@@ -1,13 +1,13 @@
-import { Cormorant_Garamond, Lato } from 'next/font/google';
+import { Poppins, Roboto } from 'next/font/google';
 
-export const cormorantGaramond = Cormorant_Garamond({
+export const poppins = Poppins({
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
+  weight: ['300', '400', '500', '600', '700', '900'],
   variable: '--font-heading',
 });
 
-export const lato = Lato({
+export const roboto = Roboto({
   subsets: ['latin'],
-  weight: ['300', '400', '700'],
+  weight: ['300', '400', '500', '600', '700', '900'],
   variable: '--font-body',
 });

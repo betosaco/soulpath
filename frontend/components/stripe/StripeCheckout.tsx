@@ -32,7 +32,7 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
   className = '',
 }) => {
   const [loading, setLoading] = useState(false);
-  const [stripe, setStripe] = useState<any>(null);
+  const [stripe, setStripe] = useState<unknown>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -41,7 +41,7 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
       try {
         const stripeClient = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
         setStripe(stripeClient);
-      } catch (_err) {
+      } catch {
         setError('Failed to load Stripe');
         onError?.('Failed to load Stripe');
       }

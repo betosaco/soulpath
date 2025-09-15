@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import { 
   Calendar, 
   Clock, 
@@ -123,27 +124,6 @@ export function CustomerBookingFlow() {
 
 
 
-  const loadCustomerData = useCallback(async () => {
-    try {
-      setLoading(true);
-      await Promise.all([
-        loadPackages(),
-        loadSchedules(),
-        loadPaymentMethods()
-      ]);
-    } catch (error) {
-      console.error('Error loading customer data:', error);
-      toast.error('Failed to load booking data');
-    } finally {
-      setLoading(false);
-    }
-  }, [user?.access_token]);
-
-  useEffect(() => {
-    if (user?.access_token) {
-      loadCustomerData();
-    }
-  }, [user?.access_token, loadCustomerData]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -239,6 +219,28 @@ export function CustomerBookingFlow() {
       console.error('Error loading payment methods:', error);
     }
   }, [user?.access_token]);
+
+  const loadCustomerData = useCallback(async () => {
+    try {
+      setLoading(true);
+      await Promise.all([
+        loadPackages(),
+        loadSchedules(),
+        loadPaymentMethods()
+      ]);
+    } catch (error) {
+      console.error('Error loading customer data:', error);
+      toast.error('Failed to load booking data');
+    } finally {
+      setLoading(false);
+    }
+  }, [loadPackages, loadSchedules, loadPaymentMethods]);
+
+  useEffect(() => {
+    if (user?.access_token) {
+      loadCustomerData();
+    }
+  }, [user?.access_token, loadCustomerData]);
 
   const handlePaymentMethodSelect = (method: PaymentMethod) => {
     setFormData(prev => ({ ...prev, selectedPaymentMethod: method }));
@@ -832,9 +834,11 @@ export function CustomerBookingFlow() {
                 <div className="flex items-center space-x-3">
                   {formData.selectedPaymentMethod && (
                     <>
-                      <img
+                      <Image
                         src={formData.selectedPaymentMethod.icon}
                         alt={formData.selectedPaymentMethod.name}
+                        width={24}
+                        height={24}
                         className="w-6 h-6 object-contain"
                       />
                       <div>
@@ -869,9 +873,11 @@ export function CustomerBookingFlow() {
                           onClick={() => handlePaymentMethodSelect(method)}
                           className="w-full flex items-center space-x-3 p-3 hover:bg-[#2a2a4a] transition-colors first:rounded-t-lg last:rounded-b-lg"
                         >
-                          <img
+                          <Image
                             src={method.icon}
                             alt={method.name}
+                            width={20}
+                            height={20}
                             className="w-5 h-5 object-contain"
                           />
                           <div className="flex-1 text-left">
@@ -928,9 +934,11 @@ export function CustomerBookingFlow() {
                   <Card className="bg-[#1a1a2e] border-[#16213e]">
                     <CardContent className="pt-6">
                       <div className="text-center space-y-4">
-                        <img
+                        <Image
                           src={formData.selectedPaymentMethod.icon}
                           alt={formData.selectedPaymentMethod.name}
+                          width={64}
+                          height={64}
                           className="w-16 h-16 object-contain mx-auto"
                         />
                         <div>

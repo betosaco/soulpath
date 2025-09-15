@@ -168,18 +168,19 @@ export async function POST(request: NextRequest) {
     const result = await orchestrator.processWhatsAppMessage(mockWebhook);
 
     if (result.success) {
+      const data = result.data as Record<string, unknown>;
       console.log('✅ Web chat message processed successfully:', {
-        logId: result.data.logId,
-        processingTime: result.data.processingTime,
-        responseLength: result.data.response?.length || 0
+        logId: data.logId,
+        processingTime: data.processingTime,
+        responseLength: (data.response as string)?.length || 0
       });
 
       return NextResponse.json({
         success: true,
         data: {
-          response: result.data.response,
-          logId: result.data.logId,
-          processingTime: result.data.processingTime,
+          response: data.response,
+          logId: data.logId,
+          processingTime: data.processingTime,
           timestamp: new Date().toISOString(),
           language
         }

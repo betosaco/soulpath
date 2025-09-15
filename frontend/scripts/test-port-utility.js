@@ -4,7 +4,7 @@
  * Test the port detection utility functions
  */
 
-const { getBaseUrl, getRasaUrl, findAvailableRasaPort, findAvailableNextJSPort } = require('../lib/utils/port-detection');
+import { getBaseUrl, getRasaUrl, findAvailableRasaPort, findAvailableNextJSPort } from '../lib/utils/port-detection.js';
 
 async function testPortUtility() {
   console.log('🔍 Testing Port Detection Utility...\n');

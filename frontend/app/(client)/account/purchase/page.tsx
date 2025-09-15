@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Package, 
@@ -593,9 +594,11 @@ export default function PurchasePage() {
                           >
                             <div className="flex items-center space-x-2">
                               {formData.selectedPaymentMethod?.icon && (
-                                <img 
+                                <Image 
                                   src={formData.selectedPaymentMethod.icon} 
                                   alt={formData.selectedPaymentMethod.name}
+                                  width={20}
+                                  height={20}
                                   className="w-5 h-5"
                                 />
                               )}
@@ -613,7 +616,7 @@ export default function PurchasePage() {
                                   className="w-full flex items-center space-x-2 px-4 py-2 text-left hover:bg-[#0a0a23] text-white"
                                 >
                                   {method.icon && (
-                                    <img src={method.icon} alt={method.name} className="w-5 h-5" />
+                                    <Image src={method.icon} alt={method.name} width={20} height={20} className="w-5 h-5" />
                                   )}
                                   <div>
                                     <p className="font-medium">{method.name}</p>

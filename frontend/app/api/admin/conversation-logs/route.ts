@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
-import { ConversationLogsResponse } from '@/lib/types/conversational-orchestrator';
+import { ConversationLogsResponse, ConversationLog, ConversationStats } from '@/lib/types/conversational-orchestrator';
 
 // Query schema for conversation logs
 const querySchema = z.object({
@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Build the query
-    const where: any = {};
+    const where: Record<string, unknown> = {};
 
     if (userId) where.userId = userId;
     if (intent) where.rasaIntent = intent;
@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Base select fields
-    const select: any = {
+    const select: Record<string, boolean | object> = {
       id: true,
       userId: true,
       userMessage: true,
@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get the logs
-    let logs: any[];
+    let logs: Record<string, unknown>[];
     try {
       logs = await prisma.conversationLog.findMany({
         where,
@@ -172,7 +172,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Calculate statistics
-    let stats: any;
+    let stats: ConversationStats;
     try {
       stats = await calculateConversationStats(where);
       console.log('✅ Statistics calculation successful');
@@ -190,7 +190,7 @@ export async function GET(request: NextRequest) {
 
     const response: ConversationLogsResponse = {
       success: true,
-      data: logs,
+      data: logs as unknown as ConversationLog[],
       pagination: {
         page,
         limit,
@@ -305,7 +305,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function calculateConversationStats(where: any) {
+async function calculateConversationStats(where: Record<string, unknown>): Promise<ConversationStats> {
   try {
     console.log('🔍 Calculating conversation statistics...');
     
@@ -353,11 +353,13 @@ async function calculateConversationStats(where: any) {
       lowConfidenceLogs,
       highConfidenceLogs,
       logsWithFeedback,
-      averageConfidence: averageConfidence._avg.rasaConfidence || 0,
-      topIntents: topIntents.map(item => ({
-        intent: item.rasaIntent,
-        count: item._count.rasaIntent
-      }))
+      averageConfidence: Number(averageConfidence._avg.rasaConfidence) || 0,
+      topIntents: topIntents
+        .filter(item => item.rasaIntent !== null)
+        .map(item => ({
+          intent: item.rasaIntent as string,
+          count: item._count.rasaIntent
+        }))
     };
   } catch (error) {
     console.error('❌ Error calculating conversation statistics:', error);
@@ -365,28 +367,29 @@ async function calculateConversationStats(where: any) {
   }
 }
 
-function convertToRasaFormat(logs: any[]): string {
+function convertToRasaFormat(logs: unknown[]): string {
   const intentGroups: Record<string, string[]> = {};
   
   for (const log of logs) {
-    if (!log.rasaIntent) continue;
+    const logObj = log as Record<string, unknown>;
+    if (!logObj.rasaIntent) continue;
     
-    if (!intentGroups[log.rasaIntent]) {
-      intentGroups[log.rasaIntent] = [];
+    if (!intentGroups[logObj.rasaIntent as string]) {
+      intentGroups[logObj.rasaIntent as string] = [];
     }
     
-    let example = log.userMessage;
-    if (log.rasaEntities && log.rasaEntities.length > 0) {
+    let example = logObj.userMessage as string;
+    if (logObj.rasaEntities && Array.isArray(logObj.rasaEntities) && logObj.rasaEntities.length > 0) {
       // Add entity annotations
-      const sortedEntities = log.rasaEntities.sort((a: any, b: any) => b.start - a.start);
+      const sortedEntities = (logObj.rasaEntities as Record<string, unknown>[]).sort((a: Record<string, unknown>, b: Record<string, unknown>) => (b.start as number) - (a.start as number));
       for (const entity of sortedEntities) {
-        const before = example.substring(0, entity.start);
-        const after = example.substring(entity.end);
-        example = `${before}[${entity.value}](${entity.entity})${after}`;
+        const before = example.substring(0, entity.start as number);
+        const after = example.substring(entity.end as number);
+        example = `${before}[${entity.value as string}](${entity.entity as string})${after}`;
       }
     }
     
-    intentGroups[log.rasaIntent].push(`    - ${example}`);
+    intentGroups[logObj.rasaIntent as string].push(`    - ${example}`);
   }
 
   let yaml = 'version: "3.1"\n\nnlu:\n';

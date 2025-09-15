@@ -1,4 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
 
 async function testConnection() {
   console.log('🔍 Testing Prisma connection...');

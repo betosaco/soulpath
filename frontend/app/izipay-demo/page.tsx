@@ -33,7 +33,7 @@ export default function IzipayDemoPage() {
     }));
   };
 
-  const handlePaymentSuccess = (result: any) => {
+  const handlePaymentSuccess = (result: Record<string, unknown>) => {
     console.log('Payment successful:', result);
     alert('¡Pago exitoso! Revisa la consola para más detalles.');
   };
@@ -132,7 +132,7 @@ export default function IzipayDemoPage() {
 
             <div>
               <Label htmlFor="variant">Tipo de Componente</Label>
-              <Select value={paymentVariant} onValueChange={(value: any) => setPaymentVariant(value)}>
+              <Select value={paymentVariant} onValueChange={(value: string) => setPaymentVariant(value as 'button' | 'inline' | 'card')}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

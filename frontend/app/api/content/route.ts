@@ -7,7 +7,7 @@ export const revalidate = 3600; // Revalidate every hour
 
 
 interface NestedContent {
-  [key: string]: string | NestedContent;
+  [key: string]: string | NestedContent | Array<{ title: string; text: string }>;
 }
 
 interface TransformedContent {
@@ -96,7 +96,7 @@ function transformFlatContentToNested(flatContent: Record<string, string>): Tran
           title: 'Spiritual Awakening',
           text: 'Discover your spiritual path and deepen your connection to the divine through meditation and spiritual practices.'
         }
-      ] as any
+      ] as Array<{ title: string; text: string }>
     };
     nestedContent.es.approach = {
       title: flatContent.approachTitleEs || 'Nuestro Enfoque',
@@ -114,7 +114,7 @@ function transformFlatContentToNested(flatContent: Record<string, string>): Tran
           title: 'Despertar Espiritual',
           text: 'Descubre tu camino espiritual y profundiza tu conexión con lo divino a través de la meditación y prácticas espirituales.'
         }
-      ] as any
+      ] as Array<{ title: string; text: string }>
     };
 
     // Services section
@@ -215,7 +215,7 @@ export async function GET() {
 
           // Transform flat content to nested structure
           return transformFlatContentToNested(content as unknown as Record<string, string>);
-        } catch (dbError) {
+        } catch {
           console.warn('Content table not available, using in-memory defaults');
           const defaultContent: Record<string, string> = {
             heroTitleEn: 'MatMax Yoga Studio',

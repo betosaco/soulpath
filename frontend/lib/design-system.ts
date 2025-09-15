@@ -316,7 +316,7 @@ export const withOpacity = (color: string, opacity: number) => {
   return `${color} / ${opacity}`;
 };
 
-export const responsive = (base: string, _variants: Record<string, string>) => {
+export const responsive = (base: string) => {
   // This would need to be implemented differently for CSS variables
   return base;
 };

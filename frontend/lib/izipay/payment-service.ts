@@ -19,7 +19,7 @@ export interface IzipayPaymentRequest {
   returnUrl: string;
   cancelUrl: string;
   description?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface IzipayPaymentResponse {
@@ -27,7 +27,7 @@ export interface IzipayPaymentResponse {
   paymentUrl?: string;
   transactionId?: string;
   error?: string;
-  details?: any;
+  details?: unknown;
 }
 
 export interface IzipayWebhookPayload {
@@ -48,7 +48,7 @@ export interface CreatePaymentIntentParams {
   customerName?: string;
   orderId: string;
   description?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface IzipayTokenRequest {
@@ -69,7 +69,7 @@ export interface IzipayTokenResponse {
   success: boolean;
   formToken?: string;
   error?: string;
-  details?: any;
+  details?: unknown;
 }
 
 /**
@@ -340,7 +340,7 @@ export class IzipayPaymentService {
       const apiUrl = getIzipayApiUrl(config.environment);
       const authHeader = getIzipayAuthHeader(config.username, config.password);
 
-      const requestData: any = {
+      const requestData: Record<string, unknown> = {
         uuid: transactionId,
       };
 

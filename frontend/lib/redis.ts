@@ -165,7 +165,7 @@ export const redisManager = RedisManager.getInstance();
 export async function initRedis(): Promise<RedisClientType | null> {
   try {
     return await redisManager.connect();
-  } catch (_error) {
+    } catch {
     console.warn('Redis initialization failed, using fallback cache');
     return null;
   }

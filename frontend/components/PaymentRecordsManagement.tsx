@@ -176,7 +176,7 @@ const PaymentRecordsManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.access_token, filters.userId, filters.paymentMethod, filters.paymentStatus, filters.dateFrom, filters.dateTo, filters.amountMin, filters.amountMax, pagination.page]);
+  }, [user?.access_token, filters.userId, filters.paymentMethod, filters.paymentStatus, filters.dateFrom, filters.dateTo, filters.amountMin, filters.amountMax, pagination.page, pagination.limit]);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -220,14 +220,14 @@ const PaymentRecordsManagement: React.FC = () => {
       fetchPurchases();
       fetchUsers();
     }
-  }, [user?.access_token, fetchPurchases, fetchUsers]);
+  }, [user, user?.access_token, fetchPurchases, fetchUsers]);
 
   // Load purchases when filters or pagination change
   useEffect(() => {
     if (user?.access_token) {
       fetchPurchases();
     }
-  }, [filters.userId, filters.paymentMethod, filters.paymentStatus, filters.dateFrom, filters.dateTo, filters.amountMin, filters.amountMax, pagination.page, fetchPurchases]);
+  }, [user?.access_token, filters.userId, filters.paymentMethod, filters.paymentStatus, filters.dateFrom, filters.dateTo, filters.amountMin, filters.amountMax, pagination.page, fetchPurchases]);
 
   // Expose refresh function globally for debugging
   useEffect(() => {

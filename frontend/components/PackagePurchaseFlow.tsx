@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BaseButton } from '@/components/ui/BaseButton';
@@ -11,6 +12,7 @@ import { Package, Users, CheckCircle, CreditCard, ShoppingCart, User, Calendar }
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { StripeInlineForm } from '@/components/stripe/StripeInlineForm';
+import { IzipayForm } from '@/components/izipay/IzipayForm';
 
 interface PackagePrice {
   id: number;
@@ -39,6 +41,15 @@ interface PaymentMethod {
   requiresConfirmation: boolean;
   autoAssignPackage: boolean;
   isActive: boolean;
+  providerConfig?: {
+    izipayConfig?: {
+      publicKey: string;
+      username?: string;
+      password?: string;
+      hmacKey?: string;
+      environment: 'TEST' | 'PRODUCTION';
+    };
+  };
 }
 
 
@@ -66,6 +77,7 @@ export function PackagePurchaseFlow() {
   const [processing, setProcessing] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [showPaymentMethodDropdown, setShowPaymentMethodDropdown] = useState(false);
+  const [paymentToken, setPaymentToken] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<PurchaseFormData>({
     selectedPackage: null,
@@ -228,7 +240,7 @@ export function PackagePurchaseFlow() {
     setFormData(prev => ({ ...prev, quantity: Math.max(1, Math.min(10, quantity)) }));
   };
 
-  const handlePurchase = async () => {
+  const handlePurchase = async (token?: string) => {
     if (!formData.selectedPackage || !formData.selectedPaymentMethod) {
       toast.error('Please select a package and payment method');
       return;
@@ -237,18 +249,25 @@ export function PackagePurchaseFlow() {
     setProcessing(true);
 
     try {
+      const requestBody: any = {
+        packagePriceId: formData.selectedPackage.id,
+        paymentMethodId: formData.selectedPaymentMethod.id,
+        quantity: formData.quantity,
+        notes: formData.notes
+      };
+
+      // Add payment token for Izipay payments
+      if (formData.selectedPaymentMethod.type === 'izipay' && token) {
+        requestBody.paymentToken = token;
+      }
+
       const response = await fetch('/api/client/purchase', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${user?.access_token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          packagePriceId: formData.selectedPackage.id,
-          paymentMethodId: formData.selectedPaymentMethod.id,
-          quantity: formData.quantity,
-          notes: formData.notes
-        })
+        body: JSON.stringify(requestBody)
       });
 
       const result = await response.json();
@@ -263,6 +282,7 @@ export function PackagePurchaseFlow() {
           quantity: 1,
           notes: ''
         }));
+        setPaymentToken(null);
         setCurrentStep(0);
       } else {
         toast.error(result.message || 'Failed to complete purchase');
@@ -538,7 +558,7 @@ export function PackagePurchaseFlow() {
                           className="p-3 border border-[#0a0a23] rounded-lg cursor-pointer hover:bg-[#0a0a23] transition-colors"
                         >
                           <div className="flex items-center space-x-3">
-                            <img src={method.icon} alt={method.name} className="w-6 h-6" />
+                            <Image src={method.icon} alt={method.name} width={24} height={24} className="w-6 h-6" />
                             <div>
                               <div className="text-white font-medium">{method.name}</div>
                               <div className="text-gray-400 text-sm">{method.description}</div>
@@ -568,8 +588,29 @@ export function PackagePurchaseFlow() {
                     </div>
                   )}
 
+                  {/* Izipay Payment Form */}
+                  {formData.selectedPaymentMethod?.type === 'izipay' && formData.selectedPaymentMethod.providerConfig?.izipayConfig && (
+                    <div className="mt-4">
+                      <IzipayForm
+                        publicKey={formData.selectedPaymentMethod.providerConfig.izipayConfig.publicKey}
+                        amountInCents={formData.selectedPackage ? Math.round(formData.selectedPackage.price * formData.quantity * 100) : 0}
+                        currency={formData.selectedPackage?.currency.code || 'PEN'}
+                        onSuccess={(token) => {
+                          setPaymentToken(token);
+                          toast.success('Payment token created successfully!');
+                          handlePurchase(token);
+                        }}
+                        onError={(error) => {
+                          toast.error(`Payment failed: ${error}`);
+                        }}
+                      />
+                    </div>
+                  )}
+
                   {/* Other Payment Methods */}
-                  {formData.selectedPaymentMethod?.type !== 'stripe' && formData.selectedPaymentMethod && (
+                  {formData.selectedPaymentMethod?.type !== 'stripe' && 
+                   formData.selectedPaymentMethod?.type !== 'izipay' && 
+                   formData.selectedPaymentMethod && (
                     <div className="mt-4 p-4 bg-[#16213e] rounded-lg">
                       <p className="text-gray-300 text-sm">
                         You selected {formData.selectedPaymentMethod.name}. 
@@ -620,9 +661,10 @@ export function PackagePurchaseFlow() {
                     </span>
                   </div>
 
-                  {formData.selectedPaymentMethod?.type !== 'stripe' && (
+                  {formData.selectedPaymentMethod?.type !== 'stripe' && 
+                   formData.selectedPaymentMethod?.type !== 'izipay' && (
                     <Button
-                      onClick={handlePurchase}
+                      onClick={() => handlePurchase()}
                       disabled={!formData.selectedPaymentMethod || processing}
                       className="w-full bg-[#ffd700] text-black hover:bg-[#ffd700]/90 disabled:opacity-50"
                     >

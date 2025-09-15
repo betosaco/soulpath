@@ -10,7 +10,7 @@ interface PaymentMethodUpdateData {
   requiresConfirmation?: boolean;
   autoAssignPackage?: boolean;
   isActive?: boolean;
-  providerConfig?: any;
+  providerConfig?: Record<string, unknown>;
 }
 
 // GET - List all payment methods
@@ -135,11 +135,11 @@ export async function PUT(request: NextRequest) {
     if (requiresConfirmation !== undefined) updateData.requiresConfirmation = requiresConfirmation;
     if (autoAssignPackage !== undefined) updateData.autoAssignPackage = autoAssignPackage;
     if (isActive !== undefined) updateData.isActive = isActive;
-    if (providerConfig !== undefined) updateData.providerConfig = providerConfig;
+    if (providerConfig !== undefined) updateData.providerConfig = providerConfig as any;
 
     const updatedPaymentMethod = await prisma.paymentMethodConfig.update({
       where: { id: parseInt(id) },
-      data: updateData
+      data: updateData as any
     });
 
     return NextResponse.json({

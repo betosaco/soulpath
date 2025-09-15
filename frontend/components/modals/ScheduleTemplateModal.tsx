@@ -34,7 +34,7 @@ interface ScheduleTemplate {
 interface ScheduleTemplateModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: Record<string, unknown>) => void;
   scheduleTemplate?: ScheduleTemplate | null;
   sessionDurations: SessionDuration[];
   mode: 'create' | 'edit';

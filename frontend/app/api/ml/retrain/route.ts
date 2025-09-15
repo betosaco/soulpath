@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Step 2: Save training data to file (for Rasa training)
-    const trainingDataFile = await saveTrainingDataToFile(trainingData);
+    const trainingDataFile = await saveTrainingDataToFile(trainingData as unknown as Record<string, unknown>[]);
     console.log(`💾 Saved training data to ${trainingDataFile}`);
 
     // Step 3: Train new Rasa model
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function saveTrainingDataToFile(trainingData: any[]): Promise<string> {
+async function saveTrainingDataToFile(trainingData: Record<string, unknown>[]): Promise<string> {
   const fs = await import('fs/promises');
   const path = await import('path');
   
@@ -114,18 +114,20 @@ async function saveTrainingDataToFile(trainingData: any[]): Promise<string> {
   return filePath;
 }
 
-function convertToRasaFormat(trainingData: any[]): string {
+function convertToRasaFormat(trainingData: Record<string, unknown>[]): string {
   const intentGroups: Record<string, string[]> = {};
   
   for (const data of trainingData) {
-    if (!intentGroups[data.intent]) {
-      intentGroups[data.intent] = [];
+    const intent = data.intent as string;
+    const text = data.text as string;
+    if (!intentGroups[intent]) {
+      intentGroups[intent] = [];
     }
     
-    let example = data.text;
-    if (data.entities && data.entities.length > 0) {
+    let example = text;
+    if (data.entities && Array.isArray(data.entities) && data.entities.length > 0) {
       // Add entity annotations
-      const sortedEntities = data.entities.sort((a: any, b: any) => b.start - a.start);
+      const sortedEntities = (data.entities as Array<{ start: number; end: number; value: string; entity: string }>).sort((a, b) => b.start - a.start);
       for (const entity of sortedEntities) {
         const before = example.substring(0, entity.start);
         const after = example.substring(entity.end);
@@ -133,7 +135,7 @@ function convertToRasaFormat(trainingData: any[]): string {
       }
     }
     
-    intentGroups[data.intent].push(`    - ${example}`);
+    intentGroups[intent].push(`    - ${example}`);
   }
 
   let yaml = 'version: "3.1"\n\nnlu:\n';

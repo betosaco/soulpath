@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Package, CreditCard, Users, Clock, DollarSign, 
@@ -62,7 +62,7 @@ export function PurchaseHistory() {
 
 
 
-  const loadPurchaseHistory = async () => {
+  const loadPurchaseHistory = useCallback(async () => {
     if (!user?.access_token) return;
     
     setIsLoading(true);
@@ -95,7 +95,7 @@ export function PurchaseHistory() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user?.access_token]);
 
   useEffect(() => {
     if (user?.access_token) {

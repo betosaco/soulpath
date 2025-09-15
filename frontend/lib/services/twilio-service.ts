@@ -15,7 +15,7 @@ export class TwilioService {
       this.client = twilio(config.accountSid, config.authToken);
     } else {
       console.warn('Twilio credentials not configured, WhatsApp messaging disabled');
-      this.client = null as any;
+      this.client = null as unknown as typeof twilio;
     }
   }
 
@@ -56,8 +56,7 @@ export class TwilioService {
   async sendMediaMessage(
     to: string, 
     message: string, 
-    mediaUrl: string, 
-    _mediaType: 'image' | 'document' | 'audio' | 'video' = 'image'
+    mediaUrl: string
   ): Promise<{success: boolean, messageId?: string, error?: string}> {
     try {
       const response = await this.client.messages.create({
@@ -83,7 +82,7 @@ export class TwilioService {
   /**
    * Procesa un webhook de WhatsApp y extrae el mensaje
    */
-  parseWebhook(body: any): WhatsAppMessage | null {
+  parseWebhook(body: Record<string, unknown>): WhatsAppMessage | null {
     try {
       // Twilio envía los datos del webhook en el body
       const message = body.Body;
@@ -115,7 +114,7 @@ export class TwilioService {
   /**
    * Valida que el webhook proviene de Twilio
    */
-  validateWebhook(signature: string, url: string, params: any): boolean {
+  validateWebhook(signature: string, url: string, params: Record<string, unknown>): boolean {
     try {
       return twilio.validateRequest(this.config.authToken, signature, url, params);
     } catch (error) {
@@ -127,7 +126,7 @@ export class TwilioService {
   /**
    * Envía un mensaje de confirmación de recepción
    */
-  async sendDeliveryConfirmation(to: string, _originalMessageId: string): Promise<void> {
+  async sendDeliveryConfirmation(to: string): Promise<void> {
     try {
       await this.sendMessage(to, '✅ Mensaje recibido. Te ayudo en un momento...');
     } catch (error) {
@@ -195,7 +194,7 @@ Si tienes más preguntas, no dudes en escribirnos.
   /**
    * Obtiene información de un mensaje específico
    */
-  async getMessageInfo(messageId: string): Promise<any> {
+  async getMessageInfo(messageId: string): Promise<Record<string, unknown>> {
     try {
       const message = await this.client.messages(messageId).fetch();
       return {

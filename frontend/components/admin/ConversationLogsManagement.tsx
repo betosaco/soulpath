@@ -411,7 +411,7 @@ export default function ConversationLogsManagement() {
     }
   };
 
-  const getFeedbackIcon = (feedback?: any) => {
+  const getFeedbackIcon = (feedback?: Record<string, unknown>) => {
     if (!feedback) return <XCircle className="h-4 w-4 text-[var(--color-text-tertiary)]" />;
     
     if (feedback.rating >= 4) {

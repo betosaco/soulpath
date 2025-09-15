@@ -46,7 +46,7 @@ export class OpenRouterService {
    */
   async generateBookingResponse(context: {
     userMessage: string;
-    bookingState: any;
+    bookingState: Record<string, unknown>;
     missingDetails: string[];
     emotionalTone?: 'urgent' | 'calm' | 'confused' | 'excited';
     persona: 'empathetic' | 'professional' | 'spiritual';
@@ -80,7 +80,7 @@ export class OpenRouterService {
   }): Promise<{
     intent: string;
     confidence: number;
-    entities: Record<string, any>;
+    entities: Record<string, unknown>;
   }> {
     const systemPrompt = `You are an expert at extracting structured information from natural language. 
     Extract booking-related entities from user messages and return them in JSON format.
@@ -206,7 +206,7 @@ export class OpenRouterService {
       .slice(0, 5);
   }
 
-  private buildSystemPrompt(context: any): string {
+  private buildSystemPrompt(context: Record<string, unknown>): string {
     const basePrompt = `You are an empathetic, welcoming yoga studio assistant for MatMax Yoga Studio.
     You help users book yoga classes and find the right offerings.
     
@@ -234,7 +234,7 @@ export class OpenRouterService {
     return basePrompt;
   }
 
-  private buildUserPrompt(context: any): string {
+  private buildUserPrompt(context: Record<string, unknown>): string {
     let prompt = `User message: "${context.userMessage}"\n\n`;
     
     if (context.missingDetails.length > 0) {
@@ -284,8 +284,8 @@ Keep response SHORT (1-2 sentences).`;
    */
   async generateClarificationResponse(
     userMessage: string,
-    alternativeIntents: any[],
-    entities: Record<string, any>
+    alternativeIntents: Array<{ name: string; confidence: number }>,
+    entities: Record<string, unknown>
   ): Promise<string> {
     const systemPrompt = `You are a helpful astrology booking assistant. The user's message was unclear, and you need to ask for clarification.
 
@@ -314,9 +314,9 @@ Please ask a clarifying question to help the user get the assistance they need.`
   async generateContextualResponse(
     userMessage: string,
     intent: string,
-    entities: Record<string, any>,
-    apiData: any,
-    conversationHistory: any[]
+    entities: Record<string, unknown>,
+    apiData: Record<string, unknown>,
+    conversationHistory: Array<{ role: string; content: string; timestamp?: string }>
   ): Promise<string> {
     const systemPrompt = `You are a helpful assistant for MatMax Yoga Studio. Help users book yoga classes and find the right offerings.
 

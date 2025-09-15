@@ -148,7 +148,7 @@ export async function getContent() {
     const content = data?.reduce((acc, item) => {
       acc[item.key] = item.value;
       return acc;
-    }, {} as Record<string, any>) || {};
+    }, {} as Record<string, unknown>) || {};
 
     return content;
 

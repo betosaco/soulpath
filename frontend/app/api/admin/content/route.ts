@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
         console.log('✅ Content fetched successfully:', Object.keys(content).length, 'fields');
 
         // Remove timestamps from response for cleaner data
-        const { updatedAt, ...cleanContent } = content;
+        const { updatedAt: _updatedAt, ...cleanContent } = content;
 
         return NextResponse.json({
           success: true,
@@ -277,7 +277,7 @@ export async function PUT(request: NextRequest) {
     const processingTime = Date.now() - startTime;
 
     // Remove timestamps from response
-    const { updatedAt, ...cleanResult } = result;
+    const { updatedAt: _updatedAt, ...cleanResult } = result;
 
     return NextResponse.json({
       success: true,

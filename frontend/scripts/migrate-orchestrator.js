@@ -5,8 +5,8 @@
  * Ejecutar con: node scripts/migrate-orchestrator.js
  */
 
-const { execSync } = require('child_process');
-const path = require('path');
+import { execSync } from 'child_process';
+import path from 'path';
 
 async function migrateDatabase() {
   console.log('🗄️  Ejecutando migración de base de datos...\n');

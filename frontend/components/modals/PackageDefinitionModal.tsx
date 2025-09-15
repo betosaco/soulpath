@@ -35,7 +35,7 @@ interface PackageDefinition {
 interface PackageDefinitionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: Record<string, unknown>) => void;
   packageDefinition?: PackageDefinition | null;
   sessionDurations: SessionDuration[];
   mode: 'create' | 'edit';

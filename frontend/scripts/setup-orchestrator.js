@@ -5,9 +5,9 @@
  * Ejecutar con: node scripts/setup-orchestrator.js
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
 
 console.log('🚀 Configurando Orquestador Conversacional...\n');
 
@@ -221,7 +221,7 @@ console.log('✅ Script de migración creado: scripts/migrate-orchestrator.js');
 try {
   execSync('chmod +x scripts/test-orchestrator.js scripts/migrate-orchestrator.js', { stdio: 'inherit' });
   console.log('✅ Scripts marcados como ejecutables');
-} catch (error) {
+} catch {
   console.log('⚠️  No se pudieron hacer ejecutables los scripts (esto es normal en Windows)');
 }
 

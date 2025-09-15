@@ -5,9 +5,9 @@
  * This script applies performance optimizations to the PostgreSQL database
  */
 
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
 
 async function optimizeDatabase() {
   console.log('🚀 Starting database performance optimization...\n');
@@ -70,7 +70,7 @@ async function optimizeDatabase() {
       try {
         execSync(psqlCommand, { stdio: 'inherit' });
         console.log('✅ Database optimizations applied successfully');
-      } catch (error) {
+      } catch {
         console.warn('⚠️  Some database optimizations may require manual execution');
         console.log('📋 Please run the following command manually:');
         console.log(`psql "${databaseUrl.replace(/:[^:]+@/, ':***@')}" -f "${sqlPath}"`);

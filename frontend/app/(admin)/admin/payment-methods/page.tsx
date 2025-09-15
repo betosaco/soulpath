@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BaseButton } from '@/components/ui/BaseButton';
 import { BaseInput } from '@/components/ui/BaseInput';
@@ -35,7 +36,7 @@ interface PaymentMethod {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  providerConfig?: any;
+  providerConfig?: Record<string, unknown>;
 }
 
 export default function PaymentMethodsPage() {
@@ -256,7 +257,7 @@ export default function PaymentMethodsPage() {
               
               {method.icon && (
                 <div className={`flex items-center space-x-[${spacing[2]}] text-[${colors.text.secondary}]`}>
-                  <img src={method.icon} alt={method.name} className="w-4 h-4" />
+                  <Image src={method.icon} alt={method.name} width={16} height={16} className="w-4 h-4" />
                   <span className={`text-[${typography.fontSize.sm}]`}>
                     Icon available
                   </span>

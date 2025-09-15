@@ -204,7 +204,7 @@ export const conditionalStyles = (condition: boolean, trueStyle: string, falseSt
   return condition ? trueStyle : falseStyle;
 };
 
-export const responsiveStyles = (base: string, _variants: Record<string, string>): string => {
+export const responsiveStyles = (base: string): string => {
   // For now, return base styles. This could be enhanced with responsive variants
   return base;
 };

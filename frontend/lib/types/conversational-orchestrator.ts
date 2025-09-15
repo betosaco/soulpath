@@ -30,13 +30,13 @@ export interface RasaResponse {
 export interface RasaAction {
   action: string;
   confidence: number;
-  parameters?: Record<string, any>;
+  parameters?: Record<string, unknown>;
   response?: string;
 }
 
 export interface APICallResult {
   success: boolean;
-  data?: any;
+  data?: unknown;
   error?: string;
   statusCode?: number;
 }
@@ -85,16 +85,16 @@ export interface ConversationLog {
   rasaIntent: string | null;
   confidence?: number;
   rasaConfidence: number | null;
-  entities?: any[];
-  rasaEntities: any[] | null;
+  entities?: Record<string, unknown>[];
+  rasaEntities: Record<string, unknown>[] | null;
   action?: string;
   responseGenerator: string;
   bookingStep: string | null;
-  bookingData?: any;
-  bookingDataSnapshot: any | null;
+  bookingData?: Record<string, unknown>;
+  bookingDataSnapshot: Record<string, unknown> | null;
   modelVersion: string | null;
   success?: boolean;
-  apiCalls?: any[];
+  apiCalls?: Record<string, unknown>[];
   processingTime?: number;
   error?: string;
   feedback?: UserFeedback[];
@@ -180,7 +180,7 @@ export interface ConversationContext {
   userId: string;
   sessionId: string;
   lastIntent?: string;
-  lastEntities?: Record<string, any>;
+  lastEntities?: Record<string, unknown>;
   conversationHistory: Array<{
     role: 'user' | 'assistant';
     message: string;
@@ -189,7 +189,7 @@ export interface ConversationContext {
   userPreferences?: {
     language: string;
     timezone: string;
-    notificationSettings: any;
+    notificationSettings: Record<string, unknown>;
   };
 }
 
@@ -214,12 +214,12 @@ export interface ErrorResponse {
   success: false;
   error: string;
   code: string;
-  details?: any;
+  details?: unknown;
 }
 
 export interface SuccessResponse {
   success: true;
-  data: any;
+  data: unknown;
   message?: string;
 }
 

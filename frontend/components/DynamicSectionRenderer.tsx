@@ -35,17 +35,17 @@ const DynamicSectionRenderer: React.FC<DynamicSectionRendererProps> = ({
 
   // Base section wrapper with responsive classes
   const getSectionWrapperClasses = () => {
-    const baseClasses = `h-full flex flex-col justify-center px-4 sm:px-6 lg:px-8 ${padding} overflow-hidden safe-padding`;
+    const baseClasses = `h-full flex flex-col justify-center px-3 sm:px-4 md:px-6 lg:px-8 ${padding} overflow-hidden safe-padding`;
     
     switch (layout) {
       case 'stack':
-        return `${baseClasses} items-center text-center`;
+        return `${baseClasses} items-center text-center space-y-4 sm:space-y-6 md:space-y-8`;
       case 'grid':
         return `${baseClasses} items-center`;
       case 'center':
-        return `${baseClasses} items-center text-center`;
+        return `${baseClasses} items-center text-center space-y-4 sm:space-y-6 md:space-y-8`;
       default:
-        return baseClasses;
+        return `${baseClasses} space-y-4 sm:space-y-6 md:space-y-8`;
     }
   };
 

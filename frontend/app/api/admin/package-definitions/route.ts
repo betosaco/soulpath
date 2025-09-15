@@ -142,16 +142,13 @@ export async function GET(request: NextRequest) {
 
     console.log('🔍 Executing database query...');
     
-    const queryOptions: any = {
+    // Enhanced mode includes pricing information
+    const queryOptions = enhanced === 'true' ? {
       where,
       skip: offset,
       take: limit,
-      orderBy: { createdAt: 'desc' }
-    };
-
-    // Enhanced mode includes pricing information
-    if (enhanced === 'true') {
-      queryOptions.include = {
+      orderBy: { createdAt: 'desc' as const },
+      include: {
         sessionDuration: {
           select: {
             id: true,
@@ -178,13 +175,17 @@ export async function GET(request: NextRequest) {
             packagePrices: true
           }
         }
-      };
-    } else {
-      queryOptions.select = select;
-    }
+      }
+    } : {
+      where,
+      skip: offset,
+      take: limit,
+      orderBy: { createdAt: 'desc' as const },
+      select
+    };
     
     const [packageDefinitions, totalCount] = await Promise.all([
-      prisma.packageDefinition.findMany(queryOptions),
+      prisma.packageDefinition.findMany(queryOptions as any),
       prisma.packageDefinition.count({ where })
     ]);
 

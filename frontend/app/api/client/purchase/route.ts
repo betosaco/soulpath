@@ -9,7 +9,8 @@ const createPurchaseSchema = z.object({
   packagePriceId: z.number().int('Invalid package price ID'),
   paymentMethodId: z.number().int('Invalid payment method ID'),
   quantity: z.number().int().min(1, 'Quantity must be at least 1').default(1),
-  notes: z.string().optional()
+  notes: z.string().optional(),
+  paymentToken: z.string().optional() // For Izipay payments
 });
 
 export async function GET() {
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    const { packagePriceId, paymentMethodId, quantity, notes } = validation.data;
+    const { packagePriceId, paymentMethodId, quantity, notes, paymentToken } = validation.data;
 
     // Get package price details with related data
     const packagePrice = await prisma.packagePrice.findUnique({
@@ -87,9 +88,20 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Get payment method details
+    // Get payment method details with provider config
     const paymentMethod = await prisma.paymentMethodConfig.findUnique({
-      where: { id: paymentMethodId }
+      where: { id: paymentMethodId },
+      select: {
+        id: true,
+        type: true,
+        name: true,
+        description: true,
+        icon: true,
+        isActive: true,
+        requiresConfirmation: true,
+        autoAssignPackage: true,
+        providerConfig: true
+      }
     });
 
     if (!paymentMethod || !paymentMethod.isActive) {
@@ -116,6 +128,95 @@ export async function POST(request: NextRequest) {
     });
 
     console.log('✅ Purchase created:', purchase.id);
+
+    // Handle Izipay payment processing
+    if (paymentMethod.type === 'izipay' && paymentToken) {
+      try {
+        const izipayConfig = (paymentMethod.providerConfig as Record<string, unknown>)?.izipayConfig;
+        
+        if (!izipayConfig || !(izipayConfig as Record<string, unknown>).username || !(izipayConfig as Record<string, unknown>).password) {
+          throw new Error('Izipay configuration is incomplete');
+        }
+
+        // Create Basic Auth header
+        const credentials = Buffer.from(`${(izipayConfig as Record<string, unknown>).username}:${(izipayConfig as Record<string, unknown>).password}`).toString('base64');
+        
+        // Prepare Izipay API request
+        const izipayPayload = {
+          amount: Math.round(totalAmount * 100), // Convert to cents
+          currency: packagePrice.currency.code,
+          paymentToken: paymentToken,
+          customer: {
+            email: user.email,
+            name: user.email, // Using email as name for now
+          },
+          orderId: purchase.id.toString(),
+          metadata: {
+            packageName: packagePrice.packageDefinition.name,
+            quantity: quantity.toString(),
+            userId: user.id.toString()
+          }
+        };
+
+        console.log('🔍 Processing Izipay payment for purchase:', purchase.id);
+
+        // Make API call to Izipay
+        const izipayResponse = await fetch('https://api.izipay.pe/api-payment/v4/Charge/CreatePayment', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Basic ${credentials}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(izipayPayload)
+        });
+
+        const izipayResult = await izipayResponse.json();
+        console.log('🔍 Izipay API response:', izipayResult);
+
+        if (izipayResponse.ok && izipayResult.status === 'SUCCESS') {
+          // Update purchase status to completed
+          await prisma.purchase.update({
+            where: { id: purchase.id },
+            data: {
+              paymentStatus: 'completed',
+              transactionId: izipayResult.transactionId || paymentToken,
+              purchasedAt: new Date()
+            }
+          });
+
+          console.log('✅ Izipay payment processed successfully');
+        } else {
+          // Update purchase status to failed
+          await prisma.purchase.update({
+            where: { id: purchase.id },
+            data: {
+              paymentStatus: 'failed',
+              notes: `Payment failed: ${izipayResult.errorMessage || 'Unknown error'}`
+            }
+          });
+
+          throw new Error(izipayResult.errorMessage || 'Payment processing failed');
+        }
+      } catch (error: any) {
+        console.error('❌ Izipay payment error:', error);
+        
+        // Update purchase status to failed
+        await prisma.purchase.update({
+          where: { id: purchase.id },
+          data: {
+            paymentStatus: 'failed',
+            notes: `Payment error: ${error.message}`
+          }
+        });
+
+        return NextResponse.json({
+          success: false,
+          error: 'Payment failed',
+          message: error.message || 'Payment processing failed'
+        }, { status: 400 });
+      }
+    }
 
     // Create user package if payment method auto-assigns packages
     let userPackage = null;

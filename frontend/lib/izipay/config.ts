@@ -82,7 +82,7 @@ export function getIzipayAuthHeader(username: string, password: string): string 
 /**
  * Generate signature for Izipay requests
  */
-export function generateIzipaySignature(data: Record<string, any>, key: string): string {
+export function generateIzipaySignature(data: Record<string, unknown>, key: string): string {
   const sortedKeys = Object.keys(data).sort();
   const queryString = sortedKeys
     .map(key => `${key}=${data[key]}`)
@@ -93,10 +93,12 @@ export function generateIzipaySignature(data: Record<string, any>, key: string):
   return createHash('sha256').update(signatureString).digest('base64');
 }
 
-export default {
+const izipayConfig = {
   getIzipayConfig,
   getIzipayApiUrl,
   validateIzipayConfig,
   getIzipayAuthHeader,
   generateIzipaySignature,
 };
+
+export default izipayConfig;

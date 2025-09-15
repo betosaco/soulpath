@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Settings,
@@ -36,7 +36,7 @@ interface ExternalAPIConfig {
   apiUrl?: string;
   webhookUrl?: string;
   webhookSecret?: string;
-  config?: any;
+  config?: Record<string, unknown>;
   isActive: boolean;
   testMode: boolean;
   description?: string;
@@ -111,14 +111,9 @@ export function ExternalAPIManagement() {
   const [formData, setFormData] = useState<APIConfigFormData>(initialFormData);
   const [showPasswords, setShowPasswords] = useState<{[key: string]: boolean}>({});
   const [testingConfig, setTestingConfig] = useState<string | null>(null);
-  const [testResults, setTestResults] = useState<{[key: string]: any}>({});
+  const [testResults, setTestResults] = useState<{[key: string]: Record<string, unknown>}>({});
 
-  // Cargar configuraciones
-  useEffect(() => {
-    loadConfigs();
-  }, []);
-
-  const loadConfigs = async () => {
+  const loadConfigs = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/external-apis?action=list', {
         headers: {
@@ -135,7 +130,12 @@ export function ExternalAPIManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.access_token]);
+
+  // Cargar configuraciones
+  useEffect(() => {
+    loadConfigs();
+  }, [loadConfigs]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

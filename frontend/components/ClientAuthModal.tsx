@@ -69,9 +69,9 @@ export default function ClientAuthModal({ isOpen, onClose, onSuccess }: ClientAu
           setIsLogin(true);
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Auth error:', error);
-      toast.error(error.message || 'Authentication failed');
+      toast.error((error as Error).message || 'Authentication failed');
     } finally {
       setLoading(false);
     }
@@ -94,9 +94,9 @@ export default function ClientAuthModal({ isOpen, onClose, onSuccess }: ClientAu
       }
 
       toast.success('Password reset email sent! Please check your inbox.');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Password reset error:', error);
-      toast.error(error.message || 'Failed to send password reset email');
+      toast.error((error as Error).message || 'Failed to send password reset email');
     }
   };
 

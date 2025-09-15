@@ -68,7 +68,7 @@ export function ThemeProvider({ children, initialTheme = 'light' }: ThemeProvide
       if (savedCustomTheme) {
         try {
           themeToApply = JSON.parse(savedCustomTheme);
-        } catch (error) {
+        } catch {
           console.warn('Failed to parse custom theme from localStorage');
         }
       }

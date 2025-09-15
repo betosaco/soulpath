@@ -68,7 +68,7 @@ export class ConversationalOrchestrator {
             null,
             []
           );
-        } catch (error) {
+        } catch {
           // Fallback response when OpenRouter is not available
           clarificationResponse = "I'm not sure I understand. Could you please rephrase your question? I'm here to help with MatMax Yoga Studio!";
         }
@@ -94,9 +94,9 @@ export class ConversationalOrchestrator {
             null,
             []
           );
-        } catch (error) {
+        } catch {
           // Fallback response when OpenRouter is not available
-          generalResponse = this.getFallbackResponse(intent, text);
+          generalResponse = this.getFallbackResponse(intent);
         }
         
         return this.createSuccessResponse({
@@ -108,9 +108,9 @@ export class ConversationalOrchestrator {
       }
 
       // 6. Ejecutar acción específica
-      let actionResult: any = null;
+      let actionResult: APICallResult[] | null = null;
       if (actionMapping.apiEndpoint) {
-        actionResult = await this.apiService.executeAction(actionMapping.action, rasaResponse.entities || [], context.userId);
+        actionResult = await this.apiService.executeAction(actionMapping.action, rasaResponse.entities || []);
       }
 
       // 7. Generar respuesta final
@@ -129,9 +129,9 @@ export class ConversationalOrchestrator {
             actionResult,
             []
           );
-        } catch (error) {
+        } catch {
           // Fallback response when OpenRouter is not available
-          finalResponse = this.getFallbackResponse(intent, text);
+          finalResponse = this.getFallbackResponse(intent);
         }
       }
 
@@ -197,7 +197,7 @@ export class ConversationalOrchestrator {
   /**
    * Procesa un mensaje de WhatsApp completo
    */
-  async processWhatsAppMessage(webhookBody: any, signature?: string): Promise<OrchestratorResponse> {
+  async processWhatsAppMessage(webhookBody: Record<string, unknown>, signature?: string): Promise<OrchestratorResponse> {
     const startTime = Date.now();
     let logId: string | undefined;
 
@@ -220,7 +220,7 @@ export class ConversationalOrchestrator {
       const context = this.getOrCreateConversationContext(userId, whatsappMessage.messageId);
 
       // 3. Enviar confirmación de recepción
-      await this.twilioService.sendDeliveryConfirmation(userId, whatsappMessage.messageId);
+      await this.twilioService.sendDeliveryConfirmation(userId);
 
       // 4. Procesar el mensaje con Rasa
       const rasaResponse = await this.rasaService.parseMessage(userMessage, userId);
@@ -229,8 +229,7 @@ export class ConversationalOrchestrator {
         // Intención no confiable, pedir aclaración
         const clarificationResponse = await this.handleAmbiguousIntent(
           userMessage, 
-          rasaResponse, 
-          context
+          rasaResponse
         );
         
         await this.twilioService.sendMessage(userId, clarificationResponse);
@@ -246,7 +245,7 @@ export class ConversationalOrchestrator {
       const intent = rasaResponse.intent.name;
 
       // 6. Ejecutar acción correspondiente
-      const apiResults = await this.apiService.executeAction(intent, entities, userId);
+      const apiResults = await this.apiService.executeAction(intent, entities);
 
       // 7. Generar respuesta con LLM
       const llmResponse = await this.generateLLMResponse(
@@ -336,8 +335,7 @@ export class ConversationalOrchestrator {
    */
   private async handleAmbiguousIntent(
     userMessage: string,
-    rasaResponse: RasaResponse,
-    _context: ConversationContext
+    rasaResponse: RasaResponse
   ): Promise<string> {
     const alternativeIntents = this.rasaService.getAlternativeIntents(rasaResponse);
     
@@ -354,8 +352,8 @@ export class ConversationalOrchestrator {
   private async generateLLMResponse(
     userMessage: string,
     intent: string,
-    entities: Record<string, any>,
-    apiResults: any[],
+    entities: Record<string, unknown>,
+    apiResults: APICallResult[],
     context: ConversationContext
   ): Promise<string> {
     try {
@@ -373,7 +371,7 @@ export class ConversationalOrchestrator {
         context.conversationHistory
       );
     } catch (error) {
-      console.error('Error generating LLM response:', error);
+      console.error('Error generating LLM response');
       return await this.openRouterService.generateErrorResponse(
         error instanceof Error ? error.message : 'Unknown error',
         userMessage,
@@ -385,8 +383,8 @@ export class ConversationalOrchestrator {
   /**
    * Extrae entidades de la respuesta de Rasa
    */
-  private extractEntities(entities: RasaResponse['entities']): Record<string, any> {
-    const extracted: Record<string, any> = {};
+  private extractEntities(entities: RasaResponse['entities']): Record<string, unknown> {
+    const extracted: Record<string, unknown> = {};
     
     entities.forEach(entity => {
       if (entity.confidence >= 0.7) {
@@ -420,7 +418,7 @@ export class ConversationalOrchestrator {
     userMessage: string,
     assistantResponse: string,
     intent: string,
-    entities: Record<string, any>
+    entities: Record<string, unknown>
   ): void {
     // Agregar mensaje del usuario
     context.conversationHistory.push({
@@ -449,7 +447,7 @@ export class ConversationalOrchestrator {
   /**
    * Crea una respuesta de error
    */
-  private createErrorResponse(code: string, message: string, details?: any): ErrorResponse {
+  private createErrorResponse(code: string, message: string, details?: unknown): ErrorResponse {
     return {
       success: false,
       error: message,
@@ -461,7 +459,7 @@ export class ConversationalOrchestrator {
   /**
    * Crea una respuesta exitosa
    */
-  private createSuccessResponse(data: any): SuccessResponse {
+  private createSuccessResponse(data: unknown): SuccessResponse {
     return {
       success: true,
       data
@@ -471,7 +469,7 @@ export class ConversationalOrchestrator {
   /**
    * Provides fallback responses when OpenRouter is not available
    */
-  private getFallbackResponse(intent: string, _text: string): string {
+  private getFallbackResponse(intent: string): string {
     const fallbackResponses: Record<string, string> = {
       'greet': '¡Hola! ¿En qué puedo ayudarte?',
       'goodbye': '¡Hasta luego! 🌟',

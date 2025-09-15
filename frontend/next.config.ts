@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   // Remove turbopack config that might cause Vercel build issues
   // output: 'standalone', // This can cause issues in Vercel
   outputFileTracingRoot: process.cwd(),
-  webpack: (config, { isServer }) => {
+  webpack: (config) => {
     // Handle WebAssembly modules
     config.experiments = {
       ...config.experiments,

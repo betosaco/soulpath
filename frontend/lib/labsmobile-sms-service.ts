@@ -75,7 +75,7 @@ export class LabsMobileSmsService {
     return Buffer.from(`${this.config.username}:${this.config.tokenApi}`).toString('base64');
   }
 
-  private async makeRequest<T>(endpoint: string, method: 'GET' | 'POST', body?: any): Promise<T> {
+  private async makeRequest<T>(endpoint: string, method: 'GET' | 'POST', body?: Record<string, unknown>): Promise<T> {
     if (!this.config) {
       throw new Error('SMS configuration not found');
     }
@@ -162,7 +162,7 @@ export class LabsMobileSmsService {
   async sendSmsWithTemplate(
     phoneNumber: string, 
     templateName: string, 
-    data: Record<string, any> = {}, 
+    data: Record<string, unknown> = {}, 
     language: string = 'en'
   ): Promise<LabsMobileResponse> {
     try {
@@ -194,7 +194,7 @@ export class LabsMobileSmsService {
   /**
    * Get SMS prices for specific countries
    */
-  async getPrices(_countries: string[] = ['ES', 'CO', 'US', 'MX']): Promise<LabsMobilePricesResponse> {
+  async getPrices(): Promise<LabsMobilePricesResponse> {
     return this.makeRequest<LabsMobilePricesResponse>('/prices', 'GET');
   }
 

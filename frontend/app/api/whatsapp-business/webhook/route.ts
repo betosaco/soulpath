@@ -205,13 +205,13 @@ export async function POST(request: NextRequest) {
                 const orchestrator = getOrchestrator();
                 const result = await orchestrator.processMessage(text, from);
                 
-                if (result.success && result.data.response) {
+                if (result.success && (result.data as Record<string, unknown>).response) {
                   // Enviar respuesta a WhatsApp
                   await sendWhatsAppMessage(
                     process.env.WHATSAPP_PHONE_NUMBER_ID || '',
                     process.env.WHATSAPP_ACCESS_TOKEN || '',
                     from,
-                    result.data.response
+                    (result.data as Record<string, unknown>).response as string
                   );
                   
                   console.log('WhatsApp response sent successfully');

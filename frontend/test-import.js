@@ -1,5 +1,5 @@
 // Test file to check import resolution
-const fs = require('fs');
+import fs from 'fs';
 
 console.log('Testing file existence...');
 console.log('rasa-service.ts exists:', fs.existsSync('./lib/services/rasa-service.ts'));

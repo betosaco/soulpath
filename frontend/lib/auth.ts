@@ -27,7 +27,7 @@ export async function requireAuth(request: NextRequest): Promise<AuthenticatedUs
   
   try {
     // Verify JWT token
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    const decoded = jwt.verify(token, JWT_SECRET) as Record<string, unknown>;
     
     if (!decoded || !decoded.userId) {
       console.log('Auth: Invalid JWT token or missing userId');

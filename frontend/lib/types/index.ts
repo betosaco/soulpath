@@ -207,15 +207,11 @@ export interface PaymentMethodConfig {
   };
   // Izipay-specific configuration
   izipayConfig?: {
-    merchantId: string;
     username: string;
-    password: string;
+    password?: string; // Secret, may not always be sent to client
     publicKey: string;
-    currency: string;
-    environment: 'sandbox' | 'production';
-    supportedCountries: string[];
-    returnUrl: string;
-    cancelUrl: string;
+    hmacKey?: string;   // Secret
+    environment: 'TEST' | 'PRODUCTION';
   };
   createdAt: string;
   updatedAt: string;

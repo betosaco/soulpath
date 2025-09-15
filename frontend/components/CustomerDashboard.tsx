@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   User, 
   Package, 
@@ -87,30 +87,8 @@ export function CustomerDashboard() {
 
 
 
-  const loadCustomerData = async () => {
-    try {
-      setLoading(true);
-      await Promise.all([
-        loadStats(),
-        loadPackages(),
-        loadBookings(),
-        loadPurchases()
-      ]);
-    } catch (error) {
-      console.error('Error loading customer data:', error);
-      toast.error('Failed to load account data');
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  useEffect(() => {
-    if (user?.access_token) {
-      loadCustomerData();
-    }
-  }, [user?.access_token, loadCustomerData]);
-
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     try {
       const response = await fetch('/api/client/dashboard-stats', {
         headers: {
@@ -128,9 +106,9 @@ export function CustomerDashboard() {
     } catch (error) {
       console.error('Error loading stats:', error);
     }
-  };
+  }, [user?.access_token]);
 
-  const loadPackages = async () => {
+  const loadPackages = useCallback(async () => {
     try {
       const response = await fetch('/api/client/my-packages', {
         headers: {
@@ -148,9 +126,9 @@ export function CustomerDashboard() {
     } catch (error) {
       console.error('Error loading packages:', error);
     }
-  };
+  }, [user?.access_token]);
 
-  const loadBookings = async () => {
+  const loadBookings = useCallback(async () => {
     try {
       const response = await fetch('/api/client/my-bookings', {
         headers: {
@@ -168,9 +146,9 @@ export function CustomerDashboard() {
     } catch (error) {
       console.error('Error loading bookings:', error);
     }
-  };
+  }, [user?.access_token]);
 
-  const loadPurchases = async () => {
+  const loadPurchases = useCallback(async () => {
     try {
       const response = await fetch('/api/client/purchase-history', {
         headers: {
@@ -188,7 +166,30 @@ export function CustomerDashboard() {
     } catch (error) {
       console.error('Error loading purchases:', error);
     }
-  };
+  }, [user?.access_token]);
+
+  const loadCustomerData = useCallback(async () => {
+    try {
+      setLoading(true);
+      await Promise.all([
+        loadStats(),
+        loadPackages(),
+        loadBookings(),
+        loadPurchases()
+      ]);
+    } catch (error) {
+      console.error('Error loading customer data:', error);
+      toast.error('Failed to load account data');
+    } finally {
+      setLoading(false);
+    }
+  }, [loadStats, loadPackages, loadBookings, loadPurchases]);
+
+  useEffect(() => {
+    if (user?.access_token) {
+      loadCustomerData();
+    }
+  }, [user?.access_token, loadCustomerData]);
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {

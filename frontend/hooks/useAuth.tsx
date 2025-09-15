@@ -35,11 +35,11 @@ export function useAuth() {
         body: JSON.stringify({ token })
       })
       .then(data => {
-        if (data.success) {
+        if (data.success && data.data && typeof data.data === 'object') {
           const userData = {
             ...data.data,
             access_token: token
-          };
+          } as User;
           console.log('🔐 useAuth: User authenticated from token:', userData);
           setUser(userData);
         } else {
@@ -72,12 +72,12 @@ export function useAuth() {
         body: JSON.stringify({ email, password })
       });
       
-      if (data.success) {
+      if (data.success && data.data && typeof data.data === 'object') {
         // Store token in localStorage
-        localStorage.setItem('auth_token', data.data.access_token);
+        localStorage.setItem('auth_token', (data.data as any).access_token);
         
         console.log('🔐 useAuth: Sign in successful:', data.data);
-        setUser(data.data);
+        setUser(data.data as User);
         
         return { data, error: null };
       } else {

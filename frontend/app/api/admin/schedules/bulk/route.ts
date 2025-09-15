@@ -15,6 +15,7 @@ const bulkScheduleSchema = z.object({
   timeSlots: z.array(z.string().regex(/^\d{2}:\d{2}$/, 'Invalid time format (HH:MM)')).min(1, 'At least one time slot is required'),
   duration: z.number().min(30, 'Duration must be at least 30 minutes').max(180, 'Duration cannot exceed 3 hours'),
   capacity: z.number().min(1, 'Capacity must be at least 1').max(10, 'Capacity cannot exceed 10'),
+  serviceType: z.string().default('yoga'),
   available: z.boolean().default(true),
   notes: z.string().optional()
 });
@@ -92,12 +93,12 @@ export async function POST(request: NextRequest) {
     }> = [];
     for (const date of dates) {
       for (const time of scheduleData.timeSlots) {
-        (schedulesToCreate as any[]).push({
+        schedulesToCreate.push({
           date,
           time,
           duration: scheduleData.duration,
           capacity: scheduleData.capacity,
-          created_at: new Date().toISOString()
+          serviceType: scheduleData.serviceType
         });
       }
     }

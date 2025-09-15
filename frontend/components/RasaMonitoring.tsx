@@ -63,7 +63,7 @@ interface PerformanceMetrics {
 
 interface RasaHealth {
   status: 'healthy' | 'unhealthy';
-  rasa?: any;
+  rasa?: Record<string, unknown>;
   error?: string;
   timestamp: string;
 }

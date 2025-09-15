@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { Save, Search, Globe, RefreshCw, Eye, EyeOff, Upload, Trash2 } from 'lucide-react';
 import { BaseButton } from './ui/BaseButton';
 import { BaseInput } from './ui/BaseInput';
@@ -471,7 +472,7 @@ export function SeoManagement() {
                       <Label className="text-[#C0C0C0]">OG Image</Label>
                       {seoSettings.ogImage && (
                         <div className="p-3 bg-[var(--color-surface-secondary)] border border-[var(--color-border-500)] rounded-lg">
-                          <img src={seoSettings.ogImage} alt="OG Preview" className="max-h-32 object-contain" />
+                          <Image src={seoSettings.ogImage} alt="OG Preview" width={200} height={128} className="max-h-32 object-contain" />
                         </div>
                       )}
                       <input
@@ -534,7 +535,7 @@ export function SeoManagement() {
                       <Label className="text-[#C0C0C0]">Twitter Image</Label>
                       {seoSettings.twitterImage && (
                         <div className="p-3 bg-[var(--color-surface-secondary)] border border-[var(--color-border-500)] rounded-lg">
-                          <img src={seoSettings.twitterImage} alt="Twitter Preview" className="max-h-32 object-contain" />
+                          <Image src={seoSettings.twitterImage} alt="Twitter Preview" width={200} height={128} className="max-h-32 object-contain" />
                         </div>
                       )}
                       <input
@@ -754,7 +755,7 @@ export function SeoManagement() {
                 <div>
                   <h3 className="text-lg font-heading text-[#FFD700] mb-3">Facebook Preview</h3>
                   <div className="border border-gray-300 rounded-lg bg-white max-w-md">
-                    <img src={seoSettings.ogImage} alt="OG Preview" className="w-full h-48 object-cover rounded-t-lg" />
+                    <Image src={seoSettings.ogImage} alt="OG Preview" width={400} height={192} className="w-full h-48 object-cover rounded-t-lg" />
                     <div className="p-3">
                       <div className="font-semibold text-black">{seoSettings.ogTitle}</div>
                       <div className="text-gray-600 text-sm">{seoSettings.ogDescription}</div>

@@ -19,8 +19,10 @@ declare module 'ephemeris' {
   ): EphemerisData;
 
   // Add other exports as needed
-  export default {
+  const ephemerisModule = {
     calculate,
     calculateAll
   };
+
+  export default ephemerisModule;
 }

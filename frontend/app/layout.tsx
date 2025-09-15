@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { cormorantGaramond, lato } from './fonts';
+import { poppins, roboto } from './fonts';
 import './globals.css';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { cn } from '@/lib/utils';
@@ -60,6 +60,7 @@ export const viewport = {
   maximumScale: 1.0,
   userScalable: false,
   viewportFit: 'cover',
+  themeColor: '#0A0A23',
 };
 
 export default function RootLayout({
@@ -68,11 +69,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${cormorantGaramond.variable} ${lato.variable}`}>
+    <html lang="en" className={`${poppins.variable} ${roboto.variable}`}>
       <body className={cn(
         "antialiased",
-        cormorantGaramond.variable,
-        lato.variable
+        poppins.variable,
+        roboto.variable
       )}>
         <ThemeProvider initialTheme="light">
           {children}

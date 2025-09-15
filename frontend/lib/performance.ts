@@ -53,8 +53,8 @@ export class PerformanceMonitor {
     };
   }
 
-  getAllMetrics(): Record<string, any> {
-    const result: Record<string, any> = {};
+  getAllMetrics(): Record<string, unknown> {
+    const result: Record<string, unknown> = {};
     for (const [label] of this.metrics.entries()) {
       result[label] = this.getMetrics(label);
     }
@@ -73,8 +73,8 @@ export class PerformanceMonitor {
 export const performanceMonitor = PerformanceMonitor.getInstance();
 
 // Middleware to monitor API performance
-export function withPerformanceMonitoring<T extends any[]>(
-  fn: (...args: T) => Promise<any>,
+export function withPerformanceMonitoring<T extends unknown[]>(
+  fn: (...args: T) => Promise<unknown>,
   label: string
 ) {
   return async (...args: T) => {

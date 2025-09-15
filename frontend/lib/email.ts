@@ -110,7 +110,7 @@ export async function sendEmail(
 
 export async function sendBookingConfirmation(
   clientEmail: string,
-  scheduleData: any,
+  scheduleData: Record<string, unknown>,
   language: 'en' | 'es' = 'en'
 ): Promise<boolean> {
   try {

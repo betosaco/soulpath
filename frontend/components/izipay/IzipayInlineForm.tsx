@@ -19,8 +19,8 @@ interface IzipayInlineFormProps {
   description?: string;
   packagePriceId?: number;
   quantity?: number;
-  metadata?: Record<string, any>;
-  onSuccess?: (result: any) => void;
+  metadata?: Record<string, unknown>;
+  onSuccess?: (result: Record<string, unknown>) => void;
   onError?: (error: string) => void;
   onCancel?: () => void;
   className?: string;
@@ -28,7 +28,7 @@ interface IzipayInlineFormProps {
 
 declare global {
   interface Window {
-    KR?: any;
+    KR?: Record<string, unknown>;
   }
 }
 
@@ -149,7 +149,7 @@ export function IzipayInlineForm({
           console.log('✅ Izipay form initialized');
           
           // Handle form events
-          window.KR!.on('kr-error', (event: any) => {
+          window.KR!.on('kr-error', (event: Record<string, unknown>) => {
             console.error('❌ Izipay form error:', event);
             setPaymentStatus('error');
             setError(event.error.message || 'Payment form error');
@@ -159,12 +159,12 @@ export function IzipayInlineForm({
             }
           });
 
-          window.KR!.on('kr-payment-created', (event: any) => {
+          window.KR!.on('kr-payment-created', (event: Record<string, unknown>) => {
             console.log('🔄 Payment created:', event);
             setPaymentStatus('processing');
           });
 
-          window.KR!.on('kr-payment-success', (event: any) => {
+          window.KR!.on('kr-payment-success', (event: Record<string, unknown>) => {
             console.log('✅ Payment successful:', event);
             setPaymentStatus('success');
             
@@ -173,7 +173,7 @@ export function IzipayInlineForm({
             }
           });
 
-          window.KR!.on('kr-payment-error', (event: any) => {
+          window.KR!.on('kr-payment-error', (event: Record<string, unknown>) => {
             console.error('❌ Payment error:', event);
             setPaymentStatus('error');
             setError(event.error.message || 'Payment failed');
@@ -183,7 +183,7 @@ export function IzipayInlineForm({
             }
           });
         })
-        .catch((error: any) => {
+        .catch((error: unknown) => {
           console.error('❌ Failed to initialize Izipay form:', error);
           setError('Failed to initialize payment form');
         });

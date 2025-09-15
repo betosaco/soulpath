@@ -16,11 +16,11 @@ import {
 interface ModelConfig {
   pipeline: Array<{
     name: string;
-    [key: string]: any;
+    [key: string]: unknown;
   }>;
   policies: Array<{
     name: string;
-    [key: string]: any;
+    [key: string]: unknown;
   }>;
   language: string;
   assistant_id: string;
@@ -210,7 +210,7 @@ export function RasaModelTuning() {
       setConfig(parsedConfig);
       setIsEditing(false);
       // Here you would save to the server
-    } catch (error) {
+    } catch {
       alert('Invalid JSON configuration');
     }
   };

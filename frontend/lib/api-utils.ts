@@ -5,7 +5,7 @@
  * and provide better error messages when APIs return HTML instead of JSON.
  */
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -34,7 +34,7 @@ export class ApiError extends Error {
 /**
  * Safely parse JSON response, handling cases where API returns HTML error pages
  */
-export async function safeJsonParse<T = any>(response: Response): Promise<T> {
+export async function safeJsonParse<T = unknown>(response: Response): Promise<T> {
   const contentType = response.headers.get('content-type');
   
   if (!contentType || !contentType.includes('application/json')) {
@@ -77,7 +77,7 @@ export async function safeJsonParse<T = any>(response: Response): Promise<T> {
 /**
  * Make a safe API call with proper error handling
  */
-export async function safeApiCall<T = any>(
+export async function safeApiCall<T = unknown>(
   url: string, 
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
@@ -121,7 +121,7 @@ export async function safeApiCall<T = any>(
 /**
  * Make a safe API call with authentication
  */
-export async function safeApiCallWithAuth<T = any>(
+export async function safeApiCallWithAuth<T = unknown>(
   url: string,
   token: string,
   options: RequestInit = {}
@@ -138,6 +138,6 @@ export async function safeApiCallWithAuth<T = any>(
 /**
  * Check if an error is a JSON parsing error
  */
-export function isJsonError(error: any): error is ApiError {
-  return error && typeof error === 'object' && error.isJsonError === true;
+export function isJsonError(error: unknown): error is ApiError {
+  return error !== null && typeof error === 'object' && 'isJsonError' in error && (error as ApiError).isJsonError === true;
 }

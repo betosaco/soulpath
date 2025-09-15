@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Lato:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700;900&family=Poppins:wght@300;400;500;600;700;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -25,177 +25,134 @@
   border: 0;
 }
 
-/* Centralized Theme System - Modify colors in /lib/theme/theme-config.ts */
+/* MATMAX YOGA STUDIO - COMPLETE DESIGN SYSTEM */
+
 :root {
-  /* Primary colors (buttons, main actions) */
-  --color-primary-main: #6ea058;
-  --color-primary-hover: #5a8a47;
-  --color-primary-light: #8bb570;
-  --color-primary-dark: #4f7c41;
-  --color-primary-contrast: #ffffff;
-  
-  /* Legacy primary palette (for backward compatibility) */
-  --color-primary-500: var(--color-primary-main);
-  --color-primary-600: var(--color-primary-hover);
-  --color-primary-400: var(--color-primary-light);
-  --color-primary-700: var(--color-primary-dark);
+  /* BRAND COLORS */
+  --matmax-purple: #8B5CF6;
+  --matmax-purple-light: #A78BFA;
+  --matmax-purple-dark: #7C3AED;
+  --matmax-purple-50: #F5F3FF;
+  --matmax-purple-100: #EDE9FE;
+  --matmax-purple-200: #DDD6FE;
+  --matmax-purple-300: #C4B5FD;
+  --matmax-purple-400: #A78BFA;
+  --matmax-purple-500: #8B5CF6;
+  --matmax-purple-600: #7C3AED;
+  --matmax-purple-700: #6D28D9;
+  --matmax-purple-800: #5B21B6;
+  --matmax-purple-900: #4C1D95;
 
-  /* Colors - Secondary Palette */
-  --color-secondary-50: #f8fafc;
-  --color-secondary-100: #f1f5f9;
-  --color-secondary-200: #e2e8f0;
-  --color-secondary-300: #cbd5e1;
-  --color-secondary-400: #94a3b8;
-  --color-secondary-500: #64748b;
-  --color-secondary-600: #475569;
-  --color-secondary-700: #334155;
-  --color-secondary-800: #1e293b;
-  --color-secondary-900: #0f172a;
-  --color-secondary-950: #020617;
+  --matmax-teal: #14B8A6;
+  --matmax-teal-light: #5EEAD4;
+  --matmax-teal-dark: #0F766E;
+  --matmax-teal-50: #F0FDFA;
+  --matmax-teal-100: #CCFBF1;
+  --matmax-teal-200: #99F6E4;
+  --matmax-teal-300: #5EEAD4;
+  --matmax-teal-400: #2DD4BF;
+  --matmax-teal-500: #14B8A6;
+  --matmax-teal-600: #0D9488;
+  --matmax-teal-700: #0F766E;
+  --matmax-teal-800: #115E59;
+  --matmax-teal-900: #134E4A;
 
-  /* Accent colors (other elements, highlights) */
-  --color-accent-main: #f4a556;
-  --color-accent-hover: #e07c2f;
-  --color-accent-light: #f5b369;
-  --color-accent-dark: #bb5f25;
-  --color-accent-contrast: #383838;
-  
-  /* Legacy accent palette (for backward compatibility) */
-  --color-accent-500: var(--color-accent-main);
-  --color-accent-600: var(--color-accent-hover);
-  --color-accent-400: var(--color-accent-light);
-  --color-accent-700: var(--color-accent-dark);
+  --matmax-orange: #F59E0B;
+  --matmax-orange-light: #FCD34D;
+  --matmax-orange-dark: #D97706;
+  --matmax-orange-50: #FFFBEB;
+  --matmax-orange-100: #FEF3C7;
+  --matmax-orange-200: #FDE68A;
+  --matmax-orange-300: #FCD34D;
+  --matmax-orange-400: #FBBF24;
+  --matmax-orange-500: #F59E0B;
+  --matmax-orange-600: #D97706;
+  --matmax-orange-700: #B45309;
+  --matmax-orange-800: #92400E;
+  --matmax-orange-900: #78350F;
 
-  /* Colors - Sidebar Palette (Light theme) */
-  --color-sidebar-50: #faf9f9;
-  --color-sidebar-100: #f4f2f2;
-  --color-sidebar-200: #ede6e5;
-  --color-sidebar-300: #e0d6d4;
-  --color-sidebar-400: #c7b8b5;
-  --color-sidebar-500: #a89490;
-  --color-sidebar-600: #8b7470;
-  --color-sidebar-700: #6b5955;
-  --color-sidebar-800: #4a3e3b;
-  --color-sidebar-900: #2e2523;
-  --color-sidebar-950: #1a1412;
+  --matmax-white: #FFFFFF;
+  --matmax-black: #111827;
+  --matmax-gray-50: #F9FAFB;
+  --matmax-gray-100: #F3F4F6;
+  --matmax-gray-200: #E5E7EB;
+  --matmax-gray-300: #D1D5DB;
+  --matmax-gray-400: #9CA3AF;
+  --matmax-gray-500: #6B7280;
+  --matmax-gray-600: #4B5563;
+  --matmax-gray-700: #374151;
+  --matmax-gray-800: #1F2937;
+  --matmax-gray-900: #111827;
 
-  /* Colors - Border Palette (Light theme) */
-  --color-border-50: #faf9f9;
-  --color-border-100: #f4f2f2;
-  --color-border-200: #ede6e5;
-  --color-border-300: #e0d6d4;
-  --color-border-400: #c7b8b5;
-  --color-border-500: #a89490;
-  --color-border-600: #8b7470;
-  --color-border-700: #6b5955;
-  --color-border-800: #4a3e3b;
-  --color-border-900: #2e2523;
-  --color-border-950: #1a1412;
+  /* SPACING & LAYOUT */
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+  --space-20: 5rem;     /* 80px */
+  --space-24: 6rem;     /* 96px */
+  --space-32: 8rem;     /* 128px */
+  --space-40: 10rem;    /* 160px */
+  --space-48: 12rem;    /* 192px */
+  --space-56: 14rem;    /* 224px */
+  --space-64: 16rem;    /* 256px */
+  --space-72: 18rem;    /* 288px */
+  --space-80: 20rem;    /* 320px */
+  --space-96: 24rem;    /* 384px */
 
-  /* Text colors */
-  --color-text-primary: #383838;
-  --color-text-secondary: #666666;
-  --color-text-tertiary: #888888;
-  --color-text-inverse: #ffffff;
+  /* TYPOGRAPHY SYSTEM */
+  --font-heading: 'Poppins', sans-serif;
+  --font-body: 'Roboto', sans-serif;
 
-  /* Colors - Status Palette */
-  --color-status-success: #10b981;
-  --color-status-warning: #f59e0b;
-  --color-status-error: #ef4444;
-  --color-status-info: #3b82f6;
+  /* Font Sizes */
+  --text-xs: 0.75rem;     /* 12px */
+  --text-sm: 0.875rem;    /* 14px */
+  --text-base: 1rem;      /* 16px */
+  --text-lg: 1.125rem;    /* 18px */
+  --text-xl: 1.25rem;     /* 20px */
+  --text-2xl: 1.5rem;     /* 24px */
+  --text-3xl: 1.875rem;   /* 30px */
+  --text-4xl: 2.25rem;    /* 36px */
+  --text-5xl: 3rem;       /* 48px */
+  --text-6xl: 3.75rem;    /* 60px */
+  --text-7xl: 4.5rem;     /* 72px */
+  --text-8xl: 6rem;       /* 96px */
+  --text-9xl: 8rem;       /* 128px */
 
-  /* Colors - Semantic Surface Palette (Light theme) */
-  --color-surface-primary: #ffffff;
-  --color-surface-secondary: #f9f7f6;
-  --color-surface-tertiary: #ede6e5;
-  --color-surface-quaternary: #e0d6d4;
-
-  /* Background colors */
-  --color-background-primary: #f4eeed;
-  --color-background-secondary: #ede6e5;
-  --color-background-tertiary: #e0d6d4;
-  --color-background-surface: #ffffff;
-
-  /* Spacing */
-  --spacing-0: 0px;
-  --spacing-1: 0.25rem;
-  --spacing-2: 0.5rem;
-  --spacing-3: 0.75rem;
-  --spacing-4: 1rem;
-  --spacing-5: 1.25rem;
-  --spacing-6: 1.5rem;
-  --spacing-8: 2rem;
-  --spacing-10: 2.5rem;
-  --spacing-12: 3rem;
-  --spacing-16: 4rem;
-  --spacing-20: 5rem;
-  --spacing-24: 6rem;
-  --spacing-32: 8rem;
-  --spacing-40: 10rem;
-  --spacing-48: 12rem;
-  --spacing-56: 14rem;
-  --spacing-64: 16rem;
-
-  /* Typography - Font Sizes */
-  --font-size-xs: 0.75rem;
-  --font-size-sm: 0.875rem;
-  --font-size-base: 1rem;
-  --font-size-lg: 1.125rem;
-  --font-size-xl: 1.25rem;
-  --font-size-2xl: 1.5rem;
-  --font-size-3xl: 1.875rem;
-  --font-size-4xl: 2.25rem;
-  --font-size-5xl: 3rem;
-  --font-size-6xl: 3.75rem;
-  --font-size-7xl: 4.5rem;
-  --font-size-8xl: 6rem;
-  --font-size-9xl: 8rem;
-
-  /* Typography - Font Weights */
-  --font-weight-thin: 100;
-  --font-weight-extralight: 200;
+  /* Font Weights */
   --font-weight-light: 300;
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
-  --font-weight-extrabold: 800;
   --font-weight-black: 900;
 
-  /* Typography - Line Heights */
-  --line-height-none: 1;
-  --line-height-tight: 1.25;
-  --line-height-snug: 1.375;
-  --line-height-normal: 1.5;
-  --line-height-relaxed: 1.625;
-  --line-height-loose: 2;
+  /* Line Heights */
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
 
-  /* Typography - Letter Spacing */
-  --letter-spacing-tighter: -0.05em;
-  --letter-spacing-tight: -0.025em;
-  --letter-spacing-normal: 0em;
-  --letter-spacing-wide: 0.025em;
-  --letter-spacing-wider: 0.05em;
-  --letter-spacing-widest: 0.1em;
+  /* BORDERS & RADIUS */
+  --radius-none: 0px;
+  --radius-sm: 0.125rem;    /* 2px */
+  --radius-base: 0.25rem;   /* 4px */
+  --radius-md: 0.375rem;    /* 6px */
+  --radius-lg: 0.5rem;      /* 8px */
+  --radius-xl: 0.75rem;     /* 12px */
+  --radius-2xl: 1rem;       /* 16px */
+  --radius-3xl: 1.5rem;     /* 24px */
+  --radius-full: 9999px;
 
-  /* Borders */
-  --border-radius-none: 0px;
-  --border-radius-sm: 0.125rem;
-  --border-radius-base: 0.25rem;
-  --border-radius-md: 0.375rem;
-  --border-radius-lg: 0.5rem;
-  --border-radius-xl: 0.75rem;
-  --border-radius-2xl: 1rem;
-  --border-radius-3xl: 1.5rem;
-  --border-radius-full: 9999px;
-
-  --border-width-0: 0px;
-  --border-width-1: 1px;
-  --border-width-2: 2px;
-  --border-width-4: 4px;
-  --border-width-8: 8px;
-
-  /* Shadows */
+  /* SHADOWS */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-base: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
@@ -235,6 +192,209 @@
   --admin-sidebar-bg: #000000;
   --admin-border: #000000;
   --admin-text-inverse: #ffffff;
+}
+
+/* COMPONENT STYLES */
+/* Button Components */
+.btn-primary {
+  background-color: var(--matmax-purple);
+  color: var(--matmax-white);
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-6);
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--text-base);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.btn-primary:hover {
+  background-color: var(--matmax-purple-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-secondary {
+  background-color: var(--matmax-teal);
+  color: var(--matmax-white);
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-6);
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--text-base);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.btn-secondary:hover {
+  background-color: var(--matmax-teal-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--matmax-purple);
+  border: 2px solid var(--matmax-purple);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-6);
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--text-base);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.btn-outline:hover {
+  background-color: var(--matmax-purple);
+  color: var(--matmax-white);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Navigation Components */
+.nav-link {
+  color: var(--matmax-gray-600);
+  text-decoration: none;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-base);
+  transition: color 0.2s ease;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+}
+
+.nav-link:hover {
+  color: var(--matmax-purple);
+}
+
+.nav-link.active {
+  color: var(--matmax-purple);
+  background-color: var(--matmax-purple-50);
+}
+
+/* Card Components */
+.card-base {
+  background-color: var(--matmax-white);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--matmax-gray-200);
+  padding: var(--space-6);
+  transition: all 0.2s ease;
+}
+
+.card-hover {
+  transition: all 0.2s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Utility Classes */
+.bg-light {
+  background-color: var(--matmax-gray-50);
+}
+
+.text-primary {
+  color: var(--matmax-purple);
+}
+
+.text-muted {
+  color: var(--matmax-gray-600);
+}
+
+.gradient-purple {
+  background: linear-gradient(135deg, var(--matmax-purple) 0%, var(--matmax-purple-dark) 100%);
+}
+
+.hover-lift {
+  transition: transform 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+}
+
+.hover-scale {
+  transition: transform 0.2s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+/* Grid Layouts */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-6);
+}
+
+.schedule-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: var(--space-1);
+  border: 1px solid var(--matmax-gray-200);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.schedule-cell {
+  padding: var(--space-3);
+  text-align: center;
+  font-size: var(--text-sm);
+  border-right: 1px solid var(--matmax-gray-200);
+  border-bottom: 1px solid var(--matmax-gray-200);
+}
+
+.schedule-cell:last-child {
+  border-right: none;
+}
+
+/* MatPass Card */
+.matpass-card {
+  background: linear-gradient(135deg, var(--matmax-purple) 0%, var(--matmax-purple-dark) 100%);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-12);
+  text-align: center;
+  color: var(--matmax-white);
+  box-shadow: var(--shadow-2xl);
+}
+
+/* Loading Animation */
+.loading-shimmer {
+  background: linear-gradient(90deg, 
+    var(--matmax-gray-200) 25%, 
+    var(--matmax-gray-100) 50%, 
+    var(--matmax-gray-200) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 /* Dark theme overrides */
@@ -825,7 +985,8 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
-    background: linear-gradient(180deg, var(--cosmic-navy) 0%, var(--cosmic-black) 100%);
+    background-color: var(--matmax-white);
+    color: var(--matmax-black);
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -843,109 +1004,7 @@ body {
   overflow: hidden; /* Prevent default scrolling for fullpage */
 }
 
-/* Enhanced cosmic effects */
-@keyframes twinkle {
-  0%, 100% { opacity: 0.3; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.2); }
-}
-
-@keyframes glow {
-  0%, 100% { box-shadow: 0 0 5px var(--starlight-gold), 0 0 10px var(--starlight-gold), 0 0 15px var(--starlight-gold); }
-  50% { box-shadow: 0 0 10px var(--starlight-gold), 0 0 20px var(--starlight-gold), 0 0 30px var(--starlight-gold); }
-}
-
-@keyframes starDrift {
-  0%, 100% { 
-    transform: translateX(0) translateY(0) scale(1);
-    opacity: 0.3;
-  }
-  25% { 
-    transform: translateX(10px) translateY(-5px) scale(1.1);
-    opacity: 0.7;
-  }
-  50% { 
-    transform: translateX(-5px) translateY(-10px) scale(1.3);
-    opacity: 1;
-  }
-  75% { 
-    transform: translateX(-8px) translateY(5px) scale(1.1);
-    opacity: 0.8;
-  }
-}
-
-@keyframes cosmicPulse {
-  0%, 100% { 
-    transform: scale(1) rotate(0deg);
-    opacity: 0.2;
-    filter: blur(0.5px) hue-rotate(0deg);
-  }
-  33% { 
-    transform: scale(1.3) rotate(120deg);
-    opacity: 0.6;
-    filter: blur(1px) hue-rotate(60deg);
-  }
-  66% { 
-    transform: scale(0.8) rotate(240deg);
-    opacity: 0.8;
-    filter: blur(0.8px) hue-rotate(120deg);
-  }
-}
-
-@keyframes nebulaFlow {
-  0%, 100% {
-    transform: scale(1) rotate(0deg);
-    opacity: 0.1;
-    filter: blur(2px);
-  }
-  50% {
-    transform: scale(1.2) rotate(180deg);
-    opacity: 0.3;
-    filter: blur(4px);
-  }
-}
-
-@keyframes orbitMotion {
-  0% {
-    transform: rotate(0deg) translateX(50px) rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg) translateX(50px) rotate(-360deg);
-  }
-}
-
-@keyframes shootingStar {
-  0% {
-    transform: translateX(-100px) translateY(-100px);
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  90% {
-    opacity: 0.8;
-  }
-  100% {
-    transform: translateX(100px) translateY(100px);
-    opacity: 0;
-  }
-}
-
-@keyframes particleTrail {
-  0% {
-    transform: translateX(0) translateY(0) scale(1);
-    opacity: 0;
-  }
-  20% {
-    opacity: 0.6;
-  }
-  80% {
-    opacity: 0.3;
-  }
-  100% {
-    transform: translateX(20px) translateY(-15px) scale(0.3);
-    opacity: 0;
-  }
-}
+/* Removed old cosmic animations - replaced with new design system */
 
 .cosmic-glow {
   animation: glow 3s ease-in-out infinite;
@@ -1327,30 +1386,50 @@ html, body {
   }
   
   .header-container {
-    padding-left: max(1rem, env(safe-area-inset-left));
-    padding-right: max(1rem, env(safe-area-inset-right));
-    padding-top: max(0.75rem, env(safe-area-inset-top));
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+    padding-top: max(0.5rem, env(safe-area-inset-top));
   }
   
   .cta-button-container {
-    bottom: max(0.75rem, env(safe-area-inset-bottom));
-    padding-left: max(0.75rem, env(safe-area-inset-left));
-    padding-right: max(0.75rem, env(safe-area-inset-right));
+    bottom: max(0.5rem, env(safe-area-inset-bottom));
+    padding-left: max(0.5rem, env(safe-area-inset-left));
+    padding-right: max(0.5rem, env(safe-area-inset-right));
   }
   
   .navigation-arrow {
-    bottom: max(5rem, calc(env(safe-area-inset-bottom) + 4.5rem)) !important;
+    bottom: max(4rem, calc(env(safe-area-inset-bottom) + 3.5rem)) !important;
   }
   
   .booking-nav-buttons {
-    padding-bottom: max(2rem, calc(env(safe-area-inset-bottom) + 2rem)) !important;
+    padding-bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 1.5rem)) !important;
   }
   
   .safe-padding {
-    padding-top: max(1rem, env(safe-area-inset-top));
-    padding-bottom: max(1rem, env(safe-area-inset-bottom));
-    padding-left: max(1rem, env(safe-area-inset-left));
-    padding-right: max(1rem, env(safe-area-inset-right));
+    padding-top: max(0.75rem, env(safe-area-inset-top));
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+  }
+
+  /* Enhanced mobile safe area support */
+  .mobile-safe-area {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* Mobile navigation safe area */
+  .mobile-nav-safe {
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+
+  /* Mobile content safe area */
+  .mobile-content-safe {
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
   }
 }
 
@@ -1582,13 +1661,40 @@ html, body {
 /* Mobile-specific improvements */
 @media (max-width: 640px) {
   h1 {
-    font-size: 2rem;
+    font-size: 1.75rem;
     line-height: 1.1;
+    font-weight: 700;
   }
 
   h2 {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     line-height: 1.2;
+    font-weight: 600;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    line-height: 1.3;
+    font-weight: 600;
+  }
+
+  p {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  /* Improve text readability on mobile */
+  .text-mobile-optimized {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    letter-spacing: 0.01em;
+  }
+
+  /* Better mobile button text */
+  .button-text-mobile {
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.025em;
   }
   
   .navigation-arrow {
@@ -1675,6 +1781,119 @@ html, body {
   
   .cosmic-background-mobile .cosmic-pulse {
     animation-duration: 3.5s;
+  }
+
+  /* Enhanced mobile touch feedback */
+  .mobile-touch-feedback {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .mobile-touch-feedback::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease;
+  }
+
+  .mobile-touch-feedback:active::before {
+    width: 200%;
+    height: 200%;
+  }
+
+  /* Mobile-optimized spacing */
+  .mobile-spacing {
+    padding: 0.75rem;
+    margin: 0.5rem;
+  }
+
+  .mobile-spacing-lg {
+    padding: 1rem;
+    margin: 0.75rem;
+  }
+
+  /* Mobile text scaling */
+  .mobile-text-scale {
+    font-size: clamp(0.875rem, 4vw, 1rem);
+  }
+
+  .mobile-heading-scale {
+    font-size: clamp(1.5rem, 8vw, 2.5rem);
+  }
+
+  /* Mobile container improvements */
+  .mobile-container-optimized {
+    min-height: 100vh;
+    min-height: 100svh;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  /* Mobile-specific animations */
+  @keyframes mobileSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes mobileFadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes mobileBounce {
+    0%, 20%, 50%, 80%, 100% {
+      transform: translateY(0);
+    }
+    40% {
+      transform: translateY(-10px);
+    }
+    60% {
+      transform: translateY(-5px);
+    }
+  }
+
+  .mobile-slide-in {
+    animation: mobileSlideIn 0.4s ease-out;
+  }
+
+  .mobile-fade-in {
+    animation: mobileFadeIn 0.3s ease-out;
+  }
+
+  .mobile-bounce {
+    animation: mobileBounce 0.6s ease-out;
+  }
+
+  /* Mobile gesture feedback */
+  .mobile-gesture-feedback {
+    transition: transform 0.1s ease-out;
+  }
+
+  .mobile-gesture-feedback:active {
+    transform: scale(0.98);
+  }
+
+  /* Mobile scroll improvements */
+  .mobile-scroll-smooth {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
   }
 }
 

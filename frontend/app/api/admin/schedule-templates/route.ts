@@ -133,20 +133,24 @@ export async function GET(request: NextRequest) {
     };
 
     // Enhanced mode includes slot information
+    let enhancedSelect: any = select;
     if (enhanced === 'true') {
-      (select as any)._count = {
-        scheduleSlots: true
-      };
-      select.scheduleSlots = {
-        take: 10,
-        orderBy: { startTime: 'desc' },
-        select: {
-          id: true,
-          startTime: true,
-          endTime: true,
-          capacity: true,
-          bookedCount: true,
-          isAvailable: true
+      enhancedSelect = {
+        ...select,
+        _count: {
+          scheduleSlots: true
+        },
+        scheduleSlots: {
+          take: 10,
+          orderBy: { startTime: 'desc' },
+          select: {
+            id: true,
+            startTime: true,
+            endTime: true,
+            capacity: true,
+            bookedCount: true,
+            isAvailable: true
+          }
         }
       };
     }
@@ -156,7 +160,7 @@ export async function GET(request: NextRequest) {
     const [scheduleTemplates, totalCount] = await Promise.all([
       prisma.scheduleTemplate.findMany({
         where,
-        select,
+        select: enhancedSelect,
         skip: offset,
         take: limit,
         orderBy: [

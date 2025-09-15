@@ -5,10 +5,10 @@
  * Tests both Next.js and Rasa server port detection
  */
 
-const { exec } = require('child_process');
-const util = require('util');
+import { exec } from 'child_process';
+import { promisify } from 'util';
 
-const execAsync = util.promisify(exec);
+const execAsync = promisify(exec);
 
 async function testPortDetection() {
   console.log('🔍 Testing Dynamic Port Detection...\n');
@@ -22,7 +22,7 @@ async function testPortDetection() {
     } else {
       console.log('   ⚠️  No Next.js server found on common ports');
     }
-  } catch (error) {
+  } catch {
     console.log('   ⚠️  No Next.js server found on common ports');
   }
 
@@ -35,7 +35,7 @@ async function testPortDetection() {
     } else {
       console.log('   ⚠️  No Rasa server found on common ports');
     }
-  } catch (error) {
+  } catch {
     console.log('   ⚠️  No Rasa server found on common ports');
   }
 
@@ -51,7 +51,7 @@ async function testPortDetection() {
         console.log(`   ✅ Next.js API responding on port ${port}`);
         break;
       }
-    } catch (error) {
+    } catch {
       // Port not responding, continue
     }
   }
@@ -65,7 +65,7 @@ async function testPortDetection() {
         console.log(`   ✅ Rasa API responding on port ${port}`);
         break;
       }
-    } catch (error) {
+    } catch {
       // Port not responding, continue
     }
   }

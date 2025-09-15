@@ -11,7 +11,7 @@ export interface ExternalAPIConfig {
   apiUrl?: string;
   webhookUrl?: string;
   webhookSecret?: string;
-  config?: any;
+  config?: Record<string, unknown>;
   isActive: boolean;
   testMode: boolean;
   description?: string;
@@ -19,7 +19,7 @@ export interface ExternalAPIConfig {
   rateLimit?: number;
   timeout?: number;
   lastTestedAt?: Date;
-  lastTestResult?: any;
+  lastTestResult?: Record<string, unknown>;
   healthStatus?: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -30,8 +30,8 @@ export interface ExternalAPIConfig {
 export interface APIConfigAudit {
   configId: string;
   action: 'create' | 'update' | 'delete' | 'test';
-  oldValues?: any;
-  newValues?: any;
+  oldValues?: Record<string, unknown>;
+  newValues?: Record<string, unknown>;
   performedBy: string;
   ipAddress?: string;
   userAgent?: string;
@@ -233,7 +233,7 @@ export class ExternalAPIService {
     userId: string,
     ipAddress?: string,
     userAgent?: string
-  ): Promise<{ success: boolean; message: string; details?: any }> {
+  ): Promise<{ success: boolean; message: string; details?: unknown }> {
     try {
       const config = await this.prisma.externalAPIConfig.findUnique({
         where: { id },
@@ -311,7 +311,7 @@ export class ExternalAPIService {
     data: Partial<ExternalAPIConfig>,
     action: 'encrypt' | 'decrypt'
   ): Promise<Partial<ExternalAPIConfig>> {
-    const processed: any = { ...data };
+    const processed: Partial<ExternalAPIConfig> = { ...data };
 
     // Campos sensibles que requieren encriptación
     const sensitiveFields = ['apiKey', 'apiSecret', 'webhookSecret'];
@@ -334,7 +334,7 @@ export class ExternalAPIService {
   /**
    * Formatear configuración para respuesta (desencriptar valores sensibles si es necesario)
    */
-  private formatConfig(config: any): ExternalAPIConfig {
+  private formatConfig(config: Record<string, unknown>): ExternalAPIConfig {
     // En un entorno real, aquí desencriptarías los valores sensibles
     // Para esta implementación, simplemente devolvemos la configuración sin desencriptar
     // ya que las claves encriptadas se usarían directamente en las llamadas a APIs
@@ -366,7 +366,7 @@ export class ExternalAPIService {
   /**
    * Realizar prueba de API específica según el proveedor
    */
-  private async performAPITest(config: any): Promise<{ success: boolean; message: string; details?: any }> {
+  private async performAPITest(config: Record<string, unknown>): Promise<{ success: boolean; message: string; details?: unknown }> {
     try {
       switch (config.name.toLowerCase()) {
         case 'openrouter':
@@ -392,7 +392,7 @@ export class ExternalAPIService {
   /**
    * Probar conexión con OpenRouter
    */
-  private async testOpenRouter(config: any): Promise<{ success: boolean; message: string; details?: any }> {
+  private async testOpenRouter(config: Record<string, unknown>): Promise<{ success: boolean; message: string; details?: unknown }> {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), config.timeout || 30000);
@@ -431,7 +431,7 @@ export class ExternalAPIService {
   /**
    * Probar conexión con Twilio
    */
-  private async testTwilio(config: any): Promise<{ success: boolean; message: string; details?: any }> {
+  private async testTwilio(config: Record<string, unknown>): Promise<{ success: boolean; message: string; details?: unknown }> {
     try {
       // Usar la API de Twilio para verificar credenciales
       const auth = Buffer.from(`${config.apiKey}:${config.apiSecret}`).toString('base64');
@@ -473,7 +473,7 @@ export class ExternalAPIService {
   /**
    * Probar conexión con Telegram
    */
-  private async testTelegram(config: any): Promise<{ success: boolean; message: string; details?: any }> {
+  private async testTelegram(config: Record<string, unknown>): Promise<{ success: boolean; message: string; details?: unknown }> {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), config.timeout || 30000);

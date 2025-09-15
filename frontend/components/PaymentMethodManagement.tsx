@@ -9,12 +9,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Save, X, CreditCard, Wallet, Banknote, QrCode, Bitcoin, Clock, Zap, RefreshCw } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, CreditCard, Wallet, Banknote, QrCode, Bitcoin, Clock, Zap, RefreshCw, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { PaymentMethodConfig, PaymentMethod } from '@/lib/types';
 import { useAuth } from '../hooks/useAuth';
 import StripeConfigModal from './modals/StripeConfigModal';
 
+
+// --- IZIPAY INTEGRATION START ---
+interface IzipayConfig {
+  username: string;
+  password?: string;
+  publicKey: string;
+  hmacKey?: string;
+  environment: 'TEST' | 'PRODUCTION';
+}
 
 interface PaymentMethodFormData {
   name: string;
@@ -23,18 +32,9 @@ interface PaymentMethodFormData {
   icon: string;
   requiresConfirmation: boolean;
   autoAssignPackage: boolean;
-  izipayConfig?: {
-    merchantId: string;
-    username: string;
-    password: string;
-    publicKey: string;
-    currency: string;
-    environment: 'sandbox' | 'production';
-    supportedCountries: string[];
-    returnUrl: string;
-    cancelUrl: string;
-  };
+  izipayConfig?: IzipayConfig;
 }
+// --- IZIPAY INTEGRATION END ---
 
 interface StripeConfig {
   publishableKey: string;
@@ -62,14 +62,22 @@ const PaymentMethodManagement: React.FC = () => {
   const [showStripeConfig, setShowStripeConfig] = useState(false);
   const [editingMethod, setEditingMethod] = useState<PaymentMethodConfig | null>(null);
   const [stripeConfig, setStripeConfig] = useState<StripeConfig | StripeConfigData | null>(null);
-  const [izipayConfig, setIzipayConfig] = useState<any>(null);
-    const [formData, setFormData] = useState<PaymentMethodFormData>({
+  const [showSecrets, setShowSecrets] = useState({ password: false, hmacKey: false });
+
+  const [formData, setFormData] = useState<PaymentMethodFormData>({
     name: '',
     type: 'cash',
     description: '',
     icon: '',
     requiresConfirmation: false,
-    autoAssignPackage: true
+    autoAssignPackage: true,
+    izipayConfig: {
+      username: '',
+      password: '',
+      publicKey: '',
+      hmacKey: '',
+      environment: 'TEST',
+    },
   });
 
   const fetchPaymentMethods = useCallback(async () => {
@@ -208,56 +216,45 @@ const PaymentMethodManagement: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate Stripe configuration if type is stripe
-    if (formData.type === 'stripe' && !stripeConfig) {
-      toast.error('Stripe configuration is required for Stripe payment method');
+    if (formData.type === 'izipay' && (!formData.izipayConfig?.username || !formData.izipayConfig?.publicKey)) {
+      toast.error('Izipay username and public key are required.');
       return;
     }
-    
+
     try {
       const authToken = user?.access_token;
       if (!authToken) {
         toast.error('Authentication required');
         return;
       }
-
-      const url = editingMethod 
-        ? '/api/admin/payment-methods' 
-        : '/api/admin/payment-methods';
-      
+      const url = editingMethod ? '/api/admin/payment-methods' : '/api/admin/payment-methods';
       const method = editingMethod ? 'PUT' : 'POST';
-      const body = editingMethod 
-        ? { 
-            id: editingMethod.id, 
-            ...formData, 
-            stripeConfig: formData.type === 'stripe' ? stripeConfig : undefined,
-            izipayConfig: formData.type === 'izipay' ? izipayConfig : undefined
-          }
-        : { 
-            ...formData, 
-            stripeConfig: formData.type === 'stripe' ? stripeConfig : undefined,
-            izipayConfig: formData.type === 'izipay' ? izipayConfig : undefined
-          };
+      
+      let providerConfig = {};
+      if (formData.type === 'stripe') {
+        providerConfig = { stripeConfig };
+      } else if (formData.type === 'izipay') {
+        providerConfig = { izipayConfig: formData.izipayConfig };
+      }
+
+      const body = {
+        ...(editingMethod && { id: editingMethod.id }),
+        ...formData,
+        providerConfig
+      };
 
       const response = await fetch(url, {
         method,
-        headers: { 
-          'Authorization': `Bearer ${authToken}`,
-          'Content-Type': 'application/json' 
-        },
+        headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
-
       if (!response.ok) throw new Error('Failed to save payment method');
-
       toast.success(editingMethod ? 'Payment method updated' : 'Payment method created');
       setShowCreateModal(false);
       setEditingMethod(null);
       resetForm();
       fetchPaymentMethods();
     } catch (error) {
-      console.error('Error saving payment method:', error);
       toast.error('Failed to save payment method');
     }
   };
@@ -270,18 +267,12 @@ const PaymentMethodManagement: React.FC = () => {
       description: method.description || '',
       icon: method.icon || '',
       requiresConfirmation: method.requiresConfirmation,
-      autoAssignPackage: method.autoAssignPackage
+      autoAssignPackage: method.autoAssignPackage,
+      izipayConfig: method.providerConfig?.izipayConfig || {
+        username: '', password: '', publicKey: '', hmacKey: '', environment: 'TEST',
+      },
     });
-    
-    // Set configuration based on payment method type
-    if (method.type === 'stripe' && method.stripeConfig) {
-      setStripeConfig(method.stripeConfig);
-    } else if (method.type === 'izipay' && method.izipayConfig) {
-      setIzipayConfig(method.izipayConfig);
-    } else {
-      setStripeConfig(null);
-      setIzipayConfig(null);
-    }
+    setStripeConfig(method.providerConfig?.stripeConfig || null);
     setShowCreateModal(true);
   };
 
@@ -315,15 +306,13 @@ const PaymentMethodManagement: React.FC = () => {
 
   const resetForm = () => {
     setFormData({
-      name: '',
-      type: 'cash',
-      description: '',
-      icon: '',
-      requiresConfirmation: false,
-      autoAssignPackage: true
+      name: '', type: 'cash', description: '', icon: '',
+      requiresConfirmation: false, autoAssignPackage: true,
+      izipayConfig: {
+        username: '', password: '', publicKey: '', hmacKey: '', environment: 'TEST',
+      },
     });
     setStripeConfig(null);
-    setIzipayConfig(null);
   };
 
   const handleStripeConfigSave = (config: StripeConfig) => {
@@ -333,13 +322,7 @@ const PaymentMethodManagement: React.FC = () => {
 
   const handleTypeChange = (type: PaymentMethod) => {
     setFormData(prev => ({ ...prev, type }));
-    // Reset configurations when changing type
-    if (type !== 'stripe') {
-      setStripeConfig(null);
-    }
-    if (type !== 'izipay') {
-      setIzipayConfig(null);
-    }
+    if (type !== 'stripe') setStripeConfig(null);
   };
 
   const getMethodIcon = (type: PaymentMethod) => {
@@ -363,7 +346,7 @@ const PaymentMethodManagement: React.FC = () => {
       case 'qr_payment': return 'QR Payment';
       case 'credit_card': return 'Credit Card';
       case 'stripe': return 'Stripe (Credit Card)';
-      case 'izipay': return 'Izipay (Perú)';
+      case 'izipay': return 'Izipay (JS Client)';
       case 'crypto': return 'Cryptocurrency';
       case 'pay_later': return 'Pay Later';
       default: return type;
@@ -537,7 +520,7 @@ const PaymentMethodManagement: React.FC = () => {
                       <SelectItem value="qr_payment" className="dashboard-dropdown-item">QR Payment</SelectItem>
                       <SelectItem value="credit_card" className="dashboard-dropdown-item">Credit Card</SelectItem>
                       <SelectItem value="stripe" className="dashboard-dropdown-item">Stripe (Credit Card)</SelectItem>
-                      <SelectItem value="izipay" className="dashboard-dropdown-item">Izipay (Perú)</SelectItem>
+                      <SelectItem value="izipay" className="dashboard-dropdown-item">Izipay (JS Client)</SelectItem>
                       <SelectItem value="crypto" className="dashboard-dropdown-item">Cryptocurrency</SelectItem>
                       <SelectItem value="pay_later" className="dashboard-dropdown-item">Pay Later</SelectItem>
                     </SelectContent>
@@ -580,59 +563,70 @@ const PaymentMethodManagement: React.FC = () => {
                   </div>
                 )}
 
-                {/* Izipay Configuration Section */}
+                {/* --- IZIPAY INTEGRATION START --- */}
                 {formData.type === 'izipay' && (
-                  <div className="space-y-4 p-4 border border-[var(--color-accent-200)] rounded-lg bg-[var(--color-accent-50)]">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <CreditCard className="w-5 h-5 text-[var(--color-accent-600)]" />
-                        <h4 className="text-sm font-medium text-[var(--color-accent-900)]">Izipay Configuration</h4>
+                  <div className="space-y-4 p-4 border border-blue-500/30 rounded-lg bg-blue-900/10">
+                    <h4 className="text-sm font-medium text-blue-300">Izipay Configuration</h4>
+                    <div className="space-y-2">
+                      <Label className="dashboard-label">Environment</Label>
+                      <Select
+                        value={formData.izipayConfig?.environment}
+                        onValueChange={(value) => setFormData(prev => ({ ...prev, izipayConfig: { ...prev.izipayConfig!, environment: value as 'TEST' | 'PRODUCTION' }}))}
+                      >
+                        <SelectTrigger className="dashboard-select"><SelectValue /></SelectTrigger>
+                        <SelectContent className="dashboard-dropdown-content">
+                          <SelectItem value="TEST">Test</SelectItem>
+                          <SelectItem value="PRODUCTION">Production</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="dashboard-label">Username / Merchant ID</Label>
+                      <BaseInput
+                        value={formData.izipayConfig?.username}
+                        onChange={(e) => setFormData(prev => ({ ...prev, izipayConfig: { ...prev.izipayConfig!, username: e.target.value }}))}
+                        className="dashboard-input"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="dashboard-label">Password</Label>
+                       <div className="relative">
+                        <BaseInput
+                          type={showSecrets.password ? 'text' : 'password'}
+                          value={formData.izipayConfig?.password}
+                          onChange={(e) => setFormData(prev => ({ ...prev, izipayConfig: { ...prev.izipayConfig!, password: e.target.value }}))}
+                          className="dashboard-input pr-10"
+                        />
+                        <button type="button" onClick={() => setShowSecrets(p => ({...p, password: !p.password}))} className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400">
+                          {showSecrets.password ? <EyeOff size={16}/> : <Eye size={16}/>}
+                        </button>
                       </div>
                     </div>
-                    
-                    {formData.izipayConfig && 'merchantId' in formData.izipayConfig ? (
-                      <div className="space-y-2">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label className="text-xs text-[var(--color-accent-700)]">Merchant ID</Label>
-                            <p className="text-sm text-[var(--color-accent-900)] font-mono">
-                              {formData.izipayConfig.merchantId || 'Not set'}
-                            </p>
-                          </div>
-                          <div>
-                            <Label className="text-xs text-[var(--color-accent-700)]">Environment</Label>
-                            <p className="text-sm text-[var(--color-accent-900)]">
-                              {formData.izipayConfig.environment || 'sandbox'}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label className="text-xs text-[var(--color-accent-700)]">Currency</Label>
-                            <p className="text-sm text-[var(--color-accent-900)]">
-                              {formData.izipayConfig.currency || 'PEN'}
-                            </p>
-                          </div>
-                          <div>
-                            <Label className="text-xs text-[var(--color-accent-700)]">Supported Countries</Label>
-                            <p className="text-sm text-[var(--color-accent-900)]">
-                              {Array.isArray(formData.izipayConfig.supportedCountries) 
-                                ? formData.izipayConfig.supportedCountries.join(', ') 
-                                : 'PE'}
-                            </p>
-                          </div>
-                        </div>
+                    <div className="space-y-2">
+                      <Label className="dashboard-label">Client-Side Public Key</Label>
+                      <BaseInput
+                        value={formData.izipayConfig?.publicKey}
+                        onChange={(e) => setFormData(prev => ({ ...prev, izipayConfig: { ...prev.izipayConfig!, publicKey: e.target.value }}))}
+                        className="dashboard-input"
+                      />
+                    </div>
+                     <div className="space-y-2">
+                      <Label className="dashboard-label">Webhook HMAC Secret Key</Label>
+                      <div className="relative">
+                        <BaseInput
+                          type={showSecrets.hmacKey ? 'text' : 'password'}
+                          value={formData.izipayConfig?.hmacKey}
+                          onChange={(e) => setFormData(prev => ({ ...prev, izipayConfig: { ...prev.izipayConfig!, hmacKey: e.target.value }}))}
+                          className="dashboard-input pr-10"
+                        />
+                        <button type="button" onClick={() => setShowSecrets(p => ({...p, hmacKey: !p.hmacKey}))} className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400">
+                          {showSecrets.hmacKey ? <EyeOff size={16}/> : <Eye size={16}/>}
+                        </button>
                       </div>
-                    ) : (
-                      <div className="text-center py-4">
-                        <p className="text-[var(--color-text-primary)] font-medium">⚠️ Izipay configuration required</p>
-                        <p className="text-xs text-[var(--color-accent-700)] mt-1">
-                          Izipay configuration will be set up automatically with default values
-                        </p>
-                      </div>
-                    )}
+                    </div>
                   </div>
                 )}
+                {/* --- IZIPAY INTEGRATION END --- */}
 
                 <div className="space-y-2">
                   <Label htmlFor="description" className="dashboard-filter-label">Description</Label>

@@ -72,8 +72,8 @@ export async function POST(request: NextRequest) {
             case 'package_details':
               // Use Rasa actions to fetch specific package details
               const entities = rasaData.entities || [];
-              const packageName = entities.find((e: any) => e.entity === 'package_name')?.value;
-              const packageId = entities.find((e: any) => e.entity === 'package_id')?.value;
+              const packageName = entities.find((e: Record<string, unknown>) => e.entity === 'package_name')?.value as string;
+              const packageId = entities.find((e: Record<string, unknown>) => e.entity === 'package_id')?.value as string;
               response = await fetchPackageDetailsFromAPI(packageName, packageId);
               break;
             default:
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
           }
         }
       }
-    } catch (error) {
+    } catch {
       console.log('Rasa not available, using fallback methods');
     }
 
@@ -193,7 +193,7 @@ async function fetchPackagesFromAPI(): Promise<string> {
 
       let message = '🌟 **Paquetes de Astrología Disponibles:**\n\n';
       
-      packages.forEach((pkg: any, index: number) => {
+      packages.forEach((pkg: Record<string, unknown>, index: number) => {
         const name = pkg.name || 'Paquete Desconocido';
         const description = pkg.description || 'Sin descripción disponible';
         const price = pkg.price || 0;
@@ -242,10 +242,10 @@ async function fetchPackageDetailsFromAPI(packageName?: string, packageId?: stri
       // Find the specific package
       let targetPackage = null;
       if (packageId) {
-        targetPackage = packages.find((pkg: any) => String(pkg.id) === String(packageId));
+        targetPackage = packages.find((pkg: Record<string, unknown>) => String(pkg.id) === String(packageId));
       } else if (packageName) {
-        targetPackage = packages.find((pkg: any) => 
-          pkg.name && pkg.name.toLowerCase().includes(packageName.toLowerCase())
+        targetPackage = packages.find((pkg: Record<string, unknown>) => 
+          pkg.name && (pkg.name as string).toLowerCase().includes(packageName.toLowerCase())
         );
       }
       
@@ -309,7 +309,7 @@ function isComplexQuery(message: string): boolean {
 }
 
 // Helper function for simple pattern matching (fallback)
-async function getSimpleResponse(lowerMessage: string, conversationHistory: any[] = []): Promise<string | null> {
+async function getSimpleResponse(lowerMessage: string, conversationHistory: Record<string, unknown>[] = []): Promise<string | null> {
   // Greetings
   if (lowerMessage.includes('hola') || lowerMessage.includes('hello') || lowerMessage.includes('hi') ||
       lowerMessage.includes('buenos dias') || lowerMessage.includes('buenas tardes') || lowerMessage.includes('buenas noches')) {
@@ -384,7 +384,7 @@ async function getSimpleResponse(lowerMessage: string, conversationHistory: any[
   // Yes responses - check context for more specific responses
   if (lowerMessage.includes('si') || lowerMessage.includes('yes') || lowerMessage.includes('claro') || lowerMessage.includes('por supuesto')) {
     // Check if the conversation is about astrology/reading
-    const lastMessages = conversationHistory.slice(-3).map(msg => msg.content.toLowerCase()).join(' ');
+    const lastMessages = conversationHistory.slice(-3).map(msg => (msg.content as string).toLowerCase()).join(' ');
     if (lastMessages.includes('carta natal') || lastMessages.includes('lectura') || lastMessages.includes('signo') || 
         lastMessages.includes('astrología') || lastMessages.includes('leo') || lastMessages.includes('aries') ||
         lastMessages.includes('tauro') || lastMessages.includes('géminis') || lastMessages.includes('cáncer') ||

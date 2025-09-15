@@ -138,9 +138,9 @@ export async function GET() {
                 desktopConfig: true
               }
             });
-          } catch (innerError) {
+          } catch {
             console.warn('Sections table not available, returning empty array');
-            return [] as any[];
+            return [] as Array<Record<string, unknown>>;
           }
         },
         10 * 60 * 1000 // Cache for 10 minutes
@@ -173,7 +173,7 @@ export async function GET() {
           source: 'database'
         });
       }
-    } catch (dbError) {
+    } catch {
       console.warn('⚠️ Database unavailable for sections; using defaults');
       // Continue to fallback
     }

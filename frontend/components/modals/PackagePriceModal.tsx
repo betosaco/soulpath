@@ -43,7 +43,7 @@ interface PackagePrice {
 interface PackagePriceModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: Record<string, unknown>) => void;
   packagePrice?: PackagePrice | null;
   packageDefinitions: PackageDefinition[];
   currencies: Currency[];

@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
         where: { email: customerEmail },
         select: { id: true, fullName: true, email: true }
       });
-    } catch (error) {
+    } catch {
       console.log('Customer not found in database, proceeding with provided info');
     }
 
@@ -76,14 +76,14 @@ export async function POST(request: NextRequest) {
     console.log('💳 Creating Izipay payment intent with params:', paymentParams);
 
     // Load Izipay provider config from admin-configured payment methods
-    let overrideConfig: any = null;
+    let overrideConfig: Record<string, unknown> | null = null;
     try {
       const izipayMethod = await prisma.paymentMethodConfig.findFirst({
         where: { type: 'izipay', isActive: true },
         select: { providerConfig: true }
       });
-      overrideConfig = izipayMethod?.providerConfig || null;
-    } catch (e) {
+      overrideConfig = (izipayMethod?.providerConfig as Record<string, unknown>) || null;
+    } catch {
       console.warn('Could not load Izipay providerConfig from DB. Falling back to env.');
     }
 

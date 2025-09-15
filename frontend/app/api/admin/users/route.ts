@@ -198,7 +198,7 @@ export async function GET(request: NextRequest) {
     console.error('❌ Error details:', {
       name: error instanceof Error ? error.name : 'Unknown',
       message: error instanceof Error ? error.message : 'Unknown error',
-      cause: error instanceof Error && 'cause' in error ? (error as any).cause : undefined
+      cause: error instanceof Error && 'cause' in error ? (error as Record<string, unknown>).cause : undefined
     });
     return NextResponse.json({ 
       success: false,

@@ -246,7 +246,7 @@ class ClientsApi extends ApiClient {
   /**
    * Delete a client
    */
-  async delete(id: string): Promise<ApiResponse<any>> {
+  async delete(id: string): Promise<ApiResponse<unknown>> {
     const result = await this.request(`${this.baseUrl}?id=${id}`, {
       method: 'DELETE',
     });
@@ -325,7 +325,7 @@ class BookingsApi extends ApiClient {
   /**
    * Delete a booking
    */
-  async delete(id: string): Promise<ApiResponse<any>> {
+  async delete(id: string): Promise<ApiResponse<unknown>> {
     const result = await this.request(`${this.baseUrl}?id=${id}`, {
       method: 'DELETE',
     });
@@ -391,7 +391,7 @@ class PackagesApi extends ApiClient {
   /**
    * Delete a package
    */
-  async delete(id: string): Promise<ApiResponse<any>> {
+  async delete(id: string): Promise<ApiResponse<unknown>> {
     const result = await this.request(`${this.baseUrl}?id=${id}`, {
       method: 'DELETE',
     });

@@ -61,7 +61,7 @@ export class LoggingService {
       message?: string;
       intent?: string;
       action?: string;
-      apiCalls?: any[];
+      apiCalls?: Record<string, unknown>[];
     }
   ): Promise<string> {
     const logData: Omit<ConversationLog, 'id' | 'timestamp'> = {
@@ -183,10 +183,10 @@ export class LoggingService {
       `;
 
       return {
-        totalConversations: Number((stats as any)[0]?.total_conversations || 0),
-        successfulConversations: Number((stats as any)[0]?.successful_conversations || 0),
-        failedConversations: Number((stats as any)[0]?.failed_conversations || 0),
-        averageProcessingTime: Number((stats as any)[0]?.average_processing_time || 0),
+        totalConversations: Number((stats as Record<string, unknown>[])[0]?.total_conversations || 0),
+        successfulConversations: Number((stats as Record<string, unknown>[])[0]?.successful_conversations || 0),
+        failedConversations: Number((stats as Record<string, unknown>[])[0]?.failed_conversations || 0),
+        averageProcessingTime: Number((stats as Record<string, unknown>[])[0]?.average_processing_time || 0),
         topIntents: topIntents as Array<{intent: string, count: number}>,
         topErrors: topErrors as Array<{error: string, count: number}>
       };
