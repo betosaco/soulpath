@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { BaseButton } from './ui/BaseButton';
 import { BaseInput } from './ui/BaseInput';
+import { BaseModal, ConfirmationModal } from './ui/BaseModal';
 import { useAuth } from '../hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Label } from './ui/label';
@@ -432,37 +433,29 @@ export function ImageManagement() {
       )}
 
       {/* Upload Modal Placeholder */}
-      <AnimatePresence>
-        {showUploadModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className={`fixed inset-0 bg-black/50 flex items-center justify-center z-50`}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className={`bg-[${colors.semantic.surface.primary}] rounded-[${borders.radius.lg}] p-[${spacing[6]}] max-w-md w-full mx-[${spacing[4]}]`}
+      <BaseModal
+        isOpen={showUploadModal}
+        onClose={() => setShowUploadModal(false)}
+        title="Upload Image"
+        description="Upload modal functionality coming soon..."
+        size="md"
+        variant="default"
+      >
+        <BaseModal.Content>
+          <div className="text-center py-4">
+            <p className="dashboard-text-secondary mb-4">
+              Upload functionality will be implemented soon.
+            </p>
+            <BaseButton 
+              onClick={() => setShowUploadModal(false)} 
+              variant="primary"
+              className="w-full"
             >
-              <h3 className={`text-[${typography.fontSize.lg}] font-[${typography.fontWeight.medium}] text-[${colors.text.primary}] mb-[${spacing[4]}]`}>
-                Upload Image
-              </h3>
-              <p className={`text-[${colors.text.secondary}] mb-[${spacing[4]}]`}>
-                Upload modal functionality coming soon...
-              </p>
-              <BaseButton 
-                onClick={() => setShowUploadModal(false)} 
-                variant="primary"
-                className="w-full"
-              >
-                Close
-              </BaseButton>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              Close
+            </BaseButton>
+          </div>
+        </BaseModal.Content>
+      </BaseModal>
 
       {/* Filters */}
       <Card className={`bg-[${colors.semantic.surface.primary}] border-[${colors.border[500]}]`}>
@@ -618,136 +611,92 @@ export function ImageManagement() {
       </Card>
 
       {/* Edit Modal */}
-      <AnimatePresence>
-        {showEditModal && editingImage && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className={`fixed inset-0 bg-black/50 flex items-center justify-center z-50`}
+      <BaseModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        title="Edit Image"
+        description="Update image details and settings"
+        size="md"
+        variant="default"
+      >
+        <BaseModal.Content>
+          <form onSubmit={handleEditSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit_name" className="dashboard-label">
+                Name
+              </Label>
+              <BaseInput
+                id="edit_name"
+                value={editFormData.name}
+                onChange={(e) => setEditFormData(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Image name"
+                className="dashboard-input"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="edit_alt" className="dashboard-label">
+                Alt Text
+              </Label>
+              <BaseInput
+                id="edit_alt"
+                value={editFormData.alt}
+                onChange={(e) => setEditFormData(prev => ({ ...prev, alt: e.target.value }))}
+                placeholder="Alternative text for accessibility"
+                className="dashboard-input"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="edit_category" className="dashboard-label">
+                Category
+              </Label>
+              <Select value={editFormData.category} onValueChange={(value) => setEditFormData(prev => ({ ...prev, category: value }))}>
+                <SelectTrigger className="dashboard-select">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="dashboard-dropdown-content">
+                  <SelectItem value="general" className="dashboard-dropdown-item">General</SelectItem>
+                  <SelectItem value="hero" className="dashboard-dropdown-item">Hero</SelectItem>
+                  <SelectItem value="gallery" className="dashboard-dropdown-item">Gallery</SelectItem>
+                  <SelectItem value="logo" className="dashboard-dropdown-item">Logo</SelectItem>
+                  <SelectItem value="background" className="dashboard-dropdown-item">Background</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </form>
+        </BaseModal.Content>
+        
+        <BaseModal.Footer>
+          <BaseButton
+            variant="outline"
+            onClick={() => setShowEditModal(false)}
+            className="dashboard-button-outline"
           >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-[#1a1a2e] rounded-lg p-6 w-full max-w-md mx-4"
-            >
-              <CardHeader>
-                <CardTitle className={`text-[${typography.fontSize.lg}] text-[${colors.text.primary}]`}>Edit Image</CardTitle>
-                <CardDescription className={`text-[${colors.text.secondary}]`}>
-                  Update image details and settings
-                </CardDescription>
-              </CardHeader>
-              
-              <form onSubmit={handleEditSubmit} className={`space-y-[${spacing[4]}]`}>
-                <div className={`space-y-[${spacing[2]}]`}>
-                  <Label htmlFor="edit_name" className={`text-[${typography.fontSize.sm}] font-[${typography.fontWeight.medium}] text-[${colors.text.secondary}]`}>
-                    Name
-                  </Label>
-                  <BaseInput
-                    id="edit_name"
-                    value={editFormData.name}
-                    onChange={(e) => setEditFormData(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Image name"
-                  />
-                </div>
-                
-                <div className={`space-y-[${spacing[2]}]`}>
-                  <Label htmlFor="edit_alt" className={`text-[${typography.fontSize.sm}] font-[${typography.fontWeight.medium}] text-[${colors.text.secondary}]`}>
-                    Alt Text
-                  </Label>
-                  <BaseInput
-                    id="edit_alt"
-                    value={editFormData.alt}
-                    onChange={(e) => setEditFormData(prev => ({ ...prev, alt: e.target.value }))}
-                    placeholder="Alternative text for accessibility"
-                  />
-                </div>
-                
-                <div className={`space-y-[${spacing[2]}]`}>
-                  <Label htmlFor="edit_category" className={`text-[${typography.fontSize.sm}] font-[${typography.fontWeight.medium}] text-[${colors.text.secondary}]`}>
-                    Category
-                  </Label>
-                  <Select value={editFormData.category} onValueChange={(value) => setEditFormData(prev => ({ ...prev, category: value }))}>
-                    <SelectTrigger className={`bg-[${colors.semantic.surface.primary}] border-[${colors.border[500]}] text-[${colors.text.primary}]`}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="dashboard-dropdown-content">
-                      <SelectItem value="general" className="dashboard-dropdown-item">General</SelectItem>
-                      <SelectItem value="hero" className="dashboard-dropdown-item">Hero</SelectItem>
-                      <SelectItem value="gallery" className="dashboard-dropdown-item">Gallery</SelectItem>
-                      <SelectItem value="logo" className="dashboard-dropdown-item">Logo</SelectItem>
-                      <SelectItem value="background" className="dashboard-dropdown-item">Background</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className={`flex space-x-[${spacing[2]}] pt-[${spacing[4]}]`}>
-                  <BaseButton
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowEditModal(false)}
-                    className="flex-1"
-                  >
-                    Cancel
-                  </BaseButton>
-                  <BaseButton
-                    type="submit"
-                    variant="primary"
-                    className="flex-1"
-                  >
-                    Update
-                  </BaseButton>
-                </div>
-              </form>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            Cancel
+          </BaseButton>
+          <BaseButton
+            variant="primary"
+            onClick={handleEditSubmit}
+            className="dashboard-button-primary"
+          >
+            Update
+          </BaseButton>
+        </BaseModal.Footer>
+      </BaseModal>
 
       {/* Delete Confirmation Modal */}
-      <AnimatePresence>
-        {showDeleteModal && deletingImage && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className={`fixed inset-0 bg-black/50 flex items-center justify-center z-50`}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-[#1a1a2e] rounded-lg p-6 max-w-md w-full mx-4"
-            >
-              <h3 className={`text-[${typography.fontSize.lg}] font-[${typography.fontWeight.medium}] text-[${colors.text.primary}] mb-[${spacing[4]}]`}>
-                Delete Image
-              </h3>
-              <p className={`text-[${colors.text.secondary}] mb-[${spacing[6]}]`}>
-                Are you sure you want to delete &ldquo;{deletingImage?.name}&rdquo;? This action cannot be undone.
-              </p>
-              
-              <div className={`flex space-x-[${spacing[2]}]`}>
-                <BaseButton
-                  variant="outline"
-                  onClick={() => setShowDeleteModal(false)}
-                  className="flex-1"
-                >
-                  Cancel
-                </BaseButton>
-                <BaseButton
-                  variant="danger"
-                  onClick={confirmDelete}
-                  className="flex-1"
-                  leftIcon={<Trash2 className="w-4 h-4" />}
-                >
-                  Delete
-                </BaseButton>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={confirmDelete}
+        title="Delete Image"
+        description={`Are you sure you want to delete "${deletingImage?.name}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+        icon={<Trash2 className="w-5 h-5" />}
+      />
     </div>
   );
 }
