@@ -66,7 +66,7 @@ export function MatmaxHomepage() {
             className="text-4xl md:text-6xl font-bold mb-6 leading-tight"
             style={{ fontFamily: 'var(--font-heading)' }}
           >
-            Find Your Flow, Strengthen Yourself from Head to Toe
+            Find Your Flow, Transform Your Body & Mind
           </h1>
           <p 
             className="text-xl mb-8 leading-relaxed"
