@@ -90,7 +90,7 @@ export async function safeApiCall<T = unknown>(
       ...options
     });
 
-    const data = await safeJsonParse<ApiResponse<T>>(response);
+    const data = await safeJsonParse<T>(response);
     
     if (!response.ok) {
       return {
@@ -100,7 +100,10 @@ export async function safeApiCall<T = unknown>(
       };
     }
     
-    return data;
+    return {
+      success: true,
+      data: data
+    };
   } catch (error) {
     if (error instanceof ApiError) {
       return {
