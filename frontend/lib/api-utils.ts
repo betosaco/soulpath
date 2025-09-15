@@ -1,267 +1,131 @@
-import { z } from 'zod';
-import { toast } from 'sonner';
+/**
+ * API Utility Functions
+ * 
+ * Provides safe API calling functions that handle JSON parsing errors
+ * and provide better error messages when APIs return HTML instead of JSON.
+ */
 
-// Generic API response handler
-export interface ApiResponse<T = unknown> {
+export interface ApiResponse<T = any> {
   success: boolean;
-  message: string;
   data?: T;
   error?: string;
-  details?: string;
+  message?: string;
 }
 
-// Validation error handler
-export function handleValidationError(error: z.ZodError): string[] {
-  return (error as any).errors.map((err: any) => `${err.path.join('.')}: ${err.message}`);
+export interface ApiError {
+  message: string;
+  status: number;
+  statusText: string;
+  isJsonError: boolean;
 }
 
-// API response handler with toast notifications
-export async function handleApiResponse<T>(
-  response: Response,
-  successMessage?: string,
-  errorMessage?: string
-): Promise<ApiResponse<T>> {
-  try {
-    const data = await response.json();
+/**
+ * Safely parse JSON response, handling cases where API returns HTML error pages
+ */
+export async function safeJsonParse<T = any>(response: Response): Promise<T> {
+  const contentType = response.headers.get('content-type');
+  
+  if (!contentType || !contentType.includes('application/json')) {
+    const errorText = await response.text();
+    console.error('❌ Non-JSON response received:', {
+      status: response.status,
+      statusText: response.statusText,
+      contentType,
+      url: response.url,
+      body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+    });
     
-    if (response.ok) {
-      const message = successMessage || data.message || 'Operation completed successfully';
-      toast.success(message);
-      return {
-        success: true,
-        message,
-        data: data.data || data
-      };
-    } else {
-      const message = errorMessage || data.error || data.message || 'Operation failed';
-      toast.error(message);
-      return {
-        success: false,
-        message: message,
-        error: message,
-        details: data.details
-      };
-    }
-  } catch (error) {
-    const message = 'Network error occurred';
-    toast.error(message);
-    return {
-      success: false,
-      message: message,
-      error: message,
-      details: error instanceof Error ? error.message : 'Unknown error'
-    };
+    throw new ApiError({
+      message: `API returned ${response.status} ${response.statusText} instead of JSON`,
+      status: response.status,
+      statusText: response.statusText,
+      isJsonError: true
+    });
+  }
+  
+  try {
+    return await response.json();
+  } catch (parseError) {
+    console.error('❌ JSON parsing failed:', {
+      status: response.status,
+      statusText: response.statusText,
+      url: response.url,
+      error: parseError
+    });
+    
+    throw new ApiError({
+      message: `Failed to parse JSON response: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`,
+      status: response.status,
+      statusText: response.statusText,
+      isJsonError: true
+    });
   }
 }
 
-// Generic API request handler
-export async function apiRequest<T>(
-  url: string,
-  options: RequestInit = {},
-  successMessage?: string,
-  errorMessage?: string
+/**
+ * Make a safe API call with proper error handling
+ */
+export async function safeApiCall<T = any>(
+  url: string, 
+  options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
   try {
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
-        ...options.headers,
+        ...options.headers
       },
-      ...options,
+      ...options
     });
 
-    return await handleApiResponse<T>(response, successMessage, errorMessage);
+    const data = await safeJsonParse<ApiResponse<T>>(response);
+    
+    if (!response.ok) {
+      return {
+        success: false,
+        error: data.error || `HTTP ${response.status}: ${response.statusText}`,
+        message: data.message || 'Request failed'
+      };
+    }
+    
+    return data;
   } catch (error) {
-    const message = 'Network error occurred';
-    toast.error(message);
+    if (error instanceof ApiError) {
+      return {
+        success: false,
+        error: error.message,
+        message: `API call failed: ${error.status} ${error.statusText}`
+      };
+    }
+    
     return {
       success: false,
-      message: message,
-      error: message,
-      details: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
+      message: 'Network or parsing error occurred'
     };
   }
 }
 
-// Confirmation dialog utility
-export function confirmAction(
-  message: string,
-  onConfirm: () => void,
-  onCancel?: () => void
-): void {
-  if (window.confirm(message)) {
-    onConfirm();
-  } else if (onCancel) {
-    onCancel();
-  }
-}
-
-// Success toast with action
-export function showSuccessToast(message: string, action?: { label: string; onClick: () => void }) {
-  if (action) {
-    toast.success(message, {
-      action: {
-        label: action.label,
-        onClick: action.onClick,
-      },
-    });
-  } else {
-    toast.success(message);
-  }
-}
-
-// Error toast with retry option
-export function showErrorToast(message: string, retryAction?: () => void) {
-  if (retryAction) {
-    toast.error(message, {
-      action: {
-        label: 'Retry',
-        onClick: retryAction,
-      },
-    });
-  } else {
-    toast.error(message);
-  }
-}
-
-// Loading toast
-export function showLoadingToast(message: string) {
-  return toast.loading(message);
-}
-
-// Dismiss loading toast
-export function dismissLoadingToast(toastId: string | number) {
-  toast.dismiss(toastId);
-}
-
-// Form validation helper
-export function validateForm<T>(schema: z.ZodSchema<T>, data: unknown): { success: true; data: T } | { success: false; errors: string[] } {
-  try {
-    const validatedData = schema.parse(data);
-    return { success: true, data: validatedData };
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      const errors = handleValidationError(error);
-      return { success: false, errors };
+/**
+ * Make a safe API call with authentication
+ */
+export async function safeApiCallWithAuth<T = any>(
+  url: string,
+  token: string,
+  options: RequestInit = {}
+): Promise<ApiResponse<T>> {
+  return safeApiCall<T>(url, {
+    ...options,
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      ...options.headers
     }
-    return { success: false, errors: ['Validation failed'] };
-  }
-}
-
-// Safe JSON parsing
-export function safeJsonParse<T>(json: string, fallback: T): T {
-  try {
-    return JSON.parse(json) as T;
-  } catch {
-    return fallback;
-  }
-}
-
-// Format error message for display
-export function formatErrorMessage(error: unknown): string {
-  if (typeof error === 'string') return error;
-  if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') return error.message;
-  if (error && typeof error === 'object' && 'error' in error && typeof error.error === 'string') return error.error;
-  return 'An unexpected error occurred';
-}
-
-// Debounce utility for search inputs
-export function debounce<T extends (...args: unknown[]) => unknown>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout;
-  return (...args: Parameters<T>) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-}
-
-// Format date for display
-export function formatDate(date: string | Date): string {
-  try {
-    const dateObj = typeof date === 'string' ? new Date(date) : date;
-    return dateObj.toLocaleDateString();
-  } catch {
-    return 'Invalid date';
-  }
-}
-
-// Format time for display
-export function formatTime(time: string): string {
-  try {
-    const [hours, minutes] = time.split(':');
-    const hour = parseInt(hours);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
-    return `${displayHour}:${minutes} ${ampm}`;
-  } catch {
-    return time;
-  }
-}
-
-// Capitalize first letter
-export function capitalize(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-}
-
-// Truncate text with ellipsis
-export function truncateText(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength) + '...';
-}
-
-// Generate unique ID
-export function generateId(): string {
-  return Math.random().toString(36).substr(2, 9);
-}
-
-// Check if object is empty
-export function isEmpty(obj: unknown): boolean {
-  if (obj == null) return true;
-  if (Array.isArray(obj) || typeof obj === 'string') return obj.length === 0;
-  if (obj instanceof Map || obj instanceof Set) return obj.size === 0;
-  if (typeof obj === 'object') return Object.keys(obj as Record<string, unknown>).length === 0;
-  return false;
-}
-
-// Deep clone object
-export function deepClone<T>(obj: T): T {
-  if (obj === null || typeof obj !== 'object') return obj;
-  if (obj instanceof Date) return new Date(obj.getTime()) as T;
-  if (obj instanceof Array) return obj.map(item => deepClone(item)) as T;
-  if (typeof obj === 'object') {
-    const cloned = {} as T;
-    for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        cloned[key] = deepClone(obj[key]);
-      }
-    }
-    return cloned;
-  }
-  return obj;
+  });
 }
 
 /**
- * Utility function for making authenticated API calls to admin endpoints
+ * Check if an error is a JSON parsing error
  */
-export async function authenticatedFetch(
-  url: string, 
-  options: RequestInit = {}, 
-  accessToken?: string
-): Promise<Response> {
-  if (!accessToken) {
-    throw new Error('Access token is required for admin API calls');
-  }
-
-  const headers = {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${accessToken}`,
-    ...options.headers,
-  };
-
-  return fetch(url, {
-    ...options,
-    headers,
-  });
+export function isJsonError(error: any): error is ApiError {
+  return error && typeof error === 'object' && error.isJsonError === true;
 }

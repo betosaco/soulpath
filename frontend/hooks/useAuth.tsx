@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { safeApiCall } from '@/lib/api-utils';
 
 interface User {
   id: string;
@@ -28,15 +29,11 @@ export function useAuth() {
     const token = localStorage.getItem('auth_token');
     
     if (token) {
-      // Verify token with our API
-      fetch('/api/auth/verify', {
+      // Verify token with our API using safe API call
+      safeApiCall('/api/auth/verify', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ token })
       })
-      .then(response => response.json())
       .then(data => {
         if (data.success) {
           const userData = {
@@ -70,15 +67,10 @@ export function useAuth() {
     console.log('🔐 useAuth: Attempting sign in for:', email);
     
     try {
-      const response = await fetch('/api/auth/login', {
+      const data = await safeApiCall('/api/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ email, password })
       });
-
-      const data = await response.json();
       
       if (data.success) {
         // Store token in localStorage
