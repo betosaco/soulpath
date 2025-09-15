@@ -372,10 +372,10 @@ function BookingHistoryModal({ client, isOpen, onClose }: BookingHistoryModalPro
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       'pending': { color: 'bg-yellow-500/20 text-black', label: 'Pending' },
-      'confirmed': { color: 'bg-blue-500/20 text-blue-400', label: 'Confirmed' },
-      'completed': { color: 'bg-green-500/20 text-green-400', label: 'Completed' },
-      'cancelled': { color: 'bg-red-500/20 text-red-400', label: 'Cancelled' },
-      'no-show': { color: 'bg-gray-500/20 text-gray-400', label: 'No Show' }
+      'confirmed': { color: 'bg-blue-500/20 text-black', label: 'Confirmed' },
+      'completed': { color: 'bg-green-500/20 text-black', label: 'Completed' },
+      'cancelled': { color: 'bg-red-500/20 text-black', label: 'Cancelled' },
+      'no-show': { color: 'bg-gray-500/20 text-black', label: 'No Show' }
     };
     
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
@@ -873,10 +873,10 @@ export function ClientManagement() {
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       'pending': { color: 'bg-yellow-500/20 text-black', label: 'Pending' },
-      'confirmed': { color: 'bg-blue-500/20 text-blue-400', label: 'Confirmed' },
-      'completed': { color: 'bg-green-500/20 text-green-400', label: 'Completed' },
-      'cancelled': { color: 'bg-red-500/20 text-red-400', label: 'Cancelled' },
-      'no-show': { color: 'bg-gray-500/20 text-gray-400', label: 'No Show' }
+      'confirmed': { color: 'bg-blue-500/20 text-black', label: 'Confirmed' },
+      'completed': { color: 'bg-green-500/20 text-black', label: 'Completed' },
+      'cancelled': { color: 'bg-red-500/20 text-black', label: 'Cancelled' },
+      'no-show': { color: 'bg-gray-500/20 text-black', label: 'No Show' }
     };
     
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
