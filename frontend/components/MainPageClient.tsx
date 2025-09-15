@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { AdminDashboard } from '@/components/AdminDashboard';
 import LoginModal from '@/components/LoginModal';
 import { BookingSection } from '@/components/BookingSection';
+import { Header } from '@/components/Header';
 import { themeClasses } from '@/lib/theme/theme-utils';
 
 
@@ -21,11 +22,6 @@ interface SessionSectionProps extends TranslationProps {
   scrollToSection: (sectionId: string) => void;
 }
 
-interface HeaderProps extends TranslationProps {
-  language: string;
-  setLanguage: (lang: 'en' | 'es') => void;
-  onLoginClick: () => void;
-}
 
 interface MainPageClientProps {
   content: Record<string, string>;
@@ -35,68 +31,6 @@ interface MainPageClientProps {
 
 
 
-// Header Component
-function Header({
-  language,
-  setLanguage,
-  t,
-  onLoginClick
-}: HeaderProps) {
-  return (
-    <motion.header 
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      className={`fixed top-0 left-0 right-0 z-[9997] ${themeClasses.background.surface}/80 backdrop-blur-md ${themeClasses.border.light} border-b`}
-    >
-      <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
-        <div className="flex items-center justify-between">
-          <motion.div 
-            className="flex items-center space-x-4"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <span className={`font-heading text-lg sm:text-xl md:text-2xl ${themeClasses.text.accent}`}>
-              MatMax
-            </span>
-          </motion.div>
-          
-          <div className="flex items-center space-x-4">
-            <div className="hidden sm:flex items-center space-x-2">
-              <button
-                onClick={() => setLanguage('en')}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 ${
-                  language === 'en'
-                    ? themeClasses.button.primary
-                    : `${themeClasses.text.secondary} hover:${themeClasses.text.accent} ${themeClasses.button.ghost}`
-                }`}
-              >
-                EN
-              </button>
-              <button
-                onClick={() => setLanguage('es')}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 ${
-                  language === 'es'
-                    ? themeClasses.button.primary
-                    : `${themeClasses.text.secondary} hover:${themeClasses.text.accent} ${themeClasses.button.ghost}`
-                }`}
-              >
-                ES
-              </button>
-            </div>
-            
-            <button
-              onClick={onLoginClick}
-              className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-xl ${themeClasses.button.primary}`}
-            >
-              {typeof t?.admin === 'object' && t.admin?.login || 'Login'}
-            </button>
-          </div>
-        </div>
-      </div>
-    </motion.header>
-  );
-}
 
 // HeroSection Component
 function HeroSection({ t }: TranslationProps) {
@@ -391,10 +325,15 @@ export default function MainPageClient({
       <ConstellationBackground />
       
       <Header
-        language="en"
+        language={language}
         setLanguage={setLanguage}
+        scrollToSection={scrollToSection}
         t={translations}
+        isMenuOpen={isMenuOpen}
+        setIsMenuOpen={setIsMenuOpen}
         onLoginClick={handleLoginClick}
+        user={null}
+        isAdmin={false}
       />
       
       <div 

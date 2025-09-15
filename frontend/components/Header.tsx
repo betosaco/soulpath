@@ -99,6 +99,8 @@ export function Header({
                 width={40}
                 height={40}
                 className="h-7 sm:h-8 md:h-9 lg:h-10 object-contain"
+                onError={(e) => console.error('Image load error:', e)}
+                onLoad={() => console.log('Image loaded successfully')}
               />
             ) : (
               <span className="font-heading text-base sm:text-lg md:text-xl lg:text-2xl text-[#FFD700] font-semibold">MatMax</span>
