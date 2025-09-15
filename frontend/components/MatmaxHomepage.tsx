@@ -67,16 +67,11 @@ export function MatmaxHomepage() {
               href="/account/book"
               className="btn-primary"
             >
-              View Class Schedule
+              Class Schedule
             </a>
             <a 
               href="/packages"
               className="btn-secondary"
-              style={{ 
-                color: 'var(--matmax-white)', 
-                backgroundColor: 'var(--matmax-teal)',
-                borderColor: 'var(--matmax-teal)'
-              }}
             >
               View Packages
             </a>

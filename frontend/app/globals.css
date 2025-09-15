@@ -197,8 +197,8 @@
 /* COMPONENT STYLES */
 /* Button Components */
 .btn-primary {
-  background-color: var(--matmax-purple);
-  color: var(--matmax-white);
+  background-color: #6ea058;
+  color: white;
   border: none;
   border-radius: var(--radius-lg);
   padding: var(--space-3) var(--space-6);
@@ -211,17 +211,19 @@
   align-items: center;
   justify-content: center;
   text-decoration: none;
+  height: 48px;
+  width: 180px;
 }
 
 .btn-primary:hover {
-  background-color: var(--matmax-purple-dark);
+  background-color: #5a8a4a;
   transform: translateY(-1px);
   box-shadow: var(--shadow-lg);
 }
 
 .btn-secondary {
-  background-color: var(--matmax-teal);
-  color: var(--matmax-white);
+  background-color: #6ea058;
+  color: white;
   border: none;
   border-radius: var(--radius-lg);
   padding: var(--space-3) var(--space-6);
@@ -234,10 +236,12 @@
   align-items: center;
   justify-content: center;
   text-decoration: none;
+  height: 48px;
+  width: 180px;
 }
 
 .btn-secondary:hover {
-  background-color: var(--matmax-teal-dark);
+  background-color: #5a8a4a;
   transform: translateY(-1px);
   box-shadow: var(--shadow-lg);
 }
@@ -903,9 +907,10 @@
 }
 
 .dashboard-modal {
-  background-color: var(--color-surface-primary);
+  background-color: #1f2937 !important;
   border: 1px solid var(--color-border-500);
   border-radius: var(--border-radius-lg);
+  opacity: 1 !important;
 }
 
 .dashboard-modal-title {
@@ -1906,6 +1911,20 @@ html, body {
   overflow: auto !important;
   position: static !important;
   height: auto !important;
+}
+
+/* Payment step scrolling fix */
+.payment-step {
+  overflow: visible !important;
+  min-height: auto !important;
+}
+
+.payment-step .card-base {
+  overflow: visible !important;
+}
+
+.payment-step .card-content {
+  overflow: visible !important;
 }
 
 /* ===========================================

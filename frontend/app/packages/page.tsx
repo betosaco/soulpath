@@ -319,6 +319,15 @@ export default function PackagesPage() {
     };
   }, [isCountryDropdownOpen]);
 
+  // Ensure scrolling works on payment step
+  useEffect(() => {
+    if (currentStep === 3) {
+      // Force enable scrolling on payment step
+      document.body.style.overflow = 'auto';
+      document.documentElement.style.overflow = 'auto';
+    }
+  }, [currentStep]);
+
   const loadData = async () => {
     console.log('🔄 Starting loadData...');
     setLoading(true);
@@ -874,7 +883,8 @@ export default function PackagesPage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="max-w-2xl mx-auto"
+              className="max-w-2xl mx-auto payment-step"
+              style={{ overflow: 'visible' }}
             >
               <Card className="card-base">
                 <CardHeader>
