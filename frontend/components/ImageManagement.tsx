@@ -102,97 +102,42 @@ export function ImageManagement() {
     }
   }, [user?.access_token]);
 
-  const fetchAllData = useCallback(async () => {
-    try {
-      console.log('🔍 fetchAllData called, user:', user);
-      console.log('🔍 access_token exists:', !!user?.access_token);
-      console.log('🔍 access_token length:', user?.access_token?.length);
-
-      if (!user?.access_token) {
-        console.log('❌ No access token, cannot load image data');
-        return;
-      }
-
-      setIsLoading(true);
-      console.log('Loading image data...');
-
-      await loadImages();
-
-      setLastLoaded(new Date());
-      console.log('✅ Image data loaded successfully');
-    } catch (error) {
-      console.error('❌ Error fetching image data:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user, loadImages]);
-
   // Add a manual refresh function that can be called from parent components
-  const refreshImageData = useCallback(() => {
+  const refreshImageData = useCallback(async () => {
     if (user?.access_token) {
       console.log('Manual refresh requested...');
-      fetchAllData();
+      setIsLoading(true);
+      try {
+        await loadImages();
+        setLastLoaded(new Date());
+        console.log('✅ Image data refreshed successfully');
+      } catch (error) {
+        console.error('❌ Error refreshing image data:', error);
+      } finally {
+        setIsLoading(false);
+      }
     }
-  }, [user?.access_token, fetchAllData]);
+  }, [user?.access_token, loadImages]);
 
+  // Load data when component mounts or user changes
   useEffect(() => {
     if (user?.access_token) {
       console.log('User authenticated, loading image data...');
-      fetchAllData();
+      setIsLoading(true);
+      loadImages().then(() => {
+        setLastLoaded(new Date());
+        console.log('✅ Image data loaded successfully');
+        setIsLoading(false);
+      }).catch((error) => {
+        console.error('❌ Error loading image data:', error);
+        setIsLoading(false);
+      });
     } else {
       console.log('User not authenticated, clearing image data...');
       setImages({});
       setIsLoading(false);
     }
-  }, [user?.access_token, fetchAllData]);
-
-  // Refresh data when component becomes visible
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && user?.access_token && Object.keys(images).length === 0) {
-        console.log('Component became visible, refreshing image data...');
-        fetchAllData();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [user?.access_token, images, fetchAllData]);
-
-  // Additional effect to handle component mounting/navigation
-  useEffect(() => {
-    if (user?.access_token && Object.keys(images).length === 0) {
-      console.log('Component mounted or navigated to, loading image data...');
-      fetchAllData();
-    }
-  }, [user?.access_token, images, fetchAllData]);
-
-  // Expose refresh function to parent components if needed
-  useEffect(() => {
-    // @ts-expect-error - Exposing refresh function globally for debugging
-    window.refreshImageData = refreshImageData;
-
-    return () => {
-      // @ts-expect-error - Clean up global function
-      delete window.refreshImageData;
-    };
-  }, [refreshImageData]);
-
-  // Listen for navigation events and refresh data when needed
-  useEffect(() => {
-    const handleNavigation = () => {
-      // Small delay to ensure the component is fully mounted
-      setTimeout(() => {
-        if (user?.access_token && Object.keys(images).length === 0) {
-          console.log('Navigation detected, refreshing image data...');
-          fetchAllData();
-        }
-      }, 100);
-    };
-
-    window.addEventListener('popstate', handleNavigation);
-    return () => window.removeEventListener('popstate', handleNavigation);
-  }, [user?.access_token, images, fetchAllData]);
+  }, [user?.access_token, loadImages]);
 
   const handleEdit = (image: any) => {
     setEditingImage(image);
