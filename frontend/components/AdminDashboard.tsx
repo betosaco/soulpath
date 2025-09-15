@@ -217,8 +217,8 @@ export function AdminDashboard({ onClose, isModal = true, children }: AdminDashb
         </Sidebar>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto bg-[var(--color-background-primary)] mx-[50px]">
-          <div className="py-6">
+        <main className="flex-1 overflow-y-auto bg-[var(--color-background-primary)]">
+          <div className="dashboard-container p-6 space-y-6">
             {children ? (
               children
             ) : (
