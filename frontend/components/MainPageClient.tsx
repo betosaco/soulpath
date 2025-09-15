@@ -5,9 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
 import { useProfileImage } from '@/hooks/useProfileImage';
 import { useTranslations, useLanguage } from '@/hooks/useTranslations';
-import { useAuth } from '@/hooks/useAuth';
 import { AdminDashboard } from '@/components/AdminDashboard';
-import LoginModal from '@/components/LoginModal';
 import { BookingSection } from '@/components/BookingSection';
 import { Header } from '@/components/Header';
 import { themeClasses } from '@/lib/theme/theme-utils';
@@ -222,12 +220,9 @@ export default function MainPageClient({
   const translations = t as Record<string, string | Record<string, string>>;
   const { } = useProfileImage(initialProfileImage);
 
-  const { signIn } = useAuth();
-  
   const [currentSection, setCurrentSection] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
   
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -236,7 +231,7 @@ export default function MainPageClient({
   // Fullpage scroll functionality
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      if (showAdmin || showLoginModal || isMenuOpen || isScrolling) return;
+      if (showAdmin || isMenuOpen || isScrolling) return;
       e.preventDefault();
       setIsScrolling(true);
       
@@ -252,12 +247,12 @@ export default function MainPageClient({
 
     let touchStartY = 0;
     const handleTouchStart = (e: TouchEvent) => {
-      if (showAdmin || showLoginModal || isMenuOpen) return;
+      if (showAdmin || isMenuOpen) return;
       touchStartY = e.touches[0].clientY;
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
-      if (showAdmin || showLoginModal || isMenuOpen || isScrolling) return;
+      if (showAdmin || isMenuOpen || isScrolling) return;
       const touchEndY = e.changedTouches[0].clientY;
       const diff = touchStartY - touchEndY;
       const minSwipeDistance = 50;
@@ -284,7 +279,7 @@ export default function MainPageClient({
       document.removeEventListener('touchend', handleTouchEnd);
       if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
     };
-  }, [showAdmin, showLoginModal, isMenuOpen, sections.length, isScrolling]);
+  }, [showAdmin, isMenuOpen, sections.length, isScrolling]);
 
   const scrollToSection = (sectionName: string) => {
     const index = sections.indexOf(sectionName);
@@ -394,35 +389,6 @@ export default function MainPageClient({
         )}
       </AnimatePresence>
       
-      <LoginModal 
-        isOpen={showLoginModal} 
-        onClose={() => setShowLoginModal(false)}
-        onLogin={async (email: string, password: string) => {
-          try {
-            const { data, error } = await signIn(email, password);
-            if (error) {
-              console.error('Login error:', error);
-              return false;
-            }
-            if (data) {
-              setShowLoginModal(false);
-              // Check if user is admin and show admin dashboard or redirect
-              const userData = data as { role: string };
-              if (userData.role === 'admin') {
-                setShowAdmin(true);
-              } else {
-                // For non-admin users, redirect to account page
-                window.location.href = '/account';
-              }
-              return true;
-            }
-            return false;
-          } catch (error) {
-            console.error('Login failed:', error);
-            return false;
-          }
-        }}
-      />
     </div>
   );
 }

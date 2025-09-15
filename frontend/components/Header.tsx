@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Menu, X, LogIn, Settings, User, Package, Calendar } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
@@ -8,8 +8,6 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 import { useLogo } from '../hooks/useLogo';
-import LoginModal from './LoginModal';
-import { useAuth } from '../hooks/useAuth';
 
 interface HeaderProps {
   language: "en" | "es";
@@ -35,9 +33,7 @@ export function Header({
   isAdmin
 }: HeaderProps) {
   const { logoSettings, isLoading } = useLogo();
-  const { signIn } = useAuth();
   const router = useRouter();
-  const [showLoginModal, setShowLoginModal] = useState(false);
   
   // Handle touch gestures for closing menu
   useEffect(() => {
@@ -214,7 +210,7 @@ export function Header({
             </motion.button>
           ) : (
             <motion.button
-              onClick={() => setShowLoginModal(true)}
+              onClick={() => router.push('/login')}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="hidden sm:flex items-center space-x-1 header-button-language-inactive"
@@ -331,7 +327,13 @@ export function Header({
                   )}
 
                   <motion.button
-                    onClick={() => setShowLoginModal(true)}
+                    onClick={() => {
+                      if (user && isAdmin) {
+                        router.push('/admin');
+                      } else {
+                        router.push('/login');
+                      }
+                    }}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30"
@@ -375,37 +377,6 @@ export function Header({
         )}
       </AnimatePresence>
 
-      {/* Login Modal */}
-      <LoginModal 
-        isOpen={showLoginModal} 
-        onClose={() => setShowLoginModal(false)}
-        onLogin={async (email: string, password: string) => {
-          try {
-            const { data, error } = await signIn(email, password);
-            if (error) {
-              console.error('Login error:', error);
-              return false;
-            }
-            if (data) {
-              setShowLoginModal(false);
-              
-              // Check if user is admin and redirect accordingly
-              const userData = data as { role: string };
-              if (userData.role === 'admin') {
-                router.push('/admin');
-              } else {
-                router.push('/account');
-              }
-              
-              return true;
-            }
-            return false;
-          } catch (error) {
-            console.error('Login failed:', error);
-            return false;
-          }
-        }}
-      />
     </header>
   );
 }
