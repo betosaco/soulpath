@@ -242,15 +242,28 @@ export default function PackagesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p 
-            className="text-primary text-lg font-semibold"
-            style={{ fontFamily: 'var(--font-heading)' }}
-          >
-            Loading packages...
-          </p>
+      <div className="min-h-screen bg-white">
+        <Header
+          language={language}
+          setLanguage={setLanguage}
+          scrollToSection={scrollToSection}
+          t={translations}
+          isMenuOpen={isMenuOpen}
+          setIsMenuOpen={setIsMenuOpen}
+          onLoginClick={handleLoginClick}
+          user={null}
+          isAdmin={false}
+        />
+        <div className="flex items-center justify-center pt-24">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p 
+              className="text-primary text-lg font-semibold"
+              style={{ fontFamily: 'var(--font-heading)' }}
+            >
+              Loading packages...
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -271,7 +284,7 @@ export default function PackagesPage() {
       />
       
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 pt-24">
         <div className="text-center mb-12">
           <h1 
             className="text-4xl md:text-6xl font-bold mb-6 text-primary"
