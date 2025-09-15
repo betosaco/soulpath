@@ -80,9 +80,9 @@ export function Header({
   
   return (
     <header className="fixed top-0 left-0 right-0 z-[9997] bg-white shadow-sm border-b border-gray-200 safe-padding">
-      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-0 flex items-center justify-between header-container h-8">
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-0 flex items-center justify-between header-container h-10">
         <motion.div 
-          className="flex items-center space-x-2 cursor-pointer touch-manipulation min-h-[20px] min-w-[20px] flex items-center justify-center"
+          className="flex items-center space-x-2 cursor-pointer touch-manipulation min-h-[24px] min-w-[24px] flex items-center justify-center"
           onClick={() => scrollToSection('invitation')}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
