@@ -116,12 +116,12 @@ export function Header({
           )}
         </motion.div>
         
-        <div className="flex items-center space-x-2 sm:space-x-4 lg:space-x-6">
-          {/* Mobile Language Selector */}
+        <div className="flex items-center justify-center sm:justify-end space-x-2 sm:space-x-4 lg:space-x-6 flex-1 sm:flex-none">
+          {/* Mobile Language Selector - Centered */}
           <div className="flex sm:hidden items-center space-x-1">
             <button 
               onClick={() => setLanguage('en')}
-              className={`px-2 py-1 text-xs font-medium rounded-md transition-all duration-200 touch-manipulation min-h-[32px] min-w-[32px] flex items-center justify-center ${
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200 touch-manipulation min-h-[36px] min-w-[36px] flex items-center justify-center ${
                 language === 'en' 
                   ? 'bg-[#6ea058] text-white shadow-sm' 
                   : 'text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10'
@@ -132,7 +132,7 @@ export function Header({
             <span className="text-gray-400 text-xs">|</span>
             <button 
               onClick={() => setLanguage('es')}
-              className={`px-2 py-1 text-xs font-medium rounded-md transition-all duration-200 touch-manipulation min-h-[32px] min-w-[32px] flex items-center justify-center ${
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200 touch-manipulation min-h-[36px] min-w-[36px] flex items-center justify-center ${
                 language === 'es' 
                   ? 'bg-[#6ea058] text-white shadow-sm' 
                   : 'text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10'
@@ -228,7 +228,7 @@ export function Header({
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center justify-center rounded-lg header-button-menu touch-manipulation focus-visible px-3 py-2 sm:px-3 sm:py-2 min-h-[44px] min-w-[44px] relative overflow-hidden"
+            className="flex items-center justify-center rounded-lg header-button-menu touch-manipulation focus-visible px-4 py-2 sm:px-3 sm:py-2 min-h-[44px] min-w-[44px] relative overflow-hidden"
             aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={isMenuOpen}
           >
@@ -294,15 +294,15 @@ export function Header({
                   </button>
                 </div>
                 
-                <nav className="flex-1 space-y-1 sm:space-y-2">
+                <nav className="flex-1 space-y-2 sm:space-y-3">
                   <Link href="/account/book">
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="w-full text-left px-4 sm:px-6 py-3 sm:py-4 rounded-xl transition-all duration-200 flex items-center space-x-3 sm:space-x-4 touch-manipulation min-h-[48px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15"
+                      className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30"
                     >
-                      <Calendar size={16} />
-                      <span className="text-sm sm:text-base font-medium">Schedule</span>
+                      <Calendar size={18} />
+                      <span className="text-base sm:text-lg font-medium">Schedule</span>
                     </motion.button>
                   </Link>
 
@@ -310,10 +310,10 @@ export function Header({
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="w-full text-left px-4 sm:px-6 py-3 sm:py-4 rounded-xl transition-all duration-200 flex items-center space-x-3 sm:space-x-4 touch-manipulation min-h-[48px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15"
+                      className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30"
                     >
-                      <Package size={16} />
-                      <span className="text-sm sm:text-base font-medium">Packages</span>
+                      <Package size={18} />
+                      <span className="text-base sm:text-lg font-medium">Packages</span>
                     </motion.button>
                   </Link>
 
@@ -322,10 +322,10 @@ export function Header({
                       <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className="w-full text-left px-4 sm:px-6 py-3 sm:py-4 rounded-xl transition-all duration-200 flex items-center space-x-3 sm:space-x-4 touch-manipulation min-h-[48px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15"
+                        className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30"
                       >
-                        <User size={16} />
-                        <span className="text-sm sm:text-base font-medium">Account</span>
+                        <User size={18} />
+                        <span className="text-base sm:text-lg font-medium">Account</span>
                       </motion.button>
                     </Link>
                   )}
@@ -334,10 +334,10 @@ export function Header({
                     onClick={() => setShowLoginModal(true)}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="w-full text-left px-4 sm:px-6 py-3 sm:py-4 rounded-xl transition-all duration-200 flex items-center space-x-3 sm:space-x-4 touch-manipulation min-h-[48px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15"
+                    className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30"
                   >
-                    <LogIn size={16} />
-                    <span className="text-sm sm:text-base font-medium">
+                    <LogIn size={18} />
+                    <span className="text-base sm:text-lg font-medium">
                       {user && isAdmin ? 'Dashboard' : (t.nav as Record<string, string>).login || 'Login'}
                     </span>
                   </motion.button>
@@ -345,13 +345,13 @@ export function Header({
 
                 {/* Language Selector */}
                 <div className="pt-4 border-t border-gray-200">
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center justify-center space-x-3">
                     <button 
                       onClick={() => setLanguage('en')}
-                      className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation min-h-[40px] min-w-[40px] flex items-center justify-center ${
                         language === 'en' 
-                          ? 'bg-[#6ea058] text-white' 
-                          : 'text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10'
+                          ? 'bg-[#6ea058] text-white shadow-sm' 
+                          : 'text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 border border-gray-200'
                       }`}
                     >
                       EN
@@ -359,10 +359,10 @@ export function Header({
                     <span className="text-gray-400">|</span>
                     <button 
                       onClick={() => setLanguage('es')}
-                      className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation min-h-[40px] min-w-[40px] flex items-center justify-center ${
                         language === 'es' 
-                          ? 'bg-[#6ea058] text-white' 
-                          : 'text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10'
+                          ? 'bg-[#6ea058] text-white shadow-sm' 
+                          : 'text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 border border-gray-200'
                       }`}
                     >
                       ES

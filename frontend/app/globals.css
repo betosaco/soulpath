@@ -1261,6 +1261,26 @@ html, body {
     max-width: 320px;
   }
   
+  /* Mobile header improvements */
+  .header-container {
+    padding: 0.5rem 1rem;
+  }
+  
+  /* Mobile navigation button improvements */
+  .header-button-menu {
+    padding: 0.75rem 1rem;
+    min-height: 48px;
+    min-width: 48px;
+  }
+  
+  /* Mobile language selector improvements */
+  .header-button-language-active,
+  .header-button-language-inactive {
+    padding: 0.5rem 0.75rem;
+    min-height: 40px;
+    min-width: 40px;
+  }
+  
   /* Improve touch feedback */
   .touch-manipulation:active {
     transform: scale(0.98);
@@ -1903,6 +1923,19 @@ html, body {
   scroll-behavior: smooth;
 }
 
+/* Inner pages scrolling fix for mobile */
+.inner-page {
+  overflow: auto !important;
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+.inner-page body {
+  overflow: auto !important;
+  position: static !important;
+  height: auto !important;
+}
+
 /* Packages page scrolling fix */
 .packages-page {
   overflow: auto !important;
@@ -1912,6 +1945,32 @@ html, body {
   overflow: auto !important;
   position: static !important;
   height: auto !important;
+}
+
+/* Mobile inner pages scrolling */
+@media (max-width: 640px) {
+  .inner-page {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  
+  .inner-page body {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    position: static !important;
+    height: auto !important;
+    min-height: 100vh;
+    min-height: 100svh;
+  }
+  
+  /* Ensure mobile pages can scroll */
+  .mobile-scrollable {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
 }
 
 /* Payment step scrolling fix */
