@@ -33,10 +33,6 @@ export function Header({
 }: HeaderProps) {
   const { logoSettings, isLoading } = useLogo();
   
-  // Debug logging
-  console.log('Header Debug - logoSettings:', logoSettings);
-  console.log('Header Debug - isLoading:', isLoading);
-  
   // Handle touch gestures for closing menu
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -83,7 +79,7 @@ export function Header({
   }, [isMenuOpen, setIsMenuOpen]);
   
   return (
-    <header className="fixed top-0 left-0 right-0 z-[9997] bg-black/30 backdrop-blur-lg border-b border-white/20 safe-padding">
+    <header className="fixed top-0 left-0 right-0 z-[9997] bg-white shadow-sm border-b border-gray-200 safe-padding">
       <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 flex items-center justify-between header-container">
         <motion.div 
           className="flex items-center space-x-2 cursor-pointer touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
@@ -92,27 +88,25 @@ export function Header({
           whileTap={{ scale: 0.95 }}
         >
           {isLoading ? (
-            <div className="h-7 sm:h-8 md:h-9 lg:h-10 w-10 bg-gray-300 animate-pulse rounded"></div>
+            <div className="h-12 sm:h-14 md:h-16 lg:h-18 w-16 bg-gray-300 animate-pulse rounded"></div>
           ) : logoSettings.isActive ? (
             logoSettings.type === 'text' ? (
-              <span className="font-heading text-base sm:text-lg md:text-xl lg:text-2xl text-[#FFD700] font-semibold">
+              <span className="font-heading text-base sm:text-lg md:text-xl lg:text-2xl text-gray-800 font-semibold">
                 {logoSettings.text || 'MatMax'}
               </span>
             ) : logoSettings.imageUrl ? (
               <Image 
                 src={logoSettings.imageUrl} 
                 alt="MatMax Yoga Studio Logo" 
-                width={40}
-                height={40}
-                className="h-7 sm:h-8 md:h-9 lg:h-10 object-contain"
-                onError={(e) => console.error('Image load error:', e)}
-                onLoad={() => console.log('Image loaded successfully')}
+                width={80}
+                height={80}
+                className="h-12 sm:h-14 md:h-16 lg:h-18 object-contain"
               />
             ) : (
-              <span className="font-heading text-base sm:text-lg md:text-xl lg:text-2xl text-[#FFD700] font-semibold">MatMax</span>
+              <span className="font-heading text-base sm:text-lg md:text-xl lg:text-2xl text-gray-800 font-semibold">MatMax</span>
             )
           ) : (
-            <span className="font-heading text-base sm:text-lg md:text-xl lg:text-2xl text-[#FFD700] font-semibold">MatMax</span>
+            <span className="font-heading text-base sm:text-lg md:text-xl lg:text-2xl text-gray-800 font-semibold">MatMax</span>
           )}
         </motion.div>
         
