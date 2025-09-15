@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import { Header } from '@/components/Header';
 import { useTranslations, useLanguage } from '@/hooks/useTranslations';
 
@@ -94,15 +93,8 @@ export default function LoginPage() {
             transition={{ duration: 0.5 }}
             className="bg-white/95 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-white/20"
           >
-            {/* Logo */}
+            {/* Header */}
             <div className="text-center mb-8">
-              <Image 
-                src="/logo_matmax.png" 
-                alt="Matmax Studio" 
-                width={80}
-                height={80}
-                className="h-20 mx-auto mb-4"
-              />
               <h1 
                 className="text-3xl font-bold text-gray-800 mb-2"
                 style={{ fontFamily: 'var(--font-heading)' }}
