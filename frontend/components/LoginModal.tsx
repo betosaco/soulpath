@@ -89,9 +89,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
       size="sm"
       variant="default"
     >
-      <BaseModal.Header icon={<User className="w-5 h-5" />}>
+      <BaseModal.Header icon={<User className="w-5 h-5 text-[#6ea058]" />}>
         <div className="text-center">
-          <p className="text-[var(--color-text-secondary)] text-sm">
+          <p className="text-gray-600 text-sm">
             Enter your credentials to continue
           </p>
         </div>
@@ -100,7 +100,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
       <BaseModal.Content>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-white text-sm">
+            <Label htmlFor="email" className="text-gray-700 text-sm font-medium">
               Email
             </Label>
             <BaseInput
@@ -115,7 +115,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-white text-sm">
+            <Label htmlFor="password" className="text-gray-700 text-sm font-medium">
               Password
             </Label>
             <div className="relative">
@@ -131,7 +131,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-[var(--color-text-secondary)] hover:text-[#FFD700] transition-colors"
+                    className="text-gray-500 hover:text-[#6ea058] transition-colors"
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -147,11 +147,11 @@ const LoginModal: React.FC<LoginModalProps> = ({
               type="checkbox"
               checked={rememberEmail}
               onChange={(e) => setRememberEmail(e.target.checked)}
-              className="w-4 h-4 text-[#FFD700] bg-[var(--color-surface-secondary)] border-[var(--color-border-500)] rounded focus:ring-[#FFD700] focus:ring-2"
+              className="w-4 h-4 text-[#6ea058] bg-white border-gray-300 rounded focus:ring-[#6ea058] focus:ring-2"
             />
             <Label 
               htmlFor="rememberEmail" 
-              className="text-sm text-[var(--color-text-secondary)] cursor-pointer select-none"
+              className="text-sm text-gray-600 cursor-pointer select-none"
             >
               Remember my email address
             </Label>

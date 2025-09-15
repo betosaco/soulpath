@@ -99,11 +99,11 @@ export function BaseModal({
   };
 
   const variantClasses = {
-    default: 'bg-gray-900 border-gray-600',
-    danger: 'bg-gray-900 border-red-500',
-    warning: 'bg-gray-900 border-yellow-500',
-    success: 'bg-gray-900 border-green-500',
-    info: 'bg-gray-900 border-blue-500',
+    default: 'bg-white border-gray-200',
+    danger: 'bg-white border-red-500',
+    warning: 'bg-white border-yellow-500',
+    success: 'bg-white border-green-500',
+    info: 'bg-white border-blue-500',
   };
 
   const modalClasses = cn(

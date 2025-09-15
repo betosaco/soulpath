@@ -40,7 +40,7 @@ export const cardStyles = {
 export const buttonStyles = {
   base: 'inline-flex items-center justify-center font-[var(--font-weight-medium)] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-500)] focus:ring-offset-2 focus:ring-offset-[var(--color-background-primary)] disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95',
   variants: {
-    primary: 'bg-[#FFD700] text-[#0A0A23] hover:bg-[#FFD700]/90 active:bg-[#FFD700]/80 border-2 border-[#FFD700] rounded-[var(--border-radius-md)] shadow-lg shadow-[#FFD700]/30 font-[var(--font-weight-semibold)] hover:shadow-xl hover:shadow-[#FFD700]/40 focus:ring-4 focus:ring-[#FFD700]/30 focus:border-[#FFD700]',
+    primary: 'bg-[#6ea058] text-white hover:bg-[#5a8a4a] active:bg-[#5a8a4a] border-2 border-[#6ea058] rounded-[var(--border-radius-md)] shadow-lg shadow-[#6ea058]/30 font-[var(--font-weight-semibold)] hover:shadow-xl hover:shadow-[#6ea058]/40 focus:ring-4 focus:ring-[#6ea058]/30 focus:border-[#6ea058]',
     secondary: 'bg-[var(--color-surface-secondary)] text-[var(--color-text-primary)] hover:bg-[var(--color-surface-tertiary)] border border-[var(--color-border-500)] rounded-[var(--border-radius-md)]',
     outline: 'bg-transparent text-[var(--color-text-primary)] hover:bg-[var(--color-surface-secondary)] border border-[var(--color-border-500)] rounded-[var(--border-radius-md)]',
     danger: 'bg-[var(--color-status-error)] text-white hover:bg-red-600 border-none rounded-[var(--border-radius-md)]',
