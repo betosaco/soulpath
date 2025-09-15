@@ -9,6 +9,13 @@ interface User {
   access_token: string;
 }
 
+interface LoginResponse {
+  success: boolean;
+  user?: User;
+  message?: string;
+  error?: string;
+}
+
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -67,17 +74,17 @@ export function useAuth() {
     console.log('🔐 useAuth: Attempting sign in for:', email);
     
     try {
-      const data = await safeApiCall('/api/auth/login', {
+      const data = await safeApiCall<LoginResponse>('/api/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password })
       });
       
       if (data.success && data.user && typeof data.user === 'object') {
         // Store token in localStorage
-        localStorage.setItem('auth_token', (data.user as { access_token: string }).access_token);
+        localStorage.setItem('auth_token', data.user.access_token);
         
         console.log('🔐 useAuth: Sign in successful:', data.user);
-        setUser(data.user as User);
+        setUser(data.user);
         
         return { data: data.user, error: null };
       } else {

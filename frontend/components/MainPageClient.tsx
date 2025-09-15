@@ -406,7 +406,14 @@ export default function MainPageClient({
             }
             if (data) {
               setShowLoginModal(false);
-              setShowAdmin(true);
+              // Check if user is admin and show admin dashboard or redirect
+              const userData = data as { role: string };
+              if (userData.role === 'admin') {
+                setShowAdmin(true);
+              } else {
+                // For non-admin users, redirect to account page
+                window.location.href = '/account';
+              }
               return true;
             }
             return false;
