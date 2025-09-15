@@ -371,7 +371,7 @@ function BookingHistoryModal({ client, isOpen, onClose }: BookingHistoryModalPro
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      'pending': { color: 'bg-yellow-500/20 text-yellow-400', label: 'Pending' },
+      'pending': { color: 'bg-yellow-500/20 text-black', label: 'Pending' },
       'confirmed': { color: 'bg-blue-500/20 text-blue-400', label: 'Confirmed' },
       'completed': { color: 'bg-green-500/20 text-green-400', label: 'Completed' },
       'cancelled': { color: 'bg-red-500/20 text-red-400', label: 'Cancelled' },
@@ -872,7 +872,7 @@ export function ClientManagement() {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      'pending': { color: 'bg-yellow-500/20 text-yellow-400', label: 'Pending' },
+      'pending': { color: 'bg-yellow-500/20 text-black', label: 'Pending' },
       'confirmed': { color: 'bg-blue-500/20 text-blue-400', label: 'Confirmed' },
       'completed': { color: 'bg-green-500/20 text-green-400', label: 'Completed' },
       'cancelled': { color: 'bg-red-500/20 text-red-400', label: 'Cancelled' },
