@@ -53,6 +53,8 @@ export default function IzipayPayment({
       script.src = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js';
       script.async = true;
       script.onload = () => {
+        console.log('📜 Izipay script loaded successfully');
+        console.log('📜 KR object available after script load:', !!window.KR);
         setIsScriptLoaded(true);
       };
       script.onerror = () => {
@@ -63,8 +65,10 @@ export default function IzipayPayment({
     };
 
     if (!window.KR) {
+      console.log('📜 KR not available, loading script...');
       loadScript();
     } else {
+      console.log('📜 KR already available, skipping script load');
       setIsScriptLoaded(true);
     }
   }, []);
@@ -155,13 +159,21 @@ export default function IzipayPayment({
         // Wait a bit for the DOM to be ready, then add and show form
         setTimeout(() => {
           try {
+            console.log('🔧 Attempting to add form to KR...');
+            console.log('🔧 KR object available:', !!window.KR);
+            console.log('🔧 Form element exists:', !!document.getElementById('izipay-payment-form'));
+            
             // Add form to KR
             window.KR.addForm('#izipay-payment-form');
+            console.log('✅ Form added to KR successfully');
+            
             window.KR.showForm('#izipay-payment-form');
+            console.log('✅ Form shown successfully');
+            
             setIsLoading(false);
           } catch (formError) {
-            console.error('Error adding/showing form:', formError);
-            setError('Failed to display payment form');
+            console.error('❌ Error adding/showing form:', formError);
+            setError('Failed to display payment form: ' + (formError instanceof Error ? formError.message : 'Unknown error'));
             setIsLoading(false);
           }
         }, 200);
