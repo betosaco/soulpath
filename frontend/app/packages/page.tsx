@@ -169,13 +169,18 @@ export default function PackagesPage() {
 
   const handleSlotSelect = (slot: ScheduleSlot) => {
     // Transform the slot data to match the expected format
-    const transformedSlot = {
+    const transformedSlot: ScheduleSlot = {
       id: slot.id,
+      date: slot.date,
+      time: slot.time,
+      duration: slot.duration || 60,
       startTime: new Date(`${slot.date}T${slot.time}`).toISOString(),
       endTime: new Date(new Date(`${slot.date}T${slot.time}`).getTime() + ((slot.duration || 60) * 60000)).toISOString(),
       capacity: slot.capacity,
       bookedCount: slot.bookedCount,
       isAvailable: slot.isAvailable,
+      dayOfWeek: slot.dayOfWeek || new Date(slot.date).toLocaleDateString('en-US', { weekday: 'long' }),
+      serviceType: slot.serviceType || { name: 'Session' },
       scheduleTemplate: {
         dayOfWeek: slot.dayOfWeek || new Date(slot.date).toLocaleDateString('en-US', { weekday: 'long' }),
         sessionDuration: {
@@ -183,7 +188,9 @@ export default function PackagesPage() {
           duration_minutes: slot.duration || 60
         }
       },
-      instructorName: slot.teacher?.name || 'Available'
+      instructorName: slot.teacher?.name || 'Available',
+      teacher: slot.teacher || { id: 0, name: 'Available' },
+      venue: slot.venue || { id: 0, name: 'TBD' }
     };
     
     setFormData(prev => ({ ...prev, selectedScheduleSlot: transformedSlot, skipBooking: false }));
