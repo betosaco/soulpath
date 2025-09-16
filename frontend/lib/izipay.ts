@@ -1,7 +1,10 @@
 // Izipay (Lyra) Payment Configuration
+console.log('🔧 Izipay config loading - API_BASE_URL:', process.env.IZIPAY_API_BASE_URL);
+console.log('🔧 Izipay config loading - NODE_ENV:', process.env.NODE_ENV);
+
 export const IZIPAY_CONFIG = {
   // API Configuration
-  API_BASE_URL: process.env.IZIPAY_API_BASE_URL || 'https://api.micuentaweb.pe',
+  API_BASE_URL: 'https://api.micuentaweb.pe',
   API_VERSION: 'V4',
   
   // Test Environment
@@ -26,7 +29,13 @@ export const IZIPAY_CONFIG = {
 // Get current environment configuration
 export const getIzipayConfig = () => {
   const isProduction = process.env.NODE_ENV === 'production';
-  return isProduction ? IZIPAY_CONFIG.PRODUCTION : IZIPAY_CONFIG.TEST;
+  const envConfig = isProduction ? IZIPAY_CONFIG.PRODUCTION : IZIPAY_CONFIG.TEST;
+  
+  return {
+    ...envConfig,
+    API_BASE_URL: IZIPAY_CONFIG.API_BASE_URL,
+    API_VERSION: IZIPAY_CONFIG.API_VERSION
+  };
 };
 
 // API Endpoints

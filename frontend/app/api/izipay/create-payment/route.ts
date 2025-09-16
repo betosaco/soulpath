@@ -26,6 +26,8 @@ export async function POST(request: NextRequest) {
       apiBaseUrl: config.API_BASE_URL,
       hasPassword: !!config.PASSWORD 
     });
+    console.log('🔧 Raw config object:', config);
+    console.log('🔧 API_BASE_URL directly:', config.API_BASE_URL);
     
     // Prepare the request payload
     const payload = {
@@ -98,7 +100,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { 
         success: false, 
-        error: 'Internal server error' 
+        error: error instanceof Error ? error.message : 'Internal server error',
+        details: error instanceof Error ? error.stack : 'Unknown error'
       },
       { status: 500 }
     );
