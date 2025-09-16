@@ -18,20 +18,45 @@ import { toast } from 'sonner';
 // PackagePrice interface is now imported from usePackages hook
 
 
+interface Teacher {
+  id: number;
+  name: string;
+  email: string;
+  languages: string[];
+  experience: number;
+  isActive: boolean;
+}
+
+interface ServiceType {
+  id: number;
+  name: string;
+  duration: number;
+}
+
+interface Venue {
+  id: number;
+  name: string;
+  city: string;
+  country: string;
+  capacity: number;
+  isActive: boolean;
+}
+
 interface ScheduleSlot {
   id: number;
   date: string;
   time: string;
-  duration: number;
-  startTime: string;
-  endTime: string;
+  isAvailable: boolean;
   capacity: number;
   bookedCount: number;
-  isAvailable: boolean;
-  dayOfWeek?: string;
-  serviceType?: {
-    name: string;
-  };
+  duration: number;
+  teacher: Teacher;
+  serviceType: ServiceType;
+  venue: Venue;
+  dayOfWeek: string;
+  // Additional properties for internal use
+  startTime?: string;
+  endTime?: string;
   instructorName?: string;
   scheduleTemplate?: {
     dayOfWeek: string;
@@ -39,14 +64,6 @@ interface ScheduleSlot {
       name: string;
       duration_minutes: number;
     };
-  };
-  teacher?: {
-    id: number;
-    name: string;
-  };
-  venue?: {
-    id: number;
-    name: string;
   };
 }
 
@@ -168,29 +185,19 @@ export default function PackagesPage() {
   };
 
   const handleSlotSelect = (slot: ScheduleSlot) => {
-    // Transform the slot data to match the expected format
+    // Add additional properties for internal use
     const transformedSlot: ScheduleSlot = {
-      id: slot.id,
-      date: slot.date,
-      time: slot.time,
-      duration: slot.duration || 60,
+      ...slot,
       startTime: new Date(`${slot.date}T${slot.time}`).toISOString(),
-      endTime: new Date(new Date(`${slot.date}T${slot.time}`).getTime() + ((slot.duration || 60) * 60000)).toISOString(),
-      capacity: slot.capacity,
-      bookedCount: slot.bookedCount,
-      isAvailable: slot.isAvailable,
-      dayOfWeek: slot.dayOfWeek || new Date(slot.date).toLocaleDateString('en-US', { weekday: 'long' }),
-      serviceType: slot.serviceType || { name: 'Session' },
+      endTime: new Date(new Date(`${slot.date}T${slot.time}`).getTime() + (slot.duration * 60000)).toISOString(),
+      instructorName: slot.teacher.name,
       scheduleTemplate: {
-        dayOfWeek: slot.dayOfWeek || new Date(slot.date).toLocaleDateString('en-US', { weekday: 'long' }),
+        dayOfWeek: slot.dayOfWeek,
         sessionDuration: {
-          name: slot.serviceType?.name || 'Session',
-          duration_minutes: slot.duration || 60
+          name: slot.serviceType.name,
+          duration_minutes: slot.duration
         }
-      },
-      instructorName: slot.teacher?.name || 'Available',
-      teacher: slot.teacher || { id: 0, name: 'Available' },
-      venue: slot.venue || { id: 0, name: 'TBD' }
+      }
     };
     
     setFormData(prev => ({ ...prev, selectedScheduleSlot: transformedSlot, skipBooking: false }));
