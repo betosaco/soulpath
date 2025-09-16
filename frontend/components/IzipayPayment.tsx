@@ -124,11 +124,10 @@ export default function IzipayPayment({
         // Clear previous form
         paymentContainerRef.current.innerHTML = '';
 
-        // Set up KR configuration FIRST
+        // Set up KR configuration FIRST - this is critical!
         console.log('🔑 Setting KR config with public key:', publicKey);
         window.KR.setFormConfig({
           'kr-public-key': publicKey,
-          'kr-form-token': formToken,
           'kr-post-url-success': window.location.origin + '/api/izipay/payment-success',
           'kr-post-url-refused': window.location.origin + '/api/izipay/payment-error',
           'kr-post-url-cancelled': window.location.origin + '/api/izipay/payment-cancelled'
@@ -149,9 +148,9 @@ export default function IzipayPayment({
           onSuccess(result);
         });
 
-        // Wait a moment for KR to be fully configured
+        // Wait a moment for KR to be fully configured, then create the form
         setTimeout(() => {
-          // Create embedded form
+          // Create embedded form with proper attributes
           const formDiv = document.createElement('div');
           formDiv.id = 'izipay-payment-form';
           formDiv.className = 'kr-embedded';
@@ -165,47 +164,42 @@ export default function IzipayPayment({
           });
         }, 100);
 
-        // Wait a bit for the DOM to be ready, then let KR automatically render the form
+        // According to Izipay docs, the form should auto-render when the div is added to DOM
+        // with kr-embedded class and kr-form-token attribute
         setTimeout(() => {
           try {
-            console.log('🔧 Checking if KR can auto-render the form...');
+            console.log('🔧 Checking if form auto-rendered...');
             console.log('🔧 KR object available:', !!window.KR);
             console.log('🔧 Form element exists:', !!document.getElementById('izipay-payment-form'));
             
-            // According to Izipay docs, the form should auto-render when the div is in DOM
-            // with kr-embedded class and kr-form-token attribute
-            console.log('🔧 Form should auto-render with kr-embedded class and kr-form-token');
+            // Check if form content was rendered
+            const formContent = document.querySelector('#izipay-payment-form');
+            console.log('🔧 Form content after auto-render:', formContent?.innerHTML);
             
-            // Check if form is rendered after a short delay
-            setTimeout(() => {
-              const formContent = document.querySelector('#izipay-payment-form');
-              console.log('🔧 Form content after auto-render:', formContent?.innerHTML);
-              
-              if (formContent && formContent.innerHTML.trim()) {
-                console.log('✅ Form auto-rendered successfully');
+            if (formContent && formContent.innerHTML.trim()) {
+              console.log('✅ Form auto-rendered successfully');
+              setIsLoading(false);
+            } else {
+              console.log('⚠️ Form not auto-rendered, trying manual approach...');
+              // Fallback to manual approach
+              try {
+                window.KR.addForm('#izipay-payment-form');
+                window.KR.showForm('#izipay-payment-form');
+                console.log('✅ Form rendered manually');
                 setIsLoading(false);
-              } else {
-                console.log('⚠️ Form not auto-rendered, trying manual approach...');
-                // Fallback to manual approach
-                try {
-                  window.KR.addForm('#izipay-payment-form');
-                  window.KR.showForm('#izipay-payment-form');
-                  console.log('✅ Form rendered manually');
-                  setIsLoading(false);
-                } catch (manualError) {
-                  console.error('❌ Manual form rendering failed:', manualError);
-                  setError('Failed to display payment form: ' + (manualError instanceof Error ? manualError.message : 'Unknown error'));
-                  setIsLoading(false);
-                }
+              } catch (manualError) {
+                console.error('❌ Manual form rendering failed:', manualError);
+                setError('Failed to display payment form: ' + (manualError instanceof Error ? manualError.message : 'Unknown error'));
+                setIsLoading(false);
               }
-            }, 500);
+            }
             
           } catch (formError) {
             console.error('❌ Error in form rendering:', formError);
             setError('Failed to display payment form: ' + (formError instanceof Error ? formError.message : 'Unknown error'));
             setIsLoading(false);
           }
-        }, 200);
+        }, 1000); // Give more time for auto-rendering
       } catch (err) {
         console.error('Error initializing payment form:', err);
         setError('Failed to initialize payment form');
