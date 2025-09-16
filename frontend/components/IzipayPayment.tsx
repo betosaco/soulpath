@@ -153,14 +153,14 @@ export default function IzipayPayment({
 
         // Wait a moment for KR to be fully configured, then create the form
         setTimeout(() => {
-          // Create embedded form with proper attributes
+          // Create smart form with proper attributes (new Izipay format)
           const formDiv = document.createElement('div');
           formDiv.id = 'izipay-payment-form';
-          formDiv.className = 'kr-embedded';
+          formDiv.className = 'kr-smart-form';
           formDiv.setAttribute('kr-form-token', formToken);
           paymentContainerRef.current.appendChild(formDiv);
           
-          console.log('🔧 Form div created with attributes:', {
+          console.log('🔧 Smart form div created with attributes:', {
             id: formDiv.id,
             className: formDiv.className,
             krFormToken: formDiv.getAttribute('kr-form-token')
@@ -168,7 +168,7 @@ export default function IzipayPayment({
         }, 100);
 
         // According to Izipay docs, the form should auto-render when the div is added to DOM
-        // with kr-embedded class and kr-form-token attribute
+        // with kr-smart-form class and kr-form-token attribute
         setTimeout(() => {
           try {
             console.log('🔧 Checking if form auto-rendered...');
