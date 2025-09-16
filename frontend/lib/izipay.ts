@@ -4,6 +4,9 @@ export const IZIPAY_CONFIG = {
   API_BASE_URL: 'https://api.micuentaweb.pe',
   API_VERSION: 'V4',
   
+  // Development Mode (set to true to use mock payments)
+  MOCK_MODE: process.env.IZIPAY_MOCK_MODE === 'true' || false,
+  
   // Test Environment
   TEST: {
     USERNAME: process.env.IZIPAY_TEST_USERNAME || '88569105',

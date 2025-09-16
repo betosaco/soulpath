@@ -5,8 +5,15 @@ export async function POST(request: NextRequest) {
   try {
     const body: PaymentFormConfig = await request.json();
     
+    console.log('🔍 Izipay API - Request body received:', JSON.stringify(body, null, 2));
+    
     // Validate required fields
     if (!body.amount || !body.orderId || !body.customer?.email) {
+      console.log('❌ Missing required fields:', { 
+        amount: body.amount, 
+        orderId: body.orderId, 
+        email: body.customer?.email 
+      });
       return NextResponse.json(
         { 
           success: false, 
@@ -18,18 +25,27 @@ export async function POST(request: NextRequest) {
 
     // Get Izipay configuration
     const config = getIzipayConfig();
+    console.log('🔧 Izipay config loaded:', {
+      username: config.USERNAME,
+      apiBaseUrl: config.API_BASE_URL,
+      hasPassword: !!config.PASSWORD,
+      hasPublicKey: !!config.PUBLIC_KEY
+    });
     
-    // Prepare the request payload
+    // Prepare the request payload according to Izipay documentation
     const payload = {
-      amount: Math.round(body.amount * 100), // Convert to cents
-      currency: body.currency || 'PEN',
-      orderId: body.orderId,
+      amount: Math.round(body.amount * 100), // Convert to cents (required: integer)
+      currency: body.currency || 'PEN', // Required: currency code
+      orderId: body.orderId, // Required: unique order identifier
       customer: {
-        email: body.customer.email,
+        email: body.customer.email, // Required: customer email
         ...(body.customer.firstName && { firstName: body.customer.firstName }),
         ...(body.customer.lastName && { lastName: body.customer.lastName }),
-        ...(body.customer.phone && { phone: body.customer.phone })
+        ...(body.customer.phone && { phone: body.customer.phone }),
+        // Add reference field as recommended by Izipay
+        reference: body.orderId // Use orderId as customer reference
       },
+      // Add required fields for Izipay
       ...(body.returnUrl && { returnUrl: body.returnUrl }),
       ...(body.successUrl && { successUrl: body.successUrl }),
       ...(body.errorUrl && { errorUrl: body.errorUrl })
@@ -38,6 +54,18 @@ export async function POST(request: NextRequest) {
     // Create Basic Auth header
     const credentials = Buffer.from(`${config.USERNAME}:${config.PASSWORD}`).toString('base64');
     const apiUrl = `${config.API_BASE_URL}${IZIPAY_ENDPOINTS.CREATE_PAYMENT}`;
+    
+    console.log('🌐 Making request to Izipay:', {
+      url: apiUrl,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${credentials.substring(0, 20)}...`,
+        'Accept': 'application/json'
+      }
+    });
+    
+    console.log('📦 Request payload to Izipay:', JSON.stringify(payload, null, 2));
     
     // Make request to Izipay API
     const response = await fetch(apiUrl, {
@@ -50,28 +78,75 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(payload)
     });
 
-    const data: FormTokenResponse = await response.json();
+    console.log('📡 Izipay response status:', response.status);
+    console.log('📡 Izipay response headers:', Object.fromEntries(response.headers.entries()));
+    
+    const responseText = await response.text();
+    console.log('📊 Izipay raw response:', responseText);
+    
+    let data: FormTokenResponse;
+    try {
+      data = JSON.parse(responseText);
+      console.log('📊 Izipay parsed response:', JSON.stringify(data, null, 2));
+    } catch (parseError) {
+      console.error('❌ Failed to parse Izipay response as JSON:', parseError);
+      throw new Error(`Invalid JSON response from Izipay: ${responseText}`);
+    }
 
     if (!response.ok) {
-      console.error('Izipay API Error:', data);
+      console.error('❌ Izipay API HTTP Error:', {
+        status: response.status,
+        statusText: response.statusText,
+        data: data
+      });
       return NextResponse.json(
         { 
           success: false, 
-          error: data.errorMessage || 'Failed to create payment token' 
+          error: data.errorMessage || `Izipay API error: ${response.status} ${response.statusText}`,
+          details: data
         },
         { status: response.status }
       );
     }
 
-    if (data.status !== 'SUCCESS' || !data.answer?.formToken) {
+    if (data.status !== 'SUCCESS') {
+      console.error('❌ Izipay API returned non-success status:', {
+        status: data.status,
+        errorCode: data.errorCode,
+        errorMessage: data.errorMessage,
+        fullResponse: data
+      });
       return NextResponse.json(
         { 
           success: false, 
-          error: 'Invalid response from payment provider' 
+          error: data.errorMessage || `Payment creation failed: ${data.status}`,
+          errorCode: data.errorCode,
+          details: data
         },
-        { status: 500 }
+        { status: 400 }
       );
     }
+
+    if (!data.answer?.formToken) {
+      console.error('❌ Izipay API response missing formToken:', {
+        hasAnswer: !!data.answer,
+        answerKeys: data.answer ? Object.keys(data.answer) : 'N/A',
+        fullResponse: data
+      });
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'No form token received from payment provider',
+          details: data
+        },
+        { status: 400 }
+      );
+    }
+
+    console.log('✅ Izipay payment token created successfully:', {
+      formToken: data.answer.formToken.substring(0, 20) + '...',
+      publicKey: config.PUBLIC_KEY.substring(0, 20) + '...'
+    });
 
     return NextResponse.json({
       success: true,
