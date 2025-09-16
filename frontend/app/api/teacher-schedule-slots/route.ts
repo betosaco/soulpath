@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const venueId = searchParams.get('venueId');
 
     // Build where clause
-    const whereClause: any = {};
+    const whereClause: Record<string, any> = {};
 
     if (available === 'true') {
       whereClause.isAvailable = true;

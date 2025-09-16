@@ -20,18 +20,33 @@ import { toast } from 'sonner';
 
 interface ScheduleSlot {
   id: number;
+  date: string;
+  time: string;
+  duration: number;
   startTime: string;
   endTime: string;
   capacity: number;
   bookedCount: number;
   isAvailable: boolean;
+  dayOfWeek?: string;
+  serviceType?: {
+    name: string;
+  };
   instructorName?: string;
-  scheduleTemplate: {
+  scheduleTemplate?: {
     dayOfWeek: string;
     sessionDuration: {
       name: string;
       duration_minutes: number;
     };
+  };
+  teacher?: {
+    id: number;
+    name: string;
+  };
+  venue?: {
+    id: number;
+    name: string;
   };
 }
 
