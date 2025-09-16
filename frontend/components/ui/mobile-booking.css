@@ -6,12 +6,14 @@
   .mobile-touch-target {
     min-height: 44px;
     min-width: 44px;
+    touch-action: manipulation;
   }
 
   /* Better focus states for mobile */
   .mobile-focus:focus {
     outline: 2px solid #FFD700;
     outline-offset: 2px;
+    border-radius: 0.5rem;
   }
 
   /* Improve button active states */
@@ -30,6 +32,7 @@
     -webkit-appearance: none;
     appearance: none;
     background-clip: padding-box;
+    font-size: 16px; /* Prevent zoom on iOS */
   }
 
   /* Better date input styling for mobile */
@@ -37,6 +40,8 @@
     opacity: 0.8;
     cursor: pointer;
     padding: 0.5rem;
+    min-width: 44px;
+    min-height: 44px;
   }
 
   .mobile-date-input::-webkit-calendar-picker-indicator:hover {
@@ -52,12 +57,45 @@
     background-position: right 1rem center;
     background-size: 1rem;
     padding-right: 3rem;
+    font-size: 16px; /* Prevent zoom on iOS */
   }
 
   /* Better scroll behavior */
   .mobile-scroll {
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
+    overscroll-behavior: contain;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  /* Ensure scrollable content areas */
+  .mobile-scrollable {
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    height: 100%;
+    max-height: 100vh;
+  }
+
+  /* Fix for mobile viewport issues */
+  .mobile-viewport-fix {
+    height: 100vh;
+    height: calc(var(--vh, 1vh) * 100); /* Use custom viewport height */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Ensure proper mobile scrolling */
+  .mobile-scroll-container {
+    height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
   }
 
   /* Improve grid layouts for mobile */
@@ -69,6 +107,122 @@
   .mobile-optimized-animation {
     will-change: transform;
     transform: translateZ(0);
+  }
+
+  /* Enhanced tap highlight for better mobile feedback */
+  .mobile-tap-highlight {
+    -webkit-tap-highlight-color: rgba(255, 215, 0, 0.3);
+    tap-highlight-color: rgba(255, 215, 0, 0.3);
+  }
+
+  /* Better card spacing on mobile */
+  .mobile-card-spacing {
+    margin: 0.5rem;
+    padding: 1rem;
+  }
+
+  /* Improved button spacing for mobile */
+  .mobile-button-spacing {
+    margin: 0.25rem 0;
+    padding: 0.75rem 1rem;
+  }
+
+  /* Better text sizing for mobile readability */
+  .mobile-text-responsive {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  /* Enhanced form field spacing */
+  .mobile-form-field {
+    margin-bottom: 1rem;
+  }
+
+  /* Better grid responsiveness for mobile */
+  .mobile-grid-responsive {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  /* Improved modal and overlay behavior */
+  .mobile-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  /* Country dropdown specific styles */
+  .country-dropdown {
+    position: relative;
+  }
+
+  .country-dropdown button {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  .country-dropdown .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    margin-top: 0.25rem;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    max-height: 240px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .country-dropdown .dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    min-height: 44px;
+    touch-action: manipulation;
+    transition: background-color 0.2s ease;
+  }
+
+  .country-dropdown .dropdown-item:hover {
+    background-color: #f3f4f6;
+  }
+
+  .country-dropdown .dropdown-item.selected {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+  }
+
+  .country-dropdown .flag {
+    font-size: 1.125rem;
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .country-dropdown .country-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .country-dropdown .country-name {
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: #374151;
+  }
+
+  .country-dropdown .country-code {
+    font-size: 0.75rem;
+    color: #6b7280;
   }
 }
 

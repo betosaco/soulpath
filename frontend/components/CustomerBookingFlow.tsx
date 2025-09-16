@@ -96,6 +96,7 @@ export function CustomerBookingFlow() {
   const [currentStep, setCurrentStep] = useState(0);
   const [processing, setProcessing] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');
+  const [showDateSelector, setShowDateSelector] = useState(false);
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [showPaymentMethodDropdown, setShowPaymentMethodDropdown] = useState(false);
@@ -162,7 +163,7 @@ export function CustomerBookingFlow() {
 
   const loadSchedules = useCallback(async () => {
     try {
-      const response = await fetch('/api/client/schedule-slots', {
+      const response = await fetch('/api/teacher-schedule-slots?available=true', {
         headers: {
           'Authorization': `Bearer ${user?.access_token}`,
           'Content-Type': 'application/json'
@@ -172,7 +173,28 @@ export function CustomerBookingFlow() {
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          setSchedules(data.data || []);
+          const schedulesData = data.data || [];
+          setSchedules(schedulesData);
+          
+          // Set today's date as default if there are classes today
+          const today = new Date().toISOString().split('T')[0];
+          const todayClasses = schedulesData.filter((s: AvailableSchedule) => 
+            s.date === today && s.isAvailable && s.bookedCount < s.capacity
+          );
+          
+          if (todayClasses.length > 0) {
+            setSelectedDate(today);
+          } else {
+            // If no classes today, set the first available date
+            const availableDates = [...new Set(schedulesData
+              .filter((s: AvailableSchedule) => s.isAvailable && s.bookedCount < s.capacity)
+              .map((s: AvailableSchedule) => s.date)
+              .sort()
+            )];
+            if (availableDates.length > 0) {
+              setSelectedDate(availableDates[0] as string);
+            }
+          }
         }
       }
     } catch (error) {
@@ -363,9 +385,17 @@ export function CustomerBookingFlow() {
     return <Badge className={config.color}>{config.label}</Badge>;
   };
 
-  // Get available dates from schedules
-  const availableDates = [...new Set(schedules
-    .filter(s => s.isAvailable && s.bookedCount < s.capacity)
+  // Get today's date
+  const today = new Date().toISOString().split('T')[0];
+  
+  // Get today's classes
+  const todayClasses = schedules
+    .filter(s => s.date === today && s.isAvailable && s.bookedCount < s.capacity)
+    .sort((a, b) => a.time.localeCompare(b.time));
+
+  // Get other available dates (excluding today)
+  const otherDates = [...new Set(schedules
+    .filter(s => s.isAvailable && s.bookedCount < s.capacity && s.date !== today)
     .map(s => s.date)
     .sort()
   )];
@@ -404,30 +434,30 @@ export function CustomerBookingFlow() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 mobile-scroll">
       {/* Header */}
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-white mb-2">Book Your Session</h1>
-        <p className="text-gray-400">Schedule your spiritual consultation</p>
+      <div className="text-center px-2 sm:px-0">
+        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Book Your Session</h1>
+        <p className="text-gray-400 text-sm sm:text-base">Schedule your spiritual consultation</p>
       </div>
 
       {/* Progress Steps */}
-      <div className="flex items-center justify-center space-x-4 mb-8">
+      <div className="flex items-center justify-center space-x-2 sm:space-x-4 mb-6 sm:mb-8 px-2 sm:px-0">
         {steps.map((step, index) => (
           <div key={step.id} className="flex items-center">
-            <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
+            <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 mobile-touch-target ${
               index <= currentStep 
                 ? 'border-[#ffd700] bg-[#ffd700] text-black' 
                 : 'border-gray-600 text-gray-400'
             }`}>
               {step.completed ? (
-                <CheckCircle size={20} />
+                <CheckCircle size={16} className="sm:w-5 sm:h-5" />
               ) : (
-                <span className="text-sm font-medium">{index + 1}</span>
+                <span className="text-xs sm:text-sm font-medium">{index + 1}</span>
               )}
             </div>
             {index < steps.length - 1 && (
-              <div className={`w-16 h-0.5 mx-2 ${
+              <div className={`w-8 sm:w-16 h-0.5 mx-1 sm:mx-2 ${
                 index < currentStep ? 'bg-[#ffd700]' : 'bg-gray-600'
               }`} />
             )}
@@ -445,11 +475,11 @@ export function CustomerBookingFlow() {
             transition={{ duration: 0.3 }}
           >
             {/* Package Selection */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-2 sm:px-0">
               {packages.map((pkg) => (
                 <Card 
                   key={pkg.id} 
-                  className={`cursor-pointer transition-all ${
+                  className={`cursor-pointer transition-all mobile-touch-target mobile-tap-highlight ${
                     formData.selectedPackage?.id === pkg.id 
                       ? 'ring-2 ring-[#ffd700] bg-[#1a1a2e]' 
                       : 'bg-[#1a1a2e] border-[#16213e] hover:border-[#ffd700]/50'
@@ -483,7 +513,7 @@ export function CustomerBookingFlow() {
                     </div>
 
                     <BaseButton 
-                      className="w-full dashboard-button-primary"
+                      className="w-full dashboard-button-primary mobile-touch-target mobile-button"
                       onClick={() => handlePackageSelect(pkg)}
                     >
                       Use This Package
@@ -504,65 +534,118 @@ export function CustomerBookingFlow() {
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Date Selection */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 px-2 sm:px-0">
+              {/* Today's Classes */}
               <Card className="bg-[#1a1a2e] border-[#16213e]">
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center">
-                    <Calendar size={20} className="mr-2 text-[#ffd700]" />
-                    Select Date
+                  <CardTitle className="text-white flex items-center justify-between text-sm sm:text-base">
+                    <div className="flex items-center">
+                      <Calendar size={18} className="mr-2 text-[#ffd700] sm:w-5 sm:h-5" />
+                      Today&apos;s Classes
+                    </div>
+                    {otherDates.length > 0 && (
+                      <BaseButton
+                        variant="outline"
+                        onClick={() => setShowDateSelector(!showDateSelector)}
+                        className="text-xs px-3 py-1 border-[#2a2a4a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white"
+                      >
+                        {showDateSelector ? 'Hide' : 'Other Dates'}
+                      </BaseButton>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {availableDates.slice(0, 12).map((date) => (
-                      <BaseButton
-                        key={date}
-                        variant="outline"
-                        onClick={() => setSelectedDate(date)}
-                        className={`${
-                          selectedDate === date 
-                            ? 'border-[#ffd700] bg-[#ffd700]/10 text-[#ffd700]' 
-                            : 'border-[#2a2a4a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white'
-                        }`}
-                      >
-                        {formatDate(date)}
-                      </BaseButton>
-                    ))}
-                  </div>
+                  {todayClasses.length === 0 ? (
+                    <div className="text-center py-6 sm:py-8">
+                      <AlertCircle size={40} className="mx-auto text-gray-400/50 mb-4 sm:w-12 sm:h-12" />
+                      <p className="text-gray-400 text-sm sm:text-base">No classes available today</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                      {todayClasses.map((schedule) => (
+                        <BaseButton
+                          key={schedule.id}
+                          variant="outline"
+                          onClick={() => handleScheduleSelect(schedule)}
+                          className={`mobile-touch-target mobile-tap-highlight min-h-[44px] ${
+                            formData.selectedSchedule?.id === schedule.id 
+                              ? 'border-[#ffd700] bg-[#ffd700]/10 text-[#ffd700]' 
+                              : 'border-[#2a2a4a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white'
+                          }`}
+                        >
+                          <div className="text-center">
+                            <div className="font-medium text-xs sm:text-sm">{formatTime(schedule.time)}</div>
+                            <div className="text-xs opacity-75">
+                              {schedule.bookedCount}/{schedule.capacity} booked
+                            </div>
+                          </div>
+                        </BaseButton>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
-              {/* Time Selection */}
-              {selectedDate && (
+              {/* Other Dates Selector */}
+              {showDateSelector && otherDates.length > 0 && (
                 <Card className="bg-[#1a1a2e] border-[#16213e]">
                   <CardHeader>
-                    <CardTitle className="text-white flex items-center">
-                      <Clock size={20} className="mr-2 text-[#ffd700]" />
-                      Select Time
+                    <CardTitle className="text-white flex items-center text-sm sm:text-base">
+                      <Calendar size={18} className="mr-2 text-[#ffd700] sm:w-5 sm:h-5" />
+                      Select Other Date
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
+                      {otherDates.slice(0, 12).map((date) => (
+                        <BaseButton
+                          key={date}
+                          variant="outline"
+                          onClick={() => setSelectedDate(date)}
+                          className={`mobile-touch-target mobile-tap-highlight min-h-[44px] text-xs sm:text-sm ${
+                            selectedDate === date 
+                              ? 'border-[#ffd700] bg-[#ffd700]/10 text-[#ffd700]' 
+                              : 'border-[#2a2a4a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white'
+                          }`}
+                        >
+                          {formatDate(date)}
+                        </BaseButton>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Time Selection for Other Dates */}
+              {selectedDate && selectedDate !== today && (
+                <Card className="bg-[#1a1a2e] border-[#16213e]">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center text-sm sm:text-base">
+                      <Clock size={18} className="mr-2 text-[#ffd700] sm:w-5 sm:h-5" />
+                      Select Time for {formatDate(selectedDate)}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     {availableTimes.length === 0 ? (
-                      <div className="text-center py-8">
-                        <AlertCircle size={48} className="mx-auto text-gray-400/50 mb-4" />
-                        <p className="text-gray-400">No available times for this date</p>
+                      <div className="text-center py-6 sm:py-8">
+                        <AlertCircle size={40} className="mx-auto text-gray-400/50 mb-4 sm:w-12 sm:h-12" />
+                        <p className="text-gray-400 text-sm sm:text-base">No available times for this date</p>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-2 sm:gap-3">
                         {availableTimes.map((schedule) => (
                           <BaseButton
                             key={schedule.id}
                             variant="outline"
                             onClick={() => handleScheduleSelect(schedule)}
-                            className={`${
+                            className={`mobile-touch-target mobile-tap-highlight min-h-[44px] ${
                               formData.selectedSchedule?.id === schedule.id 
                                 ? 'border-[#ffd700] bg-[#ffd700]/10 text-[#ffd700]' 
                                 : 'border-[#2a2a4a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white'
                             }`}
                           >
                             <div className="text-center">
-                              <div className="font-medium">{formatTime(schedule.time)}</div>
+                              <div className="font-medium text-xs sm:text-sm">{formatTime(schedule.time)}</div>
                               <div className="text-xs opacity-75">
                                 {schedule.bookedCount}/{schedule.capacity} booked
                               </div>
@@ -576,11 +659,11 @@ export function CustomerBookingFlow() {
               )}
             </div>
 
-            <div className="flex justify-between mt-6">
+            <div className="flex justify-between mt-6 px-2 sm:px-0">
               <BaseButton
                 variant="outline"
                 onClick={handleBackToPackages}
-                className="border-[#2a2a4a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white"
+                className="border-[#2a2a4a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white mobile-touch-target mobile-button"
               >
                 <ArrowLeft size={16} className="mr-2" />
                 Back to Packages
@@ -597,59 +680,59 @@ export function CustomerBookingFlow() {
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 px-2 sm:px-0">
               {/* Session Details Form */}
               <Card className="bg-[#1a1a2e] border-[#16213e]">
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center">
-                    <User size={20} className="mr-2 text-[#ffd700]" />
+                  <CardTitle className="text-white flex items-center text-sm sm:text-base">
+                    <User size={18} className="mr-2 text-[#ffd700] sm:w-5 sm:h-5" />
                     Session Details
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <CardContent className="space-y-4 mobile-form-spacing">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                      <Label htmlFor="clientName" className="text-gray-300">Full Name *</Label>
+                      <Label htmlFor="clientName" className="text-gray-300 text-sm">Full Name *</Label>
                       <Input
                         id="clientName"
                         value={formData.clientName}
                         onChange={(e) => handleFormChange('clientName', e.target.value)}
-                        className="bg-[#16213e] border-[#0a0a23] text-white"
+                        className="bg-[#16213e] border-[#0a0a23] text-white h-12 mobile-input mobile-focus"
                         required
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="clientEmail" className="text-gray-300">Email *</Label>
+                      <Label htmlFor="clientEmail" className="text-gray-300 text-sm">Email *</Label>
                       <Input
                         id="clientEmail"
                         type="email"
                         value={formData.clientEmail}
                         onChange={(e) => handleFormChange('clientEmail', e.target.value)}
-                        className="bg-[#16213e] border-[#0a0a23] text-white"
+                        className="bg-[#16213e] border-[#0a0a23] text-white h-12 mobile-input mobile-focus"
                         required
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="clientPhone" className="text-gray-300">Phone</Label>
+                      <Label htmlFor="clientPhone" className="text-gray-300 text-sm">Phone</Label>
                       <Input
                         id="clientPhone"
                         type="tel"
                         value={formData.clientPhone}
                         onChange={(e) => handleFormChange('clientPhone', e.target.value)}
-                        className="bg-[#16213e] border-[#0a0a23] text-white"
+                        className="bg-[#16213e] border-[#0a0a23] text-white h-12 mobile-input mobile-focus"
                         placeholder="+1 (555) 123-4567"
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="language" className="text-gray-300">Language</Label>
+                      <Label htmlFor="language" className="text-gray-300 text-sm">Language</Label>
                       <Select
                         value={formData.language}
                         onValueChange={(value) => handleFormChange('language', value)}
                       >
-                        <SelectTrigger className="bg-[#16213e] border-[#0a0a23] text-white">
+                        <SelectTrigger className="bg-[#16213e] border-[#0a0a23] text-white h-12 mobile-select mobile-focus">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="bg-[#16213e] border-[#0a0a23] text-white">
@@ -660,60 +743,60 @@ export function CustomerBookingFlow() {
                     </div>
 
                     <div>
-                      <Label htmlFor="birthDate" className="text-gray-300">Birth Date *</Label>
+                      <Label htmlFor="birthDate" className="text-gray-300 text-sm">Birth Date *</Label>
                       <Input
                         id="birthDate"
                         type="date"
                         value={formData.birthDate}
                         onChange={(e) => handleFormChange('birthDate', e.target.value)}
-                        className="bg-[#16213e] border-[#0a0a23] text-white"
+                        className="bg-[#16213e] border-[#0a0a23] text-white h-12 mobile-date-input mobile-focus"
                         required
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="birthTime" className="text-gray-300">Birth Time (Optional)</Label>
+                      <Label htmlFor="birthTime" className="text-gray-300 text-sm">Birth Time (Optional)</Label>
                       <Input
                         id="birthTime"
                         type="time"
                         value={formData.birthTime}
                         onChange={(e) => handleFormChange('birthTime', e.target.value)}
-                        className="bg-[#16213e] border-[#0a0a23] text-white"
+                        className="bg-[#16213e] border-[#0a0a23] text-white h-12 mobile-input mobile-focus"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="birthPlace" className="text-gray-300">Birth Place *</Label>
+                    <Label htmlFor="birthPlace" className="text-gray-300 text-sm">Birth Place *</Label>
                     <Input
                       id="birthPlace"
                       value={formData.birthPlace}
                       onChange={(e) => handleFormChange('birthPlace', e.target.value)}
-                      className="bg-[#16213e] border-[#0a0a23] text-white"
+                      className="bg-[#16213e] border-[#0a0a23] text-white h-12 mobile-input mobile-focus"
                       placeholder="City, Country"
                       required
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="question" className="text-gray-300">Question/Focus Areas *</Label>
+                    <Label htmlFor="question" className="text-gray-300 text-sm">Question/Focus Areas *</Label>
                     <Textarea
                       id="question"
                       value={formData.question}
                       onChange={(e) => handleFormChange('question', e.target.value)}
-                      className="bg-[#16213e] border-[#0a0a23] text-white min-h-[100px]"
+                      className="bg-[#16213e] border-[#0a0a23] text-white min-h-[100px] mobile-input mobile-focus"
                       placeholder="What would you like to explore in your reading?"
                       required
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="specialRequests" className="text-gray-300">Special Requests</Label>
+                    <Label htmlFor="specialRequests" className="text-gray-300 text-sm">Special Requests</Label>
                     <Textarea
                       id="specialRequests"
                       value={formData.specialRequests}
                       onChange={(e) => handleFormChange('specialRequests', e.target.value)}
-                      className="bg-[#16213e] border-[#0a0a23] text-white min-h-[80px]"
+                      className="bg-[#16213e] border-[#0a0a23] text-white min-h-[80px] mobile-input mobile-focus"
                       placeholder="Any special requests or additional information..."
                     />
                   </div>

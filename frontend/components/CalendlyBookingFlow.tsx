@@ -44,6 +44,32 @@ interface ScheduleSlot {
   isAvailable: boolean;
   capacity?: number;
   bookedCount?: number;
+  duration?: number;
+  teacher?: {
+    id: number;
+    name: string;
+    bio?: string;
+    shortBio?: string;
+    experience?: number;
+    avatarUrl?: string;
+  };
+  serviceType?: {
+    id: number;
+    name: string;
+    description?: string;
+    shortDescription?: string;
+    duration?: number;
+    difficulty?: string;
+    color?: string;
+    icon?: string;
+  };
+  venue?: {
+    id: number;
+    name: string;
+    address?: string;
+    city?: string;
+  };
+  dayOfWeek?: string;
 }
 
 interface PaymentMethod {
@@ -99,6 +125,7 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
   const [isMobile, setIsMobile] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [isPhoneModalOpen, setIsPhoneModalOpen] = useState(false);
+  const [showDateSelector, setShowDateSelector] = useState(false);
 
   // Helper function to safely access nested translation properties
   const getTranslation = (path: string, fallback: string = ''): string => {
@@ -162,17 +189,38 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
           console.error('❌ Packages API HTTP error:', packagesResponse.status, errorData);
         }
 
-        // Fetch schedule slots
-        const scheduleResponse = await fetch('/api/schedule-slots?available=true');
+        // Fetch teacher schedule slots
+        const scheduleResponse = await fetch('/api/teacher-schedule-slots?available=true');
         if (scheduleResponse.ok) {
           const scheduleData = await scheduleResponse.json();
           if (scheduleData.success) {
-            setScheduleSlots(scheduleData.slots || []);
+            const slots = scheduleData.slots || [];
+            setScheduleSlots(slots);
+            
+            // Set today's date as default if there are classes today
+            const today = new Date().toISOString().split('T')[0];
+            const todayClasses = slots.filter((s: ScheduleSlot) => 
+              s.date === today && s.isAvailable
+            );
+            
+            if (todayClasses.length > 0) {
+              updateBookingData('selectedDate', today);
+            } else {
+              // If no classes today, set the first available date
+              const availableDates = [...new Set(slots
+                .filter((s: ScheduleSlot) => s.isAvailable)
+                .map((s: ScheduleSlot) => s.date)
+                .sort()
+              )];
+              if (availableDates.length > 0) {
+                updateBookingData('selectedDate', availableDates[0] as string);
+              }
+            }
           } else {
-            console.error('❌ Schedule slots API error:', scheduleData);
+            console.error('❌ Teacher schedule slots API error:', scheduleData);
           }
         } else {
-          console.error('❌ Schedule slots API HTTP error:', scheduleResponse.status);
+          console.error('❌ Teacher schedule slots API HTTP error:', scheduleResponse.status);
         }
 
         // Fetch payment methods
@@ -273,9 +321,17 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
     }
   };
 
-  // Get available dates
-  const availableDates = [...new Set(scheduleSlots
-    .filter(slot => slot.isAvailable)
+  // Get today's date
+  const today = new Date().toISOString().split('T')[0];
+  
+  // Get today's classes
+  const todayClasses = scheduleSlots
+    .filter(slot => slot.date === today && slot.isAvailable)
+    .sort((a, b) => a.time.localeCompare(b.time));
+
+  // Get other available dates (excluding today)
+  const otherDates = [...new Set(scheduleSlots
+    .filter(slot => slot.isAvailable && slot.date !== today)
     .map(slot => slot.date)
     .sort()
   )];
@@ -402,40 +458,40 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
   }
 
   return (
-    <div className="h-full p-2 sm:p-4 lg:p-8 xl:p-12 pt-20 sm:pt-24 lg:pt-28">
-      <div className={`mx-auto ${isMobile ? 'max-w-sm' : 'max-w-4xl lg:max-w-6xl xl:max-w-7xl'}`}>
+    <div className="h-full p-2 sm:p-4 lg:p-8 xl:p-12 pt-20 sm:pt-24 lg:pt-28 mobile-scroll">
+      <div className={`mx-auto ${isMobile ? 'max-w-sm px-2' : 'max-w-4xl lg:max-w-6xl xl:max-w-7xl'}`}>
         {/* Header */}
         <div className="text-center mb-4 sm:mb-6 pt-2 sm:pt-4">
           <h1 className="text-xl sm:text-2xl lg:text-4xl xl:text-5xl font-heading text-[#EAEAEA] mb-2">
             {getTranslation('booking.title', 'Book Your Session')}
           </h1>
-          <p className="text-[#EAEAEA]/80 text-xs sm:text-sm lg:text-lg xl:text-xl px-4">
+          <p className="text-[#EAEAEA]/80 text-xs sm:text-sm lg:text-lg xl:text-xl px-2 sm:px-4">
             {getTranslation('booking.subtitle', 'Choose your cosmic journey')}
           </p>
         </div>
 
         {/* Progress Steps - Responsive */}
-        <div className={`flex justify-between mb-6 sm:mb-8 ${isMobile ? 'px-2' : ''}`}>
+        <div className={`flex justify-between mb-6 sm:mb-8 ${isMobile ? 'px-1 gap-1' : 'gap-2'}`}>
           {STEPS.map((step) => {
             const Icon = step.icon;
             const isActive = currentStep === step.id;
             const isCompleted = currentStep > step.id;
             
             return (
-              <div key={step.id} className="flex flex-col items-center flex-1">
+              <div key={step.id} className="flex flex-col items-center flex-1 min-w-0">
                 <div className={`
-                  ${isMobile ? 'w-8 h-8' : 'w-10 h-10 lg:w-12 lg:h-12'} rounded-full flex items-center justify-center mb-1 sm:mb-2 transition-all duration-300
+                  ${isMobile ? 'w-10 h-10' : 'w-10 h-10 lg:w-12 lg:h-12'} rounded-full flex items-center justify-center mb-1 sm:mb-2 transition-all duration-300 mobile-touch-target
                   ${isActive ? 'bg-[#FFD700] text-[#0A0A23]' : 
                     isCompleted ? 'bg-[#FFD700]/20 text-[#FFD700]' : 
                     'bg-[#C0C0C0]/20 text-[#C0C0C0]/50'}
                 `}>
                   {isCompleted ? (
-                    <CheckCircle className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5 lg:w-6 lg:h-6'}`} />
+                    <CheckCircle className={`${isMobile ? 'w-5 h-5' : 'w-5 h-5 lg:w-6 lg:h-6'}`} />
                   ) : (
-                    <Icon className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5 lg:w-6 lg:h-6'}`} />
+                    <Icon className={`${isMobile ? 'w-5 h-5' : 'w-5 h-5 lg:w-6 lg:h-6'}`} />
                   )}
                 </div>
-                <span className={`${isMobile ? 'text-xs' : 'text-xs sm:text-sm'} ${isActive ? 'text-[#FFD700]' : 'text-[#C0C0C0]/50'} text-center leading-tight`}>
+                <span className={`${isMobile ? 'text-xs leading-tight' : 'text-xs sm:text-sm'} ${isActive ? 'text-[#FFD700]' : 'text-[#C0C0C0]/50'} text-center px-1`}>
                   {isMobile ? step.title.split(' ')[0] : step.title}
                 </span>
               </div>
@@ -490,7 +546,7 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         className={`
-                          p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all duration-300
+                          p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all duration-300 mobile-touch-target mobile-tap-highlight
                           ${bookingData.packageId === pkg.id 
                             ? 'border-[#FFD700] bg-[#FFD700]/10' 
                             : 'border-[#C0C0C0]/20 hover:border-[#FFD700]/50'
@@ -564,7 +620,7 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
                     {getTranslation('booking.personalInfo', 'Personal Information')}
                   </h3>
                   
-                  <div className={`grid gap-3 sm:gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2 xl:grid-cols-3'}`}>
+                  <div className={`grid gap-3 sm:gap-4 mobile-form-spacing ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2 xl:grid-cols-3'}`}>
                     <div>
                       <label className="block text-[#EAEAEA] font-medium mb-2 text-sm sm:text-base">
                         <User className="inline w-4 h-4 mr-2" />
@@ -574,7 +630,7 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
                         type="text"
                         value={bookingData.clientName}
                         onChange={(e) => updateBookingData('clientName', e.target.value)}
-                        className="bg-[#191970]/10 border-[#C0C0C0]/20 text-[#EAEAEA] placeholder-[#C0C0C0]/60 h-10 sm:h-11"
+                        className="bg-[#191970]/10 border-[#C0C0C0]/20 text-[#EAEAEA] placeholder-[#C0C0C0]/60 h-12 sm:h-11 mobile-input mobile-focus"
                         placeholder={getTranslation('booking.namePlaceholder', 'Enter your full name')}
                       />
                     </div>
@@ -588,7 +644,7 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
                         type="email"
                         value={bookingData.clientEmail}
                         onChange={(e) => updateBookingData('clientEmail', e.target.value)}
-                        className="bg-[#191970]/10 border-[#C0C0C0]/20 text-[#EAEAEA] placeholder-[#C0C0C0]/60 h-10 sm:h-11"
+                        className="bg-[#191970]/10 border-[#C0C0C0]/20 text-[#EAEAEA] placeholder-[#C0C0C0]/60 h-12 sm:h-11 mobile-input mobile-focus"
                         placeholder={getTranslation('booking.emailPlaceholder', 'Enter your email')}
                       />
                     </div>
@@ -602,7 +658,7 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
                         type="tel"
                         value={bookingData.clientPhone}
                         onChange={(e) => updateBookingData('clientPhone', e.target.value)}
-                        className="bg-[#191970]/10 border-[#C0C0C0]/20 text-[#EAEAEA] placeholder-[#C0C0C0]/60 h-10 sm:h-11"
+                        className="bg-[#191970]/10 border-[#C0C0C0]/20 text-[#EAEAEA] placeholder-[#C0C0C0]/60 h-12 sm:h-11 mobile-input mobile-focus"
                         placeholder={getTranslation('booking.phonePlaceholder', 'Enter your phone number')}
                       />
                     </div>
@@ -641,35 +697,123 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
                     </div>
                   </div>
 
+                  {/* Today's Classes Section */}
+                  {todayClasses.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold text-[#EAEAEA] mb-4 flex items-center">
+                        <Calendar className="w-5 h-5 mr-2 text-[#FFD700]" />
+                        Today&apos;s Classes
+                      </h3>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                        {todayClasses.map((slot) => (
+                          <motion.button
+                            key={slot.id}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => {
+                              updateBookingData('selectedDate', slot.date);
+                              updateBookingData('selectedTime', slot.time);
+                            }}
+                            className={`
+                              p-3 rounded-lg text-sm font-medium transition-all duration-300 mobile-touch-target mobile-tap-highlight
+                              ${bookingData.selectedDate === slot.date && bookingData.selectedTime === slot.time
+                                ? 'bg-[#FFD700] text-[#0A0A23]'
+                                : 'bg-[#191970]/20 text-[#EAEAEA] hover:bg-[#FFD700]/20'
+                              }
+                            `}
+                          >
+                            <div className="text-center">
+                              <div className="font-medium">{slot.time}</div>
+                              {slot.teacher && (
+                                <div className="text-xs opacity-75 mt-1">{slot.teacher.name}</div>
+                              )}
+                            </div>
+                          </motion.button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Other Dates Toggle */}
+                  {otherDates.length > 0 && (
+                    <div className="mb-4">
+                      <button
+                        onClick={() => setShowDateSelector(!showDateSelector)}
+                        className="w-full px-4 py-2 border border-[#2a2a4a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white rounded-lg transition-colors"
+                      >
+                        {showDateSelector ? 'Hide Other Dates' : 'View Other Dates'}
+                      </button>
+                    </div>
+                  )}
+
                   {/* Calendar Grid - Responsive */}
-                  <div className={`grid gap-1 sm:gap-2 mb-3 sm:mb-4 ${isMobile ? 'grid-cols-7' : 'grid-cols-7 lg:grid-cols-10 xl:grid-cols-14'}`}>
-                    {getCalendarDates().map((date, index) => {
-                      const dateString = date.toISOString().split('T')[0];
-                      const isAvailable = availableDates.includes(dateString);
-                      const isSelected = bookingData.selectedDate === dateString;
-                      
-                      return (
-                        <motion.button
-                          key={index}
-                          whileHover={isAvailable ? { scale: 1.05 } : {}}
-                          whileTap={isAvailable ? { scale: 0.95 } : {}}
-                          onClick={() => isAvailable && updateBookingData('selectedDate', dateString)}
-                          disabled={!isAvailable}
-                          className={`
-                            ${isMobile ? 'aspect-square text-xs' : 'aspect-square text-xs sm:text-sm'} rounded-lg font-medium transition-all duration-300
-                            ${isSelected 
-                              ? 'bg-[#FFD700] text-[#0A0A23]' 
-                              : isAvailable 
-                                ? 'bg-[#191970]/10 text-[#EAEAEA] hover:bg-[#FFD700]/20' 
-                                : 'bg-[#C0C0C0]/5 text-[#C0C0C0]/30 cursor-not-allowed'
-                            }
-                          `}
-                        >
-                          {date.getDate()}
-                        </motion.button>
-                      );
-                    })}
-                  </div>
+                  {showDateSelector && otherDates.length > 0 && (
+                    <div className={`grid gap-1 sm:gap-2 mb-3 sm:mb-4 ${isMobile ? 'grid-cols-7' : 'grid-cols-7 lg:grid-cols-10 xl:grid-cols-14'}`}>
+                      {getCalendarDates().map((date, index) => {
+                        const dateString = date.toISOString().split('T')[0];
+                        const isAvailable = otherDates.includes(dateString);
+                        const isSelected = bookingData.selectedDate === dateString;
+                        
+                        // Get available teachers for this date
+                        const daySlots = scheduleSlots.filter(slot => slot.date === dateString && slot.isAvailable);
+                        const uniqueTeachers = [...new Set(daySlots.map(slot => slot.teacher?.name).filter(Boolean))];
+                        
+                        return (
+                          <motion.button
+                            key={index}
+                            whileHover={isAvailable ? { scale: 1.05 } : {}}
+                            whileTap={isAvailable ? { scale: 0.95 } : {}}
+                            onClick={() => isAvailable && updateBookingData('selectedDate', dateString)}
+                            disabled={!isAvailable}
+                            className={`
+                              ${isMobile ? 'aspect-square text-xs min-h-[44px]' : 'aspect-square text-xs sm:text-sm min-h-[40px]'} rounded-lg font-medium transition-all duration-300 mobile-touch-target mobile-tap-highlight relative
+                              ${isSelected 
+                                ? 'bg-[#FFD700] text-[#0A0A23]' 
+                                : isAvailable 
+                                  ? 'bg-[#191970]/10 text-[#EAEAEA] hover:bg-[#FFD700]/20' 
+                                  : 'bg-[#C0C0C0]/5 text-[#C0C0C0]/30 cursor-not-allowed'
+                              }
+                            `}
+                          >
+                            <div className="flex flex-col items-center justify-center h-full">
+                              <div>{date.getDate()}</div>
+                              {isAvailable && uniqueTeachers.length > 0 && (
+                                <div className="text-xs opacity-75 mt-1">
+                                  {uniqueTeachers.length} teacher{uniqueTeachers.length > 1 ? 's' : ''}
+                                </div>
+                              )}
+                            </div>
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Available Teachers Info */}
+                  {otherDates.length > 0 && (
+                    <div className="bg-[#191970]/10 rounded-lg p-3 sm:p-4">
+                      <h4 className="font-medium text-[#EAEAEA] mb-2 text-sm">Available Teachers</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {(() => {
+                          const allTeachers = [...new Set(scheduleSlots
+                            .filter(slot => otherDates.includes(slot.date) && slot.isAvailable)
+                            .map(slot => slot.teacher)
+                            .filter(Boolean)
+                          )];
+                          
+                          return allTeachers.map((teacher, index) => (
+                            <div key={index} className="flex items-center gap-2 bg-[#FFD700]/10 rounded-full px-3 py-1">
+                              <User className="w-3 h-3" />
+                              <span className="text-xs font-medium">{teacher?.name}</span>
+                              {teacher?.experience && (
+                                <span className="text-xs opacity-75">({teacher.experience}+ years)</span>
+                              )}
+                            </div>
+                          ));
+                        })()}
+                      </div>
+                    </div>
+                  )}
 
 
                 </div>
@@ -699,24 +843,64 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
                         <Clock className="inline w-4 h-4 mr-2" />
                         {getTranslation('booking.selectTime', 'Select Time')}
                       </label>
-                      <div className={`grid gap-2 ${isMobile ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6'}`}>
-                        {availableTimes.map((time) => (
-                          <motion.button
-                            key={time}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => updateBookingData('selectedTime', time)}
-                            className={`
-                              p-2 sm:p-3 rounded-lg text-sm font-medium transition-all duration-300
-                              ${bookingData.selectedTime === time
-                                ? 'bg-[#FFD700] text-[#0A0A23]'
-                                : 'bg-[#191970]/10 text-[#EAEAEA] hover:bg-[#FFD700]/20'
-                              }
-                            `}
-                          >
-                            {time}
-                          </motion.button>
-                        ))}
+                      <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
+                        {availableTimes.map((time) => {
+                          const slot = scheduleSlots.find(s => s.date === bookingData.selectedDate && s.time === time);
+                          return (
+                            <motion.button
+                              key={time}
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => updateBookingData('selectedTime', time)}
+                              className={`
+                                p-4 rounded-lg text-sm font-medium transition-all duration-300 mobile-touch-target mobile-tap-highlight
+                                ${bookingData.selectedTime === time
+                                  ? 'bg-[#FFD700] text-[#0A0A23]'
+                                  : 'bg-[#191970]/10 text-[#EAEAEA] hover:bg-[#FFD700]/20'
+                                }
+                              `}
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="text-lg font-bold">{time}</div>
+                                {slot?.serviceType && (
+                                  <div 
+                                    className="px-2 py-1 rounded-full text-xs font-medium"
+                                    style={{ 
+                                      backgroundColor: slot.serviceType.color ? `${slot.serviceType.color}20` : '#FFD70020',
+                                      color: slot.serviceType.color || '#FFD700'
+                                    }}
+                                  >
+                                    {slot.serviceType.name}
+                                  </div>
+                                )}
+                              </div>
+                              {slot?.teacher && (
+                                <div className="text-left">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <User className="w-4 h-4" />
+                                    <span className="font-medium">{slot.teacher.name}</span>
+                                    {slot.teacher.experience && (
+                                      <span className="text-xs opacity-75">
+                                        ({slot.teacher.experience}+ years)
+                                      </span>
+                                    )}
+                                  </div>
+                                  {slot.venue && (
+                                    <div className="flex items-center gap-2 text-xs opacity-75">
+                                      <MapPin className="w-3 h-3" />
+                                      <span>{slot.venue.name}</span>
+                                    </div>
+                                  )}
+                                  {slot.capacity && (
+                                    <div className="text-xs opacity-75 mt-1">
+                                      {slot.bookedCount || 0}/{slot.capacity} spots available
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </motion.button>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
@@ -736,7 +920,7 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
                     {getTranslation('booking.birthInfo', 'Birth Information')}
                   </h3>
                   
-                  <div className={`grid gap-3 sm:gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2 xl:grid-cols-3'}`}>
+                  <div className={`grid gap-3 sm:gap-4 mobile-form-spacing ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2 xl:grid-cols-3'}`}>
                     <div>
                       <label className="block text-[#EAEAEA] font-medium mb-2 text-sm sm:text-base">
                         <Calendar className="inline w-4 h-4 mr-2" />
@@ -746,7 +930,7 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
                         type="date"
                         value={bookingData.birthDate}
                         onChange={(e) => updateBookingData('birthDate', e.target.value)}
-                        className="bg-[#191970]/10 border-[#C0C0C0]/20 text-[#EAEAEA] h-10 sm:h-11"
+                        className="bg-[#191970]/10 border-[#C0C0C0]/20 text-[#EAEAEA] h-12 sm:h-11 mobile-date-input mobile-focus"
                       />
                     </div>
 
@@ -759,7 +943,7 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
                         type="text"
                         value={bookingData.birthCity}
                         onChange={(e) => updateBookingData('birthCity', e.target.value)}
-                        className="bg-[#191970]/10 border-[#C0C0C0]/20 text-[#EAEAEA] placeholder-[#C0C0C0]/60 h-10 sm:h-11"
+                        className="bg-[#191970]/10 border-[#C0C0C0]/20 text-[#EAEAEA] placeholder-[#C0C0C0]/60 h-12 sm:h-11 mobile-input mobile-focus"
                         placeholder={getTranslation('booking.birthCityPlaceholder', 'Enter your birth city')}
                       />
                     </div>
@@ -772,7 +956,7 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
                         value={bookingData.message}
                         onChange={(e) => updateBookingData('message', e.target.value)}
                         rows={3}
-                        className="bg-[#191970]/10 border-[#C0C0C0]/20 text-[#EAEAEA] placeholder-[#C0C0C0]/60 resize-none"
+                        className="bg-[#191970]/10 border-[#C0C0C0]/20 text-[#EAEAEA] placeholder-[#C0C0C0]/60 resize-none mobile-input mobile-focus"
                         placeholder={getTranslation('booking.messagePlaceholder', 'Tell us about your intentions for this session...')}
                       />
                     </div>
@@ -807,6 +991,31 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
                         <span className="text-[#C0C0C0]/70">Time:</span>
                         <span className="text-[#EAEAEA]">{bookingData.selectedTime}</span>
                       </div>
+                      {(() => {
+                        const selectedSlot = scheduleSlots.find(s => s.date === bookingData.selectedDate && s.time === bookingData.selectedTime);
+                        return selectedSlot ? (
+                          <>
+                            {selectedSlot.teacher && (
+                              <div className="flex justify-between">
+                                <span className="text-[#C0C0C0]/70">Teacher:</span>
+                                <span className="text-[#EAEAEA]">{selectedSlot.teacher.name}</span>
+                              </div>
+                            )}
+                            {selectedSlot.serviceType && (
+                              <div className="flex justify-between">
+                                <span className="text-[#C0C0C0]/70">Service:</span>
+                                <span className="text-[#EAEAEA]">{selectedSlot.serviceType.name}</span>
+                              </div>
+                            )}
+                            {selectedSlot.venue && (
+                              <div className="flex justify-between">
+                                <span className="text-[#C0C0C0]/70">Location:</span>
+                                <span className="text-[#EAEAEA]">{selectedSlot.venue.name}</span>
+                              </div>
+                            )}
+                          </>
+                        ) : null;
+                      })()}
                       <div className="flex justify-between border-t border-[#C0C0C0]/20 pt-2">
                         <span className="text-[#EAEAEA] font-medium">Total:</span>
                         <span className="text-[#FFD700] font-bold">
@@ -826,7 +1035,7 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
                       value={bookingData.paymentMethodId?.toString()} 
                       onValueChange={(value) => updateBookingData('paymentMethodId', parseInt(value))}
                     >
-                      <SelectTrigger className="bg-[#191970]/10 border-[#C0C0C0]/20 text-[#EAEAEA] h-10 sm:h-11">
+                      <SelectTrigger className="bg-[#191970]/10 border-[#C0C0C0]/20 text-[#EAEAEA] h-12 sm:h-11 mobile-select mobile-focus">
                         <SelectValue placeholder={getTranslation('booking.selectPaymentMethod', 'Select payment method')}>
                           {bookingData.paymentMethodId && (() => {
                             const selectedMethod = paymentMethods.find(m => m.id === bookingData.paymentMethodId);
@@ -916,7 +1125,7 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
             <Button
               onClick={prevStep}
               variant="outline"
-              className={`border-[#C0C0C0]/20 text-[#EAEAEA] hover:bg-[#191970]/10 h-10 sm:h-11 ${isMobile ? 'w-full' : 'flex-1'}`}
+              className={`border-[#C0C0C0]/20 text-[#EAEAEA] hover:bg-[#191970]/10 h-12 sm:h-11 mobile-touch-target mobile-button ${isMobile ? 'w-full' : 'flex-1'}`}
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               {getTranslation('booking.back', 'Back')}
@@ -927,7 +1136,7 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
             <Button
               onClick={nextStep}
               disabled={!canProceed()}
-              className={`bg-[#FFD700] text-[#0A0A23] hover:bg-[#FFD700]/90 disabled:opacity-50 disabled:cursor-not-allowed h-10 sm:h-11 ${isMobile ? 'w-full' : 'flex-1'}`}
+              className={`bg-[#FFD700] text-[#0A0A23] hover:bg-[#FFD700]/90 disabled:opacity-50 disabled:cursor-not-allowed h-12 sm:h-11 mobile-touch-target mobile-button ${isMobile ? 'w-full' : 'flex-1'}`}
             >
               {getTranslation('booking.next', 'Next')}
               <ArrowRight className="w-4 h-4 ml-2" />
@@ -936,7 +1145,7 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
             <Button
               onClick={handleSubmit}
               disabled={!canProceed() || isSubmitting}
-              className={`bg-[#FFD700] text-[#0A0A23] hover:bg-[#FFD700]/90 disabled:opacity-50 disabled:cursor-not-allowed h-10 sm:h-11 ${isMobile ? 'w-full' : 'flex-1'}`}
+              className={`bg-[#FFD700] text-[#0A0A23] hover:bg-[#FFD700]/90 disabled:opacity-50 disabled:cursor-not-allowed h-12 sm:h-11 mobile-touch-target mobile-button ${isMobile ? 'w-full' : 'flex-1'}`}
             >
               {isSubmitting ? (
                 <motion.div

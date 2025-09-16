@@ -407,13 +407,13 @@ async function main() {
         isActive: true
       }
     }),
-    // Group session rates
+    // Group session rates - using different currency to avoid conflict
     prisma.rate.upsert({
       where: { id: 4 },
       update: {},
       create: {
-        currencyId: 1, // USD
-        sessionDurationId: 2, // 60 minutes
+        currencyId: 2, // EUR
+        sessionDurationId: 1, // 30 minutes - different duration to avoid conflict
         sessionType: 'group',
         base_price: 60.00,
         group_discount_percent: 25.00,
@@ -432,18 +432,18 @@ async function main() {
       where: { id: 1 },
       update: {
         name: '01 MATPASS',
-        description: 'All classes are 60 minutes',
+        description: '1 session of 60 minutes',
         sessionsCount: 1,
-        sessionDurationId: 2,
+        sessionDurationId: 3,
         packageType: 'individual',
         maxGroupSize: 1,
         isActive: true
       },
       create: {
         name: '01 MATPASS',
-        description: 'All classes are 60 minutes',
+        description: '1 session of 60 minutes',
         sessionsCount: 1,
-        sessionDurationId: 2,
+        sessionDurationId: 3,
         packageType: 'individual',
         maxGroupSize: 1,
         isActive: true
@@ -453,18 +453,18 @@ async function main() {
       where: { id: 2 },
       update: {
         name: '04 MATPASS',
-        description: 'All classes are 60 minutes',
+        description: '4 sessions of 60 minutes each',
         sessionsCount: 4,
-        sessionDurationId: 2,
+        sessionDurationId: 3,
         packageType: 'individual',
         maxGroupSize: 1,
         isActive: true
       },
       create: {
         name: '04 MATPASS',
-        description: 'All classes are 60 minutes',
+        description: '4 sessions of 60 minutes each',
         sessionsCount: 4,
-        sessionDurationId: 2,
+        sessionDurationId: 3,
         packageType: 'individual',
         maxGroupSize: 1,
         isActive: true
@@ -474,18 +474,18 @@ async function main() {
       where: { id: 3 },
       update: {
         name: '08 MATPASS',
-        description: 'All classes are 60 minutes',
+        description: '8 sessions of 60 minutes each',
         sessionsCount: 8,
-        sessionDurationId: 2,
+        sessionDurationId: 3,
         packageType: 'individual',
         maxGroupSize: 1,
         isActive: true
       },
       create: {
         name: '08 MATPASS',
-        description: 'All classes are 60 minutes',
+        description: '8 sessions of 60 minutes each',
         sessionsCount: 8,
-        sessionDurationId: 2,
+        sessionDurationId: 3,
         packageType: 'individual',
         maxGroupSize: 1,
         isActive: true
@@ -495,18 +495,18 @@ async function main() {
       where: { id: 4 },
       update: {
         name: '12 MATPASS',
-        description: 'All classes are 60 minutes',
+        description: '12 sessions of 60 minutes each',
         sessionsCount: 12,
-        sessionDurationId: 2,
+        sessionDurationId: 3,
         packageType: 'individual',
         maxGroupSize: 1,
         isActive: true
       },
       create: {
         name: '12 MATPASS',
-        description: 'All classes are 60 minutes',
+        description: '12 sessions of 60 minutes each',
         sessionsCount: 12,
-        sessionDurationId: 2,
+        sessionDurationId: 3,
         packageType: 'individual',
         maxGroupSize: 1,
         isActive: true
@@ -516,18 +516,18 @@ async function main() {
       where: { id: 5 },
       update: {
         name: '24 MATPASS',
-        description: 'All classes are 60 minutes',
+        description: '24 sessions of 60 minutes each',
         sessionsCount: 24,
-        sessionDurationId: 2,
+        sessionDurationId: 3,
         packageType: 'individual',
         maxGroupSize: 1,
         isActive: true
       },
       create: {
         name: '24 MATPASS',
-        description: 'All classes are 60 minutes',
+        description: '24 sessions of 60 minutes each',
         sessionsCount: 24,
-        sessionDurationId: 2,
+        sessionDurationId: 3,
         packageType: 'individual',
         maxGroupSize: 1,
         isActive: true
@@ -542,16 +542,14 @@ async function main() {
   const penCurrencyId = penCurrency?.id ?? 5;
   const packagePrices = await Promise.all([
     prisma.packagePrice.upsert({
-      where: { id: 1 },
+      where: { packageDefinitionId_currencyId: { packageDefinitionId: packageDefinitions[0].id, currencyId: penCurrencyId } },
       update: {
-        packageDefinitionId: 1,
-        currencyId: penCurrencyId,
         price: 50.00,
         pricingMode: 'custom',
         isActive: true
       },
       create: {
-        packageDefinitionId: 1,
+        packageDefinitionId: packageDefinitions[0].id,
         currencyId: penCurrencyId,
         price: 50.00,
         pricingMode: 'custom',
@@ -559,69 +557,61 @@ async function main() {
       }
     }),
     prisma.packagePrice.upsert({
-      where: { id: 2 },
+      where: { packageDefinitionId_currencyId: { packageDefinitionId: packageDefinitions[1].id, currencyId: penCurrencyId } },
       update: {
-        packageDefinitionId: 2,
-        currencyId: penCurrencyId,
-        price: 210.00,
+        price: 190.00,
         pricingMode: 'custom',
         isActive: true
       },
       create: {
-        packageDefinitionId: 2,
+        packageDefinitionId: packageDefinitions[1].id,
         currencyId: penCurrencyId,
-        price: 210.00,
+        price: 190.00,
         pricingMode: 'custom',
         isActive: true
       }
     }),
     prisma.packagePrice.upsert({
-      where: { id: 3 },
+      where: { packageDefinitionId_currencyId: { packageDefinitionId: packageDefinitions[2].id, currencyId: penCurrencyId } },
       update: {
-        packageDefinitionId: 3,
-        currencyId: penCurrencyId,
-        price: 320.00,
+        price: 350.00,
         pricingMode: 'custom',
         isActive: true
       },
       create: {
-        packageDefinitionId: 3,
+        packageDefinitionId: packageDefinitions[2].id,
         currencyId: penCurrencyId,
-        price: 320.00,
+        price: 350.00,
         pricingMode: 'custom',
         isActive: true
       }
     }),
     prisma.packagePrice.upsert({
-      where: { id: 4 },
+      where: { packageDefinitionId_currencyId: { packageDefinitionId: packageDefinitions[3].id, currencyId: penCurrencyId } },
       update: {
-        packageDefinitionId: 4,
-        currencyId: penCurrencyId,
-        price: 400.00,
+        price: 420.00,
         pricingMode: 'custom',
         isActive: true
       },
       create: {
-        packageDefinitionId: 4,
+        packageDefinitionId: packageDefinitions[3].id,
         currencyId: penCurrencyId,
-        price: 400.00,
+        price: 420.00,
         pricingMode: 'custom',
         isActive: true
       }
     }),
     prisma.packagePrice.upsert({
-      where: { id: 5 },
+      where: { packageDefinitionId_currencyId: { packageDefinitionId: packageDefinitions[4].id, currencyId: penCurrencyId } },
       update: {
-        packageDefinitionId: 5,
-        currencyId: penCurrencyId,
-        price: 900.00,
+        price: 530.00,
         pricingMode: 'custom',
         isActive: true
       },
       create: {
-        packageDefinitionId: 5,
+        packageDefinitionId: packageDefinitions[4].id,
         currencyId: penCurrencyId,
-        price: 900.00,
+        price: 530.00,
         pricingMode: 'custom',
         isActive: true
       }
@@ -641,7 +631,7 @@ async function main() {
         endTime: '17:00',
         capacity: 3,
         isAvailable: true,
-        sessionDurationId: 2, // 60 minutes
+        sessionDurationId: 3, // 60 minutes
         autoAvailable: true
       }
     }),
@@ -654,7 +644,7 @@ async function main() {
         endTime: '17:00',
         capacity: 3,
         isAvailable: true,
-        sessionDurationId: 2, // 60 minutes
+        sessionDurationId: 3, // 60 minutes
         autoAvailable: true
       }
     }),
@@ -667,7 +657,7 @@ async function main() {
         endTime: '17:00',
         capacity: 3,
         isAvailable: true,
-        sessionDurationId: 2, // 60 minutes
+        sessionDurationId: 3, // 60 minutes
         autoAvailable: true
       }
     }),
@@ -680,7 +670,7 @@ async function main() {
         endTime: '17:00',
         capacity: 3,
         isAvailable: true,
-        sessionDurationId: 2, // 60 minutes
+        sessionDurationId: 3, // 60 minutes
         autoAvailable: true
       }
     }),
@@ -693,7 +683,7 @@ async function main() {
         endTime: '17:00',
         capacity: 3,
         isAvailable: true,
-        sessionDurationId: 2, // 60 minutes
+        sessionDurationId: 3, // 60 minutes
         autoAvailable: true
       }
     }),
@@ -706,7 +696,7 @@ async function main() {
         endTime: '16:00',
         capacity: 3,
         isAvailable: true,
-        sessionDurationId: 2, // 60 minutes
+        sessionDurationId: 3, // 60 minutes
         autoAvailable: true
       }
     })
@@ -715,7 +705,7 @@ async function main() {
 
   // 12. Create schedule slots (for backward compatibility)
   console.log('📅 Creating schedule slots...');
-  const scheduleSlots = await Promise.all([
+  const legacyScheduleSlots = await Promise.all([
     prisma.scheduleSlot.upsert({
       where: { id: 1 },
       update: {},
@@ -741,7 +731,7 @@ async function main() {
       }
     })
   ]);
-  console.log('✅ Schedule slots created:', scheduleSlots.length);
+  console.log('✅ Schedule slots created:', legacyScheduleSlots.length);
 
   // 13. Create payment method configurations
   console.log('💳 Creating payment method configurations...');
@@ -901,7 +891,7 @@ async function main() {
         email: 'john.doe@example.com',
         fullName: 'John Doe',
         phone: '+1234567890',
-        status: 'active',
+        status: 'ACTIVE',
         birthDate: new Date('1990-01-15'),
         birthTime: new Date('1990-01-15T10:30:00'),
         birthPlace: 'New York, USA',
@@ -916,7 +906,7 @@ async function main() {
         email: 'maria.garcia@example.com',
         fullName: 'Maria Garcia',
         phone: '+1234567891',
-        status: 'active',
+        status: 'ACTIVE',
         birthDate: new Date('1985-06-20'),
         birthTime: new Date('1985-06-20T14:15:00'),
         birthPlace: 'Madrid, Spain',
@@ -931,7 +921,7 @@ async function main() {
         email: 'test@example.com',
         fullName: 'Test Client',
         phone: '+1234567892',
-        status: 'active',
+        status: 'ACTIVE',
         birthDate: new Date('1995-03-10'),
         birthTime: new Date('1995-03-10T09:00:00'),
         birthPlace: 'Toronto, Canada',
@@ -951,7 +941,7 @@ async function main() {
       email: 'coco@matmax.store',
       fullName: 'Coco Admin',
       phone: '+1234567890',
-      status: 'active',
+      status: 'ACTIVE',
       birthDate: new Date('1990-01-15'),
       birthTime: new Date('1990-01-15T10:30:00'),
       birthPlace: 'New York, USA',
@@ -971,9 +961,9 @@ async function main() {
       email: 'admin@matmax.store',
       password: hashedPassword,
       fullName: 'MatMax Admin',
-      role: 'admin',
+      role: 'ADMIN',
       phone: '+1234567890',
-      status: 'active',
+      status: 'ACTIVE',
       birthDate: new Date('1990-01-15'),
       birthTime: new Date('1990-01-15T10:30:00'),
       birthPlace: 'New York, USA',
@@ -995,7 +985,7 @@ async function main() {
         totalAmount: 50.00,
         currencyCode: 'PEN',
         paymentMethod: 'stripe',
-        paymentStatus: 'confirmed',
+        paymentStatus: 'COMPLETED',
         transactionId: 'txn_test_123',
         notes: 'Test purchase for John Doe - 01 MATPASS',
         purchasedAt: new Date(),
@@ -1010,7 +1000,7 @@ async function main() {
         totalAmount: 210.00,
         currencyCode: 'PEN',
         paymentMethod: 'cash',
-        paymentStatus: 'confirmed',
+        paymentStatus: 'COMPLETED',
         transactionId: 'txn_test_456',
         notes: 'Test purchase for Maria Garcia - 04 MATPASS',
         purchasedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
@@ -1095,7 +1085,7 @@ async function main() {
         amount: 50.00,
         currencyCode: 'PEN',
         paymentMethod: 'stripe',
-        paymentStatus: 'confirmed',
+        paymentStatus: 'COMPLETED',
         transactionId: 'txn_123456789',
         notes: '01 MATPASS payment - Credit card',
         paymentDate: new Date(),
@@ -1112,7 +1102,7 @@ async function main() {
         amount: 210.00,
         currencyCode: 'PEN',
         paymentMethod: 'cash',
-        paymentStatus: 'confirmed',
+        paymentStatus: 'COMPLETED',
         transactionId: null,
         notes: '04 MATPASS payment - Cash',
         paymentDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
@@ -1236,6 +1226,928 @@ async function main() {
   ]);
   console.log('✅ Test bug comments created:', bugComments.length);
 
+  // 25. Create Lucia Meza teacher profile
+  console.log('👩‍🏫 Creating Lucia Meza teacher profile...');
+  const luciaMeza = await prisma.teacher.upsert({
+    where: { email: 'lucia.meza@matmax.store' },
+    update: {},
+    create: {
+      name: 'Lucia Meza',
+      email: 'lucia.meza@matmax.store',
+      phone: '+1234567893',
+      bio: 'Experienced yoga instructor specializing in Hatha and Vinyasa yoga. With over 8 years of teaching experience, Lucia brings a gentle yet powerful approach to her classes, helping students find balance and strength both on and off the mat.',
+      shortBio: 'Experienced yoga instructor specializing in Hatha and Vinyasa yoga with 8+ years of teaching experience.',
+      experience: 8,
+      teachingStyle: 'Gentle yet powerful approach focusing on alignment, breath, and mindful movement.',
+      philosophy: 'Yoga is a journey of self-discovery and transformation that extends beyond the physical practice.',
+      approach: 'Combines traditional yoga teachings with modern understanding of anatomy and movement.',
+      maxStudents: 15,
+      minStudents: 1,
+      preferredTimes: ['08:15', '09:30', '17:30', '18:45'],
+      isActive: true,
+      displayOrder: 1,
+      featured: true,
+      slug: 'lucia-meza',
+      metaTitle: 'Lucia Meza - Yoga Instructor | MatMax Yoga Studio',
+      metaDescription: 'Meet Lucia Meza, experienced yoga instructor specializing in Hatha and Vinyasa yoga at MatMax Yoga Studio.'
+    }
+  });
+  console.log('✅ Lucia Meza teacher profile created:', luciaMeza.id);
+
+  // 26. Create venue
+  console.log('🏢 Creating MatMax Yoga Studio venue...');
+  const venue = await prisma.venue.upsert({
+    where: { id: 1 },
+    update: {},
+    create: {
+      name: 'MatMax Yoga Studio',
+      description: 'A peaceful and modern yoga studio designed for wellness and mindfulness.',
+      address: '123 Wellness Street, Yoga District',
+      city: 'Lima',
+      country: 'Peru',
+      capacity: 20,
+      maxGroupSize: 15,
+      isActive: true,
+      displayOrder: 1,
+      featured: true
+    }
+  });
+  console.log('✅ MatMax Yoga Studio venue created:', venue.id);
+
+  // 27. Create service types (Hatha Yoga and Vinyasa Yoga)
+  console.log('🧘 Creating yoga service types...');
+  const serviceTypes = await Promise.all([
+    prisma.serviceType.upsert({
+      where: { id: 1 },
+      update: {},
+      create: {
+        name: 'Hatha Yoga',
+        description: 'A gentle form of yoga that focuses on basic postures and breathing techniques. Perfect for beginners and those looking for a slower-paced practice.',
+        shortDescription: 'Gentle yoga focusing on basic postures and breathing techniques.',
+        category: 'CLASS',
+        duration: 60,
+        maxParticipants: 15,
+        minParticipants: 1,
+        requirements: ['Yoga mat', 'Comfortable clothing', 'Water bottle'],
+        benefits: ['Improved flexibility', 'Better posture', 'Stress relief', 'Mind-body connection'],
+        difficulty: 'ALL_LEVELS',
+        price: 50.00,
+        currencyId: 5, // PEN
+        isActive: true,
+        displayOrder: 1,
+        featured: true,
+        color: '#4A90E2',
+        icon: 'lotus',
+        highlights: ['Beginner-friendly', 'Gentle approach', 'Focus on alignment', 'Breathing techniques']
+      }
+    }),
+    prisma.serviceType.upsert({
+      where: { id: 2 },
+      update: {},
+      create: {
+        name: 'Vinyasa Yoga',
+        description: 'A dynamic form of yoga that links breath with movement through flowing sequences. Great for building strength, flexibility, and cardiovascular fitness.',
+        shortDescription: 'Dynamic yoga linking breath with movement through flowing sequences.',
+        category: 'CLASS',
+        duration: 60,
+        maxParticipants: 15,
+        minParticipants: 1,
+        requirements: ['Yoga mat', 'Comfortable clothing', 'Water bottle'],
+        benefits: ['Improved strength', 'Better flexibility', 'Cardiovascular fitness', 'Mental focus'],
+        difficulty: 'INTERMEDIATE',
+        price: 50.00,
+        currencyId: 5, // PEN
+        isActive: true,
+        displayOrder: 2,
+        featured: true,
+        color: '#E24A4A',
+        icon: 'flow',
+        highlights: ['Dynamic flow', 'Strength building', 'Cardiovascular benefits', 'Mental focus']
+      }
+    })
+  ]);
+  console.log('✅ Yoga service types created:', serviceTypes.length);
+
+  // 28. Link Lucia Meza to both service types
+  console.log('🔗 Linking Lucia Meza to service types...');
+  const teacherServiceTypes = await Promise.all([
+    prisma.teacherServiceType.upsert({
+      where: { teacherId_serviceTypeId: { teacherId: luciaMeza.id, serviceTypeId: 1 } },
+      update: {},
+      create: {
+        teacherId: luciaMeza.id,
+        serviceTypeId: 1 // Hatha Yoga
+      }
+    }),
+    prisma.teacherServiceType.upsert({
+      where: { teacherId_serviceTypeId: { teacherId: luciaMeza.id, serviceTypeId: 2 } },
+      update: {},
+      create: {
+        teacherId: luciaMeza.id,
+        serviceTypeId: 2 // Vinyasa Yoga
+      }
+    })
+  ]);
+  console.log('✅ Teacher service types linked:', teacherServiceTypes.length);
+
+  // 29. Create recurring teacher schedules (EST timezone)
+  console.log('📅 Creating recurring teacher schedules in EST...');
+  const teacherSchedules = await Promise.all([
+    // Monday - 08:15 Hatha, 09:30 Vinyasa, 17:30 Hatha
+    prisma.teacherSchedule.upsert({
+      where: { id: 1 },
+      update: {},
+      create: {
+        teacherId: luciaMeza.id,
+        venueId: venue.id,
+        serviceTypeId: 1, // Hatha Yoga
+        dayOfWeek: 'Monday',
+        startTime: new Date('1970-01-01T13:15:00Z'), // 08:15 EST = 13:15 UTC
+        endTime: new Date('1970-01-01T14:15:00Z'), // 09:15 EST = 14:15 UTC
+        isAvailable: true,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherSchedule.upsert({
+      where: { id: 2 },
+      update: {},
+      create: {
+        teacherId: luciaMeza.id,
+        venueId: venue.id,
+        serviceTypeId: 2, // Vinyasa Yoga
+        dayOfWeek: 'Monday',
+        startTime: new Date('1970-01-01T14:30:00Z'), // 09:30 EST = 14:30 UTC
+        endTime: new Date('1970-01-01T15:30:00Z'), // 10:30 EST = 15:30 UTC
+        isAvailable: true,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherSchedule.upsert({
+      where: { id: 3 },
+      update: {},
+      create: {
+        teacherId: luciaMeza.id,
+        venueId: venue.id,
+        serviceTypeId: 1, // Hatha Yoga
+        dayOfWeek: 'Monday',
+        startTime: new Date('1970-01-01T22:30:00Z'), // 17:30 EST = 22:30 UTC
+        endTime: new Date('1970-01-01T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        isAvailable: true,
+        maxBookings: 15
+      }
+    }),
+    // Tuesday - 17:30 Hatha, 18:45 Vinyasa
+    prisma.teacherSchedule.upsert({
+      where: { id: 4 },
+      update: {},
+      create: {
+        teacherId: luciaMeza.id,
+        venueId: venue.id,
+        serviceTypeId: 1, // Hatha Yoga
+        dayOfWeek: 'Tuesday',
+        startTime: new Date('1970-01-01T22:30:00Z'), // 17:30 EST = 22:30 UTC
+        endTime: new Date('1970-01-01T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        isAvailable: true,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherSchedule.upsert({
+      where: { id: 5 },
+      update: {},
+      create: {
+        teacherId: luciaMeza.id,
+        venueId: venue.id,
+        serviceTypeId: 2, // Vinyasa Yoga
+        dayOfWeek: 'Tuesday',
+        startTime: new Date('1970-01-01T23:45:00Z'), // 18:45 EST = 23:45 UTC
+        endTime: new Date('1970-01-02T00:45:00Z'), // 19:45 EST = 00:45 UTC (next day)
+        isAvailable: true,
+        maxBookings: 15
+      }
+    }),
+    // Wednesday - 08:15 Hatha, 09:30 Vinyasa, 17:30 Hatha
+    prisma.teacherSchedule.upsert({
+      where: { id: 6 },
+      update: {},
+      create: {
+        teacherId: luciaMeza.id,
+        venueId: venue.id,
+        serviceTypeId: 1, // Hatha Yoga
+        dayOfWeek: 'Wednesday',
+        startTime: new Date('1970-01-01T13:15:00Z'), // 08:15 EST = 13:15 UTC
+        endTime: new Date('1970-01-01T14:15:00Z'), // 09:15 EST = 14:15 UTC
+        isAvailable: true,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherSchedule.upsert({
+      where: { id: 7 },
+      update: {},
+      create: {
+        teacherId: luciaMeza.id,
+        venueId: venue.id,
+        serviceTypeId: 2, // Vinyasa Yoga
+        dayOfWeek: 'Wednesday',
+        startTime: new Date('1970-01-01T14:30:00Z'), // 09:30 EST = 14:30 UTC
+        endTime: new Date('1970-01-01T15:30:00Z'), // 10:30 EST = 15:30 UTC
+        isAvailable: true,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherSchedule.upsert({
+      where: { id: 8 },
+      update: {},
+      create: {
+        teacherId: luciaMeza.id,
+        venueId: venue.id,
+        serviceTypeId: 1, // Hatha Yoga
+        dayOfWeek: 'Wednesday',
+        startTime: new Date('1970-01-01T22:30:00Z'), // 17:30 EST = 22:30 UTC
+        endTime: new Date('1970-01-01T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        isAvailable: true,
+        maxBookings: 15
+      }
+    }),
+    // Thursday - 17:30 Hatha, 18:45 Vinyasa
+    prisma.teacherSchedule.upsert({
+      where: { id: 9 },
+      update: {},
+      create: {
+        teacherId: luciaMeza.id,
+        venueId: venue.id,
+        serviceTypeId: 1, // Hatha Yoga
+        dayOfWeek: 'Thursday',
+        startTime: new Date('1970-01-01T22:30:00Z'), // 17:30 EST = 22:30 UTC
+        endTime: new Date('1970-01-01T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        isAvailable: true,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherSchedule.upsert({
+      where: { id: 10 },
+      update: {},
+      create: {
+        teacherId: luciaMeza.id,
+        venueId: venue.id,
+        serviceTypeId: 2, // Vinyasa Yoga
+        dayOfWeek: 'Thursday',
+        startTime: new Date('1970-01-01T23:45:00Z'), // 18:45 EST = 23:45 UTC
+        endTime: new Date('1970-01-02T00:45:00Z'), // 19:45 EST = 00:45 UTC (next day)
+        isAvailable: true,
+        maxBookings: 15
+      }
+    }),
+    // Friday - 08:15 Hatha, 09:30 Vinyasa, 17:30 Hatha
+    prisma.teacherSchedule.upsert({
+      where: { id: 11 },
+      update: {},
+      create: {
+        teacherId: luciaMeza.id,
+        venueId: venue.id,
+        serviceTypeId: 1, // Hatha Yoga
+        dayOfWeek: 'Friday',
+        startTime: new Date('1970-01-01T13:15:00Z'), // 08:15 EST = 13:15 UTC
+        endTime: new Date('1970-01-01T14:15:00Z'), // 09:15 EST = 14:15 UTC
+        isAvailable: true,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherSchedule.upsert({
+      where: { id: 12 },
+      update: {},
+      create: {
+        teacherId: luciaMeza.id,
+        venueId: venue.id,
+        serviceTypeId: 2, // Vinyasa Yoga
+        dayOfWeek: 'Friday',
+        startTime: new Date('1970-01-01T14:30:00Z'), // 09:30 EST = 14:30 UTC
+        endTime: new Date('1970-01-01T15:30:00Z'), // 10:30 EST = 15:30 UTC
+        isAvailable: true,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherSchedule.upsert({
+      where: { id: 13 },
+      update: {},
+      create: {
+        teacherId: luciaMeza.id,
+        venueId: venue.id,
+        serviceTypeId: 1, // Hatha Yoga
+        dayOfWeek: 'Friday',
+        startTime: new Date('1970-01-01T22:30:00Z'), // 17:30 EST = 22:30 UTC
+        endTime: new Date('1970-01-01T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        isAvailable: true,
+        maxBookings: 15
+      }
+    }),
+    // Saturday - 08:30 Hatha, 09:45 Vinyasa
+    prisma.teacherSchedule.upsert({
+      where: { id: 14 },
+      update: {},
+      create: {
+        teacherId: luciaMeza.id,
+        venueId: venue.id,
+        serviceTypeId: 1, // Hatha Yoga
+        dayOfWeek: 'Saturday',
+        startTime: new Date('1970-01-01T13:30:00Z'), // 08:30 EST = 13:30 UTC
+        endTime: new Date('1970-01-01T14:30:00Z'), // 09:30 EST = 14:30 UTC
+        isAvailable: true,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherSchedule.upsert({
+      where: { id: 15 },
+      update: {},
+      create: {
+        teacherId: luciaMeza.id,
+        venueId: venue.id,
+        serviceTypeId: 2, // Vinyasa Yoga
+        dayOfWeek: 'Saturday',
+        startTime: new Date('1970-01-01T14:45:00Z'), // 09:45 EST = 14:45 UTC
+        endTime: new Date('1970-01-01T15:45:00Z'), // 10:45 EST = 15:45 UTC
+        isAvailable: true,
+        maxBookings: 15
+      }
+    })
+  ]);
+  console.log('✅ Recurring teacher schedules created:', teacherSchedules.length);
+
+  // 30. Create specific schedule slots for October 6-11, 2025 (EST timezone)
+  console.log('📅 Creating specific schedule slots for October 6-11, 2025 in EST...');
+  const scheduleSlots = await Promise.all([
+    // Monday, October 6, 2025
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 1 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[0].id, // Monday 08:15 Hatha
+        startTime: new Date('2025-10-06T13:15:00Z'), // 08:15 EST = 13:15 UTC
+        endTime: new Date('2025-10-06T14:15:00Z'), // 09:15 EST = 14:15 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 2 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[1].id, // Monday 09:30 Vinyasa
+        startTime: new Date('2025-10-06T14:30:00Z'), // 09:30 EST = 14:30 UTC
+        endTime: new Date('2025-10-06T15:30:00Z'), // 10:30 EST = 15:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 3 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[2].id, // Monday 17:30 Hatha
+        startTime: new Date('2025-10-06T22:30:00Z'), // 17:30 EST = 22:30 UTC
+        endTime: new Date('2025-10-06T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    // Tuesday, October 7, 2025
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 4 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[3].id, // Tuesday 17:30 Hatha
+        startTime: new Date('2025-10-07T22:30:00Z'), // 17:30 EST = 22:30 UTC
+        endTime: new Date('2025-10-07T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 5 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[4].id, // Tuesday 18:45 Vinyasa
+        startTime: new Date('2025-10-07T23:45:00Z'), // 18:45 EST = 23:45 UTC
+        endTime: new Date('2025-10-08T00:45:00Z'), // 19:45 EST = 00:45 UTC (next day)
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    // Wednesday, October 8, 2025
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 6 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[5].id, // Wednesday 08:15 Hatha
+        startTime: new Date('2025-10-08T13:15:00Z'), // 08:15 EST = 13:15 UTC
+        endTime: new Date('2025-10-08T14:15:00Z'), // 09:15 EST = 14:15 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 7 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[6].id, // Wednesday 09:30 Vinyasa
+        startTime: new Date('2025-10-08T14:30:00Z'), // 09:30 EST = 14:30 UTC
+        endTime: new Date('2025-10-08T15:30:00Z'), // 10:30 EST = 15:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 8 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[7].id, // Wednesday 17:30 Hatha
+        startTime: new Date('2025-10-08T22:30:00Z'), // 17:30 EST = 22:30 UTC
+        endTime: new Date('2025-10-08T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    // Thursday, October 9, 2025
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 9 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[8].id, // Thursday 17:30 Hatha
+        startTime: new Date('2025-10-09T22:30:00Z'), // 17:30 EST = 22:30 UTC
+        endTime: new Date('2025-10-09T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 10 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[9].id, // Thursday 18:45 Vinyasa
+        startTime: new Date('2025-10-09T23:45:00Z'), // 18:45 EST = 23:45 UTC
+        endTime: new Date('2025-10-10T00:45:00Z'), // 19:45 EST = 00:45 UTC (next day)
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    // Friday, October 10, 2025
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 11 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[10].id, // Friday 08:15 Hatha
+        startTime: new Date('2025-10-10T13:15:00Z'), // 08:15 EST = 13:15 UTC
+        endTime: new Date('2025-10-10T14:15:00Z'), // 09:15 EST = 14:15 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 12 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[11].id, // Friday 09:30 Vinyasa
+        startTime: new Date('2025-10-10T14:30:00Z'), // 09:30 EST = 14:30 UTC
+        endTime: new Date('2025-10-10T15:30:00Z'), // 10:30 EST = 15:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 13 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[12].id, // Friday 17:30 Hatha
+        startTime: new Date('2025-10-10T22:30:00Z'), // 17:30 EST = 22:30 UTC
+        endTime: new Date('2025-10-10T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    // Saturday, October 11, 2025
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 14 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[13].id, // Saturday 08:30 Hatha
+        startTime: new Date('2025-10-11T13:30:00Z'), // 08:30 EST = 13:30 UTC
+        endTime: new Date('2025-10-11T14:30:00Z'), // 09:30 EST = 14:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 15 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[14].id, // Saturday 09:45 Vinyasa
+        startTime: new Date('2025-10-11T14:45:00Z'), // 09:45 EST = 14:45 UTC
+        endTime: new Date('2025-10-11T15:45:00Z'), // 10:45 EST = 15:45 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    })
+  ]);
+  console.log('✅ Schedule slots for October 6-11, 2025 created:', scheduleSlots.length);
+
+  // 31. Create specific schedule slots for September 2025 (EST timezone)
+  console.log('📅 Creating specific schedule slots for September 2025 in EST...');
+  const septemberScheduleSlots = await Promise.all([
+    // Monday, September 1, 2025
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 16 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[0].id, // Monday 08:15 Hatha
+        startTime: new Date('2025-09-01T13:15:00Z'), // 08:15 EST = 13:15 UTC
+        endTime: new Date('2025-09-01T14:15:00Z'), // 09:15 EST = 14:15 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 17 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[1].id, // Monday 09:30 Vinyasa
+        startTime: new Date('2025-09-01T14:30:00Z'), // 09:30 EST = 14:30 UTC
+        endTime: new Date('2025-09-01T15:30:00Z'), // 10:30 EST = 15:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 18 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[2].id, // Monday 17:30 Hatha
+        startTime: new Date('2025-09-01T22:30:00Z'), // 17:30 EST = 22:30 UTC
+        endTime: new Date('2025-09-01T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    // Tuesday, September 2, 2025
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 19 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[3].id, // Tuesday 17:30 Hatha
+        startTime: new Date('2025-09-02T22:30:00Z'), // 17:30 EST = 22:30 UTC
+        endTime: new Date('2025-09-02T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 20 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[4].id, // Tuesday 18:45 Vinyasa
+        startTime: new Date('2025-09-02T23:45:00Z'), // 18:45 EST = 23:45 UTC
+        endTime: new Date('2025-09-03T00:45:00Z'), // 19:45 EST = 00:45 UTC (next day)
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    // Wednesday, September 3, 2025
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 21 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[5].id, // Wednesday 08:15 Hatha
+        startTime: new Date('2025-09-03T13:15:00Z'), // 08:15 EST = 13:15 UTC
+        endTime: new Date('2025-09-03T14:15:00Z'), // 09:15 EST = 14:15 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 22 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[6].id, // Wednesday 09:30 Vinyasa
+        startTime: new Date('2025-09-03T14:30:00Z'), // 09:30 EST = 14:30 UTC
+        endTime: new Date('2025-09-03T15:30:00Z'), // 10:30 EST = 15:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 23 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[7].id, // Wednesday 17:30 Hatha
+        startTime: new Date('2025-09-03T22:30:00Z'), // 17:30 EST = 22:30 UTC
+        endTime: new Date('2025-09-03T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    // Thursday, September 4, 2025
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 24 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[8].id, // Thursday 17:30 Hatha
+        startTime: new Date('2025-09-04T22:30:00Z'), // 17:30 EST = 22:30 UTC
+        endTime: new Date('2025-09-04T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 25 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[9].id, // Thursday 18:45 Vinyasa
+        startTime: new Date('2025-09-04T23:45:00Z'), // 18:45 EST = 23:45 UTC
+        endTime: new Date('2025-09-05T00:45:00Z'), // 19:45 EST = 00:45 UTC (next day)
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    // Friday, September 5, 2025
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 26 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[10].id, // Friday 08:15 Hatha
+        startTime: new Date('2025-09-05T13:15:00Z'), // 08:15 EST = 13:15 UTC
+        endTime: new Date('2025-09-05T14:15:00Z'), // 09:15 EST = 14:15 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 27 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[11].id, // Friday 09:30 Vinyasa
+        startTime: new Date('2025-09-05T14:30:00Z'), // 09:30 EST = 14:30 UTC
+        endTime: new Date('2025-09-05T15:30:00Z'), // 10:30 EST = 15:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 28 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[12].id, // Friday 17:30 Hatha
+        startTime: new Date('2025-09-05T22:30:00Z'), // 17:30 EST = 22:30 UTC
+        endTime: new Date('2025-09-05T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    // Saturday, September 6, 2025
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 29 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[13].id, // Saturday 08:30 Hatha
+        startTime: new Date('2025-09-06T13:30:00Z'), // 08:30 EST = 13:30 UTC
+        endTime: new Date('2025-09-06T14:30:00Z'), // 09:30 EST = 14:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 30 },
+      update: {},
+      create: {
+        teacherScheduleId: teacherSchedules[14].id, // Saturday 09:45 Vinyasa
+        startTime: new Date('2025-09-06T14:45:00Z'), // 09:45 EST = 14:45 UTC
+        endTime: new Date('2025-09-06T15:45:00Z'), // 10:45 EST = 15:45 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    })
+  ]);
+  console.log('✅ Schedule slots for September 2025 created:', septemberScheduleSlots.length);
+
+  // 32. Create specific schedule slots for current week (September 15-21, 2025) in EST
+  console.log('📅 Creating specific schedule slots for current week (September 15-21, 2025) in EST...');
+  const currentWeekScheduleSlots = await Promise.all([
+    // Monday, September 15, 2025
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 31 },
+      update: {},
+      create: {
+        teacherScheduleId: 1, // Monday 08:15 Hatha
+        startTime: new Date('2025-09-15T13:15:00Z'), // 08:15 EST = 13:15 UTC
+        endTime: new Date('2025-09-15T14:15:00Z'), // 09:15 EST = 14:15 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 32 },
+      update: {},
+      create: {
+        teacherScheduleId: 2, // Monday 09:30 Vinyasa
+        startTime: new Date('2025-09-15T14:30:00Z'), // 09:30 EST = 14:30 UTC
+        endTime: new Date('2025-09-15T15:30:00Z'), // 10:30 EST = 15:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 33 },
+      update: {},
+      create: {
+        teacherScheduleId: 3, // Monday 17:30 Hatha
+        startTime: new Date('2025-09-15T22:30:00Z'), // 17:30 EST = 22:30 UTC
+        endTime: new Date('2025-09-15T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    // Tuesday, September 16, 2025
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 34 },
+      update: {},
+      create: {
+        teacherScheduleId: 4, // Tuesday 17:30 Hatha
+        startTime: new Date('2025-09-16T22:30:00Z'), // 17:30 EST = 22:30 UTC
+        endTime: new Date('2025-09-16T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 35 },
+      update: {},
+      create: {
+        teacherScheduleId: 5, // Tuesday 18:45 Vinyasa
+        startTime: new Date('2025-09-16T23:45:00Z'), // 18:45 EST = 23:45 UTC
+        endTime: new Date('2025-09-17T00:45:00Z'), // 19:45 EST = 00:45 UTC (next day)
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    // Wednesday, September 17, 2025
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 36 },
+      update: {},
+      create: {
+        teacherScheduleId: 6, // Wednesday 08:15 Hatha
+        startTime: new Date('2025-09-17T13:15:00Z'), // 08:15 EST = 13:15 UTC
+        endTime: new Date('2025-09-17T14:15:00Z'), // 09:15 EST = 14:15 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 37 },
+      update: {},
+      create: {
+        teacherScheduleId: 10, // Wednesday 09:30 Vinyasa
+        startTime: new Date('2025-09-17T14:30:00Z'), // 09:30 EST = 14:30 UTC
+        endTime: new Date('2025-09-17T15:30:00Z'), // 10:30 EST = 15:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 38 },
+      update: {},
+      create: {
+        teacherScheduleId: 9, // Wednesday 17:30 Hatha
+        startTime: new Date('2025-09-17T22:30:00Z'), // 17:30 EST = 22:30 UTC
+        endTime: new Date('2025-09-17T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    // Thursday, September 18, 2025
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 39 },
+      update: {},
+      create: {
+        teacherScheduleId: 12, // Thursday 17:30 Hatha
+        startTime: new Date('2025-09-18T22:30:00Z'), // 17:30 EST = 22:30 UTC
+        endTime: new Date('2025-09-18T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 40 },
+      update: {},
+      create: {
+        teacherScheduleId: 7, // Thursday 18:45 Vinyasa
+        startTime: new Date('2025-09-18T23:45:00Z'), // 18:45 EST = 23:45 UTC
+        endTime: new Date('2025-09-19T00:45:00Z'), // 19:45 EST = 00:45 UTC (next day)
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    // Friday, September 19, 2025
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 41 },
+      update: {},
+      create: {
+        teacherScheduleId: 11, // Friday 08:15 Hatha
+        startTime: new Date('2025-09-19T13:15:00Z'), // 08:15 EST = 13:15 UTC
+        endTime: new Date('2025-09-19T14:15:00Z'), // 09:15 EST = 14:15 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 42 },
+      update: {},
+      create: {
+        teacherScheduleId: 14, // Friday 09:30 Vinyasa
+        startTime: new Date('2025-09-19T14:30:00Z'), // 09:30 EST = 14:30 UTC
+        endTime: new Date('2025-09-19T15:30:00Z'), // 10:30 EST = 15:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 43 },
+      update: {},
+      create: {
+        teacherScheduleId: 15, // Friday 17:30 Hatha
+        startTime: new Date('2025-09-19T22:30:00Z'), // 17:30 EST = 22:30 UTC
+        endTime: new Date('2025-09-19T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    // Saturday, September 20, 2025
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 44 },
+      update: {},
+      create: {
+        teacherScheduleId: 13, // Saturday 08:30 Hatha
+        startTime: new Date('2025-09-20T13:30:00Z'), // 08:30 EST = 13:30 UTC
+        endTime: new Date('2025-09-20T14:30:00Z'), // 09:30 EST = 14:30 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    }),
+    prisma.teacherScheduleSlot.upsert({
+      where: { id: 45 },
+      update: {},
+      create: {
+        teacherScheduleId: 8, // Saturday 09:45 Vinyasa
+        startTime: new Date('2025-09-20T14:45:00Z'), // 09:45 EST = 14:45 UTC
+        endTime: new Date('2025-09-20T15:45:00Z'), // 10:45 EST = 15:45 UTC
+        isAvailable: true,
+        bookedCount: 0,
+        maxBookings: 15
+      }
+    })
+  ]);
+  console.log('✅ Schedule slots for current week (September 15-21, 2025) created:', currentWeekScheduleSlots.length);
+
   console.log('');
   console.log('🎉 Comprehensive database seeding completed successfully!');
   console.log('');
@@ -1251,7 +2163,7 @@ async function main() {
   console.log(`   📦 Package definitions: ${packageDefinitions.length}`);
   console.log(`   💲 Package prices: ${packagePrices.length}`);
   console.log(`   📅 Schedule templates: ${scheduleTemplates.length}`);
-  console.log(`   📅 Schedule slots: ${scheduleSlots.length}`);
+  console.log(`   📅 Schedule slots: ${legacyScheduleSlots.length}`);
   console.log(`   💳 Payment methods: ${paymentMethods.length}`);
   console.log(`   💳 Payment methods data: ${paymentMethodsData.length}`);
   console.log(`   👥 Group booking tiers: ${groupBookingTiers.length}`);
@@ -1267,6 +2179,14 @@ async function main() {
   console.log(`   🖼️ Test images: ${images.length}`);
   console.log(`   🐛 Test bug reports: ${bugReports.length}`);
   console.log(`   💬 Test bug comments: ${bugComments.length}`);
+  console.log(`   👩‍🏫 Lucia Meza teacher: ${luciaMeza.id}`);
+  console.log(`   🏢 MatMax Yoga Studio venue: ${venue.id}`);
+  console.log(`   🧘 Yoga service types: ${serviceTypes.length}`);
+  console.log(`   🔗 Teacher service types: ${teacherServiceTypes.length}`);
+  console.log(`   📅 Recurring teacher schedules: ${teacherSchedules.length}`);
+  console.log(`   📅 October 6-11, 2025 schedule slots: ${scheduleSlots.length}`);
+  console.log(`   📅 September 2025 schedule slots: ${septemberScheduleSlots.length}`);
+  console.log(`   📅 Current week (Sept 15-21, 2025) schedule slots: ${currentWeekScheduleSlots.length}`);
   console.log('');
   console.log('🚀 Your MatMax Yoga Studio system is now fully seeded and ready for testing!');
   console.log('');

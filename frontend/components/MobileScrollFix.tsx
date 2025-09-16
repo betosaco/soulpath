@@ -1,0 +1,28 @@
+'use client';
+
+import { useEffect } from 'react';
+
+export function MobileScrollFix() {
+  useEffect(() => {
+    // Fix mobile viewport height issues
+    const setVH = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
+
+    // Set initial value
+    setVH();
+
+    // Update on resize
+    window.addEventListener('resize', setVH);
+    window.addEventListener('orientationchange', setVH);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', setVH);
+      window.removeEventListener('orientationchange', setVH);
+    };
+  }, []);
+
+  return null;
+}

@@ -215,7 +215,7 @@ export function Header({
               className="hidden sm:flex items-center space-x-1 header-button-language-inactive"
             >
               <LogIn size={14} />
-              <span>{(t.nav as Record<string, string>).login || 'Login'}</span>
+              <span>{(t?.common as Record<string, string>)?.login || 'Login'}</span>
             </motion.button>
           )}
           
@@ -339,7 +339,7 @@ export function Header({
                   >
                     <LogIn size={18} />
                     <span className="text-base sm:text-lg font-medium">
-                      {user && isAdmin ? 'Dashboard' : (t.nav as Record<string, string>).login || 'Login'}
+                      {user && isAdmin ? 'Dashboard' : (t?.common as Record<string, string>)?.login || 'Login'}
                     </span>
                   </motion.button>
                 </nav>

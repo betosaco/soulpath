@@ -87,9 +87,18 @@ export function usePackages(currency: string = 'PEN'): UsePackagesReturn {
 
       console.log('✅ Packages fetched successfully:', response.data);
       
-      // Handle the API response format
+      // Handle the API response format - the response.data is already the API response
       const apiResponse = response.data as PackagesApiResponse;
-      const packages: PackagePrice[] = apiResponse?.success ? apiResponse.data : [];
+      console.log('🔍 API Response structure:', {
+        success: apiResponse?.success,
+        hasData: !!apiResponse?.data,
+        dataLength: apiResponse?.data?.length,
+        dataType: typeof apiResponse?.data,
+        dataIsArray: Array.isArray(apiResponse?.data)
+      });
+      
+      // The API response is already the correct format
+      const packages: PackagePrice[] = apiResponse?.success && Array.isArray(apiResponse.data) ? apiResponse.data : [];
       console.log('📦 Processed packages:', packages.length, packages);
       setPackages(packages);
       setLastLoaded(new Date());

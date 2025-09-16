@@ -1,13 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useProfileImage } from '@/hooks/useProfileImage';
 import { useTranslations, useLanguage } from '@/hooks/useTranslations';
 import { AdminDashboard } from '@/components/AdminDashboard';
-import { BookingSection } from '@/components/BookingSection';
 import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import { themeClasses } from '@/lib/theme/theme-utils';
 
 
@@ -16,9 +15,6 @@ interface TranslationProps {
   t: Record<string, string | Record<string, string>>;
 }
 
-interface SessionSectionProps extends TranslationProps {
-  scrollToSection: (sectionId: string) => void;
-}
 
 
 interface MainPageClientProps {
@@ -71,121 +67,6 @@ function HeroSection({ t }: TranslationProps) {
   );
 }
 
-// ApproachSection Component
-function ApproachSection({ t }: TranslationProps) {
-  return (
-    <motion.section
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 1 }}
-      className="relative h-screen flex items-center justify-center px-6"
-    >
-      <div className="max-w-6xl mx-auto text-center">
-        <motion.h2
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.8 }}
-          className={`text-4xl sm:text-5xl font-heading ${themeClasses.text.primary} mb-12`}
-        >
-          {typeof t?.approach === 'object' && t.approach?.title || 'Our Approach'}
-        </motion.h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[1, 2, 3].map((i) => (
-            <motion.div
-              key={i}
-              initial={{ y: 50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.5 + i * 0.1, duration: 0.8 }}
-              className={`rounded-2xl p-6 ${themeClasses.card.default}`}
-            >
-              <h3 className={`text-xl font-heading ${themeClasses.text.primary} mb-4`}>
-                {typeof t?.approach === 'object' && t.approach?.[`step${i}Title`] || `Step ${i}`}
-              </h3>
-              <p className={`${themeClasses.text.secondary} leading-relaxed`}>
-                {typeof t?.approach === 'object' && t.approach?.[`step${i}Description`] || `Description for step ${i}`}
-              </p>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </motion.section>
-  );
-}
-
-// SessionSection Component
-function SessionSection({ t, scrollToSection }: SessionSectionProps) {
-  return (
-    <motion.section
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 1 }}
-      className="relative h-screen flex items-center justify-center px-6"
-    >
-      <div className="max-w-4xl mx-auto text-center">
-        <motion.h2
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.8 }}
-          className={`text-4xl sm:text-5xl font-heading ${themeClasses.text.primary} mb-8`}
-        >
-          {typeof t?.session === 'object' && t.session?.title || 'Book Your Session'}
-        </motion.h2>
-        
-        <motion.p
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.8 }}
-          className={`text-xl ${themeClasses.text.secondary} mb-8 leading-relaxed`}
-        >
-          {typeof t?.session === 'object' && t.session?.description || 'Ready to begin your spiritual journey?'}
-        </motion.p>
-        
-        <motion.button
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.7, duration: 0.8 }}
-          onClick={() => scrollToSection('apply')}
-          className={`px-8 py-4 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-xl text-lg ${themeClasses.button.primary}`}
-        >
-          {typeof t?.session === 'object' && t.session?.cta || 'Get Started'}
-        </motion.button>
-      </div>
-    </motion.section>
-  );
-}
-
-// AboutSection Component
-function AboutSection({ t }: TranslationProps) {
-  return (
-    <motion.section
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 1 }}
-      className="relative h-screen flex items-center justify-center px-6"
-    >
-      <div className="max-w-4xl mx-auto text-center">
-        <motion.h2
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.8 }}
-          className={`text-4xl sm:text-5xl font-heading ${themeClasses.text.primary} mb-8`}
-        >
-          {typeof t?.about === 'object' && t.about?.title || 'About Us'}
-        </motion.h2>
-        
-        <motion.p
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.8 }}
-          className={`text-xl ${themeClasses.text.secondary} mb-8 leading-relaxed`}
-        >
-          {typeof t?.about === 'object' && t.about?.description || 'Learn more about our mission and approach to spiritual healing.'}
-        </motion.p>
-      </div>
-    </motion.section>
-  );
-}
 
 
 
@@ -220,77 +101,16 @@ export default function MainPageClient({
   const translations = t as Record<string, string | Record<string, string>>;
   const { } = useProfileImage(initialProfileImage);
 
-  const [currentSection, setCurrentSection] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
-  const [isScrolling, setIsScrolling] = useState(false);
-  
-  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
-  const sections = ['invitation', 'approach', 'session', 'about', 'apply'];
-
-  // Fullpage scroll functionality
-  useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
-      if (showAdmin || isMenuOpen || isScrolling) return;
-      e.preventDefault();
-      setIsScrolling(true);
-      
-      const direction = e.deltaY > 0 ? 1 : -1;
-      setCurrentSection((prev) => {
-        const next = prev + direction;
-        return Math.max(0, Math.min(sections.length - 1, next));
-      });
-      
-      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
-      scrollTimeout.current = setTimeout(() => setIsScrolling(false), 800);
-    };
-
-    let touchStartY = 0;
-    const handleTouchStart = (e: TouchEvent) => {
-      if (showAdmin || isMenuOpen) return;
-      touchStartY = e.touches[0].clientY;
-    };
-
-    const handleTouchEnd = (e: TouchEvent) => {
-      if (showAdmin || isMenuOpen || isScrolling) return;
-      const touchEndY = e.changedTouches[0].clientY;
-      const diff = touchStartY - touchEndY;
-      const minSwipeDistance = 50;
-      
-      if (Math.abs(diff) > minSwipeDistance) {
-        setIsScrolling(true);
-        if (diff > 0) {
-          setCurrentSection((prev) => Math.min(sections.length - 1, prev + 1));
-        } else {
-          setCurrentSection((prev) => Math.max(0, prev - 1));
-        }
-        if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
-        scrollTimeout.current = setTimeout(() => setIsScrolling(false), 800);
-      }
-    };
-
-    document.addEventListener('wheel', handleWheel, { passive: false });
-    document.addEventListener('touchstart', handleTouchStart, { passive: true });
-    document.addEventListener('touchend', handleTouchEnd, { passive: true });
-
-    return () => {
-      document.removeEventListener('wheel', handleWheel);
-      document.removeEventListener('touchstart', handleTouchStart);
-      document.removeEventListener('touchend', handleTouchEnd);
-      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
-    };
-  }, [showAdmin, isMenuOpen, sections.length, isScrolling]);
 
   const scrollToSection = (sectionName: string) => {
-    const index = sections.indexOf(sectionName);
-    if (index !== -1) {
-      setCurrentSection(index);
+    // Simple scroll to section functionality
+    const element = document.getElementById(sectionName);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
     }
     setIsMenuOpen(false);
-  };
-
-  const scrollToSectionByIndex = (index: number) => {
-    setCurrentSection(index);
   };
 
 
@@ -313,7 +133,7 @@ export default function MainPageClient({
   }
 
   return (
-    <div className={`h-screen overflow-hidden ${themeClasses.background.primary} ${themeClasses.text.primary} mobile-container`}>
+    <div className={`min-h-screen ${themeClasses.background.primary} ${themeClasses.text.primary}`}>
       <ConstellationBackground />
       
       <Header
@@ -327,64 +147,11 @@ export default function MainPageClient({
         isAdmin={false}
       />
       
-      <div 
-        className="fullpage-container" 
-        style={{ transform: `translateY(-${currentSection * 100}vh)` }}
-      >
-        <section id="invitation">
-          <HeroSection t={translations} />
-        </section>
-        <section id="approach">
-          <ApproachSection t={translations} />
-        </section>
-        <section id="session">
-          <SessionSection t={translations} scrollToSection={scrollToSection} />
-        </section>
-        <section id="about">
-          <AboutSection t={translations} />
-        </section>
-        <section id="apply">
-          <BookingSection t={translations} language={language} />
-        </section>
-      </div>
+      <main>
+        <HeroSection t={translations} />
+      </main>
       
-      {/* Navigation Dots */}
-      <div className="fixed right-2 sm:right-3 lg:right-6 top-1/2 -translate-y-1/2 z-40 flex flex-col space-y-2 sm:space-y-3 lg:space-y-4 navigation-dots">
-        {sections.map((section, index) => (
-          <motion.button
-            key={section}
-            onClick={() => scrollToSectionByIndex(index)}
-            whileHover={{ scale: 1.2 }}
-            whileTap={{ scale: 0.9 }}
-            className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full border-2 transition-all duration-300 touch-manipulation relative ${
-              currentSection === index
-                ? 'bg-[var(--color-primary-main)] border-[var(--color-primary-main)] shadow-lg shadow-[var(--color-primary-main)]/30'
-                : 'bg-transparent border-[var(--color-primary-main)]/50 hover:border-[var(--color-primary-main)] hover:bg-[var(--color-primary-main)]/10'
-            }`}
-            title={section}
-            aria-label={`Go to ${section} section`}
-          />
-        ))}
-      </div>
-      
-      {/* Next Section Arrow */}
-      <AnimatePresence>
-        {currentSection < sections.length - 1 && (
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => scrollToSectionByIndex(currentSection + 1)}
-            className="fixed bottom-6 right-6 w-12 h-12 rounded-full border-2 border-[var(--color-text-secondary)]/30 bg-[var(--color-surface-primary)]/80 backdrop-blur-md flex items-center justify-center text-[var(--color-text-secondary)] hover:text-[var(--color-primary-main)] hover:border-[var(--color-primary-main)]/50 transition-all duration-300 z-[9995] navigation-arrow touch-manipulation"
-            aria-label="Next section"
-          >
-            <ChevronRight size={20} />
-          </motion.button>
-        )}
-      </AnimatePresence>
-      
+      <Footer />
     </div>
   );
 }

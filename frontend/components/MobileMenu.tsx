@@ -102,21 +102,23 @@ export function MobileMenu({
                       onClick={() => setLanguage('en')}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className={`px-4 sm:px-6 py-3 sm:py-4 rounded-xl transition-all duration-200 touch-manipulation font-medium text-sm sm:text-base min-h-[48px] mobile-touch-feedback ${
+                      className={`px-4 sm:px-6 py-3 sm:py-4 rounded-xl transition-all duration-200 touch-manipulation font-medium text-sm sm:text-base min-h-[48px] mobile-touch-feedback flex items-center space-x-2 ${
                         language === 'en' ? 'text-[#FFD700] bg-[#FFD700]/15 border border-[#FFD700]/30' : 'text-[#C0C0C0] hover:text-[#FFD700] hover:bg-[#C0C0C0]/10'
                       }`}
                     >
-                      English
+                      <span className="text-lg sm:text-xl">🇺🇸</span>
+                      <span>English</span>
                     </motion.button>
                     <motion.button 
                       onClick={() => setLanguage('es')}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className={`px-4 sm:px-6 py-3 sm:py-4 rounded-xl transition-all duration-200 touch-manipulation font-medium text-sm sm:text-base min-h-[48px] mobile-touch-feedback ${
+                      className={`px-4 sm:px-6 py-3 sm:py-4 rounded-xl transition-all duration-200 touch-manipulation font-medium text-sm sm:text-base min-h-[48px] mobile-touch-feedback flex items-center space-x-2 ${
                         language === 'es' ? 'text-[#FFD700] bg-[#FFD700]/15 border border-[#FFD700]/30' : 'text-[#C0C0C0] hover:text-[#FFD700] hover:bg-[#C0C0C0]/10'
                       }`}
                     >
-                      Español
+                      <span className="text-lg sm:text-xl">🇪🇸</span>
+                      <span>Español</span>
                     </motion.button>
                   </div>
                   

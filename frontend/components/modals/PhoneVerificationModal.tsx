@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Phone, ArrowLeft, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useToast } from '../cms/Toast';
+import '../ui/mobile-booking.css';
 
 interface Country {
   code: string;
@@ -32,15 +33,15 @@ interface PhoneVerificationModalProps {
 }
 
 const countries: Country[] = [
-  { code: 'US', name: 'United States', flag: '🇺🇸', prefix: '+1', example: '5551234567' },
+  { code: 'PE', name: 'Peru', flag: '🇵🇪', prefix: '+51', example: '912345678' },
   { code: 'CO', name: 'Colombia', flag: '🇨🇴', prefix: '+57', example: '3001234567' },
   { code: 'MX', name: 'Mexico', flag: '🇲🇽', prefix: '+52', example: '5512345678' },
   { code: 'ES', name: 'Spain', flag: '🇪🇸', prefix: '+34', example: '612345678' },
-  { code: 'CA', name: 'Canada', flag: '🇨🇦', prefix: '+1', example: '5551234567' },
-  { code: 'BR', name: 'Brazil', flag: '🇧🇷', prefix: '+55', example: '11987654321' },
   { code: 'AR', name: 'Argentina', flag: '🇦🇷', prefix: '+54', example: '91123456789' },
   { code: 'CL', name: 'Chile', flag: '🇨🇱', prefix: '+56', example: '912345678' },
-  { code: 'PE', name: 'Peru', flag: '🇵🇪', prefix: '+51', example: '912345678' },
+  { code: 'US', name: 'United States', flag: '🇺🇸', prefix: '+1', example: '5551234567' },
+  { code: 'CA', name: 'Canada', flag: '🇨🇦', prefix: '+1', example: '5551234567' },
+  { code: 'BR', name: 'Brazil', flag: '🇧🇷', prefix: '+55', example: '11987654321' },
 ];
 
 export function PhoneVerificationModal({ 
@@ -56,6 +57,7 @@ export function PhoneVerificationModal({
   const [error, setError] = useState('');
   const [, setOtpSent] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const toast = useToast();
 
   // Timer for OTP resend
@@ -68,6 +70,18 @@ export function PhoneVerificationModal({
     }
     return () => clearInterval(interval);
   }, [timeRemaining]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isCountryDropdownOpen && !(event.target as Element).closest('.country-dropdown')) {
+        setIsCountryDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isCountryDropdownOpen]);
 
   const handleSendOtp = async () => {
     if (!phoneNumber.trim()) {
@@ -252,21 +266,56 @@ export function PhoneVerificationModal({
                   <label className="text-sm font-medium text-[#EAEAEA]">
                     Country
                   </label>
-                  <div className="relative">
-                    <select
-                      value={selectedCountry.code}
-                      onChange={(e) => {
-                        const country = countries.find(c => c.code === e.target.value);
-                        if (country) setSelectedCountry(country);
-                      }}
-                      className="w-full p-3 bg-[#191970]/10 border border-[#C0C0C0]/20 text-[#EAEAEA] rounded-lg focus:ring-2 focus:ring-[#FFD700] focus:border-transparent"
+                  <div className="relative country-dropdown">
+                    <button
+                      type="button"
+                      onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
+                      className="w-full p-3 bg-[#191970]/10 border border-[#C0C0C0]/20 text-[#EAEAEA] rounded-lg focus:ring-2 focus:ring-[#FFD700] focus:border-transparent flex items-center justify-between mobile-touch-target"
                     >
-                      {countries.map((country) => (
-                        <option key={country.code} value={country.code}>
-                          {country.flag} {country.name} ({country.prefix})
-                        </option>
-                      ))}
-                    </select>
+                      <div className="flex items-center space-x-3">
+                        <span className="text-lg">{selectedCountry.flag}</span>
+                        <span className="text-sm">{selectedCountry.name}</span>
+                        <span className="text-xs text-[#C0C0C0]/70">({selectedCountry.prefix})</span>
+                      </div>
+                      <svg 
+                        className={`w-4 h-4 text-[#C0C0C0] transition-transform duration-200 ${isCountryDropdownOpen ? 'rotate-180' : ''}`} 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    
+                    {/* Dropdown Menu */}
+                    {isCountryDropdownOpen && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-[#191970]/95 backdrop-blur-xl border border-[#C0C0C0]/20 rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto mobile-scroll">
+                        {countries.map((country) => (
+                          <button
+                            key={country.code}
+                            type="button"
+                            onClick={() => {
+                              setSelectedCountry(country);
+                              setIsCountryDropdownOpen(false);
+                            }}
+                            className={`w-full px-4 py-3 text-left hover:bg-[#FFD700]/10 transition-colors duration-200 flex items-center space-x-3 mobile-touch-target ${
+                              selectedCountry.code === country.code ? 'bg-[#FFD700]/15 text-[#FFD700]' : 'text-[#EAEAEA]'
+                            }`}
+                          >
+                            <span className="text-lg">{country.flag}</span>
+                            <div className="flex-1">
+                              <div className="text-sm font-medium">{country.name}</div>
+                              <div className="text-xs text-[#C0C0C0]/70">{country.prefix}</div>
+                            </div>
+                            {selectedCountry.code === country.code && (
+                              <svg className="w-4 h-4 text-[#FFD700]" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
 
