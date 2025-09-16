@@ -17,37 +17,6 @@ import { toast } from 'sonner';
 
 // PackagePrice interface is now imported from usePackages hook
 
-interface TeacherScheduleSlotApiResponse {
-  id: number;
-  date: string;
-  time: string;
-  isAvailable: boolean;
-  capacity: number;
-  bookedCount: number;
-  duration: number;
-  teacher: {
-    id: number;
-    name: string;
-    email: string;
-    languages: string[];
-    experience: number;
-    isActive: boolean;
-  };
-  serviceType: {
-    id: number;
-    name: string;
-    duration: number;
-  };
-  venue: {
-    id: number;
-    name: string;
-    city: string;
-    country: string;
-    capacity: number;
-    isActive: boolean;
-  };
-  dayOfWeek: string;
-}
 
 interface ScheduleSlot {
   id: number;
@@ -183,7 +152,7 @@ export default function PackagesPage() {
     setCurrentStep(1);
   };
 
-  const handleSlotSelect = (slot: any) => {
+  const handleSlotSelect = (slot: ScheduleSlot) => {
     // Transform the slot data to match the expected format
     const transformedSlot = {
       id: slot.id,
