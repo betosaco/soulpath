@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Quick Izipay Setup - One-liner script
+echo "🚀 Quick Izipay Environment Setup"
+
+# Create .env.local
+cat > .env.local << 'EOF'
+# Izipay Configuration
+IZIPAY_TEST_USERNAME=88569105
+IZIPAY_TEST_PASSWORD=testpassword_NS]pdOEIQsM4RMu16WF89kCViBW9ddilhEdsq02sHA2T
+IZIPAY_TEST_PUBLIC_KEY=88569105:testpublickey_oHKEsiKA3i9E1JshcnIA7RktrR163DdRZYZYOWgXqwSXx
+IZIPAY_TEST_HMAC_KEY=H9ataKGBMUFzH8F0kz4ihdw3MTBb0WbpJ1TLLuRL<HZM1
+IZIPAY_PROD_USERNAME=88569105
+IZIPAY_PROD_PASSWORD=prodpassword_di6IeBzwz6ccq30feWkUmGN5s6PmhX67|6RrKJHSicFPh
+IZIPAY_PROD_PUBLIC_KEY=88569105:publickey UKrWazicOvfMEi40dXuBAcGK1TaTK6izIIJZYWWHGCakv
+IZIPAY_PROD_HMAC_KEY=XnvOuum4jpXuY9U1BbpoY3tPK0KRy3|vBfw1ZKmp2G2Sz
+IZIPAY_API_BASE_URL=https://api.micuentaweb.pe
+IZIPAY_JAVASCRIPT_URL=https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js
+EOF
+
+echo "✅ Local environment variables created"
+echo "📝 Next steps:"
+echo "1. Run: npm run dev"
+echo "2. Test payment on packages page"
+echo "3. For Vercel: run ./setup-izipay-env.sh"
