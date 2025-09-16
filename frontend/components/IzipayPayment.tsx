@@ -55,6 +55,15 @@ export default function IzipayPayment({
       script.onload = () => {
         console.log('📜 Izipay script loaded successfully');
         console.log('📜 KR object available after script load:', !!window.KR);
+        
+        // Immediately set the public key to prevent CLIENT_501 error
+        if (window.KR && publicKey) {
+          console.log('🔑 Setting public key immediately after script load');
+          window.KR.setFormConfig({
+            'kr-public-key': publicKey
+          });
+        }
+        
         setIsScriptLoaded(true);
       };
       script.onerror = () => {
@@ -69,9 +78,18 @@ export default function IzipayPayment({
       loadScript();
     } else {
       console.log('📜 KR already available, skipping script load');
+      
+      // Immediately set the public key if available
+      if (publicKey) {
+        console.log('🔑 Setting public key immediately for already loaded KR');
+        window.KR.setFormConfig({
+          'kr-public-key': publicKey
+        });
+      }
+      
       setIsScriptLoaded(true);
     }
-  }, []);
+  }, [publicKey]);
 
   // Create form token
   useEffect(() => {
@@ -124,10 +142,9 @@ export default function IzipayPayment({
         // Clear previous form
         paymentContainerRef.current.innerHTML = '';
 
-        // Set up KR configuration FIRST - this is critical!
-        console.log('🔑 Setting KR config with public key:', publicKey);
+        // Set up additional KR configuration
+        console.log('🔑 Setting additional KR config');
         window.KR.setFormConfig({
-          'kr-public-key': publicKey,
           'kr-post-url-success': window.location.origin + '/api/izipay/payment-success',
           'kr-post-url-refused': window.location.origin + '/api/izipay/payment-error',
           'kr-post-url-cancelled': window.location.origin + '/api/izipay/payment-cancelled'
