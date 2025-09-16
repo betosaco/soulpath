@@ -97,6 +97,8 @@ export default function IzipayPayment({
           throw new Error(data.error || 'Failed to create payment token');
         }
 
+        console.log('🎫 Received form token:', data.formToken ? 'Present' : 'Missing');
+        console.log('🔑 Received public key:', data.publicKey ? 'Present' : 'Missing');
         setFormToken(data.formToken);
         setPublicKey(data.publicKey);
       } catch (err) {
@@ -118,45 +120,51 @@ export default function IzipayPayment({
         // Clear previous form
         paymentContainerRef.current.innerHTML = '';
 
-        // Wait a bit for KR to be fully initialized
+        // Set up KR configuration FIRST
+        console.log('🔑 Setting KR config with public key:', publicKey);
+        window.KR.setFormConfig({
+          'kr-public-key': publicKey,
+          'kr-form-token': formToken,
+          'kr-post-url-success': window.location.origin + '/api/izipay/payment-success',
+          'kr-post-url-refused': window.location.origin + '/api/izipay/payment-error',
+          'kr-post-url-cancelled': window.location.origin + '/api/izipay/payment-cancelled'
+        });
+
+        // Set up event handlers
+        window.KR.onSubmit(() => {
+          console.log('Payment form submitted');
+        });
+
+        window.KR.onError((error: any) => {
+          console.error('Payment error:', error);
+          onError(error.message || 'Payment failed');
+        });
+
+        window.KR.onTransactionCreated((result: any) => {
+          console.log('Transaction created:', result);
+          onSuccess(result);
+        });
+
+        // Create embedded form
+        const formDiv = document.createElement('div');
+        formDiv.id = 'izipay-payment-form';
+        formDiv.className = 'kr-embedded';
+        formDiv.setAttribute('kr-form-token', formToken);
+        paymentContainerRef.current.appendChild(formDiv);
+
+        // Wait a bit for the DOM to be ready, then add and show form
         setTimeout(() => {
-          // Set up KR configuration
-          window.KR.setFormConfig({
-            'kr-public-key': publicKey,
-            'kr-form-token': formToken,
-            'kr-post-url-success': window.location.origin + '/api/izipay/payment-success',
-            'kr-post-url-refused': window.location.origin + '/api/izipay/payment-error',
-            'kr-post-url-cancelled': window.location.origin + '/api/izipay/payment-cancelled'
-          });
-
-          // Set up event handlers
-          window.KR.onSubmit(() => {
-            console.log('Payment form submitted');
-          });
-
-          window.KR.onError((error: any) => {
-            console.error('Payment error:', error);
-            onError(error.message || 'Payment failed');
-          });
-
-          window.KR.onTransactionCreated((result: any) => {
-            console.log('Transaction created:', result);
-            onSuccess(result);
-          });
-
-          // Create embedded form
-          const formDiv = document.createElement('div');
-          formDiv.id = 'izipay-payment-form';
-          formDiv.className = 'kr-embedded';
-          formDiv.setAttribute('kr-form-token', formToken);
-          paymentContainerRef.current.appendChild(formDiv);
-
-          // Add form to KR
-          window.KR.addForm('#izipay-payment-form');
-          window.KR.showForm('#izipay-payment-form');
-
-          setIsLoading(false);
-        }, 100);
+          try {
+            // Add form to KR
+            window.KR.addForm('#izipay-payment-form');
+            window.KR.showForm('#izipay-payment-form');
+            setIsLoading(false);
+          } catch (formError) {
+            console.error('Error adding/showing form:', formError);
+            setError('Failed to display payment form');
+            setIsLoading(false);
+          }
+        }, 200);
       } catch (err) {
         console.error('Error initializing payment form:', err);
         setError('Failed to initialize payment form');

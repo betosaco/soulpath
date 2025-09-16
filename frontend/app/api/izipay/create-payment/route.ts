@@ -5,15 +5,8 @@ export async function POST(request: NextRequest) {
   try {
     const body: PaymentFormConfig = await request.json();
     
-    console.log('🔍 Izipay API - Request body received:', JSON.stringify(body, null, 2));
-    
     // Validate required fields
     if (!body.amount || !body.orderId || !body.customer?.email) {
-      console.log('❌ Missing required fields:', { 
-        amount: body.amount, 
-        orderId: body.orderId, 
-        email: body.customer?.email 
-      });
       return NextResponse.json(
         { 
           success: false, 
@@ -25,12 +18,6 @@ export async function POST(request: NextRequest) {
 
     // Get Izipay configuration
     const config = getIzipayConfig();
-    console.log('🔧 Izipay config loaded:', {
-      username: config.USERNAME,
-      apiBaseUrl: config.API_BASE_URL,
-      hasPassword: !!config.PASSWORD,
-      hasPublicKey: !!config.PUBLIC_KEY
-    });
     
     // Prepare the request payload according to Izipay documentation
     const payload = {
@@ -55,18 +42,6 @@ export async function POST(request: NextRequest) {
     const credentials = Buffer.from(`${config.USERNAME}:${config.PASSWORD}`).toString('base64');
     const apiUrl = `${config.API_BASE_URL}${IZIPAY_ENDPOINTS.CREATE_PAYMENT}`;
     
-    console.log('🌐 Making request to Izipay:', {
-      url: apiUrl,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${credentials.substring(0, 20)}...`,
-        'Accept': 'application/json'
-      }
-    });
-    
-    console.log('📦 Request payload to Izipay:', JSON.stringify(payload, null, 2));
-    
     // Make request to Izipay API
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -78,18 +53,13 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(payload)
     });
 
-    console.log('📡 Izipay response status:', response.status);
-    console.log('📡 Izipay response headers:', Object.fromEntries(response.headers.entries()));
-    
     const responseText = await response.text();
-    console.log('📊 Izipay raw response:', responseText);
     
     let data: FormTokenResponse;
     try {
       data = JSON.parse(responseText);
-      console.log('📊 Izipay parsed response:', JSON.stringify(data, null, 2));
     } catch (parseError) {
-      console.error('❌ Failed to parse Izipay response as JSON:', parseError);
+      console.error('Failed to parse Izipay response as JSON:', parseError);
       throw new Error(`Invalid JSON response from Izipay: ${responseText}`);
     }
 
