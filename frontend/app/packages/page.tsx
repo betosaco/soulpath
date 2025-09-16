@@ -6,7 +6,7 @@ import { Package, CheckCircle, ArrowRight, ArrowLeft, Clock, Users, Star, Loader
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { IzipayPaymentMethod } from '@/components/izipay/IzipayPaymentMethod';
+import IzipayPayment from '@/components/IzipayPayment';
 import { Header } from '@/components/Header';
 import { EnhancedSchedule } from '@/components/EnhancedSchedule';
 import '@/components/ui/mobile-booking.css';
@@ -795,19 +795,12 @@ export default function PackagesPage() {
 
                   {/* Payment Method */}
                   {formData.selectedPackage && (
-                    <IzipayPaymentMethod
+                    <IzipayPayment
                       amount={formData.selectedPackage.price}
-                      currency="PEN"
+                      orderId={`order-${Date.now()}-${formData.selectedPackage.id}`}
                       customerEmail={formData.clientEmail}
                       customerName={formData.clientName}
-                      description={`${formData.selectedPackage.packageDefinition.name} - ${formData.selectedPackage.packageDefinition.sessionsCount} sessions`}
-                      packagePriceId={formData.selectedPackage.id}
-                      quantity={1}
-                      metadata={{
-                        clientPhone: `${formData.countryCode}${formData.clientPhone}`,
-                        language: formData.language,
-                        scheduleSlotId: formData.selectedScheduleSlot?.id
-                      }}
+                      customerPhone={`${formData.countryCode}${formData.clientPhone}`}
                       onSuccess={handlePaymentSuccess}
                       onError={handlePaymentError}
                       onCancel={() => setCurrentStep(2)}
