@@ -49,6 +49,25 @@ export default function IzipayPayment({
         return;
       }
 
+      // Create a script tag that sets the public key before the KR script loads
+      const configScript = document.createElement('script');
+      configScript.textContent = `
+        window.KR = window.KR || {};
+        window.KR.setFormConfig = function(config) {
+          this._config = this._config || {};
+          Object.assign(this._config, config);
+        };
+        window.KR.getFormConfig = function() {
+          return this._config || {};
+        };
+        if (window.KR.setFormConfig) {
+          window.KR.setFormConfig({
+            'kr-public-key': '${publicKey}'
+          });
+        }
+      `;
+      document.head.appendChild(configScript);
+
       const script = document.createElement('script');
       script.src = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js';
       script.async = true;
@@ -56,9 +75,9 @@ export default function IzipayPayment({
         console.log('📜 Izipay script loaded successfully');
         console.log('📜 KR object available after script load:', !!window.KR);
         
-        // Immediately set the public key to prevent CLIENT_501 error
+        // Ensure the public key is still set after the script loads
         if (window.KR && publicKey) {
-          console.log('🔑 Setting public key immediately after script load');
+          console.log('🔑 Ensuring public key is set after script load');
           window.KR.setFormConfig({
             'kr-public-key': publicKey
           });
@@ -78,15 +97,6 @@ export default function IzipayPayment({
       loadScript();
     } else {
       console.log('📜 KR already available, skipping script load');
-      
-      // Immediately set the public key if available
-      if (publicKey) {
-        console.log('🔑 Setting public key immediately for already loaded KR');
-        window.KR.setFormConfig({
-          'kr-public-key': publicKey
-        });
-      }
-      
       setIsScriptLoaded(true);
     }
   }, [publicKey]);
