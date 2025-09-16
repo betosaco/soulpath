@@ -21,25 +21,28 @@ import { toast } from 'sonner';
 interface Teacher {
   id: number;
   name: string;
-  email: string;
-  languages: string[];
+  bio?: string;
+  shortBio?: string;
   experience: number;
-  isActive: boolean;
+  avatarUrl?: string;
 }
 
 interface ServiceType {
   id: number;
   name: string;
+  description?: string;
+  shortDescription?: string;
   duration: number;
+  difficulty?: string;
+  color?: string;
+  icon?: string;
 }
 
 interface Venue {
   id: number;
   name: string;
-  city: string;
-  country: string;
-  capacity: number;
-  isActive: boolean;
+  address?: string;
+  city?: string;
 }
 
 interface ScheduleSlot {
