@@ -49,40 +49,16 @@ export default function IzipayPayment({
         return;
       }
 
-      // Create a script tag that sets the public key before the KR script loads
-      const configScript = document.createElement('script');
-      configScript.textContent = `
-        window.KR = window.KR || {};
-        window.KR.setFormConfig = function(config) {
-          this._config = this._config || {};
-          Object.assign(this._config, config);
-        };
-        window.KR.getFormConfig = function() {
-          return this._config || {};
-        };
-        if (window.KR.setFormConfig) {
-          window.KR.setFormConfig({
-            'kr-public-key': '${publicKey}'
-          });
-        }
-      `;
-      document.head.appendChild(configScript);
-
       const script = document.createElement('script');
       script.src = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js';
+      script.setAttribute('kr-public-key', publicKey || '');
+      script.setAttribute('kr-post-url-success', window.location.origin + '/api/izipay/payment-success');
+      script.setAttribute('kr-post-url-refused', window.location.origin + '/api/izipay/payment-error');
+      script.setAttribute('kr-post-url-cancelled', window.location.origin + '/api/izipay/payment-cancelled');
       script.async = true;
       script.onload = () => {
         console.log('📜 Izipay script loaded successfully');
         console.log('📜 KR object available after script load:', !!window.KR);
-        
-        // Ensure the public key is still set after the script loads
-        if (window.KR && publicKey) {
-          console.log('🔑 Ensuring public key is set after script load');
-          window.KR.setFormConfig({
-            'kr-public-key': publicKey
-          });
-        }
-        
         setIsScriptLoaded(true);
       };
       script.onerror = () => {
