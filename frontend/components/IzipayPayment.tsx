@@ -49,9 +49,16 @@ export default function IzipayPayment({
         return;
       }
 
+      // Only load script if we have the public key
+      if (!publicKey) {
+        console.log('⏳ Waiting for public key before loading script...');
+        return;
+      }
+
+      console.log('📜 Loading Izipay script with public key:', publicKey);
       const script = document.createElement('script');
       script.src = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js';
-      script.setAttribute('kr-public-key', publicKey || '');
+      script.setAttribute('kr-public-key', publicKey);
       script.setAttribute('kr-post-url-success', window.location.origin + '/api/izipay/payment-success');
       script.setAttribute('kr-post-url-refused', window.location.origin + '/api/izipay/payment-error');
       script.setAttribute('kr-post-url-cancelled', window.location.origin + '/api/izipay/payment-cancelled');

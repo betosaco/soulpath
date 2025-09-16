@@ -4,9 +4,15 @@ import { getIzipayConfig, IZIPAY_ENDPOINTS, PaymentFormConfig, FormTokenResponse
 export async function POST(request: NextRequest) {
   try {
     const body: PaymentFormConfig = await request.json();
+    console.log('🔍 API Request body:', JSON.stringify(body, null, 2));
     
     // Validate required fields
     if (!body.amount || !body.orderId || !body.customer?.email) {
+      console.log('❌ Missing required fields:', {
+        amount: body.amount,
+        orderId: body.orderId,
+        customerEmail: body.customer?.email
+      });
       return NextResponse.json(
         { 
           success: false, 
