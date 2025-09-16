@@ -25,6 +25,17 @@ export async function POST(request: NextRequest) {
     // Get Izipay configuration
     const config = getIzipayConfig();
     
+    // Check if mock mode is enabled
+    if (config.MOCK_MODE) {
+      console.log('🎭 Mock mode enabled - returning mock payment token');
+      return NextResponse.json({
+        success: true,
+        formToken: `MOCK-TOKEN-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        publicKey: 'MOCK-PUBLIC-KEY',
+        javascriptUrl: config.JAVASCRIPT_URL
+      });
+    }
+    
     // Prepare the request payload according to Izipay documentation
     const payload = {
       amount: Math.round(body.amount * 100), // Convert to cents (required: integer)

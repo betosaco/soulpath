@@ -102,6 +102,13 @@ export default function IzipayPayment({
         return;
       }
 
+      // Check if this is a mock payment (mock public key)
+      if (publicKey === 'MOCK-PUBLIC-KEY') {
+        console.log('🎭 Mock payment detected - skipping Izipay script load');
+        setIsScriptLoaded(true);
+        return;
+      }
+
       console.log('📜 Loading Izipay script with public key:', publicKey);
       const script = document.createElement('script');
       script.src = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js';
@@ -133,10 +140,76 @@ export default function IzipayPayment({
 
   // Initialize payment form
   useEffect(() => {
-    if (isScriptLoaded && formToken && publicKey && paymentContainerRef.current && window.KR) {
+    if (isScriptLoaded && formToken && publicKey && paymentContainerRef.current) {
       try {
         // Clear previous form
         paymentContainerRef.current.innerHTML = '';
+
+        // Check if this is a mock payment
+        if (publicKey === 'MOCK-PUBLIC-KEY') {
+          console.log('🎭 Creating mock payment form');
+          const mockForm = document.createElement('div');
+          mockForm.className = 'mock-payment-form p-6 bg-gray-50 border border-gray-200 rounded-lg';
+          mockForm.innerHTML = `
+            <div class="text-center mb-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">Mock Payment Form</h3>
+              <p class="text-gray-600">This is a development mock - no real payment will be processed</p>
+            </div>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Card Number</label>
+                <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="1234 5678 9012 3456" />
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
+                  <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="MM/YY" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">CVV</label>
+                  <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="123" />
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Cardholder Name</label>
+                <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="John Doe" />
+              </div>
+              <div class="pt-4">
+                <button 
+                  id="mock-pay-button"
+                  class="w-full bg-primary text-white py-3 px-4 rounded-md font-medium hover:bg-primary/90 transition-colors"
+                >
+                  Pay S/ ${amount.toFixed(2)}
+                </button>
+              </div>
+            </div>
+          `;
+          paymentContainerRef.current.appendChild(mockForm);
+          
+          // Add click handler for mock payment
+          const payButton = mockForm.querySelector('#mock-pay-button');
+          payButton?.addEventListener('click', () => {
+            console.log('🎭 Mock payment submitted');
+            onSuccess({
+              orderId: orderId,
+              amount: amount,
+              currency: 'PEN',
+              status: 'PAID',
+              mockPayment: true
+            });
+          });
+          
+          setIsLoading(false);
+          return;
+        }
+
+        // Real Izipay form initialization
+        if (!window.KR) {
+          console.log('❌ KR object not available for real payment');
+          setError('Payment system not available');
+          setIsLoading(false);
+          return;
+        }
 
         // Set up additional KR configuration
         console.log('🔑 Setting additional KR config');
