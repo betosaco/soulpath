@@ -5,11 +5,8 @@ export async function POST(request: NextRequest) {
   try {
     const body: PaymentFormConfig = await request.json();
     
-    console.log('🔍 Izipay API - Request body:', body);
-    
     // Validate required fields
     if (!body.amount || !body.orderId || !body.customer?.email) {
-      console.log('❌ Missing required fields:', { amount: body.amount, orderId: body.orderId, email: body.customer?.email });
       return NextResponse.json(
         { 
           success: false, 
@@ -21,13 +18,6 @@ export async function POST(request: NextRequest) {
 
     // Get Izipay configuration
     const config = getIzipayConfig();
-    console.log('🔧 Izipay config:', { 
-      username: config.USERNAME, 
-      apiBaseUrl: config.API_BASE_URL,
-      hasPassword: !!config.PASSWORD 
-    });
-    console.log('🔧 Raw config object:', config);
-    console.log('🔧 API_BASE_URL directly:', config.API_BASE_URL);
     
     // Prepare the request payload
     const payload = {
@@ -49,9 +39,6 @@ export async function POST(request: NextRequest) {
     const credentials = Buffer.from(`${config.USERNAME}:${config.PASSWORD}`).toString('base64');
     const apiUrl = `${config.API_BASE_URL}${IZIPAY_ENDPOINTS.CREATE_PAYMENT}`;
     
-    console.log('🌐 Making request to:', apiUrl);
-    console.log('📦 Payload:', payload);
-    
     // Make request to Izipay API
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -63,9 +50,7 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(payload)
     });
 
-    console.log('📡 Response status:', response.status);
     const data: FormTokenResponse = await response.json();
-    console.log('📊 Response data:', data);
 
     if (!response.ok) {
       console.error('Izipay API Error:', data);

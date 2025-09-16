@@ -1,7 +1,4 @@
 // Izipay (Lyra) Payment Configuration
-console.log('🔧 Izipay config loading - API_BASE_URL:', process.env.IZIPAY_API_BASE_URL);
-console.log('🔧 Izipay config loading - NODE_ENV:', process.env.NODE_ENV);
-
 export const IZIPAY_CONFIG = {
   // API Configuration
   API_BASE_URL: 'https://api.micuentaweb.pe',
