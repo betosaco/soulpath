@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     console.log('🔍 GET /api/admin/email/config - Starting request...');
     
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       console.log('❌ Unauthorized access attempt');
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
@@ -69,7 +69,7 @@ export async function PUT(request: NextRequest) {
     console.log('🔍 PUT /api/admin/email/config - Starting request...');
     
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       console.log('❌ Unauthorized access attempt');
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }

@@ -190,6 +190,45 @@ const PaymentRecordsManagement: React.FC = () => {
         }
       });
 
+      // Check content type before parsing JSON
+
+
+      const contentType = response.headers.get('content-type');
+
+
+      if (!contentType || !contentType.includes('application/json')) {
+
+
+        const errorText = await response.text();
+
+
+        console.error('❌ PaymentRecordsManagement: Non-JSON response received:', {
+
+
+          status: response.status,
+
+
+          statusText: response.statusText,
+
+
+          contentType,
+
+
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+
+        });
+
+
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+
+      }
+
+
+      
+
+
       const data = await response.json();
       if (data.success) {
         setUsers(data.data || []);

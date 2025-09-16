@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
-import { Settings, LogOut, User, Bug } from 'lucide-react';
+import { Settings, LogOut, User, Bug, Home } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { BugReportSystem } from '../BugReportSystem';
 
@@ -13,6 +14,7 @@ interface AdminHeaderProps {
 
 export function AdminHeader({ onClose, isModal = false }: AdminHeaderProps) {
   const { user, signOut, isAdmin } = useAuth();
+  const router = useRouter();
 
   if (!user) return null;
 
@@ -30,6 +32,16 @@ export function AdminHeader({ onClose, isModal = false }: AdminHeaderProps) {
         </div>
         
         <div className="admin-header__actions">
+          {/* Back to Main Page Button */}
+          <button
+            onClick={() => router.push('/')}
+            className="admin-header__button admin-header__button--back"
+            title="Back to main page"
+          >
+            <Home size={16} />
+            Main Page
+          </button>
+
           {/* Report Bug Button */}
           <BugReportSystem onSubmitSuccess={() => {}}>
             {({ openReport }) => (

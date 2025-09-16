@@ -1,0 +1,1270 @@
+/* ============================================================================
+   UNIFIED SCHEDULE MANAGEMENT STYLES
+   ============================================================================
+   This file extends the unified-component-styles.css for schedule-specific components
+   All schedule management components should use these classes for consistency
+   ============================================================================ */
+
+@import './unified-component-styles.css';
+
+/* ============================================================================
+   SCHEDULE MANAGEMENT LAYOUT
+   ============================================================================ */
+
+.unified-schedule-management {
+  padding: var(--unified-spacing-2xl);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.unified-schedule-management__header {
+  margin-bottom: var(--unified-spacing-2xl);
+}
+
+.unified-schedule-management__title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--unified-text-primary);
+  margin-bottom: var(--unified-spacing-sm);
+}
+
+.unified-schedule-management__subtitle {
+  color: var(--unified-text-secondary);
+  font-size: 1.1rem;
+}
+
+/* ============================================================================
+   SCHEDULE TABS
+   ============================================================================ */
+
+.unified-schedule-management__tabs {
+  display: flex;
+  gap: var(--unified-spacing-sm);
+  margin-bottom: var(--unified-spacing-2xl);
+  border-bottom: 1px solid var(--unified-border-light);
+}
+
+.unified-schedule-management__tab {
+  display: flex;
+  align-items: center;
+  gap: var(--unified-spacing-sm);
+  padding: var(--unified-spacing-md) var(--unified-spacing-xl);
+  border: none;
+  background: none;
+  color: var(--unified-text-secondary);
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all var(--unified-transition-normal);
+  text-decoration: none;
+}
+
+.unified-schedule-management__tab:hover {
+  color: var(--unified-text-primary);
+  background-color: var(--unified-bg-secondary);
+}
+
+.unified-schedule-management__tab.active {
+  color: var(--unified-primary);
+  border-bottom-color: var(--unified-primary);
+  background-color: var(--unified-bg-secondary);
+}
+
+/* ============================================================================
+   SCHEDULE FILTERS
+   ============================================================================ */
+
+.unified-schedule-management__filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--unified-spacing-lg);
+  margin-bottom: var(--unified-spacing-2xl);
+  padding: var(--unified-spacing-xl);
+  background-color: var(--unified-bg-secondary);
+  border-radius: var(--unified-radius-lg);
+  border: 1px solid var(--unified-border-light);
+}
+
+.unified-schedule-management__filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--unified-spacing-sm);
+}
+
+.unified-schedule-management__filter-label {
+  font-weight: 500;
+  color: var(--unified-text-primary);
+  font-size: 0.875rem;
+}
+
+.unified-schedule-management__filter-select {
+  padding: var(--unified-spacing-sm) var(--unified-spacing-md);
+  border: 1px solid var(--unified-border-medium);
+  border-radius: var(--unified-radius-md);
+  background-color: var(--unified-bg-surface);
+  font-size: 0.875rem;
+  transition: border-color var(--unified-transition-fast);
+}
+
+.unified-schedule-management__filter-select:focus {
+  outline: none;
+  border-color: var(--unified-primary);
+  box-shadow: 0 0 0 3px rgba(110, 160, 88, 0.1);
+}
+
+.unified-schedule-management__search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.unified-schedule-management__search svg {
+  position: absolute;
+  left: var(--unified-spacing-md);
+  color: var(--unified-text-tertiary);
+  z-index: 1;
+}
+
+.unified-schedule-management__search-input {
+  width: 100%;
+  padding: var(--unified-spacing-sm) var(--unified-spacing-md) var(--unified-spacing-sm) 2.5rem;
+  border: 1px solid var(--unified-border-medium);
+  border-radius: var(--unified-radius-md);
+  background-color: var(--unified-bg-surface);
+  font-size: 0.875rem;
+  transition: border-color var(--unified-transition-fast);
+}
+
+.unified-schedule-management__search-input:focus {
+  outline: none;
+  border-color: var(--unified-primary);
+  box-shadow: 0 0 0 3px rgba(110, 160, 88, 0.1);
+}
+
+/* ============================================================================
+   SCHEDULE ACTIONS
+   ============================================================================ */
+
+.unified-schedule-management__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--unified-spacing-2xl);
+}
+
+.unified-schedule-management__add-button {
+  display: flex;
+  align-items: center;
+  gap: var(--unified-spacing-sm);
+  padding: var(--unified-spacing-md) var(--unified-spacing-xl);
+  background-color: var(--unified-primary);
+  color: var(--unified-primary-contrast);
+  border: none;
+  border-radius: var(--unified-radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--unified-transition-normal);
+  box-shadow: var(--unified-shadow-sm);
+}
+
+.unified-schedule-management__add-button:hover {
+  background-color: var(--unified-primary-hover);
+  box-shadow: var(--unified-shadow-md);
+  transform: translateY(-1px);
+}
+
+/* ============================================================================
+   SCHEDULE GRID
+   ============================================================================ */
+
+.unified-schedule-management__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: var(--unified-spacing-xl);
+}
+
+/* ============================================================================
+   SCHEDULE CARD
+   ============================================================================ */
+
+.unified-schedule-management__card {
+  background-color: var(--unified-bg-surface);
+  border: 1px solid var(--unified-border-light);
+  border-radius: var(--unified-radius-lg);
+  padding: var(--unified-spacing-xl);
+  transition: all var(--unified-transition-normal);
+  box-shadow: var(--unified-shadow-sm);
+}
+
+.unified-schedule-management__card:hover {
+  box-shadow: var(--unified-shadow-md);
+  border-color: var(--unified-border-medium);
+}
+
+.unified-schedule-management__card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--unified-spacing-lg);
+}
+
+.unified-schedule-management__card-type {
+  display: flex;
+  align-items: center;
+}
+
+.unified-schedule-management__type-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--unified-spacing-sm);
+  padding: var(--unified-spacing-xs) var(--unified-spacing-md);
+  border-radius: var(--unified-radius-full);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.unified-schedule-management__card-actions {
+  display: flex;
+  gap: var(--unified-spacing-sm);
+}
+
+.unified-schedule-management__action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  background-color: var(--unified-bg-tertiary);
+  color: var(--unified-text-secondary);
+  border-radius: var(--unified-radius-sm);
+  cursor: pointer;
+  transition: all var(--unified-transition-fast);
+}
+
+.unified-schedule-management__action-button:hover {
+  background-color: var(--unified-bg-secondary);
+  color: var(--unified-text-primary);
+}
+
+.unified-schedule-management__card-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--unified-spacing-lg);
+}
+
+.unified-schedule-management__card-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--unified-spacing-sm);
+}
+
+.unified-schedule-management__info-item {
+  display: flex;
+  align-items: center;
+  gap: var(--unified-spacing-sm);
+  color: var(--unified-text-secondary);
+  font-size: 0.875rem;
+}
+
+.unified-schedule-management__card-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--unified-spacing-sm);
+  padding: var(--unified-spacing-md);
+  background-color: var(--unified-bg-secondary);
+  border-radius: var(--unified-radius-md);
+}
+
+.unified-schedule-management__detail-item {
+  display: flex;
+  align-items: center;
+  gap: var(--unified-spacing-sm);
+  color: var(--unified-text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.unified-schedule-management__card-status {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.unified-schedule-management__status {
+  display: flex;
+  align-items: center;
+  gap: var(--unified-spacing-xs);
+  padding: var(--unified-spacing-xs) var(--unified-spacing-md);
+  border-radius: var(--unified-radius-full);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.unified-schedule-management__status.available {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.unified-schedule-management__status.unavailable {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+
+/* ============================================================================
+   SCHEDULE MODAL
+   ============================================================================ */
+
+.unified-schedule-management__modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--unified-bg-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--unified-spacing-lg);
+  backdrop-filter: blur(4px);
+}
+
+.unified-schedule-management__modal-content {
+  background-color: var(--unified-bg-surface);
+  border-radius: var(--unified-radius-lg);
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--unified-shadow-xl);
+  border: 1px solid var(--unified-border-light);
+}
+
+.unified-schedule-management__modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--unified-spacing-xl);
+  border-bottom: 1px solid var(--unified-border-light);
+  background-color: var(--unified-bg-secondary);
+}
+
+.unified-schedule-management__modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--unified-text-primary);
+}
+
+.unified-schedule-management__modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  background-color: transparent;
+  color: var(--unified-text-secondary);
+  border-radius: var(--unified-radius-sm);
+  cursor: pointer;
+  transition: all var(--unified-transition-fast);
+}
+
+.unified-schedule-management__modal-close:hover {
+  background-color: var(--unified-bg-tertiary);
+  color: var(--unified-text-primary);
+}
+
+/* ============================================================================
+   SCHEDULE FORM
+   ============================================================================ */
+
+.unified-schedule-management__form {
+  padding: var(--unified-spacing-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--unified-spacing-xl);
+}
+
+.unified-schedule-management__form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--unified-spacing-sm);
+}
+
+.unified-schedule-management__form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--unified-spacing-lg);
+}
+
+.unified-schedule-management__form-label {
+  font-weight: 500;
+  color: var(--unified-text-primary);
+  font-size: 0.875rem;
+}
+
+.unified-schedule-management__form-input,
+.unified-schedule-management__form-select,
+.unified-schedule-management__form-textarea {
+  padding: var(--unified-spacing-sm) var(--unified-spacing-md);
+  border: 1px solid var(--unified-border-medium);
+  border-radius: var(--unified-radius-md);
+  background-color: var(--unified-bg-surface);
+  font-size: 0.875rem;
+  transition: border-color var(--unified-transition-fast);
+}
+
+.unified-schedule-management__form-input:focus,
+.unified-schedule-management__form-select:focus,
+.unified-schedule-management__form-textarea:focus {
+  outline: none;
+  border-color: var(--unified-primary);
+  box-shadow: 0 0 0 3px rgba(110, 160, 88, 0.1);
+}
+
+.unified-schedule-management__form-textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.unified-schedule-management__form-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--unified-spacing-sm);
+  cursor: pointer;
+}
+
+.unified-schedule-management__form-checkbox input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--unified-primary);
+}
+
+/* ============================================================================
+   TYPE SELECTOR
+   ============================================================================ */
+
+.unified-schedule-management__type-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--unified-spacing-sm);
+}
+
+.unified-schedule-management__type-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--unified-spacing-sm);
+  padding: var(--unified-spacing-md) var(--unified-spacing-lg);
+  border: 1px solid var(--unified-border-medium);
+  border-radius: var(--unified-radius-md);
+  background-color: var(--unified-bg-surface);
+  color: var(--unified-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--unified-transition-normal);
+}
+
+.unified-schedule-management__type-option:hover {
+  border-color: var(--unified-border-dark);
+  color: var(--unified-text-primary);
+}
+
+.unified-schedule-management__type-option.active {
+  border-color: var(--unified-primary);
+  background-color: var(--unified-bg-secondary);
+  color: var(--unified-primary);
+}
+
+/* ============================================================================
+   FORM ACTIONS
+   ============================================================================ */
+
+.unified-schedule-management__form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--unified-spacing-lg);
+  padding-top: var(--unified-spacing-lg);
+  border-top: 1px solid var(--unified-border-light);
+}
+
+.unified-schedule-management__form-cancel {
+  padding: var(--unified-spacing-md) var(--unified-spacing-xl);
+  border: 1px solid var(--unified-border-medium);
+  border-radius: var(--unified-radius-md);
+  background-color: var(--unified-bg-surface);
+  color: var(--unified-text-primary);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--unified-transition-normal);
+}
+
+.unified-schedule-management__form-cancel:hover {
+  background-color: var(--unified-bg-secondary);
+}
+
+.unified-schedule-management__form-submit {
+  padding: var(--unified-spacing-md) var(--unified-spacing-xl);
+  border: none;
+  border-radius: var(--unified-radius-md);
+  background-color: var(--unified-primary);
+  color: var(--unified-primary-contrast);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--unified-transition-normal);
+  box-shadow: var(--unified-shadow-sm);
+}
+
+.unified-schedule-management__form-submit:hover {
+  background-color: var(--unified-primary-hover);
+  box-shadow: var(--unified-shadow-md);
+  transform: translateY(-1px);
+}
+
+/* ============================================================================
+   CONFLICTS
+   ============================================================================ */
+
+.unified-schedule-management__conflicts {
+  padding: var(--unified-spacing-xl);
+}
+
+.unified-schedule-management__conflicts-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--unified-spacing-lg);
+}
+
+.unified-schedule-management__conflict {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--unified-spacing-md);
+  padding: var(--unified-spacing-lg);
+  border-radius: var(--unified-radius-md);
+  border: 1px solid;
+}
+
+.unified-schedule-management__conflict.warning {
+  background-color: #fef3c7;
+  border-color: #f59e0b;
+  color: #92400e;
+}
+
+.unified-schedule-management__conflict.error {
+  background-color: #fef2f2;
+  border-color: #ef4444;
+  color: #dc2626;
+}
+
+.unified-schedule-management__conflict-message {
+  font-weight: 500;
+  margin-bottom: var(--unified-spacing-xs);
+}
+
+.unified-schedule-management__conflict-type {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.unified-schedule-management__no-conflicts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--unified-spacing-2xl);
+  text-align: center;
+}
+
+.unified-schedule-management__no-conflicts p {
+  margin-top: var(--unified-spacing-lg);
+  font-weight: 500;
+  color: var(--unified-success);
+}
+
+/* ============================================================================
+   EMPTY STATE
+   ============================================================================ */
+
+.unified-schedule-management__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--unified-spacing-3xl) var(--unified-spacing-2xl);
+  text-align: center;
+}
+
+.unified-schedule-management__empty-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--unified-text-primary);
+  margin: var(--unified-spacing-lg) 0 var(--unified-spacing-sm) 0;
+}
+
+.unified-schedule-management__empty-message {
+  color: var(--unified-text-secondary);
+  font-size: 1rem;
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .unified-schedule-management {
+    padding: var(--unified-spacing-lg);
+  }
+
+  .unified-schedule-management__filters {
+    grid-template-columns: 1fr;
+  }
+
+  .unified-schedule-management__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .unified-schedule-management__form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .unified-schedule-management__type-selector {
+    grid-template-columns: 1fr;
+  }
+
+  .unified-schedule-management__form-actions {
+    flex-direction: column;
+  }
+}
+
+/* ============================================================================
+   VENUE MODAL TABS
+   ============================================================================ */
+
+.venue-tabs {
+  display: flex;
+  gap: var(--unified-spacing-sm);
+  margin-bottom: var(--unified-spacing-xl);
+  border-bottom: 1px solid var(--unified-border-light);
+}
+
+.venue-tab {
+  display: flex;
+  align-items: center;
+  gap: var(--unified-spacing-sm);
+  padding: var(--unified-spacing-md) var(--unified-spacing-lg);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--unified-text-secondary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--unified-transition-fast);
+  border-radius: var(--unified-radius-sm) var(--unified-radius-sm) 0 0;
+}
+
+.venue-tab:hover {
+  color: var(--unified-text-primary);
+  background-color: var(--unified-bg-tertiary);
+}
+
+.venue-tab.active {
+  color: var(--unified-primary);
+  border-bottom-color: var(--unified-primary);
+  background-color: var(--unified-bg-secondary);
+}
+
+.venue-tab svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* ============================================================================
+   VENUE FORM SECTIONS
+   ============================================================================ */
+
+.venue-form-section {
+  margin-bottom: var(--unified-spacing-2xl);
+}
+
+.venue-form-section__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--unified-text-primary);
+  margin-bottom: var(--unified-spacing-lg);
+  padding-bottom: var(--unified-spacing-sm);
+  border-bottom: 1px solid var(--unified-border-light);
+}
+
+/* ============================================================================
+   AMENITIES GRID
+   ============================================================================ */
+
+.amenities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--unified-spacing-md);
+  margin-top: var(--unified-spacing-sm);
+}
+
+.amenity-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--unified-spacing-sm);
+  padding: var(--unified-spacing-md);
+  border: 1px solid var(--unified-border-light);
+  border-radius: var(--unified-radius-md);
+  background-color: var(--unified-bg-surface);
+  cursor: pointer;
+  transition: all var(--unified-transition-fast);
+}
+
+.amenity-checkbox:hover {
+  border-color: var(--unified-primary);
+  background-color: var(--unified-bg-secondary);
+}
+
+.amenity-checkbox__input {
+  margin: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: var(--unified-primary);
+}
+
+.amenity-checkbox__content {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--unified-spacing-sm);
+  flex: 1;
+}
+
+.amenity-checkbox__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  background-color: var(--unified-bg-tertiary);
+  border-radius: var(--unified-radius-sm);
+  font-size: 1.25rem;
+}
+
+.amenity-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.amenity-icon-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: var(--unified-radius-sm);
+}
+
+.amenity-icon-placeholder {
+  font-size: 1.25rem;
+  opacity: 0.6;
+}
+
+.amenity-checkbox__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--unified-spacing-xs);
+  flex: 1;
+}
+
+.amenity-checkbox__name {
+  font-weight: 500;
+  color: var(--unified-text-primary);
+  font-size: 0.95rem;
+}
+
+.amenity-checkbox__description {
+  font-size: 0.85rem;
+  color: var(--unified-text-secondary);
+  line-height: 1.4;
+}
+
+/* ============================================================================
+   SERVICES GRID
+   ============================================================================ */
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--unified-spacing-md);
+  margin-top: var(--unified-spacing-sm);
+}
+
+.service-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--unified-spacing-sm);
+  padding: var(--unified-spacing-md);
+  border: 1px solid var(--unified-border-light);
+  border-radius: var(--unified-radius-md);
+  background-color: var(--unified-bg-surface);
+  cursor: pointer;
+  transition: all var(--unified-transition-fast);
+}
+
+.service-checkbox:hover {
+  border-color: var(--unified-primary);
+  background-color: var(--unified-bg-secondary);
+}
+
+.service-checkbox__input {
+  margin: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: var(--unified-primary);
+}
+
+.service-checkbox__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--unified-spacing-xs);
+  flex: 1;
+}
+
+.service-checkbox__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--unified-spacing-xs);
+}
+
+.service-checkbox__name {
+  font-weight: 600;
+  color: var(--unified-text-primary);
+  font-size: 1rem;
+}
+
+.service-checkbox__category {
+  font-size: 0.85rem;
+  color: var(--unified-primary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.service-checkbox__description {
+  font-size: 0.9rem;
+  color: var(--unified-text-secondary);
+  line-height: 1.4;
+}
+
+.service-checkbox__difficulty {
+  font-size: 0.8rem;
+  color: var(--unified-text-tertiary);
+  font-style: italic;
+}
+
+/* ============================================================================
+   STATUS CHECKBOXES
+   ============================================================================ */
+
+.status-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--unified-spacing-md);
+}
+
+.status-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--unified-spacing-sm);
+  padding: var(--unified-spacing-md);
+  border: 1px solid var(--unified-border-light);
+  border-radius: var(--unified-radius-md);
+  background-color: var(--unified-bg-surface);
+  cursor: pointer;
+  transition: all var(--unified-transition-fast);
+}
+
+.status-checkbox:hover {
+  border-color: var(--unified-primary);
+  background-color: var(--unified-bg-secondary);
+}
+
+.status-checkbox__input {
+  margin: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: var(--unified-primary);
+}
+
+.status-checkbox__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--unified-spacing-xs);
+}
+
+.status-checkbox__label {
+  font-weight: 600;
+  color: var(--unified-text-primary);
+  font-size: 1rem;
+}
+
+.status-checkbox__description {
+  font-size: 0.9rem;
+  color: var(--unified-text-secondary);
+  line-height: 1.4;
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN FOR VENUE TABS
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .venue-tabs {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .venue-tab {
+    border-radius: 0;
+    border-bottom: 1px solid var(--unified-border-light);
+  }
+
+  .amenities-grid,
+  .services-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .status-checkboxes {
+    gap: var(--unified-spacing-sm);
+  }
+}
+
+/* ============================================================================
+   TEACHER SPECIALTIES & LANGUAGES DISPLAY
+   ============================================================================ */
+
+/* Specialties Display */
+.teacher-card__specialties {
+  margin-top: var(--unified-spacing-md);
+}
+
+.specialties-header {
+  display: flex;
+  align-items: center;
+  gap: var(--unified-spacing-sm);
+  margin-bottom: var(--unified-spacing-sm);
+}
+
+.specialties-icon {
+  font-size: 1.1rem;
+}
+
+.specialties-label {
+  font-weight: 600;
+  color: var(--unified-text-primary);
+  font-size: 0.9rem;
+}
+
+.specialties-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--unified-spacing-sm);
+}
+
+.specialty-item {
+  display: flex;
+  align-items: center;
+  gap: var(--unified-spacing-xs);
+  padding: var(--unified-spacing-xs) var(--unified-spacing-sm);
+  background: var(--unified-bg-secondary);
+  border: 1px solid var(--unified-border-light);
+  border-radius: var(--unified-radius-md);
+  transition: all var(--unified-transition-fast);
+}
+
+.specialty-item:hover {
+  background: var(--unified-bg-tertiary);
+  border-color: var(--unified-primary);
+}
+
+.specialty-item--more {
+  background: var(--unified-bg-tertiary);
+  border-style: dashed;
+  color: var(--unified-text-secondary);
+}
+
+.specialty-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.specialty-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--unified-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Languages Display */
+.teacher-card__languages {
+  margin-top: var(--unified-spacing-md);
+}
+
+.languages-header {
+  display: flex;
+  align-items: center;
+  gap: var(--unified-spacing-sm);
+  margin-bottom: var(--unified-spacing-sm);
+}
+
+.languages-icon {
+  font-size: 1.1rem;
+}
+
+.languages-label {
+  font-weight: 600;
+  color: var(--unified-text-primary);
+  font-size: 0.9rem;
+}
+
+.languages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--unified-spacing-sm);
+}
+
+.language-item {
+  display: flex;
+  align-items: center;
+  gap: var(--unified-spacing-xs);
+  padding: var(--unified-spacing-xs) var(--unified-spacing-sm);
+  background: var(--unified-bg-secondary);
+  border: 1px solid var(--unified-border-light);
+  border-radius: var(--unified-radius-md);
+  transition: all var(--unified-transition-fast);
+}
+
+.language-item:hover {
+  background: var(--unified-bg-tertiary);
+  border-color: var(--unified-primary);
+}
+
+.language-item--more {
+  background: var(--unified-bg-tertiary);
+  border-style: dashed;
+  color: var(--unified-text-secondary);
+}
+
+.language-flag {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.language-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--unified-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.language-native {
+  font-size: 0.75rem;
+  color: var(--unified-text-secondary);
+  font-style: italic;
+}
+
+/* Form Label Icons */
+.form-label-icon {
+  margin-right: var(--unified-spacing-xs);
+  font-size: 1.1rem;
+}
+
+/* Specialties Selection Form */
+.specialties-selection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--unified-spacing-md);
+  max-height: 400px;
+  overflow-y: auto;
+  padding: var(--unified-spacing-sm);
+  border: 1px solid var(--unified-border-light);
+  border-radius: var(--unified-radius-md);
+  background: var(--unified-bg-secondary);
+}
+
+.specialty-selection-item {
+  display: block;
+  cursor: pointer;
+  transition: all var(--unified-transition-fast);
+}
+
+.specialty-selection-item:hover {
+  transform: translateY(-2px);
+}
+
+.specialty-checkbox {
+  display: none;
+}
+
+.specialty-selection-content {
+  display: flex;
+  align-items: center;
+  gap: var(--unified-spacing-md);
+  padding: var(--unified-spacing-md);
+  background: var(--unified-bg-primary);
+  border: 2px solid var(--unified-border-light);
+  border-radius: var(--unified-radius-md);
+  transition: all var(--unified-transition-fast);
+}
+
+.specialty-selection-item:hover .specialty-selection-content {
+  border-color: var(--unified-primary);
+  background: var(--unified-bg-secondary);
+}
+
+.specialty-checkbox:checked + .specialty-selection-content {
+  border-color: var(--unified-primary);
+  background: var(--unified-primary-light);
+  box-shadow: 0 0 0 3px rgba(var(--unified-primary-rgb), 0.1);
+}
+
+.specialty-selection-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.specialty-selection-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--unified-spacing-xs);
+  flex: 1;
+}
+
+.specialty-selection-name {
+  font-weight: 600;
+  color: var(--unified-text-primary);
+  font-size: 0.95rem;
+}
+
+.specialty-selection-description {
+  font-size: 0.8rem;
+  color: var(--unified-text-secondary);
+  line-height: 1.4;
+}
+
+.specialty-selection-category {
+  font-size: 0.75rem;
+  color: var(--unified-primary);
+  background: var(--unified-primary-light);
+  padding: 2px 6px;
+  border-radius: var(--unified-radius-sm);
+  align-self: flex-start;
+}
+
+/* Languages Selection Form */
+.languages-selection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--unified-spacing-md);
+  max-height: 400px;
+  overflow-y: auto;
+  padding: var(--unified-spacing-sm);
+  border: 1px solid var(--unified-border-light);
+  border-radius: var(--unified-radius-md);
+  background: var(--unified-bg-secondary);
+}
+
+.language-selection-item {
+  display: block;
+  cursor: pointer;
+  transition: all var(--unified-transition-fast);
+}
+
+.language-selection-item:hover {
+  transform: translateY(-2px);
+}
+
+.language-checkbox {
+  display: none;
+}
+
+.language-selection-content {
+  display: flex;
+  align-items: center;
+  gap: var(--unified-spacing-md);
+  padding: var(--unified-spacing-md);
+  background: var(--unified-bg-primary);
+  border: 2px solid var(--unified-border-light);
+  border-radius: var(--unified-radius-md);
+  transition: all var(--unified-transition-fast);
+}
+
+.language-selection-item:hover .language-selection-content {
+  border-color: var(--unified-primary);
+  background: var(--unified-bg-secondary);
+}
+
+.language-checkbox:checked + .language-selection-content {
+  border-color: var(--unified-primary);
+  background: var(--unified-primary-light);
+  box-shadow: 0 0 0 3px rgba(var(--unified-primary-rgb), 0.1);
+}
+
+.language-selection-flag {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.language-selection-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--unified-spacing-xs);
+  flex: 1;
+}
+
+.language-selection-name {
+  font-weight: 600;
+  color: var(--unified-text-primary);
+  font-size: 0.95rem;
+}
+
+.language-selection-code {
+  font-size: 0.8rem;
+  color: var(--unified-text-secondary);
+  font-family: 'Courier New', monospace;
+  background: var(--unified-bg-tertiary);
+  padding: 2px 6px;
+  border-radius: var(--unified-radius-sm);
+  align-self: flex-start;
+}
+
+.language-selection-native {
+  font-size: 0.8rem;
+  color: var(--unified-text-secondary);
+  font-style: italic;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .specialties-grid,
+  .languages-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .specialties-selection-grid,
+  .languages-selection-grid {
+    grid-template-columns: 1fr;
+    max-height: 300px;
+  }
+  
+  .specialty-selection-content,
+  .language-selection-content {
+    padding: var(--unified-spacing-sm);
+  }
+  
+  .specialty-selection-icon,
+  .language-selection-flag {
+    font-size: 1.25rem;
+  }
+}

@@ -98,14 +98,17 @@ model Specialty {
   name        String   @unique @db.VarChar(100)
   description String?  @db.Text
   category    String?  @db.VarChar(50)
+  serviceTypeId Int?   @map("service_type_id") // Optional: specialty can be related to a service type
   isActive    Boolean  @default(true) @map("is_active")
   displayOrder Int?    @default(0) @map("display_order")
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  serviceType ServiceType? @relation(fields: [serviceTypeId], references: [id], onDelete: SetNull, onUpdate: Restrict)
   teachers    TeacherSpecialty[]
 
   @@index([isActive], map: "idx_specialties_active")
   @@index([category], map: "idx_specialties_category")
+  @@index([serviceTypeId], map: "idx_specialties_service_type")
   @@map("specialties")
 }
 
@@ -331,6 +334,7 @@ model Teacher {
   bookings          Booking[]
   certifications    TeacherCertification[]
   specialties       TeacherSpecialty[]
+  serviceTypes      TeacherServiceType[]
   languages         TeacherLanguage[]
   testimonials      Testimonial[]
   faqs              FAQ[]
@@ -345,17 +349,41 @@ model Teacher {
 }
 
 model TeacherSpecialty {
-  id          Int       @id @default(autoincrement())
-  teacherId   Int       @map("teacher_id")
-  specialtyId Int       @map("specialty_id")
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  teacher     Teacher   @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  specialty   Specialty @relation(fields: [specialtyId], references: [id], onDelete: Cascade)
+  id            Int         @id @default(autoincrement())
+  teacherId     Int         @map("teacher_id")
+  specialtyId   Int         @map("specialty_id")
+  serviceTypeId Int?        @map("service_type_id") // Optional: specialty in context of specific service type
+  level         String?     @db.VarChar(50) // e.g., "Beginner", "Intermediate", "Advanced", "Expert"
+  yearsExperience Int?      @map("years_experience") // years of experience in this specialty
+  certification String?     @db.VarChar(255) // certification name
+  certificationDate DateTime? @map("certification_date") @db.Date
+  notes         String?     @db.Text // additional notes about this specialty
+  isVerified    Boolean?    @default(false) @map("is_verified")
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  teacher       Teacher     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  specialty     Specialty   @relation(fields: [specialtyId], references: [id], onDelete: Cascade)
+  serviceType   ServiceType? @relation(fields: [serviceTypeId], references: [id], onDelete: SetNull, onUpdate: Restrict)
 
-  @@unique([teacherId, specialtyId])
+  @@unique([teacherId, specialtyId, serviceTypeId])
   @@index([teacherId], map: "idx_teacher_specialties_teacher")
   @@index([specialtyId], map: "idx_teacher_specialties_specialty")
+  @@index([serviceTypeId], map: "idx_teacher_specialties_service_type")
   @@map("teacher_specialties")
+}
+
+model TeacherServiceType {
+  id            Int         @id @default(autoincrement())
+  teacherId     Int         @map("teacher_id")
+  serviceTypeId Int         @map("service_type_id")
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  teacher       Teacher     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  serviceType   ServiceType @relation(fields: [serviceTypeId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, serviceTypeId])
+  @@index([teacherId], map: "idx_teacher_service_types_teacher")
+  @@index([serviceTypeId], map: "idx_teacher_service_types_service_type")
+  @@map("teacher_service_types")
 }
 
 model TeacherLanguage {
@@ -430,6 +458,9 @@ model ServiceType {
   // Relations
   currency          Currency?        @relation("ServiceTypeCurrency", fields: [currencyId], references: [id], onDelete: SetNull, onUpdate: Restrict)
   teacherSchedules  TeacherSchedule[]
+  teachers          TeacherServiceType[]
+  specialties       Specialty[]
+  teacherSpecialties TeacherSpecialty[]
   packageServices   PackageService[]
   bookings          Booking[]
   testimonials      Testimonial[]

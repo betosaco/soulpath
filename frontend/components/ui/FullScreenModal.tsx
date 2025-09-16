@@ -19,6 +19,7 @@
 import React, { useEffect } from 'react';
 // import { Dialog, DialogContent } from '@/components/ui/dialog'; // Unused for now
 import { cn } from '@/lib/utils';
+import '@/styles/unified-component-styles.css';
 import { X } from 'lucide-react';
 import { BaseButton } from './BaseButton';
 
@@ -77,19 +78,13 @@ export function FullScreenModal({
   }, [isOpen, onClose, closeOnEscape]);
 
   const modalClasses = cn(
-    'fullscreen-modal',
-    'fixed inset-0 z-50',
-    'bg-gray-900/95 backdrop-blur-sm',
-    'flex flex-col',
+    'unified-modal-overlay',
     className
   );
 
   const contentClasses = cn(
-    'fullscreen-modal-content',
+    'unified-modal unified-modal--fullscreen',
     'flex-1 flex flex-col',
-    'bg-gray-800',
-    'border border-gray-600',
-    'shadow-2xl',
     'overflow-hidden'
   );
 

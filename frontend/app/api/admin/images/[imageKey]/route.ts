@@ -15,7 +15,7 @@ export async function POST(
     console.log('🔍 POST /api/admin/images/[imageKey] - Starting request...');
     
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       console.log('❌ Unauthorized access attempt');
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
@@ -72,7 +72,7 @@ export async function PUT(
     console.log('🔍 PUT /api/admin/images/[imageKey] - Starting request...');
     
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       console.log('❌ Unauthorized access attempt');
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
@@ -128,7 +128,7 @@ export async function DELETE(
     console.log('🔍 DELETE /api/admin/images/[imageKey] - Starting request...');
     
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       console.log('❌ Unauthorized access attempt');
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }

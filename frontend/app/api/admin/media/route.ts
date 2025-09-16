@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     console.log('📸 GET /api/admin/media - Starting request...');
     
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       console.log('❌ Unauthorized access attempt');
       return NextResponse.json({ 
         success: false,
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
     console.log('📸 POST /api/admin/media - Uploading media...');
     
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json({ 
         success: false,
         error: 'Unauthorized',
@@ -241,7 +241,7 @@ export async function DELETE(request: NextRequest) {
     console.log('📸 DELETE /api/admin/media - Deleting media...');
     
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json({ 
         success: false,
         error: 'Unauthorized',

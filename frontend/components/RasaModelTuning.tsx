@@ -42,26 +42,7 @@ interface ModelComparison {
   timestamp: string;
 }
 
-export function RasaModelTuning() {
-  const [activeTab, setActiveTab] = useState('config');
-  const [config, setConfig] = useState<ModelConfig | null>(null);
-  const [trainingProgress, setTrainingProgress] = useState<TrainingProgress>({
-    status: 'idle',
-    progress: 0,
-    message: 'Ready to train'
-  });
-  const [modelComparisons, setModelComparisons] = useState<ModelComparison[]>([]);
-  const [isEditing, setIsEditing] = useState(false);
-  const [configText, setConfigText] = useState('');
-
-  const tabs = [
-    { id: 'config', label: 'Model Configuration', icon: Settings },
-    { id: 'training', label: 'Training', icon: Play },
-    { id: 'comparison', label: 'Model Comparison', icon: BarChart3 },
-    { id: 'evaluation', label: 'Evaluation', icon: Target }
-  ];
-
-  const predefinedConfigs = {
+const predefinedConfigs = {
     'high-precision': {
       name: 'High Precision',
       description: 'Maximum accuracy, slower processing',
@@ -127,8 +108,27 @@ export function RasaModelTuning() {
         language: 'es',
         assistant_id: 'soulpath-rasa'
       }
-    }
-  };
+  }
+};
+
+const tabs = [
+  { id: 'config', label: 'Model Configuration', icon: Settings },
+  { id: 'training', label: 'Training', icon: Play },
+  { id: 'comparison', label: 'Model Comparison', icon: BarChart3 },
+  { id: 'evaluation', label: 'Evaluation', icon: Target }
+];
+
+export function RasaModelTuning() {
+  const [activeTab, setActiveTab] = useState('config');
+  const [config, setConfig] = useState<ModelConfig | null>(null);
+  const [trainingProgress, setTrainingProgress] = useState<TrainingProgress>({
+    status: 'idle',
+    progress: 0,
+    message: 'Ready to train'
+  });
+  const [modelComparisons, setModelComparisons] = useState<ModelComparison[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [configText, setConfigText] = useState('');
 
   const loadCurrentConfig = useCallback(async () => {
     try {
@@ -142,9 +142,9 @@ export function RasaModelTuning() {
     } catch (error) {
       console.error('Error loading config:', error);
     }
-  }, [predefinedConfigs.balanced.config]);
+  }, []);
 
-  const loadModelComparisons = async () => {
+  const loadModelComparisons = useCallback(async () => {
     // Mock data for demonstration
     setModelComparisons([
       {
@@ -162,12 +162,12 @@ export function RasaModelTuning() {
         timestamp: '2025-01-05T12:00:00Z'
       }
     ]);
-  };
+  }, []);
 
   useEffect(() => {
     loadCurrentConfig();
     loadModelComparisons();
-  }, [loadCurrentConfig]);
+  }, [loadCurrentConfig, loadModelComparisons]);
 
   const startTraining = async () => {
     setTrainingProgress({

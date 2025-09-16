@@ -31,7 +31,7 @@ const scheduleUpdateSchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json({
         success: false,
         error: 'Unauthorized',
@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json({
         success: false,
         error: 'Unauthorized',
@@ -225,7 +225,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json({
         success: false,
         error: 'Unauthorized',
@@ -352,7 +352,7 @@ export async function PUT(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json({
         success: false,
         error: 'Unauthorized',

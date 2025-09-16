@@ -4,7 +4,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ClientManagement } from '../ClientManagement';
 import BookingsManagement from '../BookingsManagement';
-import ScheduleManagement from '../ScheduleManagement';
+import { UnifiedScheduleManagement } from './UnifiedScheduleManagement';
 import PackagesAndPricing from '../PackagesAndPricing';
 import { ContentManagement } from '../ContentManagement';
 import { CommunicationSettings } from '../communication/CommunicationSettings';
@@ -22,7 +22,7 @@ import { RasaModelTuning } from '../RasaModelTuning';
 import ConversationLogsManagement from './ConversationLogsManagement';
 import { VenueManagement } from './VenueManagement';
 import { TeacherManagement } from './TeacherManagement';
-import { TeacherScheduleManagement } from './TeacherScheduleManagement';
+// import { TeacherScheduleManagement } from './TeacherScheduleManagement'; // Replaced by UnifiedScheduleManagement
 import { ServiceTypeManagement } from './ServiceTypeManagement';
 
 interface AdminMainContentProps {
@@ -47,7 +47,7 @@ export function AdminMainContent({ activeTab, bugReportManagementRef }: AdminMai
           >
             {activeTab === 'clients' && <ClientManagement />}
             {activeTab === 'bookings' && <BookingsManagement />}
-            {activeTab === 'schedules' && <ScheduleManagement />}
+            {activeTab === 'schedules' && <UnifiedScheduleManagement />}
             {activeTab === 'packages' && <PackagesAndPricing />}
             {activeTab === 'content' && <ContentManagement />}
             {activeTab === 'email' && <CommunicationSettings />}
@@ -65,7 +65,7 @@ export function AdminMainContent({ activeTab, bugReportManagementRef }: AdminMai
             {activeTab === 'conversation-logs' && <ConversationLogsManagement />}
             {activeTab === 'venues' && <VenueManagement />}
             {activeTab === 'teachers' && <TeacherManagement />}
-            {activeTab === 'teacher-schedules' && <TeacherScheduleManagement />}
+            {activeTab === 'teacher-schedules' && <UnifiedScheduleManagement />}
             {activeTab === 'service-types' && <ServiceTypeManagement />}
           </motion.div>
         </AnimatePresence>

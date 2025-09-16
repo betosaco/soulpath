@@ -16,7 +16,7 @@ export default function LoginPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-  const { signIn, user, isAdmin } = useAuth();
+  const { signIn, signOut, user, isAdmin } = useAuth();
   const { language, setLanguage } = useLanguage();
   const { t } = useTranslations();
   const translations = t as Record<string, string | Record<string, string>>;
@@ -25,7 +25,9 @@ export default function LoginPage() {
   useEffect(() => {
     if (user) {
       console.log('🔐 LoginPage: User already logged in, redirecting...', user);
+      console.log('🔐 LoginPage: User role:', user.role, 'isAdmin:', isAdmin);
       if (isAdmin) {
+        // Admin users always go to admin dashboard first
         router.push('/admin');
       } else {
         router.push('/account');
@@ -61,10 +63,6 @@ export default function LoginPage() {
     console.log('Scroll to section:', section);
   };
 
-  const handleLoginClick = () => {
-    // This is already the login page
-    console.log('Already on login page');
-  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -76,7 +74,6 @@ export default function LoginPage() {
         t={translations}
         isMenuOpen={isMenuOpen}
         setIsMenuOpen={setIsMenuOpen}
-        onLoginClick={handleLoginClick}
         user={user}
         isAdmin={isAdmin}
       />
@@ -193,6 +190,22 @@ export default function LoginPage() {
                 )}
               </motion.button>
             </form>
+
+            {/* Logout Button for existing users */}
+            {user && (
+              <div className="mt-4 text-center">
+                <button
+                  onClick={async () => {
+                    await signOut();
+                    window.location.reload();
+                  }}
+                  className="text-red-600 hover:text-red-700 transition-colors duration-200 text-sm font-medium"
+                  style={{ fontFamily: 'var(--font-body)' }}
+                >
+                  Logout and Clear Session
+                </button>
+              </div>
+            )}
 
             {/* Back to Home */}
             <div className="mt-6 text-center">

@@ -26,7 +26,7 @@ export async function GET(
 ) {
   try {
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json({ 
         success: false,
         error: 'Unauthorized',
@@ -83,7 +83,7 @@ export async function PUT(
 ) {
   try {
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json({ 
         success: false,
         error: 'Unauthorized',
@@ -232,7 +232,7 @@ export async function DELETE(
 ) {
   try {
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json({ 
         success: false,
         error: 'Unauthorized',

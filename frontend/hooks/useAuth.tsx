@@ -28,7 +28,7 @@ export function useAuth() {
   const [isLoading, setIsLoading] = useState(true);
   
   // Calculate isAdmin reactively - only based on database role
-  const isAdmin = Boolean(user?.role === 'admin');
+  const isAdmin = Boolean(user?.role === 'ADMIN');
   
   useEffect(() => {
     console.log('🔐 useAuth: useEffect triggered');
@@ -48,17 +48,30 @@ export function useAuth() {
         // Handle both nested and direct response structures
         const userData = response.data?.user;
         if (response.success && userData && typeof userData === 'object') {
-          const user = {
+          const newUser = {
             ...userData,
             access_token: token
           } as User;
-          console.log('🔐 useAuth: User authenticated from token:', user);
-          setUser(user);
+          
+          // Only update if user data has actually changed
+          setUser(prevUser => {
+            if (prevUser && 
+                prevUser.id === newUser.id && 
+                prevUser.email === newUser.email && 
+                prevUser.role === newUser.role &&
+                prevUser.access_token === newUser.access_token &&
+                prevUser.fullName === newUser.fullName) {
+              return prevUser; // Return same object reference to prevent re-renders
+            }
+            console.log('🔐 useAuth: User authenticated from token:', newUser);
+            return newUser;
+          });
           setIsLoading(false); // Set loading to false immediately after setting user
         } else {
           console.log('🔐 useAuth: Invalid token, clearing storage');
           if (typeof window !== 'undefined') {
             localStorage.removeItem('auth_token');
+            document.cookie = 'auth_token=; path=/; max-age=0';
           }
           setUser(null);
           setIsLoading(false); // Set loading to false immediately after clearing user
@@ -68,6 +81,7 @@ export function useAuth() {
         console.error('🔐 useAuth: Token verification error:', error);
         if (typeof window !== 'undefined') {
           localStorage.removeItem('auth_token');
+          document.cookie = 'auth-token=; path=/; max-age=0';
         }
         setUser(null);
         setIsLoading(false); // Set loading to false immediately after error

@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     
     // Test authentication
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       console.log('❌ Unauthorized access attempt');
       return NextResponse.json({ 
         success: false,

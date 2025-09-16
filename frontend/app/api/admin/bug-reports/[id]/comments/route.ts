@@ -8,7 +8,7 @@ export async function POST(
 ) {
   try {
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json({ 
         success: false,
         error: 'Unauthorized',
@@ -34,7 +34,7 @@ export async function POST(
       .eq('id', user.id)
       .single();
 
-    if (profile?.role !== 'admin') {
+    if (profile?.role !== 'ADMIN') {
       return NextResponse.json({ success: false, error: 'Admin access required' },
         { status: 403 }
       );

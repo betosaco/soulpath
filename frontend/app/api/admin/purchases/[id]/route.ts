@@ -6,7 +6,7 @@ import { purchaseUpdateSchema } from '@/lib/validations';
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json({ 
         success: false,
         error: 'Unauthorized',
@@ -130,7 +130,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json({ 
         success: false,
         error: 'Unauthorized',

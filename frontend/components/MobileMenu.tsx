@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, LogIn, Settings } from 'lucide-react';
+import '@/styles/unified-component-styles.css';
 
 interface User {
   id: string;
@@ -59,7 +60,7 @@ export function MobileMenu({
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed top-0 left-0 h-full w-80 max-w-[90vw] bg-gradient-to-b from-[#191970]/98 to-[#0A0A23]/98 backdrop-blur-xl border-r border-[#C0C0C0]/30 z-[9999] mobile-menu shadow-2xl"
+              className="fixed top-0 left-0 h-full w-80 max-w-[90vw] bg-gradient-to-b from-[#191970]/98 to-[#0A0A23]/98 backdrop-blur-xl border-r border-[#C0C0C0]/30 z-[9999] mobile-menu shadow-2xl mobile-scrollable"
             >
               <div className="flex flex-col h-full p-4 sm:p-6 safe-padding">
                 <div className="flex items-center justify-between mb-6 sm:mb-8">
@@ -79,7 +80,7 @@ export function MobileMenu({
                       onClick={() => scrollToSection(section)}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className={`w-full text-left px-4 sm:px-6 py-3 sm:py-4 rounded-xl transition-all duration-200 flex items-center space-x-3 sm:space-x-4 touch-manipulation min-h-[48px] ${
+                      className={`w-full text-left px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] mobile-touch-feedback ${
                         currentSection === index
                           ? 'bg-[#FFD700]/20 text-[#FFD700] border border-[#FFD700]/50 shadow-lg shadow-[#FFD700]/15'
                           : 'text-[#C0C0C0] hover:text-[#EAEAEA] hover:bg-[#C0C0C0]/10 active:bg-[#C0C0C0]/15'
@@ -101,7 +102,7 @@ export function MobileMenu({
                       onClick={() => setLanguage('en')}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className={`px-4 sm:px-6 py-2 sm:py-3 rounded-xl transition-all duration-200 touch-manipulation font-medium text-sm sm:text-base min-h-[40px] ${
+                      className={`px-4 sm:px-6 py-3 sm:py-4 rounded-xl transition-all duration-200 touch-manipulation font-medium text-sm sm:text-base min-h-[48px] mobile-touch-feedback ${
                         language === 'en' ? 'text-[#FFD700] bg-[#FFD700]/15 border border-[#FFD700]/30' : 'text-[#C0C0C0] hover:text-[#FFD700] hover:bg-[#C0C0C0]/10'
                       }`}
                     >
@@ -111,7 +112,7 @@ export function MobileMenu({
                       onClick={() => setLanguage('es')}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className={`px-4 sm:px-6 py-2 sm:py-3 rounded-xl transition-all duration-200 touch-manipulation font-medium text-sm sm:text-base min-h-[40px] ${
+                      className={`px-4 sm:px-6 py-3 sm:py-4 rounded-xl transition-all duration-200 touch-manipulation font-medium text-sm sm:text-base min-h-[48px] mobile-touch-feedback ${
                         language === 'es' ? 'text-[#FFD700] bg-[#FFD700]/15 border border-[#FFD700]/30' : 'text-[#C0C0C0] hover:text-[#FFD700] hover:bg-[#C0C0C0]/10'
                       }`}
                     >
@@ -128,7 +129,7 @@ export function MobileMenu({
                       }}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="w-full flex items-center justify-center space-x-2 sm:space-x-3 text-[#C0C0C0] hover:text-[#FFD700] transition-all duration-200 px-4 sm:px-6 py-3 sm:py-4 rounded-xl hover:bg-[#FFD700]/10 border border-[#C0C0C0]/20 hover:border-[#FFD700]/30 touch-manipulation font-medium min-h-[48px] text-sm sm:text-base"
+                      className="w-full flex items-center justify-center space-x-2 sm:space-x-3 text-[#C0C0C0] hover:text-[#FFD700] transition-all duration-200 px-4 sm:px-6 py-3 sm:py-4 rounded-xl hover:bg-[#FFD700]/10 border border-[#C0C0C0]/20 hover:border-[#FFD700]/30 touch-manipulation font-medium min-h-[52px] text-sm sm:text-base mobile-touch-feedback"
                     >
                       <LogIn size={16} className="sm:w-5 sm:h-5" />
                       <span>{typeof t.nav === 'object' && t.nav?.login || 'Login'}</span>
@@ -143,7 +144,7 @@ export function MobileMenu({
                       }}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="w-full flex items-center justify-center space-x-2 sm:space-x-3 text-[#FFD700] bg-[#FFD700]/15 px-4 sm:px-6 py-3 sm:py-4 rounded-xl border border-[#FFD700]/40 touch-manipulation font-medium shadow-lg shadow-[#FFD700]/10 min-h-[48px] text-sm sm:text-base"
+                      className="w-full flex items-center justify-center space-x-2 sm:space-x-3 text-[#FFD700] bg-[#FFD700]/15 px-4 sm:px-6 py-3 sm:py-4 rounded-xl border border-[#FFD700]/40 touch-manipulation font-medium shadow-lg shadow-[#FFD700]/10 min-h-[52px] text-sm sm:text-base mobile-touch-feedback"
                     >
                       <Settings size={16} className="sm:w-5 sm:h-5" />
                       <span>Dashboard</span>

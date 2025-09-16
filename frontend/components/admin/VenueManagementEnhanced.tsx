@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
@@ -21,6 +21,7 @@ import {
   ToggleLeft,
   ToggleRight
 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Venue {
   id: number;
@@ -86,6 +87,7 @@ type SortField = 'name' | 'city' | 'capacity' | 'teachers' | 'schedules' | 'stat
 type SortDirection = 'asc' | 'desc';
 
 export function VenueManagementEnhanced() {
+  const { user } = useAuth();
   const [venues, setVenues] = useState<Venue[]>([]);
   const [amenities, setAmenities] = useState<Array<{ id: number; name: string; description?: string; icon?: string; category?: string }>>([]);
   const [loading, setLoading] = useState(true);
@@ -112,14 +114,66 @@ export function VenueManagementEnhanced() {
   });
 
   // Fetch venues
-  const fetchVenues = async () => {
+  const fetchVenues = useCallback(async () => {
+    if (!user?.access_token) {
+      console.error('No authentication token available');
+      setError('Authentication required');
+      return;
+    }
+
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/venues?include=all');
+      setError(null);
+      const response = await fetch('/api/admin/venues?include=all', {
+        headers: {
+          'Authorization': `Bearer ${user.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      // Check content type before parsing JSON
+
+      
+      const contentType = response.headers.get('content-type');
+
+      
+      if (!contentType || !contentType.includes('application/json')) {
+
+      
+        const errorText = await response.text();
+
+      
+        console.error('❌ VenueManagementEnhanced: Non-JSON response received:', {
+
+      
+          status: response.status,
+
+      
+          statusText: response.statusText,
+
+      
+          contentType,
+
+      
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+      
+        });
+
+      
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+      
+      }
+
+      
+      
+
+      
       const data = await response.json();
       
       if (data.success) {
-        setVenues(data.venues);
+        setVenues(data.data?.venues || []);
       } else {
         setError(data.message || 'Failed to fetch venues');
       }
@@ -129,25 +183,61 @@ export function VenueManagementEnhanced() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.access_token]);
 
-  const fetchAmenities = async () => {
+  const fetchAmenities = useCallback(async () => {
+    if (!user?.access_token) return;
+
     try {
-      const response = await fetch('/api/admin/amenities');
+      const response = await fetch('/api/admin/amenities', {
+        headers: {
+          'Authorization': `Bearer ${user.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      // Check content type before parsing JSON
+
+      const contentType = response.headers.get('content-type');
+
+      if (!contentType || !contentType.includes('application/json')) {
+
+        const errorText = await response.text();
+
+        console.error('❌ VenueManagementEnhanced: Non-JSON response received:', {
+
+          status: response.status,
+
+          statusText: response.statusText,
+
+          contentType,
+
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+        });
+
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+      }
+
+      
+
       const data = await response.json();
       
       if (data.success) {
-        setAmenities(data.amenities);
+        setAmenities(data.amenities || []);
       }
     } catch (err) {
       console.error('Error fetching amenities:', err);
     }
-  };
+  }, [user?.access_token]);
 
   useEffect(() => {
-    fetchVenues();
-    fetchAmenities();
-  }, []);
+    if (user?.access_token) {
+      fetchVenues();
+      fetchAmenities();
+    }
+  }, [user?.access_token, fetchVenues, fetchAmenities]);
+
 
   // Filter and sort venues
   const filteredAndSortedVenues = venues
@@ -213,7 +303,13 @@ export function VenueManagementEnhanced() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!user?.access_token) {
+      setError('Authentication required');
+      return;
+    }
+    
     try {
+      setError(null);
       const url = editingVenue ? '/api/admin/venues' : '/api/admin/venues';
       const method = editingVenue ? 'PUT' : 'POST';
       
@@ -223,9 +319,51 @@ export function VenueManagementEnhanced() {
 
       const response = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Authorization': `Bearer ${user.access_token}`,
+          'Content-Type': 'application/json' 
+        },
         body: JSON.stringify(payload)
       });
+
+      // Check content type before parsing JSON
+
+
+      const contentType = response.headers.get('content-type');
+
+
+      if (!contentType || !contentType.includes('application/json')) {
+
+
+        const errorText = await response.text();
+
+
+        console.error('❌ VenueManagementEnhanced: Non-JSON response received:', {
+
+
+          status: response.status,
+
+
+          statusText: response.statusText,
+
+
+          contentType,
+
+
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+
+        });
+
+
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+
+      }
+
+
+      
+
 
       const data = await response.json();
       
@@ -247,10 +385,59 @@ export function VenueManagementEnhanced() {
   const handleDelete = async (id: number) => {
     if (!confirm('Are you sure you want to delete this venue?')) return;
     
+    if (!user?.access_token) {
+      setError('Authentication required');
+      return;
+    }
+    
     try {
+      setError(null);
       const response = await fetch(`/api/admin/venues?id=${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${user.access_token}`,
+          'Content-Type': 'application/json'
+        }
       });
+      
+      // Check content type before parsing JSON
+
+      
+      const contentType = response.headers.get('content-type');
+
+      
+      if (!contentType || !contentType.includes('application/json')) {
+
+      
+        const errorText = await response.text();
+
+      
+        console.error('❌ VenueManagementEnhanced: Non-JSON response received:', {
+
+      
+          status: response.status,
+
+      
+          statusText: response.statusText,
+
+      
+          contentType,
+
+      
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+      
+        });
+
+      
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+      
+      }
+
+      
+      
+
       
       const data = await response.json();
       
@@ -286,15 +473,63 @@ export function VenueManagementEnhanced() {
 
   // Toggle venue status
   const toggleVenueStatus = async (venue: Venue) => {
+    if (!user?.access_token) {
+      setError('Authentication required');
+      return;
+    }
+
     try {
+      setError(null);
       const response = await fetch('/api/admin/venues', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Authorization': `Bearer ${user.access_token}`,
+          'Content-Type': 'application/json' 
+        },
         body: JSON.stringify({
           ...venue,
           isActive: !venue.isActive
         })
       });
+
+      // Check content type before parsing JSON
+
+
+      const contentType = response.headers.get('content-type');
+
+
+      if (!contentType || !contentType.includes('application/json')) {
+
+
+        const errorText = await response.text();
+
+
+        console.error('❌ VenueManagementEnhanced: Non-JSON response received:', {
+
+
+          status: response.status,
+
+
+          statusText: response.statusText,
+
+
+          contentType,
+
+
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+
+        });
+
+
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+
+      }
+
+
+      
+
 
       const data = await response.json();
       

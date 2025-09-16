@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma, withConnection } from '@/lib/prisma';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
 
@@ -34,7 +34,18 @@ const CreateTeacherSchema = z.object({
   metaDescription: z.string().max(500).optional(),
   venueId: z.number().optional(),
   // New relationship fields
+  serviceTypeIds: z.array(z.number()).optional(),
   specialtyIds: z.array(z.number()).optional(),
+  specialtyDetails: z.array(z.object({
+    specialtyId: z.number(),
+    serviceTypeId: z.number().optional(),
+    level: z.string().optional(),
+    yearsExperience: z.number().optional(),
+    certification: z.string().optional(),
+    certificationDate: z.string().optional(),
+    notes: z.string().optional(),
+    isVerified: z.boolean().optional()
+  })).optional(),
   languageIds: z.array(z.number()).optional(),
 });
 
@@ -43,6 +54,20 @@ const UpdateTeacherSchema = CreateTeacherSchema.partial();
 // GET /api/admin/teachers - List teachers with filtering
 export async function GET(request: NextRequest) {
   try {
+    return await withConnection(async () => {
+    // Get user data from middleware headers
+    const userId = request.headers.get('x-user-id');
+    const userEmail = request.headers.get('x-user-email');
+    const userRole = request.headers.get('x-user-role');
+    
+    if (!userId || !userEmail || userRole !== 'ADMIN') {
+      return NextResponse.json({ 
+        success: false,
+        error: 'Unauthorized',
+        message: 'Admin access required'
+      }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
@@ -114,9 +139,15 @@ export async function GET(request: NextRequest) {
               }
             }
           },
+          serviceTypes: {
+            include: {
+              serviceType: true
+            }
+          },
           specialties: {
             include: {
-              specialty: true
+              specialty: true,
+              serviceType: true
             }
           },
           languages: {
@@ -154,6 +185,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     return NextResponse.json({
+      success: true,
       teachers,
       pagination: {
         page,
@@ -162,11 +194,12 @@ export async function GET(request: NextRequest) {
         pages: Math.ceil(total / limit)
       }
     });
+    }); // Close withConnection wrapper
 
   } catch (error) {
     console.error('Error fetching teachers:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch teachers' },
+      { success: false, error: 'Failed to fetch teachers' },
       { status: 500 }
     );
   }
@@ -175,11 +208,25 @@ export async function GET(request: NextRequest) {
 // POST /api/admin/teachers - Create teacher with relationships
 export async function POST(request: NextRequest) {
   try {
+    // Get user data from middleware headers
+    const userId = request.headers.get('x-user-id');
+    const userEmail = request.headers.get('x-user-email');
+    const userRole = request.headers.get('x-user-role');
+    
+    if (!userId || !userEmail || userRole !== 'ADMIN') {
+      return NextResponse.json({ 
+        success: false,
+        error: 'Unauthorized',
+        message: 'Admin access required'
+      }, { status: 401 });
+    }
+
     const body = await request.json();
     const validatedData = CreateTeacherSchema.parse(body);
 
     const {
-      specialtyIds = [],
+      serviceTypeIds = [],
+      specialtyDetails = [],
       languageIds = [],
       ...teacherData
     } = validatedData;
@@ -188,9 +235,30 @@ export async function POST(request: NextRequest) {
     const teacher = await prisma.teacher.create({
       data: {
         ...teacherData,
+        serviceTypes: {
+          create: serviceTypeIds.map((serviceTypeId: number) => ({
+            serviceType: { connect: { id: serviceTypeId } }
+          }))
+        },
         specialties: {
-          create: specialtyIds.map((specialtyId: number) => ({
-            specialty: { connect: { id: specialtyId } }
+          create: specialtyDetails.map((detail: {
+            specialtyId: number;
+            serviceTypeId?: number;
+            level?: string;
+            yearsExperience?: number;
+            certification?: string;
+            certificationDate?: string;
+            notes?: string;
+            isVerified?: boolean;
+          }) => ({
+            specialty: { connect: { id: detail.specialtyId } },
+            serviceType: detail.serviceTypeId ? { connect: { id: detail.serviceTypeId } } : undefined,
+            level: detail.level,
+            yearsExperience: detail.yearsExperience,
+            certification: detail.certification,
+            certificationDate: detail.certificationDate ? new Date(detail.certificationDate) : undefined,
+            notes: detail.notes,
+            isVerified: detail.isVerified || false
           }))
         },
         languages: {
@@ -207,9 +275,9 @@ export async function POST(request: NextRequest) {
             city: true
           }
         },
-        specialties: {
+        serviceTypes: {
           include: {
-            specialty: true
+            serviceType: true
           }
         },
         languages: {
@@ -220,19 +288,19 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    return NextResponse.json(teacher, { status: 201 });
+    return NextResponse.json({ success: true, teacher }, { status: 201 });
 
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation error', details: error.issues },
+        { success: false, error: 'Validation error', details: error.issues },
         { status: 400 }
       );
     }
 
     console.error('Error creating teacher:', error);
     return NextResponse.json(
-      { error: 'Failed to create teacher' },
+      { success: false, error: 'Failed to create teacher' },
       { status: 500 }
     );
   }
@@ -241,12 +309,25 @@ export async function POST(request: NextRequest) {
 // PUT /api/admin/teachers/[id] - Update teacher with relationships
 export async function PUT(request: NextRequest) {
   try {
+    // Get user data from middleware headers
+    const userId = request.headers.get('x-user-id');
+    const userEmail = request.headers.get('x-user-email');
+    const userRole = request.headers.get('x-user-role');
+    
+    if (!userId || !userEmail || userRole !== 'ADMIN') {
+      return NextResponse.json({ 
+        success: false,
+        error: 'Unauthorized',
+        message: 'Admin access required'
+      }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const teacherId = parseInt(searchParams.get('id') || '0');
 
     if (!teacherId) {
       return NextResponse.json(
-        { error: 'Teacher ID is required' },
+        { success: false, error: 'Teacher ID is required' },
         { status: 400 }
       );
     }
@@ -255,7 +336,7 @@ export async function PUT(request: NextRequest) {
     const validatedData = UpdateTeacherSchema.parse(body);
 
     const {
-      specialtyIds,
+      serviceTypeIds,
       languageIds,
       ...teacherData
     } = validatedData;
@@ -263,12 +344,12 @@ export async function PUT(request: NextRequest) {
     // Update teacher with relationships
     const updateData: Prisma.TeacherUpdateInput = { ...teacherData };
 
-    if (specialtyIds !== undefined) {
-      // Replace existing specialties
-      updateData.specialties = {
+    if (serviceTypeIds !== undefined) {
+      // Replace existing service types
+      updateData.serviceTypes = {
         deleteMany: {},
-        create: specialtyIds.map((specialtyId: number) => ({
-          specialty: { connect: { id: specialtyId } }
+        create: serviceTypeIds.map((serviceTypeId: number) => ({
+          serviceType: { connect: { id: serviceTypeId } }
         }))
       };
     }
@@ -294,9 +375,9 @@ export async function PUT(request: NextRequest) {
             city: true
           }
         },
-        specialties: {
+        serviceTypes: {
           include: {
-            specialty: true
+            serviceType: true
           }
         },
         languages: {
@@ -307,19 +388,19 @@ export async function PUT(request: NextRequest) {
       }
     });
 
-    return NextResponse.json(teacher);
+    return NextResponse.json({ success: true, teacher });
 
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation error', details: error.issues },
+        { success: false, error: 'Validation error', details: error.issues },
         { status: 400 }
       );
     }
 
     console.error('Error updating teacher:', error);
     return NextResponse.json(
-      { error: 'Failed to update teacher' },
+      { success: false, error: 'Failed to update teacher' },
       { status: 500 }
     );
   }
@@ -328,12 +409,25 @@ export async function PUT(request: NextRequest) {
 // DELETE /api/admin/teachers/[id] - Delete teacher
 export async function DELETE(request: NextRequest) {
   try {
+    // Get user data from middleware headers
+    const userId = request.headers.get('x-user-id');
+    const userEmail = request.headers.get('x-user-email');
+    const userRole = request.headers.get('x-user-role');
+    
+    if (!userId || !userEmail || userRole !== 'ADMIN') {
+      return NextResponse.json({ 
+        success: false,
+        error: 'Unauthorized',
+        message: 'Admin access required'
+      }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const teacherId = parseInt(searchParams.get('id') || '0');
 
     if (!teacherId) {
       return NextResponse.json(
-        { error: 'Teacher ID is required' },
+        { success: false, error: 'Teacher ID is required' },
         { status: 400 }
       );
     }
@@ -348,7 +442,7 @@ export async function DELETE(request: NextRequest) {
 
     if (activeBookings > 0) {
       return NextResponse.json(
-        { error: 'Cannot delete teacher with active bookings' },
+        { success: false, error: 'Cannot delete teacher with active bookings' },
         { status: 400 }
       );
     }
@@ -359,12 +453,12 @@ export async function DELETE(request: NextRequest) {
       data: { isActive: false }
     });
 
-    return NextResponse.json({ message: 'Teacher deactivated successfully' });
+    return NextResponse.json({ success: true, message: 'Teacher deactivated successfully' });
 
   } catch (error) {
     console.error('Error deleting teacher:', error);
     return NextResponse.json(
-      { error: 'Failed to delete teacher' },
+      { success: false, error: 'Failed to delete teacher' },
       { status: 500 }
     );
   }

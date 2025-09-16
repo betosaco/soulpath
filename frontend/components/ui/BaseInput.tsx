@@ -18,7 +18,7 @@
 
 import React, { forwardRef } from 'react';
 import { cn } from '@/lib/utils';
-import { inputStyles, combineStyles } from '@/lib/styles/common';
+import '@/styles/unified-component-styles.css';
 
 // ============================================================================
 // TYPES
@@ -52,14 +52,15 @@ export const BaseInput = forwardRef<HTMLInputElement, BaseInputProps>(({
   id,
   ...props
 }, ref) => {
-  const baseClasses = inputStyles.base;
-  const variantClasses = inputStyles.variants[variant];
-  const sizeClasses = inputStyles.sizes[size];
+  const baseClasses = 'unified-form-input';
+  const variantClasses = error ? 'border-[var(--unified-error)] focus:border-[var(--unified-error)]' : '';
+  const sizeClasses = size === 'sm' ? 'text-sm py-2' : 
+                     size === 'lg' ? 'text-base py-3' : '';
   
   // Add padding for icons
   const iconPadding = leftIcon ? 'pl-10' : rightIcon ? 'pr-10' : '';
   
-  const classes = combineStyles(
+  const classes = cn(
     baseClasses,
     variantClasses,
     sizeClasses,
@@ -74,10 +75,10 @@ export const BaseInput = forwardRef<HTMLInputElement, BaseInputProps>(({
       {label && (
         <label 
           htmlFor={inputId}
-          className="block text-sm font-medium text-gray-400 mb-2"
+          className="unified-form-label"
         >
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className="text-[var(--unified-error)] ml-1">*</span>}
         </label>
       )}
       

@@ -1,5 +1,8 @@
 // Design System Tokens
 // This file exports design tokens that can be used with CSS custom properties
+// 
+// IMPORTANT: All components should use the unified-component-styles.css for consistent styling
+// This file provides the design tokens that the unified styles are based on
 
 export const colors = {
   // Primary Palette

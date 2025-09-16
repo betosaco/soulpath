@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     console.log('🔍 POST /api/admin/live-session-config/test - Starting request...');
     
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       console.log('❌ Unauthorized access attempt');
       return NextResponse.json({ 
         success: false,

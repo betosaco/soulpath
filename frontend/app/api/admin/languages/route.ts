@@ -1,10 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma, withConnection } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 
 // GET /api/admin/languages - List all languages
 export async function GET(request: NextRequest) {
   try {
+    return await withConnection(async () => {
+    // Get user data from middleware headers
+    const userId = request.headers.get('x-user-id');
+    const userEmail = request.headers.get('x-user-email');
+    const userRole = request.headers.get('x-user-role');
+    
+    if (!userId || !userEmail || userRole !== 'ADMIN') {
+      return NextResponse.json({ 
+        success: false,
+        error: 'Unauthorized',
+        message: 'Admin access required'
+      }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const isActive = searchParams.get('isActive');
 
@@ -25,6 +39,7 @@ export async function GET(request: NextRequest) {
       success: true,
       languages
     });
+    }); // Close withConnection wrapper
 
   } catch (error) {
     console.error('Error fetching languages:', error);
@@ -38,6 +53,19 @@ export async function GET(request: NextRequest) {
 // POST /api/admin/languages - Create new language
 export async function POST(request: NextRequest) {
   try {
+    // Get user data from middleware headers
+    const userId = request.headers.get('x-user-id');
+    const userEmail = request.headers.get('x-user-email');
+    const userRole = request.headers.get('x-user-role');
+    
+    if (!userId || !userEmail || userRole !== 'ADMIN') {
+      return NextResponse.json({ 
+        success: false,
+        error: 'Unauthorized',
+        message: 'Admin access required'
+      }, { status: 401 });
+    }
+
     const body = await request.json();
     const { name, code, nativeName, isActive = true, displayOrder = 0 } = body;
 

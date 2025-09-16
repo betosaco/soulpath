@@ -243,7 +243,7 @@ function generateTableOfContents(projectRoot, basePath = '') {
       toc += `  📄 ${file.relativePath}\n`;
     }
     
-  } catch (error) {
+  } catch {
     toc += `[ERROR: Could not read directory ${projectRoot}]\n`;
   }
   
@@ -271,7 +271,7 @@ function countFiles(projectRoot) {
           }
         }
       }
-    } catch (error) {
+    } catch {
       // Ignore errors
     }
   }

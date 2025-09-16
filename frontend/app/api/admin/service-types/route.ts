@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth';
 import { z } from 'zod';
-import { prisma } from '@/lib/prisma';
+import { prisma, withConnection } from '@/lib/prisma';
 
 // Zod schemas for service type validation
 const createServiceTypeSchema = z.object({
@@ -36,8 +35,15 @@ export async function GET(request: NextRequest) {
   try {
     console.log('🎯 GET /api/admin/service-types - Starting request...');
     
-    const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    return await withConnection(async () => {
+    // Get user data from middleware headers
+    const userId = request.headers.get('x-user-id');
+    const userEmail = request.headers.get('x-user-email');
+    const userRole = request.headers.get('x-user-role');
+    
+    console.log('🔐 Service Types API: User from middleware:', { userId, userEmail, userRole });
+    
+    if (!userId || !userEmail || userRole !== 'ADMIN') {
       console.log('❌ Unauthorized access attempt');
       return NextResponse.json({ 
         success: false,
@@ -46,7 +52,7 @@ export async function GET(request: NextRequest) {
       }, { status: 401 });
     }
 
-    console.log('✅ Admin user authenticated:', user.email);
+    console.log('✅ Admin user authenticated:', userEmail);
 
     const { searchParams } = new URL(request.url);
     const queryParams = Object.fromEntries(searchParams.entries());
@@ -166,6 +172,7 @@ export async function GET(request: NextRequest) {
         }
       }
     });
+    }); // Close withConnection wrapper
 
   } catch (error) {
     console.error('❌ Service types API error:', error);
@@ -181,8 +188,12 @@ export async function POST(request: NextRequest) {
   try {
     console.log('🎯 POST /api/admin/service-types - Creating service type...');
     
-    const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    // Get user data from middleware headers
+    const userId = request.headers.get('x-user-id');
+    const userEmail = request.headers.get('x-user-email');
+    const userRole = request.headers.get('x-user-role');
+    
+    if (!userId || !userEmail || userRole !== 'ADMIN') {
       return NextResponse.json({ 
         success: false,
         error: 'Unauthorized',
@@ -266,8 +277,12 @@ export async function PUT(request: NextRequest) {
   try {
     console.log('🎯 PUT /api/admin/service-types - Updating service type...');
     
-    const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    // Get user data from middleware headers
+    const userId = request.headers.get('x-user-id');
+    const userEmail = request.headers.get('x-user-email');
+    const userRole = request.headers.get('x-user-role');
+    
+    if (!userId || !userEmail || userRole !== 'ADMIN') {
       return NextResponse.json({ 
         success: false,
         error: 'Unauthorized',
@@ -368,8 +383,12 @@ export async function DELETE(request: NextRequest) {
   try {
     console.log('🎯 DELETE /api/admin/service-types - Deleting service type...');
     
-    const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    // Get user data from middleware headers
+    const userId = request.headers.get('x-user-id');
+    const userEmail = request.headers.get('x-user-email');
+    const userRole = request.headers.get('x-user-role');
+    
+    if (!userId || !userEmail || userRole !== 'ADMIN') {
       return NextResponse.json({ 
         success: false,
         error: 'Unauthorized',

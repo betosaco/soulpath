@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react';
 import { Menu, X, LogIn, Settings, User, Package, Calendar } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import '@/styles/unified-component-styles.css';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -16,7 +17,6 @@ interface HeaderProps {
   t: Record<string, string | Record<string, string>>;
   isMenuOpen: boolean;
   setIsMenuOpen: (isOpen: boolean) => void;
-  onLoginClick: () => void;
   user: { email: string } | null;
   isAdmin: boolean;
 }
@@ -28,7 +28,6 @@ export function Header({
   t, 
   isMenuOpen, 
   setIsMenuOpen, 
-  onLoginClick,
   user,
   isAdmin
 }: HeaderProps) {
@@ -200,7 +199,7 @@ export function Header({
           {/* Admin Login Button */}
           {user && isAdmin ? (
             <motion.button
-              onClick={onLoginClick}
+              onClick={() => router.push('/admin')}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="hidden sm:flex items-center space-x-1 header-button-account"
@@ -277,7 +276,7 @@ export function Header({
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white shadow-xl z-[9999] mobile-menu"
+              className="fixed top-0 left-0 h-full w-80 max-w-[90vw] bg-white shadow-xl z-[9999] mobile-menu mobile-scrollable"
             >
               <div className="flex flex-col h-full p-4 sm:p-6 safe-padding">
                 <div className="flex items-center justify-between mb-6 sm:mb-8">
@@ -295,7 +294,7 @@ export function Header({
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30"
+                      className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30 mobile-touch-feedback"
                     >
                       <Calendar size={18} />
                       <span className="text-base sm:text-lg font-medium">Schedule</span>
@@ -306,7 +305,7 @@ export function Header({
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30"
+                      className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30 mobile-touch-feedback"
                     >
                       <Package size={18} />
                       <span className="text-base sm:text-lg font-medium">Packages</span>

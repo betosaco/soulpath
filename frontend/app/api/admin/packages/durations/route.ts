@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth';
 import { z } from 'zod';
-import { prisma } from '@/lib/prisma';
+import { prisma, withConnection } from '@/lib/prisma';
 import { 
   sessionDurationCreateSchema, 
   sessionDurationUpdateSchema,
@@ -16,8 +15,14 @@ export async function GET(request: NextRequest) {
   try {
     console.log('🔍 GET /api/admin/packages/durations - Starting request...');
     
-    const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    return await withConnection(async () => {
+    
+    // Get user data from middleware headers
+    const userId = request.headers.get('x-user-id');
+    const userEmail = request.headers.get('x-user-email');
+    const userRole = request.headers.get('x-user-role');
+    
+    if (!userId || !userEmail || userRole !== 'ADMIN') {
       console.log('❌ Unauthorized access attempt');
       return NextResponse.json({ 
         success: false,
@@ -26,7 +31,7 @@ export async function GET(request: NextRequest) {
       }, { status: 401 });
     }
 
-    console.log('✅ Admin user authenticated:', user.email);
+    console.log('✅ Admin user authenticated:', userEmail);
 
     const { searchParams } = new URL(request.url);
     const queryParams = Object.fromEntries(searchParams.entries());
@@ -75,6 +80,7 @@ export async function GET(request: NextRequest) {
         totalPages
       }
     });
+    }); // Close withConnection wrapper
 
   } catch (error) {
     console.error('❌ Unexpected error in session-durations API:', error);
@@ -91,8 +97,12 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    // Get user data from middleware headers
+    const userId = request.headers.get('x-user-id');
+    const userEmail = request.headers.get('x-user-email');
+    const userRole = request.headers.get('x-user-role');
+    
+    if (!userId || !userEmail || userRole !== 'ADMIN') {
       return NextResponse.json({ 
         success: false,
         error: 'Unauthorized',
@@ -153,8 +163,12 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    // Get user data from middleware headers
+    const userId = request.headers.get('x-user-id');
+    const userEmail = request.headers.get('x-user-email');
+    const userRole = request.headers.get('x-user-role');
+    
+    if (!userId || !userEmail || userRole !== 'ADMIN') {
       return NextResponse.json({ 
         success: false,
         error: 'Unauthorized',
@@ -234,8 +248,12 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    // Get user data from middleware headers
+    const userId = request.headers.get('x-user-id');
+    const userEmail = request.headers.get('x-user-email');
+    const userRole = request.headers.get('x-user-role');
+    
+    if (!userId || !userEmail || userRole !== 'ADMIN') {
       return NextResponse.json({ 
         success: false,
         error: 'Unauthorized',

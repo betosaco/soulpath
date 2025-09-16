@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import * as jwt from 'jsonwebtoken';
+import { jwtVerify } from 'jose';
 import { prisma } from '@/lib/prisma';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
@@ -16,10 +16,11 @@ export async function POST(request: NextRequest) {
       }, { status: 401 });
     }
 
-    // Verify JWT token
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; iat?: number; exp?: number };
+    // Verify JWT token using jose library
+    const secret = new TextEncoder().encode(JWT_SECRET);
+    const { payload } = await jwtVerify(token, secret);
     
-    if (!decoded) {
+    if (!payload) {
       return NextResponse.json({
         success: false,
         error: 'Invalid token',
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest) {
 
     // Get user from database
     const user = await prisma.user.findUnique({
-      where: { id: decoded.userId }
+      where: { id: String(payload.userId) }
     });
 
     if (!user) {

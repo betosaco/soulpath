@@ -29,6 +29,7 @@ import { cn } from '@/lib/utils';
 import { CheckCircle, AlertTriangle, Info } from 'lucide-react';
 import { BaseButton } from './BaseButton';
 import { colors } from '@/lib/design-system';
+import '@/styles/unified-component-styles.css';
 
 // ============================================================================
 // TYPES
@@ -107,12 +108,9 @@ export function BaseModal({
   };
 
   const modalClasses = cn(
-    'dashboard-modal',
+    'unified-modal',
     sizeClasses[size],
     variantClasses[variant],
-    'rounded-lg',
-    'shadow-xl',
-    'border',
     className
   );
 
@@ -122,15 +120,15 @@ export function BaseModal({
       onOpenChange={closeOnOverlayClick ? onClose : undefined}
     >
       <DialogContent className={modalClasses}>
-        <DialogHeader>
+        <DialogHeader className="unified-modal__header">
           <DialogTitle className={cn(
-            "dashboard-modal-title text-xl font-bold",
-            title ? "text-white" : "sr-only" // sr-only hides the title visually but keeps it accessible
+            "unified-modal__title",
+            title ? "unified-text-primary" : "sr-only" // sr-only hides the title visually but keeps it accessible
           )}>
             {title || "Modal"}
           </DialogTitle>
           {description && (
-            <DialogDescription className="dashboard-modal-description text-gray-400 text-base">
+            <DialogDescription className="unified-modal__description unified-text-secondary">
               {description}
             </DialogDescription>
           )}

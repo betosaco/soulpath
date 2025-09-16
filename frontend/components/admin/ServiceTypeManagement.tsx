@@ -140,6 +140,32 @@ export function ServiceTypeManagement() {
     try {
       setLoading(true);
       const response = await fetch('/api/admin/service-types?include=all');
+      // Check content type before parsing JSON
+
+      const contentType = response.headers.get('content-type');
+
+      if (!contentType || !contentType.includes('application/json')) {
+
+        const errorText = await response.text();
+
+        console.error('❌ ServiceTypeManagement: Non-JSON response received:', {
+
+          status: response.status,
+
+          statusText: response.statusText,
+
+          contentType,
+
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+        });
+
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+      }
+
+      
+
       const data = await response.json();
       
       if (data.success) {
@@ -191,6 +217,45 @@ export function ServiceTypeManagement() {
         body: JSON.stringify(payload)
       });
 
+      // Check content type before parsing JSON
+
+
+      const contentType = response.headers.get('content-type');
+
+
+      if (!contentType || !contentType.includes('application/json')) {
+
+
+        const errorText = await response.text();
+
+
+        console.error('❌ ServiceTypeManagement: Non-JSON response received:', {
+
+
+          status: response.status,
+
+
+          statusText: response.statusText,
+
+
+          contentType,
+
+
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+
+        });
+
+
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+
+      }
+
+
+      
+
+
       const data = await response.json();
       
       if (data.success) {
@@ -215,6 +280,45 @@ export function ServiceTypeManagement() {
       const response = await fetch(`/api/admin/service-types?id=${id}`, {
         method: 'DELETE'
       });
+      
+      // Check content type before parsing JSON
+
+      
+      const contentType = response.headers.get('content-type');
+
+      
+      if (!contentType || !contentType.includes('application/json')) {
+
+      
+        const errorText = await response.text();
+
+      
+        console.error('❌ ServiceTypeManagement: Non-JSON response received:', {
+
+      
+          status: response.status,
+
+      
+          statusText: response.statusText,
+
+      
+          contentType,
+
+      
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+      
+        });
+
+      
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+      
+      }
+
+      
+      
+
       
       const data = await response.json();
       

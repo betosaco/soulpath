@@ -25,7 +25,7 @@ else
 fi
 
 # Start Rasa server
-exec python -m rasa run \
+exec python -W ignore::DeprecationWarning -W ignore::PendingDeprecationWarning -W ignore::UserWarning -m rasa run \
     --enable-api \
     --cors "*" \
     --port $PORT \

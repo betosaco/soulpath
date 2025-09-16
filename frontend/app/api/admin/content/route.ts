@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
 
     const user = await Promise.race([authPromise, timeoutPromise]) as { email?: string; role?: string } | null;
 
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       console.log('❌ Unauthorized access attempt');
       return NextResponse.json({
         success: false,
@@ -145,7 +145,7 @@ export async function PUT(request: NextRequest) {
 
     const user = await Promise.race([authPromise, timeoutPromise]) as { email?: string; role?: string } | null;
 
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       console.log('❌ Unauthorized access attempt');
       return NextResponse.json({
         success: false,

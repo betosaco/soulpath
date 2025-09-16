@@ -481,12 +481,19 @@
    ============================================================================ */
 
 .admin-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4rem 2rem;
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(2px);
   text-align: center;
+  z-index: 10;
 }
 
 .admin-loading__spinner {
@@ -978,4 +985,257 @@
   .admin-button {
     justify-content: center;
   }
+}
+
+/* ============================================================================
+   ADMIN HEADER STYLES
+   ============================================================================ */
+
+.admin-header {
+  background: #000000;
+  border-bottom: 1px solid #333333;
+  padding: 1rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.admin-header__container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.admin-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.admin-header__icon {
+  width: 40px;
+  height: 40px;
+  background: #333333;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+}
+
+.admin-header__title-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.admin-header__subtitle {
+  font-size: 0.875rem;
+  color: #cccccc;
+  margin: 0;
+}
+
+.admin-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.admin-header__button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #444444;
+  background: #1a1a1a;
+  color: #ffffff;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.admin-header__button:hover {
+  background: #333333;
+  border-color: #555555;
+  color: #ffffff;
+}
+
+.admin-header__button--back {
+  background: #1a4d1a;
+  border-color: #2d6b2d;
+  color: #90ee90;
+}
+
+.admin-header__button--back:hover {
+  background: #2d6b2d;
+  border-color: #3d7b3d;
+  color: #ffffff;
+}
+
+.admin-header__button--bug {
+  background: #4d2d1a;
+  border-color: #6b3d2d;
+  color: #ffb366;
+}
+
+.admin-header__button--bug:hover {
+  background: #6b3d2d;
+  border-color: #7b4d3d;
+  color: #ffffff;
+}
+
+.admin-header__button--account {
+  background: #1a2d4d;
+  border-color: #2d3d6b;
+  color: #6699ff;
+}
+
+.admin-header__button--account:hover {
+  background: #2d3d6b;
+  border-color: #3d4d7b;
+  color: #ffffff;
+}
+
+.admin-header__button--logout {
+  background: #4d1a1a;
+  border-color: #6b2d2d;
+  color: #ff6666;
+}
+
+.admin-header__button--logout:hover {
+  background: #6b2d2d;
+  border-color: #7b3d3d;
+  color: #ffffff;
+}
+
+.admin-header__button--close {
+  background: #2d2d2d;
+  border-color: #444444;
+  color: #cccccc;
+}
+
+.admin-header__button--close:hover {
+  background: #444444;
+  border-color: #555555;
+  color: #ffffff;
+}
+
+/* ============================================================================
+   MULTI-DAY SELECTOR STYLES
+   ============================================================================ */
+
+.unified-schedule-management__days-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+.unified-schedule-management__weekdays-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.375rem;
+  padding: 0.75rem;
+  border: 1px solid var(--admin-border-secondary);
+  border-radius: 0.5rem;
+  background: #ffffff;
+  transition: border-color 0.2s ease;
+  width: 100%;
+  max-width: 100%;
+}
+
+.unified-schedule-management__weekdays-grid:focus-within {
+  border-color: var(--matmax-purple-800);
+  box-shadow: 0 0 0 2px rgba(139, 69, 19, 0.2);
+}
+
+.unified-schedule-management__weekday-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.25rem;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 0.8rem;
+  color: #000000;
+  position: relative;
+  min-height: 2.5rem;
+  text-align: center;
+}
+
+.unified-schedule-management__weekday-checkbox:hover {
+  border-color: var(--matmax-purple-800);
+  background: #ffffff;
+  color: #000000;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(139, 69, 19, 0.15);
+}
+
+.unified-schedule-management__checkbox-input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--matmax-purple-800);
+  cursor: pointer;
+  margin: 0;
+}
+
+.unified-schedule-management__checkbox-input:checked + .unified-schedule-management__checkbox-label {
+  color: #000000;
+  font-weight: 600;
+}
+
+.unified-schedule-management__weekday-checkbox:has(.unified-schedule-management__checkbox-input:checked) {
+  background: #ffffff;
+  border-color: var(--matmax-purple-800);
+  color: #000000;
+  box-shadow: 0 1px 3px rgba(139, 69, 19, 0.2);
+}
+
+.unified-schedule-management__checkbox-label {
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  transition: all 0.2s ease;
+  user-select: none;
+  font-size: 0.75rem;
+  line-height: 1;
+  color: inherit;
+}
+
+.unified-schedule-management__selected-summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1rem;
+  background: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  min-height: 2.5rem;
+}
+
+.unified-schedule-management__no-selection {
+  color: #6c757d;
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.unified-schedule-management__selection-count {
+  color: #000000;
+  font-weight: 600;
 }

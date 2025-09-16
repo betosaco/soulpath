@@ -14,8 +14,8 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { buttonStyles, combineStyles } from '@/lib/styles/common';
 import { Loader2 } from 'lucide-react';
+import '@/styles/unified-component-styles.css';
 
 // ============================================================================
 // TYPES
@@ -46,16 +46,18 @@ export function BaseButton({
   rightIcon,
   ...props
 }: BaseButtonProps) {
-  const baseClasses = buttonStyles.base;
-  const variantClasses = buttonStyles.variants[variant];
-  const sizeClasses = buttonStyles.sizes[size];
+  const baseClasses = 'unified-button';
+  const variantClasses = `unified-button--${variant}`;
+  const sizeClasses = size === 'xs' ? 'unified-button--sm' : 
+                     size === 'lg' ? 'unified-button--lg' : 
+                     size === 'xl' ? 'unified-button--lg' : '';
   
-  const stateClasses = combineStyles(
-    loading && buttonStyles.states.loading,
-    disabled && buttonStyles.states.disabled
+  const stateClasses = cn(
+    loading && 'opacity-50 cursor-not-allowed',
+    disabled && 'opacity-50 cursor-not-allowed'
   );
 
-  const classes = combineStyles(
+  const classes = cn(
     baseClasses,
     variantClasses,
     sizeClasses,

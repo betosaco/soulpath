@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
@@ -16,6 +16,7 @@ import {
   Calendar,
   Users
 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 interface TeacherSchedule {
   id: number;
@@ -69,6 +70,7 @@ const DAYS_OF_WEEK = [
 ];
 
 export function TeacherScheduleManagement() {
+  const { user } = useAuth();
   const [schedules, setSchedules] = useState<TeacherSchedule[]>([]);
   const [teachers, setTeachers] = useState<Array<{ id: number; name: string; isActive: boolean }>>([]);
   const [venues, setVenues] = useState<Array<{ id: number; name: string; city?: string }>>([]);
@@ -93,14 +95,51 @@ export function TeacherScheduleManagement() {
   const [newSpecialty, setNewSpecialty] = useState('');
 
   // Fetch schedules, teachers, and venues
-  const fetchSchedules = async () => {
+  const fetchSchedules = useCallback(async () => {
+    if (!user?.access_token) {
+      console.error('No authentication token available');
+      setError('Authentication required');
+      return;
+    }
+
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/teacher-schedules?include=all');
+      const response = await fetch('/api/admin/teacher-schedules?include=all', {
+        headers: {
+          'Authorization': `Bearer ${user.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      // Check content type before parsing JSON
+
+      const contentType = response.headers.get('content-type');
+
+      if (!contentType || !contentType.includes('application/json')) {
+
+        const errorText = await response.text();
+
+        console.error('❌ TeacherScheduleManagement: Non-JSON response received:', {
+
+          status: response.status,
+
+          statusText: response.statusText,
+
+          contentType,
+
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+        });
+
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+      }
+
+      
+
       const data = await response.json();
       
       if (data.success) {
-        setSchedules(data.data.schedules);
+        setSchedules(data.data?.schedules || []);
       } else {
         setError(data.message || 'Failed to fetch schedules');
       }
@@ -110,39 +149,115 @@ export function TeacherScheduleManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.access_token]);
 
-  const fetchTeachers = async () => {
+  const fetchTeachers = useCallback(async () => {
+    if (!user?.access_token) return;
+
     try {
-      const response = await fetch('/api/admin/teachers?isActive=true');
+      const response = await fetch('/api/admin/teachers?isActive=true', {
+        headers: {
+          'Authorization': `Bearer ${user.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      // Check content type before parsing JSON
+
+      const contentType = response.headers.get('content-type');
+
+      if (!contentType || !contentType.includes('application/json')) {
+
+        const errorText = await response.text();
+
+        console.error('❌ TeacherScheduleManagement: Non-JSON response received:', {
+
+          status: response.status,
+
+          statusText: response.statusText,
+
+          contentType,
+
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+        });
+
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+      }
+
+      
+
       const data = await response.json();
       
       if (data.success) {
-        setTeachers(data.data.teachers);
+        setTeachers(data.teachers || []);
+      } else {
+        console.error('Failed to fetch teachers:', data.error || 'Unknown error');
+        setTeachers([]);
       }
     } catch (err) {
       console.error('Error fetching teachers:', err);
+      setTeachers([]);
     }
-  };
+  }, [user?.access_token]);
 
-  const fetchVenues = async () => {
+  const fetchVenues = useCallback(async () => {
+    if (!user?.access_token) return;
+
     try {
-      const response = await fetch('/api/admin/venues?isActive=true');
+      const response = await fetch('/api/admin/venues?isActive=true', {
+        headers: {
+          'Authorization': `Bearer ${user.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      // Check content type before parsing JSON
+
+      const contentType = response.headers.get('content-type');
+
+      if (!contentType || !contentType.includes('application/json')) {
+
+        const errorText = await response.text();
+
+        console.error('❌ TeacherScheduleManagement: Non-JSON response received:', {
+
+          status: response.status,
+
+          statusText: response.statusText,
+
+          contentType,
+
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+        });
+
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+      }
+
+      
+
       const data = await response.json();
       
       if (data.success) {
-        setVenues(data.data.venues);
+        setVenues(data.data?.venues || []);
+      } else {
+        console.error('Failed to fetch venues:', data.error || 'Unknown error');
+        setVenues([]);
       }
     } catch (err) {
       console.error('Error fetching venues:', err);
+      setVenues([]);
     }
-  };
+  }, [user?.access_token]);
 
   useEffect(() => {
-    fetchSchedules();
-    fetchTeachers();
-    fetchVenues();
-  }, []);
+    if (user?.access_token) {
+      fetchSchedules();
+      fetchTeachers();
+      fetchVenues();
+    }
+  }, [user?.access_token, fetchSchedules, fetchTeachers, fetchVenues]);
 
   // Filter schedules
   const filteredSchedules = schedules.filter(schedule => {
@@ -162,9 +277,15 @@ export function TeacherScheduleManagement() {
     return matchesSearch && matchesTeacher && matchesVenue && matchesDay;
   });
 
+
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!user?.access_token) {
+      setError('Authentication required');
+      return;
+    }
     
     try {
       const url = editingSchedule ? '/api/admin/teacher-schedules' : '/api/admin/teacher-schedules';
@@ -176,9 +297,51 @@ export function TeacherScheduleManagement() {
 
       const response = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Authorization': `Bearer ${user.access_token}`,
+          'Content-Type': 'application/json' 
+        },
         body: JSON.stringify(payload)
       });
+
+      // Check content type before parsing JSON
+
+
+      const contentType = response.headers.get('content-type');
+
+
+      if (!contentType || !contentType.includes('application/json')) {
+
+
+        const errorText = await response.text();
+
+
+        console.error('❌ TeacherScheduleManagement: Non-JSON response received:', {
+
+
+          status: response.status,
+
+
+          statusText: response.statusText,
+
+
+          contentType,
+
+
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+
+        });
+
+
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+
+      }
+
+
+      
+
 
       const data = await response.json();
       
@@ -200,10 +363,58 @@ export function TeacherScheduleManagement() {
   const handleDelete = async (id: number) => {
     if (!confirm('Are you sure you want to delete this schedule?')) return;
     
+    if (!user?.access_token) {
+      setError('Authentication required');
+      return;
+    }
+    
     try {
       const response = await fetch(`/api/admin/teacher-schedules?id=${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${user.access_token}`,
+          'Content-Type': 'application/json'
+        }
       });
+      
+      // Check content type before parsing JSON
+
+      
+      const contentType = response.headers.get('content-type');
+
+      
+      if (!contentType || !contentType.includes('application/json')) {
+
+      
+        const errorText = await response.text();
+
+      
+        console.error('❌ TeacherScheduleManagement: Non-JSON response received:', {
+
+      
+          status: response.status,
+
+      
+          statusText: response.statusText,
+
+      
+          contentType,
+
+      
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+      
+        });
+
+      
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+      
+      }
+
+      
+      
+
       
       const data = await response.json();
       

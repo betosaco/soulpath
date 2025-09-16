@@ -4,8 +4,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import unified component styles */
+@import '../styles/unified-component-styles.css';
+
 /* Import admin dashboard styles */
 @import '../styles/admin-dashboard.css';
+
+/* Import unified schedule management styles */
+@import '../styles/unified-schedule-management.css';
+@import '../styles/schedule-calendar-view.css';
 
 /* Import service display styles */
 @import '../styles/service-display.css';
@@ -267,13 +274,19 @@
 
 /* Admin Loading State */
 .admin-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  background: var(--admin-bg-primary);
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(2px);
   color: var(--admin-text-primary);
+  z-index: 10;
 }
 
 .admin-loading__spinner {
@@ -528,6 +541,7 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .admin-main-content__wrapper {
@@ -1542,8 +1556,16 @@ section {
   z-index: 9999 !important;
   position: fixed !important;
   top: 0 !important;
-  right: 0 !important;
+  left: 0 !important;
+  right: auto !important;
   pointer-events: auto;
+  height: 100vh;
+  height: 100svh;
+  width: 85vw;
+  max-width: 400px;
+  min-width: 280px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .mobile-menu-backdrop {
@@ -1614,6 +1636,135 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Allow text selection in content areas */
+.mobile-menu, .mobile-content, .inner-page, .packages-page, .booking-page {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Mobile device-specific classes */
+.mobile-small-phone {
+  width: 95vw !important;
+  max-width: 300px !important;
+  min-width: 280px !important;
+}
+
+.mobile-medium-phone {
+  width: 92vw !important;
+  max-width: 330px !important;
+  min-width: 280px !important;
+}
+
+.mobile-large-phone {
+  width: 90vw !important;
+  max-width: 360px !important;
+  min-width: 290px !important;
+}
+
+.mobile-tablet {
+  width: 85vw !important;
+  max-width: 400px !important;
+  min-width: 320px !important;
+}
+
+/* Enhanced mobile touch feedback */
+.mobile-touch-feedback {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.1s ease-out, background-color 0.2s ease;
+}
+
+.mobile-touch-feedback::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease;
+  pointer-events: none;
+}
+
+.mobile-touch-feedback:active::before {
+  width: 200%;
+  height: 200%;
+}
+
+.mobile-touch-feedback:active {
+  transform: scale(0.98);
+}
+
+/* Mobile content scrolling */
+.mobile-content {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Performance optimizations for mobile */
+.mobile-menu, .mobile-content {
+  will-change: transform;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  perspective: 1000px;
+  -webkit-perspective: 1000px;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .mobile-menu, .mobile-content, .mobile-touch-feedback {
+    transition: none !important;
+    animation: none !important;
+  }
+  
+  .mobile-touch-feedback:active {
+    transform: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .mobile-menu {
+    border: 2px solid currentColor;
+  }
+  
+  .mobile-menu button {
+    border: 1px solid currentColor;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .mobile-menu {
+    background: linear-gradient(to bottom, #1a1a2e 98%, #0f0f23 98%);
+  }
+}
+
+/* Print styles */
+@media print {
+  .mobile-menu {
+    display: none !important;
+  }
 }
 
 /* Force mobile view on all devices */
@@ -1642,8 +1793,9 @@ html, body {
   }
   
   .mobile-menu {
-    width: 85vw;
-    max-width: 320px;
+    width: 90vw;
+    max-width: 360px;
+    min-width: 280px;
   }
   
   /* Mobile header improvements */
@@ -1724,6 +1876,244 @@ html, body {
   .mobile-menu button:active::before {
     width: 200%;
     height: 200%;
+  }
+}
+
+/* Device-specific optimizations */
+
+/* iPhone 16 Pro Max, 15 Pro Max, 14 Pro Max */
+@media (max-width: 430px) and (min-height: 932px) {
+  .mobile-menu {
+    width: 88vw;
+    max-width: 380px;
+    min-width: 300px;
+  }
+  
+  .mobile-menu .safe-padding {
+    padding-top: max(2rem, env(safe-area-inset-top));
+    padding-bottom: max(2rem, env(safe-area-inset-bottom));
+  }
+  
+  .header-container {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+}
+
+/* iPhone 16 Pro, 15 Pro, 14 Pro */
+@media (max-width: 393px) and (min-height: 852px) {
+  .mobile-menu {
+    width: 90vw;
+    max-width: 350px;
+    min-width: 280px;
+  }
+  
+  .mobile-menu button {
+    min-height: 52px;
+    padding: 1rem 1.25rem;
+  }
+}
+
+/* iPhone 16, 15, 14 */
+@media (max-width: 390px) and (min-height: 844px) {
+  .mobile-menu {
+    width: 92vw;
+    max-width: 340px;
+    min-width: 280px;
+  }
+  
+  .mobile-menu .safe-padding {
+    padding: 1rem;
+  }
+}
+
+/* iPhone 11 Pro Max, XS Max */
+@media (max-width: 414px) and (min-height: 896px) {
+  .mobile-menu {
+    width: 87vw;
+    max-width: 360px;
+    min-width: 290px;
+  }
+}
+
+/* iPhone 11, XR */
+@media (max-width: 414px) and (min-height: 896px) {
+  .mobile-menu {
+    width: 87vw;
+    max-width: 360px;
+    min-width: 290px;
+  }
+}
+
+/* iPhone 11 Pro, XS, X */
+@media (max-width: 375px) and (min-height: 812px) {
+  .mobile-menu {
+    width: 90vw;
+    max-width: 330px;
+    min-width: 280px;
+  }
+  
+  .mobile-menu button {
+    min-height: 48px;
+    padding: 0.875rem 1rem;
+  }
+}
+
+/* Samsung Galaxy S24 Ultra, S23 Ultra */
+@media (max-width: 412px) and (min-height: 915px) {
+  .mobile-menu {
+    width: 88vw;
+    max-width: 365px;
+    min-width: 290px;
+  }
+  
+  .mobile-menu .safe-padding {
+    padding-top: max(1.5rem, env(safe-area-inset-top));
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Samsung Galaxy S24+, S23+ */
+@media (max-width: 384px) and (min-height: 854px) {
+  .mobile-menu {
+    width: 90vw;
+    max-width: 345px;
+    min-width: 280px;
+  }
+}
+
+/* Samsung Galaxy S24, S23 */
+@media (max-width: 360px) and (min-height: 780px) {
+  .mobile-menu {
+    width: 92vw;
+    max-width: 330px;
+    min-width: 280px;
+  }
+  
+  .mobile-menu button {
+    min-height: 48px;
+    padding: 0.875rem 1rem;
+  }
+}
+
+/* Samsung Galaxy Note series */
+@media (max-width: 412px) and (min-height: 915px) {
+  .mobile-menu {
+    width: 88vw;
+    max-width: 365px;
+    min-width: 290px;
+  }
+}
+
+/* Google Pixel 8 Pro, 7 Pro */
+@media (max-width: 412px) and (min-height: 915px) {
+  .mobile-menu {
+    width: 88vw;
+    max-width: 365px;
+    min-width: 290px;
+  }
+}
+
+/* Google Pixel 8, 7 */
+@media (max-width: 393px) and (min-height: 851px) {
+  .mobile-menu {
+    width: 90vw;
+    max-width: 350px;
+    min-width: 280px;
+  }
+}
+
+/* OnePlus 12, 11 */
+@media (max-width: 412px) and (min-height: 915px) {
+  .mobile-menu {
+    width: 88vw;
+    max-width: 365px;
+    min-width: 290px;
+  }
+}
+
+/* Xiaomi 14 Pro, 13 Pro */
+@media (max-width: 412px) and (min-height: 915px) {
+  .mobile-menu {
+    width: 88vw;
+    max-width: 365px;
+    min-width: 290px;
+  }
+}
+
+/* Comprehensive responsive breakpoints */
+
+/* Extra small devices (phones, 320px and up) */
+@media (max-width: 320px) {
+  .mobile-menu {
+    width: 95vw;
+    max-width: 300px;
+    min-width: 280px;
+  }
+  
+  .mobile-menu button {
+    min-height: 48px;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .mobile-menu .safe-padding {
+    padding: 0.75rem;
+  }
+}
+
+/* Small devices (phones, 375px and up) */
+@media (min-width: 321px) and (max-width: 375px) {
+  .mobile-menu {
+    width: 92vw;
+    max-width: 330px;
+    min-width: 280px;
+  }
+  
+  .mobile-menu button {
+    min-height: 50px;
+    padding: 0.875rem 1.125rem;
+  }
+}
+
+/* Medium devices (phones, 414px and up) */
+@media (min-width: 376px) and (max-width: 414px) {
+  .mobile-menu {
+    width: 90vw;
+    max-width: 360px;
+    min-width: 290px;
+  }
+  
+  .mobile-menu button {
+    min-height: 52px;
+    padding: 1rem 1.25rem;
+  }
+}
+
+/* Large devices (phones, 480px and up) */
+@media (min-width: 415px) and (max-width: 480px) {
+  .mobile-menu {
+    width: 88vw;
+    max-width: 380px;
+    min-width: 300px;
+  }
+  
+  .mobile-menu button {
+    min-height: 54px;
+    padding: 1rem 1.5rem;
+  }
+}
+
+/* Extra large devices (tablets, 768px and up) */
+@media (min-width: 481px) and (max-width: 768px) {
+  .mobile-menu {
+    width: 85vw;
+    max-width: 400px;
+    min-width: 320px;
+  }
+  
+  .mobile-menu button {
+    min-height: 56px;
+    padding: 1.125rem 1.75rem;
   }
 }
 
@@ -2306,6 +2696,16 @@ html, body {
 .mobile-scroll-smooth {
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
+  overscroll-behavior: contain;
+}
+
+/* Enhanced mobile scrolling for all pages */
+.mobile-scrollable {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Inner pages scrolling fix for mobile */
@@ -2313,21 +2713,51 @@ html, body {
   overflow: auto !important;
   min-height: 100vh;
   min-height: 100svh;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .inner-page body {
   overflow: auto !important;
   position: static !important;
   height: auto !important;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Packages page scrolling fix */
 .packages-page {
   overflow: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .packages-page body {
   overflow: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Booking page scrolling fix */
+.booking-page {
+  overflow: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.booking-page body {
+  overflow: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Homepage scrolling fix */
+.homepage {
+  overflow: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.homepage body {
+  overflow: auto !important;
+  -webkit-overflow-scrolling: touch;
   position: static !important;
   height: auto !important;
 }

@@ -31,8 +31,8 @@ async function updateAdminPassword() {
       data: {
         password: hashedPassword,
         fullName: 'MatMax Admin',
-        role: 'admin',
-        status: 'active'
+        role: 'ADMIN',
+        status: 'ACTIVE'
       }
     });
     

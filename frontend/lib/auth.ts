@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { jwtVerify } from 'jose';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -48,17 +48,18 @@ export async function requireAuth(request: NextRequest): Promise<AuthenticatedUs
   console.log('Auth: Token received, length:', token.length);
   
   try {
-    // Verify JWT token
-    const decoded = jwt.verify(token, JWT_SECRET) as Record<string, unknown>;
+    // Verify JWT token using jose library
+    const secret = new TextEncoder().encode(JWT_SECRET);
+    const { payload } = await jwtVerify(token, secret);
     
-    if (!decoded || !decoded.userId) {
+    if (!payload || !payload.userId) {
       console.log('Auth: Invalid JWT token or missing userId');
       return null;
     }
 
     // Get user from database
     const user = await prisma.user.findUnique({
-      where: { id: String(decoded.userId) },
+      where: { id: String(payload.userId) },
       select: { id: true, email: true, role: true, status: true }
     });
 

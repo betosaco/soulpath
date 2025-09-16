@@ -17,7 +17,7 @@ async function testBugReports() {
 
     // 1. Test if bug_reports table exists and has correct structure
     console.log('1. Checking bug_reports table structure...');
-    const { data: tableInfo, error: tableError } = await supabase
+    const { error: tableError } = await supabase
       .from('bug_reports')
       .select('*')
       .limit(1);
@@ -30,7 +30,7 @@ async function testBugReports() {
 
     // 2. Test if bug_comments table exists
     console.log('\n2. Checking bug_comments table structure...');
-    const { data: commentsInfo, error: commentsError } = await supabase
+    const { error: commentsError } = await supabase
       .from('bug_comments')
       .select('*')
       .limit(1);

@@ -20,7 +20,7 @@ async function main() {
     });
     console.log('✅ USD currency created');
 
-    const eur = await prisma.currency.upsert({
+    await prisma.currency.upsert({
       where: { code: 'EUR' },
       update: {},
       create: {

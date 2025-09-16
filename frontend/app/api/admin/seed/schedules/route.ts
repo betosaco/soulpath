@@ -25,7 +25,7 @@ const seedSchedulesSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json({ 
         success: false,
         error: 'Unauthorized',

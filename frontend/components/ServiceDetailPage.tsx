@@ -97,6 +97,32 @@ export function ServiceDetailPage({
     try {
       setLoading(true);
       const response = await fetch(`/api/services/${currentServiceId}`);
+      // Check content type before parsing JSON
+
+      const contentType = response.headers.get('content-type');
+
+      if (!contentType || !contentType.includes('application/json')) {
+
+        const errorText = await response.text();
+
+        console.error('❌ ServiceDetailPage: Non-JSON response received:', {
+
+          status: response.status,
+
+          statusText: response.statusText,
+
+          contentType,
+
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+        });
+
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+      }
+
+      
+
       const data = await response.json();
       
       if (data.success) {
@@ -116,6 +142,32 @@ export function ServiceDetailPage({
   const fetchRelatedServices = async (category: string, excludeId: number) => {
     try {
       const response = await fetch(`/api/services?category=${category}&limit=4`);
+      // Check content type before parsing JSON
+
+      const contentType = response.headers.get('content-type');
+
+      if (!contentType || !contentType.includes('application/json')) {
+
+        const errorText = await response.text();
+
+        console.error('❌ ServiceDetailPage: Non-JSON response received:', {
+
+          status: response.status,
+
+          statusText: response.statusText,
+
+          contentType,
+
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+        });
+
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+      }
+
+      
+
       const data = await response.json();
       
       if (data.success) {

@@ -30,31 +30,31 @@ function log(color, message) {
 }
 
 // API endpoints that should require authentication
-const ADMIN_API_ENDPOINTS = [
-  '/api/admin/users',
-  '/api/admin/bookings',
-  '/api/admin/stats',
-  '/api/admin/content',
-  '/api/admin/communication',
-  '/api/admin/bug-reports',
-  '/api/admin/health',
-  '/api/admin/external-apis',
-  '/api/admin/package-definitions',
-  '/api/admin/schedule-templates',
-  '/api/admin/schedule-slots',
-  '/api/admin/session-durations',
-  '/api/admin/payment-methods',
-  '/api/admin/payment-records',
-  '/api/admin/purchases',
-  '/api/admin/images',
-  '/api/admin/seo',
-  '/api/admin/live-session-config',
-  '/api/admin/telegram-config',
-  '/api/admin/sms-config',
-  '/api/admin/email',
-  '/api/admin/rasa',
-  '/api/admin/conversation-logs'
-];
+// const ADMIN_API_ENDPOINTS = [
+//   '/api/admin/users',
+//   '/api/admin/bookings',
+//   '/api/admin/stats',
+//   '/api/admin/content',
+//   '/api/admin/communication',
+//   '/api/admin/bug-reports',
+//   '/api/admin/health',
+//   '/api/admin/external-apis',
+//   '/api/admin/package-definitions',
+//   '/api/admin/schedule-templates',
+//   '/api/admin/schedule-slots',
+//   '/api/admin/session-durations',
+//   '/api/admin/payment-methods',
+//   '/api/admin/payment-records',
+//   '/api/admin/purchases',
+//   '/api/admin/images',
+//   '/api/admin/seo',
+//   '/api/admin/live-session-config',
+//   '/api/admin/telegram-config',
+//   '/api/admin/sms-config',
+//   '/api/admin/email',
+//   '/api/admin/rasa',
+//   '/api/admin/conversation-logs'
+// ];
 
 // Components that should use adminApi
 const ADMIN_COMPONENTS = [

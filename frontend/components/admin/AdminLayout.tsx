@@ -13,13 +13,23 @@ interface AdminLayoutProps {
 }
 
 export function AdminLayout({ onClose, isModal = true }: AdminLayoutProps) {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState('clients');
   const bugReportManagementRef = useRef<BugReportManagementRef>(null);
 
   console.log('🎯 AdminLayout: activeTab =', activeTab);
 
-  // Show loading state if no user
+  // Show loading state while authentication is being checked
+  if (isLoading) {
+    return (
+      <div className="admin-loading">
+        <div className="admin-loading__spinner"></div>
+        <p className="admin-loading__text">Loading...</p>
+      </div>
+    );
+  }
+
+  // Show loading state if no user (after auth check is complete)
   if (!user) {
     return (
       <div className="admin-loading">
@@ -29,7 +39,7 @@ export function AdminLayout({ onClose, isModal = true }: AdminLayoutProps) {
     );
   }
 
-  // Show access denied if not admin
+  // Show access denied if not admin (only after auth check is complete)
   if (!isAdmin) {
     return (
       <div className="admin-access-denied">

@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     console.log('📦 GET /api/admin/package-services - Starting request...');
     
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       console.log('❌ Unauthorized access attempt');
       return NextResponse.json({ 
         success: false,
@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
     console.log('📦 POST /api/admin/package-services - Creating package service...');
     
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json({ 
         success: false,
         error: 'Unauthorized',
@@ -259,7 +259,7 @@ export async function PUT(request: NextRequest) {
     console.log('📦 PUT /api/admin/package-services - Updating package service...');
     
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json({ 
         success: false,
         error: 'Unauthorized',
@@ -382,7 +382,7 @@ export async function DELETE(request: NextRequest) {
     console.log('📦 DELETE /api/admin/package-services - Deleting package service...');
     
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json({ 
         success: false,
         error: 'Unauthorized',

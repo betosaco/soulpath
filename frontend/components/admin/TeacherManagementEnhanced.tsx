@@ -97,6 +97,32 @@ export function TeacherManagementEnhanced() {
     try {
       setLoading(true);
       const response = await fetch('/api/admin/teachers?include=all');
+      // Check content type before parsing JSON
+
+      const contentType = response.headers.get('content-type');
+
+      if (!contentType || !contentType.includes('application/json')) {
+
+        const errorText = await response.text();
+
+        console.error('❌ TeacherManagementEnhanced: Non-JSON response received:', {
+
+          status: response.status,
+
+          statusText: response.statusText,
+
+          contentType,
+
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+        });
+
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+      }
+
+      
+
       const data = await response.json();
       
       if (data.success) {
@@ -115,6 +141,32 @@ export function TeacherManagementEnhanced() {
   const fetchVenues = async () => {
     try {
       const response = await fetch('/api/admin/venues');
+      // Check content type before parsing JSON
+
+      const contentType = response.headers.get('content-type');
+
+      if (!contentType || !contentType.includes('application/json')) {
+
+        const errorText = await response.text();
+
+        console.error('❌ TeacherManagementEnhanced: Non-JSON response received:', {
+
+          status: response.status,
+
+          statusText: response.statusText,
+
+          contentType,
+
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+        });
+
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+      }
+
+      
+
       const data = await response.json();
       if (data.success) setVenues(data.venues);
     } catch (err) {
@@ -125,6 +177,32 @@ export function TeacherManagementEnhanced() {
   const fetchSpecialties = async () => {
     try {
       const response = await fetch('/api/admin/specialties');
+      // Check content type before parsing JSON
+
+      const contentType = response.headers.get('content-type');
+
+      if (!contentType || !contentType.includes('application/json')) {
+
+        const errorText = await response.text();
+
+        console.error('❌ TeacherManagementEnhanced: Non-JSON response received:', {
+
+          status: response.status,
+
+          statusText: response.statusText,
+
+          contentType,
+
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+        });
+
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+      }
+
+      
+
       const data = await response.json();
       if (data.success) setSpecialties(data.specialties);
     } catch (err) {
@@ -135,6 +213,32 @@ export function TeacherManagementEnhanced() {
   const fetchLanguages = async () => {
     try {
       const response = await fetch('/api/admin/languages');
+      // Check content type before parsing JSON
+
+      const contentType = response.headers.get('content-type');
+
+      if (!contentType || !contentType.includes('application/json')) {
+
+        const errorText = await response.text();
+
+        console.error('❌ TeacherManagementEnhanced: Non-JSON response received:', {
+
+          status: response.status,
+
+          statusText: response.statusText,
+
+          contentType,
+
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+        });
+
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+      }
+
+      
+
       const data = await response.json();
       if (data.success) setLanguages(data.languages);
     } catch (err) {
@@ -239,6 +343,45 @@ export function TeacherManagementEnhanced() {
           action
         })
       });
+
+      // Check content type before parsing JSON
+
+
+      const contentType = response.headers.get('content-type');
+
+
+      if (!contentType || !contentType.includes('application/json')) {
+
+
+        const errorText = await response.text();
+
+
+        console.error('❌ TeacherManagementEnhanced: Non-JSON response received:', {
+
+
+          status: response.status,
+
+
+          statusText: response.statusText,
+
+
+          contentType,
+
+
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+
+        });
+
+
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+
+      }
+
+
+      
+
 
       const data = await response.json();
       

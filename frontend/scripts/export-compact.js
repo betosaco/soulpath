@@ -226,7 +226,7 @@ function countFiles(projectRoot) {
           }
         }
       }
-    } catch (error) {
+    } catch {
       // Ignore errors
     }
   }

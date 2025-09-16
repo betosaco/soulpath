@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Check admin permissions
-    if (user.role !== 'admin') {
+    if (user.role !== 'ADMIN') {
       console.log('❌ Admin access required');
       return NextResponse.json({ success: false, error: 'Admin access required' }, { status: 403 });
     }
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check admin permissions
-    if (user.role !== 'admin') {
+    if (user.role !== 'ADMIN') {
       console.log('❌ Admin access required');
       return NextResponse.json({ success: false, error: 'Admin access required' }, { status: 403 });
     }
@@ -213,7 +213,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Check admin permissions
-    if (user.role !== 'admin') {
+    if (user.role !== 'ADMIN') {
       console.log('❌ Admin access required');
       return NextResponse.json({ success: false, error: 'Admin access required' }, { status: 403 });
     }

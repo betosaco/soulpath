@@ -66,6 +66,17 @@ interface Teacher {
       description?: string;
       category?: string;
     };
+    serviceType?: {
+      id: number;
+      name: string;
+      category: string;
+    };
+    level?: string;
+    yearsExperience?: number;
+    certification?: string;
+    certificationDate?: string;
+    notes?: string;
+    isVerified?: boolean;
   }>;
   languages?: Array<{
     id: number;
@@ -146,14 +157,26 @@ interface TeacherFormData {
   metaTitle: string;
   metaDescription: string;
   venueId: number;
+  serviceTypeIds: number[];
   specialtyIds: number[];
+  specialtyDetails: Array<{
+    specialtyId: number;
+    serviceTypeId?: number;
+    level?: string;
+    yearsExperience?: number;
+    certification?: string;
+    certificationDate?: string;
+    notes?: string;
+    isVerified?: boolean;
+  }>;
   languageIds: number[];
 }
 
 export function TeacherManagement() {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [venues, setVenues] = useState<Array<{ id: number; name: string; city?: string }>>([]);
-  const [specialties, setSpecialties] = useState<Array<{ id: number; name: string; description?: string; category?: string }>>([]);
+  const [serviceTypes, setServiceTypes] = useState<Array<{ id: number; name: string; description?: string; category?: string }>>([]);
+  const [specialties, setSpecialties] = useState<Array<{ id: number; name: string; description?: string; category?: string; serviceTypeId?: number }>>([]);
   const [languages, setLanguages] = useState<Array<{ id: number; name: string; code: string; nativeName?: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -191,7 +214,9 @@ export function TeacherManagement() {
     metaTitle: '',
     metaDescription: '',
     venueId: 0,
+    serviceTypeIds: [],
     specialtyIds: [],
+    specialtyDetails: [],
     languageIds: []
   });
 
@@ -200,6 +225,32 @@ export function TeacherManagement() {
     try {
       setLoading(true);
       const response = await fetch('/api/admin/teachers?include=all');
+      // Check content type before parsing JSON
+
+      const contentType = response.headers.get('content-type');
+
+      if (!contentType || !contentType.includes('application/json')) {
+
+        const errorText = await response.text();
+
+        console.error('❌ TeacherManagement: Non-JSON response received:', {
+
+          status: response.status,
+
+          statusText: response.statusText,
+
+          contentType,
+
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+        });
+
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+      }
+
+      
+
       const data = await response.json();
       
       if (data.success) {
@@ -218,23 +269,114 @@ export function TeacherManagement() {
   const fetchVenues = async () => {
     try {
       const response = await fetch('/api/admin/venues');
+      // Check content type before parsing JSON
+
+      const contentType = response.headers.get('content-type');
+
+      if (!contentType || !contentType.includes('application/json')) {
+
+        const errorText = await response.text();
+
+        console.error('❌ TeacherManagement: Non-JSON response received:', {
+
+          status: response.status,
+
+          statusText: response.statusText,
+
+          contentType,
+
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+        });
+
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+      }
+
+      
+
       const data = await response.json();
       
       if (data.success) {
-        setVenues(data.venues);
+        setVenues(Array.isArray(data.venues) ? data.venues : []);
       }
     } catch (err) {
       console.error('Error fetching venues:', err);
     }
   };
 
-  const fetchSpecialties = async () => {
+  const fetchServiceTypes = async () => {
     try {
-      const response = await fetch('/api/admin/specialties');
+      const response = await fetch('/api/admin/service-types');
+      // Check content type before parsing JSON
+
+      const contentType = response.headers.get('content-type');
+
+      if (!contentType || !contentType.includes('application/json')) {
+
+        const errorText = await response.text();
+
+        console.error('❌ TeacherManagement: Non-JSON response received:', {
+
+          status: response.status,
+
+          statusText: response.statusText,
+
+          contentType,
+
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+        });
+
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+      }
+
+      
+
       const data = await response.json();
       
       if (data.success) {
-        setSpecialties(data.specialties);
+        setServiceTypes(Array.isArray(data.serviceTypes) ? data.serviceTypes : []);
+      }
+    } catch (err) {
+      console.error('Error fetching service types:', err);
+    }
+  };
+
+  const fetchSpecialties = async () => {
+    try {
+      const response = await fetch('/api/admin/specialties');
+      // Check content type before parsing JSON
+
+      const contentType = response.headers.get('content-type');
+
+      if (!contentType || !contentType.includes('application/json')) {
+
+        const errorText = await response.text();
+
+        console.error('❌ TeacherManagement: Non-JSON response received:', {
+
+          status: response.status,
+
+          statusText: response.statusText,
+
+          contentType,
+
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+        });
+
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+      }
+
+      
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setSpecialties(Array.isArray(data.specialties) ? data.specialties : []);
       }
     } catch (err) {
       console.error('Error fetching specialties:', err);
@@ -244,10 +386,36 @@ export function TeacherManagement() {
   const fetchLanguages = async () => {
     try {
       const response = await fetch('/api/admin/languages');
+      // Check content type before parsing JSON
+
+      const contentType = response.headers.get('content-type');
+
+      if (!contentType || !contentType.includes('application/json')) {
+
+        const errorText = await response.text();
+
+        console.error('❌ TeacherManagement: Non-JSON response received:', {
+
+          status: response.status,
+
+          statusText: response.statusText,
+
+          contentType,
+
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+        });
+
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+      }
+
+      
+
       const data = await response.json();
       
       if (data.success) {
-        setLanguages(data.languages);
+        setLanguages(Array.isArray(data.languages) ? data.languages : []);
       }
     } catch (err) {
       console.error('Error fetching languages:', err);
@@ -257,6 +425,7 @@ export function TeacherManagement() {
   useEffect(() => {
     fetchTeachers();
     fetchVenues();
+    fetchServiceTypes();
     fetchSpecialties();
     fetchLanguages();
   }, []);
@@ -298,6 +467,45 @@ export function TeacherManagement() {
         body: JSON.stringify(payload)
       });
 
+      // Check content type before parsing JSON
+
+
+      const contentType = response.headers.get('content-type');
+
+
+      if (!contentType || !contentType.includes('application/json')) {
+
+
+        const errorText = await response.text();
+
+
+        console.error('❌ TeacherManagement: Non-JSON response received:', {
+
+
+          status: response.status,
+
+
+          statusText: response.statusText,
+
+
+          contentType,
+
+
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+
+        });
+
+
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+
+      }
+
+
+      
+
+
       const data = await response.json();
       
       if (data.success || response.ok) {
@@ -322,6 +530,45 @@ export function TeacherManagement() {
       const response = await fetch(`/api/admin/teachers?id=${id}`, {
         method: 'DELETE'
       });
+      
+      // Check content type before parsing JSON
+
+      
+      const contentType = response.headers.get('content-type');
+
+      
+      if (!contentType || !contentType.includes('application/json')) {
+
+      
+        const errorText = await response.text();
+
+      
+        console.error('❌ TeacherManagement: Non-JSON response received:', {
+
+      
+          status: response.status,
+
+      
+          statusText: response.statusText,
+
+      
+          contentType,
+
+      
+          body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+
+      
+        });
+
+      
+        throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+
+      
+      }
+
+      
+      
+
       
       const data = await response.json();
       
@@ -368,7 +615,18 @@ export function TeacherManagement() {
       metaTitle: teacher.metaTitle || '',
       metaDescription: teacher.metaDescription || '',
       venueId: teacher.venueId || 0,
+      serviceTypeIds: teacher.specialties?.map(s => s.serviceType?.id).filter(Boolean) as number[] || [],
       specialtyIds: teacher.specialties?.map(s => s.specialty.id) || [],
+      specialtyDetails: teacher.specialties?.map(s => ({
+        specialtyId: s.specialty.id,
+        serviceTypeId: s.serviceType?.id,
+        level: s.level,
+        yearsExperience: s.yearsExperience,
+        certification: s.certification,
+        certificationDate: s.certificationDate,
+        notes: s.notes,
+        isVerified: s.isVerified
+      })) || [],
       languageIds: teacher.languages?.map(l => l.language.id) || []
     });
     setShowForm(true);
@@ -405,9 +663,21 @@ export function TeacherManagement() {
       metaTitle: '',
       metaDescription: '',
       venueId: 0,
+      serviceTypeIds: [],
       specialtyIds: [],
+      specialtyDetails: [],
       languageIds: []
     });
+  };
+
+  // Toggle service type
+  const toggleServiceType = (serviceTypeId: number) => {
+    setFormData(prev => ({
+      ...prev,
+      serviceTypeIds: prev.serviceTypeIds.includes(serviceTypeId)
+        ? prev.serviceTypeIds.filter(id => id !== serviceTypeId)
+        : [...prev.serviceTypeIds, serviceTypeId]
+    }));
   };
 
   // Toggle specialty
@@ -416,9 +686,27 @@ export function TeacherManagement() {
       ...prev,
       specialtyIds: prev.specialtyIds.includes(specialtyId)
         ? prev.specialtyIds.filter(id => id !== specialtyId)
-        : [...prev.specialtyIds, specialtyId]
+        : [...prev.specialtyIds, specialtyId],
+      specialtyDetails: prev.specialtyIds.includes(specialtyId)
+        ? prev.specialtyDetails.filter(detail => detail.specialtyId !== specialtyId)
+        : [...prev.specialtyDetails, { specialtyId }]
     }));
   };
+
+  // Update specialty details - will be used in future mode
+  const updateSpecialtyDetail = (specialtyId: number, field: string, value: string | number | boolean | undefined) => {
+    setFormData(prev => ({
+      ...prev,
+      specialtyDetails: prev.specialtyDetails.map(detail => 
+        detail.specialtyId === specialtyId 
+          ? { ...detail, [field]: value }
+          : detail
+      )
+    }));
+  };
+
+  // Suppress unused variable warning - function will be used in future mode
+  void updateSpecialtyDetail;
 
   // Toggle language
   const toggleLanguage = (languageId: number) => {
@@ -498,7 +786,7 @@ export function TeacherManagement() {
           >
             <option value="all">All Venues</option>
             <option value="unassigned">Unassigned</option>
-            {venues.map(venue => (
+            {(Array.isArray(venues) ? venues : []).map(venue => (
               <option key={venue.id} value={venue.id.toString()}>
                 {venue.name}
               </option>
@@ -595,27 +883,130 @@ export function TeacherManagement() {
                     )}
                   </div>
 
+                  {teacher.specialties && teacher.specialties.some(s => s.serviceType) && (
+                    <div className="teacher-card__service-types">
+                      <div className="service-types-header">
+                        <span className="service-types-icon">🎯</span>
+                        <span className="service-types-label">Service Types</span>
+                      </div>
+                      <div className="service-types-grid">
+                        {teacher.specialties
+                          .filter(s => s.serviceType)
+                          .slice(0, 4)
+                          .map((specialty, index) => {
+                          const getServiceTypeIcon = (name: string) => {
+                            const iconMap: { [key: string]: string } = {
+                              'yoga': '🧘', 'pilates': '🤸', 'meditation': '🧘‍♀️', 'fitness': '💪',
+                              'dance': '💃', 'martial arts': '🥋', 'swimming': '🏊', 'running': '🏃',
+                              'cycling': '🚴', 'boxing': '🥊', 'crossfit': '🏋️', 'aerobics': '🤸‍♀️',
+                              'stretching': '🤸‍♂️', 'breathing': '🫁', 'mindfulness': '🧠', 'wellness': '🌿',
+                              'nutrition': '🥗', 'massage': '💆', 'therapy': '🩺', 'rehabilitation': '🦽',
+                              'sports': '⚽', 'tennis': '🎾', 'golf': '⛳', 'basketball': '🏀',
+                              'football': '🏈', 'soccer': '⚽', 'volleyball': '🏐', 'baseball': '⚾'
+                            };
+                            const lowerName = name.toLowerCase();
+                            return iconMap[lowerName] || iconMap[name] || '🎯';
+                          };
+                          
+                          return (
+                            <div key={index} className="service-type-item">
+                              <span className="service-type-icon">{getServiceTypeIcon(specialty.serviceType!.name)}</span>
+                              <span className="service-type-name">{specialty.serviceType!.name}</span>
+                            </div>
+                          );
+                        })}
+                        {teacher.specialties.filter(s => s.serviceType).length > 4 && (
+                          <div className="service-type-item service-type-item--more">
+                            <span className="service-type-icon">➕</span>
+                            <span className="service-type-name">+{teacher.specialties.filter(s => s.serviceType).length - 4} more</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {teacher.specialties && teacher.specialties.length > 0 && (
                     <div className="teacher-card__specialties">
-                      {teacher.specialties.slice(0, 3).map((specialty, index) => (
-                        <span key={index} className="specialty-tag">
-                          {specialty.specialty.name}
-                        </span>
-                      ))}
-                      {teacher.specialties.length > 3 && (
-                        <span className="specialty-tag specialty-tag--more">
-                          +{teacher.specialties.length - 3} more
-                        </span>
-                      )}
+                      <div className="specialties-header">
+                        <span className="specialties-icon">🏆</span>
+                        <span className="specialties-label">Specialties & Certifications</span>
+                      </div>
+                      <div className="specialties-grid">
+                        {(Array.isArray(teacher.specialties) ? teacher.specialties : []).slice(0, 4).map((specialty, index) => {
+                          const getSpecialtyIcon = (name: string) => {
+                            const iconMap: { [key: string]: string } = {
+                              'yoga alliance': '🧘‍♀️', 'pilates certification': '🤸', 'meditation teacher': '🧘', 'fitness trainer': '💪',
+                              'dance instructor': '💃', 'martial arts': '🥋', 'swimming coach': '🏊', 'running coach': '🏃',
+                              'cycling instructor': '🚴', 'boxing trainer': '🥊', 'crossfit coach': '🏋️', 'aerobics instructor': '🤸‍♀️',
+                              'stretching specialist': '🤸‍♂️', 'breathing coach': '🫁', 'mindfulness teacher': '🧠', 'wellness coach': '🌿',
+                              'nutritionist': '🥗', 'massage therapist': '💆', 'therapist': '🩺', 'rehabilitation specialist': '🦽',
+                              'sports coach': '⚽', 'tennis instructor': '🎾', 'golf coach': '⛳', 'basketball coach': '🏀',
+                              'football coach': '🏈', 'soccer coach': '⚽', 'volleyball coach': '🏐', 'baseball coach': '⚾',
+                              'certification': '📜', 'diploma': '🎓', 'license': '📋', 'degree': '🎓'
+                            };
+                            const lowerName = name.toLowerCase();
+                            return iconMap[lowerName] || iconMap[name] || '🏆';
+                          };
+                          
+                          return (
+                            <div key={index} className="specialty-item">
+                              <span className="specialty-icon">{getSpecialtyIcon(specialty.specialty.name)}</span>
+                              <span className="specialty-name">{specialty.specialty.name}</span>
+                              {specialty.level && (
+                                <span className="specialty-level">({specialty.level})</span>
+                              )}
+                              {specialty.certification && (
+                                <span className="specialty-cert">📜 {specialty.certification}</span>
+                              )}
+                            </div>
+                          );
+                        })}
+                        {teacher.specialties.length > 4 && (
+                          <div className="specialty-item specialty-item--more">
+                            <span className="specialty-icon">➕</span>
+                            <span className="specialty-name">+{teacher.specialties.length - 4} more</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
 
                   {teacher.languages && teacher.languages.length > 0 && (
                     <div className="teacher-card__languages">
-                      <span className="languages-label">Languages:</span>
-                      <span className="languages-list">
-                        {teacher.languages.map(l => l.language.name).join(', ')}
-                      </span>
+                      <div className="languages-header">
+                        <span className="languages-icon">🌍</span>
+                        <span className="languages-label">Languages</span>
+                      </div>
+                      <div className="languages-grid">
+                        {(Array.isArray(teacher.languages) ? teacher.languages : []).slice(0, 3).map((lang, index) => {
+                          const getLanguageFlag = (code: string) => {
+                            const flagMap: { [key: string]: string } = {
+                              'en': '🇺🇸', 'es': '🇪🇸', 'fr': '🇫🇷', 'de': '🇩🇪', 'it': '🇮🇹',
+                              'pt': '🇵🇹', 'ru': '🇷🇺', 'ja': '🇯🇵', 'ko': '🇰🇷', 'zh': '🇨🇳',
+                              'ar': '🇸🇦', 'hi': '🇮🇳', 'th': '🇹🇭', 'vi': '🇻🇳', 'nl': '🇳🇱',
+                              'sv': '🇸🇪', 'no': '🇳🇴', 'da': '🇩🇰', 'fi': '🇫🇮', 'pl': '🇵🇱',
+                              'tr': '🇹🇷', 'he': '🇮🇱', 'uk': '🇺🇦', 'cs': '🇨🇿', 'hu': '🇭🇺'
+                            };
+                            return flagMap[code.toLowerCase()] || '🌐';
+                          };
+                          
+                          return (
+                            <div key={index} className="language-item">
+                              <span className="language-flag">{getLanguageFlag(lang.language.code)}</span>
+                              <span className="language-name">{lang.language.name}</span>
+                              {lang.language.nativeName && lang.language.nativeName !== lang.language.name && (
+                                <span className="language-native">({lang.language.nativeName})</span>
+                              )}
+                            </div>
+                          );
+                        })}
+                        {teacher.languages.length > 3 && (
+                          <div className="language-item language-item--more">
+                            <span className="language-flag">➕</span>
+                            <span className="language-name">+{teacher.languages.length - 3} more</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -729,7 +1120,7 @@ export function TeacherManagement() {
                       className="admin-form-select"
                     >
                       <option value={0}>No venue assigned</option>
-                      {venues.map(venue => (
+                      {(Array.isArray(venues) ? venues : []).map(venue => (
                         <option key={venue.id} value={venue.id}>
                           {venue.name}
                         </option>
@@ -770,44 +1161,145 @@ export function TeacherManagement() {
                   </div>
 
                   <div className="admin-form-group admin-form-group--full">
-                    <label className="admin-form-label">Specialties</label>
-                    <div className="checkbox-grid">
-                      {specialties.map((specialty) => (
-                        <label key={specialty.id} className="checkbox-item">
-                          <input
-                            type="checkbox"
-                            checked={formData.specialtyIds.includes(specialty.id)}
-                            onChange={() => toggleSpecialty(specialty.id)}
-                          />
-                          <span className="checkbox-label">
-                            {specialty.name}
-                            {specialty.description && (
-                              <span className="checkbox-description">{specialty.description}</span>
-                            )}
-                          </span>
-                        </label>
-                      ))}
+                    <label className="admin-form-label">
+                      <span className="form-label-icon">🎯</span>
+                      Service Types
+                    </label>
+                    <div className="service-types-selection-grid">
+                      {(Array.isArray(serviceTypes) ? serviceTypes : []).map((serviceType) => {
+                        const getServiceTypeIcon = (name: string) => {
+                          const iconMap: { [key: string]: string } = {
+                            'yoga': '🧘', 'pilates': '🤸', 'meditation': '🧘‍♀️', 'fitness': '💪',
+                            'dance': '💃', 'martial arts': '🥋', 'swimming': '🏊', 'running': '🏃',
+                            'cycling': '🚴', 'boxing': '🥊', 'crossfit': '🏋️', 'aerobics': '🤸‍♀️',
+                            'stretching': '🤸‍♂️', 'breathing': '🫁', 'mindfulness': '🧠', 'wellness': '🌿',
+                            'nutrition': '🥗', 'massage': '💆', 'therapy': '🩺', 'rehabilitation': '🦽',
+                            'sports': '⚽', 'tennis': '🎾', 'golf': '⛳', 'basketball': '🏀',
+                            'football': '🏈', 'soccer': '⚽', 'volleyball': '🏐', 'baseball': '⚾'
+                          };
+                          const lowerName = name.toLowerCase();
+                          return iconMap[lowerName] || iconMap[name] || '🎯';
+                        };
+                        
+                        return (
+                          <label key={serviceType.id} className="service-type-selection-item">
+                            <input
+                              type="checkbox"
+                              checked={formData.serviceTypeIds.includes(serviceType.id)}
+                              onChange={() => toggleServiceType(serviceType.id)}
+                              className="service-type-checkbox"
+                            />
+                            <div className="service-type-selection-content">
+                              <div className="service-type-selection-icon">
+                                {getServiceTypeIcon(serviceType.name)}
+                              </div>
+                              <div className="service-type-selection-text">
+                                <span className="service-type-selection-name">{serviceType.name}</span>
+                                {serviceType.description && (
+                                  <span className="service-type-selection-description">{serviceType.description}</span>
+                                )}
+                                {serviceType.category && (
+                                  <span className="service-type-selection-category">{serviceType.category}</span>
+                                )}
+                              </div>
+                            </div>
+                          </label>
+                        );
+                      })}
                     </div>
                   </div>
 
                   <div className="admin-form-group admin-form-group--full">
-                    <label className="admin-form-label">Languages</label>
-                    <div className="checkbox-grid">
-                      {languages.map((language) => (
-                        <label key={language.id} className="checkbox-item">
-                          <input
-                            type="checkbox"
-                            checked={formData.languageIds.includes(language.id)}
-                            onChange={() => toggleLanguage(language.id)}
-                          />
-                          <span className="checkbox-label">
-                            {language.name} ({language.code})
-                            {language.nativeName && (
-                              <span className="checkbox-description">{language.nativeName}</span>
-                            )}
-                          </span>
-                        </label>
-                      ))}
+                    <label className="admin-form-label">
+                      <span className="form-label-icon">🏆</span>
+                      Specialties & Certifications
+                    </label>
+                    <div className="specialties-selection-grid">
+                      {(Array.isArray(specialties) ? specialties : []).map((specialty) => {
+                        const getSpecialtyIcon = (name: string) => {
+                          const iconMap: { [key: string]: string } = {
+                            'yoga alliance': '🧘‍♀️', 'pilates certification': '🤸', 'meditation teacher': '🧘', 'fitness trainer': '💪',
+                            'dance instructor': '💃', 'martial arts': '🥋', 'swimming coach': '🏊', 'running coach': '🏃',
+                            'cycling instructor': '🚴', 'boxing trainer': '🥊', 'crossfit coach': '🏋️', 'aerobics instructor': '🤸‍♀️',
+                            'stretching specialist': '🤸‍♂️', 'breathing coach': '🫁', 'mindfulness teacher': '🧠', 'wellness coach': '🌿',
+                            'nutritionist': '🥗', 'massage therapist': '💆', 'therapist': '🩺', 'rehabilitation specialist': '🦽',
+                            'sports coach': '⚽', 'tennis instructor': '🎾', 'golf coach': '⛳', 'basketball coach': '🏀',
+                            'football coach': '🏈', 'soccer coach': '⚽', 'volleyball coach': '🏐', 'baseball coach': '⚾',
+                            'certification': '📜', 'diploma': '🎓', 'license': '📋', 'degree': '🎓'
+                          };
+                          const lowerName = name.toLowerCase();
+                          return iconMap[lowerName] || iconMap[name] || '🏆';
+                        };
+                        
+                        return (
+                          <label key={specialty.id} className="specialty-selection-item">
+                            <input
+                              type="checkbox"
+                              checked={formData.specialtyIds.includes(specialty.id)}
+                              onChange={() => toggleSpecialty(specialty.id)}
+                              className="specialty-checkbox"
+                            />
+                            <div className="specialty-selection-content">
+                              <div className="specialty-selection-icon">
+                                {getSpecialtyIcon(specialty.name)}
+                              </div>
+                              <div className="specialty-selection-text">
+                                <span className="specialty-selection-name">{specialty.name}</span>
+                                {specialty.description && (
+                                  <span className="specialty-selection-description">{specialty.description}</span>
+                                )}
+                                {specialty.category && (
+                                  <span className="specialty-selection-category">{specialty.category}</span>
+                                )}
+                              </div>
+                            </div>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="admin-form-group admin-form-group--full">
+                    <label className="admin-form-label">
+                      <span className="form-label-icon">🌍</span>
+                      Languages
+                    </label>
+                    <div className="languages-selection-grid">
+                      {(Array.isArray(languages) ? languages : []).map((language) => {
+                        const getLanguageFlag = (code: string) => {
+                          const flagMap: { [key: string]: string } = {
+                            'en': '🇺🇸', 'es': '🇪🇸', 'fr': '🇫🇷', 'de': '🇩🇪', 'it': '🇮🇹',
+                            'pt': '🇵🇹', 'ru': '🇷🇺', 'ja': '🇯🇵', 'ko': '🇰🇷', 'zh': '🇨🇳',
+                            'ar': '🇸🇦', 'hi': '🇮🇳', 'th': '🇹🇭', 'vi': '🇻🇳', 'nl': '🇳🇱',
+                            'sv': '🇸🇪', 'no': '🇳🇴', 'da': '🇩🇰', 'fi': '🇫🇮', 'pl': '🇵🇱',
+                            'tr': '🇹🇷', 'he': '🇮🇱', 'uk': '🇺🇦', 'cs': '🇨🇿', 'hu': '🇭🇺'
+                          };
+                          return flagMap[code.toLowerCase()] || '🌐';
+                        };
+                        
+                        return (
+                          <label key={language.id} className="language-selection-item">
+                            <input
+                              type="checkbox"
+                              checked={formData.languageIds.includes(language.id)}
+                              onChange={() => toggleLanguage(language.id)}
+                              className="language-checkbox"
+                            />
+                            <div className="language-selection-content">
+                              <div className="language-selection-flag">
+                                {getLanguageFlag(language.code)}
+                              </div>
+                              <div className="language-selection-text">
+                                <span className="language-selection-name">{language.name}</span>
+                                <span className="language-selection-code">({language.code.toUpperCase()})</span>
+                                {language.nativeName && language.nativeName !== language.name && (
+                                  <span className="language-selection-native">{language.nativeName}</span>
+                                )}
+                              </div>
+                            </div>
+                          </label>
+                        );
+                      })}
                     </div>
                   </div>
 

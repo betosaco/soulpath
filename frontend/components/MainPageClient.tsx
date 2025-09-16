@@ -293,9 +293,6 @@ export default function MainPageClient({
     setCurrentSection(index);
   };
 
-  const handleLoginClick = () => {
-    setShowAdmin(true);
-  };
 
   if (showAdmin) {
     return (
@@ -326,7 +323,6 @@ export default function MainPageClient({
         t={translations}
         isMenuOpen={isMenuOpen}
         setIsMenuOpen={setIsMenuOpen}
-        onLoginClick={handleLoginClick}
         user={null}
         isAdmin={false}
       />

@@ -155,23 +155,6 @@ function fixComponentAdminApi(filePath) {
   return changes;
 }
 
-function fixComponentSuccessHandling(filePath) {
-  const fullPath = path.join(__dirname, '..', filePath);
-  if (!fs.existsSync(fullPath)) return [];
-
-  const content = fs.readFileSync(fullPath, 'utf8');
-  let updated = content;
-  const changes = [];
-
-  // Add success response handling if missing
-  if (content.includes('adminApi') && !content.includes('response.success')) {
-    // This is a more complex fix that would need to be done manually
-    // For now, just add a comment
-    changes.push('Needs manual success response handling');
-  }
-
-  return changes;
-}
 
 function main() {
   log('cyan', '🔧 Fixing Remaining Authentication Issues');

@@ -12,6 +12,9 @@
 
 // Common Style Combinations
 // This file contains reusable style combinations using CSS custom properties
+// 
+// IMPORTANT: For new components, use the unified-component-styles.css classes instead
+// This file is maintained for backward compatibility with existing components
 
 // Card Styles
 export const cardStyles = {

@@ -7,6 +7,7 @@
 
 import { execSync } from 'child_process';
 import path from 'path';
+import fs from 'fs';
 
 async function migrateDatabase() {
   console.log('🗄️  Ejecutando migración de base de datos...\n');
@@ -15,7 +16,6 @@ async function migrateDatabase() {
     const sqlFile = path.join(__dirname, 'create-conversation-logs-table.sql');
     
     // Verificar que el archivo SQL existe
-    const fs = require('fs');
     if (!fs.existsSync(sqlFile)) {
       console.error('❌ No se encontró el archivo SQL de migración');
       process.exit(1);
@@ -43,8 +43,8 @@ async function migrateDatabase() {
 }
 
 // Ejecutar migración si se llama directamente
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   migrateDatabase();
 }
 
-module.exports = { migrateDatabase };
+export { migrateDatabase };

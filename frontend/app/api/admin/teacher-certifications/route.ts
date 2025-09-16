@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     console.log('🏆 GET /api/admin/teacher-certifications - Starting request...');
     
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       console.log('❌ Unauthorized access attempt');
       return NextResponse.json({ 
         success: false,
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
     console.log('🏆 POST /api/admin/teacher-certifications - Creating certification...');
     
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json({ 
         success: false,
         error: 'Unauthorized',
@@ -227,7 +227,7 @@ export async function PUT(request: NextRequest) {
     console.log('🏆 PUT /api/admin/teacher-certifications - Updating certification...');
     
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json({ 
         success: false,
         error: 'Unauthorized',
@@ -326,7 +326,7 @@ export async function DELETE(request: NextRequest) {
     console.log('🏆 DELETE /api/admin/teacher-certifications - Deleting certification...');
     
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json({ 
         success: false,
         error: 'Unauthorized',

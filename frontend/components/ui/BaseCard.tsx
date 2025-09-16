@@ -16,7 +16,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { cardStyles, combineStyles } from '@/lib/styles/common';
+import '@/styles/unified-component-styles.css';
 
 // ============================================================================
 // TYPES
@@ -57,17 +57,21 @@ export function BaseCard({
   children,
   ...props
 }: BaseCardProps) {
-  const baseClasses = cardStyles.base;
-  const variantClasses = cardStyles.variants[variant];
-  const sizeClasses = cardStyles.sizes[size];
+  const baseClasses = 'unified-card';
+  const variantClasses = variant === 'elevated' ? 'shadow-lg' : 
+                        variant === 'outlined' ? 'border-2' : 
+                        variant === 'ghost' ? 'bg-transparent border-none' : '';
+  const sizeClasses = size === 'sm' ? 'p-4' : 
+                     size === 'lg' ? 'p-6' : 
+                     size === 'xl' ? 'p-8' : 'p-5';
   
-  const stateClasses = combineStyles(
-    hover && cardStyles.states.hover,
-    focus && cardStyles.states.focus,
-    active && cardStyles.states.active
+  const stateClasses = cn(
+    hover && 'hover:shadow-md',
+    focus && 'focus:ring-2 focus:ring-[var(--unified-primary)]',
+    active && 'active:scale-95'
   );
 
-  const classes = combineStyles(
+  const classes = cn(
     baseClasses,
     variantClasses,
     sizeClasses,
@@ -94,7 +98,7 @@ BaseCard.Header = function BaseCardHeader({
   return (
     <div
       className={cn(
-        'border-b border-border/20 pb-4 mb-4',
+        'unified-card__header',
         className
       )}
       {...props}
@@ -110,7 +114,7 @@ BaseCard.Content = function BaseCardContent({
   ...props
 }: BaseCardContentProps) {
   return (
-    <div className={cn('', className)} {...props}>
+    <div className={cn('unified-card__content', className)} {...props}>
       {children}
     </div>
   );
@@ -124,7 +128,7 @@ BaseCard.Footer = function BaseCardFooter({
   return (
     <div
       className={cn(
-        'border-t border-border/20 pt-4 mt-4',
+        'unified-card__footer',
         className
       )}
       {...props}

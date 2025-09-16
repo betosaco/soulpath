@@ -1,6 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
+import { safeGet } from '@/lib/safe-fetch';
+
+// API response interface for packages endpoint
+interface PackagesApiResponse {
+  success: boolean;
+  data: PackagePrice[];
+  meta: {
+    currency: string;
+    total: number;
+  };
+  message?: string;
+  error?: string;
+}
 
 export interface PackagePrice {
   id: number;
@@ -55,29 +68,28 @@ export function usePackages(currency: string = 'PEN'): UsePackagesReturn {
       
       console.log(`🔍 Fetching packages for currency: ${currency}`);
       
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      };
+      const headers: HeadersInit = {};
       
       // Add authorization header only if user is authenticated
       if (user?.access_token) {
         headers['Authorization'] = `Bearer ${user.access_token}`;
       }
       
-      const response = await fetch(`/api/packages?currency=${currency}&active=true`, {
-        method: 'GET',
+      const response = await safeGet(`/api/packages?currency=${currency}&active=true`, {
         headers,
+        timeout: 10000,
+        retries: 1,
       });
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch packages: ${response.status} ${response.statusText}`);
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to fetch packages');
       }
 
-      const result = await response.json();
-      console.log('✅ Packages fetched successfully:', result);
+      console.log('✅ Packages fetched successfully:', response.data);
       
       // Handle the API response format
-      const packages = result.success ? result.data : [];
+      const apiResponse = response.data as PackagesApiResponse;
+      const packages: PackagePrice[] = apiResponse?.success ? apiResponse.data : [];
       console.log('📦 Processed packages:', packages.length, packages);
       setPackages(packages);
       setLastLoaded(new Date());

@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
     console.log('🧪 Testing Brevo email service...');
     
     const user = await requireAuth(request);
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       console.log('❌ Unauthorized access attempt');
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }

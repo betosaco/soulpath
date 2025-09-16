@@ -124,7 +124,7 @@ export OPENBLAS_NUM_THREADS=1
 export SQLALCHEMY_SILENCE_UBER_WARNING=1
 
 # Silence Python deprecation warnings from third-party libs (pkg_resources, jax, etc.)
-export PYTHONWARNINGS=ignore::DeprecationWarning
+export PYTHONWARNINGS=ignore::DeprecationWarning,ignore::PendingDeprecationWarning
 
 # Create necessary directories
 mkdir -p models logs
@@ -135,7 +135,7 @@ if [ ! -d "models" ] || [ -z "$(ls -A models/*.tar.gz 2>/dev/null)" ]; then
     echo "⚠️ Warning: Training may take several minutes..."
     
     # Train with timeout to prevent hanging
-    timeout 1800 $RASA_CMD train --force || {
+    timeout 1800 "$PYTHON_CMD" -W ignore::DeprecationWarning -W ignore::PendingDeprecationWarning -W ignore::UserWarning -m rasa train --force || {
         echo "⚠️ Training timed out or failed. Starting server without training..."
         echo "📝 Note: You may need to train the model locally and include it in the deployment."
     }
@@ -158,7 +158,7 @@ echo "🔧 Environment: ${ENVIRONMENT:-production}"
 
 # Start Rasa server with proper error handling
 echo "🚀 Starting Rasa server..."
-exec "$PYTHON_CMD" -W ignore::DeprecationWarning -W ignore::PendingDeprecationWarning -m rasa run \
+exec "$PYTHON_CMD" suppress_warnings.py run \
     --enable-api \
     --cors "*" \
     --port "$PORT" \

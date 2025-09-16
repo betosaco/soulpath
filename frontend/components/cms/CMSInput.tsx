@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import '@/styles/unified-component-styles.css';
 
 interface CMSInputProps {
   label?: string;
@@ -28,10 +29,8 @@ export const CMSInput: React.FC<CMSInputProps> = ({
   rows = 3,
   multiline = false
 }) => {
-  const baseClasses = 'w-full px-4 py-3 bg-[#1A1A2E] border border-[#2A2A3E] rounded-lg text-[#EAEAEA] placeholder-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#FFD700]/50 focus:border-[#FFD700] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed';
-  
-  const errorClasses = error ? 'border-[#DC2626] focus:ring-[#DC2626]/50 focus:border-[#DC2626]' : '';
-  
+  const baseClasses = 'unified-form-input';
+  const errorClasses = error ? 'border-[var(--unified-error)] focus:border-[var(--unified-error)]' : '';
   const classes = `${baseClasses} ${errorClasses} ${className}`;
   
   return (
@@ -41,9 +40,9 @@ export const CMSInput: React.FC<CMSInputProps> = ({
       className="space-y-2"
     >
       {label && (
-        <label className="block text-sm font-medium text-[#EAEAEA]">
+        <label className="unified-form-label">
           {label}
-          {required && <span className="text-[#DC2626] ml-1">*</span>}
+          {required && <span className="text-[var(--unified-error)] ml-1">*</span>}
         </label>
       )}
       
@@ -72,7 +71,7 @@ export const CMSInput: React.FC<CMSInputProps> = ({
         <motion.p
           initial={{ opacity: 0, y: -5 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-sm text-[#DC2626]"
+          className="text-sm text-[var(--unified-error)]"
         >
           {error}
         </motion.p>

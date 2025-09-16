@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Verificar permisos de admin
-    if (user.role !== 'admin') {
+    if (user.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'Admin access required' },
         { status: 403 }
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar permisos de admin
-    if (user.role !== 'admin') {
+    if (user.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'Admin access required' },
         { status: 403 }
@@ -172,7 +172,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Verificar permisos de admin
-    if (user.role !== 'admin') {
+    if (user.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'Admin access required' },
         { status: 403 }
@@ -238,7 +238,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Verificar permisos de admin
-    if (user.role !== 'admin') {
+    if (user.role !== 'ADMIN') {
       return NextResponse.json(
         { success: false, error: 'Admin access required' },
         { status: 403 }

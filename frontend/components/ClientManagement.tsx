@@ -13,6 +13,7 @@ import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { toast } from 'sonner';
 import { formatDate } from '@/lib/utils';
+import '@/styles/unified-component-styles.css';
 
 import { useAuth } from '../hooks/useAuth';
 import { adminApi } from '@/lib/api/admin';
@@ -107,124 +108,122 @@ function ClientModal({ client, isOpen, mode, onClose, onSave }: ClientModalProps
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-[#0a0a0a] flex items-center justify-center z-50 p-4">
+    <div className="unified-modal-overlay">
       <motion.div
         initial={{ scale: 0.9, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.9, opacity: 0, y: 20 }}
         transition={{ duration: 0.2, ease: "easeOut" }}
-        className="bg-[#1a1a2e] border-2 border-[#FFD700] rounded-xl max-w-4xl w-full max-h-[95vh] overflow-hidden shadow-2xl shadow-[#FFD700]/30"
+        className="unified-modal unified-modal--large"
       >
-        <div className="bg-gradient-to-r from-[#1a1a2e] to-[#16213e] border-b border-[#2a2a4a] p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-[#FFD700]/20 rounded-lg flex items-center justify-center">
-                <User size={24} className="text-[#FFD700]" />
-              </div>
-              <div>
-                <h2 className="text-white text-2xl font-bold">
-                  {mode === 'create' ? 'Add New Client' : mode === 'edit' ? 'Edit Client' : 'Client Details'}
-                </h2>
-                <p className="text-gray-300 text-sm mt-1">
-                  {mode === 'create' ? 'Enter client information to create a new consultation client' : 
-                   mode === 'edit' ? 'Update client details and information' : 
-                   'View complete client information and history'}
-                </p>
-              </div>
+        <div className="unified-modal__header">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-[var(--unified-accent)]/20 rounded-lg flex items-center justify-center">
+              <User size={24} className="text-[var(--unified-accent)]" />
             </div>
-            <BaseButton
-              variant="outline"
-              size="sm"
-              onClick={onClose}
-              className="bg-[#1a1a2e] text-white border border-red-500 hover:bg-red-500 hover:text-white transition-all duration-200"
-            >
-              <X size={16} />
-            </BaseButton>
+            <div>
+              <h2 className="unified-modal__title">
+                {mode === 'create' ? 'Add New Client' : mode === 'edit' ? 'Edit Client' : 'Client Details'}
+              </h2>
+              <p className="unified-text-secondary text-sm mt-1">
+                {mode === 'create' ? 'Enter client information to create a new consultation client' : 
+                 mode === 'edit' ? 'Update client details and information' : 
+                 'View complete client information and history'}
+              </p>
+            </div>
           </div>
+          <BaseButton
+            variant="outline"
+            size="sm"
+            onClick={onClose}
+            className="unified-button--danger"
+          >
+            <X size={16} />
+          </BaseButton>
         </div>
         
-        <div className="p-6 overflow-y-auto max-h-[calc(95vh-120px)]">
+        <div className="unified-modal__content">
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="unified-form">
             {/* Basic Information Section */}
-            <div className="space-y-4">
-              <h3 className="dashboard-text-primary text-lg font-semibold border-b border-[#2a2a4a] pb-2">
+            <div className="unified-form-group">
+              <h3 className="unified-text-primary text-lg font-semibold border-b border-[var(--unified-border-light)] pb-2">
                 Basic Information
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="name" className="dashboard-label">Full Name *</Label>
+              <div className="unified-form-row">
+                <div className="unified-form-group">
+                  <Label htmlFor="name" className="unified-form-label">Full Name *</Label>
                   <BaseInput
                     id="name"
                     value={formData.fullName || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
-                    className="dashboard-input"
+                    className="unified-form-input"
                     disabled={mode === 'view'}
                     required
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="email" className="dashboard-label">Email *</Label>
+                <div className="unified-form-group">
+                  <Label htmlFor="email" className="unified-form-label">Email *</Label>
                   <BaseInput
                     id="email"
                     type="email"
                     value={formData.email || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    className="dashboard-input"
+                    className="unified-form-input"
                     disabled={mode === 'view'}
                     required
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="phone" className="dashboard-label">Phone</Label>
+                <div className="unified-form-group">
+                  <Label htmlFor="phone" className="unified-form-label">Phone</Label>
                   <BaseInput
                     id="phone"
                     type="tel"
                     value={formData.phone || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                    className="dashboard-input"
+                    className="unified-form-input"
                     disabled={mode === 'view'}
                     placeholder="+1 (555) 123-4567"
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="language" className="dashboard-label">Language</Label>
+                <div className="unified-form-group">
+                  <Label htmlFor="language" className="unified-form-label">Language</Label>
                   <Select
                     value={formData.language || 'en'}
                     onValueChange={(value) => setFormData(prev => ({ ...prev, language: value }))}
                     disabled={mode === 'view'}
                   >
-                    <SelectTrigger className="dashboard-select">
+                    <SelectTrigger className="unified-form-select">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="dashboard-dropdown-content">
-                      <SelectItem value="en" className="dashboard-dropdown-item">🇺🇸 English</SelectItem>
-                      <SelectItem value="es" className="dashboard-dropdown-item">🇪🇸 Español</SelectItem>
+                    <SelectContent className="unified-menu">
+                      <SelectItem value="en" className="unified-menu-item">🇺🇸 English</SelectItem>
+                      <SelectItem value="es" className="unified-menu-item">🇪🇸 Español</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div>
-                  <Label htmlFor="status" className="dashboard-label">Status</Label>
+                <div className="unified-form-group">
+                  <Label htmlFor="status" className="unified-form-label">Status</Label>
                   <Select
                     value={formData.status || 'active'}
                     onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}
                     disabled={mode === 'view'}
                   >
-                    <SelectTrigger className="dashboard-select">
+                    <SelectTrigger className="unified-form-select">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="dashboard-dropdown-content">
-                      <SelectItem value="active" className="dashboard-dropdown-item">Active</SelectItem>
-                      <SelectItem value="pending" className="dashboard-dropdown-item">Pending</SelectItem>
-                      <SelectItem value="confirmed" className="dashboard-dropdown-item">Confirmed</SelectItem>
-                      <SelectItem value="completed" className="dashboard-dropdown-item">Completed</SelectItem>
-                      <SelectItem value="cancelled" className="dashboard-dropdown-item">Cancelled</SelectItem>
-                      <SelectItem value="no-show" className="dashboard-dropdown-item">No Show</SelectItem>
-                      <SelectItem value="inactive" className="dashboard-dropdown-item">Inactive</SelectItem>
+                    <SelectContent className="unified-menu">
+                      <SelectItem value="active" className="unified-menu-item">Active</SelectItem>
+                      <SelectItem value="pending" className="unified-menu-item">Pending</SelectItem>
+                      <SelectItem value="confirmed" className="unified-menu-item">Confirmed</SelectItem>
+                      <SelectItem value="completed" className="unified-menu-item">Completed</SelectItem>
+                      <SelectItem value="cancelled" className="unified-menu-item">Cancelled</SelectItem>
+                      <SelectItem value="no-show" className="unified-menu-item">No Show</SelectItem>
+                      <SelectItem value="inactive" className="unified-menu-item">Inactive</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -367,6 +366,19 @@ function BookingHistoryModal({ client, isOpen, onClose }: BookingHistoryModalPro
       );
 
       if (response.ok) {
+        // Check content type before parsing JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const errorText = await response.text();
+          console.error('❌ ClientManagement: Non-JSON response received for bookings:', {
+            status: response.status,
+            statusText: response.statusText,
+            contentType,
+            body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+          });
+          throw new Error(`API returned ${response.status} ${response.statusText} instead of JSON`);
+        }
+        
         const data = await response.json();
         setBookings(data.bookings || []);
       }
@@ -822,6 +834,22 @@ export function ClientManagement() {
           description: `${client.fullName} has been removed from your client list.`
         });
       } else {
+        // Check content type before parsing JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const errorText = await response.text();
+          console.error('❌ ClientManagement: Non-JSON response received for delete:', {
+            status: response.status,
+            statusText: response.statusText,
+            contentType,
+            body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+          });
+          toast.error('Failed to delete client', {
+            description: `API returned ${response.status} ${response.statusText} instead of JSON`
+          });
+          return;
+        }
+        
         const errorData = await response.json();
         toast.error('Failed to delete client', {
           description: errorData.message || 'Please try again.'
@@ -854,6 +882,22 @@ export function ClientManagement() {
       });
 
       if (response.ok) {
+        // Check content type before parsing JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const errorText = await response.text();
+          console.error('❌ ClientManagement: Non-JSON response received for save:', {
+            status: response.status,
+            statusText: response.statusText,
+            contentType,
+            body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+          });
+          toast.error('Failed to save client', {
+            description: `API returned ${response.status} ${response.statusText} instead of JSON`
+          });
+          return;
+        }
+        
         const data = await response.json();
         
         if (isCreate) {
@@ -873,6 +917,22 @@ export function ClientManagement() {
         setModalState({ isOpen: false, mode: 'view' });
         setSelectedClient(null);
       } else {
+        // Check content type before parsing JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const errorText = await response.text();
+          console.error('❌ ClientManagement: Non-JSON response received for save error:', {
+            status: response.status,
+            statusText: response.statusText,
+            contentType,
+            body: errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '')
+          });
+          toast.error('Failed to save client', {
+            description: `API returned ${response.status} ${response.statusText} instead of JSON`
+          });
+          return;
+        }
+        
         const errorData = await response.json();
         toast.error('Failed to save client', {
           description: errorData.message || 'Please try again.'

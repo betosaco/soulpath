@@ -12,6 +12,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client';
+import { safeFetch } from '@/lib/safe-fetch';
 
 // ============================================================================
 // TYPES
@@ -106,22 +107,26 @@ class ApiClient {
         throw new Error('No authentication token available');
       }
 
-      const response = await fetch(endpoint, {
+      const response = await safeFetch<ApiResponse<T>>(endpoint, {
         ...options,
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`,
           ...options.headers,
         },
+        timeout: 10000,
+        retries: 1,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      if (!response.success) {
+        return {
+          success: false,
+          error: response.error || 'API request failed',
+          message: 'API request failed',
+          data: undefined,
+        } as ApiResponse<T>;
       }
 
-      const data = await response.json();
-      return data as ApiResponse<T>;
+      return response.data as ApiResponse<T>;
     } catch (error) {
       console.error('API request failed:', error);
       return {
@@ -442,35 +447,47 @@ export const api = {
  */
 export function createApiEndpoint<T>(baseUrl: string) {
   return {
-    getAll: (params?: Record<string, string | number | boolean>) => {
+    getAll: async (params?: Record<string, string | number | boolean>) => {
       const searchParams = params ? new URLSearchParams(
         Object.entries(params).reduce((acc, [key, value]) => {
           acc[key] = String(value);
           return acc;
         }, {} as Record<string, string>)
       ) : new URLSearchParams();
-      return fetch(`${baseUrl}?${searchParams}`).then(res => res.json());
+      const response = await safeFetch(`${baseUrl}?${searchParams}`);
+      if (!response.success) throw new Error(response.error || 'Request failed');
+      return response.data;
     },
     
-    getById: (id: string) => 
-      fetch(`${baseUrl}/${id}`).then(res => res.json()),
+    getById: async (id: string) => {
+      const response = await safeFetch(`${baseUrl}/${id}`);
+      if (!response.success) throw new Error(response.error || 'Request failed');
+      return response.data;
+    },
     
-    create: (data: T) => 
-      fetch(baseUrl, {
+    create: async (data: T) => {
+      const response = await safeFetch(baseUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
-      }).then(res => res.json()),
+      });
+      if (!response.success) throw new Error(response.error || 'Request failed');
+      return response.data;
+    },
     
-    update: (id: string, data: Partial<T>) => 
-      fetch(`${baseUrl}/${id}`, {
+    update: async (id: string, data: Partial<T>) => {
+      const response = await safeFetch(`${baseUrl}/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
-      }).then(res => res.json()),
+      });
+      if (!response.success) throw new Error(response.error || 'Request failed');
+      return response.data;
+    },
     
-    delete: (id: string) => 
-      fetch(`${baseUrl}?id=${id}`, { method: 'DELETE' }).then(res => res.json()),
+    delete: async (id: string) => {
+      const response = await safeFetch(`${baseUrl}?id=${id}`, { method: 'DELETE' });
+      if (!response.success) throw new Error(response.error || 'Request failed');
+      return response.data;
+    },
   };
 }
 

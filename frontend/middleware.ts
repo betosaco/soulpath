@@ -168,7 +168,7 @@ export async function middleware(request: NextRequest) {
     }
 
     // Check if user has admin role
-    if (userData.role !== 'admin') {
+    if (userData.role !== 'ADMIN') {
       console.log('🔐 Middleware: User is not admin, role:', userData.role);
       
       // For API routes, return 403

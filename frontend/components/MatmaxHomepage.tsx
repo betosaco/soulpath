@@ -12,10 +12,6 @@ export function MatmaxHomepage() {
   const { t } = useTranslations();
   const translations = t as Record<string, string | Record<string, string>>;
 
-  const handleLoginClick = () => {
-    // Login functionality is now handled by the Header component modal
-    console.log('Login clicked - handled by Header modal');
-  };
 
   const scrollToSection = (section: string) => {
     // Add scroll functionality here
@@ -31,7 +27,6 @@ export function MatmaxHomepage() {
         t={translations}
         isMenuOpen={isMenuOpen}
         setIsMenuOpen={setIsMenuOpen}
-        onLoginClick={handleLoginClick}
         user={null}
         isAdmin={false}
       />
