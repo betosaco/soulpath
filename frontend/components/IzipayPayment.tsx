@@ -39,7 +39,51 @@ export default function IzipayPayment({
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   const paymentContainerRef = useRef<HTMLDivElement>(null);
 
-  // Load Izipay script
+  // Create form token first (this will set publicKey)
+  useEffect(() => {
+    const createFormToken = async () => {
+      try {
+        console.log('🎫 Creating form token...');
+        const response = await fetch('/api/izipay/create-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            amount,
+            currency: 'PEN',
+            orderId,
+            customer: {
+              email: customerEmail,
+              ...(customerName && { firstName: customerName.split(' ')[0] }),
+              ...(customerName && customerName.split(' ').length > 1 && { lastName: customerName.split(' ').slice(1).join(' ') }),
+              ...(customerPhone && { phone: customerPhone })
+            }
+          })
+        });
+
+        const data = await response.json();
+        console.log('🎫 API Response:', data);
+
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to create payment token');
+        }
+
+        console.log('🎫 Received form token:', data.formToken ? 'Present' : 'Missing');
+        console.log('🔑 Received public key:', data.publicKey ? 'Present' : 'Missing');
+        setFormToken(data.formToken);
+        setPublicKey(data.publicKey);
+      } catch (err) {
+        console.error('Error creating form token:', err);
+        setError(err instanceof Error ? err.message : 'Failed to create payment token');
+        setIsLoading(false);
+      }
+    };
+
+    createFormToken();
+  }, [amount, orderId, customerEmail, customerName, customerPhone]);
+
+  // Load Izipay script only after we have both public key and form token
   useEffect(() => {
     const loadScript = () => {
       // Check if script is already loaded
@@ -49,9 +93,12 @@ export default function IzipayPayment({
         return;
       }
 
-      // Only load script if we have the public key
-      if (!publicKey) {
-        console.log('⏳ Waiting for public key before loading script...');
+      // Only load script if we have both public key and form token
+      if (!publicKey || !formToken) {
+        console.log('⏳ Waiting for public key and form token before loading script...', {
+          hasPublicKey: !!publicKey,
+          hasFormToken: !!formToken
+        });
         return;
       }
 
@@ -82,51 +129,7 @@ export default function IzipayPayment({
       console.log('📜 KR already available, skipping script load');
       setIsScriptLoaded(true);
     }
-  }, [publicKey]);
-
-  // Create form token
-  useEffect(() => {
-    const createFormToken = async () => {
-      try {
-        const response = await fetch('/api/izipay/create-payment', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            amount,
-            currency: 'PEN',
-            orderId,
-            customer: {
-              email: customerEmail,
-              ...(customerName && { firstName: customerName.split(' ')[0] }),
-              ...(customerName && customerName.split(' ').length > 1 && { lastName: customerName.split(' ').slice(1).join(' ') }),
-              ...(customerPhone && { phone: customerPhone })
-            }
-          })
-        });
-
-        const data = await response.json();
-
-        if (!data.success) {
-          throw new Error(data.error || 'Failed to create payment token');
-        }
-
-        console.log('🎫 Received form token:', data.formToken ? 'Present' : 'Missing');
-        console.log('🔑 Received public key:', data.publicKey ? 'Present' : 'Missing');
-        setFormToken(data.formToken);
-        setPublicKey(data.publicKey);
-      } catch (err) {
-        console.error('Error creating form token:', err);
-        setError(err instanceof Error ? err.message : 'Failed to create payment token');
-        setIsLoading(false);
-      }
-    };
-
-    if (isScriptLoaded) {
-      createFormToken();
-    }
-  }, [isScriptLoaded, amount, orderId, customerEmail, customerName, customerPhone]);
+  }, [publicKey, formToken]);
 
   // Initialize payment form
   useEffect(() => {
@@ -164,6 +167,7 @@ export default function IzipayPayment({
           const formDiv = document.createElement('div');
           formDiv.id = 'izipay-payment-form';
           formDiv.className = 'kr-smart-form';
+          formDiv.setAttribute('kr-card-form-expanded', ''); // Enable embedded card fields
           formDiv.setAttribute('kr-form-token', formToken);
           paymentContainerRef.current.appendChild(formDiv);
           
