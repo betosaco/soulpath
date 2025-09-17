@@ -64,6 +64,8 @@ export const IzipayPaymentFormCorrect: React.FC<IzipayPaymentFormCorrectProps> =
 
       const data = await response.json();
       console.log('🎫 Form token response:', data);
+      console.log('🎫 Response status:', response.status);
+      console.log('🎫 Response details:', data.details);
 
       if (!data.success) {
         throw new Error(data.error || 'Failed to create form token');

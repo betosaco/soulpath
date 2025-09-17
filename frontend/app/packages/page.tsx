@@ -799,7 +799,12 @@ export default function PackagesPage() {
                       publicKey="69876357:testpublickey_DEMOPUBLICKEY95me92597fd28tGD4r5"
                       amountInCents={Math.round(formData.selectedPackage.price * 100)}
                       currency="PEN"
-                      onSuccess={(token) => handlePaymentSuccess({ token })}
+                      onSuccess={(token) => handlePaymentSuccess({ 
+                        orderId: token, 
+                        amount: formData.selectedPackage?.price || 0, 
+                        currency: 'PEN', 
+                        status: 'completed' 
+                      })}
                       onError={handlePaymentError}
                     />
                   )}

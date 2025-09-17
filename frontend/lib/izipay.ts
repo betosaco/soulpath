@@ -1,7 +1,7 @@
 // Izipay (Lyra) Payment Configuration
 export const IZIPAY_CONFIG = {
   // API Configuration
-  API_BASE_URL: 'https://api.micuentaweb.pe',
+  API_BASE_URL: 'https://api.lyra.com',
   API_VERSION: 'V4',
   
   // Development Mode (set to true to use mock payments)
