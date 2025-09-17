@@ -30,6 +30,7 @@ export const IzipayPaymentFormCorrect: React.FC<IzipayPaymentFormCorrectProps> =
   onCancel,
 }) => {
   const [formToken, setFormToken] = useState<string | null>(null);
+  const [javascriptUrl, setJavascriptUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -73,6 +74,7 @@ export const IzipayPaymentFormCorrect: React.FC<IzipayPaymentFormCorrectProps> =
       }
 
       setFormToken(data.formToken);
+      setJavascriptUrl(data.javascriptUrl);
       console.log('✅ Form token created successfully');
 
     } catch (err) {
@@ -159,6 +161,7 @@ export const IzipayPaymentFormCorrect: React.FC<IzipayPaymentFormCorrectProps> =
       formToken={formToken}
       amountInCents={amountInCents}
       currency={currency}
+      javascriptUrl={javascriptUrl || undefined}
       onSuccess={handleSuccess}
       onError={handleError}
       onCancel={onCancel}

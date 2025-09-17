@@ -51,7 +51,7 @@ export default function TestIzipayPage() {
             </CardHeader>
             <CardContent>
               <IzipayForm
-                publicKey="MOCK-PUBLIC-KEY"
+                publicKey="88569105:testpublickey_oHKEsiKA3i9E1JshcnIA7RktrR163DdRZYZYOWgXqwSXx"
                 amountInCents={5000} // S/ 50.00
                 currency="PEN"
                 onSuccess={handleSuccess}
@@ -77,9 +77,9 @@ export default function TestIzipayPage() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Mock Mode</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">Test Mode</h3>
                 <p className="text-sm text-gray-600">
-                  Currently running in mock mode. No real payments will be processed.
+                  Using Izipay test credentials. Test payments will be processed.
                 </p>
               </div>
               <div>
@@ -97,7 +97,7 @@ export default function TestIzipayPage() {
               <div>
                 <h3 className="font-semibold text-gray-900 mb-2">Public Key</h3>
                 <p className="text-sm text-gray-600 font-mono">
-                  MOCK-PUBLIC-KEY
+                  88569105:testpublickey_...
                 </p>
               </div>
             </div>

@@ -9,6 +9,7 @@ interface IzipaySmartFormCorrectProps {
   formToken: string;
   amountInCents: number;
   currency: string;
+  javascriptUrl?: string;
   onSuccess: (paymentResult: Record<string, unknown>) => void;
   onError: (errorMessage: string) => void;
   onCancel?: () => void;
@@ -19,6 +20,7 @@ export const IzipaySmartFormCorrect: React.FC<IzipaySmartFormCorrectProps> = ({
   formToken,
   amountInCents,
   currency,
+  javascriptUrl,
   onSuccess,
   onError,
   onCancel,
@@ -38,6 +40,42 @@ export const IzipaySmartFormCorrect: React.FC<IzipaySmartFormCorrectProps> = ({
       setIsFormReady(true);
     }
   }, [isReady, formToken, publicKey]);
+
+  // Check for KR object availability
+  useEffect(() => {
+    if (isScriptLoaded) {
+      let attempts = 0;
+      const maxAttempts = 50; // 5 seconds max
+      
+      const checkKR = () => {
+        attempts++;
+        
+        if (typeof window !== 'undefined' && (window as any).KR) {
+          console.log('✅ KR object is available:', (window as any).KR);
+          console.log('🔧 KR methods:', Object.keys((window as any).KR));
+          
+          // Check if form container exists
+          if (formContainerRef.current) {
+            console.log('✅ Form container found:', formContainerRef.current);
+            console.log('🔧 Form container attributes:', {
+              className: formContainerRef.current.className,
+              'kr-card-form-expanded': formContainerRef.current.getAttribute('kr-card-form-expanded'),
+              'kr-form-token': formContainerRef.current.getAttribute('kr-form-token')
+            });
+          } else {
+            console.log('❌ Form container not found');
+          }
+        } else if (attempts < maxAttempts) {
+          console.log(`⏳ KR object not yet available, retrying... (${attempts}/${maxAttempts})`);
+          setTimeout(checkKR, 100);
+        } else {
+          console.log('❌ KR object not available after maximum attempts');
+        }
+      };
+      
+      checkKR();
+    }
+  }, [isScriptLoaded]);
 
   const formatAmount = (amountInCents: number, currency: string) => {
     const amount = amountInCents / 100;
@@ -64,12 +102,10 @@ export const IzipaySmartFormCorrect: React.FC<IzipaySmartFormCorrectProps> = ({
     <div className="w-full max-w-md mx-auto">
       {/* Load Izipay JavaScript Library with public key */}
       <Script
-        src="https://static.lyra.com/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js"
+        src={javascriptUrl || "https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js"}
         kr-public-key={publicKey}
-        kr-post-url-success={`${window.location.origin}/api/izipay/success`}
-        kr-post-url-refused={`${window.location.origin}/api/izipay/error`}
-        kr-get-url-success={`${window.location.origin}/api/izipay/success`}
-        kr-get-url-refused={`${window.location.origin}/api/izipay/error`}
+        kr-post-url-success={`${typeof window !== 'undefined' ? window.location.origin : ''}/api/izipay/success`}
+        kr-post-url-refused={`${typeof window !== 'undefined' ? window.location.origin : ''}/api/izipay/error`}
         kr-language="es-PE"
         onLoad={() => {
           console.log('✅ Izipay script loaded');
@@ -81,12 +117,12 @@ export const IzipaySmartFormCorrect: React.FC<IzipaySmartFormCorrectProps> = ({
       {/* Load Izipay CSS Theme */}
       <link
         rel="stylesheet"
-        href="https://static.lyra.com/static/js/krypton-client/V4.0/ext/neon-reset.min.css"
+        href="https://static.micuentaweb.pe/static/js/krypton-client/V4.0/ext/neon-reset.min.css"
       />
       
       {/* Load Izipay Theme JavaScript */}
       <Script
-        src="https://static.lyra.com/static/js/krypton-client/V4.0/ext/neon.js"
+        src="https://static.micuentaweb.pe/static/js/krypton-client/V4.0/ext/neon.js"
         onLoad={() => {
           console.log('✅ Izipay theme loaded');
           setIsThemeLoaded(true);
@@ -127,52 +163,18 @@ export const IzipaySmartFormCorrect: React.FC<IzipaySmartFormCorrectProps> = ({
       )}
 
       {/* Izipay SmartForm - List mode with embedded card */}
-      {publicKey === 'MOCK-PUBLIC-KEY' ? (
-        <div className="p-6 bg-gray-50 border border-gray-200 rounded-lg">
-          <div className="text-center mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Mock Payment Form</h3>
-            <p className="text-gray-600">This is a development mock - no real payment will be processed</p>
-          </div>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Card Number</label>
-              <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="1234 5678 9012 3456" />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
-                <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="MM/YY" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">CVV</label>
-                <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="123" />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Cardholder Name</label>
-              <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="John Doe" />
-            </div>
-            <div className="pt-4">
-              <button 
-                onClick={() => onSuccess({ transaction: { uuid: 'mock-transaction-' + Date.now() } })}
-                className="w-full bg-primary text-white py-3 px-4 rounded-md font-medium hover:bg-primary/90 transition-colors"
-              >
-                Pay {formatAmount(amountInCents, currency)}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div 
-          ref={formContainerRef}
-          className="kr-smart-form" 
-          kr-card-form-expanded 
-          kr-form-token={formToken}
-        >
+      <div 
+        ref={formContainerRef}
+        className="kr-smart-form" 
+        kr-card-form-expanded 
+        kr-form-token={formToken}
+      >
+        {/* Required kr-embedded container */}
+        <div className="kr-embedded">
           {/* Error zone - Izipay will populate this */}
           <div className="kr-form-error"></div>
         </div>
-      )}
+      </div>
 
       {/* Payment Method Icons */}
       <div className="mt-6 text-center">
@@ -205,13 +207,6 @@ export const IzipaySmartFormCorrect: React.FC<IzipaySmartFormCorrectProps> = ({
         </div>
       )}
 
-      {/* Debug Info */}
-      <div className="mt-4 p-2 bg-gray-100 rounded text-xs">
-        <p>Script: {isScriptLoaded ? '✅' : '⏳'}</p>
-        <p>Theme: {isThemeLoaded ? '✅' : '⏳'}</p>
-        <p>Form Token: {formToken ? '✅' : '❌'}</p>
-        <p>Public Key: {publicKey ? '✅' : '❌'}</p>
-      </div>
     </div>
   );
 };

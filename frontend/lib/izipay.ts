@@ -5,7 +5,7 @@ export const IZIPAY_CONFIG = {
   API_VERSION: 'V4',
   
   // Development Mode (set to true to use mock payments)
-  MOCK_MODE: process.env.IZIPAY_MOCK_MODE === 'true' || true, // Enable mock mode for testing
+  MOCK_MODE: process.env.IZIPAY_MOCK_MODE === 'true' || false, // Disable mock mode for real testing
   
   // Test Environment
   TEST: {
