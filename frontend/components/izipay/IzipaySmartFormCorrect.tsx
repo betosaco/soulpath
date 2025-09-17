@@ -104,7 +104,7 @@ export const IzipaySmartFormCorrect: React.FC<IzipaySmartFormCorrectProps> = ({
     <div className="w-full max-w-xl mx-auto flex flex-col items-center">
       {/* Load Izipay JavaScript Library with public key */}
       <Script
-        src={javascriptUrl || "https://static.lyra.com/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js"}
+        src={javascriptUrl || "https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js"}
         kr-public-key={publicKey}
         kr-post-url-success={`${typeof window !== 'undefined' ? window.location.origin : ''}/api/izipay/success`}
         kr-post-url-refused={`${typeof window !== 'undefined' ? window.location.origin : ''}/api/izipay/error`}
@@ -119,7 +119,7 @@ export const IzipaySmartFormCorrect: React.FC<IzipaySmartFormCorrectProps> = ({
       {/* Load Izipay CSS Theme */}
       <link
         rel="stylesheet"
-        href="https://static.lyra.com/static/js/krypton-client/V4.0/ext/neon-reset.min.css"
+        href="https://static.micuentaweb.pe/static/js/krypton-client/V4.0/ext/neon-reset.min.css"
       />
       
       {/* Custom CSS to style the Izipay button to match the green primary color */}
@@ -163,7 +163,7 @@ export const IzipaySmartFormCorrect: React.FC<IzipaySmartFormCorrectProps> = ({
       
       {/* Load Izipay Theme JavaScript */}
       <Script
-        src="https://static.lyra.com/static/js/krypton-client/V4.0/ext/neon.js"
+        src="https://static.micuentaweb.pe/static/js/krypton-client/V4.0/ext/neon.js"
         onLoad={() => {
           console.log('✅ Izipay theme loaded');
           setIsThemeLoaded(true);
