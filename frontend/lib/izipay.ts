@@ -1,18 +1,18 @@
 // Izipay (Lyra) Payment Configuration
 export const IZIPAY_CONFIG = {
   // API Configuration
-  API_BASE_URL: 'https://api.lyra.com',
+  API_BASE_URL: 'https://api.micuentaweb.pe',
   API_VERSION: 'V4',
   
   // Development Mode (set to true to use mock payments)
-  MOCK_MODE: process.env.IZIPAY_MOCK_MODE === 'true' || false, // Disable mock mode for real testing
+  MOCK_MODE: process.env.IZIPAY_MOCK_MODE === 'true' || true, // Enable mock mode for testing
   
   // Test Environment
   TEST: {
-    USERNAME: process.env.IZIPAY_TEST_USERNAME || '69876357',
-    PASSWORD: process.env.IZIPAY_TEST_PASSWORD || 'testpassword_DEMOPRIVATEKEY23G4475zXZQ2UA5x7M',
-    PUBLIC_KEY: process.env.IZIPAY_TEST_PUBLIC_KEY || '69876357:testpublickey_DEMOPUBLICKEY95me92597fd28tGD4r5',
-    HMAC_KEY: process.env.IZIPAY_TEST_HMAC_KEY || 'H9qtqKGBMUFzH8F0kz4ihdw3MTBb0WbpJ1TLLuRLxHZM1',
+    USERNAME: process.env.IZIPAY_TEST_USERNAME || '88569105',
+    PASSWORD: process.env.IZIPAY_TEST_PASSWORD || 'testpassword_NS]pdOEIQsM4RMu16WF89kCViBW9ddilhEdsq02sHA2T',
+    PUBLIC_KEY: process.env.IZIPAY_TEST_PUBLIC_KEY || '88569105:testpublickey_oHKEsiKA3i9E1JshcnIA7RktrR163DdRZYZYOWgXqwSXx',
+    HMAC_KEY: process.env.IZIPAY_TEST_HMAC_KEY || 'H9ataKGBMUFzH8F0kz4ihdw3MTBb0WbpJ1TLLuRL<HZM1',
     JAVASCRIPT_URL: process.env.IZIPAY_JAVASCRIPT_URL || 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js'
   },
   

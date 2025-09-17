@@ -16,10 +16,6 @@ export default function TestPaymentPage() {
     alert('Payment error: ' + error);
   };
 
-  const handleCancel = () => {
-    console.log('Payment cancelled');
-    setShowPayment(false);
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -38,7 +34,7 @@ export default function TestPaymentPage() {
         ) : (
           <div className="bg-white p-6 rounded-lg shadow-lg">
             <IzipayForm
-              publicKey="69876357:testpublickey_DEMOPUBLICKEY95me92597fd28tGD4r5"
+              publicKey="88569105:testpublickey_oHKEsiKA3i9E1JshcnIA7RktrR163DdRZYZYOWgXqwSXx"
               amountInCents={10000} // S/ 100.00 in cents
               currency="PEN"
               customerEmail="test@example.com"
