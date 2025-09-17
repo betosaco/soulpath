@@ -63,6 +63,7 @@ export async function POST(request: NextRequest) {
     };
 
     console.log('📤 Sending payload to Izipay:', JSON.stringify(payload, null, 2));
+    console.log('📤 Payload size:', JSON.stringify(payload).length, 'bytes');
 
     // Create Basic Auth header
     const credentials = Buffer.from(`${config.USERNAME}:${config.PASSWORD}`).toString('base64');
@@ -70,6 +71,7 @@ export async function POST(request: NextRequest) {
     
     console.log('🌐 Making request to:', apiUrl);
     console.log('🔑 Using credentials:', `${config.USERNAME}:***`);
+    console.log('🔑 Base64 credentials:', credentials);
     
     // Make request to Izipay API
     const response = await fetch(apiUrl, {
@@ -83,7 +85,9 @@ export async function POST(request: NextRequest) {
     });
 
     const responseText = await response.text();
-    console.log('📥 Izipay response:', responseText);
+    console.log('📥 Izipay response status:', response.status);
+    console.log('📥 Izipay response headers:', Object.fromEntries(response.headers.entries()));
+    console.log('📥 Izipay response body:', responseText);
     
     let data: FormTokenResponse;
     try {
