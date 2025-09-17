@@ -23,9 +23,9 @@ export const IzipaySmartFormCorrect: React.FC<IzipaySmartFormCorrectProps> = ({
   currency,
   javascriptUrl,
   customerName,
-  onSuccess,
+  onSuccess: _onSuccess,
   onError,
-  onCancel,
+  onCancel: _onCancel,
 }) => {
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   const [isThemeLoaded, setIsThemeLoaded] = useState(false);

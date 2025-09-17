@@ -12,7 +12,6 @@ interface IzipaySmartFormProps {
   currency: string;
   onSuccess: (paymentResult: Record<string, unknown>) => void;
   onError: (errorMessage: string) => void;
-  onCancel?: () => void;
 }
 
 // Extend the global window object to include Izipay SmartForm types
@@ -42,34 +41,12 @@ export const IzipaySmartForm: React.FC<IzipaySmartFormProps> = ({
   currency,
   onSuccess,
   onError,
-  onCancel,
 }) => {
   const [isIzipayReady, setIsIzipayReady] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [isFormValid, setIsFormValid] = useState(false);
   const formContainerRef = useRef<HTMLDivElement>(null);
-
-  // Initialize Izipay SmartForm when script loads
-  useEffect(() => {
-    console.log('🔧 Form initialization useEffect triggered:', {
-      isIzipayReady,
-      hasKR: !!window.KR,
-      hasFormToken: !!formToken,
-      formToken: formToken ? 'Present' : 'Missing'
-    });
-    
-    if (isIzipayReady && window.KR && formToken) {
-      console.log('✅ All conditions met, initializing SmartForm...');
-      initializeSmartForm();
-    } else {
-      console.log('⏳ Waiting for conditions:', {
-        isIzipayReady,
-        hasKR: !!window.KR,
-        hasFormToken: !!formToken
-      });
-    }
-  }, [isIzipayReady, formToken, initializeSmartForm]);
 
   const initializeSmartForm = useCallback(() => {
     if (!window.KR || !formContainerRef.current) {
@@ -79,7 +56,7 @@ export const IzipaySmartForm: React.FC<IzipaySmartFormProps> = ({
 
     // Check if KR has required methods
     const requiredMethods = ['setFormConfig', 'onFormReady', 'onError', 'onFormValid', 'onFormInvalid'];
-    const missingMethods = requiredMethods.filter(method => typeof window.KR[method] !== 'function');
+    const missingMethods = requiredMethods.filter(method => typeof (window.KR as any)[method] !== 'function');
     
     if (missingMethods.length > 0) {
       console.error('❌ KR object missing required methods:', missingMethods);
@@ -93,7 +70,7 @@ export const IzipaySmartForm: React.FC<IzipaySmartFormProps> = ({
         publicKey: publicKey ? 'Present' : 'Missing',
         formToken: formToken ? 'Present' : 'Missing',
         container: formContainerRef.current ? 'Available' : 'Missing',
-        krMethods: requiredMethods.map(method => `${method}: ${typeof window.KR[method]}`)
+        krMethods: requiredMethods.map(method => `${method}: ${typeof (window.KR as any)[method]}`)
       });
       
       // Clear previous form
@@ -122,7 +99,7 @@ export const IzipaySmartForm: React.FC<IzipaySmartFormProps> = ({
       window.KR.onFormReady(() => {
         console.log('✅ Form is ready, setting configuration...');
         
-        window.KR.setFormConfig(config).then(({ KR, result }) => {
+        window.KR.setFormConfig(config).then(({ result }) => {
           console.log('✅ Form configuration set successfully:', result);
           
           // Create the SmartForm container after configuration
@@ -160,6 +137,27 @@ export const IzipaySmartForm: React.FC<IzipaySmartFormProps> = ({
     }
   }, [publicKey, formToken, onError]);
 
+  // Initialize Izipay SmartForm when script loads
+  useEffect(() => {
+    console.log('🔧 Form initialization useEffect triggered:', {
+      isIzipayReady,
+      hasKR: !!window.KR,
+      hasFormToken: !!formToken,
+      formToken: formToken ? 'Present' : 'Missing'
+    });
+    
+    if (isIzipayReady && window.KR && formToken) {
+      console.log('✅ All conditions met, initializing SmartForm...');
+      initializeSmartForm();
+    } else {
+      console.log('⏳ Waiting for conditions:', {
+        isIzipayReady,
+        hasKR: !!window.KR,
+        hasFormToken: !!formToken
+      });
+    }
+  }, [isIzipayReady, formToken, initializeSmartForm]);
+
   const setupEventHandlers = useCallback(() => {
     if (!window.KR) return;
 
@@ -180,10 +178,11 @@ export const IzipaySmartForm: React.FC<IzipaySmartFormProps> = ({
     });
 
     // Error handling
-    window.KR.onError((error) => {
+    window.KR.onError((error: any) => {
       console.error('❌ Izipay form error:', error);
-      setFormError(error.errorMessage || 'Error en el formulario de pago');
-      onError(error.errorMessage || 'Error en el formulario de pago');
+      const errorMessage = error?.errorMessage || 'Error en el formulario de pago';
+      setFormError(errorMessage);
+      onError(errorMessage);
     });
 
     // Form submission
@@ -194,14 +193,14 @@ export const IzipaySmartForm: React.FC<IzipaySmartFormProps> = ({
     });
 
     // Transaction created
-    window.KR.onTransactionCreated((event) => {
+    window.KR.onTransactionCreated((event: any) => {
       console.log('✅ Transaction created:', event);
       setIsSubmitting(false);
       
-      if (event.transaction && event.transaction.status === 'SUCCESS') {
+      if (event.transaction && (event.transaction as any).status === 'SUCCESS') {
         onSuccess(event);
       } else {
-        const errorMessage = event.transaction?.errorMessage || 'Error al procesar el pago';
+        const errorMessage = (event.transaction as any)?.errorMessage || 'Error al procesar el pago';
         setFormError(errorMessage);
         onError(errorMessage);
       }
@@ -262,7 +261,7 @@ export const IzipaySmartForm: React.FC<IzipaySmartFormProps> = ({
       
       if (validationResult.result) {
         // Form is invalid, handle errors
-        const errorMessage = validationResult.result.errorMessage || 'Datos del formulario inválidos';
+        const errorMessage = (validationResult.result as any).errorMessage || 'Datos del formulario inválidos';
         setFormError(errorMessage);
         onError(errorMessage);
         setIsSubmitting(false);

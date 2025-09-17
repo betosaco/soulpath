@@ -13,12 +13,20 @@ export const IzipayDebugForm: React.FC<IzipayDebugFormProps> = ({
   publicKey,
   formToken,
 }) => {
-  const [debugInfo, setDebugInfo] = useState<Record<string, unknown>>({});
+  const [debugInfo, setDebugInfo] = useState<{
+    hasWindow?: boolean;
+    hasKR?: boolean;
+    krType?: string;
+    publicKey?: string;
+    formToken?: string;
+    krMethods?: Record<string, string>;
+    krKeys?: string[];
+  }>({});
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkKR = () => {
-      const info: Record<string, unknown> = {
+      const info: typeof debugInfo = {
         hasWindow: typeof window !== 'undefined',
         hasKR: !!window.KR,
         krType: typeof window.KR,
@@ -39,7 +47,7 @@ export const IzipayDebugForm: React.FC<IzipayDebugFormProps> = ({
         ];
 
         info.krMethods = krMethods.reduce((acc, method) => {
-          acc[method] = typeof window.KR[method];
+          acc[method] = typeof (window.KR as any)[method];
           return acc;
         }, {} as Record<string, string>);
 
@@ -60,7 +68,7 @@ export const IzipayDebugForm: React.FC<IzipayDebugFormProps> = ({
   }, [publicKey, formToken]);
 
   const testKRMethod = (methodName: string) => {
-    if (!window.KR || typeof window.KR[methodName] !== 'function') {
+    if (!window.KR || typeof (window.KR as any)[methodName] !== 'function') {
       console.error(`Method ${methodName} not available`);
       return;
     }
@@ -68,7 +76,7 @@ export const IzipayDebugForm: React.FC<IzipayDebugFormProps> = ({
     try {
       console.log(`Testing ${methodName}...`);
       if (methodName === 'setFormConfig') {
-        window.KR[methodName]({
+        (window.KR as any)[methodName]({
           'kr-public-key': publicKey,
           'kr-form-token': formToken,
         }).then((result: unknown) => {
@@ -77,11 +85,11 @@ export const IzipayDebugForm: React.FC<IzipayDebugFormProps> = ({
           console.error(`${methodName} error:`, error);
         });
       } else if (methodName === 'onFormReady') {
-        window.KR[methodName](() => {
+        (window.KR as any)[methodName](() => {
           console.log('Form ready callback triggered');
         });
       } else {
-        window.KR[methodName]((result: unknown) => {
+        (window.KR as any)[methodName]((result: unknown) => {
           console.log(`${methodName} callback triggered:`, result);
         });
       }
@@ -123,17 +131,21 @@ export const IzipayDebugForm: React.FC<IzipayDebugFormProps> = ({
 
         <div className="space-y-2">
           <h4 className="font-medium">KR Methods</h4>
-          {debugInfo.krMethods && Object.entries(debugInfo.krMethods as Record<string, string>).map(([method, type]) => (
-            <div key={method} className="flex items-center text-sm">
-              {type === 'function' ? (
-                <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
-              ) : (
-                <AlertCircle className="h-4 w-4 text-red-600 mr-2" />
-              )}
-              <span className="font-mono">{method}:</span>
-              <span className="ml-2">{type}</span>
-            </div>
-          ))}
+          {debugInfo.krMethods && (
+            <>
+              {Object.entries(debugInfo.krMethods as Record<string, string>).map(([method, type]) => (
+                <div key={method} className="flex items-center text-sm">
+                  {type === 'function' ? (
+                    <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 text-red-600 mr-2" />
+                  )}
+                  <span className="font-mono">{method}:</span>
+                  <span className="ml-2">{type}</span>
+                </div>
+              ))}
+            </>
+          )}
         </div>
       </div>
 
@@ -146,7 +158,7 @@ export const IzipayDebugForm: React.FC<IzipayDebugFormProps> = ({
               size="sm"
               variant="outline"
               onClick={() => testKRMethod(method)}
-              disabled={!(debugInfo.krMethods as Record<string, string>)?.[method] === 'function'}
+              disabled={debugInfo.krMethods?.[method] !== 'function'}
             >
               Test {method}
             </Button>

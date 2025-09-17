@@ -264,8 +264,15 @@ export default function IzipayPayment({
         onError(error.message || 'Payment failed');
       });
 
-      window.KR.onTransactionCreated((result: PaymentResult) => {
-        console.log('Transaction created:', result);
+      window.KR.onTransactionCreated((event: Record<string, unknown>) => {
+        console.log('Transaction created:', event);
+        // Convert the event to PaymentResult format
+        const result: PaymentResult = {
+          orderId: (event.orderId as string) || orderId,
+          amount: (event.amount as number) || amount,
+          currency: (event.currency as string) || 'PEN',
+          status: (event.status as string) || 'UNKNOWN'
+        };
         onSuccess(result);
       });
 
@@ -303,7 +310,7 @@ export default function IzipayPayment({
         // Add the form using KR.addForm
         try {
           console.log('🔧 Calling KR.addForm...');
-          window.KR.addForm('#izipay-payment-form');
+          (window.KR as any).addForm('#izipay-payment-form');
           console.log('✅ KR.addForm successful');
           
           // The form should auto-render after addForm is called

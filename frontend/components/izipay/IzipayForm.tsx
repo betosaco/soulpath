@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { IzipayPaymentFormCorrect } from './IzipayPaymentFormCorrect';
-import { Loader2, CreditCard, Shield, AlertCircle } from 'lucide-react';
 
 interface IzipayFormProps {
   publicKey: string;

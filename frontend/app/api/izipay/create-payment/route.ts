@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getIzipayConfig, IZIPAY_ENDPOINTS, PaymentFormConfig, FormTokenResponse } from '@/lib/izipay';
+import { getIzipayConfig } from '@/lib/izipay/config';
+import { IZIPAY_ENDPOINTS, PaymentFormConfig, FormTokenResponse } from '@/lib/izipay/payment-service';
 
 export async function POST(request: NextRequest) {
   try {

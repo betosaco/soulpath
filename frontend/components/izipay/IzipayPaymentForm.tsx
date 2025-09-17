@@ -14,7 +14,6 @@ interface IzipayPaymentFormProps {
   customerPhone?: string;
   onSuccess: (paymentResult: Record<string, unknown>) => void;
   onError: (errorMessage: string) => void;
-  onCancel?: () => void;
 }
 
 export const IzipayPaymentForm: React.FC<IzipayPaymentFormProps> = ({
@@ -27,7 +26,6 @@ export const IzipayPaymentForm: React.FC<IzipayPaymentFormProps> = ({
   customerPhone,
   onSuccess,
   onError,
-  onCancel,
 }) => {
   const [formToken, setFormToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -161,7 +159,6 @@ export const IzipayPaymentForm: React.FC<IzipayPaymentFormProps> = ({
       currency={currency}
       onSuccess={handleSuccess}
       onError={handleError}
-      onCancel={onCancel}
     />
   );
 };

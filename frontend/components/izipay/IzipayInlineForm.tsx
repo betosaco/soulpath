@@ -77,17 +77,17 @@ export function IzipayInlineForm({
 
     try {
       // Initialize Izipay payment form
-      window.KR.setFormConfig({
+      (window.KR as any).setFormConfig({
         'kr-public-key': process.env.NEXT_PUBLIC_IZIPAY_PUBLIC_KEY,
         'kr-form-token': token,
       });
 
       // Create the payment form
-      window.KR.addForm('#izipay-payment-form');
+      (window.KR as any).addForm('#izipay-payment-form');
       console.log('✅ Izipay form initialized');
       
       // Handle form events
-      window.KR!.on('kr-error', (event: Record<string, unknown>) => {
+      (window.KR as any).on('kr-error', (event: Record<string, unknown>) => {
         console.error('❌ Izipay form error:', event);
         setPaymentStatus('error');
         const errorMessage = (event?.error as Record<string, unknown>)?.message || 'Payment form error';
@@ -97,17 +97,17 @@ export function IzipayInlineForm({
         }
       });
 
-      window.KR!.on('kr-form-valid', () => {
+      (window.KR as any).on('kr-form-valid', () => {
         console.log('✅ Izipay form is valid');
         setPaymentStatus('valid');
       });
 
-      window.KR!.on('kr-form-invalid', () => {
+      (window.KR as any).on('kr-form-invalid', () => {
         console.log('❌ Izipay form is invalid');
         setPaymentStatus('invalid');
       });
 
-      window.KR!.on('kr-payment-completed', (event: Record<string, unknown>) => {
+      (window.KR as any).on('kr-payment-completed', (event: Record<string, unknown>) => {
         console.log('✅ Payment completed:', event);
         setPaymentStatus('completed');
         if (onSuccess) {
@@ -115,7 +115,7 @@ export function IzipayInlineForm({
         }
       });
 
-      window.KR!.on('kr-payment-failed', (event: Record<string, unknown>) => {
+      (window.KR as any).on('kr-payment-failed', (event: Record<string, unknown>) => {
         console.error('❌ Payment failed:', event);
         setPaymentStatus('failed');
         const errorMessage = (event?.error as Record<string, unknown>)?.message || 'Payment failed';

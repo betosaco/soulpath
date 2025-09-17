@@ -5,6 +5,39 @@
 
 import { getIzipayConfig, getIzipayApiUrl, getIzipayAuthHeader, generateIzipaySignature, IzipayConfig } from './config';
 
+// API Endpoints
+export const IZIPAY_ENDPOINTS = {
+  CREATE_PAYMENT: '/api-payment/V4/Charge/CreatePayment',
+  GET_PAYMENT: '/api-payment/V4/Charge/GetPayment',
+  VALIDATE_PAYMENT: '/api-payment/V4/Charge/ValidatePayment'
+};
+
+// Payment Form Configuration
+export interface PaymentFormConfig {
+  amount: number;
+  currency: string;
+  orderId: string;
+  customer: {
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+  };
+  returnUrl?: string;
+  successUrl?: string;
+  errorUrl?: string;
+}
+
+// Form Token Response
+export interface FormTokenResponse {
+  status: 'SUCCESS' | 'ERROR';
+  answer?: {
+    formToken: string;
+  };
+  errorMessage?: string;
+  errorCode?: string;
+}
+
 // Izipay API Types
 export interface IzipayPaymentRequest {
   amount: number; // Amount in cents (e.g., 10000 for S/100.00)
@@ -96,6 +129,13 @@ export class IzipayPaymentService {
       supportedCountries: override?.supportedCountries || base.supportedCountries || ['PE'],
       returnUrl: override?.returnUrl || base.returnUrl,
       cancelUrl: override?.cancelUrl || base.cancelUrl,
+      // Add the new required properties
+      USERNAME: override?.USERNAME || base.USERNAME || base.username,
+      PASSWORD: override?.PASSWORD || base.PASSWORD || base.password,
+      PUBLIC_KEY: override?.PUBLIC_KEY || base.PUBLIC_KEY || base.publicKey,
+      API_BASE_URL: override?.API_BASE_URL || base.API_BASE_URL || 'https://api.micuentaweb.pe',
+      JAVASCRIPT_URL: override?.JAVASCRIPT_URL || base.JAVASCRIPT_URL || 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js',
+      MOCK_MODE: override?.MOCK_MODE || base.MOCK_MODE || false,
     };
     if (!merged.merchantId || !merged.username || !merged.password || !merged.publicKey) {
       throw new Error('Izipay configuration not found. Please check environment variables or providerConfig.');

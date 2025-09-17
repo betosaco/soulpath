@@ -14,6 +14,13 @@ export interface IzipayConfig {
   supportedCountries: string[];
   returnUrl: string;
   cancelUrl: string;
+  // Additional properties for API compatibility
+  USERNAME: string;
+  PASSWORD: string;
+  PUBLIC_KEY: string;
+  API_BASE_URL: string;
+  JAVASCRIPT_URL: string;
+  MOCK_MODE: boolean;
 }
 
 export interface IzipayCredentials {
@@ -28,14 +35,30 @@ export interface IzipayCredentials {
  * Get Izipay configuration from environment variables
  */
 export function getIzipayConfig(): IzipayConfig | null {
-  const merchantId = process.env.IZIPAY_MERCHANT_ID;
-  const username = process.env.IZIPAY_USERNAME;
-  const password = process.env.IZIPAY_PASSWORD;
-  const publicKey = process.env.IZIPAY_PUBLIC_KEY;
   const environment = (process.env.IZIPAY_ENVIRONMENT as 'sandbox' | 'production') || 'sandbox';
+  
+  // Use environment-specific variables
+  const merchantId = environment === 'production' 
+    ? process.env.IZIPAY_PROD_MERCHANT_ID || process.env.IZIPAY_MERCHANT_ID
+    : process.env.IZIPAY_TEST_MERCHANT_ID || process.env.IZIPAY_MERCHANT_ID;
+  const username = environment === 'production' 
+    ? process.env.IZIPAY_PROD_USERNAME || process.env.IZIPAY_USERNAME
+    : process.env.IZIPAY_TEST_USERNAME || process.env.IZIPAY_USERNAME;
+  const password = environment === 'production' 
+    ? process.env.IZIPAY_PROD_PASSWORD || process.env.IZIPAY_PASSWORD
+    : process.env.IZIPAY_TEST_PASSWORD || process.env.IZIPAY_PASSWORD;
+  const publicKey = environment === 'production' 
+    ? process.env.IZIPAY_PROD_PUBLIC_KEY || process.env.IZIPAY_PUBLIC_KEY
+    : process.env.IZIPAY_TEST_PUBLIC_KEY || process.env.IZIPAY_PUBLIC_KEY;
 
   if (!merchantId || !username || !password || !publicKey) {
-    console.warn('Izipay configuration incomplete. Missing required environment variables.');
+    console.warn('Izipay configuration incomplete. Missing required environment variables for', environment, 'environment.');
+    console.warn('Required variables:', {
+      merchantId: !!merchantId,
+      username: !!username,
+      password: !!password,
+      publicKey: !!publicKey
+    });
     return null;
   }
 
@@ -51,6 +74,13 @@ export function getIzipayConfig(): IzipayConfig | null {
     supportedCountries: ['PE'],
     returnUrl: `${baseUrl}/payment/success`,
     cancelUrl: `${baseUrl}/payment/cancel`,
+    // Add properties expected by the API route
+    USERNAME: username,
+    PASSWORD: password,
+    PUBLIC_KEY: publicKey,
+    API_BASE_URL: process.env.IZIPAY_API_BASE_URL || 'https://api.micuentaweb.pe',
+    JAVASCRIPT_URL: process.env.IZIPAY_JAVASCRIPT_URL || 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js',
+    MOCK_MODE: process.env.IZIPAY_MOCK_MODE === 'true' || false,
   };
 }
 
