@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getIzipayConfig } from '@/lib/izipay';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const config = getIzipayConfig();
     

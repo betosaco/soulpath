@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import IzipayPayment from '@/components/IzipayPayment';
+import { IzipayForm } from '@/components/izipay/IzipayForm';
 
 export default function TestPaymentPage() {
   const [showPayment, setShowPayment] = useState(false);
 
-  const handleSuccess = (result: any) => {
+  const handleSuccess = (result: unknown) => {
     console.log('Payment successful:', result);
     alert('Payment successful!');
   };
@@ -36,17 +36,15 @@ export default function TestPaymentPage() {
             </button>
           </div>
         ) : (
-          <IzipayPayment
-            amount={100}
-            orderId={`test-${Date.now()}`}
-            customerEmail="test@example.com"
-            customerName="Test User"
-            customerPhone="+51999999999"
-            onSuccess={handleSuccess}
-            onError={handleError}
-            onCancel={handleCancel}
-            className="bg-white p-6 rounded-lg shadow-lg"
-          />
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <IzipayForm
+              publicKey="MOCK-PUBLIC-KEY"
+              amountInCents={10000} // S/ 100.00 in cents
+              currency="PEN"
+              onSuccess={(token) => handleSuccess({ token })}
+              onError={handleError}
+            />
+          </div>
         )}
       </div>
     </div>

@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const venueId = searchParams.get('venueId');
 
     // Build where clause
-    const whereClause: Record<string, any> = {};
+    const whereClause: Record<string, unknown> = {};
 
     if (available === 'true') {
       whereClause.isAvailable = true;
@@ -23,21 +23,21 @@ export async function GET(request: NextRequest) {
 
     if (teacherId) {
       whereClause.teacherSchedule = {
-        ...whereClause.teacherSchedule,
+        ...(whereClause.teacherSchedule || {}),
         teacherId: parseInt(teacherId)
       };
     }
 
     if (serviceTypeId) {
       whereClause.teacherSchedule = {
-        ...whereClause.teacherSchedule,
+        ...(whereClause.teacherSchedule || {}),
         serviceTypeId: parseInt(serviceTypeId)
       };
     }
 
     if (venueId) {
       whereClause.teacherSchedule = {
-        ...whereClause.teacherSchedule,
+        ...(whereClause.teacherSchedule || {}),
         venueId: parseInt(venueId)
       };
     }

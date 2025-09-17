@@ -6,7 +6,7 @@ import { Package, CheckCircle, ArrowRight, ArrowLeft, Clock, Users, Star, Loader
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import IzipayPayment from '@/components/IzipayPayment';
+import { IzipayForm } from '@/components/izipay/IzipayForm';
 import { Header } from '@/components/Header';
 import { EnhancedSchedule } from '@/components/EnhancedSchedule';
 import '@/components/ui/mobile-booking.css';
@@ -207,7 +207,7 @@ export default function PackagesPage() {
   };
 
 
-  const handlePaymentSuccess = async (paymentData: Record<string, unknown>) => {
+  const handlePaymentSuccess = async (paymentData: { orderId: string; amount: number; currency: string; status: string }) => {
     try {
       
       // Create the purchase
@@ -701,11 +701,11 @@ export default function PackagesPage() {
                       </h4>
                       <div className="text-sm text-gray-700">
                         <div className="font-medium">
-                          {new Date(formData.selectedScheduleSlot.startTime).toLocaleDateString('en-US', { 
+                          {formData.selectedScheduleSlot.startTime ? new Date(formData.selectedScheduleSlot.startTime).toLocaleDateString('en-US', { 
                             weekday: 'long', 
                             month: 'short', 
                             day: 'numeric' 
-                          })} at {new Date(formData.selectedScheduleSlot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          }) : 'No time selected'} at {formData.selectedScheduleSlot.startTime ? new Date(formData.selectedScheduleSlot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'No time selected'}
                         </div>
                         <div className="text-gray-600">
                           {formData.selectedScheduleSlot.scheduleTemplate?.sessionDuration?.name || 'Session'} • {formData.selectedScheduleSlot.scheduleTemplate?.sessionDuration?.duration_minutes || 60} minutes
@@ -779,8 +779,8 @@ export default function PackagesPage() {
                         <div className="flex justify-between">
                           <span className="text-muted">First Session:</span>
                           <span className="text-black">
-                            {new Date(formData.selectedScheduleSlot.startTime).toLocaleDateString()} at{' '}
-                            {new Date(formData.selectedScheduleSlot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            {formData.selectedScheduleSlot.startTime ? new Date(formData.selectedScheduleSlot.startTime).toLocaleDateString() : 'No date'} at{' '}
+                            {formData.selectedScheduleSlot.startTime ? new Date(formData.selectedScheduleSlot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'No time'}
                           </span>
                         </div>
                       )}
@@ -795,15 +795,12 @@ export default function PackagesPage() {
 
                   {/* Payment Method */}
                   {formData.selectedPackage && (
-                    <IzipayPayment
-                      amount={formData.selectedPackage.price}
-                      orderId={`order-${Date.now()}-${formData.selectedPackage.id}`}
-                      customerEmail={formData.clientEmail}
-                      customerName={formData.clientName}
-                      customerPhone={`${formData.countryCode}${formData.clientPhone}`}
-                      onSuccess={handlePaymentSuccess}
+                    <IzipayForm
+                      publicKey="MOCK-PUBLIC-KEY"
+                      amountInCents={Math.round(formData.selectedPackage.price * 100)}
+                      currency="PEN"
+                      onSuccess={(token) => handlePaymentSuccess({ token })}
                       onError={handlePaymentError}
-                      onCancel={() => setCurrentStep(2)}
                     />
                   )}
 

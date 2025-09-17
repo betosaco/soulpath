@@ -26,17 +26,7 @@ interface IzipayInlineFormProps {
   className?: string;
 }
 
-declare global {
-  interface Window {
-    KR: {
-      init: (publicKey: string) => void;
-      setFormConfig: (config: Record<string, unknown>) => void;
-      createToken: () => Promise<{ 'kr-answer': string }>;
-      addForm: (selector: string) => void;
-      on: (event: string, callback: (event: Record<string, unknown>) => void) => void;
-    };
-  }
-}
+// Use the existing Window.KR type from IzipayForm.tsx
 
 export function IzipayInlineForm({
   amount,

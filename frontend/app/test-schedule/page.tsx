@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 export default function TestSchedulePage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -20,7 +20,7 @@ export default function TestSchedulePage() {
         setData(result);
       } catch (err) {
         console.error('❌ Error:', err);
-        setError(err.message);
+        setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
         setLoading(false);
       }

@@ -24,6 +24,13 @@ export async function POST(request: NextRequest) {
 
     // Get Izipay configuration
     const config = getIzipayConfig();
+    console.log('🔧 Izipay config:', {
+      hasUsername: !!config.USERNAME,
+      hasPassword: !!config.PASSWORD,
+      hasPublicKey: !!config.PUBLIC_KEY,
+      apiBaseUrl: config.API_BASE_URL,
+      mockMode: config.MOCK_MODE
+    });
     
     // Check if mock mode is enabled
     if (config.MOCK_MODE) {
@@ -55,9 +62,14 @@ export async function POST(request: NextRequest) {
       ...(body.errorUrl && { errorUrl: body.errorUrl })
     };
 
+    console.log('📤 Sending payload to Izipay:', JSON.stringify(payload, null, 2));
+
     // Create Basic Auth header
     const credentials = Buffer.from(`${config.USERNAME}:${config.PASSWORD}`).toString('base64');
     const apiUrl = `${config.API_BASE_URL}${IZIPAY_ENDPOINTS.CREATE_PAYMENT}`;
+    
+    console.log('🌐 Making request to:', apiUrl);
+    console.log('🔑 Using credentials:', `${config.USERNAME}:***`);
     
     // Make request to Izipay API
     const response = await fetch(apiUrl, {
@@ -71,6 +83,7 @@ export async function POST(request: NextRequest) {
     });
 
     const responseText = await response.text();
+    console.log('📥 Izipay response:', responseText);
     
     let data: FormTokenResponse;
     try {

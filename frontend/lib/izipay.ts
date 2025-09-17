@@ -5,7 +5,7 @@ export const IZIPAY_CONFIG = {
   API_VERSION: 'V4',
   
   // Development Mode (set to true to use mock payments)
-  MOCK_MODE: process.env.IZIPAY_MOCK_MODE === 'true' || true, // Enable mock mode for development
+  MOCK_MODE: process.env.IZIPAY_MOCK_MODE === 'true' || true, // Enable mock mode for testing
   
   // Test Environment
   TEST: {
@@ -34,7 +34,8 @@ export const getIzipayConfig = () => {
   return {
     ...envConfig,
     API_BASE_URL: IZIPAY_CONFIG.API_BASE_URL,
-    API_VERSION: IZIPAY_CONFIG.API_VERSION
+    API_VERSION: IZIPAY_CONFIG.API_VERSION,
+    MOCK_MODE: IZIPAY_CONFIG.MOCK_MODE
   };
 };
 
@@ -80,6 +81,7 @@ export interface FormTokenResponse {
     formToken: string;
   };
   errorMessage?: string;
+  errorCode?: string;
 }
 
 // Payment Result

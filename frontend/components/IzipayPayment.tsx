@@ -1,7 +1,15 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
-import { Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { Loader2, AlertCircle } from 'lucide-react';
+
+interface PaymentResult {
+  orderId: string;
+  amount: number;
+  currency: string;
+  status: string;
+  mockPayment?: boolean;
+}
 
 interface IzipayPaymentProps {
   amount: number;
@@ -9,17 +17,13 @@ interface IzipayPaymentProps {
   customerEmail: string;
   customerName?: string;
   customerPhone?: string;
-  onSuccess: (result: any) => void;
+  onSuccess: (result: PaymentResult) => void;
   onError: (error: string) => void;
   onCancel: () => void;
   className?: string;
 }
 
-declare global {
-  interface Window {
-    KR: any;
-  }
-}
+// Use the existing Window.KR type from IzipayForm.tsx
 
 export default function IzipayPayment({
   amount,
@@ -38,6 +42,24 @@ export default function IzipayPayment({
   const [publicKey, setPublicKey] = useState<string | null>(null);
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   const paymentContainerRef = useRef<HTMLDivElement>(null);
+  const [containerReady, setContainerReady] = useState(false);
+
+  // Callback ref to detect when container is attached
+  const containerRefCallback = useCallback((node: HTMLDivElement | null) => {
+    if (node) {
+      // Use a different approach to track the container
+      setContainerReady(true);
+      console.log('🔍 Container attached to DOM:', !!node);
+    } else {
+      setContainerReady(false);
+      console.log('🔍 Container detached from DOM');
+    }
+  }, []);
+
+  // Debug: Log when container ref changes
+  useEffect(() => {
+    console.log('🔍 Container ref changed:', !!paymentContainerRef.current, 'Container ready:', containerReady);
+  }, [containerReady]);
 
   // Create form token first (this will set publicKey)
   useEffect(() => {
@@ -83,9 +105,9 @@ export default function IzipayPayment({
     createFormToken();
   }, [amount, orderId, customerEmail, customerName, customerPhone]);
 
-  // Load Izipay script only after we have both public key and form token
+  // Load Izipay script and CSS theme
   useEffect(() => {
-    const loadScript = () => {
+    const loadIzipayAssets = () => {
       // Check if script is already loaded
       const existingScript = document.querySelector('script[src*="krypton-client"]');
       if (existingScript) {
@@ -109,7 +131,19 @@ export default function IzipayPayment({
         return;
       }
 
-      console.log('📜 Loading Izipay script with public key:', publicKey);
+      console.log('📜 Loading Izipay assets with public key:', publicKey);
+      
+      // Load CSS theme first (recommended by Izipay docs)
+      const existingCSS = document.querySelector('link[href*="classic-reset"]');
+      if (!existingCSS) {
+        const cssLink = document.createElement('link');
+        cssLink.rel = 'stylesheet';
+        cssLink.href = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/ext/classic-reset.min.css';
+        document.head.appendChild(cssLink);
+        console.log('📜 CSS theme loaded');
+      }
+
+      // Load JavaScript library
       const script = document.createElement('script');
       script.src = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js';
       script.setAttribute('kr-public-key', publicKey);
@@ -120,10 +154,12 @@ export default function IzipayPayment({
       script.onload = () => {
         console.log('📜 Izipay script loaded successfully');
         console.log('📜 KR object available after script load:', !!window.KR);
+        console.log('📜 KR methods available:', window.KR ? Object.keys(window.KR) : 'N/A');
         setIsScriptLoaded(true);
       };
-      script.onerror = () => {
-        setError('Failed to load payment script');
+      script.onerror = (error) => {
+        console.error('❌ Failed to load Izipay script:', error);
+        setError('Failed to load payment script. Please check your internet connection and try again.');
         setIsLoading(false);
       };
       document.head.appendChild(script);
@@ -131,169 +167,182 @@ export default function IzipayPayment({
 
     if (!window.KR) {
       console.log('📜 KR not available, loading script...');
-      loadScript();
+      loadIzipayAssets();
     } else {
       console.log('📜 KR already available, skipping script load');
       setIsScriptLoaded(true);
     }
   }, [publicKey, formToken]);
 
-  // Initialize payment form
-  useEffect(() => {
-    if (isScriptLoaded && formToken && publicKey && paymentContainerRef.current) {
-      try {
-        // Clear previous form
-        paymentContainerRef.current.innerHTML = '';
+  const initializeForm = useCallback(() => {
+    if (!paymentContainerRef.current) {
+      console.error('❌ Container still not available');
+      return;
+    }
+    
+    try {
+      console.log('🔧 Starting form initialization...');
+      
+      // Clear previous form
+      paymentContainerRef.current.innerHTML = '';
 
-        // Check if this is a mock payment
-        if (publicKey === 'MOCK-PUBLIC-KEY') {
-          console.log('🎭 Creating mock payment form');
-          const mockForm = document.createElement('div');
-          mockForm.className = 'mock-payment-form p-6 bg-gray-50 border border-gray-200 rounded-lg';
-          mockForm.innerHTML = `
-            <div class="text-center mb-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-2">Mock Payment Form</h3>
-              <p class="text-gray-600">This is a development mock - no real payment will be processed</p>
+      // Check if this is a mock payment
+      if (publicKey === 'MOCK-PUBLIC-KEY') {
+        console.log('🎭 Creating mock payment form');
+        const mockForm = document.createElement('div');
+        mockForm.className = 'mock-payment-form p-6 bg-gray-50 border border-gray-200 rounded-lg';
+        mockForm.innerHTML = `
+          <div class="text-center mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Mock Payment Form</h3>
+            <p class="text-gray-600">This is a development mock - no real payment will be processed</p>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Card Number</label>
+              <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="1234 5678 9012 3456" />
             </div>
-            <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Card Number</label>
-                <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="1234 5678 9012 3456" />
-              </div>
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
-                  <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="MM/YY" />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">CVV</label>
-                  <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="123" />
-                </div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
+                <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="MM/YY" />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Cardholder Name</label>
-                <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="John Doe" />
-              </div>
-              <div class="pt-4">
-                <button 
-                  id="mock-pay-button"
-                  class="w-full bg-primary text-white py-3 px-4 rounded-md font-medium hover:bg-primary/90 transition-colors"
-                >
-                  Pay S/ ${amount.toFixed(2)}
-                </button>
+                <label class="block text-sm font-medium text-gray-700 mb-1">CVV</label>
+                <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="123" />
               </div>
             </div>
-          `;
-          paymentContainerRef.current.appendChild(mockForm);
-          
-          // Add click handler for mock payment
-          const payButton = mockForm.querySelector('#mock-pay-button');
-          payButton?.addEventListener('click', () => {
-            console.log('🎭 Mock payment submitted');
-            onSuccess({
-              orderId: orderId,
-              amount: amount,
-              currency: 'PEN',
-              status: 'PAID',
-              mockPayment: true
-            });
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Cardholder Name</label>
+              <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="John Doe" />
+            </div>
+            <div class="pt-4">
+              <button 
+                id="mock-pay-button"
+                class="w-full bg-primary text-white py-3 px-4 rounded-md font-medium hover:bg-primary/90 transition-colors"
+              >
+                Pay S/ ${amount.toFixed(2)}
+              </button>
+            </div>
+          </div>
+        `;
+        paymentContainerRef.current.appendChild(mockForm);
+        
+        // Add click handler for mock payment
+        const payButton = mockForm.querySelector('#mock-pay-button');
+        payButton?.addEventListener('click', () => {
+          console.log('🎭 Mock payment submitted');
+          onSuccess({
+            orderId: orderId,
+            amount: amount,
+            currency: 'PEN',
+            status: 'PAID',
+            mockPayment: true
           });
-          
-          setIsLoading(false);
-          return;
-        }
+        });
+        
+        setIsLoading(false);
+        return;
+      }
 
-        // Real Izipay form initialization
-        if (!window.KR) {
-          console.log('❌ KR object not available for real payment');
-          setError('Payment system not available');
-          setIsLoading(false);
-          return;
-        }
+      // Real Izipay form initialization
+      if (!window.KR) {
+        console.log('❌ KR object not available for real payment');
+        setError('Payment system not available');
+        setIsLoading(false);
+        return;
+      }
 
-        // Set up additional KR configuration
-        console.log('🔑 Setting additional KR config');
+      console.log('🔧 Setting up KR event handlers...');
+      
+      // Set up event handlers BEFORE creating the form
+      window.KR.onSubmit(() => {
+        console.log('Payment form submitted');
+      });
+
+      window.KR.onError((error: { message?: string }) => {
+        console.error('Payment error:', error);
+        onError(error.message || 'Payment failed');
+      });
+
+      window.KR.onTransactionCreated((result: PaymentResult) => {
+        console.log('Transaction created:', result);
+        onSuccess(result);
+      });
+
+      // Use KR.onFormReady to ensure proper initialization timing
+      (window.KR as unknown as { onFormReady: (callback: () => void) => void }).onFormReady(() => {
+        console.log('🔧 KR.onFormReady callback triggered - form is ready');
+        
+        // Set additional configuration
         window.KR.setFormConfig({
           'kr-post-url-success': window.location.origin + '/api/izipay/payment-success',
           'kr-post-url-refused': window.location.origin + '/api/izipay/payment-error',
           'kr-post-url-cancelled': window.location.origin + '/api/izipay/payment-cancelled'
         });
 
-        // Set up event handlers
-        window.KR.onSubmit(() => {
-          console.log('Payment form submitted');
-        });
-
-        window.KR.onError((error: any) => {
-          console.error('Payment error:', error);
-          onError(error.message || 'Payment failed');
-        });
-
-        window.KR.onTransactionCreated((result: any) => {
-          console.log('Transaction created:', result);
-          onSuccess(result);
-        });
-
-        // Wait a moment for KR to be fully configured, then create the form
-        setTimeout(() => {
-          // Create smart form with proper attributes (new Izipay format)
-          const formDiv = document.createElement('div');
-          formDiv.id = 'izipay-payment-form';
-          formDiv.className = 'kr-smart-form';
-          formDiv.setAttribute('kr-card-form-expanded', ''); // Enable embedded card fields
-          formDiv.setAttribute('kr-form-token', formToken);
+        // Create the form container with proper attributes
+        const formDiv = document.createElement('div');
+        formDiv.id = 'izipay-payment-form';
+        formDiv.className = 'kr-smart-form';
+        formDiv.setAttribute('kr-card-form-expanded', ''); // Enable embedded card fields
+        formDiv.setAttribute('kr-form-token', formToken || '');
+        
+        // Clear container and add form
+        if (paymentContainerRef.current) {
+          paymentContainerRef.current.innerHTML = '';
           paymentContainerRef.current.appendChild(formDiv);
-          
-          console.log('🔧 Smart form div created with attributes:', {
-            id: formDiv.id,
-            className: formDiv.className,
-            krFormToken: formDiv.getAttribute('kr-form-token')
-          });
-        }, 100);
+        }
+        
+        console.log('🔧 Form container created with attributes:', {
+          id: formDiv.id,
+          className: formDiv.className,
+          krFormToken: formDiv.getAttribute('kr-form-token'),
+          parentElement: paymentContainerRef.current?.tagName
+        });
 
-        // According to Izipay docs, the form should auto-render when the div is added to DOM
-        // with kr-smart-form class and kr-form-token attribute
-        setTimeout(() => {
-          try {
-            console.log('🔧 Checking if form auto-rendered...');
-            console.log('🔧 KR object available:', !!window.KR);
-            console.log('🔧 Form element exists:', !!document.getElementById('izipay-payment-form'));
-            
-            // Check if form content was rendered
-            const formContent = document.querySelector('#izipay-payment-form');
-            console.log('🔧 Form content after auto-render:', formContent?.innerHTML);
-            
-            if (formContent && formContent.innerHTML.trim()) {
-              console.log('✅ Form auto-rendered successfully');
-              setIsLoading(false);
-            } else {
-              console.log('⚠️ Form not auto-rendered, trying manual approach...');
-              // Fallback to manual approach
-              try {
-                window.KR.addForm('#izipay-payment-form');
-                window.KR.showForm('#izipay-payment-form');
-                console.log('✅ Form rendered manually');
-                setIsLoading(false);
-              } catch (manualError) {
-                console.error('❌ Manual form rendering failed:', manualError);
-                setError('Failed to display payment form: ' + (manualError instanceof Error ? manualError.message : 'Unknown error'));
-                setIsLoading(false);
-              }
-            }
-            
-          } catch (formError) {
-            console.error('❌ Error in form rendering:', formError);
-            setError('Failed to display payment form: ' + (formError instanceof Error ? formError.message : 'Unknown error'));
-            setIsLoading(false);
-          }
-        }, 1000); // Give more time for auto-rendering
-      } catch (err) {
-        console.error('Error initializing payment form:', err);
-        setError('Failed to initialize payment form');
-        setIsLoading(false);
-      }
+        // Add the form using KR.addForm
+        try {
+          console.log('🔧 Calling KR.addForm...');
+          window.KR.addForm('#izipay-payment-form');
+          console.log('✅ KR.addForm successful');
+          
+          // The form should auto-render after addForm is called
+          console.log('✅ Form should be auto-rendering');
+          
+          setIsLoading(false);
+        } catch (addFormError) {
+          console.error('❌ KR.addForm failed:', addFormError);
+          setError('Failed to create payment form: ' + (addFormError instanceof Error ? addFormError.message : 'Unknown error'));
+          setIsLoading(false);
+        }
+      });
+
+      // Set the form token to trigger form creation
+      console.log('🔧 Setting form token to trigger initialization...');
+      (window.KR as unknown as { setFormToken: (token: string) => void }).setFormToken(formToken!);
+      
+    } catch (err) {
+      console.error('Error initializing payment form:', err);
+      setError('Failed to initialize payment form');
+      setIsLoading(false);
     }
-  }, [isScriptLoaded, formToken, publicKey, onSuccess, onError]);
+  }, [publicKey, formToken, onSuccess, onError, amount, orderId]);
+
+  // Initialize payment form using proper Izipay pattern
+  useEffect(() => {
+    console.log('🔧 Form initialization useEffect triggered:', {
+      isScriptLoaded,
+      hasFormToken: !!formToken,
+      hasPublicKey: !!publicKey,
+      hasContainer: !!paymentContainerRef.current,
+      containerReady
+    });
+    
+    if (isScriptLoaded && formToken && publicKey && paymentContainerRef.current) {
+      console.log('✅ All conditions met, initializing form...');
+      initializeForm();
+    }
+  }, [isScriptLoaded, formToken, publicKey, containerReady, initializeForm]);
 
   if (error) {
     return (
@@ -337,7 +386,7 @@ export default function IzipayPayment({
       
       <div 
         id="izipay-payment-form" 
-        ref={paymentContainerRef}
+        ref={containerRefCallback}
         className="min-h-[400px] border border-gray-200 rounded-lg p-4"
       />
       
