@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           success: false, 
-          error: data.errorMessage || `Payment creation failed: ${data.status}`,
+          error: `Payment creation failed: ${data.status} - ${data.errorMessage || 'Unknown error'}`,
           errorCode: data.errorCode,
           details: data
         },
