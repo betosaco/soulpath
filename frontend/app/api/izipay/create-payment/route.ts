@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     
     // Prepare the request payload according to Izipay documentation
     const payload = {
-      amount: Math.round(body.amount * 100), // Convert to cents (required: integer)
+      amount: body.amount, // Amount is already in cents from frontend
       currency: body.currency || 'PEN', // Required: currency code
       orderId: body.orderId, // Required: unique order identifier
       customer: {

@@ -8,6 +8,9 @@ interface IzipayFormProps {
   publicKey: string;
   amountInCents: number;
   currency: string;
+  customerEmail?: string;
+  customerName?: string;
+  customerPhone?: string;
   onSuccess: (paymentToken: string) => void;
   onError: (errorMessage: string) => void;
 }
@@ -16,6 +19,9 @@ export const IzipayForm: React.FC<IzipayFormProps> = ({
   publicKey,
   amountInCents,
   currency,
+  customerEmail,
+  customerName,
+  customerPhone,
   onSuccess,
   onError,
 }) => {
@@ -51,7 +57,9 @@ export const IzipayForm: React.FC<IzipayFormProps> = ({
       amountInCents={amountInCents}
       currency={currency}
       orderId={orderId}
-      customerEmail="customer@example.com" // This should be passed as a prop
+      customerEmail={customerEmail || "customer@example.com"}
+      customerName={customerName}
+      customerPhone={customerPhone}
       onSuccess={handleSuccess}
       onError={handleError}
     />

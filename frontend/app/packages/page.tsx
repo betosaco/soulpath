@@ -796,7 +796,7 @@ export default function PackagesPage() {
                   {/* Payment Method */}
                   {formData.selectedPackage && (
                     <IzipayForm
-                      publicKey="88569105:testpublickey_oHKEsiKA3i9E1JshcnIA7RktrR163DdRZYZYOWgXqwSXx"
+                      publicKey="69876357:testpublickey_DEMOPUBLICKEY95me92597fd28tGD4r5"
                       amountInCents={Math.round(formData.selectedPackage.price * 100)}
                       currency="PEN"
                       onSuccess={(token) => handlePaymentSuccess({ token })}

@@ -104,7 +104,7 @@ export const IzipayPaymentFormCorrect: React.FC<IzipayPaymentFormCorrectProps> =
 
   if (isLoading) {
     return (
-      <div className="w-full max-w-md mx-auto">
+      <div className="w-full max-w-xl mx-auto flex flex-col items-center">
         <div className="text-center py-8">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -120,7 +120,7 @@ export const IzipayPaymentFormCorrect: React.FC<IzipayPaymentFormCorrectProps> =
 
   if (error) {
     return (
-      <div className="w-full max-w-md mx-auto">
+      <div className="w-full max-w-xl mx-auto flex flex-col items-center">
         <div className="text-center py-8">
           <div className="flex items-center justify-center mb-4">
             <AlertCircle className="h-8 w-8 text-red-600" />
@@ -144,7 +144,7 @@ export const IzipayPaymentFormCorrect: React.FC<IzipayPaymentFormCorrectProps> =
 
   if (!formToken) {
     return (
-      <div className="w-full max-w-md mx-auto">
+      <div className="w-full max-w-xl mx-auto flex flex-col items-center">
         <div className="text-center py-8">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
           <p className="text-sm text-gray-600">
@@ -162,6 +162,7 @@ export const IzipayPaymentFormCorrect: React.FC<IzipayPaymentFormCorrectProps> =
       amountInCents={amountInCents}
       currency={currency}
       javascriptUrl={javascriptUrl || undefined}
+      customerName={customerName}
       onSuccess={handleSuccess}
       onError={handleError}
       onCancel={onCancel}

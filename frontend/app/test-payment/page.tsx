@@ -38,9 +38,12 @@ export default function TestPaymentPage() {
         ) : (
           <div className="bg-white p-6 rounded-lg shadow-lg">
             <IzipayForm
-              publicKey="88569105:testpublickey_oHKEsiKA3i9E1JshcnIA7RktrR163DdRZYZYOWgXqwSXx"
+              publicKey="69876357:testpublickey_DEMOPUBLICKEY95me92597fd28tGD4r5"
               amountInCents={10000} // S/ 100.00 in cents
               currency="PEN"
+              customerEmail="test@example.com"
+              customerName="Juan Pérez"
+              customerPhone="+51987654321"
               onSuccess={(token) => handleSuccess({ token })}
               onError={handleError}
             />

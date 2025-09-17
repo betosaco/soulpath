@@ -1,4 +1,4 @@
-Lyra Documentation
+itLyra Documentation
 Generated on: 2025-01-06 03:05:39,441
 
 Table of Contents

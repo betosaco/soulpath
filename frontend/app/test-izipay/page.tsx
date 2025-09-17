@@ -51,9 +51,12 @@ export default function TestIzipayPage() {
             </CardHeader>
             <CardContent>
               <IzipayForm
-                publicKey="88569105:testpublickey_oHKEsiKA3i9E1JshcnIA7RktrR163DdRZYZYOWgXqwSXx"
-                amountInCents={5000} // S/ 50.00
+                publicKey="69876357:testpublickey_DEMOPUBLICKEY95me92597fd28tGD4r5"
+                amountInCents={5000} // S/ 50.00 (5000 cents)
                 currency="PEN"
+                customerEmail="test@example.com"
+                customerName="María González"
+                customerPhone="+51987654321"
                 onSuccess={handleSuccess}
                 onError={handleError}
               />

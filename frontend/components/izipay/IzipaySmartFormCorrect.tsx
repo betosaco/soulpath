@@ -10,6 +10,7 @@ interface IzipaySmartFormCorrectProps {
   amountInCents: number;
   currency: string;
   javascriptUrl?: string;
+  customerName?: string;
   onSuccess: (paymentResult: Record<string, unknown>) => void;
   onError: (errorMessage: string) => void;
   onCancel?: () => void;
@@ -21,6 +22,7 @@ export const IzipaySmartFormCorrect: React.FC<IzipaySmartFormCorrectProps> = ({
   amountInCents,
   currency,
   javascriptUrl,
+  customerName,
   onSuccess,
   onError,
   onCancel,
@@ -99,7 +101,7 @@ export const IzipaySmartFormCorrect: React.FC<IzipaySmartFormCorrectProps> = ({
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full max-w-xl mx-auto flex flex-col items-center">
       {/* Load Izipay JavaScript Library with public key */}
       <Script
         src={javascriptUrl || "https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js"}
@@ -119,6 +121,45 @@ export const IzipaySmartFormCorrect: React.FC<IzipaySmartFormCorrectProps> = ({
         rel="stylesheet"
         href="https://static.micuentaweb.pe/static/js/krypton-client/V4.0/ext/neon-reset.min.css"
       />
+      
+      {/* Custom CSS to style the Izipay button to match the green primary color */}
+      <style jsx>{`
+        .kr-smart-form {
+          width: 100% !important;
+          max-width: 100% !important;
+          margin: 0 auto !important;
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: center !important;
+        }
+        .kr-smart-form .kr-embedded {
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+        .kr-smart-form button[type="submit"],
+        .kr-smart-form .kr-payment-button,
+        .kr-smart-form .kr-submit,
+        .kr-smart-form input[type="submit"] {
+          background-color: #6ea058 !important;
+          border-color: #6ea058 !important;
+          color: white !important;
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+        .kr-smart-form button[type="submit"]:hover,
+        .kr-smart-form .kr-payment-button:hover,
+        .kr-smart-form .kr-submit:hover,
+        .kr-smart-form input[type="submit"]:hover {
+          background-color: #5a8a47 !important;
+          border-color: #5a8a47 !important;
+        }
+        .kr-smart-form button[type="submit"]:focus,
+        .kr-smart-form .kr-payment-button:focus,
+        .kr-smart-form .kr-submit:focus,
+        .kr-smart-form input[type="submit"]:focus {
+          box-shadow: 0 0 0 3px rgba(110, 160, 88, 0.3) !important;
+        }
+      `}</style>
       
       {/* Load Izipay Theme JavaScript */}
       <Script
@@ -166,11 +207,25 @@ export const IzipaySmartFormCorrect: React.FC<IzipaySmartFormCorrectProps> = ({
       <div 
         ref={formContainerRef}
         className="kr-smart-form" 
-        kr-card-form-expanded 
+        kr-card-form-expanded="true"
         kr-form-token={formToken}
       >
         {/* Required kr-embedded container */}
         <div className="kr-embedded">
+          {/* Cardholder Name Field - Pre-filled if customer name is provided */}
+          {customerName && (
+            <div className="kr-card-holder-name" kr-label-card-holder-name="Nombre del titular">
+              <input 
+                type="text" 
+                name="cardholder-name" 
+                className="kr-theme" 
+                placeholder="Nombre del titular" 
+                value={customerName}
+                required 
+              />
+            </div>
+          )}
+          
           {/* Error zone - Izipay will populate this */}
           <div className="kr-form-error"></div>
         </div>
