@@ -204,21 +204,23 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
               const cvvField = document.querySelector('#lyra-payment-form .flex-container .kr-security-code');
               
               if (expiryField) {
-                expiryField.style.flex = '0 0 45%'; // Fixed width for expiry (45%)
+                expiryField.style.flex = '0 0 40%'; // Fixed width for expiry (40%)
                 expiryField.style.display = 'block';
-                expiryField.style.width = '45%';
+                expiryField.style.width = '40%';
                 expiryField.style.minWidth = '0';
-                expiryField.style.maxWidth = '45%';
+                expiryField.style.maxWidth = '40%';
                 expiryField.style.boxSizing = 'border-box';
+                expiryField.style.overflow = 'hidden';
               }
               
               if (cvvField) {
-                cvvField.style.flex = '0 0 30%'; // Fixed width for CVV (30%)
+                cvvField.style.flex = '0 0 25%'; // Fixed width for CVV (25%)
                 cvvField.style.display = 'block';
-                cvvField.style.width = '30%';
+                cvvField.style.width = '25%';
                 cvvField.style.minWidth = '0';
-                cvvField.style.maxWidth = '30%';
+                cvvField.style.maxWidth = '25%';
                 cvvField.style.boxSizing = 'border-box';
+                cvvField.style.overflow = 'hidden';
               }
 
               // Force iframe elements to match their container widths
@@ -240,6 +242,8 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
                 (iframe as HTMLElement).style.height = '3.5rem';
                 (iframe as HTMLElement).style.minHeight = '3.5rem';
                 (iframe as HTMLElement).style.maxHeight = '3.5rem';
+                (iframe as HTMLElement).style.boxSizing = 'border-box';
+                (iframe as HTMLElement).style.overflow = 'hidden';
               });
 
               const cvvIframes = document.querySelectorAll('#lyra-payment-form .kr-security-code iframe');
@@ -250,6 +254,8 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
                 (iframe as HTMLElement).style.height = '3.5rem';
                 (iframe as HTMLElement).style.minHeight = '3.5rem';
                 (iframe as HTMLElement).style.maxHeight = '3.5rem';
+                (iframe as HTMLElement).style.boxSizing = 'border-box';
+                (iframe as HTMLElement).style.overflow = 'hidden';
               });
 
               const cardholderIframes = document.querySelectorAll('#lyra-payment-form .kr-card-holder-name iframe');
