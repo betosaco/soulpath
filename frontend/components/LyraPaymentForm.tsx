@@ -191,10 +191,12 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
               if (flexContainer) {
                 flexContainer.style.display = 'flex';
                 flexContainer.style.flexDirection = 'row';
-                flexContainer.style.gap = '0.75rem';
+                flexContainer.style.gap = '1rem';
                 flexContainer.style.alignItems = 'stretch';
                 flexContainer.style.marginBottom = '1rem';
                 flexContainer.style.width = '100%';
+                flexContainer.style.justifyContent = 'space-between';
+                flexContainer.style.boxSizing = 'border-box';
               }
               
               // Ensure expiry and CVV fields are side by side within the flex container
@@ -202,19 +204,21 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
               const cvvField = document.querySelector('#lyra-payment-form .flex-container .kr-security-code');
               
               if (expiryField) {
-                expiryField.style.flex = '0 0 35%'; // Fixed width for expiry (35%)
-                expiryField.style.display = 'inline-block';
-                expiryField.style.width = '35%';
+                expiryField.style.flex = '0 0 45%'; // Fixed width for expiry (45%)
+                expiryField.style.display = 'block';
+                expiryField.style.width = '45%';
                 expiryField.style.minWidth = '0';
-                expiryField.style.maxWidth = '35%';
+                expiryField.style.maxWidth = '45%';
+                expiryField.style.boxSizing = 'border-box';
               }
               
               if (cvvField) {
-                cvvField.style.flex = '0 0 25%'; // Fixed width for CVV (25%)
-                cvvField.style.display = 'inline-block';
-                cvvField.style.width = '25%';
+                cvvField.style.flex = '0 0 30%'; // Fixed width for CVV (30%)
+                cvvField.style.display = 'block';
+                cvvField.style.width = '30%';
                 cvvField.style.minWidth = '0';
-                cvvField.style.maxWidth = '25%';
+                cvvField.style.maxWidth = '30%';
+                cvvField.style.boxSizing = 'border-box';
               }
 
               // Force iframe elements to match their container widths
