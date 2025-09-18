@@ -40,6 +40,54 @@ vercel env add NEXT_PUBLIC_BASE_URL production << EOF
 https://frontend-ap707pb1e-matmaxworlds-projects.vercel.app
 EOF
 
+# Database Configuration
+echo "Adding database configuration..."
+vercel env add DATABASE_URL production << EOF
+postgresql://postgres.hwxrstqeuouefyrwjsjt:MatMax2025!@aws-0-us-west-1.pooler.supabase.com:6543/postgres
+EOF
+
+vercel env add DIRECT_URL production << EOF
+postgresql://postgres.hwxrstqeuouefyrwjsjt:MatMax2025!@aws-0-us-west-1.pooler.supabase.com:5432/postgres
+EOF
+
+# Lyra Payment Configuration
+echo "Adding Lyra payment configuration..."
+vercel env add LYRA_USERNAME production << EOF
+88569105
+EOF
+
+vercel env add LYRA_PASSWORD production << EOF
+prodpassword_di6IeBzwz6ccq3OfeWkUmGN5s6PmhX67l6RrKJHSicFPh
+EOF
+
+vercel env add LYRA_PUBLIC_KEY production << EOF
+publickey_UKrWqzlcOvfMEi4OdXuBAcGK1TaTK6izlIJZYWwHGCqkv
+EOF
+
+vercel env add LYRA_API_ENDPOINT production << EOF
+https://api.micuentaweb.pe/api-payment/V4/Charge/CreatePayment
+EOF
+
+vercel env add LYRA_JS_LIBRARY_URL production << EOF
+https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js
+EOF
+
+vercel env add LYRA_HMAC_PROD_KEY production << EOF
+L1tb9IvJNUHb1r120tn0CXfKjaacKrwTVhH6yLX6w5SUw
+EOF
+
+vercel env add LYRA_RETURN_URL_SUCCESS production << EOF
+https://frontend-ap707pb1e-matmaxworlds-projects.vercel.app/payment-success
+EOF
+
+vercel env add LYRA_RETURN_URL_ERROR production << EOF
+https://frontend-ap707pb1e-matmaxworlds-projects.vercel.app/payment-error
+EOF
+
+vercel env add LYRA_RETURN_URL_CANCEL production << EOF
+https://frontend-ap707pb1e-matmaxworlds-projects.vercel.app/payment-cancel
+EOF
+
 # Optional: Add JWT Secret for production
 echo "Generating JWT secret for production..."
 JWT_SECRET=$(openssl rand -base64 32)
@@ -66,6 +114,17 @@ echo "• NEXT_PUBLIC_SUPABASE_URL"
 echo "• NEXT_PUBLIC_SUPABASE_ANON_KEY"
 echo "• SUPABASE_SERVICE_ROLE_KEY"
 echo "• NEXT_PUBLIC_BASE_URL"
+echo "• DATABASE_URL"
+echo "• DIRECT_URL"
+echo "• LYRA_USERNAME"
+echo "• LYRA_PASSWORD"
+echo "• LYRA_PUBLIC_KEY"
+echo "• LYRA_API_ENDPOINT"
+echo "• LYRA_JS_LIBRARY_URL"
+echo "• LYRA_HMAC_PROD_KEY"
+echo "• LYRA_RETURN_URL_SUCCESS"
+echo "• LYRA_RETURN_URL_ERROR"
+echo "• LYRA_RETURN_URL_CANCEL"
 echo "• JWT_SECRET"
 echo "• NEXTAUTH_SECRET"
 echo "• NEXTAUTH_URL"
