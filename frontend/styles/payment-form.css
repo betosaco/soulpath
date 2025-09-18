@@ -212,6 +212,17 @@
   width: 100% !important;
 }
 
+/* Ensure cardholder name field container has no padding */
+#lyra-payment-form .kr-card-holder-name {
+  width: 100% !important;
+  margin-bottom: 1.5rem !important;
+  display: block !important;
+  flex: none !important;
+  padding: 0 !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+}
+
 /* Traditional embedded form styling - following Lyra documentation exactly */
 /* The embedded form fields are enclosed in one or more containers: <div class="flex-container">...</div> */
 
@@ -221,7 +232,7 @@
   margin-bottom: 1.5rem !important;
   display: block !important;
   flex: none !important;
-  padding: 0.75rem !important;
+  padding: 0 !important;
   min-width: 100% !important;
   max-width: 100% !important;
 }
@@ -234,7 +245,7 @@
   gap: 1rem !important;
   margin-bottom: 1.5rem !important;
   align-items: stretch !important;
-  padding: 0.5rem !important;
+  padding: 0 !important;
   box-sizing: border-box !important;
 }
 
@@ -245,7 +256,7 @@
   width: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
-  padding: 0.25rem !important;
+  padding: 0 !important;
   box-sizing: border-box !important;
   overflow: hidden !important;
 }
@@ -256,7 +267,7 @@
   width: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
-  padding: 0.25rem !important;
+  padding: 0 !important;
   box-sizing: border-box !important;
   overflow: hidden !important;
 }
@@ -482,7 +493,7 @@
   height: 3.5rem !important;
   min-height: 3.5rem !important;
   max-height: 3.5rem !important;
-  padding: 1rem 1.25rem !important;
+  padding: 0 !important;
   margin-bottom: 1.5rem !important;
   box-sizing: border-box !important;
   display: block !important;
@@ -496,7 +507,7 @@
   height: 3.5rem !important;
   min-height: 3.5rem !important;
   max-height: 3.5rem !important;
-  padding: 1rem 1.25rem !important;
+  padding: 0 !important;
   margin-bottom: 1rem !important;
   box-sizing: border-box !important;
   display: block !important;
@@ -510,7 +521,7 @@
   height: 3.5rem !important;
   min-height: 3.5rem !important;
   max-height: 3.5rem !important;
-  padding: 1rem 1.25rem !important;
+  padding: 0 !important;
   margin-bottom: 1.5rem !important;
   box-sizing: border-box !important;
   display: block !important;
