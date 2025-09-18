@@ -187,8 +187,38 @@ export function PackagesBookingFlow() {
   const handlePaymentSuccess = (paymentData: any) => {
     console.log('✅ Payment successful:', paymentData);
     toast.success('¡Pago exitoso! Tu paquete ha sido activado.');
-    // Here you would typically redirect to a success page or dashboard
-    // For now, we'll just show a success message
+    
+    // Store payment result in sessionStorage for the success page
+    sessionStorage.setItem('paymentResult', JSON.stringify({
+      orderStatus: 'PAID',
+      orderId: `PKG-${formData.selectedPackage?.id}-${Date.now()}`,
+      amount: (formData.selectedPackage?.price || 0) * 100, // Convert to cents
+      currency: formData.selectedPackage?.currency || 'PEN',
+      packageData: {
+        ...formData.selectedPackage,
+        name: formData.selectedPackage.packageDefinition.name,
+        description: formData.selectedPackage.packageDefinition.description,
+        sessionsCount: formData.selectedPackage.packageDefinition.sessionsCount,
+        packageType: formData.selectedPackage.packageDefinition.packageType,
+        maxGroupSize: formData.selectedPackage.packageDefinition.maxGroupSize,
+        sessionDuration: formData.selectedPackage.packageDefinition.sessionDuration
+      },
+      bookingData: formData.selectedSchedule ? {
+        selectedDate: formData.selectedSchedule.date,
+        selectedTime: formData.selectedSchedule.time,
+        teacher: formData.selectedSchedule.teacher,
+        dayOfWeek: formData.selectedSchedule.dayOfWeek,
+        serviceType: formData.selectedSchedule.serviceType,
+        clientName: formData.clientName,
+        clientEmail: formData.clientEmail,
+        clientPhone: formData.clientPhone,
+        countryCode: formData.countryCode
+      } : null,
+      paymentData: paymentData
+    }));
+    
+    // Redirect to payment success page
+    window.location.href = '/payment-success';
   };
 
   const handleProceedToBooking = () => {
@@ -622,6 +652,13 @@ export function PackagesBookingFlow() {
                     phone: formData.clientPhone,
                     countryCode: formData.countryCode
                   }}
+                  bookingData={formData.selectedSchedule ? {
+                    selectedDate: formData.selectedSchedule.date,
+                    selectedTime: formData.selectedSchedule.time,
+                    teacher: formData.selectedSchedule.teacher,
+                    dayOfWeek: formData.selectedSchedule.dayOfWeek,
+                    serviceType: formData.selectedSchedule.serviceType
+                  } : null}
                   onPaymentSuccess={handlePaymentSuccess}
                   onBack={() => setCurrentStep(2)}
                   isLoading={sending}
@@ -654,6 +691,13 @@ export function PackagesBookingFlow() {
                   phone: formData.clientPhone,
                   countryCode: formData.countryCode
                 }}
+                bookingData={formData.selectedSchedule ? {
+                  selectedDate: formData.selectedSchedule.date,
+                  selectedTime: formData.selectedSchedule.time,
+                  teacher: formData.selectedSchedule.teacher,
+                  dayOfWeek: formData.selectedSchedule.dayOfWeek,
+                  serviceType: formData.selectedSchedule.serviceType
+                } : null}
                 onPaymentSuccess={handlePaymentSuccess}
                 onBack={() => setCurrentStep(2)}
                 isLoading={sending}

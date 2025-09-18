@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import { 
   CreditCard, 
   Lock, 
@@ -10,7 +11,8 @@ import {
   Loader2,
   Shield,
   ArrowRight,
-  ArrowLeft
+  ArrowLeft,
+  Calendar
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,6 +37,18 @@ interface PaymentFormProps {
     phone: string;
     countryCode: string;
   };
+  bookingData?: {
+    selectedDate?: string;
+    selectedTime?: string;
+    teacher?: {
+      id: number;
+      name: string;
+    };
+    dayOfWeek?: string;
+    serviceType?: {
+      name: string;
+    };
+  } | null;
   onPaymentSuccess: (paymentData: any) => void;
   onBack: () => void;
   isLoading?: boolean;
@@ -43,10 +57,12 @@ interface PaymentFormProps {
 export function PaymentForm({ 
   packageData, 
   personalInfo, 
+  bookingData = null,
   onPaymentSuccess, 
   onBack, 
   isLoading = false 
 }: PaymentFormProps) {
+  const router = useRouter();
   const [paymentResult, setPaymentResult] = useState<any>(null);
   const [processing, setProcessing] = useState(false);
 
@@ -58,7 +74,36 @@ export function PaymentForm({
       message: `¡Pago exitoso! ${packageData.currency} ${packageData.price.toFixed(2)} procesado correctamente.`
     });
     setProcessing(false);
+    
+    // Store payment result in sessionStorage for the success page
+    sessionStorage.setItem('paymentResult', JSON.stringify({
+      orderStatus: 'PAID',
+      orderId: `PKG-${packageData.id}-${Date.now()}`,
+      amount: packageData.price * 100, // Convert to cents
+      currency: packageData.currency,
+      packageData: {
+        ...packageData,
+        id: parseInt(packageData.id),
+        description: `${packageData.sessions} session(s) of ${packageData.duration} minutes each`,
+        sessionsCount: packageData.sessions,
+        packageType: 'individual',
+        maxGroupSize: 1,
+        sessionDuration: {
+          id: 1,
+          name: `${packageData.duration} Minutes`,
+          duration_minutes: packageData.duration,
+          description: `Standard ${packageData.duration}-minute session`
+        }
+      },
+      bookingData: bookingData,
+      paymentData: paymentData
+    }));
+    
+    // Call the parent callback
     onPaymentSuccess(paymentData);
+    
+    // Redirect to payment success page
+    router.push('/payment-success');
   };
 
   const handlePaymentError = (error: any) => {
@@ -86,7 +131,23 @@ export function PaymentForm({
   const igvAmount = totalAmount - basePrice; // IGV amount
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto relative">
+      {/* Payment Processing Overlay */}
+      {processing && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-8 max-w-md mx-4 text-center shadow-2xl">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent mx-auto mb-6"></div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Procesando Pago</h3>
+            <p className="text-gray-600 mb-4">Por favor, no cierres esta ventana mientras procesamos tu pago...</p>
+            <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
+              <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+              <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -133,17 +194,6 @@ export function PaymentForm({
               </CardContent>
             </Card>
 
-            {/* Payment Status */}
-            {processing && (
-              <div className="bg-yellow-50 rounded-xl p-6 border border-yellow-200">
-                <div className="flex items-center space-x-3">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-yellow-600"></div>
-                  <div className="text-yellow-800 font-medium">
-                    Procesando pago...
-                  </div>
-                </div>
-              </div>
-            )}
 
             {/* Payment Result */}
             {paymentResult && (
@@ -202,6 +252,48 @@ export function PaymentForm({
                     </div>
                   </div>
                 </div>
+
+                {/* Booking Details */}
+                {bookingData && (
+                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                    <h4 className="font-semibold text-lg text-green-700 mb-2 flex items-center gap-2">
+                      <Calendar className="w-5 h-5" />
+                      Booking Schedule
+                    </h4>
+                    <div className="space-y-2 text-sm">
+                      {bookingData.teacher && (
+                        <div className="flex justify-between">
+                          <span className="text-muted">Teacher:</span>
+                          <span className="font-medium text-green-800">{bookingData.teacher.name}</span>
+                        </div>
+                      )}
+                      {bookingData.selectedDate && (
+                        <div className="flex justify-between">
+                          <span className="text-muted">Date:</span>
+                          <span className="font-medium text-green-800">{new Date(bookingData.selectedDate).toLocaleDateString('es-PE')}</span>
+                        </div>
+                      )}
+                      {bookingData.dayOfWeek && (
+                        <div className="flex justify-between">
+                          <span className="text-muted">Day:</span>
+                          <span className="font-medium text-green-800 capitalize">{bookingData.dayOfWeek}</span>
+                        </div>
+                      )}
+                      {bookingData.selectedTime && (
+                        <div className="flex justify-between">
+                          <span className="text-muted">Time:</span>
+                          <span className="font-medium text-green-800">{bookingData.selectedTime}</span>
+                        </div>
+                      )}
+                      {bookingData.serviceType && (
+                        <div className="flex justify-between">
+                          <span className="text-muted">Service:</span>
+                          <span className="font-medium text-green-800">{bookingData.serviceType.name}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Pricing Breakdown */}
                 <div className="space-y-2">

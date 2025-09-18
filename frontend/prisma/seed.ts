@@ -536,7 +536,7 @@ async function main() {
     prisma.packageDefinition.upsert({
       where: { id: 6 },
       update: {
-        name: 'S/1 SOL',
+        name: 'TestPass',
         description: '1 session of 60 minutes - Special promotional price',
         sessionsCount: 1,
         sessionDurationId: 3,
@@ -545,7 +545,7 @@ async function main() {
         isActive: true
       },
       create: {
-        name: 'S/1 SOL',
+        name: 'TestPass',
         description: '1 session of 60 minutes - Special promotional price',
         sessionsCount: 1,
         sessionDurationId: 3,
