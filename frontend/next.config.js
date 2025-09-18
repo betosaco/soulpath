@@ -32,7 +32,7 @@ const nextConfig = {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://static.micuentaweb.pe https://static.lyra.com",
       "font-src 'self' https://fonts.gstatic.com https://static.micuentaweb.pe https://static.lyra.com",
       "img-src 'self' data: https: blob:",
-      "connect-src 'self' https://static.micuentaweb.pe https://static.lyra.com https://secure.lyra.com https://secure.micuentaweb.pe https://h.online-metrix.net https://h64.online-metrix.net",
+      "connect-src 'self' https://*.vercel.app https://matmax.world https://www.matmax.world https://static.micuentaweb.pe https://static.lyra.com https://secure.lyra.com https://secure.micuentaweb.pe https://h.online-metrix.net https://h64.online-metrix.net",
       "frame-src 'self' https://static.micuentaweb.pe https://static.lyra.com https://secure.lyra.com https://h.online-metrix.net https://h64.online-metrix.net",
       "object-src 'none'",
       "base-uri 'self'",
