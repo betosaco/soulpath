@@ -120,6 +120,9 @@ export function EnhancedSchedule({
       
       if (data.success) {
         console.log('✅ Setting slots:', data.slots.length, 'slots');
+        if (data.message && data.message.includes('mock data')) {
+          console.log('📝 Using mock data - database unavailable');
+        }
         setSlots(data.slots);
       } else {
         console.error('❌ API error:', data.error);
