@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { MessageCircle, CheckCircle, XCircle, RotateCcw, Calendar, User, CreditCard } from 'lucide-react';
+import { MessageCircle, CheckCircle, XCircle, RotateCcw, Calendar, User, CreditCard, Package } from 'lucide-react';
 import { AppLayout } from '@/components/AppLayout';
 
 interface PaymentResult {
@@ -92,12 +92,14 @@ export default function PaymentSuccessPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p className="mt-3 text-gray-600">Cargando resultado del pago...</p>
+      <AppLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+            <p className="mt-3 text-gray-600">Cargando resultado del pago...</p>
+          </div>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
@@ -293,7 +295,7 @@ export default function PaymentSuccessPage() {
                   Contactar por WhatsApp
                 </button>
                 <p className="text-sm text-gray-500 mt-3">
-                  Envíanos un mensaje con los detalles de tu pago para confirmar tu reserva
+                  Puedes contactarnos respecto a esta orden en este número de WhatsApp
                 </p>
               </div>
             </div>
