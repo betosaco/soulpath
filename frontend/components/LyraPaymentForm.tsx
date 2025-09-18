@@ -43,6 +43,36 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
   const formRef = useRef<HTMLDivElement>(null);
   const isInitializingRef = useRef(false);
 
+  // Function to reload just the form
+  const reloadForm = () => {
+    console.log('🔄 Reloading payment form...');
+    setError(null);
+    setIsCardDeclined(false);
+    setIsFormInitialized(false);
+    isInitializingRef.current = false;
+    setIsLoading(true);
+    
+    // Clear the form element
+    if (formRef.current) {
+      formRef.current.innerHTML = `
+        <div class="kr-pan"></div>
+        <div class="flex-container">
+          <div class="kr-expiry"></div>
+          <div class="kr-security-code"></div>
+        </div>
+        <div class="kr-card-holder-name"></div>
+        <button class="kr-payment-button"></button>
+        <div class="kr-form-error"></div>
+      `;
+    }
+    
+    // Force re-initialization after a short delay
+    setTimeout(() => {
+      // Trigger the useEffect by changing a dependency
+      setIsFormInitialized(false);
+    }, 100);
+  };
+
   useEffect(() => {
     // Prevent multiple initializations
     if (isFormInitialized || isInitializingRef.current) {
@@ -611,6 +641,20 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
               setIsCardDeclined(true); // Set card declined state
               console.warn('⚠️ Empty error object received - likely card decline, showing user-friendly message');
             }
+            // Also check for meaningless error objects
+            else if (error && typeof error === 'object' && Object.keys(error).length > 0) {
+              const hasMeaningfulContent = Object.values(error).some(value => 
+                value !== null && value !== undefined && value !== '' && 
+                (typeof value !== 'object' || Object.keys(value).length > 0)
+              );
+              
+              if (!hasMeaningfulContent) {
+                errorMsg = 'Su tarjeta fue rechazada. Por favor, verifique los datos de su tarjeta o use otra tarjeta.';
+                shouldReload = false; // Don't reload for card decline, let user try again
+                setIsCardDeclined(true); // Set card declined state
+                console.warn('⚠️ Meaningless error object received - likely card decline, showing user-friendly message');
+              }
+            }
             // Handle specific error codes
             else if (error?.errorCode === 'CLIENT_300') {
               errorMsg = 'Datos de formulario inválidos. Por favor, verifique la información de su tarjeta.';
@@ -650,9 +694,19 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
               console.warn('⚠️ Unknown error type received:', error);
             }
             
-            // Only log meaningful errors (not empty objects)
+            // Only log meaningful errors (not empty objects or objects with only empty values)
             if (error && typeof error === 'object' && Object.keys(error).length > 0) {
-              console.error('❌ Payment form error:', error);
+              // Check if the error has meaningful content
+              const hasMeaningfulContent = Object.values(error).some(value => 
+                value !== null && value !== undefined && value !== '' && 
+                (typeof value !== 'object' || Object.keys(value).length > 0)
+              );
+              
+              if (hasMeaningfulContent) {
+                console.error('❌ Payment form error:', error);
+              } else {
+                console.warn('⚠️ Empty or meaningless error object received, treating as card decline');
+              }
             }
             
             setError(errorMsg);
@@ -783,22 +837,23 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
                 </div>
               </div>
             )}
+            {!isReloading && !isCardDeclined && (
+              <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                <button
+                  onClick={reloadForm}
+                  className="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                >
+                  Intentar nuevamente
+                </button>
+              </div>
+            )}
             {isCardDeclined && (
               <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                 <div className="flex items-center justify-center space-x-2 mb-3">
                   <span className="text-red-700 text-sm">💳 Su tarjeta fue rechazada</span>
                 </div>
                 <button
-                  onClick={() => {
-                    setError(null);
-                    setIsCardDeclined(false);
-                    setIsFormInitialized(false);
-                    isInitializingRef.current = false;
-                    // Force re-initialization
-                    setTimeout(() => {
-                      window.location.reload();
-                    }, 100);
-                  }}
+                  onClick={reloadForm}
                   className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
                 >
                   Intentar con otra tarjeta
