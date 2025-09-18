@@ -35,8 +35,8 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [formToken, setFormToken] = useState<string | null>(null);
-  const [publicKey, setPublicKey] = useState<string | null>(null);
+  const [, setFormToken] = useState<string | null>(null);
+  const [, setPublicKey] = useState<string | null>(null);
   const [isFormInitialized, setIsFormInitialized] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
   const isInitializingRef = useRef(false);
@@ -48,9 +48,16 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
     }
 
     // Add a longer delay to ensure DOM is ready and component is fully mounted
-    const timeoutId = setTimeout(() => {
+    const timeoutId = setTimeout(async () => {
       console.log('🚀 Starting payment initialization after delay...');
-      initializePayment();
+      try {
+        await initializePayment();
+      } catch (error) {
+        console.error('❌ Uncaught error in payment initialization:', error);
+        setError('Error al inicializar el formulario de pago');
+        setIsLoading(false);
+        isInitializingRef.current = false;
+      }
     }, 500);
 
     const initializePayment = async () => {
@@ -63,7 +70,7 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
 
         // Step 1: Get form token from server
         console.log('📡 Requesting form token from server...');
-        const tokenResponse = await fetch('/api/lyra/create-token', {
+        const tokenResponse = await fetch('http://localhost:3000/api/lyra/create-token', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -94,9 +101,16 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
         const { KR } = await KRGlue.loadLibrary(endpoint, tokenData.publicKey);
         
         console.log('✅ Lyra library loaded successfully');
+        console.log('🔍 KR object methods:', Object.getOwnPropertyNames(KR));
+        console.log('🔍 KR.setFormConfig available:', typeof KR.setFormConfig === 'function');
+        console.log('🔍 KR.attachForm available:', typeof KR.attachForm === 'function');
+        console.log('🔍 KR.onSubmit available:', typeof KR.onSubmit === 'function');
 
         // Step 3: Configure and render form
         console.log('🔧 Setting form config...');
+        console.log('🔧 Form token:', tokenData.formToken);
+        console.log('🔧 Public key:', tokenData.publicKey);
+        
         KR.setFormConfig({
           formToken: tokenData.formToken,
           'kr-language': 'es-PE',
@@ -105,6 +119,8 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
           'kr-clear-on-error': false,
           'kr-hide-debug-toolbar': false, // Show debug toolbar in development
         });
+        
+        console.log('✅ Form config set successfully');
 
         console.log('🔧 Setting form token on container element');
         
@@ -140,19 +156,90 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
         // Add a small delay to ensure DOM is fully rendered
         await new Promise(resolve => setTimeout(resolve, 200));
         
-        // Get the form element and set the form token
+        // Get the form element and clear any existing content
         const formElement = document.querySelector('#lyra-payment-form');
         if (!formElement) {
           throw new Error('Form element not found');
         }
         
+        // Clear existing content
+        formElement.innerHTML = '';
+        
         // Set the form token as an attribute on the container
         formElement.setAttribute('kr-form-token', tokenData.formToken);
         formElement.setAttribute('kr-public-key', tokenData.publicKey);
         
+        console.log('🔍 Form element attributes after setting:', {
+          'kr-form-token': formElement.getAttribute('kr-form-token'),
+          'kr-public-key': formElement.getAttribute('kr-public-key'),
+          'data-lyra-ready': formElement.getAttribute('data-lyra-ready')
+        });
+        
+        // Add the required field elements for Lyra to populate
+        formElement.innerHTML = `
+          <div class="kr-field-group">
+            <div class="kr-pan" data-field="pan"></div>
+          </div>
+          <div class="kr-field-group">
+            <div class="kr-expiry" data-field="expiryDate"></div>
+            <div class="kr-security-code" data-field="securityCode"></div>
+          </div>
+          <div class="kr-field-group">
+            <div class="kr-card-holder-name" data-field="cardHolderName"></div>
+          </div>
+          <button class="kr-payment-button" type="button">Pagar</button>
+        `;
+        
         // Mark the form as ready
         formElement.setAttribute('data-lyra-ready', 'true');
-        console.log('✅ Form token set on container element');
+        console.log('✅ Form token set on container element with field structure');
+        
+        // Give Lyra time to process the form
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Try to render the form explicitly
+        try {
+          console.log('🔧 Attempting to render form explicitly...');
+          if (typeof KR.renderElements === 'function') {
+            console.log('🔧 Using KR.renderElements...');
+            KR.renderElements('#lyra-payment-form');
+            console.log('✅ Form rendered with renderElements');
+          } else if (typeof KR.attachForm === 'function') {
+            console.log('🔧 Fallback to KR.attachForm...');
+            KR.attachForm('#lyra-payment-form');
+            console.log('✅ Form attached with attachForm');
+          } else {
+            console.log('⚠️ Neither renderElements nor attachForm available, relying on automatic detection');
+          }
+        } catch (renderError) {
+          console.warn('⚠️ Explicit form rendering failed:', renderError);
+        }
+        
+        // Check if form fields were populated
+        const panField = formElement.querySelector('.kr-pan');
+        const expiryField = formElement.querySelector('.kr-expiry');
+        const securityField = formElement.querySelector('.kr-security-code');
+        const cardholderField = formElement.querySelector('.kr-card-holder-name');
+        
+        console.log('🔍 Form field check:', {
+          panField: !!panField,
+          expiryField: !!expiryField,
+          securityField: !!securityField,
+          cardholderField: !!cardholderField,
+          formElementHTML: formElement.innerHTML.substring(0, 200) + '...'
+        });
+        
+        // Check for Lyra-specific elements
+        const lyraElements = formElement.querySelectorAll('[class*="kr-"]');
+        const lyraInputs = formElement.querySelectorAll('input');
+        const lyraButtons = formElement.querySelectorAll('button');
+        
+        console.log('🔍 Lyra elements found:', {
+          lyraElements: lyraElements.length,
+          lyraInputs: lyraInputs.length,
+          lyraButtons: lyraButtons.length,
+          allElements: formElement.children.length
+        });
 
         // Step 4: Set up event handlers
         KR.onSubmit((paymentData: any) => {
@@ -179,7 +266,7 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
           console.log('📡 krAnswer:', paymentData.rawClientAnswer?.substring(0, 100) + '...');
           console.log('📡 krHash:', paymentData.hash);
           
-          fetch('/api/lyra/validate', {
+          fetch('http://localhost:3000/api/lyra/validate', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -296,19 +383,22 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
             setIsLoading(false);
             isInitializingRef.current = false;
             // Show the form container now that Lyra has populated it
-            const formElement = document.querySelector('#lyra-payment-form');
+            const formElement = document.querySelector('#lyra-payment-form') as HTMLElement;
             if (formElement) {
               formElement.style.display = 'block';
+              formElement.setAttribute('data-form-ready', 'true');
             }
           });
         } else {
           // Fallback if onFormReady is not available
           setTimeout(() => {
+            console.log('✅ Payment form ready (fallback)');
             setIsLoading(false);
             isInitializingRef.current = false;
-            const formElement = document.querySelector('#lyra-payment-form');
+            const formElement = document.querySelector('#lyra-payment-form') as HTMLElement;
             if (formElement) {
               formElement.style.display = 'block';
+              formElement.setAttribute('data-form-ready', 'true');
             }
           }, 2000);
         }
@@ -424,18 +514,7 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
               display: isLoading ? 'none' : 'block'
             }}
           >
-            {/* Required field elements for Lyra form */}
-            <div className="kr-field-group">
-              <div className="kr-pan" data-field="pan"></div>
-            </div>
-            <div className="kr-field-group">
-              <div className="kr-expiry" data-field="expiryDate"></div>
-              <div className="kr-security-code" data-field="securityCode"></div>
-            </div>
-            <div className="kr-field-group">
-              <div className="kr-card-holder-name" data-field="cardHolderName"></div>
-            </div>
-            <button className="kr-payment-button" type="button">Pagar</button>
+            {/* Form fields will be dynamically added by Lyra */}
           </div>
           
           {/* Security Notice */}

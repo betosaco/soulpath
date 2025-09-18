@@ -75,7 +75,7 @@ interface PersonalInfo {
 export default function ScheduleReviewPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { language, setLanguage } = useLanguage();
+  const { } = useLanguage();
   
   const [slotData, setSlotData] = useState<ScheduleSlot | null>(null);
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({

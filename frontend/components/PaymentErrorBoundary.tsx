@@ -29,9 +29,9 @@ export class PaymentErrorBoundary extends Component<Props, State> {
         error.message.includes('CLIENT_') ||
         error.message.includes('payment')) {
       console.warn('Payment/DOM error suppressed by PaymentErrorBoundary:', error.message);
-      return { hasError: false };
+      return { hasError: false, errorCount: 0 };
     }
-    return { hasError: true, error };
+    return { hasError: true, error, errorCount: 0 };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {

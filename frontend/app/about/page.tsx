@@ -23,7 +23,7 @@ import {
 import { toast } from 'sonner';
 
 export default function AboutPage() {
-  const { language, setLanguage } = useLanguage();
+  const { language } = useLanguage();
   const { t } = useTranslations(undefined, language);
   
   // Helper function to safely access nested translation properties

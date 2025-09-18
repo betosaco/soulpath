@@ -57,7 +57,7 @@ export function EnhancedPaymentStep({
   onContinue,
   processing
 }: EnhancedPaymentStepProps) {
-  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [, setPaymentStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   const handlePaymentSuccess = (paymentData: any) => {
     setPaymentStatus('success');

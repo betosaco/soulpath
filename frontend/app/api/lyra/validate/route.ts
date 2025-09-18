@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     console.log('✅ Payment validation successful');
     return NextResponse.json({
       success: true,
-      isValid: validationResult.isValid,
+      isValid: (validationResult as any).isValid || false,
       message: 'Payment validated successfully',
       data: validationResult.data
     });

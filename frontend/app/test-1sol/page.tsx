@@ -71,7 +71,7 @@ export default function Test1SolPage() {
                   name: "Usuario de Prueba"
                 }}
                 metadata={{
-                  test: true,
+                  test: 'true',
                   amount: "1.00",
                   description: "Pago de prueba de 1 Sol"
                 }}

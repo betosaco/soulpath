@@ -56,7 +56,7 @@ interface ScheduleSlot {
 
 export default function ScheduleBookingPage() {
   const searchParams = useSearchParams();
-  const { language, setLanguage } = useLanguage();
+  const { language } = useLanguage();
   const { t } = useTranslations(undefined, language);
   
   const [slot, setSlot] = useState<ScheduleSlot | null>(null);
@@ -75,7 +75,7 @@ export default function ScheduleBookingPage() {
   });
 
   // Ensure we have a valid translation object
-  const safeT: Record<string, string | Record<string, string>> = 
+  // const safeT: Record<string, string | Record<string, string>> = 
     (t && typeof t === 'object' && Object.keys(t).length > 0) 
       ? t as Record<string, string | Record<string, string>>
       : { common: { login: 'Login' } };

@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    const { packagePriceId, paymentMethodId, quantity, notes, paymentToken } = validation.data;
+    const { packagePriceId, paymentMethodId, quantity, notes } = validation.data;
 
     // Get package price details with related data
     const packagePrice = await prisma.packagePrice.findUnique({
