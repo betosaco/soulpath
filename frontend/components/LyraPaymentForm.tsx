@@ -821,50 +821,6 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
   // Always render the form element, even when loading
   // The form element needs to be in the DOM for Lyra to attach to it
 
-  if (error) {
-    return (
-      <div className={`lyra-payment-form-container ${className}`}>
-        <div className="p-6">
-          <div className="lyra-error-container">
-            <div className="lyra-error-icon">⚠️</div>
-            <h3 className="lyra-error-title">Error en el Formulario de Pago</h3>
-            <p className="lyra-error-message">{error}</p>
-            {isReloading && (
-              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
-                  <span className="text-blue-700 text-sm">Recargando formulario en 3 segundos...</span>
-                </div>
-              </div>
-            )}
-            {!isReloading && !isCardDeclined && (
-              <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                <button
-                  onClick={reloadForm}
-                  className="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-                >
-                  Intentar nuevamente
-                </button>
-              </div>
-            )}
-            {isCardDeclined && (
-              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <div className="flex items-center justify-center space-x-2 mb-3">
-                  <span className="text-red-700 text-sm">💳 Su tarjeta fue rechazada</span>
-                </div>
-                <button
-                  onClick={reloadForm}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-                >
-                  Intentar con otra tarjeta
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <PaymentErrorBoundary onError={(error) => {
@@ -911,6 +867,42 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
             <button className="kr-payment-button"></button>
             <div className="kr-form-error"></div>
           </div>
+
+          {/* Inline Error Display */}
+          {error && (
+            <div className="mt-4">
+              {isReloading && (
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
+                    <span className="text-blue-700 text-sm">Recargando formulario en 3 segundos...</span>
+                  </div>
+                </div>
+              )}
+              {!isReloading && !isCardDeclined && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-red-700 text-sm mb-3">{error}</p>
+                  <button
+                    onClick={reloadForm}
+                    className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                  >
+                    Intentar nuevamente
+                  </button>
+                </div>
+              )}
+              {isCardDeclined && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-red-700 text-sm mb-3">💳 Su tarjeta fue rechazada. Por favor, verifique los datos de su tarjeta o use otra tarjeta.</p>
+                  <button
+                    onClick={reloadForm}
+                    className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                  >
+                    Intentar con otra tarjeta
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
           
           {/* Security Notice */}
           <div className="lyra-security-notice">
