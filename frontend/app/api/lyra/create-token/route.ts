@@ -55,10 +55,18 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('✅ Form token created successfully');
+    
+    // Format public key with shop ID for Lyra library
+    const shopId = process.env.LYRA_USERNAME?.trim() || '88569105';
+    const publicKey = process.env.LYRA_PUBLIC_KEY?.trim() || 'publickey_UKrWqzlcOvfMEi4OdXuBAcGK1TaTK6izlIJZYWwHGCqkv';
+    const formattedPublicKey = `${shopId}:${publicKey}`;
+    
+    console.log('🔧 Formatted public key:', formattedPublicKey);
+    
     return NextResponse.json({
       success: true,
       formToken: result.formToken,
-      publicKey: process.env.LYRA_PUBLIC_KEY
+      publicKey: formattedPublicKey
     });
 
   } catch (error) {
