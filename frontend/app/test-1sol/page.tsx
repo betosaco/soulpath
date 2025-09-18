@@ -111,55 +111,6 @@ export default function Test1SolPage() {
               </div>
             )}
 
-            {/* Payment Result */}
-            {paymentResult && (
-              <div className={`rounded-xl p-6 border ${
-                paymentResult.success 
-                  ? 'bg-green-50 border-green-200' 
-                  : 'bg-red-50 border-red-200'
-              }`}>
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className={`text-2xl ${
-                    paymentResult.success ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {paymentResult.success ? '✅' : '❌'}
-                  </div>
-                  <div className={`font-semibold ${
-                    paymentResult.success ? 'text-green-900' : 'text-red-900'
-                  }`}>
-                    {paymentResult.success ? 'Pago Exitoso' : 'Error en el Pago'}
-                  </div>
-                </div>
-                
-                <div className={`text-sm ${
-                  paymentResult.success ? 'text-green-800' : 'text-red-800'
-                }`}>
-                  {paymentResult.message}
-                </div>
-
-                {paymentResult.data && (
-                  <details className="mt-4">
-                    <summary className="cursor-pointer text-sm font-medium text-gray-700 hover:text-gray-900">
-                      Ver detalles del pago
-                    </summary>
-                    <pre className="mt-2 p-3 bg-gray-100 rounded text-xs overflow-auto">
-                      {JSON.stringify(paymentResult.data, null, 2)}
-                    </pre>
-                  </details>
-                )}
-
-                {paymentResult.error && (
-                  <details className="mt-4">
-                    <summary className="cursor-pointer text-sm font-medium text-gray-700 hover:text-gray-900">
-                      Ver detalles del error
-                    </summary>
-                    <pre className="mt-2 p-3 bg-gray-100 rounded text-xs overflow-auto">
-                      {JSON.stringify(paymentResult.error, null, 2)}
-                    </pre>
-                  </details>
-                )}
-              </div>
-            )}
 
             {/* Test Instructions */}
             <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">

@@ -138,6 +138,8 @@ export function PaymentForm({
   };
 
   const handlePaymentStart = () => {
+    console.log('🚀 Payment start triggered - setting processing state to true');
+    
     // Validate that we have all required customer information
     if (!validateCustomerData()) {
       toast.error('Please complete your personal information with valid data before proceeding with payment');
@@ -147,6 +149,7 @@ export function PaymentForm({
     
     setProcessing(true);
     setPaymentResult(null);
+    console.log('✅ Processing state set to true, overlay should appear');
   };
 
   // Convert price to cents for Lyra (assuming packageData.price is in the main currency unit)
@@ -161,15 +164,18 @@ export function PaymentForm({
     <div className="max-w-4xl mx-auto relative">
       {/* Payment Processing Overlay */}
       {processing && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-8 max-w-md mx-4 text-center shadow-2xl">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent mx-auto mb-6"></div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Procesando Pago</h3>
-            <p className="text-gray-600 mb-4">Por favor, no cierres esta ventana mientras procesamos tu pago...</p>
-            <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
-              <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
-              <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-              <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[9999]">
+          <div className="bg-white rounded-xl p-8 max-w-md mx-4 text-center shadow-2xl border-2 border-primary">
+            <div className="animate-spin rounded-full h-20 w-20 border-4 border-primary border-t-transparent mx-auto mb-6"></div>
+            <h3 className="text-2xl font-bold text-primary mb-3">Procesando Pago</h3>
+            <p className="text-gray-700 mb-6 text-lg">Por favor, no cierres esta ventana mientras procesamos tu pago...</p>
+            <div className="flex items-center justify-center space-x-2 text-sm text-primary">
+              <div className="w-3 h-3 bg-primary rounded-full animate-bounce"></div>
+              <div className="w-3 h-3 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+              <div className="w-3 h-3 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            </div>
+            <div className="mt-4 text-xs text-gray-500">
+              Esto puede tomar unos segundos...
             </div>
           </div>
         </div>
@@ -223,33 +229,6 @@ export function PaymentForm({
             </Card>
 
 
-            {/* Payment Result */}
-            {paymentResult && (
-              <div className={`rounded-xl p-6 border ${
-                paymentResult.success 
-                  ? 'bg-green-50 border-green-200' 
-                  : 'bg-red-50 border-red-200'
-              }`}>
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className={`text-2xl ${
-                    paymentResult.success ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {paymentResult.success ? '✅' : '❌'}
-                  </div>
-                  <div className={`font-semibold ${
-                    paymentResult.success ? 'text-green-900' : 'text-red-900'
-                  }`}>
-                    {paymentResult.success ? 'Pago Exitoso' : 'Error en el Pago'}
-                  </div>
-                </div>
-                
-                <div className={`text-sm ${
-                  paymentResult.success ? 'text-green-800' : 'text-red-800'
-                }`}>
-                  {paymentResult.message}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Order Summary */}
