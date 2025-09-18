@@ -38,6 +38,8 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
   const [, setFormToken] = useState<string | null>(null);
   const [, setPublicKey] = useState<string | null>(null);
   const [isFormInitialized, setIsFormInitialized] = useState(false);
+  const [isReloading, setIsReloading] = useState(false);
+  const [isCardDeclined, setIsCardDeclined] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
   const isInitializingRef = useRef(false);
 
@@ -79,6 +81,7 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
         isInitializingRef.current = true;
         setIsLoading(true);
         setError(null);
+        setIsCardDeclined(false); // Reset card declined state
         setIsFormInitialized(true);
 
         // Step 1: Get form token from server
@@ -204,6 +207,30 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
             setTimeout(fixLayoutAndHideElements, 1000);
             setTimeout(fixLayoutAndHideElements, 2000);
             setTimeout(fixLayoutAndHideElements, 3000);
+            
+            // Fix placeholder text readability
+            const fixPlaceholderText = () => {
+              const inputs = document.querySelectorAll('#lyra-payment-form input');
+              inputs.forEach(input => {
+                (input as HTMLElement).style.color = '#111827';
+                (input as HTMLElement).style.fontSize = '0.875rem';
+                (input as HTMLElement).style.fontWeight = '400';
+              });
+              
+              // Target iframe content
+              const iframes = document.querySelectorAll('#lyra-payment-form iframe');
+              iframes.forEach(iframe => {
+                (iframe as HTMLElement).style.color = '#374151';
+              });
+            };
+            
+            // Apply placeholder fixes multiple times
+            fixPlaceholderText();
+            setTimeout(fixPlaceholderText, 1000);
+            setTimeout(fixPlaceholderText, 2000);
+            setTimeout(fixPlaceholderText, 3000);
+            
+            
           }, 1000);
         });
         
@@ -459,6 +486,30 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
         setTimeout(hideInformationalText, 1000);
         setTimeout(hideInformationalText, 2000);
         
+        
+        // Fix placeholder text readability
+        const fixPlaceholderText = () => {
+          const inputs = formElement.querySelectorAll('input');
+          inputs.forEach(input => {
+            input.style.color = '#111827';
+            input.style.fontSize = '0.875rem';
+            input.style.fontWeight = '400';
+          });
+          
+          // Target iframe content
+          const iframes = formElement.querySelectorAll('iframe');
+          iframes.forEach(iframe => {
+            iframe.style.color = '#374151';
+          });
+        };
+        
+        // Apply placeholder fixes
+        fixPlaceholderText();
+        setTimeout(fixPlaceholderText, 500);
+        setTimeout(fixPlaceholderText, 1000);
+        setTimeout(fixPlaceholderText, 2000);
+        
+        
         console.log('✅ Applied height fixes, layout fixes (card number on top, expiry/CVV side by side), and hidden informational text');
 
         // Step 4: Set up event handlers
@@ -478,7 +529,10 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
           
           // Call payment start callback
           if (onPaymentStart) {
+            console.log('🚀 Calling onPaymentStart callback to trigger processing state');
             onPaymentStart();
+          } else {
+            console.warn('⚠️ onPaymentStart callback not provided');
           }
           
           // Validate payment on server
@@ -547,12 +601,18 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
         // Set up error handler
         if (KR.onError) {
           KR.onError((error: any) => {
-            console.error('❌ Payment form error:', error);
-            
             let errorMsg = 'Error en el formulario de pago';
+            let shouldReload = false;
             
+            // Check if error is empty or invalid first
+            if (!error || (typeof error === 'object' && Object.keys(error).length === 0)) {
+              errorMsg = 'Su tarjeta fue rechazada. Por favor, verifique los datos de su tarjeta o use otra tarjeta.';
+              shouldReload = false; // Don't reload for card decline, let user try again
+              setIsCardDeclined(true); // Set card declined state
+              console.warn('⚠️ Empty error object received - likely card decline, showing user-friendly message');
+            }
             // Handle specific error codes
-            if (error?.errorCode === 'CLIENT_300') {
+            else if (error?.errorCode === 'CLIENT_300') {
               errorMsg = 'Datos de formulario inválidos. Por favor, verifique la información de su tarjeta.';
               
               // Log detailed validation errors if available
@@ -575,16 +635,38 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
                 errorMsg += ` Detalles: ${validationErrors.join(', ')}`;
               }
             } else if (error?.errorCode === 'CLIENT_100') {
-              errorMsg = 'Token de formulario inválido. Por favor, recarga la página e intenta nuevamente.';
+              errorMsg = 'Token de formulario inválido. Recargando formulario...';
+              shouldReload = true;
             } else if (error?.errorCode === 'CLIENT_101') {
               errorMsg = 'Transacción cancelada por el usuario.';
             } else if (error?.errorMessage) {
               errorMsg = error.errorMessage;
+            } else if (error?.message) {
+              errorMsg = error.message;
+            } else {
+              // Generic error handling for unknown error types
+              errorMsg = 'Error inesperado en el procesamiento del pago. Recargando formulario...';
+              shouldReload = true;
+              console.warn('⚠️ Unknown error type received:', error);
+            }
+            
+            // Only log meaningful errors (not empty objects)
+            if (error && typeof error === 'object' && Object.keys(error).length > 0) {
+              console.error('❌ Payment form error:', error);
             }
             
             setError(errorMsg);
             if (onError) {
               onError(errorMsg);
+            }
+            
+            // Reload form if needed
+            if (shouldReload) {
+              console.log('🔄 Reloading payment form due to error...');
+              setIsReloading(true);
+              setTimeout(() => {
+                window.location.reload();
+              }, 3000); // Give user time to read the error message
             }
           });
         }
@@ -693,6 +775,36 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
             <div className="lyra-error-icon">⚠️</div>
             <h3 className="lyra-error-title">Error en el Formulario de Pago</h3>
             <p className="lyra-error-message">{error}</p>
+            {isReloading && (
+              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
+                  <span className="text-blue-700 text-sm">Recargando formulario en 3 segundos...</span>
+                </div>
+              </div>
+            )}
+            {isCardDeclined && (
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-center justify-center space-x-2 mb-3">
+                  <span className="text-red-700 text-sm">💳 Su tarjeta fue rechazada</span>
+                </div>
+                <button
+                  onClick={() => {
+                    setError(null);
+                    setIsCardDeclined(false);
+                    setIsFormInitialized(false);
+                    isInitializingRef.current = false;
+                    // Force re-initialization
+                    setTimeout(() => {
+                      window.location.reload();
+                    }, 100);
+                  }}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                >
+                  Intentar con otra tarjeta
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
