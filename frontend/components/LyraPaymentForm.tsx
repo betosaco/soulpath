@@ -116,7 +116,7 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
 
         // Step 1: Get form token from server
         console.log('📡 Requesting form token from server...');
-        const tokenResponse = await fetch('http://localhost:3000/api/lyra/create-token', {
+        const tokenResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/lyra/create-token`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -570,7 +570,7 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
           console.log('📡 krAnswer:', paymentData.rawClientAnswer?.substring(0, 100) + '...');
           console.log('📡 krHash:', paymentData.hash);
           
-          fetch('http://localhost:3000/api/lyra/validate', {
+          fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/lyra/validate`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
