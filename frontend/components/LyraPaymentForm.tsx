@@ -881,7 +881,6 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
               )}
               {!isReloading && !isCardDeclined && (
                 <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-red-700 text-sm mb-3">{error}</p>
                   <button
                     onClick={reloadForm}
                     className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
@@ -892,7 +891,6 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
               )}
               {isCardDeclined && (
                 <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-red-700 text-sm mb-3">💳 Su tarjeta fue rechazada. Por favor, verifique los datos de su tarjeta o use otra tarjeta.</p>
                   <button
                     onClick={reloadForm}
                     className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
