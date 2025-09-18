@@ -202,18 +202,85 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
               const cvvField = document.querySelector('#lyra-payment-form .flex-container .kr-security-code');
               
               if (expiryField) {
-                expiryField.style.flex = '1';
+                expiryField.style.flex = '0 0 35%'; // Fixed width for expiry (35%)
                 expiryField.style.display = 'inline-block';
-                expiryField.style.width = 'auto';
+                expiryField.style.width = '35%';
                 expiryField.style.minWidth = '0';
+                expiryField.style.maxWidth = '35%';
               }
               
               if (cvvField) {
-                cvvField.style.flex = '1';
+                cvvField.style.flex = '0 0 25%'; // Fixed width for CVV (25%)
                 cvvField.style.display = 'inline-block';
-                cvvField.style.width = 'auto';
+                cvvField.style.width = '25%';
                 cvvField.style.minWidth = '0';
+                cvvField.style.maxWidth = '25%';
               }
+
+              // Force iframe elements to match their container widths
+              const cardNumberIframes = document.querySelectorAll('#lyra-payment-form .kr-pan iframe');
+              cardNumberIframes.forEach(iframe => {
+                (iframe as HTMLElement).style.width = '100%';
+                (iframe as HTMLElement).style.minWidth = '100%';
+                (iframe as HTMLElement).style.maxWidth = '100%';
+                (iframe as HTMLElement).style.height = '3.5rem';
+                (iframe as HTMLElement).style.minHeight = '3.5rem';
+                (iframe as HTMLElement).style.maxHeight = '3.5rem';
+              });
+
+              const expiryIframes = document.querySelectorAll('#lyra-payment-form .kr-expiry iframe');
+              expiryIframes.forEach(iframe => {
+                (iframe as HTMLElement).style.width = '100%';
+                (iframe as HTMLElement).style.minWidth = '100%';
+                (iframe as HTMLElement).style.maxWidth = '100%';
+                (iframe as HTMLElement).style.height = '3.5rem';
+                (iframe as HTMLElement).style.minHeight = '3.5rem';
+                (iframe as HTMLElement).style.maxHeight = '3.5rem';
+              });
+
+              const cvvIframes = document.querySelectorAll('#lyra-payment-form .kr-security-code iframe');
+              cvvIframes.forEach(iframe => {
+                (iframe as HTMLElement).style.width = '100%';
+                (iframe as HTMLElement).style.minWidth = '100%';
+                (iframe as HTMLElement).style.maxWidth = '100%';
+                (iframe as HTMLElement).style.height = '3.5rem';
+                (iframe as HTMLElement).style.minHeight = '3.5rem';
+                (iframe as HTMLElement).style.maxHeight = '3.5rem';
+              });
+
+              const cardholderIframes = document.querySelectorAll('#lyra-payment-form .kr-card-holder-name iframe');
+              cardholderIframes.forEach(iframe => {
+                (iframe as HTMLElement).style.width = '100%';
+                (iframe as HTMLElement).style.minWidth = '100%';
+                (iframe as HTMLElement).style.maxWidth = '100%';
+                (iframe as HTMLElement).style.height = '3.5rem';
+                (iframe as HTMLElement).style.minHeight = '3.5rem';
+                (iframe as HTMLElement).style.maxHeight = '3.5rem';
+              });
+
+              // Force all iframe wrappers to be wider
+              const allIframeWrappers = document.querySelectorAll('#lyra-payment-form .kr-iframe-wrapper');
+              allIframeWrappers.forEach(wrapper => {
+                (wrapper as HTMLElement).style.width = '100%';
+                (wrapper as HTMLElement).style.minWidth = '100%';
+                (wrapper as HTMLElement).style.maxWidth = '100%';
+                (wrapper as HTMLElement).style.height = '3.5rem';
+                (wrapper as HTMLElement).style.minHeight = '3.5rem';
+                (wrapper as HTMLElement).style.maxHeight = '3.5rem';
+              });
+
+              // Force all Lyra field elements to be wider and taller
+              const allLyraFields = document.querySelectorAll('#lyra-payment-form .kr-pan, #lyra-payment-form .kr-expiry, #lyra-payment-form .kr-security-code, #lyra-payment-form .kr-card-holder-name');
+              allLyraFields.forEach(field => {
+                (field as HTMLElement).style.width = '100%';
+                (field as HTMLElement).style.minWidth = '100%';
+                (field as HTMLElement).style.maxWidth = '100%';
+                (field as HTMLElement).style.height = '3.5rem';
+                (field as HTMLElement).style.minHeight = '3.5rem';
+                (field as HTMLElement).style.maxHeight = '3.5rem';
+                (field as HTMLElement).style.padding = '0.75rem';
+                (field as HTMLElement).style.marginBottom = '1.5rem';
+              });
               
               // Hide elements by text content
               const allElements = document.querySelectorAll('#lyra-payment-form *');
@@ -234,9 +301,18 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
             
             fixLayoutAndHideElements();
             // Run multiple times to catch dynamically loaded elements
+            setTimeout(fixLayoutAndHideElements, 500);
             setTimeout(fixLayoutAndHideElements, 1000);
+            setTimeout(fixLayoutAndHideElements, 1500);
             setTimeout(fixLayoutAndHideElements, 2000);
+            setTimeout(fixLayoutAndHideElements, 2500);
             setTimeout(fixLayoutAndHideElements, 3000);
+            setTimeout(fixLayoutAndHideElements, 4000);
+            setTimeout(fixLayoutAndHideElements, 5000);
+
+            // Run continuously for the first 10 seconds to ensure styles are applied
+            const intervalId = setInterval(fixLayoutAndHideElements, 200);
+            setTimeout(() => clearInterval(intervalId), 10000);
             
             // Fix placeholder text readability
             const fixPlaceholderText = () => {

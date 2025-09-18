@@ -221,7 +221,9 @@
   margin-bottom: 1.5rem !important;
   display: block !important;
   flex: none !important;
-  padding: 0.5rem !important;
+  padding: 0.75rem !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
 }
 
 /* Container for expiry and CVV fields - side by side */
@@ -236,14 +238,23 @@
   padding: 0.5rem;
 }
 
-/* Ensure expiry and CVV fields are side by side */
-#lyra-payment-form .flex-container .kr-expiry,
+/* Ensure expiry and CVV fields are side by side with specific widths */
+#lyra-payment-form .flex-container .kr-expiry {
+  flex: 0 0 35% !important;
+  display: inline-block !important;
+  width: 35% !important;
+  min-width: 0 !important;
+  max-width: 35% !important;
+  padding: 0.25rem !important;
+}
+
 #lyra-payment-form .flex-container .kr-security-code {
-  flex: 1;
-  display: inline-block;
-  width: auto;
-  min-width: 0;
-  padding: 0.25rem;
+  flex: 0 0 25% !important;
+  display: inline-block !important;
+  width: 25% !important;
+  min-width: 0 !important;
+  max-width: 25% !important;
+  padding: 0.25rem !important;
 }
 
 /* To center the button with the class kr-payment-button - from Lyra documentation */
@@ -456,4 +467,80 @@
     font-size: 0.9rem;
     padding: var(--unified-spacing-sm);
   }
+}
+
+/* AGGRESSIVE WIDTH STYLING - Force all form fields to be wider with proper proportions */
+#lyra-payment-form .kr-pan,
+#lyra-payment-form .kr-card-holder-name {
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  height: 3.5rem !important;
+  min-height: 3.5rem !important;
+  max-height: 3.5rem !important;
+  padding: 1rem 1.25rem !important;
+  margin-bottom: 1.5rem !important;
+  box-sizing: border-box !important;
+  display: block !important;
+}
+
+/* Specific widths for expiry and CVV fields */
+#lyra-payment-form .kr-expiry {
+  width: 35% !important;
+  min-width: 35% !important;
+  max-width: 35% !important;
+  height: 3.5rem !important;
+  min-height: 3.5rem !important;
+  max-height: 3.5rem !important;
+  padding: 1rem 1.25rem !important;
+  margin-bottom: 1.5rem !important;
+  box-sizing: border-box !important;
+  display: inline-block !important;
+}
+
+#lyra-payment-form .kr-security-code {
+  width: 25% !important;
+  min-width: 25% !important;
+  max-width: 25% !important;
+  height: 3.5rem !important;
+  min-height: 3.5rem !important;
+  max-height: 3.5rem !important;
+  padding: 1rem 1.25rem !important;
+  margin-bottom: 1.5rem !important;
+  box-sizing: border-box !important;
+  display: inline-block !important;
+}
+
+/* Force iframe elements to be wider */
+#lyra-payment-form iframe {
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  height: 3.5rem !important;
+  min-height: 3.5rem !important;
+  max-height: 3.5rem !important;
+}
+
+/* Force iframe wrappers to be wider */
+#lyra-payment-form .kr-iframe-wrapper {
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  height: 3.5rem !important;
+  min-height: 3.5rem !important;
+  max-height: 3.5rem !important;
+}
+
+/* Force all field containers to be wider */
+#lyra-payment-form .kr-field-element {
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Force form container to be wider */
+#lyra-payment-form .kr-embedded {
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
 }
