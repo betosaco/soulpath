@@ -30,7 +30,7 @@ export const CMSInput: React.FC<CMSInputProps> = ({
   multiline = false
 }) => {
   const baseClasses = 'unified-form-input';
-  const errorClasses = error ? 'border-[var(--unified-error)] focus:border-[var(--unified-error)]' : '';
+  const errorClasses = error ? 'error' : '';
   const classes = `${baseClasses} ${errorClasses} ${className}`;
   
   return (
@@ -71,7 +71,7 @@ export const CMSInput: React.FC<CMSInputProps> = ({
         <motion.p
           initial={{ opacity: 0, y: -5 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-sm text-[var(--unified-error)]"
+          className="unified-form-error"
         >
           {error}
         </motion.p>

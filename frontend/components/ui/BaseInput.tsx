@@ -53,7 +53,7 @@ export const BaseInput = forwardRef<HTMLInputElement, BaseInputProps>(({
   ...props
 }, ref) => {
   const baseClasses = 'unified-form-input';
-  const variantClasses = error ? 'border-[var(--unified-error)] focus:border-[var(--unified-error)]' : '';
+  const variantClasses = error ? 'error' : '';
   const sizeClasses = size === 'sm' ? 'text-sm py-2' : 
                      size === 'lg' ? 'text-base py-3' : '';
   
@@ -114,7 +114,7 @@ export const BaseInput = forwardRef<HTMLInputElement, BaseInputProps>(({
       {error && (
         <p 
           id={`${inputId}-error`}
-          className="mt-1 text-sm text-red-500"
+          className="unified-form-error"
           role="alert"
         >
           {error}
@@ -124,7 +124,7 @@ export const BaseInput = forwardRef<HTMLInputElement, BaseInputProps>(({
       {hint && !error && (
         <p 
           id={`${inputId}-hint`}
-          className="mt-1 text-sm text-gray-400"
+          className="unified-form-hint"
         >
           {hint}
         </p>

@@ -418,19 +418,33 @@
   font-weight: 500;
   color: var(--unified-text-primary);
   font-size: 0.875rem;
+  margin-bottom: var(--unified-spacing-xs);
+  display: block;
 }
 
 .unified-form-input,
 .unified-form-select,
 .unified-form-textarea {
-  padding: var(--unified-spacing-md);
-  border: 1px solid var(--unified-border-medium);
+  padding: var(--unified-spacing-md) var(--unified-spacing-lg);
+  border: 2px solid var(--unified-border-medium);
   border-radius: var(--unified-radius-md);
   background-color: var(--unified-bg-surface);
   color: var(--unified-text-primary);
   font-size: 0.875rem;
-  transition: all var(--unified-transition-fast);
+  font-family: inherit;
+  transition: all var(--unified-transition-normal);
   width: 100%;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.unified-form-input:hover,
+.unified-form-select:hover,
+.unified-form-textarea:hover {
+  border-color: var(--unified-primary-light);
+  box-shadow: 0 2px 4px rgba(110, 160, 88, 0.1);
 }
 
 .unified-form-input:focus,
@@ -438,25 +452,191 @@
 .unified-form-textarea:focus {
   outline: none;
   border-color: var(--unified-primary);
-  box-shadow: 0 0 0 3px rgba(110, 160, 88, 0.1);
+  background-color: var(--unified-bg-surface);
+  box-shadow: 
+    0 0 0 3px rgba(110, 160, 88, 0.1),
+    0 4px 8px rgba(110, 160, 88, 0.15);
+  transform: translateY(-1px);
+}
+
+.unified-form-input:disabled,
+.unified-form-select:disabled,
+.unified-form-textarea:disabled {
+  background-color: var(--unified-bg-tertiary);
+  color: var(--unified-text-tertiary);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.unified-form-input::placeholder,
+.unified-form-textarea::placeholder {
+  color: var(--unified-text-tertiary);
+  font-style: italic;
 }
 
 .unified-form-textarea {
-  min-height: 80px;
+  min-height: 100px;
   resize: vertical;
+  font-family: inherit;
 }
 
-.unified-form-checkbox {
+.unified-form-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236ea058'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--unified-spacing-lg) center;
+  background-size: 1rem;
+  padding-right: calc(var(--unified-spacing-lg) + 1.5rem);
+  cursor: pointer;
+}
+
+.unified-form-select:focus {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236ea058'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 15l7-7 7 7'/%3E%3C/svg%3E");
+}
+
+/* Form Error States */
+.unified-form-input.error,
+.unified-form-select.error,
+.unified-form-textarea.error {
+  border-color: var(--unified-error);
+  background-color: rgba(220, 38, 38, 0.02);
+}
+
+.unified-form-input.error:focus,
+.unified-form-select.error:focus,
+.unified-form-textarea.error:focus {
+  border-color: var(--unified-error);
+  box-shadow: 
+    0 0 0 3px rgba(220, 38, 38, 0.1),
+    0 4px 8px rgba(220, 38, 38, 0.15);
+}
+
+.unified-form-error {
+  color: var(--unified-error);
+  font-size: 0.75rem;
+  margin-top: var(--unified-spacing-xs);
+  display: flex;
+  align-items: center;
+  gap: var(--unified-spacing-xs);
+}
+
+.unified-form-error::before {
+  content: '⚠️';
+  font-size: 0.875rem;
+}
+
+.unified-form-hint {
+  color: var(--unified-text-secondary);
+  font-size: 0.75rem;
+  margin-top: var(--unified-spacing-xs);
+  display: flex;
+  align-items: center;
+  gap: var(--unified-spacing-xs);
+}
+
+.unified-form-hint::before {
+  content: '💡';
+  font-size: 0.75rem;
+}
+
+/* Form Success States */
+.unified-form-input.success,
+.unified-form-select.success,
+.unified-form-textarea.success {
+  border-color: var(--unified-success);
+  background-color: rgba(110, 160, 88, 0.02);
+}
+
+.unified-form-input.success:focus,
+.unified-form-select.success:focus,
+.unified-form-textarea.success:focus {
+  border-color: var(--unified-success);
+  box-shadow: 
+    0 0 0 3px rgba(110, 160, 88, 0.1),
+    0 4px 8px rgba(110, 160, 88, 0.15);
+}
+
+.unified-form-success {
+  color: var(--unified-success);
+  font-size: 0.75rem;
+  margin-top: var(--unified-spacing-xs);
+  display: flex;
+  align-items: center;
+  gap: var(--unified-spacing-xs);
+}
+
+.unified-form-success::before {
+  content: '✅';
+  font-size: 0.875rem;
+}
+
+/* Checkbox and Radio Styles */
+.unified-form-checkbox,
+.unified-form-radio {
   display: flex;
   align-items: center;
   gap: var(--unified-spacing-sm);
   cursor: pointer;
+  padding: var(--unified-spacing-sm);
+  border-radius: var(--unified-radius-sm);
+  transition: background-color var(--unified-transition-fast);
 }
 
-.unified-form-checkbox input[type="checkbox"] {
-  width: 1rem;
-  height: 1rem;
+.unified-form-checkbox:hover,
+.unified-form-radio:hover {
+  background-color: var(--unified-bg-secondary);
+}
+
+.unified-form-checkbox input[type="checkbox"],
+.unified-form-radio input[type="radio"] {
+  width: 1.125rem;
+  height: 1.125rem;
   accent-color: var(--unified-primary);
+  cursor: pointer;
+  margin: 0;
+}
+
+.unified-form-checkbox label,
+.unified-form-radio label {
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--unified-text-primary);
+  margin: 0;
+}
+
+/* Form Field Groups */
+.unified-form-field-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--unified-spacing-lg);
+  margin-bottom: var(--unified-spacing-lg);
+}
+
+.unified-form-field-group .unified-form-group {
+  margin-bottom: 0;
+}
+
+.unified-form-field-group--full {
+  grid-column: 1 / -1;
+}
+
+/* Mobile Form Adjustments */
+@media (max-width: 640px) {
+  .unified-form-field-group {
+    grid-template-columns: 1fr;
+    gap: var(--unified-spacing-md);
+  }
+  
+  .unified-form-input,
+  .unified-form-select,
+  .unified-form-textarea {
+    font-size: 16px; /* Prevent zoom on iOS */
+    padding: var(--unified-spacing-lg);
+  }
+  
+  .unified-form-checkbox,
+  .unified-form-radio {
+    padding: var(--unified-spacing-md);
+  }
 }
 
 /* ============================================================================

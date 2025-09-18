@@ -597,25 +597,85 @@
 .admin-form-input,
 .admin-form-select,
 .admin-form-textarea {
-  padding: 0.75rem;
-  border: 1px solid var(--matmax-purple-200);
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--matmax-purple-200);
   border-radius: 6px;
   font-size: 0.9rem;
   transition: all 0.2s ease;
   background: white;
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.admin-form-input:hover,
+.admin-form-select:hover,
+.admin-form-textarea:hover {
+  border-color: var(--matmax-purple-300);
+  box-shadow: 0 2px 4px rgba(110, 160, 88, 0.1);
 }
 
 .admin-form-input:focus,
 .admin-form-select:focus,
 .admin-form-textarea:focus {
   outline: none;
-  border-color: var(--matmax-purple-400);
-  box-shadow: 0 0 0 3px rgba(110, 160, 88, 0.1);
+  border-color: var(--matmax-purple);
+  box-shadow: 
+    0 0 0 3px rgba(110, 160, 88, 0.1),
+    0 4px 8px rgba(110, 160, 88, 0.15);
+  transform: translateY(-1px);
+}
+
+.admin-form-input:disabled,
+.admin-form-select:disabled,
+.admin-form-textarea:disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .admin-form-textarea {
+  min-height: 100px;
   resize: vertical;
-  min-height: 80px;
+}
+
+.admin-form-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236ea058'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1rem;
+  padding-right: 3rem;
+  cursor: pointer;
+}
+
+.admin-form-error {
+  color: #dc2626;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.admin-form-error::before {
+  content: '⚠️';
+  font-size: 0.875rem;
+}
+
+.admin-form-hint {
+  color: #666;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.admin-form-hint::before {
+  content: '💡';
+  font-size: 0.75rem;
 }
 
 .admin-form-checkboxes {

@@ -33,6 +33,29 @@
     appearance: none;
     background-clip: padding-box;
     font-size: 16px; /* Prevent zoom on iOS */
+    padding: 1rem;
+    border: 2px solid var(--unified-border-medium);
+    border-radius: var(--unified-radius-md);
+    background-color: var(--unified-bg-surface);
+    color: var(--unified-text-primary);
+    font-family: inherit;
+    transition: all var(--unified-transition-normal);
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .mobile-input:focus {
+    outline: none;
+    border-color: var(--unified-primary);
+    box-shadow: 
+      0 0 0 3px rgba(110, 160, 88, 0.1),
+      0 4px 8px rgba(110, 160, 88, 0.15);
+    transform: translateY(-1px);
+  }
+  
+  .mobile-input::placeholder {
+    color: var(--unified-text-tertiary);
+    font-style: italic;
   }
 
   /* Better date input styling for mobile */
@@ -52,12 +75,30 @@
   .mobile-select {
     -webkit-appearance: none;
     appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C0C0C0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236ea058' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 1rem center;
     background-size: 1rem;
-    padding-right: 3rem;
+    padding: 1rem 3rem 1rem 1rem;
     font-size: 16px; /* Prevent zoom on iOS */
+    border: 2px solid var(--unified-border-medium);
+    border-radius: var(--unified-radius-md);
+    background-color: var(--unified-bg-surface);
+    color: var(--unified-text-primary);
+    font-family: inherit;
+    transition: all var(--unified-transition-normal);
+    width: 100%;
+    box-sizing: border-box;
+    cursor: pointer;
+  }
+  
+  .mobile-select:focus {
+    outline: none;
+    border-color: var(--unified-primary);
+    box-shadow: 
+      0 0 0 3px rgba(110, 160, 88, 0.1),
+      0 4px 8px rgba(110, 160, 88, 0.15);
+    transform: translateY(-1px);
   }
 
   /* Better scroll behavior */
