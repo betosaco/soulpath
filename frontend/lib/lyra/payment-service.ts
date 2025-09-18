@@ -68,7 +68,17 @@ export class LyraPaymentService {
           currency: params.currency,
           orderId: params.orderId,
           customer: params.customer,
-          metadata: params.metadata
+          metadata: params.metadata,
+          // Disable installment options to hide informational text
+          transactionOptions: {
+            cardOptions: {
+              retry: 1,
+              // Disable installment options
+              installmentOptions: {
+                enabled: false
+              }
+            }
+          }
         })
       });
 

@@ -130,7 +130,81 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
           'kr-post-url-success': window.location.origin + '/payment-success',
           'kr-post-url-refused': window.location.origin + '/payment-error',
           'kr-clear-on-error': false,
+          // Try to hide installment information
+          cardForm: { layout: 'compact' },
           'kr-hide-debug-toolbar': false, // Show debug toolbar in development
+        });
+
+        // Set up form ready callback for traditional embedded form
+        KR.onFormReady(() => {
+          console.log('🔧 Traditional embedded form is ready');
+          // Traditional embedded form doesn't need compact layout configuration
+          // The flex-container in HTML handles the horizontal layout
+          
+          // Fix layout and hide informational text elements after form is ready
+          setTimeout(() => {
+            const fixLayoutAndHideElements = () => {
+              // Card number field - full width on its own row (outside flex container)
+              const cardNumberField = document.querySelector('#lyra-payment-form .kr-pan');
+              if (cardNumberField) {
+                cardNumberField.style.width = '100%';
+                cardNumberField.style.marginBottom = '1rem';
+                cardNumberField.style.display = 'block';
+                cardNumberField.style.flex = 'none';
+              }
+              
+              // Fix horizontal layout for expiry and CVV fields only
+              const flexContainer = document.querySelector('#lyra-payment-form .flex-container');
+              if (flexContainer) {
+                flexContainer.style.display = 'flex';
+                flexContainer.style.flexDirection = 'row';
+                flexContainer.style.gap = '0.75rem';
+                flexContainer.style.alignItems = 'stretch';
+                flexContainer.style.marginBottom = '1rem';
+                flexContainer.style.width = '100%';
+              }
+              
+              // Ensure expiry and CVV fields are side by side within the flex container
+              const expiryField = document.querySelector('#lyra-payment-form .flex-container .kr-expiry');
+              const cvvField = document.querySelector('#lyra-payment-form .flex-container .kr-security-code');
+              
+              if (expiryField) {
+                expiryField.style.flex = '1';
+                expiryField.style.display = 'inline-block';
+                expiryField.style.width = 'auto';
+                expiryField.style.minWidth = '0';
+              }
+              
+              if (cvvField) {
+                cvvField.style.flex = '1';
+                cvvField.style.display = 'inline-block';
+                cvvField.style.width = 'auto';
+                cvvField.style.minWidth = '0';
+              }
+              
+              // Hide elements by text content
+              const allElements = document.querySelectorAll('#lyra-payment-form *');
+              allElements.forEach((element: any) => {
+                const text = element.textContent || element.innerText || '';
+                if (text.includes('Sin cuotas') || text.includes('Pago diferido') || 
+                    text.includes('sin cuotas') || text.includes('pago diferido') ||
+                    text.includes('Pago sin cuotas') || text.includes('Pago sin diferido')) {
+                  element.style.display = 'none';
+                  element.style.visibility = 'hidden';
+                  element.style.opacity = '0';
+                  element.style.height = '0';
+                  element.style.overflow = 'hidden';
+                  console.log('✅ Hidden informational text element:', text.trim());
+                }
+              });
+            };
+            
+            fixLayoutAndHideElements();
+            // Run multiple times to catch dynamically loaded elements
+            setTimeout(fixLayoutAndHideElements, 1000);
+            setTimeout(fixLayoutAndHideElements, 2000);
+            setTimeout(fixLayoutAndHideElements, 3000);
+          }, 1000);
         });
         
         console.log('✅ Form config set successfully');
@@ -175,66 +249,59 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
           throw new Error('Form element not found');
         }
         
-        // Clear existing content
-        formElement.innerHTML = '';
-        
-        // Set the form token as an attribute on the container
+        // Clear existing content and set up traditional embedded form structure
+        formElement.innerHTML = `
+          <div class="kr-pan"></div>
+          <div class="flex-container">
+            <div class="kr-expiry"></div>
+            <div class="kr-security-code"></div>
+          </div>
+          <div class="kr-card-holder-name"></div>
+          <button class="kr-payment-button"></button>
+          <div class="kr-form-error"></div>
+        `;
         formElement.setAttribute('kr-form-token', tokenData.formToken);
-        formElement.setAttribute('kr-public-key', tokenData.publicKey);
+        // Note: kr-public-key is handled by the embedded-form-glue package
+        // Note: className is already set to 'kr-embedded' in the HTML
         
         console.log('🔍 Form element attributes after setting:', {
+          'class': formElement.className,
           'kr-form-token': formElement.getAttribute('kr-form-token'),
-          'kr-public-key': formElement.getAttribute('kr-public-key'),
           'data-lyra-ready': formElement.getAttribute('data-lyra-ready')
         });
         
-        // Add the required field elements for Lyra to populate
-        formElement.innerHTML = `
-          <div class="kr-field-group">
-            <div class="kr-pan" data-field="pan"></div>
-          </div>
-          <div class="kr-field-group">
-            <div class="kr-expiry" data-field="expiryDate"></div>
-            <div class="kr-security-code" data-field="securityCode"></div>
-          </div>
-          <div class="kr-field-group">
-            <div class="kr-card-holder-name" data-field="cardHolderName"></div>
-          </div>
-          <button class="kr-payment-button" type="button">Pagar</button>
-        `;
-        
-        // Mark the form as ready
+        // Mark the form as ready - Lyra will automatically create the field structure
         formElement.setAttribute('data-lyra-ready', 'true');
-        console.log('✅ Form token set on container element with field structure');
+        console.log('✅ Form token set on container element with smart form structure');
         
         // Give Lyra time to process the form
         await new Promise(resolve => setTimeout(resolve, 500));
         
         // Try to render the form explicitly
         try {
-          console.log('🔧 Attempting to render form explicitly...');
+          console.log('🔧 Attempting to render embedded form explicitly...');
           if (typeof KR.renderElements === 'function') {
-            console.log('🔧 Using KR.renderElements...');
-            KR.renderElements('#lyra-payment-form');
-            console.log('✅ Form rendered with renderElements');
+            console.log('🔧 Using KR.renderElements for embedded form...');
+            const formId = KR.renderElements('#lyra-payment-form');
+            console.log('✅ Embedded form rendered with renderElements, formId:', formId);
           } else if (typeof KR.attachForm === 'function') {
-            console.log('🔧 Fallback to KR.attachForm...');
+            console.log('🔧 Fallback to KR.attachForm for embedded form...');
             KR.attachForm('#lyra-payment-form');
-            console.log('✅ Form attached with attachForm');
+            console.log('✅ Embedded form attached with attachForm');
           } else {
             console.log('⚠️ Neither renderElements nor attachForm available, relying on automatic detection');
           }
         } catch (renderError) {
-          console.warn('⚠️ Explicit form rendering failed:', renderError);
+          console.warn('⚠️ Explicit embedded form rendering failed:', renderError);
         }
         
-        // Check if form fields were populated
-        const panField = formElement.querySelector('.kr-pan');
-        const expiryField = formElement.querySelector('.kr-expiry');
-        const securityField = formElement.querySelector('.kr-security-code');
-        const cardholderField = formElement.querySelector('.kr-card-holder-name');
+        // Check if form fields were populated by Lyra
+        const panField = formElement.querySelector('.kr-pan, [data-field="pan"]');
+        const expiryField = formElement.querySelector('.kr-expiry, [data-field="expiryDate"]');
+        const securityField = formElement.querySelector('.kr-security-code, [data-field="securityCode"]');
+        const cardholderField = formElement.querySelector('.kr-card-holder-name, [data-field="cardHolderName"]');
         
-        console.log('🔍 Form field check:', {
+        console.log('🔍 Smart form field check:', {
           panField: !!panField,
           expiryField: !!expiryField,
           securityField: !!securityField,
@@ -253,6 +320,146 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
           lyraButtons: lyraButtons.length,
           allElements: formElement.children.length
         });
+
+        // Fix height of first 3 fields to match cardholder name field
+        const fixFieldHeights = () => {
+          console.log('🔧 Fixing field heights to match cardholder name...');
+          
+          // Target the first 3 fields (pan, expiry, security-code)
+          const fields = formElement.querySelectorAll('.kr-pan, .kr-expiry, .kr-security-code');
+          fields.forEach((field: any) => {
+            field.style.height = '3rem';
+            field.style.minHeight = '3rem';
+            field.style.maxHeight = '3rem';
+            console.log('✅ Fixed field height:', field.className);
+          });
+          
+          // Target iframe wrappers inside these fields
+          const iframeWrappers = formElement.querySelectorAll('.kr-pan .kr-iframe-wrapper, .kr-expiry .kr-iframe-wrapper, .kr-security-code .kr-iframe-wrapper');
+          iframeWrappers.forEach((wrapper: any) => {
+            wrapper.style.height = '3rem';
+            wrapper.style.minHeight = '3rem';
+            wrapper.style.maxHeight = '3rem';
+            console.log('✅ Fixed iframe wrapper height:', wrapper);
+          });
+          
+          // Target iframe elements inside these fields
+          const iframes = formElement.querySelectorAll('.kr-pan iframe, .kr-expiry iframe, .kr-security-code iframe');
+          iframes.forEach((iframe: any) => {
+            iframe.style.height = '3rem';
+            iframe.style.minHeight = '3rem';
+            iframe.style.maxHeight = '3rem';
+            console.log('✅ Fixed iframe height:', iframe);
+          });
+        };
+
+        // Fix layout - card number on top, expiry and CVV side by side below
+        const fixLayout = () => {
+          console.log('🔧 Fixing layout - card number on top, expiry and CVV side by side...');
+          
+          // Card number field - full width on its own row (outside flex container)
+          const cardNumberField = formElement.querySelector('.kr-pan');
+          if (cardNumberField) {
+            cardNumberField.style.width = '100%';
+            cardNumberField.style.marginBottom = '1rem';
+            cardNumberField.style.display = 'block';
+            cardNumberField.style.flex = 'none';
+            console.log('✅ Fixed card number field layout');
+          }
+          
+          // Find the flex container for expiry and CVV only
+          const flexContainer = formElement.querySelector('.flex-container');
+          if (flexContainer) {
+            flexContainer.style.display = 'flex';
+            flexContainer.style.flexDirection = 'row';
+            flexContainer.style.gap = '0.75rem';
+            flexContainer.style.alignItems = 'stretch';
+            flexContainer.style.marginBottom = '1rem';
+            flexContainer.style.width = '100%';
+            console.log('✅ Fixed flex container layout');
+          }
+          
+          // Ensure expiry and CVV fields are side by side within the flex container
+          const expiryField = formElement.querySelector('.flex-container .kr-expiry');
+          const cvvField = formElement.querySelector('.flex-container .kr-security-code');
+          
+          if (expiryField) {
+            expiryField.style.flex = '1';
+            expiryField.style.display = 'inline-block';
+            expiryField.style.width = 'auto';
+            expiryField.style.minWidth = '0';
+            console.log('✅ Fixed expiry field layout');
+          }
+          
+          if (cvvField) {
+            cvvField.style.flex = '1';
+            cvvField.style.display = 'inline-block';
+            cvvField.style.width = 'auto';
+            cvvField.style.minWidth = '0';
+            console.log('✅ Fixed CVV field layout');
+          }
+        };
+
+        // Make informational text invisible with white color
+        const hideInformationalText = () => {
+          console.log('🔧 Making informational text invisible with white color...');
+          
+          // Make elements invisible by class names
+          const classSelectors = [
+            '.kr-installment-info',
+            '.kr-payment-info',
+            '[class*="installment"]',
+            '[class*="payment-info"]',
+            '[class*="sin-cuotas"]',
+            '[class*="pago-diferido"]'
+          ];
+          
+          classSelectors.forEach(selector => {
+            const elements = formElement.querySelectorAll(selector);
+            elements.forEach((element: any) => {
+              element.style.color = 'white';
+              element.style.background = 'white';
+              element.style.border = 'none';
+              element.style.opacity = '0';
+              console.log('✅ Made element invisible by class:', selector);
+            });
+          });
+          
+          // Make elements invisible by text content
+          const allElements = formElement.querySelectorAll('*');
+          allElements.forEach((element: any) => {
+            const text = element.textContent || element.innerText || '';
+            if (text.includes('Sin cuotas') || text.includes('Pago diferido') || 
+                text.includes('sin cuotas') || text.includes('pago diferido') ||
+                text.includes('Pago sin cuotas') || text.includes('Pago sin diferido')) {
+              element.style.color = 'white';
+              element.style.background = 'white';
+              element.style.border = 'none';
+              element.style.opacity = '0';
+              console.log('✅ Made element invisible by text:', text.trim());
+            }
+          });
+        };
+
+        // Apply height fixes
+        fixFieldHeights();
+        setTimeout(fixFieldHeights, 500);
+        setTimeout(fixFieldHeights, 1000);
+        setTimeout(fixFieldHeights, 2000);
+        
+        // Apply layout fixes
+        fixLayout();
+        setTimeout(fixLayout, 500);
+        setTimeout(fixLayout, 1000);
+        setTimeout(fixLayout, 2000);
+        
+        // Hide informational text
+        hideInformationalText();
+        setTimeout(hideInformationalText, 500);
+        setTimeout(hideInformationalText, 1000);
+        setTimeout(hideInformationalText, 2000);
+        
+        console.log('✅ Applied height fixes, layout fixes (card number on top, expiry/CVV side by side), and hidden informational text');
 
         // Step 4: Set up event handlers
         KR.onSubmit((paymentData: any) => {
@@ -527,7 +734,15 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
               display: isLoading ? 'none' : 'block'
             }}
           >
-            {/* Form fields will be dynamically added by Lyra */}
+            {/* Traditional embedded form structure - card number on top, expiry and CVV side by side */}
+            <div className="kr-pan"></div>
+            <div className="flex-container">
+              <div className="kr-expiry"></div>
+              <div className="kr-security-code"></div>
+            </div>
+            <div className="kr-card-holder-name"></div>
+            <button className="kr-payment-button"></button>
+            <div className="kr-form-error"></div>
           </div>
           
           {/* Security Notice */}
