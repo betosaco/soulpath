@@ -74,7 +74,8 @@ export default function TestLyraPage() {
                 orderId={orderId}
                 customer={{
                   email: "test@example.com",
-                  name: "Usuario de Prueba"
+                  name: "Usuario de Prueba",
+                  phone: "+51987654321"
                 }}
                 metadata={{
                   test: "true",

@@ -68,7 +68,8 @@ export default function Test1SolPage() {
                 orderId={`TEST-1SOL-${Date.now()}`}
                 customer={{
                   email: "test@example.com",
-                  name: "Usuario de Prueba"
+                  name: "Usuario de Prueba",
+                  phone: "+51987654321"
                 }}
                 metadata={{
                   test: 'true',

@@ -173,7 +173,8 @@ export function PackagesBookingFlow() {
       return;
     }
     
-    if (!formData.clientName || !formData.clientEmail || !formData.clientPhone) {
+    if (!formData.clientName || !formData.clientEmail || !formData.clientPhone || 
+        formData.clientName.trim() === '' || formData.clientEmail.trim() === '' || formData.clientPhone.trim() === '') {
       toast.error('Please complete your personal information first');
       setCurrentStep(1); // Go back to personal info
       return;
@@ -222,7 +223,8 @@ export function PackagesBookingFlow() {
   };
 
   const handleProceedToBooking = () => {
-    if (!formData.clientName || !formData.clientEmail || !formData.clientPhone) {
+    if (!formData.clientName || !formData.clientEmail || !formData.clientPhone || 
+        formData.clientName.trim() === '' || formData.clientEmail.trim() === '' || formData.clientPhone.trim() === '') {
       toast.error(getTranslation('bookingFlow.fillRequiredFields', 'Please fill in all required fields'));
       return;
     }

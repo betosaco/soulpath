@@ -63,6 +63,19 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
     const initializePayment = async () => {
       try {
         console.log('🚀 Starting Lyra payment initialization...');
+        
+        // Validate customer data before proceeding
+        if (!customer.email || !customer.name || !customer.phone || 
+            customer.email.trim() === '' || customer.name.trim() === '' || customer.phone.trim() === '') {
+          throw new Error('Customer information is incomplete. Please provide name, email, and phone number.');
+        }
+        
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(customer.email)) {
+          throw new Error('Please provide a valid email address.');
+        }
+        
         isInitializingRef.current = true;
         setIsLoading(true);
         setError(null);

@@ -117,7 +117,34 @@ export function PaymentForm({
     toast.error('Error en el procesamiento del pago. Por favor, intenta nuevamente.');
   };
 
+  const validateCustomerData = () => {
+    if (!personalInfo.name || !personalInfo.email || !personalInfo.phone || 
+        personalInfo.name.trim() === '' || personalInfo.email.trim() === '' || personalInfo.phone.trim() === '') {
+      return false;
+    }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(personalInfo.email)) {
+      return false;
+    }
+    
+    // Validate phone format (should have country code)
+    if (!personalInfo.phone.startsWith('+') && !personalInfo.phone.startsWith('51')) {
+      return false;
+    }
+    
+    return true;
+  };
+
   const handlePaymentStart = () => {
+    // Validate that we have all required customer information
+    if (!validateCustomerData()) {
+      toast.error('Please complete your personal information with valid data before proceeding with payment');
+      setProcessing(false);
+      return;
+    }
+    
     setProcessing(true);
     setPaymentResult(null);
   };
@@ -176,7 +203,8 @@ export function PaymentForm({
                   orderId={`PKG-${packageData.id}-${Date.now()}`}
                   customer={{
                     email: personalInfo.email,
-                    name: personalInfo.name
+                    name: personalInfo.name,
+                    phone: `${personalInfo.countryCode}${personalInfo.phone}`
                   }}
                   metadata={{
                     packageId: packageData.id,

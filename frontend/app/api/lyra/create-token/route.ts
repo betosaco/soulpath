@@ -9,11 +9,11 @@ export async function POST(request: NextRequest) {
     const { amount, currency, orderId, customer, metadata } = body;
 
     // Validate required fields
-    if (!amount || !currency || !orderId || !customer?.email) {
+    if (!amount || !currency || !orderId || !customer?.email || !customer?.name || !customer?.phone) {
       console.error('❌ Missing required fields:', { amount, currency, orderId, customer });
       return NextResponse.json({
         success: false,
-        error: 'Missing required fields: amount, currency, orderId, customer.email'
+        error: 'Missing required fields: amount, currency, orderId, customer.email, customer.name, customer.phone'
       }, { status: 400 });
     }
 
