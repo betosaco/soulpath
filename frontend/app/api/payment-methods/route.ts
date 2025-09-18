@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma, withConnection } from '@/lib/prisma';
 
 export async function GET() {
-  const prisma = new PrismaClient();
   
   try {
     console.log('🔍 Fetching payment methods...');
     
-    const paymentMethods = await prisma.paymentMethodConfig.findMany({
+    const paymentMethods = await withConnection(async () => {
+      return await prisma.paymentMethodConfig.findMany({
       where: {
         isActive: true
       },
@@ -24,6 +24,7 @@ export async function GET() {
       orderBy: {
         name: 'asc'
       }
+    });
     });
 
     console.log('✅ Payment methods found:', paymentMethods.length);

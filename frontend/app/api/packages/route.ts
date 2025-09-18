@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma, withConnection } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const activeOnly = searchParams.get('active') !== 'false'; // Default to true
+  const currency = searchParams.get('currency') || 'PEN';
+  
   try {
     console.log('🔍 GET /api/packages - Fetching active packages...');
 
-    const { searchParams } = new URL(request.url);
-    const activeOnly = searchParams.get('active') !== 'false'; // Default to true
-    const currency = searchParams.get('currency') || 'PEN';
-
     // Fetch packages with all pricing information
-    const packages = await prisma.packageDefinition.findMany({
+    const packages = await withConnection(async () => {
+      return await prisma.packageDefinition.findMany({
       where: {
         isActive: activeOnly ? true : undefined
       },
@@ -63,6 +64,7 @@ export async function GET(request: NextRequest) {
         { name: 'asc' }
       ]
     });
+    });
 
     // Transform the data to match the expected PackagePrice format
     const transformedPackages = packages.map(pkg => {
@@ -114,9 +116,21 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('❌ Error in GET /api/packages:', error);
+    console.error('❌ Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      name: error instanceof Error ? error.name : 'Unknown',
+      stack: error instanceof Error ? error.stack : 'No stack'
+    });
     
     // Check if it's a database connection error
-    if (error instanceof Error && error.message.includes('denied access')) {
+    if (error instanceof Error && (
+      error.message.includes('denied access') ||
+      error.message.includes('User was denied access') ||
+      error.message.includes('P1010') ||
+      error.message.includes('PrismaClientInitializationError') ||
+      error.message.includes('Can\'t reach database server') ||
+      error.message.includes('not available during build phase')
+    )) {
       console.log('🔄 Database unavailable, returning mock packages for development');
       
       // Return mock packages for development when database is not available

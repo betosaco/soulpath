@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma, withConnection } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
@@ -65,7 +63,8 @@ export async function GET(request: NextRequest) {
     });
 
     // Fetch schedule slots from database
-    const slots = await prisma.teacherScheduleSlot.findMany({
+    const slots = await withConnection(async () => {
+      return await prisma.teacherScheduleSlot.findMany({
       where: whereClause,
       include: {
         teacherSchedule: {
@@ -106,6 +105,7 @@ export async function GET(request: NextRequest) {
       orderBy: [
         { startTime: 'asc' }
       ]
+    });
     });
 
     // Transform the data to match the expected format with proper EST timezone conversion
@@ -159,7 +159,12 @@ export async function GET(request: NextRequest) {
     console.error('❌ Error in GET /api/teacher-schedule-slots:', error);
     
     // Check if it's a database connection error
-    if (error instanceof Error && error.message.includes('denied access')) {
+    if (error instanceof Error && (
+      error.message.includes('denied access') ||
+      error.message.includes('Can\'t reach database server') ||
+      error.message.includes('PrismaClientInitializationError') ||
+      error.message.includes('not available during build phase')
+    )) {
       console.log('🔄 Database unavailable, returning mock data for development');
       
       // Return mock data for development when database is not available
@@ -177,8 +182,6 @@ export async function GET(request: NextRequest) {
       error: 'Failed to fetch teacher schedule slots',
       message: 'An error occurred while fetching teacher schedule slots'
     }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -191,7 +194,7 @@ function generateMockScheduleSlots() {
   const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
   startOfWeek.setDate(today.getDate() - daysToMonday);
 
-  const mockSlots = [];
+  const mockSlots: any[] = [];
   const timeSlots = ['09:00', '10:30', '12:00', '14:00', '15:30', '17:00', '18:30', '20:00'];
   const teachers = [
     { id: 1, name: 'Ana García', bio: 'Certified Yoga Instructor', shortBio: 'Yoga Expert', experience: 5, avatarUrl: null },

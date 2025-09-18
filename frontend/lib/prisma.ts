@@ -6,11 +6,6 @@ const globalForPrisma = globalThis as unknown as {
 
 // Create Prisma client with enhanced configuration
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL || "postgresql://postgres.hwxrstqeuouefyrwjsjt:SIo1ahTJ3L0GoIMP@aws-1-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true",
-    },
-  },
   log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn', 'info'] : ['error'],
   errorFormat: 'pretty',
 });
@@ -25,6 +20,12 @@ let connectionPromise: Promise<void> | null = null;
 
 // Simple connection function
 const connect = async (): Promise<void> => {
+  // Skip database connection during build time
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    console.log('🚫 Skipping database connection during build phase');
+    return;
+  }
+
   if (isConnected) {
     return;
   }
@@ -49,8 +50,8 @@ const connect = async (): Promise<void> => {
   return connectionPromise;
 };
 
-// Force connection on startup (server-side only)
-if (typeof window === 'undefined') {
+// Force connection on startup (server-side only, but not during build)
+if (typeof window === 'undefined' && process.env.NODE_ENV !== 'production' && !process.env.NEXT_PHASE) {
   connect().catch(error => {
     console.error('❌ Background connection failed:', error);
   });
@@ -58,6 +59,12 @@ if (typeof window === 'undefined') {
 
 // Wrapper for database operations
 export const withConnection = async <T>(operation: () => Promise<T>): Promise<T> => {
+  // Skip database operations during build time
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    console.log('🚫 Skipping database operation during build phase');
+    throw new Error('Database operations not available during build phase');
+  }
+
   try {
     // Ensure connection
     await connect();
@@ -92,6 +99,11 @@ export const withConnection = async <T>(operation: () => Promise<T>): Promise<T>
 
 // Ensure connection helper
 export const ensureConnection = async (): Promise<void> => {
+  // Skip database connection during build time
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    console.log('🚫 Skipping database connection during build phase');
+    return;
+  }
   await connect();
 };
 

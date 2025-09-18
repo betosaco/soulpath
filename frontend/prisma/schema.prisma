@@ -553,8 +553,6 @@ model Purchase {
   notes          String?
   purchasedAt    DateTime?       @default(now()) @map("purchased_at") @db.Timestamptz(6)
   confirmedAt    DateTime?       @map("confirmed_at") @db.Timestamptz(6)
-  
-  
   createdAt      DateTime?       @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime?       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   paymentRecords PaymentRecord[]
@@ -647,10 +645,7 @@ model PaymentRecord {
   notes         String?
   paymentDate   DateTime?      @map("payment_date") @db.Date
   confirmedAt   DateTime?      @map("confirmed_at") @db.Timestamptz(6)
-  
-  // Add a field for raw provider data
-  providerData Json? @map("provider_data")
-  
+  providerData  Json?          @map("provider_data")
   createdAt     DateTime?      @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime?      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   purchase      Purchase       @relation(fields: [purchaseId], references: [id], onDelete: Cascade, onUpdate: Restrict)
@@ -1220,4 +1215,3 @@ enum priority_level {
   HIGH
   CRITICAL
 }
-

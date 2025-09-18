@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma, withConnection } from '@/lib/prisma';
 import { withCache } from '@/lib/cache';
 
 // ISR Configuration - This route will be statically generated and revalidated
@@ -167,12 +167,15 @@ export async function GET() {
       async () => {
         try {
           // Try to get content from the Content table using Prisma
-          const content = await prisma.content.findFirst();
+          const content = await withConnection(async () => {
+            return await prisma.content.findFirst();
+          });
 
           if (!content) {
             console.log('No content found, attempting to create default content');
             try {
-              const defaultContent = await prisma.content.create({
+              const defaultContent = await withConnection(async () => {
+                return await prisma.content.create({
                 data: {
                   heroTitleEn: 'Find Your Flow, Transform Your Body & Mind',
                   heroTitleEs: 'Find Your Flow, Transform Your Body & Mind',
@@ -191,6 +194,7 @@ export async function GET() {
                   servicesContentEn: 'Professional wellness services in a peaceful environment.',
                   servicesContentEs: 'Servicios profesionales de bienestar en un ambiente pacífico.'
                 }
+              });
               });
               return transformFlatContentToNested(defaultContent as unknown as Record<string, string>);
             } catch (createError) {
@@ -278,11 +282,14 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     
     // Get the first content record or create one
-    let content = await prisma.content.findFirst();
+    let content = await withConnection(async () => {
+      return await prisma.content.findFirst();
+    });
     
     if (!content) {
       // Create new content record
-      content = await prisma.content.create({
+      content = await withConnection(async () => {
+        return await prisma.content.create({
         data: {
           heroTitleEn: body.heroTitleEn || 'Welcome to SOULPATH',
           heroTitleEs: body.heroTitleEs || 'Bienvenido a SOULPATH',
@@ -302,9 +309,11 @@ export async function PUT(request: NextRequest) {
           servicesContentEs: body.servicesContentEs || 'Servicios profesionales de bienestar en un ambiente pacífico.'
         }
       });
+      });
     } else {
       // Update existing content record
-      content = await prisma.content.update({
+      content = await withConnection(async () => {
+        return await prisma.content.update({
         where: { id: content.id },
         data: {
           heroTitleEn: body.heroTitleEn,
@@ -324,6 +333,7 @@ export async function PUT(request: NextRequest) {
           servicesContentEn: body.servicesContentEn,
           servicesContentEs: body.servicesContentEs
         }
+      });
       });
     }
 

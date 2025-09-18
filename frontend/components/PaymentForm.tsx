@@ -1,22 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   CreditCard, 
   Lock, 
-  CheckCircle, 
-  AlertCircle, 
-  Loader2,
   Shield,
-  ArrowRight,
   ArrowLeft
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import LyraPaymentForm from '@/components/LyraPaymentForm';
 import { toast } from 'sonner';
 
@@ -45,7 +38,6 @@ export function PaymentForm({
   personalInfo, 
   onPaymentSuccess, 
   onBack, 
-  isLoading = false 
 }: PaymentFormProps) {
   const [paymentResult, setPaymentResult] = useState<any>(null);
   const [processing, setProcessing] = useState(false);
@@ -84,11 +76,11 @@ export function PaymentForm({
   const finalAmount = totalAmount + taxAmount;
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-6"
+        className="space-y-8"
       >
         {/* Header */}
         <div className="text-center mb-8">
@@ -99,37 +91,29 @@ export function PaymentForm({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Payment Form */}
           <div className="space-y-6">
-            <Card className="card-base">
-              <CardHeader>
-                <CardTitle className="text-2xl text-primary flex items-center gap-2">
-                  <CreditCard className="w-6 h-6" />
-                  Payment Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <LyraPaymentForm
-                  amount={amountInCents} // Amount in cents for Lyra
-                  currency="PEN"
-                  orderId={`PKG-${packageData.id}-${Date.now()}`}
-                  customer={{
-                    email: personalInfo.email,
-                    name: personalInfo.name
-                  }}
-                  metadata={{
-                    packageId: packageData.id,
-                    packageName: packageData.name,
-                    sessions: packageData.sessions.toString(),
-                    duration: packageData.duration.toString(),
-                    phone: personalInfo.phone,
-                    countryCode: personalInfo.countryCode
-                  }}
-                  onSuccess={handlePaymentSuccess}
-                  onError={handlePaymentError}
-                  onPaymentStart={handlePaymentStart}
-                  className="w-full"
-                />
-              </CardContent>
-            </Card>
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+              <LyraPaymentForm
+                amount={amountInCents} // Amount in cents for Lyra
+                currency="PEN"
+                orderId={`PKG-${packageData.id}-${Date.now()}`}
+                customer={{
+                  email: personalInfo.email,
+                  name: personalInfo.name
+                }}
+                metadata={{
+                  packageId: packageData.id,
+                  packageName: packageData.name,
+                  sessions: packageData.sessions.toString(),
+                  duration: packageData.duration.toString(),
+                  phone: personalInfo.phone,
+                  countryCode: personalInfo.countryCode
+                }}
+                onSuccess={handlePaymentSuccess}
+                onError={handlePaymentError}
+                onPaymentStart={handlePaymentStart}
+                className="w-full"
+              />
+            </div>
 
             {/* Payment Status */}
             {processing && (
@@ -174,14 +158,14 @@ export function PaymentForm({
 
           {/* Order Summary */}
           <div className="space-y-6">
-            <Card className="card-base">
-              <CardHeader>
-                <CardTitle className="text-2xl text-primary flex items-center gap-2">
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+              <div className="bg-gradient-to-r from-primary to-primary-light px-6 py-4">
+                <h3 className="text-2xl font-bold text-white flex items-center gap-2">
                   <Shield className="w-6 h-6" />
                   Order Summary
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+                </h3>
+              </div>
+              <div className="p-6 space-y-4">
                 {/* Package Details */}
                 <div className="p-4 bg-primary/10 rounded-lg">
                   <h4 className="font-semibold text-lg text-primary mb-2">{packageData.name}</h4>
@@ -241,19 +225,18 @@ export function PaymentForm({
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Action Buttons */}
             <div className="space-y-4">
-              <Button
+              <button
                 onClick={onBack}
-                variant="outline"
-                className="w-full h-14 text-lg font-medium text-primary border-2 border-primary hover:bg-primary hover:text-white rounded-lg transition-all duration-200"
+                className="w-full h-14 text-lg font-medium text-primary border-2 border-primary hover:bg-primary hover:text-white rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
               >
-                <ArrowLeft className="w-5 h-5 mr-2" />
-                Back to Review
-              </Button>
+                <ArrowLeft className="w-5 h-5" />
+                Back to Schedule
+              </button>
             </div>
           </div>
         </div>

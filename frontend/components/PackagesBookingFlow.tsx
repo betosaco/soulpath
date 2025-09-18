@@ -12,9 +12,9 @@ import {
   CheckCircle,
   Loader2,
   AlertCircle,
-  MessageCircle,
   Users,
-  Star
+  Star,
+  CreditCard
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -91,7 +91,7 @@ export function PackagesBookingFlow() {
   const { language } = useLanguage();
   const { t } = useTranslations(undefined, language);
   const [currentStep, setCurrentStep] = useState(0);
-  const [sending, setSending] = useState(false);
+  const [sending] = useState(false);
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [countrySearchTerm, setCountrySearchTerm] = useState('');
   
@@ -127,7 +127,6 @@ export function PackagesBookingFlow() {
     { id: 'package', title: getTranslation('bookingFlow.selectPackage', 'Select Package'), description: getTranslation('bookingFlow.selectPackageDesc', 'Choose the package that best fits your needs'), completed: false },
     { id: 'personal', title: getTranslation('bookingFlow.personalInfo', 'Personal Information'), description: getTranslation('bookingFlow.personalInfoDesc', 'Provide your contact details'), completed: false },
     { id: 'booking', title: getTranslation('bookingFlow.selectSchedule', 'Select Schedule'), description: getTranslation('bookingFlow.selectScheduleDesc', 'Choose your preferred date and time'), completed: false },
-    { id: 'summary', title: getTranslation('bookingFlow.reviewConfirm', 'Review & Confirm'), description: getTranslation('bookingFlow.reviewConfirmDesc', 'Review your booking details'), completed: false },
     { id: 'payment', title: getTranslation('bookingFlow.payment', 'Payment'), description: getTranslation('bookingFlow.paymentDesc', 'Complete your payment securely'), completed: false }
   ];
 
@@ -166,8 +165,23 @@ export function PackagesBookingFlow() {
 
   const handleScheduleSelect = (slot: ScheduleSlot) => {
     setFormData(prev => ({ ...prev, selectedSchedule: slot }));
+    
+    // Check if all required data is available for payment
+    if (!formData.selectedPackage) {
+      toast.error('Please select a package first');
+      setCurrentStep(0); // Go back to package selection
+      return;
+    }
+    
+    if (!formData.clientName || !formData.clientEmail || !formData.clientPhone) {
+      toast.error('Please complete your personal information first');
+      setCurrentStep(1); // Go back to personal info
+      return;
+    }
+    
+    // All required data is available, proceed to payment
     setCurrentStep(3);
-    toast.success(getTranslation('bookingFlow.scheduleSelected', 'Schedule selected! Now review your booking.'));
+    toast.success(getTranslation('bookingFlow.scheduleSelected', 'Schedule selected! Proceeding to payment.'));
   };
 
   const handlePaymentSuccess = (paymentData: any) => {
@@ -572,110 +586,52 @@ export function PackagesBookingFlow() {
             </motion.div>
           )}
 
-          {/* Step 4: Summary & Review */}
+          {/* Step 3: Payment */}
           {currentStep === 3 && (
             <motion.div
-              key="summary"
+              key="payment"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="max-w-4xl mx-auto mobile-step-content"
+              className="mobile-step-content"
             >
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-primary mb-4">Review Your Booking</h2>
-                <p className="text-xl text-muted">Please review your information before proceeding to payment</p>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Package Details */}
-                <Card className="card-base">
-                  <CardHeader>
-                    <CardTitle className="text-2xl text-primary flex items-center gap-2">
-                      <Package className="w-6 h-6" />
-                      Selected Package
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="p-4 bg-primary/10 rounded-lg">
-                      <h4 className="font-semibold text-lg text-primary mb-2">{formData.selectedPackage!.packageDefinition.name}</h4>
-                      <div className="text-2xl font-bold text-primary">
-                        {formData.selectedPackage!.currency.symbol}{formData.selectedPackage!.price}
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-muted">Sessions:</span>
-                        <span className="font-semibold ml-2">{formData.selectedPackage!.packageDefinition.sessionsCount}</span>
-                      </div>
-                      <div>
-                        <span className="text-muted">Duration:</span>
-                        <span className="font-semibold ml-2">{formData.selectedPackage!.packageDefinition.sessionDuration.duration_minutes} min each</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Personal Info & Schedule */}
-                <Card className="card-base">
-                  <CardHeader>
-                    <CardTitle className="text-2xl text-primary flex items-center gap-2">
-                      <User className="w-6 h-6" />
-                      Your Information
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="p-4 border border-gray-200 rounded-lg">
-                      <h4 className="font-semibold text-lg mb-2">Personal Details</h4>
-                      <p className="text-muted"><strong>Name:</strong> {formData.clientName}</p>
-                      <p className="text-muted"><strong>Email:</strong> {formData.clientEmail}</p>
-                      <p className="text-muted"><strong>Phone:</strong> {formData.countryCode}{formData.clientPhone}</p>
-                      <p className="text-muted"><strong>Language:</strong> {formData.language === 'en' ? 'English' : 'Español'}</p>
-                    </div>
-
-                    {formData.selectedSchedule && (
-                      <div className="p-4 border border-gray-200 rounded-lg">
-                        <h4 className="font-semibold text-lg mb-2">Selected Schedule</h4>
-                        <p className="text-muted"><strong>Date:</strong> {formatDate(formData.selectedSchedule.date)}</p>
-                        <p className="text-muted"><strong>Time:</strong> {formatTime(formData.selectedSchedule.time)}</p>
-                        <p className="text-muted"><strong>Instructor:</strong> {formData.selectedSchedule.teacher.name}</p>
-                        <p className="text-muted"><strong>Service:</strong> {formData.selectedSchedule.serviceType.name}</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-                <button
-                  onClick={() => setCurrentStep(2)}
-                  className="px-8 py-4 text-lg font-medium text-[#6ea058] border-2 border-[#6ea058] rounded-lg hover:bg-[#6ea058] hover:text-white transition-all duration-200 flex items-center"
-                >
-                  <ArrowLeft className="w-5 h-5 mr-2" />
-                  Back to Schedule
-                </button>
-                
-                <button
-                  onClick={() => setCurrentStep(4)}
-                  className="px-8 py-4 text-lg font-medium text-white bg-[#6ea058] border-2 border-[#6ea058] rounded-lg hover:bg-[#5a8a47] hover:border-[#5a8a47] transition-all duration-200 flex items-center"
-                >
-                  <CreditCard className="w-5 h-5 mr-2" />
-                  Proceed to Payment
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </button>
-              </div>
-
-              {/* Payment Notice */}
-              <div className="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg text-center">
-                <CheckCircle className="w-6 h-6 text-green-600 mx-auto mb-2" />
-                <p className="text-green-800 font-medium">
-                  Secure payment processing with Lyra. Your payment information is encrypted and secure.
-                </p>
-              </div>
+              {!formData.selectedPackage ? (
+                <div className="text-center py-12">
+                  <AlertCircle className="w-8 h-8 mx-auto mb-4 text-red-500" />
+                  <p className="text-red-600 text-lg mb-4">Error: No package selected</p>
+                  <button
+                    onClick={() => setCurrentStep(0)}
+                    className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                  >
+                    Select Package
+                  </button>
+                </div>
+              ) : (
+                <PaymentForm
+                  packageData={{
+                    id: formData.selectedPackage.id.toString(),
+                    name: formData.selectedPackage.packageDefinition.name,
+                    price: formData.selectedPackage.price,
+                    currency: formData.selectedPackage.currency.symbol,
+                    sessions: formData.selectedPackage.packageDefinition.sessionsCount,
+                    duration: formData.selectedPackage.packageDefinition.sessionDuration.duration_minutes
+                  }}
+                  personalInfo={{
+                    name: formData.clientName,
+                    email: formData.clientEmail,
+                    phone: formData.clientPhone,
+                    countryCode: formData.countryCode
+                  }}
+                  onPaymentSuccess={handlePaymentSuccess}
+                  onBack={() => setCurrentStep(2)}
+                  isLoading={sending}
+                />
+              )}
             </motion.div>
           )}
 
-          {/* Step 5: Payment */}
-          {currentStep === 4 && (
+          {/* Step 4: Payment (removed) */}
+          {false && (
             <motion.div
               key="payment"
               initial={{ opacity: 0, x: 20 }}
@@ -685,7 +641,7 @@ export function PackagesBookingFlow() {
             >
               <PaymentForm
                 packageData={{
-                  id: formData.selectedPackage!.id,
+                  id: formData.selectedPackage!.id.toString(),
                   name: formData.selectedPackage!.packageDefinition.name,
                   price: formData.selectedPackage!.price,
                   currency: formData.selectedPackage!.currency.symbol,
@@ -699,7 +655,7 @@ export function PackagesBookingFlow() {
                   countryCode: formData.countryCode
                 }}
                 onPaymentSuccess={handlePaymentSuccess}
-                onBack={() => setCurrentStep(3)}
+                onBack={() => setCurrentStep(2)}
                 isLoading={sending}
               />
             </motion.div>

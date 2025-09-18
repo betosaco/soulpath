@@ -1964,7 +1964,7 @@ async function main() {
       where: { id: 31 },
       update: {},
       create: {
-        teacherScheduleId: 1, // Monday 08:15 Hatha
+        teacherScheduleId: teacherSchedules[0].id, // Monday 08:15 Hatha
         startTime: new Date('2025-09-15T13:15:00Z'), // 08:15 EST = 13:15 UTC
         endTime: new Date('2025-09-15T14:15:00Z'), // 09:15 EST = 14:15 UTC
         isAvailable: true,
@@ -1976,7 +1976,7 @@ async function main() {
       where: { id: 32 },
       update: {},
       create: {
-        teacherScheduleId: 2, // Monday 09:30 Vinyasa
+        teacherScheduleId: teacherSchedules[1].id, // Monday 09:30 Vinyasa
         startTime: new Date('2025-09-15T14:30:00Z'), // 09:30 EST = 14:30 UTC
         endTime: new Date('2025-09-15T15:30:00Z'), // 10:30 EST = 15:30 UTC
         isAvailable: true,
@@ -1988,7 +1988,7 @@ async function main() {
       where: { id: 33 },
       update: {},
       create: {
-        teacherScheduleId: 3, // Monday 17:30 Hatha
+        teacherScheduleId: teacherSchedules[2].id, // Monday 17:30 Hatha
         startTime: new Date('2025-09-15T22:30:00Z'), // 17:30 EST = 22:30 UTC
         endTime: new Date('2025-09-15T23:30:00Z'), // 18:30 EST = 23:30 UTC
         isAvailable: true,
@@ -2001,7 +2001,7 @@ async function main() {
       where: { id: 34 },
       update: {},
       create: {
-        teacherScheduleId: 4, // Tuesday 17:30 Hatha
+        teacherScheduleId: teacherSchedules[3].id, // Tuesday 17:30 Hatha
         startTime: new Date('2025-09-16T22:30:00Z'), // 17:30 EST = 22:30 UTC
         endTime: new Date('2025-09-16T23:30:00Z'), // 18:30 EST = 23:30 UTC
         isAvailable: true,
@@ -2013,7 +2013,7 @@ async function main() {
       where: { id: 35 },
       update: {},
       create: {
-        teacherScheduleId: 5, // Tuesday 18:45 Vinyasa
+        teacherScheduleId: teacherSchedules[4].id, // Tuesday 18:45 Vinyasa
         startTime: new Date('2025-09-16T23:45:00Z'), // 18:45 EST = 23:45 UTC
         endTime: new Date('2025-09-17T00:45:00Z'), // 19:45 EST = 00:45 UTC (next day)
         isAvailable: true,
@@ -2026,7 +2026,7 @@ async function main() {
       where: { id: 36 },
       update: {},
       create: {
-        teacherScheduleId: 6, // Wednesday 08:15 Hatha
+        teacherScheduleId: teacherSchedules[5].id, // Wednesday 08:15 Hatha
         startTime: new Date('2025-09-17T13:15:00Z'), // 08:15 EST = 13:15 UTC
         endTime: new Date('2025-09-17T14:15:00Z'), // 09:15 EST = 14:15 UTC
         isAvailable: true,
@@ -2038,7 +2038,7 @@ async function main() {
       where: { id: 37 },
       update: {},
       create: {
-        teacherScheduleId: 10, // Wednesday 09:30 Vinyasa
+        teacherScheduleId: teacherSchedules[6].id, // Wednesday 09:30 Vinyasa
         startTime: new Date('2025-09-17T14:30:00Z'), // 09:30 EST = 14:30 UTC
         endTime: new Date('2025-09-17T15:30:00Z'), // 10:30 EST = 15:30 UTC
         isAvailable: true,
@@ -2050,7 +2050,7 @@ async function main() {
       where: { id: 38 },
       update: {},
       create: {
-        teacherScheduleId: 9, // Wednesday 17:30 Hatha
+        teacherScheduleId: teacherSchedules[7].id, // Wednesday 17:30 Hatha
         startTime: new Date('2025-09-17T22:30:00Z'), // 17:30 EST = 22:30 UTC
         endTime: new Date('2025-09-17T23:30:00Z'), // 18:30 EST = 23:30 UTC
         isAvailable: true,
@@ -2063,7 +2063,7 @@ async function main() {
       where: { id: 39 },
       update: {},
       create: {
-        teacherScheduleId: 12, // Thursday 17:30 Hatha
+        teacherScheduleId: teacherSchedules[8].id, // Thursday 17:30 Hatha
         startTime: new Date('2025-09-18T22:30:00Z'), // 17:30 EST = 22:30 UTC
         endTime: new Date('2025-09-18T23:30:00Z'), // 18:30 EST = 23:30 UTC
         isAvailable: true,
@@ -2075,7 +2075,7 @@ async function main() {
       where: { id: 40 },
       update: {},
       create: {
-        teacherScheduleId: 7, // Thursday 18:45 Vinyasa
+        teacherScheduleId: teacherSchedules[9].id, // Thursday 18:45 Vinyasa
         startTime: new Date('2025-09-18T23:45:00Z'), // 18:45 EST = 23:45 UTC
         endTime: new Date('2025-09-19T00:45:00Z'), // 19:45 EST = 00:45 UTC (next day)
         isAvailable: true,
@@ -2088,7 +2088,7 @@ async function main() {
       where: { id: 41 },
       update: {},
       create: {
-        teacherScheduleId: 11, // Friday 08:15 Hatha
+        teacherScheduleId: teacherSchedules[10].id, // Friday 08:15 Hatha
         startTime: new Date('2025-09-19T13:15:00Z'), // 08:15 EST = 13:15 UTC
         endTime: new Date('2025-09-19T14:15:00Z'), // 09:15 EST = 14:15 UTC
         isAvailable: true,
@@ -2100,7 +2100,7 @@ async function main() {
       where: { id: 42 },
       update: {},
       create: {
-        teacherScheduleId: 14, // Friday 09:30 Vinyasa
+        teacherScheduleId: teacherSchedules[11].id, // Friday 09:30 Vinyasa
         startTime: new Date('2025-09-19T14:30:00Z'), // 09:30 EST = 14:30 UTC
         endTime: new Date('2025-09-19T15:30:00Z'), // 10:30 EST = 15:30 UTC
         isAvailable: true,
@@ -2112,7 +2112,7 @@ async function main() {
       where: { id: 43 },
       update: {},
       create: {
-        teacherScheduleId: 15, // Friday 17:30 Hatha
+        teacherScheduleId: teacherSchedules[12].id, // Friday 17:30 Hatha
         startTime: new Date('2025-09-19T22:30:00Z'), // 17:30 EST = 22:30 UTC
         endTime: new Date('2025-09-19T23:30:00Z'), // 18:30 EST = 23:30 UTC
         isAvailable: true,
@@ -2125,7 +2125,7 @@ async function main() {
       where: { id: 44 },
       update: {},
       create: {
-        teacherScheduleId: 13, // Saturday 08:30 Hatha
+        teacherScheduleId: teacherSchedules[13].id, // Saturday 08:30 Hatha
         startTime: new Date('2025-09-20T13:30:00Z'), // 08:30 EST = 13:30 UTC
         endTime: new Date('2025-09-20T14:30:00Z'), // 09:30 EST = 14:30 UTC
         isAvailable: true,
@@ -2137,7 +2137,7 @@ async function main() {
       where: { id: 45 },
       update: {},
       create: {
-        teacherScheduleId: 8, // Saturday 09:45 Vinyasa
+        teacherScheduleId: teacherSchedules[14].id, // Saturday 09:45 Vinyasa
         startTime: new Date('2025-09-20T14:45:00Z'), // 09:45 EST = 14:45 UTC
         endTime: new Date('2025-09-20T15:45:00Z'), // 10:45 EST = 15:45 UTC
         isAvailable: true,

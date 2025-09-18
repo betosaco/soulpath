@@ -1,0 +1,580 @@
+/* ============================================================================
+   PAYMENT FORM STYLES
+   ============================================================================
+   Custom styling for the Lyra payment form to match the page design
+   ============================================================================ */
+
+/* Payment Form Container */
+.lyra-payment-form-container {
+  background: var(--unified-bg-surface);
+  border-radius: var(--unified-radius-lg);
+  box-shadow: var(--unified-shadow-md);
+  border: 1px solid var(--unified-border-light);
+  overflow: hidden;
+}
+
+/* Form Header */
+.lyra-form-header {
+  background: linear-gradient(135deg, var(--unified-primary) 0%, var(--unified-primary-light) 100%);
+  color: var(--unified-primary-contrast);
+  padding: var(--unified-spacing-xl);
+  text-align: center;
+}
+
+.lyra-form-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 var(--unified-spacing-sm) 0;
+  color: var(--unified-primary-contrast);
+}
+
+.lyra-form-description {
+  font-size: 0.95rem;
+  margin: 0;
+  opacity: 0.9;
+  color: var(--unified-primary-contrast);
+}
+
+/* Loading State */
+.lyra-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--unified-spacing-3xl);
+  text-align: center;
+}
+
+.lyra-loading-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid var(--unified-border-light);
+  border-top: 3px solid var(--unified-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: var(--unified-spacing-lg);
+}
+
+.lyra-loading-text {
+  color: var(--unified-text-secondary);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error State */
+.lyra-error-container {
+  text-align: center;
+  padding: var(--unified-spacing-3xl);
+}
+
+.lyra-error-icon {
+  font-size: 3rem;
+  margin-bottom: var(--unified-spacing-lg);
+}
+
+.lyra-error-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--unified-error);
+  margin: 0 0 var(--unified-spacing-sm) 0;
+}
+
+.lyra-error-message {
+  color: var(--unified-text-secondary);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* Security Notice */
+.lyra-security-notice {
+  background: var(--unified-bg-secondary);
+  border-top: 1px solid var(--unified-border-light);
+  padding: var(--unified-spacing-lg);
+  text-align: center;
+}
+
+.lyra-security-text {
+  color: var(--unified-text-secondary);
+  font-size: 0.875rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--unified-spacing-sm);
+}
+
+.lyra-security-text::before {
+  content: "🔒";
+  font-size: 1rem;
+}
+
+/* ============================================================================
+   LYRA FORM FIELD STYLING
+   ============================================================================ */
+
+/* Override Lyra's default styling to match our design */
+#lyra-payment-form {
+  padding: var(--unified-spacing-xl);
+  background: var(--unified-bg-surface);
+}
+
+/* Form field containers */
+#lyra-payment-form .kr-embedded {
+  background: transparent !important;
+}
+
+/* Input fields - All fields same size and style */
+#lyra-payment-form input[type="text"],
+#lyra-payment-form input[type="tel"],
+#lyra-payment-form input[type="email"],
+#lyra-payment-form input[type="password"],
+#lyra-payment-form .kr-pan,
+#lyra-payment-form .kr-expiry,
+#lyra-payment-form .kr-security-code,
+#lyra-payment-form .kr-card-holder-name {
+  width: 100% !important;
+  height: 3rem !important;
+  padding: var(--unified-spacing-md) var(--unified-spacing-lg) !important;
+  border: 2px solid var(--unified-border-light) !important;
+  border-radius: var(--unified-radius-md) !important;
+  font-size: 1rem !important;
+  font-family: inherit !important;
+  color: var(--unified-text-primary) !important;
+  background: var(--unified-bg-surface) !important;
+  transition: all var(--unified-transition-normal) !important;
+  box-sizing: border-box !important;
+  margin-bottom: var(--unified-spacing-lg) !important;
+  display: block !important;
+}
+
+#lyra-payment-form input[type="text"]:focus,
+#lyra-payment-form input[type="tel"]:focus,
+#lyra-payment-form input[type="email"]:focus,
+#lyra-payment-form input[type="password"]:focus,
+#lyra-payment-form .kr-pan:focus,
+#lyra-payment-form .kr-expiry:focus,
+#lyra-payment-form .kr-security-code:focus,
+#lyra-payment-form .kr-card-holder-name:focus {
+  outline: none !important;
+  border-color: var(--unified-primary) !important;
+  box-shadow: 0 0 0 3px rgba(110, 160, 88, 0.1) !important;
+}
+
+#lyra-payment-form input[type="text"]:hover,
+#lyra-payment-form input[type="tel"]:hover,
+#lyra-payment-form input[type="email"]:hover,
+#lyra-payment-form input[type="password"]:hover,
+#lyra-payment-form .kr-pan:hover,
+#lyra-payment-form .kr-expiry:hover,
+#lyra-payment-form .kr-security-code:hover,
+#lyra-payment-form .kr-card-holder-name:hover {
+  border-color: var(--unified-border-medium) !important;
+}
+
+/* Placeholder text */
+#lyra-payment-form input::placeholder,
+#lyra-payment-form .kr-pan::placeholder,
+#lyra-payment-form .kr-expiry::placeholder,
+#lyra-payment-form .kr-security-code::placeholder,
+#lyra-payment-form .kr-card-holder-name::placeholder {
+  color: var(--unified-text-tertiary) !important;
+  font-size: 0.95rem !important;
+}
+
+/* Field labels */
+#lyra-payment-form label {
+  display: block !important;
+  font-weight: 500 !important;
+  color: var(--unified-text-primary) !important;
+  margin-bottom: var(--unified-spacing-sm) !important;
+  font-size: 0.95rem !important;
+}
+
+/* Submit button */
+#lyra-payment-form button[type="submit"],
+#lyra-payment-form .kr-payment-button,
+#lyra-payment-form .kr-submit {
+  width: 100% !important;
+  height: 3.5rem !important;
+  background: linear-gradient(135deg, var(--unified-primary) 0%, var(--unified-primary-light) 100%) !important;
+  color: var(--unified-primary-contrast) !important;
+  border: none !important;
+  border-radius: var(--unified-radius-md) !important;
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all var(--unified-transition-normal) !important;
+  margin-top: var(--unified-spacing-lg) !important;
+  box-shadow: var(--unified-shadow-sm) !important;
+}
+
+#lyra-payment-form button[type="submit"]:hover,
+#lyra-payment-form .kr-payment-button:hover,
+#lyra-payment-form .kr-submit:hover {
+  background: linear-gradient(135deg, var(--unified-primary-hover) 0%, var(--unified-primary) 100%) !important;
+  box-shadow: var(--unified-shadow-md) !important;
+  transform: translateY(-1px) !important;
+}
+
+#lyra-payment-form button[type="submit"]:active,
+#lyra-payment-form .kr-payment-button:active,
+#lyra-payment-form .kr-submit:active {
+  transform: translateY(0) !important;
+  box-shadow: var(--unified-shadow-sm) !important;
+}
+
+/* Field groups */
+#lyra-payment-form .kr-field-group {
+  margin-bottom: var(--unified-spacing-lg) !important;
+}
+
+/* Field ordering - Move sin cuotas and pago del titular after nombre del titular */
+#lyra-payment-form {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Card number field - first */
+#lyra-payment-form .kr-pan-field,
+#lyra-payment-form .kr-pan {
+  order: 1 !important;
+}
+
+/* Expiry date field - second */
+#lyra-payment-form .kr-expiry-field,
+#lyra-payment-form .kr-expiry {
+  order: 2 !important;
+}
+
+/* Security code field - third */
+#lyra-payment-form .kr-security-code-field,
+#lyra-payment-form .kr-security-code {
+  order: 3 !important;
+}
+
+/* Card holder name field - fourth */
+#lyra-payment-form .kr-card-holder-name-field,
+#lyra-payment-form .kr-card-holder-name {
+  order: 4 !important;
+}
+
+/* Sin cuotas field - fifth (after nombre del titular) */
+#lyra-payment-form .kr-installment-field,
+#lyra-payment-form .kr-installment,
+#lyra-payment-form [class*="installment"],
+#lyra-payment-form [class*="cuota"] {
+  order: 5 !important;
+}
+
+/* Pago del titular field - sixth (after nombre del titular) */
+#lyra-payment-form .kr-payment-method-field,
+#lyra-payment-form .kr-payment-method,
+#lyra-payment-form [class*="payment-method"],
+#lyra-payment-form [class*="titular"] {
+  order: 6 !important;
+}
+
+/* Submit button - last */
+#lyra-payment-form button[type="submit"],
+#lyra-payment-form .kr-payment-button,
+#lyra-payment-form .kr-submit {
+  order: 99 !important;
+}
+
+/* Hide DNI and EMAIL fields - they are not necessary */
+#lyra-payment-form .kr-dni,
+#lyra-payment-form .kr-email,
+#lyra-payment-form [class*="dni"],
+#lyra-payment-form [class*="email"],
+#lyra-payment-form [class*="DNI"],
+#lyra-payment-form [class*="EMAIL"],
+#lyra-payment-form input[name*="dni"],
+#lyra-payment-form input[name*="email"],
+#lyra-payment-form input[name*="DNI"],
+#lyra-payment-form input[name*="EMAIL"],
+#lyra-payment-form .kr-field-group:has(.kr-dni),
+#lyra-payment-form .kr-field-group:has(.kr-email),
+#lyra-payment-form .kr-field-group:has([class*="dni"]),
+#lyra-payment-form .kr-field-group:has([class*="email"]),
+/* Additional aggressive hiding for any field containing DNI/EMAIL */
+#lyra-payment-form *[class*="dni"],
+#lyra-payment-form *[class*="email"],
+#lyra-payment-form *[class*="DNI"],
+#lyra-payment-form *[class*="EMAIL"],
+#lyra-payment-form *[id*="dni"],
+#lyra-payment-form *[id*="email"],
+#lyra-payment-form *[id*="DNI"],
+#lyra-payment-form *[id*="EMAIL"],
+#lyra-payment-form *[name*="dni"],
+#lyra-payment-form *[name*="email"],
+#lyra-payment-form *[name*="DNI"],
+#lyra-payment-form *[name*="EMAIL"],
+#lyra-payment-form *[placeholder*="dni"],
+#lyra-payment-form *[placeholder*="email"],
+#lyra-payment-form *[placeholder*="DNI"],
+#lyra-payment-form *[placeholder*="EMAIL"],
+#lyra-payment-form *[data-field*="dni"],
+#lyra-payment-form *[data-field*="email"],
+#lyra-payment-form *[data-field*="DNI"],
+#lyra-payment-form *[data-field*="EMAIL"] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  z-index: -1 !important;
+}
+
+/* Additional field targeting for different Lyra structures */
+#lyra-payment-form > div,
+#lyra-payment-form > fieldset,
+#lyra-payment-form .kr-field-container,
+#lyra-payment-form .kr-form-element {
+  display: flex !important;
+  flex-direction: column !important;
+  margin-bottom: var(--unified-spacing-lg) !important;
+}
+
+/* Target any div that contains form fields */
+#lyra-payment-form div[class*="pan"],
+#lyra-payment-form div[class*="expiry"],
+#lyra-payment-form div[class*="security"],
+#lyra-payment-form div[class*="card-holder"],
+#lyra-payment-form div[class*="installment"],
+#lyra-payment-form div[class*="payment-method"] {
+  display: flex !important;
+  flex-direction: column !important;
+  margin-bottom: var(--unified-spacing-lg) !important;
+}
+
+/* Specific ordering for div-based fields */
+#lyra-payment-form div[class*="pan"] {
+  order: 1 !important;
+}
+
+#lyra-payment-form div[class*="expiry"] {
+  order: 2 !important;
+}
+
+#lyra-payment-form div[class*="security"] {
+  order: 3 !important;
+}
+
+#lyra-payment-form div[class*="card-holder"] {
+  order: 4 !important;
+}
+
+#lyra-payment-form div[class*="installment"] {
+  order: 5 !important;
+}
+
+#lyra-payment-form div[class*="payment-method"] {
+  order: 6 !important;
+}
+
+/* Ensure all Lyra form elements have consistent styling */
+#lyra-payment-form .kr-form-field,
+#lyra-payment-form .kr-field,
+#lyra-payment-form .kr-pan-field,
+#lyra-payment-form .kr-expiry-field,
+#lyra-payment-form .kr-security-code-field,
+#lyra-payment-form .kr-card-holder-name-field,
+#lyra-payment-form .kr-installment-field,
+#lyra-payment-form .kr-payment-method-field {
+  width: 100% !important;
+  margin-bottom: var(--unified-spacing-lg) !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Target any input within Lyra form */
+#lyra-payment-form .kr-form-field input,
+#lyra-payment-form .kr-field input,
+#lyra-payment-form .kr-pan-field input,
+#lyra-payment-form .kr-expiry-field input,
+#lyra-payment-form .kr-security-code-field input,
+#lyra-payment-form .kr-card-holder-name-field input {
+  width: 100% !important;
+  height: 3rem !important;
+  padding: var(--unified-spacing-md) var(--unified-spacing-lg) !important;
+  border: 2px solid var(--unified-border-light) !important;
+  border-radius: var(--unified-radius-md) !important;
+  font-size: 1rem !important;
+  font-family: inherit !important;
+  color: var(--unified-text-primary) !important;
+  background: var(--unified-bg-surface) !important;
+  transition: all var(--unified-transition-normal) !important;
+  box-sizing: border-box !important;
+  margin-bottom: 0 !important;
+  display: block !important;
+}
+
+/* Focus states for nested inputs */
+#lyra-payment-form .kr-form-field input:focus,
+#lyra-payment-form .kr-field input:focus,
+#lyra-payment-form .kr-pan-field input:focus,
+#lyra-payment-form .kr-expiry-field input:focus,
+#lyra-payment-form .kr-security-code-field input:focus,
+#lyra-payment-form .kr-card-holder-name-field input:focus {
+  outline: none !important;
+  border-color: var(--unified-primary) !important;
+  box-shadow: 0 0 0 3px rgba(110, 160, 88, 0.1) !important;
+}
+
+/* Hover states for nested inputs */
+#lyra-payment-form .kr-form-field input:hover,
+#lyra-payment-form .kr-field input:hover,
+#lyra-payment-form .kr-pan-field input:hover,
+#lyra-payment-form .kr-expiry-field input:hover,
+#lyra-payment-form .kr-security-code-field input:hover,
+#lyra-payment-form .kr-card-holder-name-field input:hover {
+  border-color: var(--unified-border-medium) !important;
+}
+
+/* Card number field - keep monospace for better readability */
+#lyra-payment-form .kr-pan {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+  letter-spacing: 0.05em !important;
+}
+
+/* Security code field - keep monospace for better readability */
+#lyra-payment-form .kr-security-code {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+}
+
+/* Universal styling for ALL inputs in Lyra form - ensures all fields have same size and style */
+#lyra-payment-form input,
+#lyra-payment-form input[type="text"],
+#lyra-payment-form input[type="tel"],
+#lyra-payment-form input[type="email"],
+#lyra-payment-form input[type="password"],
+#lyra-payment-form input[type="number"] {
+  width: 100% !important;
+  height: 3rem !important;
+  padding: var(--unified-spacing-md) var(--unified-spacing-lg) !important;
+  border: 2px solid var(--unified-border-light) !important;
+  border-radius: var(--unified-radius-md) !important;
+  font-size: 1rem !important;
+  font-family: inherit !important;
+  color: var(--unified-text-primary) !important;
+  background: var(--unified-bg-surface) !important;
+  transition: all var(--unified-transition-normal) !important;
+  box-sizing: border-box !important;
+  margin-bottom: var(--unified-spacing-lg) !important;
+  display: block !important;
+}
+
+/* Universal focus states */
+#lyra-payment-form input:focus,
+#lyra-payment-form input[type="text"]:focus,
+#lyra-payment-form input[type="tel"]:focus,
+#lyra-payment-form input[type="email"]:focus,
+#lyra-payment-form input[type="password"]:focus,
+#lyra-payment-form input[type="number"]:focus {
+  outline: none !important;
+  border-color: var(--unified-primary) !important;
+  box-shadow: 0 0 0 3px rgba(110, 160, 88, 0.1) !important;
+}
+
+/* Universal hover states */
+#lyra-payment-form input:hover,
+#lyra-payment-form input[type="text"]:hover,
+#lyra-payment-form input[type="tel"]:hover,
+#lyra-payment-form input[type="email"]:hover,
+#lyra-payment-form input[type="password"]:hover,
+#lyra-payment-form input[type="number"]:hover {
+  border-color: var(--unified-border-medium) !important;
+}
+
+/* Error states */
+#lyra-payment-form .kr-field-error {
+  border-color: var(--unified-error) !important;
+  background: rgba(220, 38, 38, 0.05) !important;
+}
+
+#lyra-payment-form .kr-error-message {
+  color: var(--unified-error) !important;
+  font-size: 0.875rem !important;
+  margin-top: var(--unified-spacing-xs) !important;
+  display: block !important;
+}
+
+/* Success states */
+#lyra-payment-form .kr-field-valid {
+  border-color: var(--unified-success) !important;
+  background: rgba(110, 160, 88, 0.05) !important;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .lyra-payment-form-container {
+    margin: 0;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+  
+  .lyra-form-header {
+    padding: var(--unified-spacing-lg);
+  }
+  
+  .lyra-form-title {
+    font-size: 1.25rem;
+  }
+  
+  #lyra-payment-form {
+    padding: var(--unified-spacing-lg);
+  }
+  
+  #lyra-payment-form input[type="text"],
+  #lyra-payment-form input[type="tel"],
+  #lyra-payment-form input[type="email"],
+  #lyra-payment-form input[type="password"] {
+    height: 2.75rem !important;
+    font-size: 0.95rem !important;
+  }
+  
+  #lyra-payment-form button[type="submit"],
+  #lyra-payment-form .kr-payment-button,
+  #lyra-payment-form .kr-submit {
+    height: 3rem !important;
+    font-size: 1rem !important;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .lyra-payment-form-container {
+    background: #1a1a1a;
+    border-color: #333;
+  }
+  
+  #lyra-payment-form input[type="text"],
+  #lyra-payment-form input[type="tel"],
+  #lyra-payment-form input[type="email"],
+  #lyra-payment-form input[type="password"] {
+    background: #2a2a2a !important;
+    color: #ffffff !important;
+    border-color: #444 !important;
+  }
+  
+  #lyra-payment-form input::placeholder {
+    color: #888 !important;
+  }
+  
+  #lyra-payment-form label {
+    color: #ffffff !important;
+  }
+}

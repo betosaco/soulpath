@@ -123,8 +123,7 @@ export function ScheduleBookingFlow() {
   const steps: BookingStep[] = [
     { id: 'schedule', title: getTranslation('bookingFlow.selectSchedule', 'Select Schedule'), description: getTranslation('bookingFlow.selectScheduleDesc', 'Choose your preferred date and time'), completed: false },
     { id: 'package', title: getTranslation('bookingFlow.selectPackage', 'Select Package'), description: getTranslation('bookingFlow.selectPackageDesc', 'Choose the package that best fits your needs'), completed: false },
-    { id: 'personal', title: getTranslation('bookingFlow.personalInfo', 'Personal Information'), description: getTranslation('bookingFlow.personalInfoDesc', 'Provide your contact details'), completed: false },
-    { id: 'summary', title: getTranslation('bookingFlow.reviewConfirm', 'Review & Confirm'), description: getTranslation('bookingFlow.reviewConfirmDesc', 'Review your booking and send to WhatsApp'), completed: false }
+    { id: 'personal', title: getTranslation('bookingFlow.personalInfo', 'Personal Information'), description: getTranslation('bookingFlow.personalInfoDesc', 'Provide your contact details'), completed: false }
   ];
 
   const selectedCountry = countries.find(c => c.code === formData.countryCode) || countries[0];
@@ -173,7 +172,8 @@ export function ScheduleBookingFlow() {
       toast.error(getTranslation('bookingFlow.fillRequiredFields', 'Please fill in all required fields'));
       return;
     }
-    setCurrentStep(3);
+    // Skip review step, go directly to WhatsApp confirmation
+    handleWhatsAppBooking();
   };
 
   const handleWhatsAppBooking = async () => {
@@ -625,7 +625,7 @@ MatMax Yoga. Calle Alcanfores 425, Miraflores. Lima - Peru
                   onClick={handleProceedToSummary}
                   className="px-8 py-4 text-lg font-medium text-white bg-[#6ea058] border-2 border-[#6ea058] rounded-lg hover:bg-[#5a8a47] hover:border-[#5a8a47] transition-all duration-200 flex items-center"
                 >
-                  {getTranslation('bookingFlow.continueToReview', 'Continue to Review')}
+                  {getTranslation('bookingFlow.sendToWhatsApp', 'Send to WhatsApp')}
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </button>
               </div>
