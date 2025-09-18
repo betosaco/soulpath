@@ -1,0 +1,21 @@
+{
+  "name": "izipay-documentation-extractor",
+  "version": "1.0.0",
+  "description": "Extract complete Izipay web-core documentation",
+  "main": "extract-izipay-docs.js",
+  "scripts": {
+    "extract": "node extract-izipay-docs.js",
+    "install-deps": "npm install puppeteer"
+  },
+  "dependencies": {
+    "puppeteer": "^21.0.0"
+  },
+  "keywords": [
+    "izipay",
+    "documentation",
+    "extractor",
+    "web-scraping"
+  ],
+  "author": "Documentation Extractor",
+  "license": "MIT"
+}

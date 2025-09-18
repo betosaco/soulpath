@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PackageIcon, CalendarIcon, ShoppingCart } from 'lucide-react';
+import { PackageIcon, CalendarIcon, ShoppingCart, Clock as ClockIcon } from 'lucide-react';
 
 
 import { PackagePurchaseFlow } from '@/components/PackagePurchaseFlow';
@@ -128,9 +128,15 @@ export default function PackagesPage() {
             <CardContent className="space-y-4">
               <p className="text-gray-300 text-sm">{pkg.description}</p>
               
-              <div className="flex items-center space-x-2 text-sm text-gray-400">
-                <CalendarIcon className="w-4 h-4" />
-                <span>{pkg.sessionDuration?.duration_minutes || 'N/A'} minutes</span>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2 text-sm text-gray-400">
+                  <ClockIcon className="w-4 h-4" />
+                  <span>{pkg.sessionDuration?.duration_minutes || 'N/A'} minutes per session</span>
+                </div>
+                <div className="flex items-center space-x-2 text-sm text-gray-400">
+                  <CalendarIcon className="w-4 h-4" />
+                  <span>Valid for 30 days</span>
+                </div>
               </div>
 
               {pkg.features && pkg.features.length > 0 && (
@@ -180,9 +186,9 @@ export default function PackagesPage() {
                 <div className="w-12 h-12 bg-[#ffd700]/20 rounded-full flex items-center justify-center mx-auto mb-3">
                   <CalendarIcon className="w-6 h-6 text-[#ffd700]" />
                 </div>
-                <h3 className="text-white font-semibold mb-2">Easy Booking</h3>
+                <h3 className="text-white font-semibold mb-2">30-Day Validity</h3>
                 <p className="text-gray-400 text-sm">
-                  Book sessions at your convenience with our flexible scheduling system
+                  All packages are valid for 30 days from purchase, giving you flexibility to use your sessions
                 </p>
               </div>
               

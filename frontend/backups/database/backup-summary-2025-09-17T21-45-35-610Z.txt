@@ -1,0 +1,38 @@
+Database Backup Summary - 9/17/2025, 4:45:42 PM
+==========================================
+
+User: 5 records
+Purchase: 2 records
+PaymentRecord: 0 records
+UserPackage: 0 records
+PackageDefinition: 0 records
+PackagePrice: 0 records
+ServiceType: 0 records
+Teacher: 1 records
+Venue: 1 records
+Booking: 2 records
+Currency: 5 records
+SessionDuration: 0 records
+Rate: 4 records
+PaymentMethodConfig: 0 records
+EmailTemplate: 0 records
+LogoSettings: 0 records
+Seo: 1 records
+Image: 3 records
+ProfileImage: 0 records
+Content: 1 records
+Section: 0 records
+CommunicationConfig: 0 records
+CommunicationTemplate: 0 records
+CommunicationTemplateTranslation: 0 records
+BugReport: 0 records
+BugComment: 0 records
+SmsConfiguration: 0 records
+OtpVerification: 0 records
+ExternalAPIConfig: 0 records
+APIConfigAudit: 0 records
+ConversationLog: 0 records
+UserFeedback: 0 records
+MlModelPerformance: 0 records
+AbTestExperiment: 0 records
+AbTestAssignment: 0 records

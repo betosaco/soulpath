@@ -34,6 +34,12 @@ export function Header({
   const { logoSettings, isLoading } = useLogo();
   const router = useRouter();
   
+  // Debug: Log translations and language
+  console.log('Header - Language:', language);
+  console.log('Header - Translations:', t);
+  console.log('Header - Nav translations:', (t?.nav as Record<string, string>));
+  
+  
   // Handle touch gestures for closing menu
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -166,7 +172,7 @@ export function Header({
               className="hidden sm:flex items-center space-x-1 header-button-account"
             >
               <Calendar size={14} />
-              <span>Schedule</span>
+              <span>{(t?.nav as Record<string, string>)?.schedule || 'Schedule'}</span>
             </motion.button>
           </Link>
 
@@ -178,7 +184,7 @@ export function Header({
               className="hidden sm:flex items-center space-x-1 header-button-account"
             >
               <Package size={14} />
-              <span>Packages</span>
+              <span>{(t?.nav as Record<string, string>)?.packages || 'Packages'}</span>
             </motion.button>
           </Link>
 
@@ -297,7 +303,7 @@ export function Header({
                       className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30 mobile-touch-feedback"
                     >
                       <Calendar size={18} />
-                      <span className="text-base sm:text-lg font-medium">Schedule</span>
+                      <span className="text-base sm:text-lg font-medium">{(t?.nav as Record<string, string>)?.schedule || 'Schedule'}</span>
                     </motion.button>
                   </Link>
 
@@ -308,7 +314,7 @@ export function Header({
                       className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30 mobile-touch-feedback"
                     >
                       <Package size={18} />
-                      <span className="text-base sm:text-lg font-medium">Packages</span>
+                      <span className="text-base sm:text-lg font-medium">{(t?.nav as Record<string, string>)?.packages || 'Packages'}</span>
                     </motion.button>
                   </Link>
 

@@ -3,10 +3,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useProfileImage } from '@/hooks/useProfileImage';
-import { useTranslations, useLanguage } from '@/hooks/useTranslations';
+import { useTranslations } from '@/hooks/useTranslations';
 import { AdminDashboard } from '@/components/AdminDashboard';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
+import { AppLayout } from '@/components/AppLayout';
 import { themeClasses } from '@/lib/theme/theme-utils';
 
 
@@ -96,22 +95,12 @@ export default function MainPageClient({
   initialContent,
   initialProfileImage
 }: MainPageClientProps) {
-  const { language, setLanguage } = useLanguage();
   const { t, isLoading: isLoadingTranslations } = useTranslations(initialContent || {});
   const translations = t as Record<string, string | Record<string, string>>;
   const { } = useProfileImage(initialProfileImage);
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
 
-  const scrollToSection = (sectionName: string) => {
-    // Simple scroll to section functionality
-    const element = document.getElementById(sectionName);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-    setIsMenuOpen(false);
-  };
 
 
   if (showAdmin) {
@@ -133,25 +122,12 @@ export default function MainPageClient({
   }
 
   return (
-    <div className={`min-h-screen ${themeClasses.background.primary} ${themeClasses.text.primary}`}>
+    <AppLayout 
+      className={`min-h-screen ${themeClasses.background.primary} ${themeClasses.text.primary}`}
+      showFooter={false}
+    >
       <ConstellationBackground />
-      
-      <Header
-        language={language}
-        setLanguage={setLanguage}
-        scrollToSection={scrollToSection}
-        t={translations}
-        isMenuOpen={isMenuOpen}
-        setIsMenuOpen={setIsMenuOpen}
-        user={null}
-        isAdmin={false}
-      />
-      
-      <main>
-        <HeroSection t={translations} />
-      </main>
-      
-      <Footer />
-    </div>
+      <HeroSection t={translations} />
+    </AppLayout>
   );
 }

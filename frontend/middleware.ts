@@ -26,7 +26,6 @@ const PUBLIC_ROUTES = [
   '/api/bug-reports',
   '/api/otp/send',
   '/api/otp/verify',
-  '/api/izipay',
   '/api/stripe',
   '/api/telegram/webhook',
   '/api/whatsapp/webhook',

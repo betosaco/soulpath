@@ -59,15 +59,6 @@ const paymentMethods = [
     autoAssignPackage: true,
     isActive: true
   },
-  {
-    name: 'Izipay',
-    type: 'izipay',
-    description: 'Pago con tarjeta de crédito/débito a través de Izipay (Perú)',
-    icon: '💳',
-    requiresConfirmation: false,
-    autoAssignPackage: true,
-    isActive: true
-  }
 ];
 
 async function seedPaymentMethods() {

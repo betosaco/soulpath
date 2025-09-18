@@ -578,7 +578,7 @@ export function CustomerDashboard() {
                       </div>
                       {pkg.expiresAt && (
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-400">Expires:</span>
+                          <span className="text-gray-400">Valid for 30 days:</span>
                           <span className="text-white">{formatDate(pkg.expiresAt)}</span>
                         </div>
                       )}

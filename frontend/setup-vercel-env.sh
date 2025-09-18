@@ -33,43 +33,6 @@ vercel env add SUPABASE_SERVICE_ROLE_KEY production << EOF
 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3eHJzdHFldW91ZWZ5cndqc2p0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjUyMDE3OSwiZXhwIjoyMDcyMDk2MTc5fQ.KVXASY94u9SVY7DGscrd0T5mJoswGEmS9CqP3-jRWfA
 EOF
 
-# Izipay Configuration
-echo "Adding Izipay configuration..."
-vercel env add IZIPAY_ENVIRONMENT production << EOF
-sandbox
-EOF
-
-vercel env add IZIPAY_TEST_MERCHANT_ID production << EOF
-88569105
-EOF
-
-vercel env add IZIPAY_TEST_USERNAME production << EOF
-88569105
-EOF
-
-vercel env add IZIPAY_TEST_PASSWORD production << EOF
-testpassword_NSJpdOElQsM4RMu16WF89ykCViBW9ddilhEdsq02sHA2T
-EOF
-
-vercel env add IZIPAY_TEST_PUBLIC_KEY production << EOF
-88569105:testpublickey_oHKEsiKA3i9E1JshcnIA7RktrR163DdRZYzYOWgXqwSx
-EOF
-
-vercel env add IZIPAY_TEST_HMAC_KEY production << EOF
-H9qtqKGBMUFzH8F0kz4ihdw3MTBb0WbpJ1TLLuRLxHZM1
-EOF
-
-vercel env add IZIPAY_API_BASE_URL production << EOF
-https://api.micuentaweb.pe
-EOF
-
-vercel env add IZIPAY_JAVASCRIPT_URL production << EOF
-https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js
-EOF
-
-vercel env add IZIPAY_MOCK_MODE production << EOF
-false
-EOF
 
 # Base URL Configuration
 echo "Adding base URL configuration..."
@@ -102,15 +65,6 @@ echo "📋 Environment variables added:"
 echo "• NEXT_PUBLIC_SUPABASE_URL"
 echo "• NEXT_PUBLIC_SUPABASE_ANON_KEY"
 echo "• SUPABASE_SERVICE_ROLE_KEY"
-echo "• IZIPAY_ENVIRONMENT"
-echo "• IZIPAY_TEST_MERCHANT_ID"
-echo "• IZIPAY_TEST_USERNAME"
-echo "• IZIPAY_TEST_PASSWORD"
-echo "• IZIPAY_TEST_PUBLIC_KEY"
-echo "• IZIPAY_TEST_HMAC_KEY"
-echo "• IZIPAY_API_BASE_URL"
-echo "• IZIPAY_JAVASCRIPT_URL"
-echo "• IZIPAY_MOCK_MODE"
 echo "• NEXT_PUBLIC_BASE_URL"
 echo "• JWT_SECRET"
 echo "• NEXTAUTH_SECRET"

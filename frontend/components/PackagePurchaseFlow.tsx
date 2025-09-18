@@ -12,7 +12,6 @@ import { Package, Users, CheckCircle, CreditCard, ShoppingCart, User, Calendar }
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { StripeInlineForm } from '@/components/stripe/StripeInlineForm';
-import { IzipayForm } from '@/components/izipay/IzipayForm';
 
 interface PackagePrice {
   id: number;
@@ -42,13 +41,6 @@ interface PaymentMethod {
   autoAssignPackage: boolean;
   isActive: boolean;
   providerConfig?: {
-    izipayConfig?: {
-      publicKey: string;
-      username?: string;
-      password?: string;
-      hmacKey?: string;
-      environment: 'TEST' | 'PRODUCTION';
-    };
   };
 }
 
@@ -239,7 +231,7 @@ export function PackagePurchaseFlow() {
     setFormData(prev => ({ ...prev, quantity: Math.max(1, Math.min(10, quantity)) }));
   };
 
-  const handlePurchase = async (token?: string) => {
+  const handlePurchase = async () => {
     if (!formData.selectedPackage || !formData.selectedPaymentMethod) {
       toast.error('Please select a package and payment method');
       return;
@@ -261,10 +253,6 @@ export function PackagePurchaseFlow() {
         notes: formData.notes
       };
 
-      // Add payment token for Izipay payments
-      if (formData.selectedPaymentMethod.type === 'izipay' && token) {
-        requestBody.paymentToken = token;
-      }
 
       const response = await fetch('/api/client/purchase', {
         method: 'POST',
@@ -349,7 +337,7 @@ export function PackagePurchaseFlow() {
                       <ul className="space-y-1">
                         <li className="flex items-center space-x-2 text-sm text-gray-300">
                           <CheckCircle className="w-3 h-3 text-[#ffd700]" />
-                          <span>Personalized spiritual guidance</span>
+                          <span>Personalized wellness guidance</span>
                         </li>
                         <li className="flex items-center space-x-2 text-sm text-gray-300">
                           <CheckCircle className="w-3 h-3 text-[#ffd700]" />
@@ -592,27 +580,9 @@ export function PackagePurchaseFlow() {
                     </div>
                   )}
 
-                  {/* Izipay Payment Form */}
-                  {formData.selectedPaymentMethod?.type === 'izipay' && formData.selectedPaymentMethod.providerConfig?.izipayConfig && (
-                    <div className="mt-4">
-                      <IzipayForm
-                        publicKey={formData.selectedPaymentMethod.providerConfig.izipayConfig.publicKey}
-                        amountInCents={formData.selectedPackage ? Math.round(formData.selectedPackage.price * formData.quantity * 100) : 0}
-                        currency={formData.selectedPackage?.currency.code || 'PEN'}
-                        onSuccess={(token) => {
-                          toast.success('Payment token created successfully!');
-                          handlePurchase(token);
-                        }}
-                        onError={(error) => {
-                          toast.error(`Payment failed: ${error}`);
-                        }}
-                      />
-                    </div>
-                  )}
 
                   {/* Other Payment Methods */}
                   {formData.selectedPaymentMethod?.type !== 'stripe' && 
-                   formData.selectedPaymentMethod?.type !== 'izipay' && 
                    formData.selectedPaymentMethod && (
                     <div className="mt-4 p-4 bg-[#16213e] rounded-lg">
                       <p className="text-gray-300 text-sm">
@@ -665,7 +635,7 @@ export function PackagePurchaseFlow() {
                   </div>
 
                   {formData.selectedPaymentMethod?.type !== 'stripe' && 
-                   formData.selectedPaymentMethod?.type !== 'izipay' && (
+                   (
                     <Button
                       onClick={() => handlePurchase()}
                       disabled={!formData.selectedPaymentMethod || processing}

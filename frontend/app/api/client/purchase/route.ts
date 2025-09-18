@@ -10,7 +10,7 @@ const createPurchaseSchema = z.object({
   paymentMethodId: z.number().int('Invalid payment method ID'),
   quantity: z.number().int().min(1, 'Quantity must be at least 1').default(1),
   notes: z.string().optional(),
-  paymentToken: z.string().optional() // For Izipay payments
+  paymentToken: z.string().optional()
 });
 
 export async function GET() {
@@ -129,94 +129,6 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Purchase created:', purchase.id);
 
-    // Handle Izipay payment processing
-    if (paymentMethod.type === 'izipay' && paymentToken) {
-      try {
-        const izipayConfig = (paymentMethod.providerConfig as Record<string, unknown>)?.izipayConfig;
-        
-        if (!izipayConfig || !(izipayConfig as Record<string, unknown>).username || !(izipayConfig as Record<string, unknown>).password) {
-          throw new Error('Izipay configuration is incomplete');
-        }
-
-        // Create Basic Auth header
-        const credentials = Buffer.from(`${(izipayConfig as Record<string, unknown>).username}:${(izipayConfig as Record<string, unknown>).password}`).toString('base64');
-        
-        // Prepare Izipay API request
-        const izipayPayload = {
-          amount: Math.round(totalAmount * 100), // Convert to cents
-          currency: packagePrice.currency.code,
-          paymentToken: paymentToken,
-          customer: {
-            email: user.email,
-            name: user.email, // Using email as name for now
-          },
-          orderId: purchase.id.toString(),
-          metadata: {
-            packageName: packagePrice.packageDefinition.name,
-            quantity: quantity.toString(),
-            userId: user.id.toString()
-          }
-        };
-
-        console.log('🔍 Processing Izipay payment for purchase:', purchase.id);
-
-        // Make API call to Izipay
-        const izipayResponse = await fetch('https://api.izipay.pe/api-payment/v4/Charge/CreatePayment', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Basic ${credentials}`,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify(izipayPayload)
-        });
-
-        const izipayResult = await izipayResponse.json();
-        console.log('🔍 Izipay API response:', izipayResult);
-
-        if (izipayResponse.ok && izipayResult.status === 'SUCCESS') {
-          // Update purchase status to completed
-          await prisma.purchase.update({
-            where: { id: purchase.id },
-            data: {
-              paymentStatus: 'COMPLETED',
-              transactionId: izipayResult.transactionId || paymentToken,
-              purchasedAt: new Date()
-            }
-          });
-
-          console.log('✅ Izipay payment processed successfully');
-        } else {
-          // Update purchase status to failed
-          await prisma.purchase.update({
-            where: { id: purchase.id },
-            data: {
-              paymentStatus: 'FAILED',
-              notes: `Payment failed: ${izipayResult.errorMessage || 'Unknown error'}`
-            }
-          });
-
-          throw new Error(izipayResult.errorMessage || 'Payment processing failed');
-        }
-      } catch (error: unknown) {
-        console.error('❌ Izipay payment error:', error);
-        
-        // Update purchase status to failed
-        await prisma.purchase.update({
-          where: { id: purchase.id },
-          data: {
-            paymentStatus: 'FAILED',
-            notes: `Payment error: ${error instanceof Error ? error.message : 'Unknown error'}`
-          }
-        });
-
-        return NextResponse.json({
-          success: false,
-          error: 'Payment failed',
-          message: error instanceof Error ? error.message : 'Payment processing failed'
-        }, { status: 400 });
-      }
-    }
 
     // Create user package if payment method auto-assigns packages
     let userPackage = null;
@@ -229,7 +141,7 @@ export async function POST(request: NextRequest) {
           quantity: quantity,
           sessionsUsed: 0,
           isActive: true,
-          expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // 1 year from now
+          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
         },
         include: {
           packagePrice: {

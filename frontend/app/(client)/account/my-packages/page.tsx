@@ -159,7 +159,7 @@ export default function MyPackagesPage() {
                   </div>
                   <div className="flex items-center space-x-2 text-sm text-gray-300">
                     <CalendarIcon className="w-4 h-4" />
-                    <span>Expires: {new Date(pkg.expiresAt).toLocaleDateString()}</span>
+                    <span>Valid for 30 days - Expires: {new Date(pkg.expiresAt).toLocaleDateString()}</span>
                   </div>
                 </div>
 

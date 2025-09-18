@@ -304,8 +304,8 @@ export async function POST(request: NextRequest) {
             quantity: pkg.quantity,
             sessionsUsed: 0,
             isActive: true,
-            // Set expiry date if needed (e.g., 1 year from now)
-            expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+            // Set expiry date to 30 days from now
+            expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
           }
         });
       });

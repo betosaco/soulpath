@@ -332,9 +332,6 @@ export default function PaymentMethodsPage() {
                   <SelectItem value="stripe" className={`text-[${colors.text.primary}] hover:bg-[${colors.semantic.surface.tertiary}]`}>
                     Stripe
                   </SelectItem>
-                  <SelectItem value="izipay" className={`text-[${colors.text.primary}] hover:bg-[${colors.semantic.surface.tertiary}]`}>
-                    Izipay (Peru)
-                  </SelectItem>
                   <SelectItem value="paypal" className={`text-[${colors.text.primary}] hover:bg-[${colors.semantic.surface.tertiary}]`}>
                     PayPal
                   </SelectItem>
@@ -436,11 +433,6 @@ export default function PaymentMethodsPage() {
                 className={`bg-[${colors.semantic.surface.primary}] border-[${colors.border[500]}] text-[${colors.text.primary}] placeholder:text-[${colors.text.tertiary}]`}
                 rows={6}
               />
-              {formData.type === 'izipay' && (
-                <p className={`text-[${colors.text.tertiary}] text-[${typography.fontSize.xs}] mt-1`}>
-                  Required keys for Izipay: merchantId, username, password, publicKey, currency (PEN), environment (sandbox|production), supportedCountries, returnUrl, cancelUrl
-                </p>
-              )}
             </div>
           </div>
         </BaseModal.Content>
@@ -496,9 +488,6 @@ export default function PaymentMethodsPage() {
                 <SelectContent className={`bg-[${colors.semantic.surface.secondary}] border-[${colors.border[500]}]`}>
                   <SelectItem value="stripe" className={`text-[${colors.text.primary}] hover:bg-[${colors.semantic.surface.tertiary}]`}>
                     Stripe
-                  </SelectItem>
-                  <SelectItem value="izipay" className={`text-[${colors.text.primary}] hover:bg-[${colors.semantic.surface.tertiary}]`}>
-                    Izipay (Peru)
                   </SelectItem>
                   <SelectItem value="paypal" className={`text-[${colors.text.primary}] hover:bg-[${colors.semantic.surface.tertiary}]`}>
                     PayPal
@@ -601,11 +590,6 @@ export default function PaymentMethodsPage() {
                 className={`bg-[${colors.semantic.surface.primary}] border-[${colors.border[500]}] text-[${colors.text.primary}] placeholder:text-[${colors.text.tertiary}]`}
                 rows={6}
               />
-              {formData.type === 'izipay' && (
-                <p className={`text-[${colors.text.tertiary}] text-[${typography.fontSize.xs}] mt-1`}>
-                  Required keys for Izipay: merchantId, username, password, publicKey, currency (PEN), environment (sandbox|production), supportedCountries, returnUrl, cancelUrl
-                </p>
-              )}
             </div>
           </div>
         </BaseModal.Content>

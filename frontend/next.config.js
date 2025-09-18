@@ -22,6 +22,42 @@ const nextConfig = {
   experimental: {
     // Enable experimental features if needed
   },
+  // Content Security Policy configuration
+  async headers() {
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    
+    // Base CSP directives
+    const baseDirectives = [
+      "default-src 'self'",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://static.micuentaweb.pe https://static.lyra.com",
+      "font-src 'self' https://fonts.gstatic.com https://static.micuentaweb.pe https://static.lyra.com",
+      "img-src 'self' data: https: blob:",
+      "connect-src 'self' https://static.micuentaweb.pe https://static.lyra.com https://secure.lyra.com https://secure.micuentaweb.pe https://h.online-metrix.net https://h64.online-metrix.net",
+      "frame-src 'self' https://static.micuentaweb.pe https://static.lyra.com https://secure.lyra.com https://h.online-metrix.net https://h64.online-metrix.net",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'none'",
+      "upgrade-insecure-requests"
+    ];
+
+    // Add script-src with or without unsafe-eval based on environment
+    const scriptSrc = isDevelopment 
+      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.micuentaweb.pe https://static.lyra.com https://secure.lyra.com https://secure.micuentaweb.pe https://h.online-metrix.net https://h64.online-metrix.net"
+      : "script-src 'self' 'unsafe-inline' https://static.micuentaweb.pe https://static.lyra.com https://secure.lyra.com https://secure.micuentaweb.pe https://h.online-metrix.net https://h64.online-metrix.net";
+
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: [scriptSrc, ...baseDirectives].join('; ')
+          }
+        ]
+      }
+    ];
+  },
   images: {
     remotePatterns: [
       {

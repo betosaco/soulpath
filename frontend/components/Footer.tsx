@@ -1,85 +1,118 @@
 'use client';
 
 import React from 'react';
+import { Mail, Phone, MapPin, Instagram, Heart } from 'lucide-react';
+import { useTranslations, useLanguage } from '@/hooks/useTranslations';
 
 export function Footer() {
+  const { language } = useLanguage();
+  const { t } = useTranslations(undefined, language);
+  
+  // Clean i18n access
+  const footer = (t && typeof t === 'object' && 'footer' in t) ? t.footer as Record<string, string> : {};
+  
   return (
-    <footer className="bg-gray-100 py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Studio Info */}
-          <div className="col-span-1 md:col-span-2">
-            <h3 
-              className="text-2xl font-bold text-black mb-4"
-              style={{ fontFamily: 'var(--font-heading)' }}
-            >
-              Matmax Yoga Studio
+    <footer className="bg-gradient-to-br from-gray-50 to-gray-100 border-t border-gray-200">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Main Footer Content */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          {/* Brand & Description */}
+          <div className="space-y-4">
+            <h3 className="text-xl font-bold text-gray-900" style={{ fontFamily: 'var(--font-heading)' }}>
+              {footer.studioTitle || 'Matmax Yoga Studio'}
             </h3>
-            <p 
-              className="text-gray-600 mb-4"
-              style={{ fontFamily: 'var(--font-body)' }}
-            >
-              Your sanctuary for wellness, growth, and transformation. Join our community and discover the power of yoga.
+            <p className="text-gray-600 text-sm leading-relaxed" style={{ fontFamily: 'var(--font-body)' }}>
+              {footer.studioDescription || 'Your sanctuary for wellness, growth, and transformation.'}
             </p>
-            <div className="flex space-x-4">
-              <a href="/account/book" className="btn-primary">Get Started</a>
+            <div className="flex space-x-3">
+              <a 
+                href="https://instagram.com/matmaxyoga" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="p-2 text-gray-400 hover:text-purple-600 transition-colors"
+                aria-label="Instagram"
+              >
+                <Instagram className="w-5 h-5" />
+              </a>
+              <a 
+                href="mailto:info@matmax.world" 
+                className="p-2 text-gray-400 hover:text-purple-600 transition-colors"
+                aria-label="Email"
+              >
+                <Mail className="w-5 h-5" />
+              </a>
+              <a 
+                href="tel:+51916172368" 
+                className="p-2 text-gray-400 hover:text-purple-600 transition-colors"
+                aria-label="Phone"
+              >
+                <Phone className="w-5 h-5" />
+              </a>
             </div>
           </div>
 
           {/* Quick Links */}
-          <div>
-            <h4 
-              className="text-lg font-semibold text-black mb-4"
-              style={{ fontFamily: 'var(--font-heading)' }}
-            >
-              Quick Links
+          <div className="space-y-4">
+            <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wide" style={{ fontFamily: 'var(--font-heading)' }}>
+              {footer.quickLinksTitle || 'Quick Links'}
             </h4>
-            <ul className="space-y-2">
-              <li><a href="#about" className="nav-link" style={{ color: 'var(--matmax-gray-600)' }}>About Us</a></li>
-              <li><a href="#classes" className="nav-link" style={{ color: 'var(--matmax-gray-600)' }}>Classes</a></li>
-              <li><a href="/schedule" className="nav-link" style={{ color: 'var(--matmax-gray-600)' }}>Schedule</a></li>
-              <li><a href="/packages" className="nav-link" style={{ color: 'var(--matmax-gray-600)' }}>Packages</a></li>
-            </ul>
+            <nav className="space-y-2">
+              <a href="/" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+                {footer.home || 'Home'}
+              </a>
+              <a href="/about" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+                {footer.about || 'About'}
+              </a>
+              <a href="/packages" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+                {footer.packages || 'Packages'}
+              </a>
+              <a href="/schedule" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+                {footer.schedule || 'Schedule'}
+              </a>
+              <a href="/account/book" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+                {footer.bookSession || 'Book Session'}
+              </a>
+            </nav>
           </div>
 
-          {/* Newsletter */}
-          <div>
-            <h4 
-              className="text-lg font-semibold text-black mb-4"
-              style={{ fontFamily: 'var(--font-heading)' }}
-            >
-              Stay Connected
+          {/* Contact Info */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wide" style={{ fontFamily: 'var(--font-heading)' }}>
+              {footer.contactTitle || 'Contact'}
             </h4>
-            <p 
-              className="text-gray-600 mb-4"
-              style={{ fontFamily: 'var(--font-body)' }}
-            >
-              Get updates on new classes and special offers.
-            </p>
-            <div className="flex space-x-4">
-              <a href="#" className="text-gray-600 hover:text-black transition-colors">
-                <span className="sr-only">Facebook</span>
-                <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-              </a>
-              <a href="#" className="text-gray-600 hover:text-black transition-colors">
-                <span className="sr-only">Instagram</span>
-                <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 6.62 5.367 11.987 11.988 11.987s11.987-5.367 11.987-11.987C24.014 5.367 18.647.001 12.017.001zM8.449 16.988c-1.297 0-2.448-.49-3.323-1.297C4.198 14.895 3.708 13.744 3.708 12.447s.49-2.448 1.297-3.323c.875-.807 2.026-1.297 3.323-1.297s2.448.49 3.323 1.297c.807.875 1.297 2.026 1.297 3.323s-.49 2.448-1.297 3.323c-.875.807-2.026 1.297-3.323 1.297zm7.83-9.281c-.49 0-.98-.49-.98-.98s.49-.98.98-.98.98.49.98.98-.49.98-.98.98z"/>
-                </svg>
-              </a>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-3 text-sm text-gray-600">
+                <MapPin className="w-4 h-4 text-purple-600 flex-shrink-0" />
+                <span>Calle Alcanfores 425, Miraflores, Lima</span>
+              </div>
+              <div className="flex items-center space-x-3 text-sm text-gray-600">
+                <Phone className="w-4 h-4 text-purple-600 flex-shrink-0" />
+                <a href="tel:+51916172368" className="hover:text-purple-600 transition-colors">
+                  +51 916 172 368
+                </a>
+              </div>
+              <div className="flex items-center space-x-3 text-sm text-gray-600">
+                <Mail className="w-4 h-4 text-purple-600 flex-shrink-0" />
+                <a href="mailto:info@matmax.world" className="hover:text-purple-600 transition-colors">
+                  info@matmax.world
+                </a>
+              </div>
             </div>
           </div>
         </div>
-        
-        <div className="mt-8 pt-8 border-t border-gray-200">
-          <p 
-            className="text-center text-gray-600"
-            style={{ fontFamily: 'var(--font-body)' }}
-          >
-            © 2024 Matmax Yoga Studio. All rights reserved.
-          </p>
+
+        {/* Bottom Bar */}
+        <div className="pt-6 border-t border-gray-200">
+          <div className="flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
+            <p className="text-xs text-gray-500" style={{ fontFamily: 'var(--font-body)' }}>
+              {footer.copyright || '© 2024 Matmax Yoga Studio. All rights reserved.'}
+            </p>
+            <div className="flex items-center space-x-1 text-xs text-gray-500">
+              <span>Made with</span>
+              <Heart className="w-3 h-3 text-red-500" />
+              <span>in Lima, Peru</span>
+            </div>
+          </div>
         </div>
       </div>
     </footer>

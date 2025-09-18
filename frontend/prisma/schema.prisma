@@ -8,85 +8,17 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// ===== ENUMS FOR TYPE SAFETY =====
-enum UserRole {
-  USER
-  ADMIN
-  SUPER_ADMIN
-}
-
-enum UserStatus {
-  ACTIVE
-  INACTIVE
-  PENDING
-  SUSPENDED
-}
-
-enum ServiceCategory {
-  CLASS
-  WORKSHOP
-  TRAINING_PROGRAM
-  RETREAT
-  CONSULTATION
-}
-
-enum ServiceDifficulty {
-  BEGINNER
-  INTERMEDIATE
-  ADVANCED
-  ALL_LEVELS
-}
-
-enum BookingStatus {
-  PENDING
-  CONFIRMED
-  CANCELLED
-  COMPLETED
-  NO_SHOW
-}
-
-enum DayOfWeek {
-  MONDAY
-  TUESDAY
-  WEDNESDAY
-  THURSDAY
-  FRIDAY
-  SATURDAY
-  SUNDAY
-}
-
-enum SessionType {
-  INDIVIDUAL
-  GROUP
-  SEMI_PRIVATE
-}
-
-enum PaymentStatus {
-  PENDING
-  COMPLETED
-  FAILED
-  REFUNDED
-  CANCELLED
-}
-
-enum PackageType {
-  FIXED
-  FLEXIBLE
-  UNLIMITED
-}
-
-// ===== MANY-TO-MANY RELATIONSHIP MODELS =====
 model Amenity {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique @db.VarChar(100)
-  description String?  @db.Text
-  icon        String?  @db.VarChar(50)
-  category    String?  @db.VarChar(50)
-  isActive    Boolean  @default(true) @map("is_active")
-  displayOrder Int?    @default(0) @map("display_order")
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  venues      VenueAmenity[]
+  id           Int            @id @default(autoincrement())
+  name         String         @unique @db.VarChar(100)
+  description  String?
+  icon         String?        @db.VarChar(50)
+  category     String?        @db.VarChar(50)
+  isActive     Boolean        @default(true) @map("is_active")
+  displayOrder Int?           @default(0) @map("display_order")
+  createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  venues       VenueAmenity[]
 
   @@index([isActive], map: "idx_amenities_active")
   @@index([category], map: "idx_amenities_category")
@@ -94,17 +26,17 @@ model Amenity {
 }
 
 model Specialty {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique @db.VarChar(100)
-  description String?  @db.Text
-  category    String?  @db.VarChar(50)
-  serviceTypeId Int?   @map("service_type_id") // Optional: specialty can be related to a service type
-  isActive    Boolean  @default(true) @map("is_active")
-  displayOrder Int?    @default(0) @map("display_order")
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  serviceType ServiceType? @relation(fields: [serviceTypeId], references: [id], onDelete: SetNull, onUpdate: Restrict)
-  teachers    TeacherSpecialty[]
+  id            Int                @id @default(autoincrement())
+  name          String             @unique @db.VarChar(100)
+  description   String?
+  category      String?            @db.VarChar(50)
+  serviceTypeId Int?               @map("service_type_id")
+  isActive      Boolean            @default(true) @map("is_active")
+  displayOrder  Int?               @default(0) @map("display_order")
+  createdAt     DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  serviceType   ServiceType?       @relation(fields: [serviceTypeId], references: [id], onUpdate: Restrict)
+  teachers      TeacherSpecialty[]
 
   @@index([isActive], map: "idx_specialties_active")
   @@index([category], map: "idx_specialties_category")
@@ -113,39 +45,37 @@ model Specialty {
 }
 
 model Language {
-  id          Int      @id @default(autoincrement())
-  name        String   @db.VarChar(100)
-  code        String   @unique @db.VarChar(10) // ISO 639-1 code (e.g., 'en', 'es')
-  nativeName  String?  @map("native_name") @db.VarChar(100)
-  isActive    Boolean  @default(true) @map("is_active")
-  displayOrder Int?    @default(0) @map("display_order")
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  teachers    TeacherLanguage[]
+  id           Int               @id @default(autoincrement())
+  name         String            @db.VarChar(100)
+  code         String            @unique @db.VarChar(10)
+  nativeName   String?           @map("native_name") @db.VarChar(100)
+  isActive     Boolean           @default(true) @map("is_active")
+  displayOrder Int?              @default(0) @map("display_order")
+  createdAt    DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  teachers     TeacherLanguage[]
 
   @@index([isActive], map: "idx_languages_active")
   @@index([code], map: "idx_languages_code")
   @@map("languages")
 }
 
-// ===== RICH CONTENT MODELS =====
 model Testimonial {
-  id           Int         @id @default(autoincrement())
-  text         String      @db.Text
-  authorName   String      @map("author_name") @db.VarChar(100)
-  authorTitle  String?     @map("author_title") @db.VarChar(100)
-  authorImage  String?     @map("author_image") @db.VarChar(500)
-  rating       Int?        @db.SmallInt // 1-5 star rating
-  isVerified   Boolean     @default(false) @map("is_verified")
-  isActive     Boolean     @default(true) @map("is_active")
-  displayOrder Int?        @default(0) @map("display_order")
-  createdAt    DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt    DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  // Relations
-  serviceTypeId Int?       @map("service_type_id")
-  teacherId     Int?       @map("teacher_id")
+  id            Int          @id @default(autoincrement())
+  text          String
+  authorName    String       @map("author_name") @db.VarChar(100)
+  authorTitle   String?      @map("author_title") @db.VarChar(100)
+  authorImage   String?      @map("author_image") @db.VarChar(500)
+  rating        Int?         @db.SmallInt
+  isVerified    Boolean      @default(false) @map("is_verified")
+  isActive      Boolean      @default(true) @map("is_active")
+  displayOrder  Int?         @default(0) @map("display_order")
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  serviceTypeId Int?         @map("service_type_id")
+  teacherId     Int?         @map("teacher_id")
   serviceType   ServiceType? @relation(fields: [serviceTypeId], references: [id], onDelete: Cascade)
-  teacher       Teacher?   @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  teacher       Teacher?     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
   @@index([isActive], map: "idx_testimonials_active")
   @@index([serviceTypeId], map: "idx_testimonials_service_type")
@@ -155,19 +85,18 @@ model Testimonial {
 }
 
 model FAQ {
-  id           Int         @id @default(autoincrement())
-  question     String      @db.VarChar(500)
-  answer       String      @db.Text
-  category     String?     @db.VarChar(100)
-  isActive     Boolean     @default(true) @map("is_active")
-  displayOrder Int?        @default(0) @map("display_order")
-  createdAt    DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt    DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  // Relations
-  serviceTypeId Int?       @map("service_type_id")
-  teacherId     Int?       @map("teacher_id")
+  id            Int          @id @default(autoincrement())
+  question      String       @db.VarChar(500)
+  answer        String
+  category      String?      @db.VarChar(100)
+  isActive      Boolean      @default(true) @map("is_active")
+  displayOrder  Int?         @default(0) @map("display_order")
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  serviceTypeId Int?         @map("service_type_id")
+  teacherId     Int?         @map("teacher_id")
   serviceType   ServiceType? @relation(fields: [serviceTypeId], references: [id], onDelete: Cascade)
-  teacher       Teacher?   @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  teacher       Teacher?     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
   @@index([isActive], map: "idx_faqs_active")
   @@index([serviceTypeId], map: "idx_faqs_service_type")
@@ -176,26 +105,24 @@ model FAQ {
   @@map("faqs")
 }
 
-// ===== FLEXIBLE PRICING MODEL =====
 model ServicePrice {
-  id           Int         @id @default(autoincrement())
-  price        Decimal     @db.Decimal(10, 2)
-  currency     String      @default("USD") @db.VarChar(3)
-  pricingType  String      @map("pricing_type") @db.VarChar(50) // BASE, VENUE_SPECIFIC, TEACHER_SPECIFIC, PACKAGE_SPECIFIC
-  isActive     Boolean     @default(true) @map("is_active")
-  validFrom    DateTime?   @map("valid_from") @db.Timestamptz(6)
-  validTo      DateTime?   @map("valid_to") @db.Timestamptz(6)
-  createdAt    DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt    DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  // Relations
-  serviceTypeId Int       @map("service_type_id")
-  venueId       Int?      @map("venue_id")
-  teacherId     Int?      @map("teacher_id")
-  packageDefinitionId Int? @map("package_definition_id")
-  serviceType   ServiceType @relation(fields: [serviceTypeId], references: [id], onDelete: Cascade)
-  venue         Venue?    @relation(fields: [venueId], references: [id], onDelete: Cascade)
-  teacher       Teacher?  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  packageDefinition PackageDefinition? @relation(fields: [packageDefinitionId], references: [id], onDelete: Cascade)
+  id                  Int                @id @default(autoincrement())
+  price               Decimal            @db.Decimal(10, 2)
+  currency            String             @default("USD") @db.VarChar(3)
+  pricingType         String             @map("pricing_type") @db.VarChar(50)
+  isActive            Boolean            @default(true) @map("is_active")
+  validFrom           DateTime?          @map("valid_from") @db.Timestamptz(6)
+  validTo             DateTime?          @map("valid_to") @db.Timestamptz(6)
+  createdAt           DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  serviceTypeId       Int                @map("service_type_id")
+  venueId             Int?               @map("venue_id")
+  teacherId           Int?               @map("teacher_id")
+  packageDefinitionId Int?               @map("package_definition_id")
+  packageDefinition   PackageDefinition? @relation(fields: [packageDefinitionId], references: [id], onDelete: Cascade)
+  serviceType         ServiceType        @relation(fields: [serviceTypeId], references: [id], onDelete: Cascade)
+  teacher             Teacher?           @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  venue               Venue?             @relation(fields: [venueId], references: [id], onDelete: Cascade)
 
   @@index([serviceTypeId], map: "idx_service_prices_service_type")
   @@index([venueId], map: "idx_service_prices_venue")
@@ -248,26 +175,25 @@ model User {
 }
 
 model Venue {
-  id                Int             @id @default(autoincrement())
-  name              String          @db.VarChar(255)
+  id                Int                @id @default(autoincrement())
+  name              String             @db.VarChar(255)
   description       String?
-  address           String?         @db.Text
-  city              String?         @db.VarChar(100)
-  country           String?         @db.VarChar(100)
-  capacity          Int             @default(10)
-  maxGroupSize      Int?            @map("max_group_size")
-  isActive          Boolean?        @default(true) @map("is_active")
-  displayOrder      Int?            @default(0) @map("display_order")
-  featured          Boolean?        @default(false) @map("featured")
-  createdAt         DateTime?       @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt         DateTime?       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  // Relations
-  scheduleTemplates ScheduleTemplate[]
-  teachers          Teacher[]
-  teacherSchedules  TeacherSchedule[]
+  address           String?
+  city              String?            @db.VarChar(100)
+  country           String?            @db.VarChar(100)
+  capacity          Int                @default(10)
+  maxGroupSize      Int?               @map("max_group_size")
+  isActive          Boolean?           @default(true) @map("is_active")
+  displayOrder      Int?               @default(0) @map("display_order")
+  featured          Boolean?           @default(false) @map("featured")
+  createdAt         DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime?          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   bookings          Booking[]
-  amenities         VenueAmenity[]
+  scheduleTemplates ScheduleTemplate[]
   servicePrices     ServicePrice[]
+  teacherSchedules  TeacherSchedule[]
+  teachers          Teacher[]
+  amenities         VenueAmenity[]
 
   @@index([isActive], map: "idx_venues_active")
   @@index([displayOrder], map: "idx_venues_order")
@@ -275,14 +201,13 @@ model Venue {
   @@map("venues")
 }
 
-// ===== MANY-TO-MANY JOIN TABLES =====
 model VenueAmenity {
-  id        Int     @id @default(autoincrement())
-  venueId   Int     @map("venue_id")
-  amenityId Int     @map("amenity_id")
+  id        Int      @id @default(autoincrement())
+  venueId   Int      @map("venue_id")
+  amenityId Int      @map("amenity_id")
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  venue     Venue   @relation(fields: [venueId], references: [id], onDelete: Cascade)
-  amenity   Amenity @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+  amenity   Amenity  @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+  venue     Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade)
 
   @@unique([venueId, amenityId])
   @@index([venueId], map: "idx_venue_amenities_venue")
@@ -291,54 +216,47 @@ model VenueAmenity {
 }
 
 model Teacher {
-  id                Int             @id @default(autoincrement())
-  name              String          @db.VarChar(255)
-  email             String?         @unique @db.VarChar(255)
-  phone             String?         @db.VarChar(20)
-  bio               String?         @db.Text
-  shortBio          String?         @db.VarChar(500) @map("short_bio") // For cards/previews
-  experience        Int?            @default(0) // years of experience
-  avatarUrl         String?         @map("avatar_url")
-  // Enhanced profile fields
-  coverImage        String?         @map("cover_image") // Profile cover image
-  galleryImages     String[]        @default([]) @map("gallery_images") // Teacher photos
-  videoUrl          String?         @map("video_url") // Introduction video
-  thumbnailUrl      String?         @map("thumbnail_url") // Video thumbnail
-  // Social media and contact
-  website           String?         @db.VarChar(255)
-  instagram         String?         @db.VarChar(255)
-  facebook          String?         @db.VarChar(255)
-  linkedin          String?         @db.VarChar(255)
-  // Teaching preferences
-  teachingStyle     String?         @map("teaching_style") @db.Text
-  philosophy        String?         @db.Text
-  approach          String?         @db.Text
-  // Availability and preferences
-  maxStudents       Int?            @default(10) @map("max_students")
-  minStudents       Int?            @default(1) @map("min_students")
-  preferredTimes    String[]        @default([]) @map("preferred_times")
-  // Status and display
-  isActive          Boolean?        @default(true) @map("is_active")
-  displayOrder      Int?            @default(0) @map("display_order")
-  featured          Boolean?        @default(false) @map("featured")
-  // SEO fields
-  slug              String?         @unique @db.VarChar(255) // URL slug
-  metaTitle         String?         @map("meta_title") @db.VarChar(255)
-  metaDescription   String?         @map("meta_description") @db.VarChar(500)
-  createdAt         DateTime?       @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt         DateTime?       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  venueId           Int?            @map("venue_id")
-  venue             Venue?          @relation(fields: [venueId], references: [id], onDelete: SetNull, onUpdate: Restrict)
-  // Relations
-  teacherSchedules  TeacherSchedule[]
-  bookings          Booking[]
-  certifications    TeacherCertification[]
-  specialties       TeacherSpecialty[]
-  serviceTypes      TeacherServiceType[]
-  languages         TeacherLanguage[]
-  testimonials      Testimonial[]
-  faqs              FAQ[]
-  servicePrices     ServicePrice[]
+  id               Int                    @id @default(autoincrement())
+  name             String                 @db.VarChar(255)
+  email            String?                @unique @db.VarChar(255)
+  phone            String?                @db.VarChar(20)
+  bio              String?
+  shortBio         String?                @map("short_bio") @db.VarChar(500)
+  experience       Int?                   @default(0)
+  avatarUrl        String?                @map("avatar_url")
+  coverImage       String?                @map("cover_image")
+  galleryImages    String[]               @default([]) @map("gallery_images")
+  videoUrl         String?                @map("video_url")
+  thumbnailUrl     String?                @map("thumbnail_url")
+  website          String?                @db.VarChar(255)
+  instagram        String?                @db.VarChar(255)
+  facebook         String?                @db.VarChar(255)
+  linkedin         String?                @db.VarChar(255)
+  teachingStyle    String?                @map("teaching_style")
+  philosophy       String?
+  approach         String?
+  maxStudents      Int?                   @default(10) @map("max_students")
+  minStudents      Int?                   @default(1) @map("min_students")
+  preferredTimes   String[]               @default([]) @map("preferred_times")
+  isActive         Boolean?               @default(true) @map("is_active")
+  displayOrder     Int?                   @default(0) @map("display_order")
+  featured         Boolean?               @default(false) @map("featured")
+  slug             String?                @unique @db.VarChar(255)
+  metaTitle        String?                @map("meta_title") @db.VarChar(255)
+  metaDescription  String?                @map("meta_description") @db.VarChar(500)
+  createdAt        DateTime?              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime?              @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  venueId          Int?                   @map("venue_id")
+  bookings         Booking[]
+  faqs             FAQ[]
+  servicePrices    ServicePrice[]
+  certifications   TeacherCertification[]
+  languages        TeacherLanguage[]
+  teacherSchedules TeacherSchedule[]
+  serviceTypes     TeacherServiceType[]
+  specialties      TeacherSpecialty[]
+  venue            Venue?                 @relation(fields: [venueId], references: [id], onUpdate: Restrict)
+  testimonials     Testimonial[]
 
   @@index([isActive], map: "idx_teachers_active")
   @@index([displayOrder], map: "idx_teachers_order")
@@ -349,21 +267,21 @@ model Teacher {
 }
 
 model TeacherSpecialty {
-  id            Int         @id @default(autoincrement())
-  teacherId     Int         @map("teacher_id")
-  specialtyId   Int         @map("specialty_id")
-  serviceTypeId Int?        @map("service_type_id") // Optional: specialty in context of specific service type
-  level         String?     @db.VarChar(50) // e.g., "Beginner", "Intermediate", "Advanced", "Expert"
-  yearsExperience Int?      @map("years_experience") // years of experience in this specialty
-  certification String?     @db.VarChar(255) // certification name
-  certificationDate DateTime? @map("certification_date") @db.Date
-  notes         String?     @db.Text // additional notes about this specialty
-  isVerified    Boolean?    @default(false) @map("is_verified")
-  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt     DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  teacher       Teacher     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  specialty     Specialty   @relation(fields: [specialtyId], references: [id], onDelete: Cascade)
-  serviceType   ServiceType? @relation(fields: [serviceTypeId], references: [id], onDelete: SetNull, onUpdate: Restrict)
+  id                Int          @id @default(autoincrement())
+  teacherId         Int          @map("teacher_id")
+  specialtyId       Int          @map("specialty_id")
+  serviceTypeId     Int?         @map("service_type_id")
+  level             String?      @db.VarChar(50)
+  yearsExperience   Int?         @map("years_experience")
+  certification     String?      @db.VarChar(255)
+  certificationDate DateTime?    @map("certification_date") @db.Date
+  notes             String?
+  isVerified        Boolean?     @default(false) @map("is_verified")
+  createdAt         DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  serviceType       ServiceType? @relation(fields: [serviceTypeId], references: [id], onUpdate: Restrict)
+  specialty         Specialty    @relation(fields: [specialtyId], references: [id], onDelete: Cascade)
+  teacher           Teacher      @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
   @@unique([teacherId, specialtyId, serviceTypeId])
   @@index([teacherId], map: "idx_teacher_specialties_teacher")
@@ -377,8 +295,8 @@ model TeacherServiceType {
   teacherId     Int         @map("teacher_id")
   serviceTypeId Int         @map("service_type_id")
   createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
-  teacher       Teacher     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   serviceType   ServiceType @relation(fields: [serviceTypeId], references: [id], onDelete: Cascade)
+  teacher       Teacher     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
   @@unique([teacherId, serviceTypeId])
   @@index([teacherId], map: "idx_teacher_service_types_teacher")
@@ -391,8 +309,8 @@ model TeacherLanguage {
   teacherId  Int      @map("teacher_id")
   languageId Int      @map("language_id")
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  teacher    Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   language   Language @relation(fields: [languageId], references: [id], onDelete: Cascade)
+  teacher    Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
   @@unique([teacherId, languageId])
   @@index([teacherId], map: "idx_teacher_languages_teacher")
@@ -401,20 +319,20 @@ model TeacherLanguage {
 }
 
 model TeacherCertification {
-  id                Int             @id @default(autoincrement())
-  teacherId         Int             @map("teacher_id")
-  name              String          @db.VarChar(255)
-  issuingOrganization String        @map("issuing_organization") @db.VarChar(255)
-  issueDate         DateTime?       @map("issue_date") @db.Date
-  expiryDate        DateTime?       @map("expiry_date") @db.Date
-  credentialId      String?         @map("credential_id") @db.VarChar(100)
-  credentialUrl     String?         @map("credential_url") @db.VarChar(500)
-  description       String?         @db.Text
-  isVerified        Boolean?        @default(false) @map("is_verified")
-  displayOrder      Int?            @default(0) @map("display_order")
-  createdAt         DateTime?       @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt         DateTime?       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  teacher           Teacher         @relation(fields: [teacherId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  id                  Int       @id @default(autoincrement())
+  teacherId           Int       @map("teacher_id")
+  name                String    @db.VarChar(255)
+  issuingOrganization String    @map("issuing_organization") @db.VarChar(255)
+  issueDate           DateTime? @map("issue_date") @db.Date
+  expiryDate          DateTime? @map("expiry_date") @db.Date
+  credentialId        String?   @map("credential_id") @db.VarChar(100)
+  credentialUrl       String?   @map("credential_url") @db.VarChar(500)
+  description         String?
+  isVerified          Boolean?  @default(false) @map("is_verified")
+  displayOrder        Int?      @default(0) @map("display_order")
+  createdAt           DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  teacher             Teacher   @relation(fields: [teacherId], references: [id], onDelete: Cascade, onUpdate: Restrict)
 
   @@index([teacherId], map: "idx_teacher_certifications_teacher")
   @@index([isVerified], map: "idx_teacher_certifications_verified")
@@ -423,49 +341,45 @@ model TeacherCertification {
 }
 
 model ServiceType {
-  id                Int             @id @default(autoincrement())
-  name              String          @db.VarChar(100)
-  description       String?         @db.Text
-  shortDescription  String?         @db.VarChar(255) @map("short_description") // For cards/previews
-  category          ServiceCategory
-  duration          Int?            @default(60) // duration in minutes
-  maxParticipants   Int?            @map("max_participants")
-  minParticipants   Int?            @default(1) @map("min_participants")
-  requirements      String[]        @default([]) // equipment, level, etc.
-  benefits          String[]        @default([]) // what users will gain
-  difficulty        ServiceDifficulty?
-  price             Decimal?        @db.Decimal(10, 2) // base price for the service
-  currencyId        Int?            @map("currency_id") // reference to currency
-  isActive          Boolean?        @default(true) @map("is_active")
-  displayOrder      Int?            @default(0) @map("display_order")
-  featured          Boolean?        @default(false) @map("featured")
-  color             String?         @db.VarChar(7) // hex color for UI
-  icon              String?         @db.VarChar(50) // icon name
-  // Media fields
-  coverImage        String?         @map("cover_image") // main image URL
-  galleryImages     String[]        @default([]) @map("gallery_images") // array of image URLs
-  videoUrl          String?         @map("video_url") // promotional video URL
-  thumbnailUrl      String?         @map("thumbnail_url") // video thumbnail URL
-  // Rich content for frontend
-  content           String?         @db.Text // rich HTML content
-  highlights        String[]        @default([]) // key highlights/features
-  // SEO fields
-  metaTitle         String?         @map("meta_title") @db.VarChar(255)
-  metaDescription   String?         @map("meta_description") @db.VarChar(500)
-  slug              String?         @unique @db.VarChar(255) // URL slug
-  createdAt         DateTime?       @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt         DateTime?       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  // Relations
-  currency          Currency?        @relation("ServiceTypeCurrency", fields: [currencyId], references: [id], onDelete: SetNull, onUpdate: Restrict)
-  teacherSchedules  TeacherSchedule[]
-  teachers          TeacherServiceType[]
-  specialties       Specialty[]
+  id                 Int                  @id @default(autoincrement())
+  name               String               @db.VarChar(100)
+  description        String?
+  shortDescription   String?              @map("short_description") @db.VarChar(255)
+  category           ServiceCategory
+  duration           Int?                 @default(60)
+  maxParticipants    Int?                 @map("max_participants")
+  minParticipants    Int?                 @default(1) @map("min_participants")
+  requirements       String[]             @default([])
+  benefits           String[]             @default([])
+  difficulty         ServiceDifficulty?
+  price              Decimal?             @db.Decimal(10, 2)
+  currencyId         Int?                 @map("currency_id")
+  isActive           Boolean?             @default(true) @map("is_active")
+  displayOrder       Int?                 @default(0) @map("display_order")
+  featured           Boolean?             @default(false) @map("featured")
+  color              String?              @db.VarChar(7)
+  icon               String?              @db.VarChar(50)
+  coverImage         String?              @map("cover_image")
+  galleryImages      String[]             @default([]) @map("gallery_images")
+  videoUrl           String?              @map("video_url")
+  thumbnailUrl       String?              @map("thumbnail_url")
+  content            String?
+  highlights         String[]             @default([])
+  metaTitle          String?              @map("meta_title") @db.VarChar(255)
+  metaDescription    String?              @map("meta_description") @db.VarChar(500)
+  slug               String?              @unique @db.VarChar(255)
+  createdAt          DateTime?            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime?            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  bookings           Booking[]
+  faqs               FAQ[]
+  packageServices    PackageService[]
+  servicePrices      ServicePrice[]
+  currency           Currency?            @relation("ServiceTypeCurrency", fields: [currencyId], references: [id], onUpdate: Restrict)
+  specialties        Specialty[]
+  teacherSchedules   TeacherSchedule[]
+  teachers           TeacherServiceType[]
   teacherSpecialties TeacherSpecialty[]
-  packageServices   PackageService[]
-  bookings          Booking[]
-  testimonials      Testimonial[]
-  faqs              FAQ[]
-  servicePrices     ServicePrice[]
+  testimonials       Testimonial[]
 
   @@index([category], map: "idx_service_types_category")
   @@index([isActive], map: "idx_service_types_active")
@@ -478,15 +392,15 @@ model ServiceType {
 }
 
 model PackageService {
-  id                Int             @id @default(autoincrement())
-  packageDefinitionId Int           @map("package_definition_id")
-  serviceTypeId     Int             @map("service_type_id")
-  sessionsIncluded  Int?            @default(1) @map("sessions_included")
-  isActive          Boolean?        @default(true) @map("is_active")
-  createdAt         DateTime?       @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt         DateTime?       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  packageDefinition PackageDefinition @relation(fields: [packageDefinitionId], references: [id], onDelete: Cascade, onUpdate: Restrict)
-  serviceType       ServiceType     @relation(fields: [serviceTypeId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  id                  Int               @id @default(autoincrement())
+  packageDefinitionId Int               @map("package_definition_id")
+  serviceTypeId       Int               @map("service_type_id")
+  sessionsIncluded    Int?              @default(1) @map("sessions_included")
+  isActive            Boolean?          @default(true) @map("is_active")
+  createdAt           DateTime?         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime?         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  packageDefinition   PackageDefinition @relation(fields: [packageDefinitionId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  serviceType         ServiceType       @relation(fields: [serviceTypeId], references: [id], onDelete: Cascade, onUpdate: Restrict)
 
   @@unique([packageDefinitionId, serviceTypeId])
   @@index([packageDefinitionId], map: "idx_package_services_package")
@@ -495,21 +409,21 @@ model PackageService {
 }
 
 model TeacherSchedule {
-  id                Int             @id @default(autoincrement())
-  teacherId         Int             @map("teacher_id")
-  venueId           Int             @map("venue_id")
-  serviceTypeId     Int?            @map("service_type_id")
-  dayOfWeek         String          @map("day_of_week") @db.VarChar(20)
-  startTime         DateTime        @map("start_time") @db.Time(6) // Time format (HH:mm:ss.SSSZ)
-  endTime           DateTime        @map("end_time") @db.Time(6) // Time format (HH:mm:ss.SSSZ)
-  isAvailable       Boolean?        @default(true) @map("is_available")
-  maxBookings       Int?            @default(1) @map("max_bookings")
-  createdAt         DateTime?       @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt         DateTime?       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  teacher           Teacher         @relation(fields: [teacherId], references: [id], onDelete: Cascade, onUpdate: Restrict)
-  venue             Venue           @relation(fields: [venueId], references: [id], onDelete: Cascade, onUpdate: Restrict)
-  serviceType       ServiceType?    @relation(fields: [serviceTypeId], references: [id], onDelete: SetNull, onUpdate: Restrict)
+  id                   Int                   @id @default(autoincrement())
+  teacherId            Int                   @map("teacher_id")
+  venueId              Int                   @map("venue_id")
+  serviceTypeId        Int?                  @map("service_type_id")
+  dayOfWeek            String                @map("day_of_week") @db.VarChar(20)
+  startTime            DateTime              @map("start_time") @db.Time(6)
+  endTime              DateTime              @map("end_time") @db.Time(6)
+  isAvailable          Boolean?              @default(true) @map("is_available")
+  maxBookings          Int?                  @default(1) @map("max_bookings")
+  createdAt            DateTime?             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime?             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   teacherScheduleSlots TeacherScheduleSlot[]
+  serviceType          ServiceType?          @relation(fields: [serviceTypeId], references: [id], onUpdate: Restrict)
+  teacher              Teacher               @relation(fields: [teacherId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  venue                Venue                 @relation(fields: [venueId], references: [id], onDelete: Cascade, onUpdate: Restrict)
 
   @@index([teacherId], map: "idx_teacher_schedules_teacher")
   @@index([venueId], map: "idx_teacher_schedules_venue")
@@ -520,17 +434,17 @@ model TeacherSchedule {
 }
 
 model TeacherScheduleSlot {
-  id                 Int              @id @default(autoincrement())
-  teacherScheduleId  Int              @map("teacher_schedule_id")
-  startTime          DateTime         @map("start_time") @db.Timestamptz(6)
-  endTime            DateTime         @map("end_time") @db.Timestamptz(6)
-  isAvailable        Boolean?         @default(true) @map("is_available")
-  bookedCount        Int?             @default(0) @map("booked_count")
-  maxBookings        Int?             @default(1) @map("max_bookings")
-  createdAt          DateTime?        @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt          DateTime?        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  teacherSchedule    TeacherSchedule  @relation(fields: [teacherScheduleId], references: [id], onDelete: Cascade, onUpdate: Restrict)
-  bookings           Booking[]
+  id                Int             @id @default(autoincrement())
+  teacherScheduleId Int             @map("teacher_schedule_id")
+  startTime         DateTime        @map("start_time") @db.Timestamptz(6)
+  endTime           DateTime        @map("end_time") @db.Timestamptz(6)
+  isAvailable       Boolean?        @default(true) @map("is_available")
+  bookedCount       Int?            @default(0) @map("booked_count")
+  maxBookings       Int?            @default(1) @map("max_bookings")
+  createdAt         DateTime?       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime?       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  bookings          Booking[]
+  teacherSchedule   TeacherSchedule @relation(fields: [teacherScheduleId], references: [id], onDelete: Cascade, onUpdate: Restrict)
 
   @@index([startTime], map: "idx_teacher_schedule_slots_start_time")
   @@index([isAvailable, startTime], map: "idx_teacher_schedule_slots_available_start_time")
@@ -541,22 +455,21 @@ model TeacherScheduleSlot {
 }
 
 model PackageDefinition {
-  id                Int             @id @default(autoincrement())
-  name              String          @db.VarChar(255)
+  id                Int              @id @default(autoincrement())
+  name              String           @db.VarChar(255)
   description       String?
-  sessionsCount     Int             @map("sessions_count")
-  sessionDurationId Int             @map("session_duration_id")
-  packageType       String          @map("package_type") @db.VarChar(20)
-  maxGroupSize      Int?            @map("max_group_size")
-  isActive          Boolean?        @default(true) @map("is_active")
-  isPopular         Boolean?        @default(false) @map("is_popular")
-  displayOrder      Int?            @default(0) @map("display_order")
-  featured          Boolean?        @default(false) @map("featured")
-  // Package can be used across all venues and teachers
-  isGlobal          Boolean?        @default(true) @map("is_global")
-  createdAt         DateTime?       @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt         DateTime?       @default(now()) @map("updated_at") @db.Timestamptz(6)
-  sessionDuration   SessionDuration @relation("PackageDefinitionSessionDuration", fields: [sessionDurationId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  sessionsCount     Int              @map("sessions_count")
+  sessionDurationId Int              @map("session_duration_id")
+  packageType       String           @map("package_type") @db.VarChar(20)
+  maxGroupSize      Int?             @map("max_group_size")
+  isActive          Boolean?         @default(true) @map("is_active")
+  isPopular         Boolean?         @default(false) @map("is_popular")
+  displayOrder      Int?             @default(0) @map("display_order")
+  featured          Boolean?         @default(false) @map("featured")
+  isGlobal          Boolean?         @default(true) @map("is_global")
+  createdAt         DateTime?        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime?        @default(now()) @map("updated_at") @db.Timestamptz(6)
+  sessionDuration   SessionDuration  @relation("PackageDefinitionSessionDuration", fields: [sessionDurationId], references: [id], onDelete: Cascade, onUpdate: Restrict)
   packagePrices     PackagePrice[]
   packageServices   PackageService[]
   servicePrices     ServicePrice[]
@@ -599,9 +512,9 @@ model ScheduleTemplate {
   autoAvailable     Boolean?         @default(true) @map("auto_available")
   createdAt         DateTime?        @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt         DateTime?        @default(now()) @map("updated_at") @db.Timestamptz(6)
-  venue             Venue?           @relation(fields: [venueId], references: [id], onDelete: Cascade, onUpdate: Restrict)
   scheduleSlots     ScheduleSlot[]
   sessionDuration   SessionDuration? @relation("ScheduleTemplateSessionDuration", fields: [sessionDurationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  venue             Venue?           @relation(fields: [venueId], references: [id], onDelete: Cascade, onUpdate: Restrict)
 
   @@index([venueId], map: "idx_schedule_templates_venue")
   @@index([dayOfWeek], map: "idx_schedule_templates_day")
@@ -634,12 +547,14 @@ model Purchase {
   userId         String          @map("user_id")
   totalAmount    Decimal         @map("total_amount") @db.Decimal(10, 2)
   currencyCode   String          @map("currency_code") @db.VarChar(3)
-  paymentMethod  String          @map("payment_method") @db.VarChar(50)
+  paymentMethod  String?         @map("payment_method") @db.VarChar(50)
   paymentStatus  PaymentStatus?  @default(PENDING) @map("payment_status")
   transactionId  String?         @map("transaction_id") @db.VarChar(255)
   notes          String?
   purchasedAt    DateTime?       @default(now()) @map("purchased_at") @db.Timestamptz(6)
   confirmedAt    DateTime?       @map("confirmed_at") @db.Timestamptz(6)
+  
+  
   createdAt      DateTime?       @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime?       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   paymentRecords PaymentRecord[]
@@ -679,30 +594,30 @@ model UserPackage {
 }
 
 model Booking {
-  id              Int          @id @default(autoincrement())
-  userId          String       @map("user_id")
-  userPackageId   Int          @map("user_package_id")
-  scheduleSlotId  Int?         @map("schedule_slot_id") // Optional for teacher-specific bookings
-  teacherScheduleSlotId Int?   @map("teacher_schedule_slot_id") // For teacher-specific bookings
-  venueId         Int?         @map("venue_id")
-  teacherId       Int?         @map("teacher_id")
-  serviceTypeId   Int?         @map("service_type_id")
-  sessionType     String       @map("session_type")
-  status          String?      @default("confirmed")
-  notes           String?
-  cancelledAt     DateTime?    @map("cancelled_at") @db.Timestamptz(6)
-  cancelledReason String?      @map("cancelled_reason")
-  reminderSent    Boolean?     @default(false) @map("reminder_sent")
-  reminderSentAt  DateTime?    @map("reminder_sent_at") @db.Timestamptz(6)
-  createdAt       DateTime?    @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt       DateTime?    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  scheduleSlot    ScheduleSlot? @relation(fields: [scheduleSlotId], references: [id], onDelete: Cascade, onUpdate: Restrict)
-  teacherScheduleSlot TeacherScheduleSlot? @relation(fields: [teacherScheduleSlotId], references: [id], onDelete: Cascade, onUpdate: Restrict)
-  venue           Venue?       @relation(fields: [venueId], references: [id], onDelete: Cascade, onUpdate: Restrict)
-  teacher         Teacher?     @relation(fields: [teacherId], references: [id], onDelete: Cascade, onUpdate: Restrict)
-  serviceType     ServiceType? @relation(fields: [serviceTypeId], references: [id], onDelete: SetNull, onUpdate: Restrict)
-  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
-  userPackage     UserPackage  @relation(fields: [userPackageId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  id                    Int                  @id @default(autoincrement())
+  userId                String               @map("user_id")
+  userPackageId         Int                  @map("user_package_id")
+  scheduleSlotId        Int?                 @map("schedule_slot_id")
+  teacherScheduleSlotId Int?                 @map("teacher_schedule_slot_id")
+  venueId               Int?                 @map("venue_id")
+  teacherId             Int?                 @map("teacher_id")
+  serviceTypeId         Int?                 @map("service_type_id")
+  sessionType           String               @map("session_type")
+  status                String?              @default("confirmed")
+  notes                 String?
+  cancelledAt           DateTime?            @map("cancelled_at") @db.Timestamptz(6)
+  cancelledReason       String?              @map("cancelled_reason")
+  reminderSent          Boolean?             @default(false) @map("reminder_sent")
+  reminderSentAt        DateTime?            @map("reminder_sent_at") @db.Timestamptz(6)
+  createdAt             DateTime?            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime?            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  scheduleSlot          ScheduleSlot?        @relation(fields: [scheduleSlotId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  serviceType           ServiceType?         @relation(fields: [serviceTypeId], references: [id], onUpdate: Restrict)
+  teacher               Teacher?             @relation(fields: [teacherId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  teacherScheduleSlot   TeacherScheduleSlot? @relation(fields: [teacherScheduleSlotId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  user                  User                 @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  userPackage           UserPackage          @relation(fields: [userPackageId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  venue                 Venue?               @relation(fields: [venueId], references: [id], onDelete: Cascade, onUpdate: Restrict)
 
   @@index([userId], map: "idx_bookings_user_id")
   @@index([userPackageId], map: "idx_bookings_user_package_id")
@@ -721,21 +636,25 @@ model Booking {
 }
 
 model PaymentRecord {
-  id            Int       @id @default(autoincrement())
-  userId        String    @map("user_id")
-  purchaseId    Int       @map("purchase_id")
-  amount        Decimal   @db.Decimal(10, 2)
-  currencyCode  String    @map("currency_code") @db.VarChar(3)
-  paymentMethod String    @map("payment_method") @db.VarChar(50)
+  id            Int            @id @default(autoincrement())
+  userId        String         @map("user_id")
+  purchaseId    Int            @map("purchase_id")
+  amount        Decimal        @db.Decimal(10, 2)
+  currencyCode  String         @map("currency_code") @db.VarChar(3)
+  paymentMethod String         @map("payment_method") @db.VarChar(50)
   paymentStatus PaymentStatus? @default(PENDING) @map("payment_status")
-  transactionId String?   @map("transaction_id") @db.VarChar(255)
+  transactionId String?        @map("transaction_id") @db.VarChar(255)
   notes         String?
-  paymentDate   DateTime? @map("payment_date") @db.Date
-  confirmedAt   DateTime? @map("confirmed_at") @db.Timestamptz(6)
-  createdAt     DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt     DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  purchase      Purchase  @relation(fields: [purchaseId], references: [id], onDelete: Cascade, onUpdate: Restrict)
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  paymentDate   DateTime?      @map("payment_date") @db.Date
+  confirmedAt   DateTime?      @map("confirmed_at") @db.Timestamptz(6)
+  
+  // Add a field for raw provider data
+  providerData Json? @map("provider_data")
+  
+  createdAt     DateTime?      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime?      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  purchase      Purchase       @relation(fields: [purchaseId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
 
   @@index([userId], map: "idx_payment_records_user_id")
   @@index([purchaseId], map: "idx_payment_records_purchase_id")
@@ -755,9 +674,9 @@ model Currency {
   createdAt      DateTime?         @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime?         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   packagePrices  PackagePrice[]    @relation("PackagePriceCurrency")
-  serviceTypes   ServiceType[]     @relation("ServiceTypeCurrency")
   paymentMethods payment_methods[]
   rates          Rate[]
+  serviceTypes   ServiceType[]     @relation("ServiceTypeCurrency")
 
   @@map("currencies")
 }
@@ -1214,6 +1133,72 @@ model AbTestAssignment {
   @@map("ab_test_assignments")
 }
 
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+  SUSPENDED
+}
+
+enum ServiceCategory {
+  CLASS
+  WORKSHOP
+  TRAINING_PROGRAM
+  RETREAT
+  CONSULTATION
+}
+
+enum ServiceDifficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  ALL_LEVELS
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum SessionType {
+  INDIVIDUAL
+  GROUP
+  SEMI_PRIVATE
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+enum PackageType {
+  FIXED
+  FLEXIBLE
+  UNLIMITED
+}
+
 enum bug_status {
   OPEN
   IN_PROGRESS
@@ -1235,3 +1220,4 @@ enum priority_level {
   HIGH
   CRITICAL
 }
+

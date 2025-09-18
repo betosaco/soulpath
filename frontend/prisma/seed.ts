@@ -544,14 +544,14 @@ async function main() {
     prisma.packagePrice.upsert({
       where: { packageDefinitionId_currencyId: { packageDefinitionId: packageDefinitions[0].id, currencyId: penCurrencyId } },
       update: {
-        price: 50.00,
+        price: 60.00,
         pricingMode: 'custom',
         isActive: true
       },
       create: {
         packageDefinitionId: packageDefinitions[0].id,
         currencyId: penCurrencyId,
-        price: 50.00,
+        price: 60.00,
         pricingMode: 'custom',
         isActive: true
       }

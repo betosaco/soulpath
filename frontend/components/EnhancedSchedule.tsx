@@ -8,8 +8,6 @@ import {
   MapPin, 
   User, 
   Search,
-  Users,
-  Award,
   BookOpen,
   Loader2,
   AlertCircle
@@ -67,6 +65,37 @@ export function EnhancedSchedule({
   onBookSlot, 
   className = ''
 }: EnhancedScheduleProps) {
+  // Handle slot booking - redirect to account booking page
+  const handleBookSlot = (slot: ScheduleSlot) => {
+    try {
+      console.log('Booking slot data:', {
+        slotId: slot.id,
+        date: slot.date,
+        time: slot.time,
+        serviceType: slot.serviceType.name,
+        teacher: slot.teacher.name,
+        venue: slot.venue.name
+      });
+
+      // Redirect to schedule review page with slot information
+      const params = new URLSearchParams({
+        slotId: slot.id.toString(),
+        teacherId: slot.teacher.id.toString(),
+        serviceTypeId: slot.serviceType.id.toString(),
+        venueId: slot.venue.id.toString(),
+        date: slot.date,
+        time: slot.time
+      });
+      
+      window.location.href = `/schedule-review?${params.toString()}`;
+    } catch (error) {
+      console.error('Error redirecting to booking:', error);
+      alert('Error al procesar la reserva. Por favor, intenta de nuevo.');
+    }
+  };
+
+  // Use the onBookSlot prop if provided, otherwise use default behavior
+  const handleSlotClick = onBookSlot || handleBookSlot;
   const [slots, setSlots] = useState<ScheduleSlot[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -179,26 +208,6 @@ export function EnhancedSchedule({
     return iconMap[lowerName] || '🎯';
   };
 
-  // Get difficulty color
-  const getDifficultyColor = (difficulty?: string) => {
-    const colorMap: { [key: string]: string } = {
-      'beginner': 'text-green-600 bg-green-100',
-      'intermediate': 'text-yellow-600 bg-yellow-100',
-      'advanced': 'text-red-600 bg-red-100',
-      'all levels': 'text-blue-600 bg-blue-100'
-    };
-    return colorMap[difficulty?.toLowerCase() || 'all levels'] || 'text-blue-600 bg-blue-100';
-  };
-
-  // Handle slot booking
-  const handleBookSlot = (slot: ScheduleSlot) => {
-    if (onBookSlot) {
-      onBookSlot(slot);
-    } else {
-      // Default behavior - redirect to booking page
-      window.location.href = `/account/book?slotId=${slot.id}`;
-    }
-  };
 
   // Debug logging
   console.log('🔍 EnhancedSchedule render - loading:', loading, 'slots:', slots.length, 'error:', error);
@@ -356,13 +365,13 @@ export function EnhancedSchedule({
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-4">
                     {dateSlots.map((slot) => (
                       <motion.div
                         key={slot.id}
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className={`schedule-slot ${!slot.isAvailable ? 'schedule-slot--unavailable' : ''}`}
+                        className={`schedule-slot card-base card-hover hover-scale ${!slot.isAvailable ? 'schedule-slot--unavailable' : ''}`}
                       >
                         <div className="schedule-slot__header">
                           <div className="flex items-center gap-2 mb-2">
@@ -382,11 +391,6 @@ export function EnhancedSchedule({
                             </div>
                           </div>
                           
-                          {slot.serviceType.difficulty && (
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(slot.serviceType.difficulty)}`}>
-                              {slot.serviceType.difficulty}
-                            </span>
-                          )}
                         </div>
 
                         <div className="schedule-slot__content">
@@ -411,10 +415,6 @@ export function EnhancedSchedule({
                               <p className="font-medium text-gray-900 truncate">
                                 {slot.teacher.name}
                               </p>
-                              <div className="flex items-center gap-1 text-sm text-gray-600">
-                                <Award className="h-3 w-3" />
-                                <span>{slot.teacher.experience} years experience</span>
-                              </div>
                             </div>
                           </div>
 
@@ -434,32 +434,17 @@ export function EnhancedSchedule({
                             )}
                           </div>
 
-                          {/* Capacity Info */}
-                          <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-                            <Users className="h-4 w-4" />
-                            <span>
-                              {slot.bookedCount}/{slot.capacity} spots filled
-                            </span>
-                            <div className="flex-1 bg-gray-200 rounded-full h-2">
-                              <div 
-                                className="bg-[#6ea058] h-2 rounded-full transition-all duration-300"
-                                style={{ 
-                                  width: `${Math.min((slot.bookedCount / slot.capacity) * 100, 100)}%` 
-                                }}
-                              />
-                            </div>
-                          </div>
                         </div>
 
                         <div className="schedule-slot__actions">
                           {slot.isAvailable ? (
                             <button
-                              onClick={() => handleBookSlot(slot)}
+                              onClick={() => handleSlotClick(slot)}
                               className="w-full bg-[#6ea058] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#5a8a47] focus:ring-2 focus:ring-[#6ea058] focus:outline-none transition-colors flex items-center justify-center gap-2"
                               disabled={slot.bookedCount >= slot.capacity}
                             >
                               <BookOpen className="h-4 w-4" />
-                              {slot.bookedCount >= slot.capacity ? 'Fully Booked' : 'Book Now'}
+                              {slot.bookedCount >= slot.capacity ? 'Fully Booked' : 'Book Session'}
                             </button>
                           ) : (
                             <button

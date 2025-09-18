@@ -27,18 +27,18 @@ function transformFlatContentToNested(flatContent: Record<string, string>): Tran
     nestedContent.en.hero = {
       title: flatContent.heroTitleEn || 'MatMax Yoga Studio',
       tagline: 'Transform your life through spiritual guidance and healing',
-      description: 'Experience profound transformation through personalized spiritual sessions, energy healing, and guidance on your journey to inner peace and self-discovery.',
+      description: flatContent.heroSubtitleEn || 'Daily Vinyasa and Hatha Yoga for all levels.',
       ctaPrimary: 'Book Your Session',
       ctaSecondary: 'Learn More',
-      subtitle: flatContent.heroSubtitleEn || 'Your journey to wellness starts here'
+      subtitle: flatContent.heroSubtitleEn || 'Daily Vinyasa and Hatha Yoga for all levels.'
     };
     nestedContent.es.hero = {
       title: flatContent.heroTitleEs || 'MatMax Yoga Studio',
       tagline: 'Transforma tu vida a través de la guía espiritual y la sanación',
-      description: 'Experimenta una transformación profunda a través de sesiones espirituales personalizadas, sanación energética y guía en tu camino hacia la paz interior y el autodescubrimiento.',
+      description: flatContent.heroSubtitleEs || 'Daily Vinyasa and Hatha Yoga for all levels.',
       ctaPrimary: 'Reserva tu Sesión',
       ctaSecondary: 'Conoce Más',
-      subtitle: flatContent.heroSubtitleEs || 'Tu camino al bienestar comienza aquí'
+      subtitle: flatContent.heroSubtitleEs || 'Daily Vinyasa and Hatha Yoga for all levels.'
     };
 
     // About section
@@ -131,16 +131,20 @@ function transformFlatContentToNested(flatContent: Record<string, string>): Tran
     nestedContent.en.nav = {
       invitation: 'Invitation',
       approach: 'Approach',
-      session: 'Session',
+      session: 'Sessions',
       about: 'About',
-      apply: 'Apply'
+      apply: 'Book Now',
+      packages: 'Packages',
+      schedule: 'Schedule'
     };
     nestedContent.es.nav = {
       invitation: 'Invitación',
       approach: 'Enfoque',
-      session: 'Sesión',
+      session: 'Sesiones',
       about: 'Acerca de',
-      apply: 'Aplicar'
+      apply: 'Reserva Ahora',
+      packages: 'Paquetes',
+      schedule: 'Horarios'
     };
 
     // CTA buttons
@@ -170,10 +174,10 @@ export async function GET() {
             try {
               const defaultContent = await prisma.content.create({
                 data: {
-                  heroTitleEn: 'MatMax Yoga Studio',
-                  heroTitleEs: 'MatMax Yoga Studio',
-                  heroSubtitleEn: 'Your journey to wellness starts here',
-                  heroSubtitleEs: 'Tu camino al bienestar comienza aquí',
+                  heroTitleEn: 'Find Your Flow, Transform Your Body & Mind',
+                  heroTitleEs: 'Find Your Flow, Transform Your Body & Mind',
+                  heroSubtitleEn: 'Daily Vinyasa and Hatha Yoga for all levels.',
+                  heroSubtitleEs: 'Daily Vinyasa and Hatha Yoga for all levels.',
                   aboutTitleEn: 'About Us',
                   aboutTitleEs: 'Sobre Nosotros',
                   aboutContentEn: 'We are dedicated to helping you achieve your wellness goals.',
@@ -218,10 +222,10 @@ export async function GET() {
         } catch {
           console.warn('Content table not available, using in-memory defaults');
           const defaultContent: Record<string, string> = {
-            heroTitleEn: 'MatMax Yoga Studio',
-            heroTitleEs: 'MatMax Yoga Studio',
-            heroSubtitleEn: 'Your journey to wellness starts here',
-            heroSubtitleEs: 'Tu camino al bienestar comienza aquí',
+            heroTitleEn: 'Find Your Flow, Transform Your Body & Mind',
+            heroTitleEs: 'Find Your Flow, Transform Your Body & Mind',
+            heroSubtitleEn: 'Daily Vinyasa and Hatha Yoga for all levels.',
+            heroSubtitleEs: 'Daily Vinyasa and Hatha Yoga for all levels.',
             aboutTitleEn: 'About Us',
             aboutTitleEs: 'Sobre Nosotros',
             aboutContentEn: 'We are dedicated to helping you achieve your wellness goals.',

@@ -4,6 +4,7 @@
       "private": true,
       "type": "module",
       "dependencies": {
+            "@lyracom/embedded-form-glue": "^1.4.4",
             "@prisma/client": "^6.15.0",
             "@radix-ui/react-accordion": "^1.2.3",
             "@radix-ui/react-alert-dialog": "^1.1.6",
@@ -107,6 +108,9 @@
             "vercel:link": "vercel link",
             "vercel:env:add": "vercel env add REDIS_URL",
             "vercel:env:pull": "vercel env pull .env.local",
+            "lyra:validate": "node scripts/validate-lyra-config.js",
+            "lyra:test": "node scripts/test-lyra-integration.js",
+            "lyra:test-1sol": "node scripts/test-1sol-payment.js",
             "postinstall": "prisma generate"
       }
 }

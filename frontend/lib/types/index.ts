@@ -182,7 +182,7 @@ export interface Rate {
 }
 
 // Payment System Types
-export type PaymentMethod = 'cash' | 'bank_transfer' | 'qr_payment' | 'credit_card' | 'crypto' | 'pay_later' | 'stripe' | 'izipay';
+export type PaymentMethod = 'cash' | 'bank_transfer' | 'qr_payment' | 'credit_card' | 'crypto' | 'pay_later' | 'stripe';
 
 export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded' | 'cancelled';
 
@@ -204,14 +204,6 @@ export interface PaymentMethodConfig {
     supportedCountries: string[];
     automaticTaxes: boolean;
     allowPromotionCodes: boolean;
-  };
-  // Izipay-specific configuration
-  izipayConfig?: {
-    username: string;
-    password?: string; // Secret, may not always be sent to client
-    publicKey: string;
-    hmacKey?: string;   // Secret
-    environment: 'TEST' | 'PRODUCTION';
   };
   createdAt: string;
   updatedAt: string;

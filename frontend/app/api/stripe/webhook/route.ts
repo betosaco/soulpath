@@ -201,7 +201,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
           quantity: 1,
           sessions_used: 0,
           is_active: true,
-          expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year from now
+          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         });

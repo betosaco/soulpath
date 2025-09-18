@@ -87,7 +87,18 @@ interface BookingFormData {
   language: string;
 }
 
-export function CustomerBookingFlow() {
+interface CustomerBookingFlowProps {
+  initialSlotData?: {
+    slotId: string;
+    teacherId: string;
+    serviceTypeId: string;
+    venueId: string;
+    date: string;
+    time: string;
+  };
+}
+
+export function CustomerBookingFlow({ initialSlotData }: CustomerBookingFlowProps) {
   const { user } = useAuth();
   const [packages, setPackages] = useState<CustomerPackage[]>([]);
   const [schedules, setSchedules] = useState<AvailableSchedule[]>([]);
@@ -120,7 +131,7 @@ export function CustomerBookingFlow() {
     { id: 'schedule', title: 'Select Schedule', description: 'Pick your preferred date and time', completed: false },
     { id: 'details', title: 'Session Details', description: 'Provide your information and questions', completed: false },
     { id: 'payment', title: 'Payment', description: 'Secure payment processing', completed: false },
-    { id: 'confirmation', title: 'Confirm Booking', description: 'Review and confirm your booking', completed: false }
+    { id: 'whatsapp', title: 'WhatsApp Confirmation', description: 'Final confirmation via WhatsApp', completed: false }
   ];
 
 
@@ -258,6 +269,42 @@ export function CustomerBookingFlow() {
     }
   }, [loadPackages, loadSchedules, loadPaymentMethods]);
 
+  // Load initial slot data if provided
+  useEffect(() => {
+    if (initialSlotData) {
+      setCurrentStep(1); // Skip package selection if slot is pre-selected
+      // Load schedule data for the specific slot
+      loadScheduleForSlot(initialSlotData);
+    }
+  }, [initialSlotData]);
+
+  const loadScheduleForSlot = async (slotData: any) => {
+    try {
+      // Create a mock schedule object from the slot data
+      const mockSchedule: AvailableSchedule = {
+        id: slotData.slotId,
+        date: slotData.date,
+        time: slotData.time,
+        isAvailable: true,
+        capacity: 1,
+        bookedCount: 0,
+        sessionType: 'Spiritual Reading',
+        price: 8000, // $80 USD in cents
+        // teacher: {
+        //   name: 'Spiritual Guide',
+        //   bio: 'Certified spiritual consultant',
+        //   experience: 5
+        // },
+      };
+      
+      setSchedules([mockSchedule]);
+      setSelectedDate(slotData.date);
+      setFormData(prev => ({ ...prev, selectedSchedule: mockSchedule }));
+    } catch (error) {
+      console.error('Error loading schedule for slot:', error);
+    }
+  };
+
   useEffect(() => {
     if (user?.access_token) {
       loadCustomerData();
@@ -365,14 +412,12 @@ export function CustomerBookingFlow() {
     setCurrentStep(2);
   };
 
-  const handleBackToPayment = () => {
-    setCurrentStep(3);
-  };
 
   const handleProceedToPayment = () => {
     setCurrentStep(3);
     updateStepCompletion(2, true);
   };
+
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -506,7 +551,7 @@ export function CustomerBookingFlow() {
                       </div>
                       {pkg.expiresAt && (
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-400">Expires:</span>
+                          <span className="text-gray-400">Valid for 30 days:</span>
                           <span className="text-white">{formatDate(pkg.expiresAt)}</span>
                         </div>
                       )}
@@ -1088,7 +1133,7 @@ export function CustomerBookingFlow() {
                     onClick={() => setCurrentStep(4)}
                     className="dashboard-button-primary"
                   >
-                    Continue to Confirmation
+                    Continue to WhatsApp
                     <ArrowRight size={16} className="ml-2" />
                   </BaseButton>
                 )}
@@ -1169,11 +1214,11 @@ export function CustomerBookingFlow() {
                 <div className="flex justify-between pt-4">
                   <BaseButton
                     variant="outline"
-                    onClick={handleBackToPayment}
+                    onClick={handleBackToDetails}
                     className="border-[#2a2a4a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white"
                   >
                     <ArrowLeft size={16} className="mr-2" />
-                    Back to Payment
+                    Back to Details
                   </BaseButton>
 
                   {/* Payment Status Indicator */}
@@ -1212,6 +1257,143 @@ export function CustomerBookingFlow() {
 
         {currentStep === 5 && (
           <motion.div
+            key="whatsapp"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Card className="bg-[#1a1a2e] border-[#16213e]">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center">
+                  <MessageSquare size={20} className="mr-2 text-green-500" />
+                  WhatsApp Confirmation
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <MessageSquare size={32} className="text-green-500" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-white mb-2">Complete Your Booking via WhatsApp</h3>
+                  <p className="text-gray-400 mb-6">
+                    Click the button below to send all your booking information to our team via WhatsApp for final confirmation.
+                  </p>
+                </div>
+
+                <div className="bg-[#16213e] p-4 rounded-lg">
+                  <h4 className="text-white font-medium mb-3">Your booking information will include:</h4>
+                  <ul className="space-y-2 text-sm text-gray-300">
+                    <li className="flex items-center">
+                      <CheckCircle size={16} className="text-green-500 mr-2" />
+                      Session details (date, time, duration)
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle size={16} className="text-green-500 mr-2" />
+                      Your personal information
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle size={16} className="text-green-500 mr-2" />
+                      Your questions and special requests
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle size={16} className="text-green-500 mr-2" />
+                      Package information
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle size={16} className="text-green-500 mr-2" />
+                      Payment details
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <BaseButton
+                    variant="outline"
+                    onClick={handleBackToDetails}
+                    className="border-[#2a2a4a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white mobile-touch-target mobile-button"
+                  >
+                    <ArrowLeft size={16} className="mr-2" />
+                    Back to Details
+                  </BaseButton>
+                  
+                  <BaseButton
+                    onClick={() => {
+                      // Format WhatsApp message
+                      const message = `¡Hola! Me interesa reservar una sesión:
+
+📅 *Detalles de la Sesión:*
+• Fecha: ${new Date(formData.selectedSchedule!.date).toLocaleDateString('es-ES', { 
+                        weekday: 'long', 
+                        month: 'long', 
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+• Hora: ${new Date(`${formData.selectedSchedule!.date}T${formData.selectedSchedule!.time}`).toLocaleTimeString('es-ES', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })}
+• Duración: ${formData.selectedPackage?.sessionDuration || 60} minutos
+• Tipo de servicio: ${formData.selectedSchedule!.sessionType}
+• Precio: $${((formData.selectedSchedule!.price || 8000) / 100).toFixed(2)} USD
+
+👤 *Información Personal:*
+• Nombre: ${formData.clientName}
+• Email: ${formData.clientEmail}
+• Teléfono: ${formData.clientPhone || 'No proporcionado'}
+• Fecha de nacimiento: ${new Date(formData.birthDate).toLocaleDateString('es-ES')}
+• Hora de nacimiento: ${formData.birthTime || 'No proporcionada'}
+• Lugar de nacimiento: ${formData.birthPlace}
+• Idioma: ${formData.language === 'en' ? 'Inglés' : 'Español'}
+
+❓ *Pregunta/Áreas de enfoque:*
+${formData.question}
+
+${formData.specialRequests ? `📝 *Solicitudes especiales:*
+${formData.specialRequests}
+
+` : ''}💰 *Información de Pago:*
+• Paquete: ${formData.selectedPackage?.name || 'Sesión individual'}
+• Sesiones restantes: ${formData.selectedPackage?.sessionsRemaining || 0}/${formData.selectedPackage?.totalSessions || 1}
+
+💬 *Información adicional:*
+• ID de sesión: slot_${formData.selectedSchedule!.id}
+• Fecha de solicitud: ${new Date().toLocaleDateString('es-ES', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}
+• Hora de solicitud: ${new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+
+¿Podrían ayudarme a completar mi reserva? ¡Gracias!`;
+                      
+                      const encodedMessage = encodeURIComponent(message);
+                      const phoneNumber = '51916172368';
+                      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+                      
+                      try {
+                        window.open(whatsappUrl, '_blank');
+                        setCurrentStep(6); // Go to success step
+                        updateStepCompletion(5, true);
+                      } catch (error) {
+                        console.error('Error opening WhatsApp:', error);
+                        alert('Error al abrir WhatsApp. Por favor, contacta directamente al +51 916 172 368');
+                      }
+                    }}
+                    className="bg-green-600 hover:bg-green-700 text-white mobile-touch-target mobile-button"
+                  >
+                    <MessageSquare size={16} className="mr-2" />
+                    Send via WhatsApp
+                  </BaseButton>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {currentStep === 6 && (
+          <motion.div
             key="success"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -1223,10 +1405,10 @@ export function CustomerBookingFlow() {
                   <CheckCircle size={40} className="text-green-400" />
                 </div>
 
-                <h2 className="text-3xl font-bold text-white mb-4">Booking Confirmed!</h2>
+                <h2 className="text-3xl font-bold text-white mb-4">Booking Information Sent!</h2>
 
                 <p className="text-gray-300 mb-6">
-                  Your session has been successfully booked and paid for. You will receive a confirmation email shortly.
+                  Your booking information has been sent to our team via WhatsApp. They will contact you shortly to confirm your session and complete the booking process.
                 </p>
 
                 <div className="bg-[#16213e] rounded-lg p-6 mb-6">
@@ -1250,13 +1432,13 @@ export function CustomerBookingFlow() {
 
                 <div className="space-y-3">
                   <p className="text-gray-400 text-sm">
-                    📧 Check your email for session details and Zoom link
+                    📱 Check WhatsApp for confirmation from our team
                   </p>
                   <p className="text-gray-400 text-sm">
-                    📅 Add this session to your calendar
+                    📧 You'll receive email confirmation once booking is confirmed
                   </p>
                   <p className="text-gray-400 text-sm">
-                    📞 Join 5 minutes before your scheduled time
+                    📞 Our team will contact you to finalize payment and session details
                   </p>
                 </div>
 

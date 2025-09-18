@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { motion } from 'framer-motion';
-import { Header } from '@/components/Header';
-import { useTranslations, useLanguage } from '@/hooks/useTranslations';
+import { CentralizedHeader } from '@/components/CentralizedHeader';
 import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
@@ -13,13 +12,9 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const { signIn, signOut, user, isAdmin } = useAuth();
-  const { language, setLanguage } = useLanguage();
-  const { t } = useTranslations();
-  const translations = t as Record<string, string | Record<string, string>>;
 
   // Redirect if user is already logged in
   useEffect(() => {
@@ -58,22 +53,12 @@ export default function LoginPage() {
     }
   };
 
-  const scrollToSection = (section: string) => {
-    // For login page, we don't need scroll functionality
-    console.log('Scroll to section:', section);
-  };
 
 
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <Header
-        language={language}
-        setLanguage={setLanguage}
-        scrollToSection={scrollToSection}
-        t={translations}
-        isMenuOpen={isMenuOpen}
-        setIsMenuOpen={setIsMenuOpen}
+      <CentralizedHeader
         user={user}
         isAdmin={isAdmin}
       />

@@ -113,6 +113,13 @@ export function useTranslations(initialContent?: Record<string, unknown>, langua
     }
   }, [initialContent, currentLanguage]); // Only depend on these two values
 
+  // Separate useEffect to handle language changes specifically
+  useEffect(() => {
+    if (content && Object.keys(content).length > 0) {
+      console.log(`🔄 Language changed to: ${currentLanguage}, content available:`, Object.keys(content));
+    }
+  }, [currentLanguage, content]);
+
   const updateContent = async (newContent: Record<string, unknown>) => {
     try {
       setIsLoading(true);
@@ -147,6 +154,7 @@ export function useTranslations(initialContent?: Record<string, unknown>, langua
 
   // Get the current language translations, fallback to English if current language not found
   const t = (content?.[currentLanguage as keyof typeof content] || content?.en || defaultTranslations[currentLanguage as keyof typeof defaultTranslations] || defaultTranslations.en);
+
 
   return { t, updateContent, isLoading, content, reloadTranslations };
 }
