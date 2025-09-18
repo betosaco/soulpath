@@ -186,39 +186,38 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
                 cardNumberField.style.flex = 'none';
               }
               
-              // Fix horizontal layout for expiry and CVV fields only
+              // Change to vertical layout for expiry and CVV fields
               const flexContainer = document.querySelector('#lyra-payment-form .flex-container');
               if (flexContainer) {
                 flexContainer.style.display = 'flex';
-                flexContainer.style.flexDirection = 'row';
+                flexContainer.style.flexDirection = 'column';
                 flexContainer.style.gap = '1rem';
                 flexContainer.style.alignItems = 'stretch';
                 flexContainer.style.marginBottom = '1rem';
                 flexContainer.style.width = '100%';
-                flexContainer.style.justifyContent = 'space-between';
                 flexContainer.style.boxSizing = 'border-box';
               }
               
-              // Ensure expiry and CVV fields are side by side within the flex container
+              // Make expiry and CVV fields full width in vertical layout
               const expiryField = document.querySelector('#lyra-payment-form .flex-container .kr-expiry');
               const cvvField = document.querySelector('#lyra-payment-form .flex-container .kr-security-code');
               
               if (expiryField) {
-                expiryField.style.flex = '0 0 40%'; // Fixed width for expiry (40%)
+                expiryField.style.flex = 'none';
                 expiryField.style.display = 'block';
-                expiryField.style.width = '40%';
+                expiryField.style.width = '100%';
                 expiryField.style.minWidth = '0';
-                expiryField.style.maxWidth = '40%';
+                expiryField.style.maxWidth = '100%';
                 expiryField.style.boxSizing = 'border-box';
                 expiryField.style.overflow = 'hidden';
               }
               
               if (cvvField) {
-                cvvField.style.flex = '0 0 25%'; // Fixed width for CVV (25%)
+                cvvField.style.flex = 'none';
                 cvvField.style.display = 'block';
-                cvvField.style.width = '25%';
+                cvvField.style.width = '100%';
                 cvvField.style.minWidth = '0';
-                cvvField.style.maxWidth = '25%';
+                cvvField.style.maxWidth = '100%';
                 cvvField.style.boxSizing = 'border-box';
                 cvvField.style.overflow = 'hidden';
               }

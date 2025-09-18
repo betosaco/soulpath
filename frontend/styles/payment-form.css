@@ -226,11 +226,10 @@
   max-width: 100% !important;
 }
 
-/* Container for expiry and CVV fields - side by side */
+/* Container for expiry and CVV fields - vertical layout */
 #lyra-payment-form .kr-embedded .flex-container {
-  flex-direction: row !important;
+  flex-direction: column !important;
   display: flex !important;
-  justify-content: space-between !important;
   width: 100% !important;
   gap: 1rem !important;
   margin-bottom: 1.5rem !important;
@@ -239,24 +238,24 @@
   box-sizing: border-box !important;
 }
 
-/* Ensure expiry and CVV fields are side by side with specific widths */
+/* Ensure expiry and CVV fields are full width in vertical layout */
 #lyra-payment-form .flex-container .kr-expiry {
-  flex: 0 0 40% !important;
+  flex: none !important;
   display: block !important;
-  width: 40% !important;
+  width: 100% !important;
   min-width: 0 !important;
-  max-width: 40% !important;
+  max-width: 100% !important;
   padding: 0.25rem !important;
   box-sizing: border-box !important;
   overflow: hidden !important;
 }
 
 #lyra-payment-form .flex-container .kr-security-code {
-  flex: 0 0 25% !important;
+  flex: none !important;
   display: block !important;
-  width: 25% !important;
+  width: 100% !important;
   min-width: 0 !important;
-  max-width: 25% !important;
+  max-width: 100% !important;
   padding: 0.25rem !important;
   box-sizing: border-box !important;
   overflow: hidden !important;
@@ -489,25 +488,25 @@
   display: block !important;
 }
 
-/* Specific widths for expiry and CVV fields */
+/* Specific widths for expiry and CVV fields - full width in vertical layout */
 #lyra-payment-form .kr-expiry {
-  width: 40% !important;
-  min-width: 40% !important;
-  max-width: 40% !important;
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
   height: 3.5rem !important;
   min-height: 3.5rem !important;
   max-height: 3.5rem !important;
   padding: 1rem 1.25rem !important;
-  margin-bottom: 1.5rem !important;
+  margin-bottom: 1rem !important;
   box-sizing: border-box !important;
   display: block !important;
   overflow: hidden !important;
 }
 
 #lyra-payment-form .kr-security-code {
-  width: 25% !important;
-  min-width: 25% !important;
-  max-width: 25% !important;
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
   height: 3.5rem !important;
   min-height: 3.5rem !important;
   max-height: 3.5rem !important;
