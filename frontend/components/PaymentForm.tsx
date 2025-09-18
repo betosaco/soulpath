@@ -192,9 +192,9 @@ export function PaymentForm({
           <p className="text-xl text-muted">Secure payment processing with Lyra</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* Payment Form */}
-          <div className="space-y-6 lg:col-span-2">
+          <div className="space-y-6 lg:col-span-3">
             <Card className="card-base">
               <CardHeader>
                 <CardTitle className="text-2xl text-primary flex items-center gap-2">
@@ -232,7 +232,7 @@ export function PaymentForm({
           </div>
 
           {/* Order Summary */}
-          <div className="space-y-6 lg:col-span-1">
+          <div className="space-y-6 lg:col-span-2">
             <Card className="card-base">
               <CardHeader>
                 <CardTitle className="text-2xl text-primary flex items-center gap-2">
