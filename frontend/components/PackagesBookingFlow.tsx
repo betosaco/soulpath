@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Calendar, 
   Clock, 
-  User, 
   Package, 
   ArrowRight, 
   ArrowLeft,
@@ -13,8 +12,7 @@ import {
   Loader2,
   AlertCircle,
   Users,
-  Star,
-  CreditCard
+  Star
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,6 +25,7 @@ import { usePackages, PackagePrice } from '@/hooks/usePackages';
 import { useLanguage, useTranslations } from '@/hooks/useTranslations';
 import { countries } from '@/lib/countries';
 import { toast } from 'sonner';
+import { validateEmailWithMessage } from '@/lib/email-validation';
 
 interface Teacher {
   id: number;
@@ -94,6 +93,7 @@ export function PackagesBookingFlow() {
   const [sending] = useState(false);
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [countrySearchTerm, setCountrySearchTerm] = useState('');
+  const [emailError, setEmailError] = useState<string | null>(null);
   
   const [formData, setFormData] = useState<BookingFormData>({
     selectedPackage: null,
@@ -197,12 +197,12 @@ export function PackagesBookingFlow() {
       currency: formData.selectedPackage?.currency || 'PEN',
       packageData: {
         ...formData.selectedPackage,
-        name: formData.selectedPackage.packageDefinition.name,
-        description: formData.selectedPackage.packageDefinition.description,
-        sessionsCount: formData.selectedPackage.packageDefinition.sessionsCount,
-        packageType: formData.selectedPackage.packageDefinition.packageType,
-        maxGroupSize: formData.selectedPackage.packageDefinition.maxGroupSize,
-        sessionDuration: formData.selectedPackage.packageDefinition.sessionDuration
+        name: formData.selectedPackage?.packageDefinition.name || '',
+        description: formData.selectedPackage?.packageDefinition.description || '',
+        sessionsCount: formData.selectedPackage?.packageDefinition.sessionsCount || 0,
+        packageType: formData.selectedPackage?.packageDefinition.packageType || '',
+        maxGroupSize: formData.selectedPackage?.packageDefinition.maxGroupSize || 0,
+        sessionDuration: formData.selectedPackage?.packageDefinition.sessionDuration || 0
       },
       bookingData: formData.selectedSchedule ? {
         selectedDate: formData.selectedSchedule.date,
@@ -233,26 +233,6 @@ export function PackagesBookingFlow() {
 
 
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      month: 'long', 
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
-
-  const formatTime = (timeString: string) => {
-    const [hours, minutes] = timeString.split(':');
-    const date = new Date();
-    date.setHours(parseInt(hours), parseInt(minutes));
-    return date.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit',
-      hour12: true 
-    });
-  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -407,11 +387,22 @@ export function PackagesBookingFlow() {
                         id="clientEmail"
                         type="email"
                         value={formData.clientEmail}
-                        onChange={(e) => setFormData(prev => ({ ...prev, clientEmail: e.target.value }))}
-                        className="h-14 px-4 text-lg border-2 border-gray-300 text-black placeholder-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg transition-all duration-200"
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFormData(prev => ({ ...prev, clientEmail: value }));
+                          // Validate email when it changes
+                          const emailValidation = validateEmailWithMessage(value);
+                          setEmailError(emailValidation);
+                        }}
+                        className={`h-14 px-4 text-lg border-2 text-black placeholder-gray-400 focus:ring-2 focus:ring-primary/20 rounded-lg transition-all duration-200 ${
+                          emailError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-primary'
+                        }`}
                         placeholder={getTranslation('bookingFlow.emailPlaceholder', 'Enter your email')}
                         required
                       />
+                      {emailError && (
+                        <p className="text-red-500 text-sm mt-1">{emailError}</p>
+                      )}
                     </div>
                   </div>
                   
@@ -717,11 +708,11 @@ export function PackagesBookingFlow() {
                   countryCode: formData.countryCode
                 }}
                 bookingData={formData.selectedSchedule ? {
-                  selectedDate: formData.selectedSchedule.date,
-                  selectedTime: formData.selectedSchedule.time,
-                  teacher: formData.selectedSchedule.teacher,
-                  dayOfWeek: formData.selectedSchedule.dayOfWeek,
-                  serviceType: formData.selectedSchedule.serviceType
+                  selectedDate: formData.selectedSchedule?.date,
+                  selectedTime: formData.selectedSchedule?.time,
+                  teacher: formData.selectedSchedule?.teacher,
+                  dayOfWeek: formData.selectedSchedule?.dayOfWeek,
+                  serviceType: formData.selectedSchedule?.serviceType
                 } : null}
                 onPaymentSuccess={handlePaymentSuccess}
                 onBack={() => setCurrentStep(2)}

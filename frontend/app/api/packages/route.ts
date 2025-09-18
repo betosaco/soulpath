@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma, withConnection } from '@/lib/prisma';
+import { addCorsHeaders, handleCorsPreflight } from '@/lib/cors';
+
+export async function OPTIONS() {
+  return handleCorsPreflight();
+}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -105,14 +110,14 @@ export async function GET(request: NextRequest) {
 
     console.log(`✅ Found ${transformedPackages.length} active packages with pricing`);
 
-    return NextResponse.json({
+    return addCorsHeaders(NextResponse.json({
       success: true,
       data: transformedPackages,
       meta: {
         currency,
         total: transformedPackages.length
       }
-    });
+    }));
 
   } catch (error) {
     console.error('❌ Error in GET /api/packages:', error);
@@ -136,7 +141,7 @@ export async function GET(request: NextRequest) {
       // Return mock packages for development when database is not available
       const mockPackages = generateMockPackages(currency);
       
-      return NextResponse.json({
+      return addCorsHeaders(NextResponse.json({
         success: true,
         data: mockPackages,
         meta: {
@@ -144,15 +149,15 @@ export async function GET(request: NextRequest) {
           total: mockPackages.length
         },
         message: 'Using mock data - database unavailable'
-      });
+      }));
     }
     
-    return NextResponse.json({
+    return addCorsHeaders(NextResponse.json({
       success: false,
       error: 'Failed to fetch packages',
       message: 'An error occurred while fetching packages',
       details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : 'Unknown error') : 'Internal server error'
-    }, { status: 500 });
+    }, { status: 500 }));
   }
 }
 

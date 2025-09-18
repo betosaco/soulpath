@@ -26,6 +26,7 @@ import { usePackages, PackagePrice } from '@/hooks/usePackages';
 import { useLanguage, useTranslations } from '@/hooks/useTranslations';
 import { countries } from '@/lib/countries';
 import { toast } from 'sonner';
+import { validateEmailWithMessage } from '@/lib/email-validation';
 
 interface Teacher {
   id: number;
@@ -93,6 +94,7 @@ export function ScheduleBookingFlow() {
   const [sending, setSending] = useState(false);
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [countrySearchTerm, setCountrySearchTerm] = useState('');
+  const [emailError, setEmailError] = useState<string | null>(null);
   
   const [formData, setFormData] = useState<BookingFormData>({
     selectedSchedule: null,
@@ -172,6 +174,17 @@ export function ScheduleBookingFlow() {
       toast.error(getTranslation('bookingFlow.fillRequiredFields', 'Please fill in all required fields'));
       return;
     }
+
+    // Validate email before proceeding
+    if (formData.clientEmail) {
+      const emailValidation = validateEmailWithMessage(formData.clientEmail);
+      if (emailValidation) {
+        setEmailError(emailValidation);
+        toast.error('Please fix the email validation error before proceeding');
+        return;
+      }
+    }
+
     // Skip review step, go directly to WhatsApp confirmation
     handleWhatsAppBooking();
   };
@@ -453,11 +466,22 @@ MatMax Yoga. Calle Alcanfores 425, Miraflores. Lima - Peru
                         id="clientEmail"
                         type="email"
                         value={formData.clientEmail}
-                        onChange={(e) => setFormData(prev => ({ ...prev, clientEmail: e.target.value }))}
-                        className="h-14 px-4 text-lg border-2 border-gray-300 text-black placeholder-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg transition-all duration-200"
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFormData(prev => ({ ...prev, clientEmail: value }));
+                          // Validate email when it changes
+                          const emailValidation = validateEmailWithMessage(value);
+                          setEmailError(emailValidation);
+                        }}
+                        className={`h-14 px-4 text-lg border-2 text-black placeholder-gray-400 focus:ring-2 focus:ring-primary/20 rounded-lg transition-all duration-200 ${
+                          emailError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-primary'
+                        }`}
                         placeholder={getTranslation('bookingFlow.emailPlaceholder', 'Enter your email')}
                         required
                       />
+                      {emailError && (
+                        <p className="text-red-500 text-sm mt-1">{emailError}</p>
+                      )}
                     </div>
                   </div>
                   

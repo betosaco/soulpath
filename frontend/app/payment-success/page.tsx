@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { MessageCircle, CheckCircle, XCircle, RotateCcw, Calendar, User, CreditCard, Package } from 'lucide-react';
+import { MessageCircle, CheckCircle, XCircle, Calendar, User, CreditCard, Package } from 'lucide-react';
 import { AppLayout } from '@/components/AppLayout';
 
 interface PaymentResult {

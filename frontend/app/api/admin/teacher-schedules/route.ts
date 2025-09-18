@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { ScheduleDuplicateChecker } from '@/lib/schedule-duplicate-checker';
 
 // Zod schemas for teacher schedule validation
 const createTeacherScheduleSchema = z.object({
@@ -219,21 +220,41 @@ export async function POST(request: NextRequest) {
       }, { status: 404 });
     }
 
-    // Check if schedule already exists for this teacher, venue, and day
-    const existingSchedule = await prisma.teacherSchedule.findFirst({
-      where: {
-        teacherId: scheduleData.teacherId,
-        venueId: scheduleData.venueId,
-        dayOfWeek: scheduleData.dayOfWeek
-      }
+    // Check for duplicates using comprehensive checker
+    const duplicateCheck = await ScheduleDuplicateChecker.checkDuplicates({
+      ...scheduleData,
+      type: 'teacher'
     });
 
-    if (existingSchedule) {
-      return NextResponse.json({
-        success: false,
-        error: 'Schedule already exists',
-        message: 'A schedule already exists for this teacher at this venue on this day'
-      }, { status: 409 });
+    if (duplicateCheck.hasDuplicates) {
+      const errorDuplicates = duplicateCheck.duplicates.filter(d => d.severity === 'error');
+      const warningDuplicates = duplicateCheck.duplicates.filter(d => d.severity === 'warning');
+      
+      if (errorDuplicates.length > 0) {
+        return NextResponse.json({
+          success: false,
+          error: 'Duplicate schedule found',
+          message: 'Cannot create schedule due to conflicts',
+          details: {
+            duplicates: errorDuplicates,
+            warnings: warningDuplicates,
+            allWarnings: duplicateCheck.warnings
+          },
+          toast: {
+            type: 'error',
+            title: 'Schedule Conflict',
+            description: errorDuplicates[0].message
+          }
+        }, { status: 409 });
+      }
+      
+      // If only warnings, include them in the response but allow creation
+      if (warningDuplicates.length > 0 || duplicateCheck.warnings.length > 0) {
+        console.log('⚠️ Schedule created with warnings:', {
+          warnings: warningDuplicates,
+          systemWarnings: duplicateCheck.warnings
+        });
+      }
     }
 
     // Validate time range
@@ -351,27 +372,53 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    // Check for conflicts if day, teacher, or venue is being changed
-    if (updateData.dayOfWeek || updateData.teacherId || updateData.venueId) {
-      const teacherId = updateData.teacherId || existingSchedule.teacherId;
-      const venueId = updateData.venueId || existingSchedule.venueId;
-      const dayOfWeek = updateData.dayOfWeek || existingSchedule.dayOfWeek;
+    // Check for conflicts if any schedule data is being changed
+    if (Object.keys(updateData).length > 0) {
+      const scheduleData = {
+        id,
+        teacherId: updateData.teacherId || existingSchedule.teacherId,
+        venueId: updateData.venueId || existingSchedule.venueId,
+        dayOfWeek: updateData.dayOfWeek || existingSchedule.dayOfWeek,
+        startTime: updateData.startTime || existingSchedule.startTime,
+        endTime: updateData.endTime || existingSchedule.endTime,
+        type: 'teacher' as const
+      };
 
-      const conflictingSchedule = await prisma.teacherSchedule.findFirst({
-        where: {
-          teacherId,
-          venueId,
-          dayOfWeek,
-          id: { not: id }
-        }
+      const duplicateCheck = await ScheduleDuplicateChecker.checkDuplicates({
+        ...scheduleData,
+        startTime: String(scheduleData.startTime),
+        endTime: String(scheduleData.endTime)
       });
 
-      if (conflictingSchedule) {
-        return NextResponse.json({
-          success: false,
-          error: 'Schedule conflict',
-          message: 'A schedule already exists for this teacher at this venue on this day'
-        }, { status: 409 });
+      if (duplicateCheck.hasDuplicates) {
+        const errorDuplicates = duplicateCheck.duplicates.filter(d => d.severity === 'error');
+        const warningDuplicates = duplicateCheck.duplicates.filter(d => d.severity === 'warning');
+        
+        if (errorDuplicates.length > 0) {
+          return NextResponse.json({
+            success: false,
+            error: 'Duplicate schedule found',
+            message: 'Cannot update schedule due to conflicts',
+            details: {
+              duplicates: errorDuplicates,
+              warnings: warningDuplicates,
+              allWarnings: duplicateCheck.warnings
+            },
+            toast: {
+              type: 'error',
+              title: 'Schedule Conflict',
+              description: errorDuplicates[0].message
+            }
+          }, { status: 409 });
+        }
+        
+        // If only warnings, include them in the response but allow update
+        if (warningDuplicates.length > 0 || duplicateCheck.warnings.length > 0) {
+          console.log('⚠️ Schedule updated with warnings:', {
+            warnings: warningDuplicates,
+            systemWarnings: duplicateCheck.warnings
+          });
+        }
       }
     }
 

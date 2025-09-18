@@ -8,12 +8,12 @@ async function seedAdminUser() {
     console.log('🌱 Seeding admin user...');
     
     const adminData = {
-      email: 'admin@matmax.store',
+      email: 'admin@matmax.world',
       password: 'matmax2025',
       fullName: 'MatMax Admin',
-      role: 'admin',
+      role: 'ADMIN',
       phone: '+51987654321',
-      status: 'active',
+      status: 'ACTIVE',
       language: 'en',
       adminNotes: 'Primary system administrator for MatMax Yoga Studio'
     };
@@ -79,7 +79,7 @@ async function seedAdminUser() {
     }
     
     console.log('\n🎯 Admin credentials:');
-    console.log('   Email: admin@matmax.store');
+    console.log('   Email: admin@matmax.world');
     console.log('   Password: matmax2025');
     console.log('   Role: admin');
     

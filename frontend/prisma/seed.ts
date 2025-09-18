@@ -532,27 +532,6 @@ async function main() {
         maxGroupSize: 1,
         isActive: true
       }
-    }),
-    prisma.packageDefinition.upsert({
-      where: { id: 6 },
-      update: {
-        name: 'TestPass',
-        description: '1 session of 60 minutes - Special promotional price',
-        sessionsCount: 1,
-        sessionDurationId: 3,
-        packageType: 'individual',
-        maxGroupSize: 1,
-        isActive: true
-      },
-      create: {
-        name: 'TestPass',
-        description: '1 session of 60 minutes - Special promotional price',
-        sessionsCount: 1,
-        sessionDurationId: 3,
-        packageType: 'individual',
-        maxGroupSize: 1,
-        isActive: true
-      }
     })
   ]);
   console.log('✅ MATPASS package definitions created:', packageDefinitions.length);
@@ -637,21 +616,6 @@ async function main() {
         isActive: true
       }
     }),
-    prisma.packagePrice.upsert({
-      where: { packageDefinitionId_currencyId: { packageDefinitionId: packageDefinitions[5].id, currencyId: penCurrencyId } },
-      update: {
-        price: 1.00,
-        pricingMode: 'custom',
-        isActive: true
-      },
-      create: {
-        packageDefinitionId: packageDefinitions[5].id,
-        currencyId: penCurrencyId,
-        price: 1.00,
-        pricingMode: 'custom',
-        isActive: true
-      }
-    })
   ]);
   console.log('✅ MATPASS package prices created:', packagePrices.length);
 
@@ -988,17 +952,17 @@ async function main() {
   console.log('✅ Admin client profile created:', adminClient.id);
 
   // 16.6. Create new admin user with password
-  console.log('👤 Creating new admin user (admin@matmax.store)...');
-  const hashedPassword = await bcrypt.hash('soulpath', 12);
+  console.log('👤 Creating new admin user (admin@matmax.world)...');
+  const hashedPassword = await bcrypt.hash('matmax2025', 12);
   const newAdminUser = await prisma.user.upsert({
-    where: { email: 'admin@matmax.store' },
+    where: { email: 'admin@matmax.world' },
     update: {},
     create: {
-      email: 'admin@matmax.store',
+      email: 'admin@matmax.world',
       password: hashedPassword,
       fullName: 'MatMax Admin',
       role: 'ADMIN',
-      phone: '+1234567890',
+      phone: '+51987654321',
       status: 'ACTIVE',
       birthDate: new Date('1990-01-15'),
       birthTime: new Date('1990-01-15T10:30:00'),
@@ -1576,7 +1540,7 @@ async function main() {
         maxBookings: 15
       }
     }),
-    // Saturday - 08:30 Hatha, 09:45 Vinyasa
+    // Saturday - 08:15 Hatha, 09:30 Vinyasa
     prisma.teacherSchedule.upsert({
       where: { id: 14 },
       update: {},
@@ -1585,8 +1549,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 1, // Hatha Yoga
         dayOfWeek: 'Saturday',
-        startTime: new Date('1970-01-01T13:30:00Z'), // 08:30 EST = 13:30 UTC
-        endTime: new Date('1970-01-01T14:30:00Z'), // 09:30 EST = 14:30 UTC
+        startTime: new Date('1970-01-01T13:15:00Z'), // 08:15 EST = 13:15 UTC
+        endTime: new Date('1970-01-01T14:15:00Z'), // 09:15 EST = 14:15 UTC
         isAvailable: true,
         maxBookings: 15
       }
@@ -1599,8 +1563,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 2, // Vinyasa Yoga
         dayOfWeek: 'Saturday',
-        startTime: new Date('1970-01-01T14:45:00Z'), // 09:45 EST = 14:45 UTC
-        endTime: new Date('1970-01-01T15:45:00Z'), // 10:45 EST = 15:45 UTC
+        startTime: new Date('1970-01-01T14:30:00Z'), // 09:30 EST = 14:30 UTC
+        endTime: new Date('1970-01-01T15:30:00Z'), // 10:30 EST = 15:30 UTC
         isAvailable: true,
         maxBookings: 15
       }

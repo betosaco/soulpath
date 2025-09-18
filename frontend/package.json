@@ -110,7 +110,7 @@
             "vercel:env:pull": "vercel env pull .env.local",
             "lyra:validate": "node scripts/validate-lyra-config.js",
             "lyra:test": "node scripts/test-lyra-integration.js",
-            "lyra:test-1sol": "node scripts/test-1sol-payment.js",
+            "test:duplicates": "node scripts/test-duplicate-prevention.js",
             "postinstall": "prisma generate"
       }
 }

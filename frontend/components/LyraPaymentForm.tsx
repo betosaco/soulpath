@@ -180,22 +180,22 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
               // Card number field - full width on its own row (outside flex container)
               const cardNumberField = document.querySelector('#lyra-payment-form .kr-pan');
               if (cardNumberField) {
-                cardNumberField.style.width = '100%';
-                cardNumberField.style.marginBottom = '1rem';
-                cardNumberField.style.display = 'block';
-                cardNumberField.style.flex = 'none';
+                (cardNumberField as HTMLElement).style.width = '100%';
+                (cardNumberField as HTMLElement).style.marginBottom = '1rem';
+                (cardNumberField as HTMLElement).style.display = 'block';
+                (cardNumberField as HTMLElement).style.flex = 'none';
               }
               
               // Change to vertical layout for expiry and CVV fields
               const flexContainer = document.querySelector('#lyra-payment-form .flex-container');
               if (flexContainer) {
-                flexContainer.style.display = 'flex';
-                flexContainer.style.flexDirection = 'column';
-                flexContainer.style.gap = '1rem';
-                flexContainer.style.alignItems = 'stretch';
-                flexContainer.style.marginBottom = '1rem';
-                flexContainer.style.width = '100%';
-                flexContainer.style.boxSizing = 'border-box';
+                (flexContainer as HTMLElement).style.display = 'flex';
+                (flexContainer as HTMLElement).style.flexDirection = 'column';
+                (flexContainer as HTMLElement).style.gap = '1rem';
+                (flexContainer as HTMLElement).style.alignItems = 'stretch';
+                (flexContainer as HTMLElement).style.marginBottom = '1rem';
+                (flexContainer as HTMLElement).style.width = '100%';
+                (flexContainer as HTMLElement).style.boxSizing = 'border-box';
               }
               
               // Make expiry and CVV fields full width in vertical layout
@@ -203,23 +203,23 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
               const cvvField = document.querySelector('#lyra-payment-form .flex-container .kr-security-code');
               
               if (expiryField) {
-                expiryField.style.flex = 'none';
-                expiryField.style.display = 'block';
-                expiryField.style.width = '100%';
-                expiryField.style.minWidth = '0';
-                expiryField.style.maxWidth = '100%';
-                expiryField.style.boxSizing = 'border-box';
-                expiryField.style.overflow = 'hidden';
+                (expiryField as HTMLElement).style.flex = 'none';
+                (expiryField as HTMLElement).style.display = 'block';
+                (expiryField as HTMLElement).style.width = '100%';
+                (expiryField as HTMLElement).style.minWidth = '0';
+                (expiryField as HTMLElement).style.maxWidth = '100%';
+                (expiryField as HTMLElement).style.boxSizing = 'border-box';
+                (expiryField as HTMLElement).style.overflow = 'hidden';
               }
               
               if (cvvField) {
-                cvvField.style.flex = 'none';
-                cvvField.style.display = 'block';
-                cvvField.style.width = '100%';
-                cvvField.style.minWidth = '0';
-                cvvField.style.maxWidth = '100%';
-                cvvField.style.boxSizing = 'border-box';
-                cvvField.style.overflow = 'hidden';
+                (cvvField as HTMLElement).style.flex = 'none';
+                (cvvField as HTMLElement).style.display = 'block';
+                (cvvField as HTMLElement).style.width = '100%';
+                (cvvField as HTMLElement).style.minWidth = '0';
+                (cvvField as HTMLElement).style.maxWidth = '100%';
+                (cvvField as HTMLElement).style.boxSizing = 'border-box';
+                (cvvField as HTMLElement).style.overflow = 'hidden';
               }
 
               // Force iframe elements to match their container widths
@@ -502,22 +502,22 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
           // Card number field - full width on its own row (outside flex container)
           const cardNumberField = formElement.querySelector('.kr-pan');
           if (cardNumberField) {
-            cardNumberField.style.width = '100%';
-            cardNumberField.style.marginBottom = '1rem';
-            cardNumberField.style.display = 'block';
-            cardNumberField.style.flex = 'none';
+            (cardNumberField as HTMLElement).style.width = '100%';
+            (cardNumberField as HTMLElement).style.marginBottom = '1rem';
+            (cardNumberField as HTMLElement).style.display = 'block';
+            (cardNumberField as HTMLElement).style.flex = 'none';
             console.log('✅ Fixed card number field layout');
           }
           
           // Find the flex container for expiry and CVV only
           const flexContainer = formElement.querySelector('.flex-container');
           if (flexContainer) {
-            flexContainer.style.display = 'flex';
-            flexContainer.style.flexDirection = 'row';
-            flexContainer.style.gap = '0.75rem';
-            flexContainer.style.alignItems = 'stretch';
-            flexContainer.style.marginBottom = '1rem';
-            flexContainer.style.width = '100%';
+            (flexContainer as HTMLElement).style.display = 'flex';
+            (flexContainer as HTMLElement).style.flexDirection = 'row';
+            (flexContainer as HTMLElement).style.gap = '0.75rem';
+            (flexContainer as HTMLElement).style.alignItems = 'stretch';
+            (flexContainer as HTMLElement).style.marginBottom = '1rem';
+            (flexContainer as HTMLElement).style.width = '100%';
             console.log('✅ Fixed flex container layout');
           }
           
@@ -526,18 +526,18 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
           const cvvField = formElement.querySelector('.flex-container .kr-security-code');
           
           if (expiryField) {
-            expiryField.style.flex = '1';
-            expiryField.style.display = 'inline-block';
-            expiryField.style.width = 'auto';
-            expiryField.style.minWidth = '0';
+            (expiryField as HTMLElement).style.flex = '1';
+            (expiryField as HTMLElement).style.display = 'inline-block';
+            (expiryField as HTMLElement).style.width = 'auto';
+            (expiryField as HTMLElement).style.minWidth = '0';
             console.log('✅ Fixed expiry field layout');
           }
           
           if (cvvField) {
-            cvvField.style.flex = '1';
-            cvvField.style.display = 'inline-block';
-            cvvField.style.width = 'auto';
-            cvvField.style.minWidth = '0';
+            (cvvField as HTMLElement).style.flex = '1';
+            (cvvField as HTMLElement).style.display = 'inline-block';
+            (cvvField as HTMLElement).style.width = 'auto';
+            (cvvField as HTMLElement).style.minWidth = '0';
             console.log('✅ Fixed CVV field layout');
           }
         };

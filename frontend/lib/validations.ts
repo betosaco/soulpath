@@ -1,9 +1,10 @@
 import { z } from 'zod';
+import { isEmailValid } from './email-validation';
 
 // Client validation schemas
 export const clientSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name must be less than 100 characters'),
-  email: z.string().email('Invalid email address'),
+  email: z.string().refine(isEmailValid, 'Please enter a valid email address with a recognized domain'),
   phone: z.string().optional(),
   status: z.enum(['active', 'inactive', 'pending', 'confirmed', 'completed', 'cancelled', 'no-show']).default('active'),
   birthDate: z.string().min(1, 'Birth date is required'),
@@ -15,7 +16,7 @@ export const clientSchema = z.object({
 });
 
 export const clientCreateSchema = clientSchema.extend({
-  email: z.string().email('Invalid email address'),
+  email: z.string().refine(isEmailValid, 'Please enter a valid email address with a recognized domain'),
 });
 
 export const clientUpdateSchema = clientSchema.partial();
@@ -33,7 +34,7 @@ export const scheduleUpdateSchema = scheduleSchema.partial();
 
 // Booking validation schemas
 export const bookingSchema = z.object({
-  clientEmail: z.string().email('Invalid client email'),
+  clientEmail: z.string().refine(isEmailValid, 'Please enter a valid email address with a recognized domain'),
   sessionDate: z.string().min(1, 'Session date is required'),
   sessionTime: z.string().min(1, 'Session time is required'),
   sessionType: z.string().min(1, 'Session type is required'),
@@ -72,7 +73,7 @@ export const emailConfigSchema = z.object({
   smtpPort: z.number().min(1, 'SMTP port must be greater than 0').max(65535, 'SMTP port must be less than 65536'),
   smtpUser: z.string().min(1, 'SMTP user is required'),
   smtpPass: z.string().min(1, 'SMTP password is required'),
-  fromEmail: z.string().email('Invalid from email address'),
+  fromEmail: z.string().refine(isEmailValid, 'Please enter a valid email address with a recognized domain'),
   fromName: z.string().min(1, 'From name is required'),
 });
 
@@ -131,7 +132,7 @@ export const profileImageUpdateSchema = profileImageSchema.partial();
 
 // Admin user validation schemas
 export const adminUserSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.string().refine(isEmailValid, 'Please enter a valid email address with a recognized domain'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
   fullName: z.string().min(1, 'Full name is required'),
   role: z.enum(['admin', 'user']).default('admin'),

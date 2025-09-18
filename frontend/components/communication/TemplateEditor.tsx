@@ -17,6 +17,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { getPlaceholdersGrouped, validatePlaceholders, Placeholder } from '../../lib/communication/placeholders';
+import { useAuth } from '../../hooks/useAuth';
 
 interface Template {
   id?: number;
@@ -57,6 +58,7 @@ const LANGUAGES = [
 ];
 
 export function TemplateEditor({ template, type, onSave, onClose }: TemplateEditorProps) {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     templateKey: '',
     name: '',
@@ -172,6 +174,7 @@ export function TemplateEditor({ template, type, onSave, onClose }: TemplateEdit
         method,
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user?.access_token}`
         },
         body: JSON.stringify(templateData)
       });

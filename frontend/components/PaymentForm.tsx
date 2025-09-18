@@ -1,24 +1,17 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { 
   CreditCard, 
   Lock, 
-  CheckCircle, 
-  AlertCircle, 
-  Loader2,
   Shield,
-  ArrowRight,
   ArrowLeft,
   Calendar
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import LyraPaymentForm from '@/components/LyraPaymentForm';
 import { toast } from 'sonner';
 
@@ -60,19 +53,12 @@ export function PaymentForm({
   bookingData = null,
   onPaymentSuccess, 
   onBack, 
-  isLoading = false 
 }: PaymentFormProps) {
   const router = useRouter();
-  const [paymentResult, setPaymentResult] = useState<any>(null);
   const [processing, setProcessing] = useState(false);
 
   const handlePaymentSuccess = (paymentData: any) => {
     console.log('✅ Payment successful:', paymentData);
-    setPaymentResult({
-      success: true,
-      data: paymentData,
-      message: `¡Pago exitoso! ${packageData.currency} ${packageData.price.toFixed(2)} procesado correctamente.`
-    });
     setProcessing(false);
     
     // Store payment result in sessionStorage for the success page
@@ -108,11 +94,6 @@ export function PaymentForm({
 
   const handlePaymentError = (error: any) => {
     console.error('❌ Payment error:', error);
-    setPaymentResult({
-      success: false,
-      error: error,
-      message: 'Error en el procesamiento del pago.'
-    });
     setProcessing(false);
     toast.error('Error en el procesamiento del pago. Por favor, intenta nuevamente.');
   };
@@ -148,7 +129,6 @@ export function PaymentForm({
     }
     
     setProcessing(true);
-    setPaymentResult(null);
     console.log('✅ Processing state set to true, overlay should appear');
   };
 

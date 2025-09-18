@@ -19,6 +19,7 @@ import { BaseInput } from '../ui/BaseInput';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { TemplateEditor } from './TemplateEditor';
 import { TemplatePreview } from './TemplatePreview';
+import { useAuth } from '../../hooks/useAuth';
 
 interface Template {
   id: number;
@@ -44,6 +45,7 @@ interface TemplateLibraryProps {
 }
 
 export function TemplateLibrary({ type }: TemplateLibraryProps) {
+  const { user } = useAuth();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -58,7 +60,12 @@ export function TemplateLibrary({ type }: TemplateLibraryProps) {
   const loadTemplates = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/admin/communication/templates?type=${type}`);
+      const response = await fetch(`/api/admin/communication/templates?type=${type}`, {
+        headers: {
+          'Authorization': `Bearer ${user?.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setTemplates(data.templates || []);
@@ -68,7 +75,7 @@ export function TemplateLibrary({ type }: TemplateLibraryProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [type]);
+  }, [type, user?.access_token]);
 
   useEffect(() => {
     loadTemplates();
@@ -117,6 +124,7 @@ export function TemplateLibrary({ type }: TemplateLibraryProps) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user?.access_token}`
         },
         body: JSON.stringify(newTemplate)
       });
@@ -138,7 +146,10 @@ export function TemplateLibrary({ type }: TemplateLibraryProps) {
     if (confirm(`Are you sure you want to delete "${template.name}"?`)) {
       try {
         const response = await fetch(`/api/admin/communication/templates/${template.id}`, {
-          method: 'DELETE'
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${user?.access_token}`
+          }
         });
 
         if (response.ok) {

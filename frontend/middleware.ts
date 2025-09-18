@@ -116,6 +116,21 @@ export async function middleware(request: NextRequest) {
   
   console.log('🔐 Middleware: Processing request to', pathname);
 
+  // Handle CORS preflight requests
+  if (request.method === 'OPTIONS') {
+    console.log('🔐 Middleware: Handling CORS preflight request');
+    return new NextResponse(null, {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, PATCH',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, Accept, Origin, X-User-Id, X-User-Email, X-User-Role',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Max-Age': '86400',
+      },
+    });
+  }
+
   // Check if this is an admin route FIRST
   if (isAdminRoute(pathname)) {
     console.log('🔐 Middleware: Admin route detected, checking authentication');

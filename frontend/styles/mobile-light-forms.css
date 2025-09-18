@@ -1,0 +1,188 @@
+/* Mobile Light Form Overrides */
+/* This file ensures all forms display in light mode on mobile devices */
+
+@media (max-width: 767px) {
+  /* Override all input fields to use light styling on mobile */
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"],
+  input[type="date"],
+  input[type="time"],
+  input[type="number"],
+  textarea,
+  select {
+    background-color: #ffffff !important;
+    border-color: #d1d5db !important;
+    color: #111827 !important;
+  }
+
+  /* Override input placeholders */
+  input::placeholder,
+  textarea::placeholder {
+    color: #9ca3af !important;
+  }
+
+  /* Override select dropdowns */
+  .mobile-select,
+  [data-slot="select-trigger"] {
+    background-color: #ffffff !important;
+    border-color: #d1d5db !important;
+    color: #111827 !important;
+  }
+
+  /* Override select content dropdowns */
+  [data-slot="select-content"] {
+    background-color: #ffffff !important;
+    border-color: #d1d5db !important;
+  }
+
+  /* Override form labels to be darker for better contrast */
+  label {
+    color: #374151 !important;
+    font-weight: 500 !important;
+  }
+
+  /* Override card backgrounds for forms */
+  .mobile-form-card,
+  .mobile-form-card .card,
+  [class*="bg-[#1a1a2e]"],
+  [class*="bg-[#16213e]"] {
+    background-color: #f9fafb !important;
+    border-color: #e5e7eb !important;
+  }
+
+  /* Override text colors in form cards */
+  .mobile-form-card h1,
+  .mobile-form-card h2,
+  .mobile-form-card h3,
+  .mobile-form-card h4,
+  .mobile-form-card h5,
+  .mobile-form-card h6,
+  .mobile-form-card .card-title,
+  .mobile-form-card .text-white {
+    color: #111827 !important;
+  }
+
+  .mobile-form-card .text-gray-300,
+  .mobile-form-card .text-gray-400 {
+    color: #6b7280 !important;
+  }
+
+  /* Override button styling for better contrast */
+  .mobile-form-card button[class*="border-[#2a2a4a]"] {
+    background-color: #ffffff !important;
+    border-color: #d1d5db !important;
+    color: #374151 !important;
+  }
+
+  .mobile-form-card button[class*="border-[#2a2a4a]"]:hover {
+    background-color: #f3f4f6 !important;
+    border-color: #9ca3af !important;
+    color: #111827 !important;
+  }
+
+  /* Override summary cards */
+  .mobile-form-card [class*="bg-[#16213e]"] {
+    background-color: #ffffff !important;
+    border-color: #e5e7eb !important;
+  }
+
+  .mobile-form-card [class*="bg-[#16213e]"] p,
+  .mobile-form-card [class*="bg-[#16213e]"] span {
+    color: #374151 !important;
+  }
+
+  /* Override border colors */
+  .mobile-form-card [class*="border-[#2a2a4a]"] {
+    border-color: #d1d5db !important;
+  }
+
+  /* Override focus states */
+  .mobile-form-card input:focus,
+  .mobile-form-card textarea:focus,
+  .mobile-form-card select:focus {
+    border-color: #6ea058 !important;
+    box-shadow: 0 0 0 3px rgba(110, 160, 88, 0.1) !important;
+  }
+
+  /* Override dropdown menus */
+  .mobile-form-card [class*="dropdown-menu"],
+  .mobile-form-card [class*="bg-[#16213e]"]:has([class*="dropdown"]) {
+    background-color: #ffffff !important;
+    border-color: #d1d5db !important;
+  }
+
+  .mobile-form-card [class*="dropdown-menu"] button {
+    color: #374151 !important;
+  }
+
+  .mobile-form-card [class*="dropdown-menu"] button:hover {
+    background-color: #f3f4f6 !important;
+    color: #111827 !important;
+  }
+}
+
+/* Specific overrides for CustomerBookingFlow component */
+@media (max-width: 767px) {
+  .customer-booking-flow {
+    /* Override all dark backgrounds */
+    [class*="bg-[#1a1a2e]"] {
+      background-color: #f9fafb !important;
+    }
+
+    [class*="bg-[#16213e]"] {
+      background-color: #ffffff !important;
+    }
+
+    /* Override all dark borders */
+    [class*="border-[#16213e]"] {
+      border-color: #e5e7eb !important;
+    }
+
+    [class*="border-[#2a2a4a]"] {
+      border-color: #d1d5db !important;
+    }
+
+    /* Override text colors */
+    .text-white {
+      color: #111827 !important;
+    }
+
+    .text-gray-300 {
+      color: #6b7280 !important;
+    }
+
+    .text-gray-400 {
+      color: #9ca3af !important;
+    }
+
+    /* Override input styling */
+    input,
+    textarea,
+    select {
+      background-color: #ffffff !important;
+      border-color: #d1d5db !important;
+      color: #111827 !important;
+    }
+
+    /* Override labels */
+    label {
+      color: #374151 !important;
+      font-weight: 500 !important;
+    }
+
+    /* Override buttons */
+    button[class*="border-[#2a2a4a]"] {
+      background-color: #ffffff !important;
+      border-color: #d1d5db !important;
+      color: #374151 !important;
+    }
+
+    button[class*="border-[#2a2a4a]"]:hover {
+      background-color: #f3f4f6 !important;
+      border-color: #9ca3af !important;
+      color: #111827 !important;
+    }
+  }
+}

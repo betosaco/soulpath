@@ -22,7 +22,7 @@ const nextConfig = {
   experimental: {
     // Enable experimental features if needed
   },
-  // Content Security Policy configuration
+  // Content Security Policy and CORS configuration
   async headers() {
     const isDevelopment = process.env.NODE_ENV === 'development';
     
@@ -53,6 +53,27 @@ const nextConfig = {
           {
             key: 'Content-Security-Policy',
             value: [scriptSrc, ...baseDirectives].join('; ')
+          },
+          // CORS headers for all routes
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*'
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, PUT, DELETE, OPTIONS, PATCH'
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization, X-Requested-With, Accept, Origin, X-User-Id, X-User-Email, X-User-Role'
+          },
+          {
+            key: 'Access-Control-Allow-Credentials',
+            value: 'true'
+          },
+          {
+            key: 'Access-Control-Max-Age',
+            value: '86400'
           }
         ]
       }

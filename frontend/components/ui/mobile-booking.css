@@ -34,10 +34,10 @@
     background-clip: padding-box;
     font-size: 16px; /* Prevent zoom on iOS */
     padding: 1rem;
-    border: 2px solid var(--unified-border-medium);
+    border: 2px solid #d1d5db; /* Light gray border */
     border-radius: var(--unified-radius-md);
-    background-color: var(--unified-bg-surface);
-    color: var(--unified-text-primary);
+    background-color: #ffffff; /* White background */
+    color: #111827; /* Dark text */
     font-family: inherit;
     transition: all var(--unified-transition-normal);
     width: 100%;
@@ -54,7 +54,7 @@
   }
   
   .mobile-input::placeholder {
-    color: var(--unified-text-tertiary);
+    color: #9ca3af; /* Light gray placeholder */
     font-style: italic;
   }
 
@@ -81,10 +81,10 @@
     background-size: 1rem;
     padding: 1rem 3rem 1rem 1rem;
     font-size: 16px; /* Prevent zoom on iOS */
-    border: 2px solid var(--unified-border-medium);
+    border: 2px solid #d1d5db; /* Light gray border */
     border-radius: var(--unified-radius-md);
-    background-color: var(--unified-bg-surface);
-    color: var(--unified-text-primary);
+    background-color: #ffffff; /* White background */
+    color: #111827; /* Dark text */
     font-family: inherit;
     transition: all var(--unified-transition-normal);
     width: 100%;

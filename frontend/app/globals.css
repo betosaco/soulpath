@@ -7,6 +7,7 @@
 @import '../styles/schedule-calendar-view.css';
 @import '../styles/service-display.css';
 @import '../styles/teacher-profile.css';
+@import '../styles/mobile-light-forms.css';
 
 @tailwind base;
 @tailwind components;

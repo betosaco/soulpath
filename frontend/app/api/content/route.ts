@@ -314,7 +314,7 @@ export async function PUT(request: NextRequest) {
       // Update existing content record
       content = await withConnection(async () => {
         return await prisma.content.update({
-        where: { id: content.id },
+        where: { id: content?.id },
         data: {
           heroTitleEn: body.heroTitleEn,
           heroTitleEs: body.heroTitleEs,

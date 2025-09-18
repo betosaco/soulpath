@@ -29,6 +29,7 @@ import { useAuth } from '../hooks/useAuth';
 import { formatDate, formatTime } from '@/lib/utils';
 import { StripeInlineForm } from './stripe/StripeInlineForm';
 import { CreditCard, ChevronDown, Check } from 'lucide-react';
+import { validateEmailWithMessage } from '@/lib/email-validation';
 
 interface CustomerPackage {
   id: string;
@@ -111,6 +112,7 @@ export function CustomerBookingFlow({ initialSlotData }: CustomerBookingFlowProp
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [showPaymentMethodDropdown, setShowPaymentMethodDropdown] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
   const [formData, setFormData] = useState<BookingFormData>({
     selectedPackage: null,
     selectedSchedule: null,
@@ -331,6 +333,12 @@ export function CustomerBookingFlow({ initialSlotData }: CustomerBookingFlowProp
 
   const handleFormChange = (field: keyof BookingFormData, value: string | Date | number | boolean | null | undefined) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Validate email when it changes
+    if (field === 'clientEmail' && typeof value === 'string') {
+      const emailValidation = validateEmailWithMessage(value);
+      setEmailError(emailValidation);
+    }
   };
 
   const updateStepCompletion = (stepIndex: number, completed: boolean) => {
@@ -355,6 +363,16 @@ export function CustomerBookingFlow({ initialSlotData }: CustomerBookingFlowProp
     if (!formData.selectedPackage || !formData.selectedSchedule || !formData.selectedPaymentMethod) {
       toast.error('Missing required information');
       return;
+    }
+
+    // Validate email before proceeding
+    if (formData.clientEmail) {
+      const emailValidation = validateEmailWithMessage(formData.clientEmail);
+      if (emailValidation) {
+        setEmailError(emailValidation);
+        toast.error('Please fix the email validation error before proceeding');
+        return;
+      }
     }
 
     setProcessing(true);
@@ -479,7 +497,7 @@ export function CustomerBookingFlow({ initialSlotData }: CustomerBookingFlowProp
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6 mobile-scroll">
+    <div className="space-y-4 sm:space-y-6 mobile-scroll customer-booking-flow">
       {/* Header */}
       <div className="text-center px-2 sm:px-0">
         <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Book Your Session</h1>
@@ -737,50 +755,55 @@ export function CustomerBookingFlow({ initialSlotData }: CustomerBookingFlowProp
                 <CardContent className="space-y-4 mobile-form-spacing">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                      <Label htmlFor="clientName" className="text-gray-300 text-sm">Full Name *</Label>
+                      <Label htmlFor="clientName" className="text-gray-700 text-sm font-medium">Full Name *</Label>
                       <Input
                         id="clientName"
                         value={formData.clientName}
                         onChange={(e) => handleFormChange('clientName', e.target.value)}
-                        className="bg-[#16213e] border-[#0a0a23] text-white h-12 mobile-input mobile-focus"
+                        className="bg-white border-gray-300 text-gray-900 h-12 mobile-input mobile-focus"
                         required
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="clientEmail" className="text-gray-300 text-sm">Email *</Label>
+                      <Label htmlFor="clientEmail" className="text-gray-700 text-sm font-medium">Email *</Label>
                       <Input
                         id="clientEmail"
                         type="email"
                         value={formData.clientEmail}
                         onChange={(e) => handleFormChange('clientEmail', e.target.value)}
-                        className="bg-[#16213e] border-[#0a0a23] text-white h-12 mobile-input mobile-focus"
+                        className={`bg-white border-gray-300 text-gray-900 h-12 mobile-input mobile-focus ${
+                          emailError ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
+                        }`}
                         required
                       />
+                      {emailError && (
+                        <p className="text-red-500 text-xs mt-1">{emailError}</p>
+                      )}
                     </div>
 
                     <div>
-                      <Label htmlFor="clientPhone" className="text-gray-300 text-sm">Phone</Label>
+                      <Label htmlFor="clientPhone" className="text-gray-700 text-sm font-medium">Phone</Label>
                       <Input
                         id="clientPhone"
                         type="tel"
                         value={formData.clientPhone}
                         onChange={(e) => handleFormChange('clientPhone', e.target.value)}
-                        className="bg-[#16213e] border-[#0a0a23] text-white h-12 mobile-input mobile-focus"
+                        className="bg-white border-gray-300 text-gray-900 h-12 mobile-input mobile-focus"
                         placeholder="+1 (555) 123-4567"
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="language" className="text-gray-300 text-sm">Language</Label>
+                      <Label htmlFor="language" className="text-gray-700 text-sm font-medium">Language</Label>
                       <Select
                         value={formData.language}
                         onValueChange={(value) => handleFormChange('language', value)}
                       >
-                        <SelectTrigger className="bg-[#16213e] border-[#0a0a23] text-white h-12 mobile-select mobile-focus">
+                        <SelectTrigger className="bg-white border-gray-300 text-gray-900 h-12 mobile-select mobile-focus">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#16213e] border-[#0a0a23] text-white">
+                        <SelectContent className="bg-white border-gray-300 text-gray-900">
                           <SelectItem value="en">🇺🇸 English</SelectItem>
                           <SelectItem value="es">🇪🇸 Español</SelectItem>
                         </SelectContent>
@@ -788,62 +811,62 @@ export function CustomerBookingFlow({ initialSlotData }: CustomerBookingFlowProp
                     </div>
 
                     <div>
-                      <Label htmlFor="birthDate" className="text-gray-300 text-sm">Birth Date *</Label>
+                      <Label htmlFor="birthDate" className="text-gray-700 text-sm font-medium">Birth Date *</Label>
                       <Input
                         id="birthDate"
                         type="date"
                         value={formData.birthDate}
                         onChange={(e) => handleFormChange('birthDate', e.target.value)}
-                        className="bg-[#16213e] border-[#0a0a23] text-white h-12 mobile-date-input mobile-focus"
+                        className="bg-white border-gray-300 text-gray-900 h-12 mobile-date-input mobile-focus"
                         required
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="birthTime" className="text-gray-300 text-sm">Birth Time (Optional)</Label>
+                      <Label htmlFor="birthTime" className="text-gray-700 text-sm font-medium">Birth Time (Optional)</Label>
                       <Input
                         id="birthTime"
                         type="time"
                         value={formData.birthTime}
                         onChange={(e) => handleFormChange('birthTime', e.target.value)}
-                        className="bg-[#16213e] border-[#0a0a23] text-white h-12 mobile-input mobile-focus"
+                        className="bg-white border-gray-300 text-gray-900 h-12 mobile-input mobile-focus"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="birthPlace" className="text-gray-300 text-sm">Birth Place *</Label>
-                    <Input
-                      id="birthPlace"
-                      value={formData.birthPlace}
-                      onChange={(e) => handleFormChange('birthPlace', e.target.value)}
-                      className="bg-[#16213e] border-[#0a0a23] text-white h-12 mobile-input mobile-focus"
-                      placeholder="City, Country"
-                      required
-                    />
+                    <Label htmlFor="birthPlace" className="text-gray-700 text-sm font-medium">Birth Place *</Label>
+                      <Input
+                        id="birthPlace"
+                        value={formData.birthPlace}
+                        onChange={(e) => handleFormChange('birthPlace', e.target.value)}
+                        className="bg-white border-gray-300 text-gray-900 h-12 mobile-input mobile-focus"
+                        placeholder="City, Country"
+                        required
+                      />
                   </div>
 
                   <div>
-                    <Label htmlFor="question" className="text-gray-300 text-sm">Question/Focus Areas *</Label>
-                    <Textarea
-                      id="question"
-                      value={formData.question}
-                      onChange={(e) => handleFormChange('question', e.target.value)}
-                      className="bg-[#16213e] border-[#0a0a23] text-white min-h-[100px] mobile-input mobile-focus"
-                      placeholder="What would you like to explore in your reading?"
-                      required
-                    />
+                    <Label htmlFor="question" className="text-gray-700 text-sm font-medium">Question/Focus Areas *</Label>
+                      <Textarea
+                        id="question"
+                        value={formData.question}
+                        onChange={(e) => handleFormChange('question', e.target.value)}
+                        className="bg-white border-gray-300 text-gray-900 min-h-[100px] mobile-input mobile-focus"
+                        placeholder="What would you like to explore in your reading?"
+                        required
+                      />
                   </div>
 
                   <div>
-                    <Label htmlFor="specialRequests" className="text-gray-300 text-sm">Special Requests</Label>
-                    <Textarea
-                      id="specialRequests"
-                      value={formData.specialRequests}
-                      onChange={(e) => handleFormChange('specialRequests', e.target.value)}
-                      className="bg-[#16213e] border-[#0a0a23] text-white min-h-[80px] mobile-input mobile-focus"
-                      placeholder="Any special requests or additional information..."
-                    />
+                    <Label htmlFor="specialRequests" className="text-gray-700 text-sm font-medium">Special Requests</Label>
+                      <Textarea
+                        id="specialRequests"
+                        value={formData.specialRequests}
+                        onChange={(e) => handleFormChange('specialRequests', e.target.value)}
+                        className="bg-white border-gray-300 text-gray-900 min-h-[80px] mobile-input mobile-focus"
+                        placeholder="Any special requests or additional information..."
+                      />
                   </div>
                 </CardContent>
               </Card>

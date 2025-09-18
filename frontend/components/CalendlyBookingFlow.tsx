@@ -24,6 +24,7 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { PhoneVerificationModal } from './modals/PhoneVerificationModal';
+import { validateEmailWithMessage } from '@/lib/email-validation';
 
 interface Package {
   id: number;
@@ -154,6 +155,7 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
     message: '',
     paymentMethodId: undefined
   });
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   // Check if mobile on mount and resize
   useEffect(() => {
@@ -248,6 +250,12 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
 
   const updateBookingData = (field: keyof BookingData, value: string | number) => {
     setBookingData(prev => ({ ...prev, [field]: value }));
+    
+    // Validate email when it changes
+    if (field === 'clientEmail' && typeof value === 'string') {
+      const emailValidation = validateEmailWithMessage(value);
+      setEmailError(emailValidation);
+    }
   };
 
   const nextStep = () => {
@@ -644,9 +652,14 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
                         type="email"
                         value={bookingData.clientEmail}
                         onChange={(e) => updateBookingData('clientEmail', e.target.value)}
-                        className="bg-[#191970]/10 border-[#C0C0C0]/20 text-[#EAEAEA] placeholder-[#C0C0C0]/60 h-12 sm:h-11 mobile-input mobile-focus"
+                        className={`bg-[#191970]/10 text-[#EAEAEA] placeholder-[#C0C0C0]/60 h-12 sm:h-11 mobile-input mobile-focus ${
+                          emailError ? 'border-red-500 focus:border-red-500' : 'border-[#C0C0C0]/20'
+                        }`}
                         placeholder={getTranslation('booking.emailPlaceholder', 'Enter your email')}
                       />
+                      {emailError && (
+                        <p className="text-red-400 text-xs mt-1">{emailError}</p>
+                      )}
                     </div>
 
                     <div className={isMobile ? '' : 'lg:col-span-2'}>
