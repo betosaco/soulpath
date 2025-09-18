@@ -284,36 +284,36 @@ export class LyraPaymentService {
 
 // Production configuration for Peruvian market
 export const productionLyraConfig: LyraPaymentConfig = {
-  username: process.env.LYRA_USERNAME || '88569105',
-  password: process.env.LYRA_PASSWORD || 'prodpassword_di6IeBzwz6ccq3OfeWkUmGN5s6PmhX67l6RrKJHSicFPh',
-  publicKey: process.env.LYRA_PUBLIC_KEY || 'publickey_UKrWqzlcOvfMEi4OdXuBAcGK1TaTK6izlIJZYWwHGCqkv',
-  apiEndpoint: process.env.LYRA_API_ENDPOINT || 'https://api.micuentaweb.pe/api-payment/V4/Charge/CreatePayment',
-  jsLibraryUrl: process.env.LYRA_JS_LIBRARY_URL || 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js',
-  hmacKey: process.env.LYRA_HMAC_PROD_KEY || 'L1tb9IvJNUHb1r120tn0CXfKjaacKrwTVhH6yLX6w5SUw',
+  username: (process.env.LYRA_USERNAME || '88569105').trim(),
+  password: (process.env.LYRA_PASSWORD || 'prodpassword_di6IeBzwz6ccq3OfeWkUmGN5s6PmhX67l6RrKJHSicFPh').trim(),
+  publicKey: (process.env.LYRA_PUBLIC_KEY || 'publickey_UKrWqzlcOvfMEi4OdXuBAcGK1TaTK6izlIJZYWwHGCqkv').trim(),
+  apiEndpoint: (process.env.LYRA_API_ENDPOINT || 'https://api.micuentaweb.pe/api-payment/V4/Charge/CreatePayment').trim(),
+  jsLibraryUrl: (process.env.LYRA_JS_LIBRARY_URL || 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js').trim(),
+  hmacKey: (process.env.LYRA_HMAC_PROD_KEY || 'L1tb9IvJNUHb1r120tn0CXfKjaacKrwTVhH6yLX6w5SUw').trim(),
   environment: 'production',
   returnUrls: {
-    success: process.env.LYRA_RETURN_URL_SUCCESS || 'https://yourdomain.com/payment-success',
-    error: process.env.LYRA_RETURN_URL_ERROR || 'https://yourdomain.com/payment-error',
-    cancel: process.env.LYRA_RETURN_URL_CANCEL || 'https://yourdomain.com/payment-cancel'
+    success: (process.env.LYRA_RETURN_URL_SUCCESS || 'https://yourdomain.com/payment-success').trim(),
+    error: (process.env.LYRA_RETURN_URL_ERROR || 'https://yourdomain.com/payment-error').trim(),
+    cancel: (process.env.LYRA_RETURN_URL_CANCEL || 'https://yourdomain.com/payment-cancel').trim()
   },
-  webhookUrl: process.env.LYRA_WEBHOOK_URL
+  webhookUrl: process.env.LYRA_WEBHOOK_URL?.trim()
 };
 
 // Test configuration for development
 export const testLyraConfig: LyraPaymentConfig = {
-  username: process.env.LYRA_USERNAME || '',
-  password: process.env.LYRA_PASSWORD || '',
-  publicKey: process.env.LYRA_PUBLIC_KEY || '',
+  username: (process.env.LYRA_USERNAME || '').trim(),
+  password: (process.env.LYRA_PASSWORD || '').trim(),
+  publicKey: (process.env.LYRA_PUBLIC_KEY || '').trim(),
   apiEndpoint: 'https://api.micuentaweb.pe/api-payment/V4/Charge/CreatePayment',
   jsLibraryUrl: 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js',
-  hmacKey: process.env.LYRA_HMAC_TEST_KEY || 'H9qtqKGBMUFzH8F0kz4ihdw3MTBb0WbpJ1TLLuRLxHZM1',
+  hmacKey: (process.env.LYRA_HMAC_TEST_KEY || 'H9qtqKGBMUFzH8F0kz4ihdw3MTBb0WbpJ1TLLuRLxHZM1').trim(),
   environment: 'test',
   returnUrls: {
-    success: process.env.LYRA_RETURN_URL_SUCCESS || 'http://localhost:3000/payment-success',
-    error: process.env.LYRA_RETURN_URL_ERROR || 'http://localhost:3000/payment-error',
-    cancel: process.env.LYRA_RETURN_URL_CANCEL || 'http://localhost:3000/payment-cancel'
+    success: (process.env.LYRA_RETURN_URL_SUCCESS || 'http://localhost:3000/payment-success').trim(),
+    error: (process.env.LYRA_RETURN_URL_ERROR || 'http://localhost:3000/payment-error').trim(),
+    cancel: (process.env.LYRA_RETURN_URL_CANCEL || 'http://localhost:3000/payment-cancel').trim()
   },
-  webhookUrl: process.env.LYRA_WEBHOOK_URL
+  webhookUrl: process.env.LYRA_WEBHOOK_URL?.trim()
 };
 
 // Default configuration - uses production in production environment
