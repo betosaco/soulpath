@@ -17,6 +17,15 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
+    // Validate that customer name is not empty
+    if (!customer.name || customer.name.trim() === '') {
+      console.error('❌ Customer name is empty:', { customer });
+      return NextResponse.json({
+        success: false,
+        error: 'Customer name is required and cannot be empty'
+      }, { status: 400 });
+    }
+
     console.log('✅ Required fields validated');
     console.log('🔧 Creating form token with params:', {
       amount: parseInt(amount),

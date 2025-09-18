@@ -24,6 +24,12 @@ export interface CreatePaymentParams {
     email: string;
     name?: string;
     phone?: string;
+    billingDetails?: {
+      firstName?: string;
+      lastName?: string;
+      phoneNumber?: string;
+      country?: string;
+    };
   };
   metadata?: Record<string, string>;
 }
@@ -57,29 +63,47 @@ export class LyraPaymentService {
     try {
       const credentials = Buffer.from(`${this.config.username}:${this.config.password}`).toString('base64');
       
+      const requestBody = {
+        amount: params.amount,
+        currency: params.currency,
+        orderId: params.orderId,
+        customer: {
+          email: params.customer.email,
+          reference: `customer_${Date.now()}`,
+          billingDetails: {
+            firstName: params.customer.name?.split(' ')[0] || '',
+            lastName: params.customer.name?.split(' ').slice(1).join(' ') || '',
+            phoneNumber: params.customer.phone || '',
+            country: 'PE' // Default to Peru for this application
+          }
+        },
+        metadata: params.metadata,
+        // Disable installment options to hide informational text
+        transactionOptions: {
+          cardOptions: {
+            retry: 1,
+            // Disable installment options
+            installmentOptions: {
+              enabled: false
+            }
+          }
+        }
+      };
+
+      console.log('🔍 Lyra API request body:', JSON.stringify(requestBody, null, 2));
+      console.log('🔍 Customer name processing:', {
+        originalName: params.customer.name,
+        firstName: params.customer.name?.split(' ')[0] || '',
+        lastName: params.customer.name?.split(' ').slice(1).join(' ') || ''
+      });
+
       const response = await fetch(this.config.apiEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Basic ${credentials}`
         },
-        body: JSON.stringify({
-          amount: params.amount,
-          currency: params.currency,
-          orderId: params.orderId,
-          customer: params.customer,
-          metadata: params.metadata,
-          // Disable installment options to hide informational text
-          transactionOptions: {
-            cardOptions: {
-              retry: 1,
-              // Disable installment options
-              installmentOptions: {
-                enabled: false
-              }
-            }
-          }
-        })
+        body: JSON.stringify(requestBody)
       });
 
       const data = await response.json();

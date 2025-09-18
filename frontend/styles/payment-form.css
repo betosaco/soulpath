@@ -101,6 +101,31 @@
   width: 100%;
 }
 
+
+/* Fix placeholder text readability */
+#lyra-payment-form input::placeholder,
+#lyra-payment-form input::-webkit-input-placeholder,
+#lyra-payment-form input::-moz-placeholder,
+#lyra-payment-form input:-ms-input-placeholder {
+  color: #6b7280 !important;
+  opacity: 1 !important;
+  font-size: 0.875rem !important;
+  font-weight: 400 !important;
+}
+
+/* Target iframe content placeholder text */
+#lyra-payment-form iframe {
+  color: #374151 !important;
+}
+
+/* Ensure input text is readable */
+#lyra-payment-form input {
+  color: #111827 !important;
+  font-size: 0.875rem !important;
+  font-weight: 400 !important;
+}
+
+
 /* Flex container styling is handled by the .kr-embedded .flex-container rule below */
 
 /* Card number field - takes more space */
