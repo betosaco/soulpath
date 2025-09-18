@@ -100,6 +100,9 @@ export function usePackages(currency: string = 'PEN'): UsePackagesReturn {
       // The API response is already the correct format
       const packages: PackagePrice[] = apiResponse?.success && Array.isArray(apiResponse.data) ? apiResponse.data : [];
       console.log('📦 Processed packages:', packages.length, packages);
+      if (apiResponse?.message && apiResponse.message.includes('mock data')) {
+        console.log('📝 Using mock packages - database unavailable');
+      }
       setPackages(packages);
       setLastLoaded(new Date());
       
