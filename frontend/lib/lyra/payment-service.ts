@@ -250,8 +250,8 @@ export class LyraPaymentService {
 
 // Production configuration for Peruvian market
 export const productionLyraConfig: LyraPaymentConfig = {
-  username: process.env.LYRA_USERNAME || 'prodpassword_di6IeBzwz6ccq3OfeWkUmGN5s6PmhX67l6RrKJHSicFPh',
-  password: process.env.LYRA_PASSWORD || '88569105',
+  username: process.env.LYRA_USERNAME || '88569105',
+  password: process.env.LYRA_PASSWORD || 'prodpassword_di6IeBzwz6ccq3OfeWkUmGN5s6PmhX67l6RrKJHSicFPh',
   publicKey: process.env.LYRA_PUBLIC_KEY || 'publickey_UKrWqzlcOvfMEi4OdXuBAcGK1TaTK6izlIJZYWwHGCqkv',
   apiEndpoint: process.env.LYRA_API_ENDPOINT || 'https://api.micuentaweb.pe/api-payment/V4/Charge/CreatePayment',
   jsLibraryUrl: process.env.LYRA_JS_LIBRARY_URL || 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js',

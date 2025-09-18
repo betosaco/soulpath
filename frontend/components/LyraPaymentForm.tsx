@@ -4,7 +4,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import KRGlue from '@lyracom/embedded-form-glue';
 import { PaymentErrorBoundary } from './PaymentErrorBoundary';
-import '@/styles/payment-form.css';
 
 interface LyraPaymentFormProps {
   amount: number; // Amount in cents
@@ -176,10 +175,19 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
           'data-lyra-ready': formElement.getAttribute('data-lyra-ready')
         });
         
-        // Use original Lyra form structure - let Lyra handle field rendering
-        // This should naturally exclude email and document fields
+        // Add the required field elements for Lyra to populate
         formElement.innerHTML = `
-          <!-- Let Lyra render the standard payment fields -->
+          <div class="kr-field-group">
+            <div class="kr-pan" data-field="pan"></div>
+          </div>
+          <div class="kr-field-group">
+            <div class="kr-expiry" data-field="expiryDate"></div>
+            <div class="kr-security-code" data-field="securityCode"></div>
+          </div>
+          <div class="kr-field-group">
+            <div class="kr-card-holder-name" data-field="cardHolderName"></div>
+          </div>
+          <button class="kr-payment-button" type="button">Pagar</button>
         `;
         
         // Mark the form as ready
@@ -187,118 +195,39 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
         console.log('✅ Form token set on container element with field structure');
         
         // Give Lyra time to process the form
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 500));
         
-        console.log('🔍 Form element after Lyra processing:', {
-          innerHTML: formElement.innerHTML.substring(0, 500),
-          children: formElement.children.length,
-          hasInputs: formElement.querySelectorAll('input').length
-        });
-        
-        // Let Lyra automatically detect and render the form
-        console.log('🔧 Letting Lyra automatically detect and render the form...');
-        
-        // Check if form fields were populated by Lyra
-        console.log('🔍 Form field check after Lyra processing:', {
-          formElementHTML: formElement.innerHTML.substring(0, 200) + '...',
-          children: formElement.children.length,
-          hasInputs: formElement.querySelectorAll('input').length
-        });
-
-        // Hide any DNI or EMAIL fields that might be added by Lyra
-        const hideUnnecessaryFields = () => {
-          // More comprehensive selectors for DNI/EMAIL fields
-          const selectors = [
-            '[class*="dni"]', '[class*="email"]', '[class*="DNI"]', '[class*="EMAIL"]',
-            '[id*="dni"]', '[id*="email"]', '[id*="DNI"]', '[id*="EMAIL"]',
-            '[name*="dni"]', '[name*="email"]', '[name*="DNI"]', '[name*="EMAIL"]',
-            '[placeholder*="dni"]', '[placeholder*="email"]', '[placeholder*="DNI"]', '[placeholder*="EMAIL"]',
-            '[data-field*="dni"]', '[data-field*="email"]', '[data-field*="DNI"]', '[data-field*="EMAIL"]',
-            'input[type="email"]', 'input[type="text"][placeholder*="email"]', 'input[type="text"][placeholder*="dni"]'
-          ];
-          
-          selectors.forEach(selector => {
-            const fields = formElement.querySelectorAll(selector);
-            fields.forEach(field => {
-              if (field instanceof HTMLElement) {
-                // Check if the field is actually a DNI or EMAIL field
-                const text = (field.textContent || '').toLowerCase();
-                const className = (field.className || '').toLowerCase();
-                const id = (field.id || '').toLowerCase();
-                const name = (field.getAttribute('name') || '').toLowerCase();
-                const placeholder = (field.getAttribute('placeholder') || '').toLowerCase();
-                
-                if (text.includes('dni') || text.includes('email') || 
-                    className.includes('dni') || className.includes('email') ||
-                    id.includes('dni') || id.includes('email') ||
-                    name.includes('dni') || name.includes('email') ||
-                    placeholder.includes('dni') || placeholder.includes('email')) {
-                  
-                  // Aggressively hide the field
-                  field.style.display = 'none';
-                  field.style.visibility = 'hidden';
-                  field.style.height = '0';
-                  field.style.width = '0';
-                  field.style.margin = '0';
-                  field.style.padding = '0';
-                  field.style.overflow = 'hidden';
-                  field.style.position = 'absolute';
-                  field.style.left = '-9999px';
-                  field.style.top = '-9999px';
-                  field.style.opacity = '0';
-                  field.style.pointerEvents = 'none';
-                  field.style.zIndex = '-1';
-                  
-                  // Also hide the parent container if it only contains DNI/EMAIL fields
-                  const parent = field.parentElement;
-                  if (parent && parent !== formElement) {
-                    const parentText = (parent.textContent || '').toLowerCase();
-                    if (parentText.includes('dni') || parentText.includes('email')) {
-                      parent.style.display = 'none';
-                      parent.style.visibility = 'hidden';
-                      parent.style.height = '0';
-                      parent.style.width = '0';
-                      parent.style.margin = '0';
-                      parent.style.padding = '0';
-                      parent.style.overflow = 'hidden';
-                    }
-                  }
-                }
-              }
-            });
-          });
-        };
-
-        // Hide unnecessary fields immediately
-        hideUnnecessaryFields();
-
-        // Set up a mutation observer to hide any DNI/EMAIL fields that get added later
-        const observer = new MutationObserver(() => {
-          hideUnnecessaryFields();
-        });
-
-        observer.observe(formElement, {
-          childList: true,
-          subtree: true,
-          attributes: true
-        });
-
-        // Gentle cleanup - run every 2 seconds for the first 10 seconds
-        let cleanupAttempts = 0;
-        const maxCleanupAttempts = 5; // 10 seconds
-        
-        const gentleCleanup = setInterval(() => {
-          cleanupAttempts++;
-          hideUnnecessaryFields();
-          
-          if (cleanupAttempts >= maxCleanupAttempts) {
-            clearInterval(gentleCleanup);
+        // Try to render the form explicitly
+        try {
+          console.log('🔧 Attempting to render form explicitly...');
+          if (typeof KR.renderElements === 'function') {
+            console.log('🔧 Using KR.renderElements...');
+            KR.renderElements('#lyra-payment-form');
+            console.log('✅ Form rendered with renderElements');
+          } else if (typeof KR.attachForm === 'function') {
+            console.log('🔧 Fallback to KR.attachForm...');
+            KR.attachForm('#lyra-payment-form');
+            console.log('✅ Form attached with attachForm');
+          } else {
+            console.log('⚠️ Neither renderElements nor attachForm available, relying on automatic detection');
           }
-        }, 2000);
-
-        // Store observer reference for cleanup
-        (formElement as any)._lyraObserver = observer;
-        (formElement as any)._lyraCleanupInterval = gentleCleanup;
+        } catch (renderError) {
+          console.warn('⚠️ Explicit form rendering failed:', renderError);
+        }
+        
+        // Check if form fields were populated
+        const panField = formElement.querySelector('.kr-pan');
+        const expiryField = formElement.querySelector('.kr-expiry');
+        const securityField = formElement.querySelector('.kr-security-code');
+        const cardholderField = formElement.querySelector('.kr-card-holder-name');
+        
+        console.log('🔍 Form field check:', {
+          panField: !!panField,
+          expiryField: !!expiryField,
+          securityField: !!securityField,
+          cardholderField: !!cardholderField,
+          formElementHTML: formElement.innerHTML.substring(0, 200) + '...'
+        });
         
         // Check for Lyra-specific elements
         const lyraElements = formElement.querySelectorAll('[class*="kr-"]');
@@ -498,22 +427,6 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
     // Cleanup function
     return () => {
       clearTimeout(timeoutId);
-      
-      // Disconnect mutation observer and clear intervals
-      try {
-        const formElement = document.querySelector('#lyra-payment-form');
-        if (formElement && (formElement as any)._lyraObserver) {
-          (formElement as any)._lyraObserver.disconnect();
-          delete (formElement as any)._lyraObserver;
-        }
-        if (formElement && (formElement as any)._lyraCleanupInterval) {
-          clearInterval((formElement as any)._lyraCleanupInterval);
-          delete (formElement as any)._lyraCleanupInterval;
-        }
-      } catch (error) {
-        console.warn('Observer cleanup warning:', error);
-      }
-      
       // Clean up any existing form elements safely
       try {
         const formElement = document.querySelector('#lyra-payment-form');
@@ -555,10 +468,12 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
   if (error) {
     return (
       <div className={`lyra-payment-form-container ${className}`}>
-        <div className="lyra-error-container">
-          <div className="lyra-error-icon">⚠️</div>
-          <h3 className="lyra-error-title">Error en el Formulario de Pago</h3>
-          <p className="lyra-error-message">{error}</p>
+        <div className="p-6">
+          <div className="lyra-error-container">
+            <div className="lyra-error-icon">⚠️</div>
+            <h3 className="lyra-error-title">Error en el Formulario de Pago</h3>
+            <p className="lyra-error-message">{error}</p>
+          </div>
         </div>
       </div>
     );
@@ -572,39 +487,42 @@ const LyraPaymentForm: React.FC<LyraPaymentFormProps> = ({
       }
     }}>
       <div className={`lyra-payment-form-container ${className}`}>
-        {/* Form Header */}
-        <div className="lyra-form-header">
-          <h3 className="lyra-form-title">Formulario de Pago</h3>
-          <p className="lyra-form-description">
-            Complete los datos de su tarjeta para procesar el pago de forma segura.
-          </p>
-        </div>
-        
-        {/* Loading state - shown outside the form container to avoid DOM conflicts */}
-        {isLoading && (
-          <div className="lyra-loading-container">
-            <div className="lyra-loading-spinner"></div>
-            <p className="lyra-loading-text">Inicializando formulario de pago...</p>
+        <div className="p-6">
+          {/* Form Header */}
+          <div className="lyra-form-header">
+            <h3 className="lyra-form-title">Formulario de Pago</h3>
+            <p className="lyra-form-description">
+              Complete los datos de su tarjeta para procesar el pago de forma segura.
+            </p>
           </div>
-        )}
-        
-        {/* Form container - let Lyra handle everything automatically */}
-        <div 
-          id="lyra-payment-form" 
-          ref={formRef} 
-          style={{ 
-            minHeight: '200px',
-            display: isLoading ? 'none' : 'block'
-          }}
-        >
-          {/* Form fields will be dynamically added by Lyra */}
-        </div>
-        
-        {/* Security Notice */}
-        <div className="lyra-security-notice">
-          <p className="lyra-security-text">
-            Sus datos de pago están protegidos con encriptación SSL de 256 bits
-          </p>
+          
+          {/* Loading state - shown outside the form container to avoid DOM conflicts */}
+          {isLoading && (
+            <div className="lyra-loading-container">
+              <div className="lyra-loading-spinner"></div>
+              <p className="lyra-loading-text">Inicializando formulario de pago...</p>
+            </div>
+          )}
+          
+          {/* Form container - kept separate from loading state to avoid React/Lyra conflicts */}
+          <div 
+            id="lyra-payment-form" 
+            ref={formRef} 
+            className="kr-embedded" 
+            style={{ 
+              minHeight: '200px',
+              display: isLoading ? 'none' : 'block'
+            }}
+          >
+            {/* Form fields will be dynamically added by Lyra */}
+          </div>
+          
+          {/* Security Notice */}
+          <div className="lyra-security-notice">
+            <p className="lyra-security-text">
+              Sus datos de pago están protegidos con encriptación SSL de 256 bits
+            </p>
+          </div>
         </div>
       </div>
     </PaymentErrorBoundary>

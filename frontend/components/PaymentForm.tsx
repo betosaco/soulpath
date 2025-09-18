@@ -1,15 +1,22 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   CreditCard, 
   Lock, 
+  CheckCircle, 
+  AlertCircle, 
+  Loader2,
   Shield,
+  ArrowRight,
   ArrowLeft
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import LyraPaymentForm from '@/components/LyraPaymentForm';
 import { toast } from 'sonner';
 
@@ -38,6 +45,7 @@ export function PaymentForm({
   personalInfo, 
   onPaymentSuccess, 
   onBack, 
+  isLoading = false 
 }: PaymentFormProps) {
   const [paymentResult, setPaymentResult] = useState<any>(null);
   const [processing, setProcessing] = useState(false);
@@ -47,7 +55,7 @@ export function PaymentForm({
     setPaymentResult({
       success: true,
       data: paymentData,
-      message: `¡Pago exitoso! ${packageData.currency} ${(packageData.price / 100).toFixed(2)} procesado correctamente.`
+      message: `¡Pago exitoso! ${packageData.currency} ${packageData.price.toFixed(2)} procesado correctamente.`
     });
     setProcessing(false);
     onPaymentSuccess(paymentData);
@@ -71,16 +79,18 @@ export function PaymentForm({
 
   // Convert price to cents for Lyra (assuming packageData.price is in the main currency unit)
   const amountInCents = Math.round(packageData.price * 100);
-  const totalAmount = packageData.price;
-  const taxAmount = totalAmount * 0.18; // 18% tax
-  const finalAmount = totalAmount + taxAmount;
+  const totalAmount = packageData.price; // Price already includes IGV tax
+  
+  // Calculate IGV breakdown (18% tax included in price)
+  const basePrice = totalAmount / 1.18; // Price without tax
+  const igvAmount = totalAmount - basePrice; // IGV amount
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-4xl mx-auto">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-8"
+        className="space-y-6"
       >
         {/* Header */}
         <div className="text-center mb-8">
@@ -91,29 +101,37 @@ export function PaymentForm({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Payment Form */}
           <div className="space-y-6">
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-              <LyraPaymentForm
-                amount={amountInCents} // Amount in cents for Lyra
-                currency="PEN"
-                orderId={`PKG-${packageData.id}-${Date.now()}`}
-                customer={{
-                  email: personalInfo.email,
-                  name: personalInfo.name
-                }}
-                metadata={{
-                  packageId: packageData.id,
-                  packageName: packageData.name,
-                  sessions: packageData.sessions.toString(),
-                  duration: packageData.duration.toString(),
-                  phone: personalInfo.phone,
-                  countryCode: personalInfo.countryCode
-                }}
-                onSuccess={handlePaymentSuccess}
-                onError={handlePaymentError}
-                onPaymentStart={handlePaymentStart}
-                className="w-full"
-              />
-            </div>
+            <Card className="card-base">
+              <CardHeader>
+                <CardTitle className="text-2xl text-primary flex items-center gap-2">
+                  <CreditCard className="w-6 h-6" />
+                  Payment Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <LyraPaymentForm
+                  amount={amountInCents} // Amount in cents for Lyra
+                  currency="PEN"
+                  orderId={`PKG-${packageData.id}-${Date.now()}`}
+                  customer={{
+                    email: personalInfo.email,
+                    name: personalInfo.name
+                  }}
+                  metadata={{
+                    packageId: packageData.id,
+                    packageName: packageData.name,
+                    sessions: packageData.sessions.toString(),
+                    duration: packageData.duration.toString(),
+                    phone: personalInfo.phone,
+                    countryCode: personalInfo.countryCode
+                  }}
+                  onSuccess={handlePaymentSuccess}
+                  onError={handlePaymentError}
+                  onPaymentStart={handlePaymentStart}
+                  className="w-full"
+                />
+              </CardContent>
+            </Card>
 
             {/* Payment Status */}
             {processing && (
@@ -158,14 +176,14 @@ export function PaymentForm({
 
           {/* Order Summary */}
           <div className="space-y-6">
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-              <div className="bg-gradient-to-r from-primary to-primary-light px-6 py-4">
-                <h3 className="text-2xl font-bold text-white flex items-center gap-2">
+            <Card className="card-base">
+              <CardHeader>
+                <CardTitle className="text-2xl text-primary flex items-center gap-2">
                   <Shield className="w-6 h-6" />
                   Order Summary
-                </h3>
-              </div>
-              <div className="p-6 space-y-4">
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 {/* Package Details */}
                 <div className="p-4 bg-primary/10 rounded-lg">
                   <h4 className="font-semibold text-lg text-primary mb-2">{packageData.name}</h4>
@@ -187,18 +205,18 @@ export function PaymentForm({
 
                 {/* Pricing Breakdown */}
                 <div className="space-y-2">
-                  <div className="flex justify-between text-lg">
-                    <span className="text-muted">Package Price:</span>
-                    <span className="font-semibold">{packageData.currency}{packageData.price.toFixed(2)}</span>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted">Subtotal:</span>
+                    <span className="font-medium">{packageData.currency}{basePrice.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-lg">
-                    <span className="text-muted">Tax (18%):</span>
-                    <span className="font-semibold">{packageData.currency}{taxAmount.toFixed(2)}</span>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted">IGV (18%):</span>
+                    <span className="font-medium">{packageData.currency}{igvAmount.toFixed(2)}</span>
                   </div>
                   <div className="border-t pt-2">
                     <div className="flex justify-between text-xl font-bold text-primary">
-                      <span>Total:</span>
-                      <span>{packageData.currency}{finalAmount.toFixed(2)}</span>
+                      <span>Total a Pagar:</span>
+                      <span>{packageData.currency}{totalAmount.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -225,18 +243,19 @@ export function PaymentForm({
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Action Buttons */}
             <div className="space-y-4">
-              <button
+              <Button
                 onClick={onBack}
-                className="w-full h-14 text-lg font-medium text-primary border-2 border-primary hover:bg-primary hover:text-white rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
+                variant="outline"
+                className="w-full h-14 text-lg font-medium text-primary border-2 border-primary hover:bg-primary hover:text-white rounded-lg transition-all duration-200"
               >
-                <ArrowLeft className="w-5 h-5" />
-                Back to Schedule
-              </button>
+                <ArrowLeft className="w-5 h-5 mr-2" />
+                Back to Review
+              </Button>
             </div>
           </div>
         </div>

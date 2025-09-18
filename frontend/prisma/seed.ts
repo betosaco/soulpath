@@ -532,6 +532,27 @@ async function main() {
         maxGroupSize: 1,
         isActive: true
       }
+    }),
+    prisma.packageDefinition.upsert({
+      where: { id: 6 },
+      update: {
+        name: 'S/1 SOL',
+        description: '1 session of 60 minutes - Special promotional price',
+        sessionsCount: 1,
+        sessionDurationId: 3,
+        packageType: 'individual',
+        maxGroupSize: 1,
+        isActive: true
+      },
+      create: {
+        name: 'S/1 SOL',
+        description: '1 session of 60 minutes - Special promotional price',
+        sessionsCount: 1,
+        sessionDurationId: 3,
+        packageType: 'individual',
+        maxGroupSize: 1,
+        isActive: true
+      }
     })
   ]);
   console.log('✅ MATPASS package definitions created:', packageDefinitions.length);
@@ -612,6 +633,21 @@ async function main() {
         packageDefinitionId: packageDefinitions[4].id,
         currencyId: penCurrencyId,
         price: 530.00,
+        pricingMode: 'custom',
+        isActive: true
+      }
+    }),
+    prisma.packagePrice.upsert({
+      where: { packageDefinitionId_currencyId: { packageDefinitionId: packageDefinitions[5].id, currencyId: penCurrencyId } },
+      update: {
+        price: 1.00,
+        pricingMode: 'custom',
+        isActive: true
+      },
+      create: {
+        packageDefinitionId: packageDefinitions[5].id,
+        currencyId: penCurrencyId,
+        price: 1.00,
         pricingMode: 'custom',
         isActive: true
       }
