@@ -11,6 +11,8 @@
   box-shadow: var(--unified-shadow-md);
   border: 1px solid var(--unified-border-light);
   overflow: hidden;
+  max-width: 100%;
+  width: 100%;
 }
 
 /* Form Header */
@@ -94,6 +96,8 @@
 #lyra-payment-form {
   padding: var(--unified-spacing-xl);
   background: var(--unified-bg-surface);
+  min-width: 100%;
+  width: 100%;
 }
 
 /* Traditional embedded form styling */
@@ -224,8 +228,8 @@
   display: flex !important;
   justify-content: space-between;
   width: 100%;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
   align-items: stretch;
 }
 
@@ -250,27 +254,27 @@
 #lyra-payment-form .kr-pan,
 #lyra-payment-form .kr-expiry,
 #lyra-payment-form .kr-security-code {
-  height: 3rem !important;
-  min-height: 3rem !important;
-  max-height: 3rem !important;
+  height: 3.5rem !important;
+  min-height: 3.5rem !important;
+  max-height: 3.5rem !important;
 }
 
 /* Target iframe wrappers inside the first 3 fields */
 #lyra-payment-form .kr-pan .kr-iframe-wrapper,
 #lyra-payment-form .kr-expiry .kr-iframe-wrapper,
 #lyra-payment-form .kr-security-code .kr-iframe-wrapper {
-  height: 3rem !important;
-  min-height: 3rem !important;
-  max-height: 3rem !important;
+  height: 3.5rem !important;
+  min-height: 3.5rem !important;
+  max-height: 3.5rem !important;
 }
 
 /* Target iframe elements inside the first 3 fields */
 #lyra-payment-form .kr-pan iframe,
 #lyra-payment-form .kr-expiry iframe,
 #lyra-payment-form .kr-security-code iframe {
-  height: 3rem !important;
-  min-height: 3rem !important;
-  max-height: 3rem !important;
+  height: 3.5rem !important;
+  min-height: 3.5rem !important;
+  max-height: 3.5rem !important;
 }
 
 /* Make informational text invisible with white color - "Pago sin cuotas" and "Pago sin diferido" */
