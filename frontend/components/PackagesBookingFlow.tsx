@@ -22,6 +22,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { EnhancedSchedule } from './EnhancedSchedule';
+import { PaymentForm } from './PaymentForm';
 import { usePackages, PackagePrice } from '@/hooks/usePackages';
 import { useLanguage, useTranslations } from '@/hooks/useTranslations';
 import { countries } from '@/lib/countries';
@@ -126,7 +127,8 @@ export function PackagesBookingFlow() {
     { id: 'package', title: getTranslation('bookingFlow.selectPackage', 'Select Package'), description: getTranslation('bookingFlow.selectPackageDesc', 'Choose the package that best fits your needs'), completed: false },
     { id: 'personal', title: getTranslation('bookingFlow.personalInfo', 'Personal Information'), description: getTranslation('bookingFlow.personalInfoDesc', 'Provide your contact details'), completed: false },
     { id: 'booking', title: getTranslation('bookingFlow.selectSchedule', 'Select Schedule'), description: getTranslation('bookingFlow.selectScheduleDesc', 'Choose your preferred date and time'), completed: false },
-    { id: 'summary', title: getTranslation('bookingFlow.reviewConfirm', 'Review & Confirm'), description: getTranslation('bookingFlow.reviewConfirmDesc', 'Review your booking and send to WhatsApp'), completed: false }
+    { id: 'summary', title: getTranslation('bookingFlow.reviewConfirm', 'Review & Confirm'), description: getTranslation('bookingFlow.reviewConfirmDesc', 'Review your booking details'), completed: false },
+    { id: 'payment', title: getTranslation('bookingFlow.payment', 'Payment'), description: getTranslation('bookingFlow.paymentDesc', 'Complete your payment securely'), completed: false }
   ];
 
   // Close dropdown when clicking outside and prevent page scroll
@@ -168,6 +170,13 @@ export function PackagesBookingFlow() {
     toast.success(getTranslation('bookingFlow.scheduleSelected', 'Schedule selected! Now review your booking.'));
   };
 
+  const handlePaymentSuccess = (paymentData: any) => {
+    console.log('✅ Payment successful:', paymentData);
+    toast.success('¡Pago exitoso! Tu paquete ha sido activado.');
+    // Here you would typically redirect to a success page or dashboard
+    // For now, we'll just show a success message
+  };
+
   const handleProceedToBooking = () => {
     if (!formData.clientName || !formData.clientEmail || !formData.clientPhone) {
       toast.error(getTranslation('bookingFlow.fillRequiredFields', 'Please fill in all required fields'));
@@ -177,75 +186,6 @@ export function PackagesBookingFlow() {
   };
 
 
-  const handleWhatsAppBooking = async () => {
-    if (!formData.selectedPackage) return;
-
-    setSending(true);
-    
-    try {
-      // Create comprehensive WhatsApp message
-      const whatsappMessage = `¡Hola! Me interesa realizar una reserva:
-
-📋 *Información del Cliente:*
-• Nombre completo: ${formData.clientName}
-• Email: ${formData.clientEmail}
-• Teléfono: ${formData.countryCode}${formData.clientPhone}
-• País: ${selectedCountry.name} (${selectedCountry.flag})
-• Idioma preferido: ${formData.language === 'en' ? 'English' : 'Español'}
-
-📦 *Paquete Seleccionado:*
-• Nombre: ${formData.selectedPackage.packageDefinition.name}
-• Descripción: ${formData.selectedPackage.packageDefinition.description}
-• Precio: ${formData.selectedPackage.currency.symbol}${formData.selectedPackage.price} ${formData.selectedPackage.currency.code}
-• Número de sesiones: ${formData.selectedPackage.packageDefinition.sessionsCount}
-• Duración por sesión: ${formData.selectedPackage.packageDefinition.sessionDuration.duration_minutes} minutos
-
-${formData.selectedSchedule ? `📅 *Detalles de la Reserva:*
-• Fecha: ${new Date(formData.selectedSchedule.date).toLocaleDateString('es-ES', { 
-    weekday: 'long', 
-    month: 'long', 
-    day: 'numeric',
-    year: 'numeric'
-  })}
-• Hora: ${new Date(`2000-01-01T${formData.selectedSchedule.time}`).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
-• Instructor: ${formData.selectedSchedule.teacher.name}
-• Tipo de servicio: ${formData.selectedSchedule.serviceType.name}
-• Duración: ${formData.selectedSchedule.duration} minutos
-• Lugar: ${formData.selectedSchedule.venue.name}
-• Dirección: ${formData.selectedSchedule.venue.address}, ${formData.selectedSchedule.venue.city}` : '📅 *Reserva:* El cliente prefiere programar la sesión más tarde'}
-
-📍 *Ubicación del Estudio:*
-MatMax Yoga. Calle Alcanfores 425, Miraflores. Lima - Peru
-
-💬 *Información adicional:*
-• ID de orden: order_${Date.now()}
-• Fecha de solicitud: ${new Date().toLocaleDateString('es-ES', { 
-    weekday: 'long', 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
-  })}
-• Hora de solicitud: ${new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
-
-¿Podrían ayudarme a completar mi reserva? ¡Gracias!`;
-
-      const encodedMessage = encodeURIComponent(whatsappMessage);
-      const phoneNumber = '51916172368'; // +51 916 172 368
-      
-      // Create WhatsApp URLs
-      const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodedMessage}`;
-      
-      // Open WhatsApp
-      window.open(whatsappUrl, '_blank');
-      toast.success(getTranslation('bookingFlow.whatsappRedirect', '¡Redirigido a WhatsApp! Completa tu reserva allí.'));
-      
-    } catch (error) {
-      console.error('Error creating WhatsApp message:', error);
-      toast.error(getTranslation('bookingFlow.whatsappError', 'Error al procesar la reserva. Por favor, contacta directamente al +51 916 172 368'));
-    } finally {
-      setSending(false);
-    }
-  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -632,7 +572,7 @@ MatMax Yoga. Calle Alcanfores 425, Miraflores. Lima - Peru
             </motion.div>
           )}
 
-          {/* Step 4: Summary & WhatsApp */}
+          {/* Step 4: Summary & Review */}
           {currentStep === 3 && (
             <motion.div
               key="summary"
@@ -643,7 +583,7 @@ MatMax Yoga. Calle Alcanfores 425, Miraflores. Lima - Peru
             >
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-primary mb-4">Review Your Booking</h2>
-                <p className="text-xl text-muted">Please review your information before sending to WhatsApp</p>
+                <p className="text-xl text-muted">Please review your information before proceeding to payment</p>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -715,31 +655,53 @@ MatMax Yoga. Calle Alcanfores 425, Miraflores. Lima - Peru
                 </button>
                 
                 <button
-                  onClick={handleWhatsAppBooking}
-                  disabled={sending}
-                  className="px-8 py-4 text-lg font-medium text-white bg-[#6ea058] border-2 border-[#6ea058] rounded-lg hover:bg-[#5a8a47] hover:border-[#5a8a47] transition-all duration-200 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => setCurrentStep(4)}
+                  className="px-8 py-4 text-lg font-medium text-white bg-[#6ea058] border-2 border-[#6ea058] rounded-lg hover:bg-[#5a8a47] hover:border-[#5a8a47] transition-all duration-200 flex items-center"
                 >
-                  {sending ? (
-                    <>
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      <MessageCircle className="w-5 h-5 mr-2" />
-                      Send to WhatsApp
-                    </>
-                  )}
+                  <CreditCard className="w-5 h-5 mr-2" />
+                  Proceed to Payment
+                  <ArrowRight className="w-5 h-5 ml-2" />
                 </button>
               </div>
 
-              {/* Confirmation Note */}
-              <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg text-center">
-                <CheckCircle className="w-6 h-6 text-blue-600 mx-auto mb-2" />
-                <p className="text-blue-800 font-medium">
-                  {getTranslation('bookingFlow.whatsappConfirmation', 'By clicking "Send to WhatsApp", you\'ll be redirected to WhatsApp to complete your booking with our team.')}
+              {/* Payment Notice */}
+              <div className="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg text-center">
+                <CheckCircle className="w-6 h-6 text-green-600 mx-auto mb-2" />
+                <p className="text-green-800 font-medium">
+                  Secure payment processing with Lyra. Your payment information is encrypted and secure.
                 </p>
               </div>
+            </motion.div>
+          )}
+
+          {/* Step 5: Payment */}
+          {currentStep === 4 && (
+            <motion.div
+              key="payment"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="mobile-step-content"
+            >
+              <PaymentForm
+                packageData={{
+                  id: formData.selectedPackage!.id,
+                  name: formData.selectedPackage!.packageDefinition.name,
+                  price: formData.selectedPackage!.price,
+                  currency: formData.selectedPackage!.currency.symbol,
+                  sessions: formData.selectedPackage!.packageDefinition.sessionsCount,
+                  duration: formData.selectedPackage!.packageDefinition.sessionDuration.duration_minutes
+                }}
+                personalInfo={{
+                  name: formData.clientName,
+                  email: formData.clientEmail,
+                  phone: formData.clientPhone,
+                  countryCode: formData.countryCode
+                }}
+                onPaymentSuccess={handlePaymentSuccess}
+                onBack={() => setCurrentStep(3)}
+                isLoading={sending}
+              />
             </motion.div>
           )}
         </AnimatePresence>
