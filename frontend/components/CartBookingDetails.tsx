@@ -75,7 +75,7 @@ export function CartBookingDetails({
   };
 
   return (
-    <div className={`bg-gray-50 rounded-lg p-3 w-full ${className}`}>
+    <div className={`bg-gray-50 rounded-lg p-3 w-full border border-gray-200 ${className}`}>
       {/* Header with Class Type and Session Count */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
@@ -100,7 +100,7 @@ export function CartBookingDetails({
       {/* Bookings List */}
       <div className="space-y-3">
         {bookings.map((booking, index) => (
-          <div key={index} className="border border-gray-200 rounded-lg p-2 bg-white">
+          <div key={index} className="border border-green-200 rounded-lg p-2 bg-green-50">
             {/* Service Type Badge */}
             {booking.serviceType && (
               <div className="mb-2">

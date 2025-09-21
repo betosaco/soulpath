@@ -551,12 +551,48 @@ export function ScheduleBookingFlow({
     // Get all package items
     const allPackageItems = cartContext?.cartItems?.filter(item => item.type === 'package') || [];
     
-    // Simple logic: if there are packages, show modal
-    if (allPackageItems.length > 0) {
-      console.log('🎯 Showing modal for package selection');
+    // Only show modal if there are multiple packages
+    if (allPackageItems.length > 1) {
+      console.log('🎯 Multiple packages detected, showing modal for package selection');
       setEditingPackageId(null);
       setSelectedScheduleForPackage(slot);
       setShowPackageSelection(true);
+      return;
+    }
+    
+    // If there's only one package, auto-select it and proceed
+    if (allPackageItems.length === 1) {
+      console.log('🎯 Single package detected, auto-selecting and proceeding');
+      const singlePackage = allPackageItems[0];
+      setEditingPackageId(singlePackage.id);
+      
+      // Proceed with booking for the single package
+      const newBookingDetails = {
+        selectedDate: slot.date,
+        selectedTime: slot.time,
+        teacher: slot.teacher?.name,
+        dayOfWeek: slot.dayOfWeek,
+        serviceType: slot.serviceType?.name,
+        venue: slot.venue?.name,
+        scheduleSlotId: slot.id
+      };
+
+      // Check for duplicate booking within the same package
+      const currentPackageBookings = (singlePackage.bookingDetails || []);
+      const isDuplicate = currentPackageBookings.some(booking => 
+        booking.selectedDate === newBookingDetails.selectedDate && 
+        booking.selectedTime === newBookingDetails.selectedTime
+      );
+      
+      if (isDuplicate) {
+        toast.error('This package has already booked this time slot. Please select a different slot.');
+        return;
+      }
+
+      // Add booking to the single package
+      cartContext.addBookingToPackage(singlePackage.id, newBookingDetails);
+      cartContext.setIsCartOpen(true);
+      toast.success('Class added to your package!');
       return;
     }
     
@@ -1640,42 +1676,6 @@ export function ScheduleBookingFlow({
                 }
               </p>
               
-              {/* Show conflict information if any packages already have this schedule */}
-              {(() => {
-                const conflictingPackages = getPackagesWithSelectedSchedule();
-                if (conflictingPackages.length > 0) {
-                  return (
-                    <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                      <div className="flex items-start">
-                        <div className="flex-shrink-0">
-                          <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                        <div className="ml-3">
-                          <h4 className="text-sm font-medium text-yellow-800">
-                            Schedule Already Booked
-                          </h4>
-                          <div className="mt-1 text-sm text-yellow-700">
-                            <p>The following packages already have this schedule booked:</p>
-                            <ul className="mt-1 list-disc list-inside">
-                              {conflictingPackages.map(pkg => (
-                                <li key={pkg.id} className="font-medium">
-                                  {pkg.name} ({pkg.bookingDetails?.length || 0}/{pkg.sessions || pkg.quantity || 1} used)
-                                </li>
-                              ))}
-                            </ul>
-                            <p className="mt-2 text-xs">
-                              You can still book this schedule with other packages, or select a different time slot.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                }
-                return null;
-              })()}
               
               
               <div className="space-y-3">
@@ -1726,7 +1726,7 @@ export function ScheduleBookingFlow({
                       onClick={() => handlePackageSelectionForBooking(packageItem.id)}
                       className={`w-full p-4 border rounded-lg transition-colors text-left ${
                         canBookThisSlot 
-                          ? 'border-gray-200 hover:border-primary hover:bg-primary/5' 
+                          ? 'border-green-200 bg-green-50 hover:border-primary hover:bg-primary/5' 
                           : 'border-gray-300 bg-gray-50 hover:bg-gray-100 cursor-not-allowed opacity-75'
                       }`}
                       disabled={!canBookThisSlot}
