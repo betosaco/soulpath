@@ -1,5 +1,6 @@
 /* All @import rules must be at the top of the stylesheet */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700;900&family=Poppins:wght@300;400;500;600;700;900&display=swap');
+/* Force CSS rebuild - CSS fix for production */
 /* Payment Form Styles will be added here */
 @import '../styles/unified-component-styles.css';
 @import '../styles/admin-dashboard.css';
