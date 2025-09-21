@@ -1050,6 +1050,7 @@ export function ScheduleBookingFlow({
     
     console.log('🔍 Slot validation:');
     console.log('🔍 - Package current bookings:', currentBookings.length);
+    console.log('🔍 - Package sessions limit:', packageQuantity);
     console.log('🔍 - Slot to book:', selectedScheduleForPackage.date, selectedScheduleForPackage.time);
     console.log('🔍 - Has already booked this slot:', hasAlreadyBookedThisSlot);
     console.log('🔍 - Existing bookings for this slot:', currentBookings.filter(booking => 
@@ -1082,17 +1083,23 @@ export function ScheduleBookingFlow({
       cartContext.setIsCartOpen(true);
     }
     
-    // Close package selection modal
-    console.log('🔍 Closing package selection modal and resetting state');
-    setShowPackageSelection(false);
-    setSelectedScheduleForPackage(null);
+    // Check if this is a multi-session package that can accept more bookings
+    const packageSessions = selectedPackage.sessions || selectedPackage.quantity || 1;
+    const updatedBookings = [...currentBookings, newBookingDetails];
+    const canBookMore = updatedBookings.length < packageSessions;
     
-    // Add a small delay to ensure state is properly reset
-    setTimeout(() => {
-      console.log('🔍 Modal state reset completed');
-    }, 100);
-    
-    toast.success('Class added to package! You can select more classes or continue to checkout.');
+    if (canBookMore) {
+      // Keep modal open for more bookings
+      console.log('🔍 Multi-session package - keeping modal open for more bookings');
+      setSelectedScheduleForPackage(null); // Clear selected schedule for next selection
+      toast.success(`Class added! (${updatedBookings.length}/${packageSessions} used) Select another schedule or continue to checkout.`);
+    } else {
+      // Close modal when package is full
+      console.log('🔍 Package is full - closing modal');
+      setShowPackageSelection(false);
+      setSelectedScheduleForPackage(null);
+      toast.success(`All classes booked! (${packageSessions}/${packageSessions} used) Continue to checkout.`);
+    }
   };
 
   const handlePackageSelect = (pkg: PackagePrice) => {
@@ -1799,7 +1806,8 @@ export function ScheduleBookingFlow({
                     const packageCapacity = packageItem.sessions || packageItem.quantity || 1;
                     const hasCapacity = currentBookings.length < packageCapacity;
                     
-                    // If no schedule is selected yet, allow selection (user will select schedule after choosing package)
+                    // For modal display, allow selection if package has capacity
+                    // The specific slot validation happens in handlePackageSelectionForBooking
                     const canBookThisSlot = hasCapacity;
                     
                     console.log(`🔍 Modal - Package ${packageItem.name}:`, {
@@ -1869,6 +1877,21 @@ export function ScheduleBookingFlow({
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
                 >
                   Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    console.log('🔍 Continue to checkout clicked - closing modal and navigating');
+                    setShowPackageSelection(false);
+                    setSelectedScheduleForPackage(null);
+                    
+                    // Navigate to checkout
+                    if (typeof window !== 'undefined') {
+                      window.location.href = '/checkout';
+                    }
+                  }}
+                  className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                  Continue to Checkout
                 </button>
               </div>
             </div>
