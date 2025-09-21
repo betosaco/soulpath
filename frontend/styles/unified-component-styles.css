@@ -87,6 +87,80 @@
    BUTTON STYLES
    ============================================================================ */
 
+/* Legacy button classes for backward compatibility */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--unified-spacing-sm);
+  padding: var(--unified-spacing-md) var(--unified-spacing-lg);
+  border: none;
+  border-radius: var(--unified-radius-md);
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all var(--unified-transition-normal);
+  background-color: var(--unified-primary);
+  color: var(--unified-primary-contrast);
+  box-shadow: var(--unified-shadow-sm);
+  text-decoration: none;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--unified-primary-hover);
+  box-shadow: var(--unified-shadow-md);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: var(--unified-shadow-sm);
+}
+
+.btn-primary:focus {
+  outline: 2px solid var(--unified-primary);
+  outline-offset: 2px;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--unified-spacing-sm);
+  padding: var(--unified-spacing-md) var(--unified-spacing-lg);
+  border: 1px solid var(--unified-border-medium);
+  border-radius: var(--unified-radius-md);
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all var(--unified-transition-normal);
+  background-color: var(--unified-bg-surface);
+  color: var(--unified-text-primary);
+  text-decoration: none;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--unified-bg-secondary);
+  border-color: var(--unified-border-dark);
+}
+
+.btn-secondary:focus {
+  outline: 2px solid var(--unified-primary);
+  outline-offset: 2px;
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .unified-button {
   display: inline-flex;
   align-items: center;
