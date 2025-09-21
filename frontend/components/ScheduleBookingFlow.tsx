@@ -552,7 +552,11 @@ export function ScheduleBookingFlow({
     const packageItems = cartContext.cartItems.filter(item => item.type === 'package');
     const totalPackageQuantity = packageItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
     
-    // Show modal if: multiple package items OR single package with quantity > 1
+    // Show modal only if: 
+    // 1. Multiple package items OR 
+    // 2. Single package with quantity > 1
+    // Note: Single matpass with sessions > 1 (4,8,12,24) should NOT show modal
+    // but still allow multiple bookings based on sessions
     return packageItems.length > 1 || totalPackageQuantity > 1;
   }, [cartContext?.cartItems]);
 
@@ -612,11 +616,58 @@ export function ScheduleBookingFlow({
     const shouldShowModal = allPackageItems.length > 1 || totalPackageQuantity > 1;
     
     if (shouldShowModal) {
-      console.log('🎯 Multiple packages detected, showing package selection modal');
+      console.log('🎯 Modal needed - multiple packages or multiple quantities detected');
+      console.log('🎯 Package details:', allPackageItems.map(p => ({ 
+        id: p.id, 
+        name: p.name, 
+        sessions: p.sessions, 
+        quantity: p.quantity 
+      })));
       // Clear editing mode when showing modal for multiple packages
       setEditingPackageId(null);
       setSelectedScheduleForPackage(slot);
       setShowPackageSelection(true);
+      return;
+    }
+    
+    // For single matpass with multiple sessions, allow multiple bookings without modal
+    if (allPackageItems.length === 1 && allPackageItems[0] && (allPackageItems[0].sessions || 1) > 1) {
+      console.log('🎯 Single matpass with multiple sessions - allowing multiple bookings');
+      const singlePackage = allPackageItems[0];
+      const packageSessions = singlePackage.sessions || 1;
+      
+      // Check if this package has already booked this specific slot
+      const currentBookings = Array.isArray(singlePackage.bookingDetails) ? singlePackage.bookingDetails : [];
+      const hasAlreadyBookedThisSlot = currentBookings.some(booking => 
+        booking.selectedDate === slot.date && 
+        booking.selectedTime === slot.time
+      );
+      
+      if (hasAlreadyBookedThisSlot) {
+        toast.error('This package has already booked this time slot. Please select a different slot.');
+        return;
+      }
+      
+      // Check if we haven't reached the package sessions limit
+      if (currentBookings.length >= packageSessions) {
+        toast.error(`You've reached the maximum number of classes for this package (${packageSessions}).`);
+        return;
+      }
+      
+      // Add booking to the single package
+      const newBookingDetails = {
+        selectedDate: slot.date,
+        selectedTime: slot.time,
+        teacher: slot.teacher?.name,
+        dayOfWeek: slot.dayOfWeek,
+        serviceType: slot.serviceType?.name,
+        venue: slot.venue?.name,
+        scheduleSlotId: slot.id
+      };
+      
+      cartContext.addBookingToPackage(singlePackage.id, newBookingDetails);
+      cartContext.setIsCartOpen(true);
+      toast.success(`Class added to your ${packageSessions}-session package! (${currentBookings.length + 1}/${packageSessions} used)`);
       return;
     }
     
@@ -912,8 +963,8 @@ export function ScheduleBookingFlow({
 
       // Check if this package has already booked this specific slot
         const hasAlreadyBookedThisSlot = currentBookings.some(booking => 
-          booking.selectedDate === newBookingDetails.selectedDate && 
-          booking.selectedTime === newBookingDetails.selectedTime
+        booking.selectedDate === newBookingDetails.selectedDate && 
+        booking.selectedTime === newBookingDetails.selectedTime
       );
 
       if (hasAlreadyBookedThisSlot) {
@@ -1722,7 +1773,7 @@ export function ScheduleBookingFlow({
               <p className="text-sm text-gray-600 mb-6">
                 {selectedScheduleForPackage ? 
                   `You have packages with available slots. Which package would you like to add this class (${selectedScheduleForPackage.date} at ${selectedScheduleForPackage.time}) to?` :
-                  'You have packages in your cart. Select which package you want to use for booking a class.'
+                  'You have multiple packages in your cart. Select which package you want to use for booking a class.'
                 }
               </p>
               
@@ -1743,18 +1794,19 @@ export function ScheduleBookingFlow({
                   
                   return allPackages.map((packageItem) => {
                     const currentBookings = Array.isArray(packageItem.bookingDetails) ? packageItem.bookingDetails : [];
-                    // Use quantity field for validation (this is what gets updated in cart)
-                    const packageQuantity = packageItem.quantity || packageItem.sessions || 1;
                     
-                    // Check if package has capacity
-                    const hasCapacity = currentBookings.length < packageQuantity;
+                    // Check if package has capacity - use sessions for multi-session packages, quantity for regular packages
+                    const packageCapacity = packageItem.sessions || packageItem.quantity || 1;
+                    const hasCapacity = currentBookings.length < packageCapacity;
                     
                     // If no schedule is selected yet, allow selection (user will select schedule after choosing package)
                     const canBookThisSlot = hasCapacity;
                     
                     console.log(`🔍 Modal - Package ${packageItem.name}:`, {
                       id: packageItem.id,
-                      quantity: packageQuantity,
+                      sessions: packageItem.sessions,
+                      quantity: packageItem.quantity,
+                      capacity: packageCapacity,
                       currentBookings: currentBookings.length,
                       hasCapacity,
                       canBookThisSlot,
@@ -1779,7 +1831,7 @@ export function ScheduleBookingFlow({
                             {packageItem.sessions || packageItem.quantity || 1} sessions • {packageItem.duration} min each
                           </p>
                             <p className="text-xs text-gray-500 mt-1">
-                            {packageItem.bookingDetails?.length || 0} / {packageItem.quantity || packageItem.sessions || 1} classes booked
+                            {packageItem.bookingDetails?.length || 0} / {packageCapacity} classes booked
                             {canBookThisSlot ? (
                               <span className="text-green-600 font-medium"> • Available</span>
                             ) : (
