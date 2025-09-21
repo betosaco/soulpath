@@ -21,7 +21,7 @@ const nextConfig = {
   },
   experimental: {
     // Enable experimental features if needed
-    optimizeCss: true,
+    optimizeCss: false, // Disable CSS optimization to prevent purging issues
   },
   // Optimize bundle and prevent preload warnings
   compiler: {

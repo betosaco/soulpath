@@ -7,6 +7,33 @@ const config: Config = {
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  safelist: [
+    // Ensure important classes are not purged
+    'btn-primary',
+    'btn-secondary',
+    'header-button-account',
+    'header-button-language-inactive',
+    'header-button-menu',
+    'unified-primary',
+    'unified-bg-primary',
+    'unified-text-primary',
+    // CSS Variables and custom properties
+    '--unified-primary',
+    '--unified-primary-hover',
+    '--unified-bg-primary',
+    '--unified-text-primary',
+    '--matmax-purple',
+    '--matmax-purple-light',
+    '--matmax-purple-dark',
+    // Custom component classes
+    'safe-padding',
+    'header-container',
+    'mobile-input-group',
+    'mobile-step-container',
+    'country-dropdown',
+    'mobile-country-dropdown',
+    // Add any other custom classes that might be purged
+  ],
   theme: {
     extend: {
       colors: {
