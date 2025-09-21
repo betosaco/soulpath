@@ -22,7 +22,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatDate, formatTime } from '@/lib/utils';
 import { CentralizedHeader } from '@/components/CentralizedHeader';
-import { useTranslations, useLanguage } from '@/hooks/useTranslations';
+// import { useTranslations, useLanguage } from '@/hooks/useTranslations';
 import Link from 'next/link';
 
 interface ScheduleSlot {
@@ -56,8 +56,8 @@ interface ScheduleSlot {
 
 export default function ScheduleBookingPage() {
   const searchParams = useSearchParams();
-  const { language } = useLanguage();
-  const { t } = useTranslations(undefined, language);
+  // const { language } = useLanguage();
+  // const { t } = useTranslations(undefined, language);
   
   const [slot, setSlot] = useState<ScheduleSlot | null>(null);
   const [loading, setLoading] = useState(true);
@@ -75,10 +75,10 @@ export default function ScheduleBookingPage() {
   });
 
   // Ensure we have a valid translation object
-  // const safeT: Record<string, string | Record<string, string>> = 
-    (t && typeof t === 'object' && Object.keys(t).length > 0) 
-      ? t as Record<string, string | Record<string, string>>
-      : { common: { login: 'Login' } };
+  // const safeT: Record<string, string | Record<string, string>> =
+  //   (t && typeof t === 'object' && Object.keys(t).length > 0)
+  //     ? t as Record<string, string | Record<string, string>>
+  //     : { common: { login: 'Login' } };
 
   useEffect(() => {
     const loadSlotData = async () => {
@@ -568,7 +568,7 @@ ${formData.specialRequests}
                         <span>Book via WhatsApp</span>
                       </BaseButton>
                       <p className="text-xs text-gray-500">
-                        You'll be redirected to WhatsApp with all session details pre-filled
+                        You&apos;ll be redirected to WhatsApp with all session details pre-filled
                       </p>
                     </div>
                   </CardContent>
@@ -577,7 +577,7 @@ ${formData.specialRequests}
                 {/* Features */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">What's Included</CardTitle>
+                    <CardTitle className="text-lg">What&apos;s Included</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2 text-sm">

@@ -40,8 +40,7 @@ interface PaymentMethod {
   requiresConfirmation: boolean;
   autoAssignPackage: boolean;
   isActive: boolean;
-  providerConfig?: {
-  };
+  providerConfig?: Record<string, string | number | boolean>;
 }
 
 

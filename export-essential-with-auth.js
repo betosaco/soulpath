@@ -70,7 +70,6 @@ const ESSENTIAL_PATTERNS = [
   '**/api/booking/route.ts',
   '**/api/health/route.ts',
   '**/api/client/**',
-  '**/api/izipay/**',
   '**/api/stripe/**',
   '**/api/telegram/**',
   '**/api/whatsapp/**',

@@ -73,7 +73,7 @@ export async function sendBrevoEmail(options: BrevoEmailOptions): Promise<BrevoR
 export async function sendTemplateEmail(
   templateKey: string,
   recipientEmail: string,
-  data: Record<string, any>,
+  data: Record<string, string | number | boolean>,
   config: {
     brevo_api_key: string;
     sender_email: string;

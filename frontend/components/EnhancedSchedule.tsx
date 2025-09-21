@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Calendar, 
@@ -59,11 +59,17 @@ interface EnhancedScheduleProps {
   onBookSlot?: (slot: ScheduleSlot) => void;
   showBookingButton?: boolean;
   className?: string;
+  startDate?: Date;
+  endDate?: Date;
+  onSlotsChange?: (slots: ScheduleSlot[]) => void;
 }
 
 export function EnhancedSchedule({ 
   onBookSlot, 
-  className = ''
+  className = '',
+  startDate,
+  endDate,
+  onSlotsChange
 }: EnhancedScheduleProps) {
   // Handle slot booking - redirect to account booking page
   const handleBookSlot = (slot: ScheduleSlot) => {
@@ -106,15 +112,41 @@ export function EnhancedSchedule({
   const [searchTerm, setSearchTerm] = useState('');
 
   // Fetch schedule slots
-  const fetchSlots = async () => {
+  const fetchSlots = useCallback(async (customStartDate?: Date, customEndDate?: Date) => {
     try {
       setLoading(true);
       setError(null);
+      console.log('🔄 Starting fetchSlots function...');
       
-      console.log('🔍 Fetching schedule slots...');
-      const response = await fetch(`/api/teacher-schedule-slots?available=true&t=${Date.now()}`);
+      const start = customStartDate || startDate;
+      const end = customEndDate || endDate;
+      
+      console.log('🔍 Fetching schedule slots...', { start, end });
+      
+      // Build query parameters
+      const params = new URLSearchParams({
+        available: 'true',
+        t: Date.now().toString()
+      });
+      
+      if (start && end) {
+        params.append('startDate', start.toISOString().split('T')[0]);
+        params.append('endDate', end.toISOString().split('T')[0]);
+      }
+      
+      console.log('🌐 Fetching from:', `/api/teacher-schedule-slots?${params.toString()}`);
+
+      const response = await fetch(`/api/teacher-schedule-slots?${params.toString()}`);
       console.log('📡 Response status:', response.status);
-      
+      console.log('📡 Response ok:', response.ok);
+      console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Response error text:', errorText);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       const data = await response.json();
       console.log('📊 Response data:', data);
       
@@ -124,29 +156,50 @@ export function EnhancedSchedule({
           console.log('📝 Using mock data - database unavailable');
         }
         setSlots(data.slots);
+        onSlotsChange?.(data.slots);
       } else {
         console.error('❌ API error:', data.error);
         setError(data.error || 'Failed to fetch schedule');
       }
     } catch (err) {
       console.error('❌ Fetch error:', err);
-      setError('Failed to fetch schedule');
+      console.error('❌ Error type:', err?.constructor?.name);
+      console.error('❌ Error message:', (err as Error)?.message);
+
+      // Provide more specific error messages
+      if (err instanceof TypeError && err.message.includes('fetch')) {
+        console.error('🌐 Network error - check if server is running');
+        setError('Network error: Unable to connect to server. Please check your connection.');
+      } else if (err instanceof Error && err.message.includes('HTTP')) {
+        console.error('📡 HTTP error from server');
+        setError(`Server error: ${err.message}`);
+      } else {
+        console.error('❓ Unknown error occurred');
+        setError('Failed to fetch schedule. Please try again.');
+      }
     } finally {
       console.log('🏁 Setting loading to false');
       setLoading(false);
     }
-  };
+  }, [startDate, endDate, onSlotsChange]);
 
   useEffect(() => {
     fetchSlots();
-  }, []);
+  }, [fetchSlots]);
+
+  // Refetch when date range changes
+  useEffect(() => {
+    if (startDate && endDate) {
+      fetchSlots(startDate, endDate);
+    }
+  }, [startDate, endDate, fetchSlots]);
 
   // Get unique teachers and services for filters
-  const teachers = [...new Set(slots.map(slot => slot.teacher.name))];
-  const services = [...new Set(slots.map(slot => slot.serviceType.name))];
+  const teachers = [...new Set((slots || []).map(slot => slot.teacher.name))];
+  const services = [...new Set((slots || []).map(slot => slot.serviceType.name))];
 
   // Filter slots based on selected criteria
-  const filteredSlots = slots.filter(slot => {
+  const filteredSlots = (slots || []).filter(slot => {
     const matchesDate = !selectedDate || slot.date === selectedDate;
     const matchesTeacher = selectedTeacher === 'all' || slot.teacher.name === selectedTeacher;
     const matchesService = selectedService === 'all' || slot.serviceType.name === selectedService;
@@ -213,7 +266,7 @@ export function EnhancedSchedule({
 
 
   // Debug logging
-  console.log('🔍 EnhancedSchedule render - loading:', loading, 'slots:', slots.length, 'error:', error);
+  console.log('🔍 EnhancedSchedule render - loading:', loading, 'slots:', slots?.length || 0, 'error:', error);
 
   if (loading) {
     return (
@@ -235,7 +288,7 @@ export function EnhancedSchedule({
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Unable to load schedule</h3>
             <p className="text-gray-600 mb-4">{error}</p>
             <button 
-              onClick={fetchSlots}
+              onClick={() => fetchSlots()}
               className="bg-[#6ea058] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#5a8a47] focus:ring-2 focus:ring-[#6ea058] focus:outline-none transition-colors"
             >
               Try Again

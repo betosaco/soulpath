@@ -6,7 +6,14 @@ interface DuplicateInfo {
   type: 'exact_match' | 'time_overlap' | 'same_teacher_same_day' | 'same_venue_same_day';
   message: string;
   conflictingScheduleId: number;
-  conflictingSchedule: any;
+  conflictingSchedule: {
+    id: number;
+    date: string;
+    time: string;
+    teacherId: string;
+    serviceTypeId: string;
+    venueId: string;
+  };
   severity: 'error' | 'warning';
 }
 
@@ -22,7 +29,14 @@ interface UseScheduleDuplicatesOptions {
 }
 
 export function useScheduleDuplicates(
-  scheduleData: any,
+  scheduleData: {
+    id: string;
+    date: string;
+    time: string;
+    teacherId: string;
+    serviceTypeId: string;
+    venueId: string;
+  },
   options: UseScheduleDuplicatesOptions = {}
 ) {
   const { debounceMs = 500, autoCheck = true } = options;
@@ -35,8 +49,15 @@ export function useScheduleDuplicates(
   const [isChecking, setIsChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const checkDuplicates = useCallback(async (data: any) => {
-    if (!data || !data.startTime || !data.endTime || !data.type) {
+  const checkDuplicates = useCallback(async (data: {
+    id: string;
+    date: string;
+    time: string;
+    teacherId: string;
+    serviceTypeId: string;
+    venueId: string;
+  }) => {
+    if (!data || !data.time || !data.teacherId || !data.venueId) {
       setDuplicateCheck({
         hasDuplicates: false,
         duplicates: [],
@@ -135,7 +156,14 @@ export function useScheduleDuplicates(
 
 // Hook for checking duplicates in a form
 export function useScheduleFormDuplicates(
-  formData: any,
+  formData: {
+    id: string;
+    date: string;
+    time: string;
+    teacherId: string;
+    serviceTypeId: string;
+    venueId: string;
+  },
   options: UseScheduleDuplicatesOptions = {}
 ) {
   const duplicateHook = useScheduleDuplicates(formData, options);

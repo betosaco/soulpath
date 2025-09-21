@@ -2,7 +2,7 @@
 
 /**
  * Codebase Export Script
- * 
+ *
  * This script exports the entire codebase as text, excluding unnecessary files
  */
 
@@ -174,7 +174,8 @@ function generateExport() {
   exportContent += `🏷️  Version: ${packageJson.version}\n`;
   exportContent += `📅 Export Date: ${new Date().toISOString()}\n`;
   exportContent += `🔧 Node Version: ${process.version}\n`;
-  exportContent += `💻 Platform: ${process.platform}\n\n`;
+  exportContent += `💻 Platform: ${process.platform}\n`;
+  exportContent += `💳 Payment Integration: Ready for new provider\n\n`;
   
   exportContent += '📋 Table of Contents:\n';
   exportContent += '-'.repeat(50) + '\n';

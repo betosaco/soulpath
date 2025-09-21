@@ -8,7 +8,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useTranslations, useLanguage } from '@/hooks/useTranslations';
-import { useLogo } from '../hooks/useLogo';
 
 interface CentralizedHeaderProps {
   user?: { email: string } | null;
@@ -18,7 +17,6 @@ interface CentralizedHeaderProps {
 export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedHeaderProps) {
   const { language, setLanguage } = useLanguage();
   const { t } = useTranslations(undefined, language);
-  const { logoSettings, isLoading } = useLogo();
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   
@@ -26,11 +24,11 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
   // Helper function to safely access nested translation properties
   const getTranslation = (path: string, fallback: string = ''): string => {
     const keys = path.split('.');
-    let current: any = (t && typeof t === 'object') ? t : {};
+    let current: Record<string, unknown> = (t && typeof t === 'object') ? t as Record<string, unknown> : {};
 
     for (const key of keys) {
       if (current && typeof current === 'object' && key in current) {
-        current = current[key];
+        current = current[key] as Record<string, unknown>;
       } else {
         return fallback;
       }
@@ -100,27 +98,14 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          {isLoading ? (
-            <div className="h-16 sm:h-20 md:h-24 lg:h-28 w-20 bg-gray-300 animate-pulse rounded"></div>
-          ) : logoSettings.isActive ? (
-            logoSettings.type === 'text' ? (
-              <span className="font-heading text-base sm:text-lg md:text-xl lg:text-2xl text-gray-800 font-semibold">
-                {logoSettings.text || 'MatMax'}
-              </span>
-            ) : logoSettings.imageUrl ? (
-              <Image 
-                src={logoSettings.imageUrl} 
-                alt="MatMax Yoga Studio Logo" 
-                width={120}
-                height={120}
-                className="h-16 sm:h-20 md:h-24 lg:h-28 object-contain"
-              />
-            ) : (
-              <span className="font-heading text-base sm:text-lg md:text-xl lg:text-2xl text-gray-800 font-semibold">MatMax</span>
-            )
-          ) : (
-            <span className="font-heading text-base sm:text-lg md:text-xl lg:text-2xl text-gray-800 font-semibold">MatMax</span>
-          )}
+          <Image 
+            src="/logo_matmax.webp" 
+            alt="MatMax Yoga Studio Logo" 
+            width={120}
+            height={120}
+            className="h-12 sm:h-16 md:h-20 lg:h-24 object-contain"
+            priority
+          />
         </motion.div>
         
         <div className="flex items-center justify-center sm:justify-end space-x-2 sm:space-x-4 lg:space-x-6 flex-1 sm:flex-none">
@@ -133,7 +118,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                 whileTap={{ scale: 0.95 }}
                 className="hidden sm:flex items-center space-x-1 header-button-account"
               >
-                <Calendar size={14} />
+                <Calendar size={14} className="text-gray-600" />
                 <span>{getTranslation('nav.schedule', 'Schedule')}</span>
               </motion.button>
             </Link>
@@ -145,7 +130,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                 whileTap={{ scale: 0.95 }}
                 className="hidden sm:flex items-center space-x-1 header-button-account"
               >
-                <Package size={14} />
+                <Package size={14} className="text-gray-600" />
                 <span>{getTranslation('nav.packages', 'Packages')}</span>
               </motion.button>
             </Link>
@@ -158,7 +143,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                 whileTap={{ scale: 0.95 }}
                 className="hidden sm:flex items-center space-x-1 header-button-account"
               >
-                <User size={14} />
+                <User size={14} className="text-gray-600" />
                 <span>{getTranslation('common.account', 'Account')}</span>
               </motion.button>
             )}
@@ -171,7 +156,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                 whileTap={{ scale: 0.95 }}
                 className="hidden sm:flex items-center space-x-1 header-button-account"
               >
-                <Settings size={14} />
+                <Settings size={14} className="text-gray-600" />
                 <span>{getTranslation('common.dashboard', 'Dashboard')}</span>
               </motion.button>
             ) : (
@@ -181,7 +166,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                 whileTap={{ scale: 0.95 }}
                 className="hidden sm:flex items-center space-x-1 header-button-language-inactive"
               >
-                <LogIn size={14} />
+                <LogIn size={14} className="text-gray-600" />
                 <span>{getTranslation('common.login', 'Login')}</span>
               </motion.button>
             )}
@@ -274,7 +259,13 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
             >
               <div className="flex flex-col h-full p-4 sm:p-6 safe-padding">
                 <div className="flex items-center justify-between mb-6 sm:mb-8">
-                  <span className="font-heading text-lg sm:text-xl text-black font-semibold">MatMax</span>
+                  <Image 
+                    src="/logo_matmax.webp" 
+                    alt="MatMax Yoga Studio Logo" 
+                    width={80}
+                    height={80}
+                    className="h-8 sm:h-10 object-contain"
+                  />
                   <button 
                     onClick={() => setIsMenuOpen(false)}
                     className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 hover:text-black transition-colors touch-manipulation min-h-[44px] min-w-[44px]"
@@ -291,7 +282,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                       onClick={() => setIsMenuOpen(false)}
                       className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30 mobile-touch-feedback"
                     >
-                      <Calendar size={18} />
+                      <Calendar size={18} className="text-gray-800" />
                       <span className="text-base sm:text-lg font-medium">{getTranslation('nav.schedule', 'Schedule')}</span>
                     </motion.button>
                   </Link>
@@ -303,7 +294,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                       onClick={() => setIsMenuOpen(false)}
                       className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30 mobile-touch-feedback"
                     >
-                      <Package size={18} />
+                      <Package size={18} className="text-gray-800" />
                       <span className="text-base sm:text-lg font-medium">{getTranslation('nav.packages', 'Packages')}</span>
                     </motion.button>
                   </Link>
@@ -316,7 +307,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                         onClick={() => setIsMenuOpen(false)}
                         className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30"
                       >
-                        <User size={18} />
+                        <User size={18} className="text-gray-800" />
                         <span className="text-base sm:text-lg font-medium">{getTranslation('common.account', 'Account')}</span>
                       </motion.button>
                     </Link>
@@ -335,7 +326,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                     whileTap={{ scale: 0.98 }}
                     className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30"
                   >
-                    <LogIn size={18} />
+                    <LogIn size={18} className="text-gray-800" />
                     <span className="text-base sm:text-lg font-medium">
                       {user && isAdmin ? getTranslation('common.dashboard', 'Dashboard') : getTranslation('common.login', 'Login')}
                     </span>

@@ -893,6 +893,60 @@
 }
 
 /* ============================================================================
+   ICON FIXES
+   ============================================================================ */
+
+/* Ensure Lucide icons are visible */
+.lucide,
+[data-lucide] {
+  display: inline-block !important;
+  vertical-align: middle !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  stroke-width: 2 !important;
+  width: 1em !important;
+  height: 1em !important;
+}
+
+/* Fix for icon containers */
+.icon-container {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Force icon rendering in specific contexts */
+button svg,
+.btn svg,
+.button svg {
+  display: inline-block !important;
+  width: 1em !important;
+  height: 1em !important;
+  flex-shrink: 0 !important;
+}
+
+/* Global SVG visibility fix */
+svg {
+  display: inline-block !important;
+  vertical-align: middle !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Specific icon containers in forms */
+.icon-wrapper,
+.icon-container,
+.icon-box {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 1em !important;
+  min-height: 1em !important;
+}
+
+/* ============================================================================
    UTILITY CLASSES
    ============================================================================ */
 

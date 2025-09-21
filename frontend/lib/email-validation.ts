@@ -6,37 +6,39 @@
 // RFC 5322 compliant email regex (simplified but comprehensive)
 const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
-// Common TLD patterns for validation
-const COMMON_TLDS = [
-  // Generic TLDs
-  'com', 'org', 'net', 'edu', 'gov', 'mil', 'int', 'info', 'biz', 'name', 'pro',
-  // Country code TLDs (major ones)
-  'us', 'uk', 'ca', 'au', 'de', 'fr', 'es', 'it', 'nl', 'be', 'ch', 'at', 'se', 'no', 'dk', 'fi',
-  'jp', 'cn', 'kr', 'in', 'br', 'mx', 'ar', 'cl', 'co', 'pe', 've', 'ec', 'uy', 'py', 'bo',
-  'za', 'ng', 'eg', 'ma', 'ke', 'gh', 'tz', 'ug', 'rw', 'et', 'zm', 'bw', 'sz', 'ls',
-  'ru', 'pl', 'cz', 'hu', 'ro', 'bg', 'hr', 'si', 'sk', 'lt', 'lv', 'ee', 'ua', 'by',
-  'tr', 'gr', 'cy', 'mt', 'is', 'ie', 'pt', 'lu', 'li', 'mc', 'ad', 'sm', 'va',
-  'il', 'ae', 'sa', 'kw', 'qa', 'bh', 'om', 'jo', 'lb', 'sy', 'iq', 'ir', 'af',
-  'pk', 'bd', 'lk', 'mv', 'bt', 'np', 'mm', 'th', 'la', 'kh', 'vn', 'my', 'sg',
-  'id', 'ph', 'tw', 'hk', 'mo', 'mn', 'kz', 'uz', 'tm', 'kg', 'tj', 'af',
-  'nz', 'fj', 'pg', 'sb', 'vu', 'nc', 'pf', 'ws', 'to', 'ki', 'tv', 'nr', 'fm',
-  // New gTLDs (popular ones)
-  'app', 'dev', 'io', 'ai', 'co', 'me', 'tv', 'cc', 'ly', 'be', 'fm', 'ms', 'gs',
-  'tk', 'ml', 'ga', 'cf', 'click', 'download', 'link', 'online', 'site', 'store',
-  'tech', 'website', 'work', 'email', 'news', 'blog', 'shop', 'buy', 'sale',
-  'money', 'bank', 'finance', 'invest', 'trade', 'crypto', 'bitcoin', 'ethereum',
-  'music', 'video', 'photo', 'pics', 'gallery', 'art', 'design', 'style', 'fashion',
-  'food', 'restaurant', 'cafe', 'bar', 'pub', 'club', 'party', 'event', 'wedding',
-  'travel', 'hotel', 'vacation', 'trip', 'tour', 'guide', 'booking', 'reservation',
-  'health', 'medical', 'doctor', 'clinic', 'hospital', 'pharmacy', 'drug', 'medicine',
-  'fitness', 'gym', 'sport', 'football', 'soccer', 'basketball', 'tennis', 'golf',
-  'education', 'school', 'university', 'college', 'academy', 'course', 'training',
-  'job', 'career', 'work', 'employment', 'recruitment', 'hiring', 'resume',
-  'business', 'company', 'corp', 'inc', 'llc', 'ltd', 'group', 'team', 'agency',
-  'consulting', 'services', 'solutions', 'systems', 'software', 'apps', 'mobile',
-  'cloud', 'data', 'analytics', 'marketing', 'advertising', 'promotion', 'social',
-  'media', 'content', 'creative', 'digital', 'online', 'internet', 'web', 'www'
-];
+// Common TLD patterns for validation (currently unused but kept for future use)
+  // Common TLDs for email validation (currently unused but kept for future use)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // const _COMMON_TLDS = [
+  //   // Generic TLDs
+  //   'com', 'org', 'net', 'edu', 'gov', 'mil', 'int', 'info', 'biz', 'name', 'pro',
+  //   // Country code TLDs (major ones)
+  //   'us', 'uk', 'ca', 'au', 'de', 'fr', 'es', 'it', 'nl', 'be', 'ch', 'at', 'se', 'no', 'dk', 'fi',
+  //   'jp', 'cn', 'kr', 'in', 'br', 'mx', 'ar', 'cl', 'co', 'pe', 've', 'ec', 'uy', 'py', 'bo',
+  //   'za', 'ng', 'eg', 'ma', 'ke', 'gh', 'tz', 'ug', 'rw', 'et', 'zm', 'bw', 'sz', 'ls',
+  //   'ru', 'pl', 'cz', 'hu', 'ro', 'bg', 'hr', 'si', 'sk', 'lt', 'lv', 'ee', 'ua', 'by',
+  //   'tr', 'gr', 'cy', 'mt', 'is', 'ie', 'pt', 'lu', 'li', 'mc', 'ad', 'sm', 'va',
+  //   'il', 'ae', 'sa', 'kw', 'qa', 'bh', 'om', 'jo', 'lb', 'sy', 'iq', 'ir', 'af',
+  //   'pk', 'bd', 'lk', 'mv', 'bt', 'np', 'mm', 'th', 'la', 'kh', 'vn', 'my', 'sg',
+  //   'id', 'ph', 'tw', 'hk', 'mo', 'mn', 'kz', 'uz', 'tm', 'kg', 'tj', 'af',
+  //   'nz', 'fj', 'pg', 'sb', 'vu', 'nc', 'pf', 'ws', 'to', 'ki', 'tv', 'nr', 'fm',
+  //   // New gTLDs (popular ones)
+  //   'app', 'dev', 'io', 'ai', 'co', 'me', 'tv', 'cc', 'ly', 'be', 'fm', 'ms', 'gs',
+  //   'tk', 'ml', 'ga', 'cf', 'click', 'download', 'link', 'online', 'site', 'store',
+  //   'tech', 'website', 'work', 'email', 'news', 'blog', 'shop', 'buy', 'sale',
+  //   'money', 'bank', 'finance', 'invest', 'trade', 'crypto', 'bitcoin', 'ethereum',
+  //   'music', 'video', 'photo', 'pics', 'gallery', 'art', 'design', 'style', 'fashion',
+  //   'food', 'restaurant', 'cafe', 'bar', 'pub', 'club', 'party', 'event', 'wedding',
+  //   'travel', 'hotel', 'vacation', 'trip', 'tour', 'guide', 'booking', 'reservation',
+  //   'health', 'medical', 'doctor', 'clinic', 'hospital', 'pharmacy', 'drug', 'medicine',
+  //   'fitness', 'gym', 'sport', 'football', 'soccer', 'basketball', 'tennis', 'golf',
+  //   'education', 'school', 'university', 'college', 'academy', 'course', 'training',
+  //   'job', 'career', 'work', 'employment', 'recruitment', 'hiring', 'resume',
+  //   'business', 'company', 'corp', 'inc', 'llc', 'ltd', 'group', 'team', 'agency',
+  //   'consulting', 'services', 'solutions', 'systems', 'software', 'apps', 'mobile',
+  //   'cloud', 'data', 'analytics', 'marketing', 'advertising', 'promotion', 'social',
+  //   'media', 'content', 'creative', 'digital', 'online', 'internet', 'web', 'www'
+  // ];
 
 // Special domain patterns
 const SPECIAL_DOMAINS = [

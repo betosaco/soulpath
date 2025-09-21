@@ -33,7 +33,16 @@ export function ThemeProvider({ children, initialTheme = 'light' }: ThemeProvide
   // Apply theme to CSS variables when theme changes
   useEffect(() => {
     applyTheme(theme);
-  }, [theme]);
+    
+    // Also apply Tailwind dark mode class
+    if (typeof document !== 'undefined') {
+      if (themeName === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  }, [theme, themeName]);
 
   // Load theme from localStorage on mount
   useEffect(() => {
@@ -42,6 +51,13 @@ export function ThemeProvider({ children, initialTheme = 'light' }: ThemeProvide
       if (savedTheme && availableThemes[savedTheme]) {
         setThemeState(availableThemes[savedTheme]);
         setThemeName(savedTheme);
+        
+        // Apply dark class immediately if needed
+        if (savedTheme === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
       }
     }
   }, [availableThemes]);

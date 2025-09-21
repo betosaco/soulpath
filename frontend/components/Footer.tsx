@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { Mail, Phone, MapPin, Instagram, Heart } from 'lucide-react';
 import { useTranslations, useLanguage } from '@/hooks/useTranslations';
 
@@ -57,21 +58,21 @@ export function Footer() {
               {footer.quickLinksTitle || 'Quick Links'}
             </h4>
             <nav className="space-y-2">
-              <a href="/" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <Link href="/" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
                 {footer.home || 'Home'}
-              </a>
-              <a href="/about" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              </Link>
+              <Link href="/about" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
                 {footer.about || 'About'}
-              </a>
-              <a href="/packages" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              </Link>
+              <Link href="/packages" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
                 {footer.packages || 'Packages'}
-              </a>
-              <a href="/schedule" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              </Link>
+              <Link href="/schedule" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
                 {footer.schedule || 'Schedule'}
-              </a>
-              <a href="/account/book" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              </Link>
+              <Link href="/account/book" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
                 {footer.bookSession || 'Book Session'}
-              </a>
+              </Link>
             </nav>
           </div>
 

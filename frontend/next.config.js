@@ -21,6 +21,17 @@ const nextConfig = {
   },
   experimental: {
     // Enable experimental features if needed
+    optimizeCss: true,
+  },
+  // Optimize bundle and prevent preload warnings
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+  // Optimize for better performance
+  // swcMinify: true, // Deprecated in Next.js 15+
+  // Disable webpack bundle analyzer warnings
+  generateBuildId: async () => {
+    return 'build-' + Date.now();
   },
   // Content Security Policy and CORS configuration
   async headers() {
@@ -29,22 +40,22 @@ const nextConfig = {
     // Base CSP directives
     const baseDirectives = [
       "default-src 'self'",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://static.micuentaweb.pe https://static.lyra.com",
-      "font-src 'self' https://fonts.gstatic.com https://static.micuentaweb.pe https://static.lyra.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: https: blob:",
-      `connect-src 'self' ${isDevelopment ? 'http://localhost:* ws://localhost:* ' : ''}https://*.vercel.app https://matmax.world https://www.matmax.world https://static.micuentaweb.pe https://static.lyra.com https://secure.lyra.com https://secure.micuentaweb.pe https://h.online-metrix.net https://h64.online-metrix.net`,
-      "frame-src 'self' https://static.micuentaweb.pe https://static.lyra.com https://secure.lyra.com https://h.online-metrix.net https://h64.online-metrix.net",
+      `connect-src 'self' ${isDevelopment ? 'http://localhost:* ws://localhost:* ' : ''}https://*.vercel.app https://matmax.world https://www.matmax.world https://api.stripe.com https://js.stripe.com`,
+      "frame-src 'self'",
       "object-src 'none'",
       "base-uri 'self'",
-      "form-action 'self'",
+      "form-action 'self' https://*.vercel.app",
       "frame-ancestors 'none'",
       "upgrade-insecure-requests"
     ];
 
     // Add script-src with or without unsafe-eval based on environment
-    const scriptSrc = isDevelopment 
-      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.micuentaweb.pe https://static.lyra.com https://secure.lyra.com https://secure.micuentaweb.pe https://h.online-metrix.net https://h64.online-metrix.net"
-      : "script-src 'self' 'unsafe-inline' https://static.micuentaweb.pe https://static.lyra.com https://secure.lyra.com https://secure.micuentaweb.pe https://h.online-metrix.net https://h64.online-metrix.net";
+    const scriptSrc = isDevelopment
+      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com"
+      : "script-src 'self' 'unsafe-inline' https://js.stripe.com";
 
     return [
       {
@@ -107,12 +118,46 @@ const nextConfig = {
       },
     ],
   },
-  webpack: (config) => {
+  webpack: (config, { dev, isServer }) => {
     // Configure webpack to handle module resolution
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': path.resolve(__dirname),
     };
+
+    // Optimize webpack chunk loading to prevent preload warnings
+    if (!isServer) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          ...config.optimization.splitChunks,
+          chunks: 'all',
+          minSize: 20000,
+          maxSize: 244000,
+          cacheGroups: {
+            ...config.optimization.splitChunks.cacheGroups,
+            default: {
+              minChunks: 1,
+              priority: -20,
+              reuseExistingChunk: true,
+            },
+            vendor: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendors',
+              priority: -10,
+              chunks: 'all',
+            },
+          },
+        },
+      };
+
+      // Add performance hints to reduce preload warnings
+      config.performance = {
+        ...config.performance,
+        hints: false, // Disable performance hints that can cause preload warnings
+      };
+    }
+
     return config;
   },
 };

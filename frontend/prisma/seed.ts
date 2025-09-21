@@ -437,7 +437,8 @@ async function main() {
         sessionDurationId: 3,
         packageType: 'individual',
         maxGroupSize: 1,
-        isActive: true
+        isActive: true,
+        displayOrder: 1
       },
       create: {
         name: '01 MATPASS',
@@ -446,7 +447,8 @@ async function main() {
         sessionDurationId: 3,
         packageType: 'individual',
         maxGroupSize: 1,
-        isActive: true
+        isActive: true,
+        displayOrder: 1
       }
     }),
     prisma.packageDefinition.upsert({
@@ -458,7 +460,8 @@ async function main() {
         sessionDurationId: 3,
         packageType: 'individual',
         maxGroupSize: 1,
-        isActive: true
+        isActive: true,
+        displayOrder: 2
       },
       create: {
         name: '04 MATPASS',
@@ -467,7 +470,8 @@ async function main() {
         sessionDurationId: 3,
         packageType: 'individual',
         maxGroupSize: 1,
-        isActive: true
+        isActive: true,
+        displayOrder: 2
       }
     }),
     prisma.packageDefinition.upsert({
@@ -479,7 +483,8 @@ async function main() {
         sessionDurationId: 3,
         packageType: 'individual',
         maxGroupSize: 1,
-        isActive: true
+        isActive: true,
+        displayOrder: 3
       },
       create: {
         name: '08 MATPASS',
@@ -488,7 +493,8 @@ async function main() {
         sessionDurationId: 3,
         packageType: 'individual',
         maxGroupSize: 1,
-        isActive: true
+        isActive: true,
+        displayOrder: 3
       }
     }),
     prisma.packageDefinition.upsert({
@@ -500,7 +506,8 @@ async function main() {
         sessionDurationId: 3,
         packageType: 'individual',
         maxGroupSize: 1,
-        isActive: true
+        isActive: true,
+        displayOrder: 4
       },
       create: {
         name: '12 MATPASS',
@@ -509,7 +516,8 @@ async function main() {
         sessionDurationId: 3,
         packageType: 'individual',
         maxGroupSize: 1,
-        isActive: true
+        isActive: true,
+        displayOrder: 4
       }
     }),
     prisma.packageDefinition.upsert({
@@ -521,7 +529,8 @@ async function main() {
         sessionDurationId: 3,
         packageType: 'individual',
         maxGroupSize: 1,
-        isActive: true
+        isActive: true,
+        displayOrder: 5
       },
       create: {
         name: '24 MATPASS',
@@ -530,11 +539,28 @@ async function main() {
         sessionDurationId: 3,
         packageType: 'individual',
         maxGroupSize: 1,
-        isActive: true
+        isActive: true,
+        displayOrder: 5
       }
     })
   ]);
   console.log('✅ MATPASS package definitions created:', packageDefinitions.length);
+
+  // 9.1. Hide Test Us package if it exists
+  console.log('🚫 Hiding Test Us package...');
+  try {
+    await prisma.packageDefinition.updateMany({
+      where: {
+        name: { contains: 'Test Us' }
+      },
+      data: {
+        isActive: false
+      }
+    });
+    console.log('✅ Test Us package hidden');
+  } catch (_error) { // eslint-disable-line @typescript-eslint/no-unused-vars
+    console.log('ℹ️ Test Us package not found or already hidden');
+  }
 
   // 10. Create package prices (PEN)
   console.log('💲 Creating MATPASS package prices in PEN...');
@@ -1362,8 +1388,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 1, // Hatha Yoga
         dayOfWeek: 'Monday',
-        startTime: new Date('1970-01-01T13:15:00Z'), // 08:15 EST = 13:15 UTC
-        endTime: new Date('1970-01-01T14:15:00Z'), // 09:15 EST = 14:15 UTC
+        startTime: new Date('1970-01-01T08:15:00Z'), // 08:15 EST stored directly
+        endTime: new Date('1970-01-01T09:15:00Z'), // 09:15 EST stored directly
         isAvailable: true,
         maxBookings: 15
       }
@@ -1376,8 +1402,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 2, // Vinyasa Yoga
         dayOfWeek: 'Monday',
-        startTime: new Date('1970-01-01T14:30:00Z'), // 09:30 EST = 14:30 UTC
-        endTime: new Date('1970-01-01T15:30:00Z'), // 10:30 EST = 15:30 UTC
+        startTime: new Date('1970-01-01T09:30:00Z'), // 09:30 EST stored directly
+        endTime: new Date('1970-01-01T10:30:00Z'), // 10:30 EST stored directly
         isAvailable: true,
         maxBookings: 15
       }
@@ -1390,8 +1416,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 1, // Hatha Yoga
         dayOfWeek: 'Monday',
-        startTime: new Date('1970-01-01T22:30:00Z'), // 17:30 EST = 22:30 UTC
-        endTime: new Date('1970-01-01T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        startTime: new Date('1970-01-01T17:30:00Z'), // 17:30 EST stored directly
+        endTime: new Date('1970-01-01T18:30:00Z'), // 18:30 EST stored directly
         isAvailable: true,
         maxBookings: 15
       }
@@ -1405,8 +1431,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 1, // Hatha Yoga
         dayOfWeek: 'Tuesday',
-        startTime: new Date('1970-01-01T22:30:00Z'), // 17:30 EST = 22:30 UTC
-        endTime: new Date('1970-01-01T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        startTime: new Date('1970-01-01T17:30:00Z'), // 17:30 EST stored directly
+        endTime: new Date('1970-01-01T18:30:00Z'), // 18:30 EST stored directly
         isAvailable: true,
         maxBookings: 15
       }
@@ -1419,8 +1445,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 2, // Vinyasa Yoga
         dayOfWeek: 'Tuesday',
-        startTime: new Date('1970-01-01T23:45:00Z'), // 18:45 EST = 23:45 UTC
-        endTime: new Date('1970-01-02T00:45:00Z'), // 19:45 EST = 00:45 UTC (next day)
+        startTime: new Date('1970-01-01T18:45:00Z'), // 18:45 EST stored directly
+        endTime: new Date('1970-01-01T19:45:00Z'), // 19:45 EST stored directly
         isAvailable: true,
         maxBookings: 15
       }
@@ -1434,8 +1460,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 1, // Hatha Yoga
         dayOfWeek: 'Wednesday',
-        startTime: new Date('1970-01-01T13:15:00Z'), // 08:15 EST = 13:15 UTC
-        endTime: new Date('1970-01-01T14:15:00Z'), // 09:15 EST = 14:15 UTC
+        startTime: new Date('1970-01-01T08:15:00Z'), // 08:15 EST stored directly
+        endTime: new Date('1970-01-01T09:15:00Z'), // 09:15 EST stored directly
         isAvailable: true,
         maxBookings: 15
       }
@@ -1448,8 +1474,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 2, // Vinyasa Yoga
         dayOfWeek: 'Wednesday',
-        startTime: new Date('1970-01-01T14:30:00Z'), // 09:30 EST = 14:30 UTC
-        endTime: new Date('1970-01-01T15:30:00Z'), // 10:30 EST = 15:30 UTC
+        startTime: new Date('1970-01-01T09:30:00Z'), // 09:30 EST stored directly
+        endTime: new Date('1970-01-01T10:30:00Z'), // 10:30 EST stored directly
         isAvailable: true,
         maxBookings: 15
       }
@@ -1462,8 +1488,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 1, // Hatha Yoga
         dayOfWeek: 'Wednesday',
-        startTime: new Date('1970-01-01T22:30:00Z'), // 17:30 EST = 22:30 UTC
-        endTime: new Date('1970-01-01T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        startTime: new Date('1970-01-01T17:30:00Z'), // 17:30 EST stored directly
+        endTime: new Date('1970-01-01T18:30:00Z'), // 18:30 EST stored directly
         isAvailable: true,
         maxBookings: 15
       }
@@ -1477,8 +1503,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 1, // Hatha Yoga
         dayOfWeek: 'Thursday',
-        startTime: new Date('1970-01-01T22:30:00Z'), // 17:30 EST = 22:30 UTC
-        endTime: new Date('1970-01-01T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        startTime: new Date('1970-01-01T17:30:00Z'), // 17:30 EST stored directly
+        endTime: new Date('1970-01-01T18:30:00Z'), // 18:30 EST stored directly
         isAvailable: true,
         maxBookings: 15
       }
@@ -1491,8 +1517,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 2, // Vinyasa Yoga
         dayOfWeek: 'Thursday',
-        startTime: new Date('1970-01-01T23:45:00Z'), // 18:45 EST = 23:45 UTC
-        endTime: new Date('1970-01-02T00:45:00Z'), // 19:45 EST = 00:45 UTC (next day)
+        startTime: new Date('1970-01-01T18:45:00Z'), // 18:45 EST stored directly
+        endTime: new Date('1970-01-01T19:45:00Z'), // 19:45 EST stored directly
         isAvailable: true,
         maxBookings: 15
       }
@@ -1506,8 +1532,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 1, // Hatha Yoga
         dayOfWeek: 'Friday',
-        startTime: new Date('1970-01-01T13:15:00Z'), // 08:15 EST = 13:15 UTC
-        endTime: new Date('1970-01-01T14:15:00Z'), // 09:15 EST = 14:15 UTC
+        startTime: new Date('1970-01-01T08:15:00Z'), // 08:15 EST stored directly
+        endTime: new Date('1970-01-01T09:15:00Z'), // 09:15 EST stored directly
         isAvailable: true,
         maxBookings: 15
       }
@@ -1520,8 +1546,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 2, // Vinyasa Yoga
         dayOfWeek: 'Friday',
-        startTime: new Date('1970-01-01T14:30:00Z'), // 09:30 EST = 14:30 UTC
-        endTime: new Date('1970-01-01T15:30:00Z'), // 10:30 EST = 15:30 UTC
+        startTime: new Date('1970-01-01T09:30:00Z'), // 09:30 EST stored directly
+        endTime: new Date('1970-01-01T10:30:00Z'), // 10:30 EST stored directly
         isAvailable: true,
         maxBookings: 15
       }
@@ -1534,13 +1560,13 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 1, // Hatha Yoga
         dayOfWeek: 'Friday',
-        startTime: new Date('1970-01-01T22:30:00Z'), // 17:30 EST = 22:30 UTC
-        endTime: new Date('1970-01-01T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        startTime: new Date('1970-01-01T17:30:00Z'), // 17:30 EST stored directly
+        endTime: new Date('1970-01-01T18:30:00Z'), // 18:30 EST stored directly
         isAvailable: true,
         maxBookings: 15
       }
     }),
-    // Saturday - 08:15 Hatha, 09:30 Vinyasa
+    // Saturday - 08:30 Hatha, 09:45 Vinyasa
     prisma.teacherSchedule.upsert({
       where: { id: 14 },
       update: {},
@@ -1549,8 +1575,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 1, // Hatha Yoga
         dayOfWeek: 'Saturday',
-        startTime: new Date('1970-01-01T13:15:00Z'), // 08:15 EST = 13:15 UTC
-        endTime: new Date('1970-01-01T14:15:00Z'), // 09:15 EST = 14:15 UTC
+        startTime: new Date('1970-01-01T08:30:00Z'), // 08:30 EST stored directly
+        endTime: new Date('1970-01-01T09:30:00Z'), // 09:30 EST stored directly
         isAvailable: true,
         maxBookings: 15
       }
@@ -1563,12 +1589,13 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 2, // Vinyasa Yoga
         dayOfWeek: 'Saturday',
-        startTime: new Date('1970-01-01T14:30:00Z'), // 09:30 EST = 14:30 UTC
-        endTime: new Date('1970-01-01T15:30:00Z'), // 10:30 EST = 15:30 UTC
+        startTime: new Date('1970-01-01T09:45:00Z'), // 09:45 EST stored directly
+        endTime: new Date('1970-01-01T10:45:00Z'), // 10:45 EST stored directly
         isAvailable: true,
         maxBookings: 15
       }
     })
+    // Sunday - No classes (removed all Sunday schedules)
   ]);
   console.log('✅ Recurring teacher schedules created:', teacherSchedules.length);
 

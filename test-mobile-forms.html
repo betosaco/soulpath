@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Form Test</title>
+    <style>
+        /* Simulate the mobile form styling */
+        @media (max-width: 767px) {
+            .test-form {
+                background-color: #f9fafb;
+                padding: 1rem;
+                border-radius: 0.5rem;
+            }
+            
+            .test-form input,
+            .test-form textarea,
+            .test-form select {
+                background-color: #ffffff !important;
+                border: 2px solid #d1d5db !important;
+                color: #111827 !important;
+                padding: 1rem;
+                border-radius: 0.5rem;
+                width: 100%;
+                margin-bottom: 1rem;
+                font-size: 16px;
+            }
+            
+            .test-form label {
+                color: #374151 !important;
+                font-weight: 500 !important;
+                display: block;
+                margin-bottom: 0.5rem;
+            }
+            
+            .test-form input::placeholder,
+            .test-form textarea::placeholder {
+                color: #9ca3af !important;
+            }
+        }
+        
+        /* Desktop styling (dark) */
+        .test-form {
+            background-color: #1a1a2e;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            color: white;
+        }
+        
+        .test-form input,
+        .test-form textarea,
+        .test-form select {
+            background-color: #16213e;
+            border: 2px solid #0a0a23;
+            color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        
+        .test-form label {
+            color: #d1d5db;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div style="padding: 2rem;">
+        <h1>Mobile Form Test</h1>
+        <p>This form should appear dark on desktop and light on mobile (width < 768px)</p>
+        
+        <div class="test-form">
+            <h2>Test Form</h2>
+            <form>
+                <label for="name">Full Name *</label>
+                <input type="text" id="name" placeholder="Enter your full name" required>
+                
+                <label for="email">Email *</label>
+                <input type="email" id="email" placeholder="Enter your email" required>
+                
+                <label for="phone">Phone</label>
+                <input type="tel" id="phone" placeholder="+1 (555) 123-4567">
+                
+                <label for="language">Language</label>
+                <select id="language">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="es">🇪🇸 Español</option>
+                </select>
+                
+                <label for="birthDate">Birth Date *</label>
+                <input type="date" id="birthDate" required>
+                
+                <label for="question">Your Question *</label>
+                <textarea id="question" placeholder="What would you like to explore in your reading?" rows="4" required></textarea>
+                
+                <button type="submit" style="background-color: #6ea058; color: white; padding: 1rem; border: none; border-radius: 0.5rem; width: 100%; font-size: 16px;">
+                    Submit Form
+                </button>
+            </form>
+        </div>
+        
+        <div style="margin-top: 2rem; padding: 1rem; background-color: #f0f0f0; border-radius: 0.5rem;">
+            <h3>Instructions:</h3>
+            <ol>
+                <li>On desktop: Form should have dark background (#1a1a2e) with dark inputs (#16213e)</li>
+                <li>On mobile (width < 768px): Form should have light background (#f9fafb) with white inputs</li>
+                <li>Resize your browser window or use mobile device to test</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
-import { createEmailService } from '@/lib/brevo-email-service';
 
 // Zod schema for purchase creation
 const createPurchaseSchema = z.object({
@@ -154,32 +153,16 @@ export async function POST(request: NextRequest) {
       console.log('✅ User package created:', userPackage.id);
     }
 
-    // Send confirmation email
-    try {
-      const emailService = await createEmailService();
-      if (emailService) {
-        const replacements = {
-          client_name: user.email,
-          package_name: packagePrice.packageDefinition.name,
-          quantity: quantity.toString(),
-          total_amount: `${packagePrice.currency.symbol}${totalAmount.toFixed(2)}`,
-          payment_method: paymentMethod.name,
-          purchase_date: new Date().toLocaleDateString(),
-          sessions_count: packagePrice.packageDefinition.sessionsCount.toString()
-        };
-
-        await emailService.sendTemplateEmail(
-          user.email,
-          'purchase_confirmation',
-          'Purchase Confirmation - SoulPath',
-          replacements
-        );
-        console.log('✅ Purchase confirmation email sent');
-      }
-    } catch (emailError) {
-      console.error('⚠️ Failed to send confirmation email:', emailError);
-      // Don't fail the purchase if email fails
-    }
+    // Email is sent via webhook, no need to send here to avoid duplicates
+    // try {
+    //   const emailService = await createEmailService();
+    //   if (emailService) {
+    //     // Email sending logic removed to prevent duplicates
+    //     console.log('📧 Email will be sent via webhook');
+    //   }
+    // } catch (emailError) {
+    //   console.error('⚠️ Email will be handled by webhook:', emailError);
+    // }
 
     return NextResponse.json({
       success: true,

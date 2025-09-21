@@ -26,7 +26,7 @@ const defaultLogo = {
   id: 1,
   type: 'image',
   text: 'MatMax Yoga Studio',
-  imageUrl: '/logo_matmax.png',
+  imageUrl: '/logo_matmax.webp',
   isActive: true,
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString()

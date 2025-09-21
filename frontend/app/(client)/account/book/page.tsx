@@ -6,7 +6,14 @@ import { useEffect, useState } from 'react';
 
 export default function BookPage() {
   const searchParams = useSearchParams();
-  const [initialSlotData, setInitialSlotData] = useState<any>(null);
+  const [initialSlotData, setInitialSlotData] = useState<{
+    slotId?: string;
+    teacherId?: string;
+    serviceTypeId?: string;
+    venueId?: string;
+    date?: string;
+    time?: string;
+  } | null>(null);
 
   useEffect(() => {
     // Check if we have slot data from URL parameters
@@ -31,7 +38,7 @@ export default function BookPage() {
 
   return (
     <div className="container mx-auto p-6">
-      <CustomerBookingFlow initialSlotData={initialSlotData} />
+      <CustomerBookingFlow initialSlotData={initialSlotData || undefined} />
     </div>
   );
 }

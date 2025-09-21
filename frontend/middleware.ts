@@ -27,6 +27,9 @@ const PUBLIC_ROUTES = [
   '/api/otp/send',
   '/api/otp/verify',
   '/api/stripe',
+  '/api/payment-methods',
+  '/api/purchases',
+  '/api/client',
   '/api/telegram/webhook',
   '/api/whatsapp/webhook',
   '/api/whatsapp-business/webhook'

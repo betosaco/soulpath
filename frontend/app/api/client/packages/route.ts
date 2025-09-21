@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
         },
         skip: offset,
         take: limit,
-        orderBy: { name: 'asc' }
+        orderBy: { displayOrder: 'asc' }
       }),
       prisma.packageDefinition.count({ where })
     ]);

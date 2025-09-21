@@ -1,15 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Calendar, 
-  Clock, 
-  Package, 
-  ArrowRight, 
+import {
+  Calendar,
+  Clock,
+  Package,
+  ArrowRight,
   ArrowLeft,
   CheckCircle,
-  Loader2,
   AlertCircle,
   Users,
   Star
@@ -94,6 +93,29 @@ export function PackagesBookingFlow() {
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [countrySearchTerm, setCountrySearchTerm] = useState('');
   const [emailError, setEmailError] = useState<string | null>(null);
+
+  // Icon diagnostic - remove after testing
+  useEffect(() => {
+    const checkIcons = () => {
+      const icons = document.querySelectorAll('svg');
+      console.log('📊 Icon Diagnostic:', {
+        totalIcons: icons.length,
+        visibleIcons: Array.from(icons).filter(icon => {
+          const style = window.getComputedStyle(icon);
+          return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+        }).length,
+        lucideIcons: document.querySelectorAll('.lucide').length,
+        firstIcon: icons[0] ? {
+          tagName: icons[0].tagName,
+          classList: Array.from(icons[0].classList),
+          style: window.getComputedStyle(icons[0])
+        } : null
+      });
+    };
+
+    // Check icons after component mounts
+    setTimeout(checkIcons, 1000);
+  }, []);
   
   const [formData, setFormData] = useState<BookingFormData>({
     selectedPackage: null,
@@ -108,27 +130,27 @@ export function PackagesBookingFlow() {
   const selectedCountry = countries.find(c => c.code === formData.countryCode) || countries[0];
 
   // Helper function to safely access nested translation properties
-  const getTranslation = (path: string, fallback: string = ''): string => {
+  const getTranslation = useCallback((path: string, fallback: string = ''): string => {
     const keys = path.split('.');
-    let current: any = (t && typeof t === 'object') ? t : {};
+    let current: Record<string, unknown> = (t && typeof t === 'object') ? t as Record<string, unknown> : {};
 
     for (const key of keys) {
       if (current && typeof current === 'object' && key in current) {
-        current = current[key];
+        current = current[key] as Record<string, unknown>;
       } else {
         return fallback;
       }
     }
 
     return typeof current === 'string' ? current : fallback;
-  };
+  }, [t]);
 
-  const steps: BookingStep[] = [
+  const steps: BookingStep[] = React.useMemo(() => [
     { id: 'package', title: getTranslation('bookingFlow.selectPackage', 'Select Package'), description: getTranslation('bookingFlow.selectPackageDesc', 'Choose the package that best fits your needs'), completed: false },
     { id: 'personal', title: getTranslation('bookingFlow.personalInfo', 'Personal Information'), description: getTranslation('bookingFlow.personalInfoDesc', 'Provide your contact details'), completed: false },
     { id: 'booking', title: getTranslation('bookingFlow.selectSchedule', 'Select Schedule'), description: getTranslation('bookingFlow.selectScheduleDesc', 'Choose your preferred date and time'), completed: false },
     { id: 'payment', title: getTranslation('bookingFlow.payment', 'Payment'), description: getTranslation('bookingFlow.paymentDesc', 'Complete your payment securely'), completed: false }
-  ];
+  ], [getTranslation]);
 
   // Close dropdown when clicking outside and prevent page scroll
   useEffect(() => {
@@ -185,7 +207,13 @@ export function PackagesBookingFlow() {
     toast.success(getTranslation('bookingFlow.scheduleSelected', 'Schedule selected! Proceeding to payment.'));
   };
 
-  const handlePaymentSuccess = (paymentData: any) => {
+  const handlePaymentSuccess = (paymentData: {
+    orderId: string;
+    status: string;
+    amount?: number;
+    currency?: string;
+    transactionId?: string;
+  }) => {
     console.log('✅ Payment successful:', paymentData);
     toast.success('¡Pago exitoso! Tu paquete ha sido activado.');
     
@@ -291,8 +319,8 @@ export function PackagesBookingFlow() {
 
               {packagesLoading ? (
                 <div className="text-center py-12">
-                  <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
-                  <p className="text-muted text-lg">Loading packages...</p>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                  <p className="text-gray-600 text-lg">Loading packages...</p>
                 </div>
               ) : packagesError ? (
                 <div className="text-center py-12">
@@ -563,7 +591,7 @@ export function PackagesBookingFlow() {
                   onClick={() => setCurrentStep(0)}
                   className="px-8 py-4 text-lg font-medium text-[#6ea058] border-2 border-[#6ea058] rounded-lg hover:bg-[#6ea058] hover:text-white transition-all duration-200 flex items-center"
                 >
-                  <ArrowLeft className="w-5 h-5 mr-2" />
+                  <ArrowLeft className="w-5 h-5 mr-2 text-[#6ea058]" />
                   Back to Packages
                 </button>
                 <button
@@ -658,7 +686,7 @@ export function PackagesBookingFlow() {
                     id: formData.selectedPackage.id.toString(),
                     name: formData.selectedPackage.packageDefinition.name,
                     price: formData.selectedPackage.price,
-                    currency: formData.selectedPackage.currency.symbol,
+                    currency: formData.selectedPackage.currency?.code || 'PEN',
                     sessions: formData.selectedPackage.packageDefinition.sessionsCount,
                     duration: formData.selectedPackage.packageDefinition.sessionDuration.duration_minutes
                   }}
@@ -678,6 +706,8 @@ export function PackagesBookingFlow() {
                   onPaymentSuccess={handlePaymentSuccess}
                   onBack={() => setCurrentStep(2)}
                   isLoading={sending}
+                  debugMode={false}
+                  layout="wide"
                 />
               )}
             </motion.div>
@@ -697,7 +727,7 @@ export function PackagesBookingFlow() {
                   id: formData.selectedPackage!.id.toString(),
                   name: formData.selectedPackage!.packageDefinition.name,
                   price: formData.selectedPackage!.price,
-                  currency: formData.selectedPackage!.currency.symbol,
+                  currency: formData.selectedPackage!.currency?.code || 'PEN',
                   sessions: formData.selectedPackage!.packageDefinition.sessionsCount,
                   duration: formData.selectedPackage!.packageDefinition.sessionDuration.duration_minutes
                 }}
@@ -717,6 +747,8 @@ export function PackagesBookingFlow() {
                 onPaymentSuccess={handlePaymentSuccess}
                 onBack={() => setCurrentStep(2)}
                 isLoading={sending}
+                layout="wide"
+                debugMode={false}
               />
             </motion.div>
           )}

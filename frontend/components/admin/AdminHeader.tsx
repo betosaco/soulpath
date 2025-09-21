@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Settings, LogOut, User, Bug, Home } from 'lucide-react';
+import { Settings, LogOut, User, Bug, Home, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -32,6 +32,16 @@ export function AdminHeader({ onClose, isModal = false }: AdminHeaderProps) {
         </div>
         
         <div className="admin-header__actions">
+          {/* Ecommerce Dashboard Button */}
+          <button
+            onClick={() => router.push('/admin/ecommerce')}
+            className="admin-header__button admin-header__button--ecommerce"
+            title="Ecommerce Dashboard"
+          >
+            <ShoppingCart size={16} />
+            Ecommerce
+          </button>
+
           {/* Back to Main Page Button */}
           <button
             onClick={() => router.push('/')}

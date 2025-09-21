@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,7 +21,14 @@ interface DaySummary {
   totalSchedules: number;
   duplicates: number;
   warnings: number;
-  scheduleList: any[];
+  scheduleList: Array<{
+    id: number;
+    date: string;
+    time: string;
+    teacherId: string;
+    serviceTypeId: string;
+    venueId: string;
+  }>;
 }
 
 const DAYS_OF_WEEK = [
@@ -34,9 +41,16 @@ export default function ScheduleDuplicatesPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { getDaySummary } = useScheduleDuplicates(null, { autoCheck: false });
+  const { getDaySummary } = useScheduleDuplicates({
+    id: '',
+    date: '',
+    time: '',
+    teacherId: '',
+    serviceTypeId: '',
+    venueId: ''
+  }, { autoCheck: false });
 
-  const loadDaySummary = async (day: string) => {
+  const loadDaySummary = useCallback(async (day: string) => {
     setIsLoading(true);
     setError(null);
     
@@ -52,7 +66,7 @@ export default function ScheduleDuplicatesPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [getDaySummary]);
 
   const loadAllDays = async () => {
     setIsLoading(true);
@@ -78,7 +92,7 @@ export default function ScheduleDuplicatesPage() {
 
   useEffect(() => {
     loadDaySummary(selectedDay);
-  }, [selectedDay]);
+  }, [selectedDay, loadDaySummary]);
 
 
   const getSeverityIcon = (count: number) => {
@@ -250,42 +264,33 @@ export default function ScheduleDuplicatesPage() {
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4 text-gray-400" />
                         <span className="font-medium">
-                          {schedule.startTime} - {schedule.endTime}
+                          {schedule.time}
                         </span>
                       </div>
                       
-                      {schedule.type === 'teacher' && schedule.teacher && (
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm text-gray-600">
-                            {schedule.teacher.name}
-                          </span>
-                        </div>
-                      )}
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-gray-400" />
+                        <span className="text-sm text-gray-600">
+                          Teacher ID: {schedule.teacherId}
+                        </span>
+                      </div>
                       
-                      {schedule.venue && (
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm text-gray-600">
-                            {schedule.venue.name}
-                          </span>
-                        </div>
-                      )}
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-gray-400" />
+                        <span className="text-sm text-gray-600">
+                          Venue ID: {schedule.venueId}
+                        </span>
+                      </div>
                     </div>
                     
                     <div className="flex items-center gap-2">
                       <Badge variant="outline">
-                        {schedule.type}
+                        Service Type: {schedule.serviceTypeId}
                       </Badge>
-                      {schedule.isAvailable ? (
-                        <Badge variant="default" className="bg-green-100 text-green-800">
-                          Available
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary">
-                          Unavailable
-                        </Badge>
-                      )}
+                      
+                      <Badge variant="default" className="bg-blue-100 text-blue-800">
+                        ID: {schedule.id}
+                      </Badge>
                     </div>
                   </div>
                 ))}

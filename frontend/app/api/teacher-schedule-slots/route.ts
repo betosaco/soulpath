@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma, withConnection } from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,6 +11,8 @@ export async function GET(request: NextRequest) {
     const teacherId = searchParams.get('teacherId');
     const serviceTypeId = searchParams.get('serviceTypeId');
     const venueId = searchParams.get('venueId');
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
 
     // Build where clause
     const whereClause: Record<string, unknown> = {};
@@ -40,31 +42,43 @@ export async function GET(request: NextRequest) {
       };
     }
 
-    // Show current week starting from today
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const startOfWeek = new Date(today);
-    const dayOfWeek = today.getDay();
-    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Sunday = 0, so 6 days to Monday
-    startOfWeek.setDate(today.getDate() - daysToMonday);
+    // Determine date range
+    let dateStart: Date;
+    let dateEnd: Date;
 
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 7); // Show one week
+    if (startDate && endDate) {
+      // Use custom date range
+      dateStart = new Date(startDate);
+      dateEnd = new Date(endDate);
+      dateEnd.setHours(23, 59, 59, 999); // Include the entire end date
+    } else {
+      // Default to current week
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const startOfWeek = new Date(today);
+      const dayOfWeek = today.getDay();
+      const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Sunday = 0, so 6 days to Monday
+      startOfWeek.setDate(today.getDate() - daysToMonday);
+
+      dateStart = startOfWeek;
+      dateEnd = new Date(startOfWeek);
+      dateEnd.setDate(startOfWeek.getDate() + 7); // Show one week
+    }
 
     whereClause.startTime = {
       ...(whereClause.startTime || {}),
-      gte: startOfWeek,
-      lt: endOfWeek
+      gte: dateStart,
+      lt: dateEnd
     };
 
-    console.log('📅 Current week range:', {
-      start: startOfWeek.toISOString().split('T')[0],
-      end: endOfWeek.toISOString().split('T')[0]
+    console.log('📅 Date range:', {
+      start: dateStart.toISOString().split('T')[0],
+      end: dateEnd.toISOString().split('T')[0],
+      custom: !!(startDate && endDate)
     });
 
     // Fetch schedule slots from database
-    const slots = await withConnection(async () => {
-      return await prisma.teacherScheduleSlot.findMany({
+    const slots = await prisma.teacherScheduleSlot.findMany({
       where: whereClause,
       include: {
         teacherSchedule: {
@@ -106,28 +120,24 @@ export async function GET(request: NextRequest) {
         { startTime: 'asc' }
       ]
     });
-    });
 
-    // Transform the data to match the expected format with proper EST timezone conversion
+    // Transform the data to match the expected format - times are already stored in EST
     const transformedSlots = slots.map(slot => {
-      // Convert UTC time to EST (UTC-5) using proper timezone handling
+      // Times are already stored in EST format, no conversion needed
       const startTime = new Date(slot.startTime);
       
-      // Convert to EST by subtracting 5 hours
-      const estTime = new Date(startTime.getTime() - (5 * 60 * 60 * 1000));
-      
       // Format date as YYYY-MM-DD
-      const date = estTime.toISOString().split('T')[0];
+      const date = startTime.toISOString().split('T')[0];
       
-      // Format time as HH:MM in 24-hour format
-      const hours = estTime.getUTCHours().toString().padStart(2, '0');
-      const minutes = estTime.getUTCMinutes().toString().padStart(2, '0');
+      // Format time as HH:MM in 24-hour format - adjust for EST display (subtract 5 hours)
+      const adjustedTime = new Date(startTime.getTime() - (5 * 60 * 60 * 1000)); // Subtract 5 hours
+      const hours = adjustedTime.getHours().toString().padStart(2, '0');
+      const minutes = adjustedTime.getMinutes().toString().padStart(2, '0');
       const time = `${hours}:${minutes}`;
       
-      // Get the actual day of week from the EST date
-      const actualDayOfWeek = estTime.toLocaleDateString('en-US', { 
-        weekday: 'long',
-        timeZone: 'America/New_York'
+      // Get the actual day of week from the date
+      const actualDayOfWeek = startTime.toLocaleDateString('en-US', { 
+        weekday: 'long'
       });
       
       return {
@@ -141,18 +151,26 @@ export async function GET(request: NextRequest) {
         teacher: slot.teacherSchedule.teacher,
         serviceType: slot.teacherSchedule.serviceType,
         venue: slot.teacherSchedule.venue,
-        dayOfWeek: actualDayOfWeek
+        dayOfWeek: actualDayOfWeek,
+        dayOrder: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].indexOf(actualDayOfWeek)
       };
     });
 
-    // Filter out Sunday classes (safety check)
-    const filteredSlots = transformedSlots.filter(slot => slot.dayOfWeek !== 'Sunday');
+    // Sort by date (current day first), then by time
+    transformedSlots.sort((a, b) => {
+      // First sort by date
+      if (a.date !== b.date) {
+        return a.date.localeCompare(b.date);
+      }
+      // Then sort by time within the same date
+      return a.time.localeCompare(b.time);
+    });
 
-    console.log(`✅ Found ${filteredSlots.length} teacher schedule slots (filtered out Sunday classes)`);
+    console.log(`✅ Found ${transformedSlots.length} teacher schedule slots`);
 
     return NextResponse.json({
       success: true,
-      slots: filteredSlots
+      slots: transformedSlots
     });
 
   } catch (error) {
@@ -194,8 +212,18 @@ function generateMockScheduleSlots() {
   const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
   startOfWeek.setDate(today.getDate() - daysToMonday);
 
-  const mockSlots: any[] = [];
+  const mockSlots: Array<{
+    id: string;
+    date: string;
+    time: string;
+    teacherId: string;
+    serviceTypeId: string;
+    venueId: string;
+    isAvailable: boolean;
+  }> = [];
   const timeSlots = ['09:00', '10:30', '12:00', '14:00', '15:30', '17:00', '18:30', '20:00'];
+  // Mock data for demonstration (commented out as not used in current implementation)
+  /*
   const teachers = [
     { id: 1, name: 'Ana García', bio: 'Certified Yoga Instructor', shortBio: 'Yoga Expert', experience: 5, avatarUrl: null },
     { id: 2, name: 'Carlos Mendoza', bio: 'Pilates Specialist', shortBio: 'Pilates Pro', experience: 8, avatarUrl: null },
@@ -210,38 +238,31 @@ function generateMockScheduleSlots() {
     { id: 1, name: 'Studio A', address: 'Calle Alcanfores 425', city: 'Miraflores' },
     { id: 2, name: 'Studio B', address: 'Calle Alcanfores 425', city: 'Miraflores' }
   ];
+  */
 
   // Generate slots for the next 7 days
   for (let day = 0; day < 7; day++) {
     const currentDate = new Date(startOfWeek);
     currentDate.setDate(startOfWeek.getDate() + day);
     const dateStr = currentDate.toISOString().split('T')[0];
-    const dayName = currentDate.toLocaleDateString('en-US', { weekday: 'long' });
+    // const dayName = currentDate.toLocaleDateString('en-US', { weekday: 'long' }); // Not used in current implementation
 
-    // Skip Sunday
-    if (dayName === 'Sunday') continue;
+    // Process all days including Sunday
 
     // Generate 3-5 slots per day
     const slotsPerDay = Math.floor(Math.random() * 3) + 3;
     const selectedTimes = timeSlots.sort(() => 0.5 - Math.random()).slice(0, slotsPerDay);
 
     selectedTimes.forEach((time, index) => {
-      const teacher = teachers[Math.floor(Math.random() * teachers.length)];
-      const serviceType = serviceTypes[Math.floor(Math.random() * serviceTypes.length)];
-      const venue = venues[Math.floor(Math.random() * venues.length)];
-
+      // Teacher, serviceType, and venue selection removed as they're not used in the response
       mockSlots.push({
         id: `mock_${day}_${index}`,
         date: dateStr,
         time,
-        isAvailable: Math.random() > 0.2, // 80% availability
-        capacity: 15,
-        bookedCount: Math.floor(Math.random() * 8),
-        duration: serviceType.duration,
-        teacher,
-        serviceType,
-        venue,
-        dayOfWeek: dayName
+        teacherId: `teacher_${Math.floor(Math.random() * 3) + 1}`,
+        serviceTypeId: `service_${Math.floor(Math.random() * 3) + 1}`,
+        venueId: `venue_${Math.floor(Math.random() * 2) + 1}`,
+        isAvailable: Math.random() > 0.2 // 80% availability
       });
     });
   }

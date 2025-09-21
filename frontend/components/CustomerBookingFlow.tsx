@@ -90,12 +90,12 @@ interface BookingFormData {
 
 interface CustomerBookingFlowProps {
   initialSlotData?: {
-    slotId: string;
-    teacherId: string;
-    serviceTypeId: string;
-    venueId: string;
-    date: string;
-    time: string;
+    slotId?: string;
+    teacherId?: string;
+    serviceTypeId?: string;
+    venueId?: string;
+    date?: string;
+    time?: string;
   };
 }
 
@@ -280,13 +280,20 @@ export function CustomerBookingFlow({ initialSlotData }: CustomerBookingFlowProp
     }
   }, [initialSlotData]);
 
-  const loadScheduleForSlot = async (slotData: any) => {
+  const loadScheduleForSlot = async (slotData: {
+    slotId?: string;
+    date?: string;
+    time?: string;
+    teacherId?: string;
+    serviceTypeId?: string;
+    venueId?: string;
+  }) => {
     try {
       // Create a mock schedule object from the slot data
       const mockSchedule: AvailableSchedule = {
-        id: slotData.slotId,
-        date: slotData.date,
-        time: slotData.time,
+        id: slotData.slotId || '',
+        date: slotData.date || '',
+        time: slotData.time || '',
         isAvailable: true,
         capacity: 1,
         bookedCount: 0,
@@ -300,7 +307,7 @@ export function CustomerBookingFlow({ initialSlotData }: CustomerBookingFlowProp
       };
       
       setSchedules([mockSchedule]);
-      setSelectedDate(slotData.date);
+      setSelectedDate(slotData.date || '');
       setFormData(prev => ({ ...prev, selectedSchedule: mockSchedule }));
     } catch (error) {
       console.error('Error loading schedule for slot:', error);
@@ -1458,7 +1465,7 @@ ${formData.specialRequests}
                     📱 Check WhatsApp for confirmation from our team
                   </p>
                   <p className="text-gray-400 text-sm">
-                    📧 You'll receive email confirmation once booking is confirmed
+                    📧 You&apos;ll receive email confirmation once booking is confirmed
                   </p>
                   <p className="text-gray-400 text-sm">
                     📞 Our team will contact you to finalize payment and session details

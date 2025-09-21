@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Template Dark Mode Test</title>
+    <style>
+        /* Light mode (default) */
+        body {
+            font-family: 'Lato', Arial, sans-serif;
+            line-height: 1.6;
+            color: #383838;
+            background-color: #f4eeed;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #1a1a1a;
+                color: #e0e0e0;
+            }
+            .email-container {
+                background-color: #2d2d2d;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            }
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #6ea058 0%, #8bc34a 100%);
+            color: #ffffff;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        .content {
+            padding: 40px 30px;
+            background-color: #ffffff;
+        }
+        
+        /* Dark mode content styles */
+        @media (prefers-color-scheme: dark) {
+            .content {
+                background-color: #2d2d2d;
+            }
+        }
+        
+        .test-section {
+            background: linear-gradient(135deg, #f4eeed 0%, #ede6e5 100%);
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 12px;
+            border-left: 5px solid #6ea058;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Dark mode package info styles */
+        @media (prefers-color-scheme: dark) {
+            .test-section {
+                background: linear-gradient(135deg, #3a3a3a 0%, #2d2d2d 100%);
+                border-left-color: #6ea058;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            }
+        }
+        
+        .test-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .test-controls button {
+            margin: 5px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .light-mode-btn {
+            background: #f4eeed;
+            color: #383838;
+        }
+        
+        .dark-mode-btn {
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-controls">
+        <h3>Test Controls</h3>
+        <button class="light-mode-btn" onclick="setLightMode()">Light Mode</button>
+        <button class="dark-mode-btn" onclick="setDarkMode()">Dark Mode</button>
+        <p>Or use your system preference</p>
+    </div>
+
+    <div class="email-container">
+        <div class="header">
+            <h1>MatMax Yoga Studio</h1>
+            <h2>Compra Confirmada</h2>
+        </div>
+        
+        <div class="content">
+            <div class="greeting">
+                <span class="success-text">Confirmado</span>
+                Hola <strong class="highlight">Test User</strong>,
+            </div>
+            
+            <p>Gracias por tu compra en MatMax Yoga Studio. Tu paquete ha sido confirmado exitosamente y ya puedes comenzar a reservar tus clases.</p>
+            
+            <div class="test-section">
+                <h3>Detalles de tu Paquete</h3>
+                <p>Este es un ejemplo de cómo se ve el contenido en diferentes modos de color.</p>
+                <p>En modo claro: fondo beige (#f4eeed)</p>
+                <p>En modo oscuro: fondo gris oscuro (#3a3a3a)</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setLightMode() {
+            document.documentElement.style.colorScheme = 'light';
+        }
+        
+        function setDarkMode() {
+            document.documentElement.style.colorScheme = 'dark';
+        }
+    </script>
+</body>
+</html>

@@ -171,7 +171,7 @@ export function Header({
               whileTap={{ scale: 0.95 }}
               className="hidden sm:flex items-center space-x-1 header-button-account"
             >
-              <Calendar size={14} />
+              <Calendar size={14} className="text-gray-600" />
               <span>{(t?.nav as Record<string, string>)?.schedule || 'Schedule'}</span>
             </motion.button>
           </Link>
@@ -183,7 +183,7 @@ export function Header({
               whileTap={{ scale: 0.95 }}
               className="hidden sm:flex items-center space-x-1 header-button-account"
             >
-              <Package size={14} />
+              <Package size={14} className="text-gray-600" />
               <span>{(t?.nav as Record<string, string>)?.packages || 'Packages'}</span>
             </motion.button>
           </Link>
@@ -196,7 +196,7 @@ export function Header({
                 whileTap={{ scale: 0.95 }}
                 className="hidden sm:flex items-center space-x-1 header-button-account"
               >
-                <User size={14} />
+                <User size={14} className="text-gray-600" />
                 <span>Account</span>
               </motion.button>
             </Link>
@@ -210,7 +210,7 @@ export function Header({
               whileTap={{ scale: 0.95 }}
               className="hidden sm:flex items-center space-x-1 header-button-account"
             >
-              <Settings size={14} />
+              <Settings size={14} className="text-gray-600" />
               <span>Dashboard</span>
             </motion.button>
           ) : (
@@ -220,7 +220,7 @@ export function Header({
               whileTap={{ scale: 0.95 }}
               className="hidden sm:flex items-center space-x-1 header-button-language-inactive"
             >
-              <LogIn size={14} />
+              <LogIn size={14} className="text-gray-600" />
               <span>{(t?.common as Record<string, string>)?.login || 'Login'}</span>
             </motion.button>
           )}
@@ -302,7 +302,7 @@ export function Header({
                       whileTap={{ scale: 0.98 }}
                       className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30 mobile-touch-feedback"
                     >
-                      <Calendar size={18} />
+                      <Calendar size={18} className="text-gray-800" />
                       <span className="text-base sm:text-lg font-medium">{(t?.nav as Record<string, string>)?.schedule || 'Schedule'}</span>
                     </motion.button>
                   </Link>
@@ -313,7 +313,7 @@ export function Header({
                       whileTap={{ scale: 0.98 }}
                       className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30 mobile-touch-feedback"
                     >
-                      <Package size={18} />
+                      <Package size={18} className="text-gray-800" />
                       <span className="text-base sm:text-lg font-medium">{(t?.nav as Record<string, string>)?.packages || 'Packages'}</span>
                     </motion.button>
                   </Link>
@@ -325,7 +325,7 @@ export function Header({
                         whileTap={{ scale: 0.98 }}
                         className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30"
                       >
-                        <User size={18} />
+                        <User size={18} className="text-gray-800" />
                         <span className="text-base sm:text-lg font-medium">Account</span>
                       </motion.button>
                     </Link>
@@ -343,7 +343,7 @@ export function Header({
                     whileTap={{ scale: 0.98 }}
                     className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30"
                   >
-                    <LogIn size={18} />
+                    <LogIn size={18} className="text-gray-800" />
                     <span className="text-base sm:text-lg font-medium">
                       {user && isAdmin ? 'Dashboard' : (t?.common as Record<string, string>)?.login || 'Login'}
                     </span>

@@ -5,7 +5,13 @@ import { useRouter } from 'next/navigation';
 
 const Result = () => {
   const router = useRouter();
-  const [clientAnswer, setClientAnswer] = useState<any>(null);
+  const [clientAnswer, setClientAnswer] = useState<{
+    orderId: string;
+    status: string;
+    amount?: number;
+    currency?: string;
+    transactionId?: string;
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -110,25 +116,24 @@ const Result = () => {
                 <h5 className="card-title">Estado del Pago</h5>
                 <p className="card-text">
                   <strong>Estado:</strong> 
-                  <span className={`badge badge-${getStatusColor(clientAnswer.orderStatus)} ml-2`}>
-                    {getStatusText(clientAnswer.orderStatus)}
+                  <span className={`badge badge-${getStatusColor(clientAnswer.status)} ml-2`}>
+                    {getStatusText(clientAnswer.status)}
                   </span>
                 </p>
                 
-                {clientAnswer.orderDetails && (
-                  <>
-                    <p className="card-text">
-                      <strong>Monto:</strong> {clientAnswer.orderDetails.orderCurrency} {(clientAnswer.orderDetails.orderTotalAmount / 100).toFixed(2)}
-                    </p>
-                    <p className="card-text">
-                      <strong>Order-id:</strong> {clientAnswer.orderDetails.orderId}
-                    </p>
-                  </>
+                {clientAnswer.amount && (
+                  <p className="card-text">
+                    <strong>Monto:</strong> {clientAnswer.currency || 'PEN'} {(clientAnswer.amount / 100).toFixed(2)}
+                  </p>
                 )}
                 
-                {clientAnswer.transaction && (
+                <p className="card-text">
+                  <strong>Order-id:</strong> {clientAnswer.orderId}
+                </p>
+                
+                {clientAnswer.transactionId && (
                   <p className="card-text">
-                    <strong>ID de Transacción:</strong> {clientAnswer.transaction.uuid || clientAnswer.transaction.transactionId}
+                    <strong>ID de Transacción:</strong> {clientAnswer.transactionId}
                   </p>
                 )}
               </div>

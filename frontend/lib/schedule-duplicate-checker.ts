@@ -10,7 +10,14 @@ export interface DuplicateInfo {
   type: 'exact_match' | 'time_overlap' | 'same_teacher_same_day' | 'same_venue_same_day';
   message: string;
   conflictingScheduleId: number;
-  conflictingSchedule: any;
+  conflictingSchedule: {
+    id: number;
+    date: string;
+    time: string;
+    teacherId: string;
+    serviceTypeId: string;
+    venueId: string;
+  };
   severity: 'error' | 'warning';
 }
 
@@ -106,7 +113,14 @@ export class ScheduleDuplicateChecker {
           type: 'exact_match',
           message: `Exact duplicate found: ${exactMatch.teacher?.name} at ${exactMatch.venue?.name} on ${scheduleData.dayOfWeek} from ${scheduleData.startTime} to ${scheduleData.endTime}`,
           conflictingScheduleId: exactMatch.id,
-          conflictingSchedule: exactMatch,
+          conflictingSchedule: {
+            id: exactMatch.id,
+            date: '', // Not available in this context
+            time: `${exactMatch.startTime}-${exactMatch.endTime}`,
+            teacherId: exactMatch.teacherId.toString(),
+            serviceTypeId: exactMatch.serviceTypeId?.toString() || '',
+            venueId: exactMatch.venueId.toString()
+          },
           severity: 'error'
         });
       }
@@ -131,7 +145,14 @@ export class ScheduleDuplicateChecker {
           type: 'exact_match',
           message: `Exact duplicate found: ${exactMatch.venue?.name} on ${scheduleData.dayOfWeek} from ${scheduleData.startTime} to ${scheduleData.endTime}`,
           conflictingScheduleId: exactMatch.id,
-          conflictingSchedule: exactMatch,
+          conflictingSchedule: {
+            id: exactMatch.id,
+            date: '', // Not available in this context
+            time: `${exactMatch.startTime}-${exactMatch.endTime}`,
+            teacherId: (exactMatch as any).teacherId?.toString() || '',
+            serviceTypeId: '', // Not available in teacherSchedule
+            venueId: exactMatch.venueId?.toString() || ''
+          },
           severity: 'error'
         });
       }
@@ -184,7 +205,14 @@ export class ScheduleDuplicateChecker {
           type: 'time_overlap',
           message: `Time overlap: ${overlap.teacher?.name} at ${overlap.venue?.name} on ${scheduleData.dayOfWeek} (${overlap.startTime} - ${overlap.endTime}) overlaps with your schedule (${scheduleData.startTime} - ${scheduleData.endTime})`,
           conflictingScheduleId: overlap.id,
-          conflictingSchedule: overlap,
+          conflictingSchedule: {
+            id: overlap.id,
+            date: '', // Not available in this context
+            time: `${overlap.startTime}-${overlap.endTime}`,
+            teacherId: overlap.teacherId.toString(),
+            serviceTypeId: overlap.serviceTypeId?.toString() || '',
+            venueId: overlap.venueId.toString()
+          },
           severity: 'error'
         });
       }
@@ -227,7 +255,14 @@ export class ScheduleDuplicateChecker {
           type: 'time_overlap',
           message: `Time overlap: ${overlap.venue?.name} on ${scheduleData.dayOfWeek} (${overlap.startTime} - ${overlap.endTime}) overlaps with your schedule (${scheduleData.startTime} - ${scheduleData.endTime})`,
           conflictingScheduleId: overlap.id,
-          conflictingSchedule: overlap,
+          conflictingSchedule: {
+            id: overlap.id,
+            date: '', // Not available in this context
+            time: `${overlap.startTime}-${overlap.endTime}`,
+            teacherId: (overlap as any).teacherId?.toString() || '',
+            serviceTypeId: '', // Not available in teacherSchedule
+            venueId: overlap.venueId?.toString() || ''
+          },
           severity: 'error'
         });
       }
@@ -260,7 +295,14 @@ export class ScheduleDuplicateChecker {
           type: 'same_teacher_same_day',
           message: `Teacher ${schedule.teacher?.name} already has a schedule on ${scheduleData.dayOfWeek} at ${schedule.venue?.name} (${schedule.startTime} - ${schedule.endTime})`,
           conflictingScheduleId: schedule.id,
-          conflictingSchedule: schedule,
+          conflictingSchedule: {
+            id: schedule.id,
+            date: '', // Not available in this context
+            time: `${schedule.startTime}-${schedule.endTime}`,
+            teacherId: (schedule as any).teacherId?.toString() || '',
+            serviceTypeId: '', // Not available in teacherSchedule
+            venueId: schedule.venueId.toString()
+          },
           severity: 'warning'
         });
       }
@@ -292,7 +334,14 @@ export class ScheduleDuplicateChecker {
           type: 'same_venue_same_day',
           message: `Venue ${schedule.venue?.name} already has a schedule on ${scheduleData.dayOfWeek} (${schedule.startTime} - ${schedule.endTime})`,
           conflictingScheduleId: schedule.id,
-          conflictingSchedule: schedule,
+          conflictingSchedule: {
+            id: schedule.id,
+            date: '', // Not available in this context
+            time: `${schedule.startTime}-${schedule.endTime}`,
+            teacherId: (schedule as any).teacherId?.toString() || '',
+            serviceTypeId: '', // Not available in teacherSchedule
+            venueId: schedule.venueId?.toString() || ''
+          },
           severity: 'warning'
         });
       }
@@ -328,7 +377,14 @@ export class ScheduleDuplicateChecker {
   /**
    * Get all schedules for a specific day to help with duplicate detection
    */
-  static async getSchedulesForDay(dayOfWeek: string): Promise<any[]> {
+  static async getSchedulesForDay(dayOfWeek: string): Promise<Array<{
+    id: number;
+    date: string;
+    time: string;
+    teacherId: string;
+    serviceTypeId: string;
+    venueId: string;
+  }>> {
     const schedules = [];
 
     // Get teacher schedules for the day
@@ -348,8 +404,25 @@ export class ScheduleDuplicateChecker {
       }
     });
 
-    schedules.push(...teacherSchedules.map(s => ({ ...s, type: 'teacher' })));
-    schedules.push(...venueSchedules.map(s => ({ ...s, type: 'venue' })));
+    // Map teacher schedules to expected format
+    schedules.push(...teacherSchedules.map(s => ({
+      id: s.id,
+      date: '', // Not available in this context
+      time: `${s.startTime}-${s.endTime}`,
+      teacherId: s.teacherId.toString(),
+      serviceTypeId: s.serviceTypeId?.toString() || '',
+      venueId: s.venueId.toString()
+    })));
+
+    // Map venue schedules to expected format
+    schedules.push(...venueSchedules.map(s => ({
+      id: s.id,
+      date: '', // Not available in this context
+      time: `${s.startTime}-${s.endTime}`,
+      teacherId: (s as any).teacherId?.toString() || '',
+      serviceTypeId: (s as any).serviceTypeId?.toString() || '',
+      venueId: s.venueId?.toString() || ''
+    })));
 
     return schedules;
   }
@@ -361,7 +434,14 @@ export class ScheduleDuplicateChecker {
     totalSchedules: number;
     duplicates: number;
     warnings: number;
-    scheduleList: any[];
+    scheduleList: Array<{
+      id: number;
+      date: string;
+      time: string;
+      teacherId: string;
+      serviceTypeId: string;
+      venueId: string;
+    }>;
   }> {
     const schedules = await this.getSchedulesForDay(dayOfWeek);
     
@@ -374,15 +454,14 @@ export class ScheduleDuplicateChecker {
         const schedule1 = schedules[i];
         const schedule2 = schedules[j];
 
-        // Check for exact matches
-        if (schedule1.startTime === schedule2.startTime && 
-            schedule1.endTime === schedule2.endTime &&
+        // Check for exact matches (using time string comparison)
+        if (schedule1.time === schedule2.time &&
             schedule1.teacherId === schedule2.teacherId &&
             schedule1.venueId === schedule2.venueId) {
           duplicates++;
         }
-        // Check for time overlaps
-        else if (this.isTimeOverlapping(schedule1.startTime, schedule1.endTime, schedule2.startTime, schedule2.endTime)) {
+        // Check for time overlaps (extract start and end times from time string)
+        else if (this.isTimeOverlappingFromString(schedule1.time, schedule2.time)) {
           duplicates++;
         }
         // Check for same teacher different times
@@ -414,6 +493,20 @@ export class ScheduleDuplicateChecker {
     const time2End = this.timeToMinutes(end2);
 
     return (time1Start < time2End && time1End > time2Start);
+  }
+
+  /**
+   * Helper function to check if two time ranges overlap from time strings (format: "startTime-endTime")
+   */
+  private static isTimeOverlappingFromString(time1: string, time2: string): boolean {
+    const [start1, end1] = time1.split('-');
+    const [start2, end2] = time2.split('-');
+    
+    if (!start1 || !end1 || !start2 || !end2) {
+      return false; // Invalid time format
+    }
+    
+    return this.isTimeOverlapping(start1, end1, start2, end2);
   }
 
   /**

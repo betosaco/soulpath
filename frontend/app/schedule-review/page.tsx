@@ -565,7 +565,7 @@ MatMax Yoga. Calle Alcanfores 425, Miraflores. Lima - Peru
           >
             <CheckCircle className="w-6 h-6 text-blue-600 mx-auto mb-2" />
             <p className="text-blue-800 font-medium">
-              By clicking "Send to WhatsApp", you'll be redirected to WhatsApp to complete your booking with our team.
+              By clicking &quot;Send to WhatsApp&quot;, you&apos;ll be redirected to WhatsApp to complete your booking with our team.
             </p>
           </motion.div>
         </div>

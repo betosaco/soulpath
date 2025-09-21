@@ -62,7 +62,12 @@ interface AvailableSchedule {
 interface BookingFormData {
   selectedPackage: CustomerPackage | null;
   selectedSchedule: AvailableSchedule | null;
-  selectedPaymentMethod: any;
+  selectedPaymentMethod: {
+    id: string;
+    name: string;
+    type: string;
+    isActive: boolean;
+  } | null;
   clientName: string;
   clientEmail: string;
   clientPhone: string;
@@ -405,7 +410,7 @@ ${formData.specialRequests}
             </pre>
           </div>
           <p className="text-gray-400 text-xs mt-2">
-            This message will be sent to +51 916 172 368 when you click "Continue via WhatsApp"
+            This message will be sent to +51 916 172 368 when you click &quot;Continue via WhatsApp&quot;
           </p>
         </CardContent>
       </Card>

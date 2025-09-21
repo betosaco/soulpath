@@ -7,7 +7,14 @@ interface DuplicateInfo {
   type: 'exact_match' | 'time_overlap' | 'same_teacher_same_day' | 'same_venue_same_day';
   message: string;
   conflictingScheduleId: number;
-  conflictingSchedule: any;
+  conflictingSchedule: {
+    id: number;
+    date: string;
+    time: string;
+    teacherId: string;
+    serviceTypeId: string;
+    venueId: string;
+  };
   severity: 'error' | 'warning';
 }
 
@@ -149,13 +156,20 @@ export function InlineDuplicateChecker({
   onDuplicatesFound,
   children
 }: {
-  scheduleData: any;
+  scheduleData: {
+    id: string;
+    date: string;
+    time: string;
+    teacherId: string;
+    serviceTypeId: string;
+    venueId: string;
+  };
   onDuplicatesFound: (duplicates: DuplicateInfo[], warnings: string[]) => void;
   children: React.ReactNode;
 }) {
   const [isChecking, setIsChecking] = React.useState(false);
 
-  const checkDuplicates = async () => {
+  const checkDuplicates = React.useCallback(async () => {
     if (!scheduleData) return;
 
     setIsChecking(true);
@@ -178,12 +192,12 @@ export function InlineDuplicateChecker({
     } finally {
       setIsChecking(false);
     }
-  };
+  }, [scheduleData, onDuplicatesFound]);
 
   React.useEffect(() => {
     const timeoutId = setTimeout(checkDuplicates, 500); // Debounce
     return () => clearTimeout(timeoutId);
-  }, [scheduleData]);
+  }, [scheduleData, checkDuplicates]);
 
   return (
     <div className="relative">

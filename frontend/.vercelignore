@@ -107,8 +107,7 @@ debug-*
 *.md
 !README.md
 
-# Large media files
-*.mp4
+# Large media files (excluding hero video)
 *.avi
 *.mov
 *.wmv

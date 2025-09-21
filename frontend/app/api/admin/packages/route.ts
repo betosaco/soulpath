@@ -118,7 +118,7 @@ export async function GET(request: NextRequest) {
         select,
         skip: offset,
         take: limit,
-        orderBy: { createdAt: 'desc' }
+        orderBy: { displayOrder: 'asc' }
       }),
       prisma.packageDefinition.count({ where })
     ]);

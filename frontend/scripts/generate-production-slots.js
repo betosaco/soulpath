@@ -55,7 +55,7 @@ async function generateProductionSlots() {
       for (const schedule of daySchedules) {
         // Convert UTC time to EST for display
         const startTime = schedule.startTime;
-        const endTime = schedule.endTime;
+        const _endTime = schedule.endTime; // eslint-disable-line @typescript-eslint/no-unused-vars
         
         // Create the slot
         const slot = {

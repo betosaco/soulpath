@@ -21,7 +21,7 @@ export default function PurchaseFailedPage() {
           </h1>
           
           <p className="text-lg text-gray-600 mb-8">
-            We're sorry, but your payment could not be processed at this time.
+            We&apos;re sorry, but your payment could not be processed at this time.
           </p>
 
           {/* Error Details */}

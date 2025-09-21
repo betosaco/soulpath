@@ -90,7 +90,8 @@ async function testDuplicatePrevention() {
     // Test 2: Try to create exact duplicate (should fail)
     console.log('\n📅 Test 2: Attempting to create exact duplicate...');
     try {
-      const duplicateSchedule = await prisma.teacherSchedule.create({
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const _duplicateSchedule = await prisma.teacherSchedule.create({
         data: {
           teacherId: testTeacher.id,
           venueId: testVenue.id,
@@ -113,7 +114,8 @@ async function testDuplicatePrevention() {
     // Test 3: Try to create overlapping schedule (should fail)
     console.log('\n📅 Test 3: Attempting to create overlapping schedule...');
     try {
-      const overlappingSchedule = await prisma.teacherSchedule.create({
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const _overlappingSchedule = await prisma.teacherSchedule.create({
         data: {
           teacherId: testTeacher.id,
           venueId: testVenue.id,

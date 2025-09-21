@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CentralizedHeader } from '@/components/CentralizedHeader';
 import { Footer } from '@/components/Footer';
+import { LoadingState } from '@/components/LoadingState';
 import { useTranslations, useLanguage } from '@/hooks/useTranslations';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,23 +26,7 @@ import { toast } from 'sonner';
 export default function AboutPage() {
   const { language } = useLanguage();
   const { t } = useTranslations(undefined, language);
-  
-  // Helper function to safely access nested translation properties
-  const getTranslation = (path: string, fallback: string = ''): string => {
-    const keys = path.split('.');
-    let current: any = (t && typeof t === 'object') ? t : {};
-
-    for (const key of keys) {
-      if (current && typeof current === 'object' && key in current) {
-        current = current[key];
-      } else {
-        return fallback;
-      }
-    }
-
-    return typeof current === 'string' ? current : fallback;
-  };
-  
+  const [loading, setLoading] = useState(true);
   const [contactForm, setContactForm] = useState({
     name: '',
     email: '',
@@ -49,6 +34,32 @@ export default function AboutPage() {
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Simulate loading
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Helper function to safely access nested translation properties
+  const getTranslation = (path: string, fallback: string = ''): string => {
+    const keys = path.split('.');
+    let current: Record<string, unknown> = (t && typeof t === 'object') ? t as Record<string, unknown> : {};
+
+    for (const key of keys) {
+      if (current && typeof current === 'object' && key in current) {
+        current = current[key] as Record<string, unknown>;
+      } else {
+        return fallback;
+      }
+    }
+
+    return typeof current === 'string' ? current : fallback;
+  };
+
+  if (loading) {
+    return <LoadingState message="Loading about page..." />;
+  }
 
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

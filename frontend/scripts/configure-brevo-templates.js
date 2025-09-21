@@ -23,7 +23,8 @@ async function configureBrevoTemplates() {
   try {
     // Update communication configuration with Brevo settings
     console.log('🔧 Updating communication configuration...');
-    const commConfig = await prisma.communicationConfig.upsert({
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _commConfig = await prisma.communicationConfig.upsert({
       where: { id: 1 },
       update: {
         email_enabled: true,
@@ -51,11 +52,8 @@ async function configureBrevoTemplates() {
         description: 'Email enviado cuando un cliente compra un paquete de yoga',
         type: 'email',
         category: 'purchase',
-        translations: [
-          {
-            language: 'es',
-            subject: '¡Gracias por tu compra! - MatMax Yoga Studio',
-            content: `
+        subject: '¡Gracias por tu compra! - MatMax Yoga Studio',
+        htmlContent: `
 <!DOCTYPE html>
 <html>
 <head>
@@ -154,6 +152,38 @@ Contacto:
 ¡Namaste!
 MatMax Yoga Studio
         `,
+        textContent: `
+¡Gracias por tu compra! - MatMax Yoga Studio
+
+Hola {{customer_name}},
+
+¡Gracias por tu compra en MatMax Yoga Studio! Tu paquete ha sido confirmado exitosamente.
+
+DETALLES DE TU COMPRA:
+- Paquete: {{package_name}}
+- Sesiones: {{sessions_count}} clases de {{session_duration}} minutos
+- Precio: S/ {{package_price}}
+- Fecha de compra: {{purchase_date}}
+- Válido hasta: {{expiry_date}}
+
+HORARIOS DISPONIBLES:
+- Lunes: 08:15 Hatha, 09:30 Vinyasa, 17:30 Hatha
+- Martes: 17:30 Hatha, 18:45 Vinyasa
+- Miércoles: 08:15 Hatha, 09:30 Vinyasa, 17:30 Hatha
+- Jueves: 17:30 Hatha, 18:45 Vinyasa
+- Viernes: 08:15 Hatha, 09:30 Vinyasa, 17:30 Hatha
+- Sábado: 08:15 Hatha, 09:30 Vinyasa
+
+Reserva tu primera clase: {{booking_url}}
+
+Si tienes alguna pregunta, no dudes en contactarnos:
+- Email: info@matmax.store
+- WhatsApp: +51 999 999 999
+- Web: {{website_url}}
+
+¡Namaste!
+MatMax Yoga Studio
+        `,
         placeholders: [
           'customer_name',
           'package_name', 
@@ -168,7 +198,11 @@ MatMax Yoga Studio
         isActive: true
       },
       {
+        templateKey: 'booking_confirmation',
         name: 'booking_confirmation',
+        description: 'Email de confirmación enviado cuando se confirma una reserva',
+        type: 'email',
+        category: 'booking',
         subject: '¡Reserva Confirmada! - MatMax Yoga Studio',
         htmlContent: `
 <!DOCTYPE html>
@@ -290,7 +324,11 @@ MatMax Yoga Studio
         isActive: true
       },
       {
+        templateKey: 'booking_reminder',
         name: 'booking_reminder',
+        description: 'Email de recordatorio enviado un día antes de la clase',
+        type: 'email',
+        category: 'reminder',
         subject: 'Recordatorio: Tu clase de yoga es mañana - MatMax',
         htmlContent: `
 <!DOCTYPE html>
@@ -359,7 +397,7 @@ MatMax Yoga Studio
           'customer_name',
           'class_date',
           'class_time',
-          'class_type', 
+          'class_type',
           'instructor_name',
           'venue_address'
         ],

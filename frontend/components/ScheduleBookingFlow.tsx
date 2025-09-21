@@ -1,20 +1,20 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Calendar, 
-  Clock, 
-  User, 
-  Package, 
-  ArrowRight, 
+import {
+  Calendar,
+  Clock,
+  User,
+  Package,
+  ArrowRight,
   ArrowLeft,
   CheckCircle,
-  Loader2,
   AlertCircle,
-  MessageCircle,
   Users,
-  MapPin
+  MapPin,
+  CreditCard,
+  Shield
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,9 @@ import { usePackages, PackagePrice } from '@/hooks/usePackages';
 import { useLanguage, useTranslations } from '@/hooks/useTranslations';
 import { countries } from '@/lib/countries';
 import { toast } from 'sonner';
+// import { AppLayout } from '@/components/AppLayout';
 import { validateEmailWithMessage } from '@/lib/email-validation';
+// Payment integration will be added here
 
 interface Teacher {
   id: number;
@@ -86,15 +88,27 @@ interface BookingStep {
   completed: boolean;
 }
 
-export function ScheduleBookingFlow() {
+interface ScheduleBookingFlowProps {
+  startDate?: Date;
+  endDate?: Date;
+  onSlotsChange?: (slots: ScheduleSlot[]) => void;
+  onStepChange?: (step: number) => void;
+}
+
+export function ScheduleBookingFlow({ 
+  startDate, 
+  endDate, 
+  onSlotsChange,
+  onStepChange
+}: ScheduleBookingFlowProps = {}) {
   const { packages, loading: packagesLoading, error: packagesError } = usePackages('PEN');
   const { language } = useLanguage();
   const { t } = useTranslations(undefined, language);
   const [currentStep, setCurrentStep] = useState(0);
-  const [sending, setSending] = useState(false);
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [countrySearchTerm, setCountrySearchTerm] = useState('');
   const [emailError, setEmailError] = useState<string | null>(null);
+  // const [paymentProcessing, setPaymentProcessing] = useState(false);
   
   const [formData, setFormData] = useState<BookingFormData>({
     selectedSchedule: null,
@@ -107,26 +121,27 @@ export function ScheduleBookingFlow() {
   });
 
   // Helper function to safely access nested translation properties
-  const getTranslation = (path: string, fallback: string = ''): string => {
+  const getTranslation = useCallback((path: string, fallback: string = ''): string => {
     const keys = path.split('.');
-    let current: any = (t && typeof t === 'object') ? t : {};
+    let current: Record<string, unknown> = (t && typeof t === 'object') ? t as Record<string, unknown> : {};
 
     for (const key of keys) {
       if (current && typeof current === 'object' && key in current) {
-        current = current[key];
+        current = current[key] as Record<string, unknown>;
       } else {
         return fallback;
       }
     }
 
     return typeof current === 'string' ? current : fallback;
-  };
+  }, [t]);
 
-  const steps: BookingStep[] = [
+  const steps: BookingStep[] = React.useMemo(() => [
     { id: 'schedule', title: getTranslation('bookingFlow.selectSchedule', 'Select Schedule'), description: getTranslation('bookingFlow.selectScheduleDesc', 'Choose your preferred date and time'), completed: false },
     { id: 'package', title: getTranslation('bookingFlow.selectPackage', 'Select Package'), description: getTranslation('bookingFlow.selectPackageDesc', 'Choose the package that best fits your needs'), completed: false },
-    { id: 'personal', title: getTranslation('bookingFlow.personalInfo', 'Personal Information'), description: getTranslation('bookingFlow.personalInfoDesc', 'Provide your contact details'), completed: false }
-  ];
+    { id: 'personal', title: getTranslation('bookingFlow.personalInfo', 'Personal Information'), description: getTranslation('bookingFlow.personalInfoDesc', 'Provide your contact details'), completed: false },
+    { id: 'summary', title: 'Summary & Payment', description: 'Review your booking and complete payment', completed: false }
+  ], [getTranslation]);
 
   const selectedCountry = countries.find(c => c.code === formData.countryCode) || countries[0];
 
@@ -160,12 +175,14 @@ export function ScheduleBookingFlow() {
   const handleScheduleSelect = (slot: ScheduleSlot) => {
     setFormData(prev => ({ ...prev, selectedSchedule: slot }));
     setCurrentStep(1);
+    onStepChange?.(1);
     toast.success('Schedule selected! Now choose your package.');
   };
 
   const handlePackageSelect = (pkg: PackagePrice) => {
     setFormData(prev => ({ ...prev, selectedPackage: pkg }));
     setCurrentStep(2);
+    onStepChange?.(2);
     toast.success(getTranslation('bookingFlow.packageSelected', 'Package selected! Now provide your information.'));
   };
 
@@ -185,79 +202,68 @@ export function ScheduleBookingFlow() {
       }
     }
 
-    // Skip review step, go directly to WhatsApp confirmation
-    handleWhatsAppBooking();
+    // Go to summary step
+    setCurrentStep(3);
+    onStepChange?.(3);
   };
 
-  const handleWhatsAppBooking = async () => {
-    if (!formData.selectedSchedule || !formData.selectedPackage) return;
-
-    setSending(true);
+  // Payment success handler will be implemented when payment integration is added
+  /*
+  const handlePaymentSuccess = (paymentData: {
+    orderId: string;
+    status: string;
+    amount?: number;
+    currency?: string;
+    transactionId?: string;
+  }) => {
+    console.log('✅ Payment successful:', paymentData);
+    toast.success('¡Pago exitoso! Tu reserva ha sido confirmada.');
     
-    try {
-      // Create comprehensive WhatsApp message
-      const whatsappMessage = `¡Hola! Me interesa realizar una reserva:
-
-📋 *Información del Cliente:*
-• Nombre completo: ${formData.clientName}
-• Email: ${formData.clientEmail}
-• Teléfono: ${formData.countryCode}${formData.clientPhone}
-• País: ${selectedCountry.name} (${selectedCountry.flag})
-• Idioma preferido: ${formData.language === 'en' ? 'English' : 'Español'}
-
-📦 *Paquete Seleccionado:*
-• Nombre: ${formData.selectedPackage.packageDefinition.name}
-• Descripción: ${formData.selectedPackage.packageDefinition.description}
-• Precio: ${formData.selectedPackage.currency.symbol}${formData.selectedPackage.price} ${formData.selectedPackage.currency.code}
-• Número de sesiones: ${formData.selectedPackage.packageDefinition.sessionsCount}
-• Duración por sesión: ${formData.selectedPackage.packageDefinition.sessionDuration.duration_minutes} minutos
-
-📅 *Detalles de la Reserva:*
-• Fecha: ${new Date(formData.selectedSchedule.date).toLocaleDateString('es-ES', { 
-    weekday: 'long', 
-    month: 'long', 
-    day: 'numeric',
-    year: 'numeric'
-  })}
-• Hora: ${new Date(`2000-01-01T${formData.selectedSchedule.time}`).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
-• Instructor: ${formData.selectedSchedule.teacher.name}
-• Tipo de servicio: ${formData.selectedSchedule.serviceType.name}
-• Duración: ${formData.selectedSchedule.duration} minutos
-• Lugar: ${formData.selectedSchedule.venue.name}
-• Dirección: ${formData.selectedSchedule.venue.address}, ${formData.selectedSchedule.venue.city}
-
-📍 *Ubicación del Estudio:*
-MatMax Yoga. Calle Alcanfores 425, Miraflores. Lima - Peru
-
-💬 *Información adicional:*
-• ID de orden: order_${Date.now()}
-• Fecha de solicitud: ${new Date().toLocaleDateString('es-ES', { 
-    weekday: 'long', 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
-  })}
-• Hora de solicitud: ${new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
-
-¿Podrían ayudarme a completar mi reserva? ¡Gracias!`;
-
-      const encodedMessage = encodeURIComponent(whatsappMessage);
-      const phoneNumber = '51916172368'; // +51 916 172 368
-      
-      // Create WhatsApp URLs
-      const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodedMessage}`;
-      
-      // Open WhatsApp
-      window.open(whatsappUrl, '_blank');
-      toast.success(getTranslation('bookingFlow.whatsappRedirect', '¡Redirigido a WhatsApp! Completa tu reserva allí.'));
-      
-    } catch (error) {
-      console.error('Error creating WhatsApp message:', error);
-      toast.error(getTranslation('bookingFlow.whatsappError', 'Error al procesar la reserva. Por favor, contacta directamente al +51 916 172 368'));
-    } finally {
-      setSending(false);
-    }
+    // Store payment result in sessionStorage for the success page
+    sessionStorage.setItem('paymentResult', JSON.stringify({
+      orderStatus: 'PAID',
+      orderId: `SCH-${formData.selectedSchedule?.id}-${Date.now()}`,
+      amount: (formData.selectedPackage?.price || 0) * 100, // Convert to cents
+      currency: formData.selectedPackage?.currency || 'PEN',
+      packageData: {
+        ...formData.selectedPackage,
+        name: formData.selectedPackage?.packageDefinition.name || '',
+        description: formData.selectedPackage?.packageDefinition.description || '',
+        sessionsCount: formData.selectedPackage?.packageDefinition.sessionsCount || 0,
+        packageType: formData.selectedPackage?.packageDefinition.packageType || '',
+        maxGroupSize: formData.selectedPackage?.packageDefinition.maxGroupSize || 0,
+        sessionDuration: formData.selectedPackage?.packageDefinition.sessionDuration || 0
+      },
+      bookingData: formData.selectedSchedule ? {
+        selectedDate: formData.selectedSchedule.date,
+        selectedTime: formData.selectedSchedule.time,
+        teacher: formData.selectedSchedule.teacher,
+        dayOfWeek: formData.selectedSchedule.dayOfWeek,
+        serviceType: formData.selectedSchedule.serviceType,
+        clientName: formData.clientName,
+        clientEmail: formData.clientEmail,
+        clientPhone: formData.clientPhone,
+        countryCode: formData.countryCode
+      } : null,
+      paymentData: paymentData
+    }));
+    
+    // Redirect to payment success page
+    window.location.href = '/payment-success';
   };
+  */
+
+  // const handlePaymentError = (error: string) => {
+  //   console.error('❌ Payment failed:', error);
+  //   toast.error(`Payment failed: ${error}`);
+  //   setPaymentProcessing(false);
+  // };
+
+  // const handlePaymentStart = () => {
+  //   // Payment processing state management will be added when payment integration is implemented
+  //   console.log('Payment processing started');
+  // };
+
 
 
   const formatDate = (dateString: string) => {
@@ -340,6 +346,9 @@ MatMax Yoga. Calle Alcanfores 425, Miraflores. Lima - Peru
                 onBookSlot={handleScheduleSelect}
                 showBookingButton={false}
                 className="max-w-full"
+                startDate={startDate}
+                endDate={endDate}
+                onSlotsChange={onSlotsChange}
               />
             </motion.div>
           )}
@@ -360,8 +369,8 @@ MatMax Yoga. Calle Alcanfores 425, Miraflores. Lima - Peru
 
               {packagesLoading ? (
                 <div className="text-center py-12">
-                  <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
-                  <p className="text-muted text-lg">Loading packages...</p>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-400 mx-auto mb-4"></div>
+                  <p className="text-gray-600 text-lg">Loading packages...</p>
                 </div>
               ) : packagesError ? (
                 <div className="text-center py-12">
@@ -419,10 +428,13 @@ MatMax Yoga. Calle Alcanfores 425, Miraflores. Lima - Peru
 
               <div className="flex justify-center mt-8">
                 <button
-                  onClick={() => setCurrentStep(0)}
+                  onClick={() => {
+                    setCurrentStep(0);
+                    onStepChange?.(0);
+                  }}
                   className="px-8 py-4 text-lg font-medium text-[#6ea058] border-2 border-[#6ea058] rounded-lg hover:bg-[#6ea058] hover:text-white transition-all duration-200 flex items-center"
                 >
-                  <ArrowLeft className="w-5 h-5 mr-2" />
+                  <ArrowLeft className="w-5 h-5 mr-2 text-[#6ea058]" />
                   {getTranslation('bookingFlow.backToSchedule', 'Back to Schedule')}
                 </button>
               </div>
@@ -639,35 +651,38 @@ MatMax Yoga. Calle Alcanfores 425, Miraflores. Lima - Peru
 
               <div className="flex justify-between pt-6">
                 <button
-                  onClick={() => setCurrentStep(1)}
+                  onClick={() => {
+                    setCurrentStep(1);
+                    onStepChange?.(1);
+                  }}
                   className="px-8 py-4 text-lg font-medium text-[#6ea058] border-2 border-[#6ea058] rounded-lg hover:bg-[#6ea058] hover:text-white transition-all duration-200 flex items-center"
                 >
-                  <ArrowLeft className="w-5 h-5 mr-2" />
+                  <ArrowLeft className="w-5 h-5 mr-2 text-[#6ea058]" />
                   {getTranslation('bookingFlow.backToPackages', 'Back to Packages')}
                 </button>
                 <button
                   onClick={handleProceedToSummary}
                   className="px-8 py-4 text-lg font-medium text-white bg-[#6ea058] border-2 border-[#6ea058] rounded-lg hover:bg-[#5a8a47] hover:border-[#5a8a47] transition-all duration-200 flex items-center"
                 >
-                  {getTranslation('bookingFlow.sendToWhatsApp', 'Send to WhatsApp')}
+                  {getTranslation('bookingFlow.proceedToSummary', 'Proceed to Summary')}
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </button>
               </div>
             </motion.div>
           )}
 
-          {/* Step 4: Summary & WhatsApp */}
+          {/* Step 4: Summary & Payment */}
           {currentStep === 3 && (
             <motion.div
               key="summary"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="max-w-4xl mx-auto mobile-step-content"
+              className="max-w-6xl mx-auto mobile-step-content"
             >
               <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-primary mb-4">Review Your Booking</h2>
-                <p className="text-xl text-muted">Please review your information before sending to WhatsApp</p>
+                <h2 className="text-3xl font-bold text-primary mb-4">Review & Complete Payment</h2>
+                <p className="text-xl text-muted">Review your booking details and complete your secure payment</p>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -759,39 +774,74 @@ MatMax Yoga. Calle Alcanfores 425, Miraflores. Lima - Peru
                 </Card>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+              {/* Payment Section */}
+              <div className="mt-8">
+                <Card className="card-base">
+                  <CardHeader>
+                    <CardTitle className="text-2xl text-primary flex items-center gap-2">
+                      <CreditCard className="w-6 h-6" />
+                      Complete Payment
+                    </CardTitle>
+                    <p className="text-muted">Secure payment processing</p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      {/* Payment Summary */}
+                      <div className="p-4 bg-primary/10 rounded-lg">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="text-lg font-semibold">{formData.selectedPackage!.packageDefinition.name}</p>
+                            <p className="text-muted">{formData.selectedPackage!.packageDefinition.sessionsCount} sessions</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-2xl font-bold text-primary">
+                              {formData.selectedPackage!.currency.symbol}{formData.selectedPackage!.price}
+                            </p>
+                            <p className="text-sm text-muted">{formData.selectedPackage!.currency.code}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Payment Integration Placeholder */}
+                      <div className="p-8 text-center">
+                        <div className="mb-6">
+                          <CreditCard className="w-16 h-16 text-muted mx-auto mb-4" />
+                          <h3 className="text-xl font-semibold text-primary mb-2">Payment Integration</h3>
+                          <p className="text-muted">
+                            Payment processing will be integrated here. 
+                            The form will be added when a new payment provider is selected.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                          <p className="text-yellow-800 text-sm">
+                            <strong>Note:</strong> Payment integration is currently being updated. 
+                            Please contact support for assistance with payments.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="flex justify-center mt-8">
                 <button
-                  onClick={() => setCurrentStep(2)}
+                  onClick={() => {
+                    setCurrentStep(2);
+                    onStepChange?.(2);
+                  }}
                   className="px-8 py-4 text-lg font-medium text-[#6ea058] border-2 border-[#6ea058] rounded-lg hover:bg-[#6ea058] hover:text-white transition-all duration-200 flex items-center"
                 >
-                  <ArrowLeft className="w-5 h-5 mr-2" />
+                  <ArrowLeft className="w-5 h-5 mr-2 text-[#6ea058]" />
                   {getTranslation('bookingFlow.backToPersonal', 'Back to Personal Info')}
-                </button>
-                
-                <button
-                  onClick={handleWhatsAppBooking}
-                  disabled={sending}
-                  className="px-8 py-4 text-lg font-medium text-white bg-[#6ea058] border-2 border-[#6ea058] rounded-lg hover:bg-[#5a8a47] hover:border-[#5a8a47] transition-all duration-200 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {sending ? (
-                    <>
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      <MessageCircle className="w-5 h-5 mr-2" />
-                      {getTranslation('bookingFlow.sendToWhatsApp', 'Send to WhatsApp')}
-                    </>
-                  )}
                 </button>
               </div>
 
-              {/* Confirmation Note */}
-              <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg text-center">
-                <CheckCircle className="w-6 h-6 text-blue-600 mx-auto mb-2" />
-                <p className="text-blue-800 font-medium">
-                  {getTranslation('bookingFlow.whatsappConfirmation', 'By clicking "Send to WhatsApp", you\'ll be redirected to WhatsApp to complete your booking with our team.')}
+              {/* Security Note */}
+              <div className="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg text-center">
+                <Shield className="w-6 h-6 text-green-600 mx-auto mb-2" />
+                <p className="text-green-800 font-medium">
+                  Your payment is secure and encrypted. We use industry-standard security measures to protect your information.
                 </p>
               </div>
             </motion.div>
