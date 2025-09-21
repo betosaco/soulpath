@@ -1878,21 +1878,6 @@ export function ScheduleBookingFlow({
                 >
                   Cancel
                 </button>
-                <button
-                  onClick={() => {
-                    console.log('🔍 Continue to checkout clicked - closing modal and navigating');
-                    setShowPackageSelection(false);
-                    setSelectedScheduleForPackage(null);
-                    
-                    // Navigate to checkout
-                    if (typeof window !== 'undefined') {
-                      window.location.href = '/checkout';
-                    }
-                  }}
-                  className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
-                >
-                  Continue to Checkout
-                </button>
               </div>
             </div>
           </div>
