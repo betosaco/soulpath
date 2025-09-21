@@ -123,6 +123,55 @@ function UnifiedCheckoutFlowContent({
   const [conflictingBookings, setConflictingBookings] = useState<any[]>([]);
   const [originalConflictingBookings, setOriginalConflictingBookings] = useState<any[]>([]);
   
+  // Function to check for schedule conflicts
+  const checkForScheduleConflicts = () => {
+    const packageItems = cartItems.filter(item => item.type === 'package');
+    const allBookings = packageItems.flatMap(item => 
+      (item.bookingDetails || []).map((booking: any, index: number) => ({
+        ...booking,
+        packageId: item.id,
+        packageName: item.name,
+        bookingIndex: index
+      }))
+    );
+    
+    // Group bookings by date and time
+    const scheduleGroups: { [key: string]: any[] } = {};
+    allBookings.forEach(booking => {
+      const key = `${booking.selectedDate}-${booking.selectedTime}`;
+      if (!scheduleGroups[key]) {
+        scheduleGroups[key] = [];
+      }
+      scheduleGroups[key].push(booking);
+    });
+    
+    // Find conflicts (multiple packages for same schedule)
+    const conflicts = Object.values(scheduleGroups).filter(group => group.length > 1);
+    
+    return {
+      hasConflicts: conflicts.length > 0,
+      conflictingBookings: conflicts.flat()
+    };
+  };
+  
+  // Function to safely proceed to step 3 with conflict validation
+  const proceedToStep3 = () => {
+    // Only check for conflicts if individual booking is selected
+    if (isGroupBooking === false) {
+      const conflictCheck = checkForScheduleConflicts();
+      if (conflictCheck.hasConflicts) {
+        console.log('🚫 CONFLICT DETECTED - preventing checkout progression');
+        setConflictingBookings(conflictCheck.conflictingBookings);
+        setOriginalConflictingBookings(conflictCheck.conflictingBookings);
+        setShowConflictResolution(true);
+        return false; // Prevent progression
+      }
+    }
+    
+    setCurrentStep(3);
+    return true; // Allow progression
+  };
+  
   // Currency configuration
   const currencyCode = 'PEN'; // Default to Peruvian Soles
   
@@ -574,12 +623,14 @@ function UnifiedCheckoutFlowContent({
     }
 
     if (requiresAddress()) {
-      setCurrentStep(3);
+      if (proceedToStep3()) {
       toast.success('Personal information saved! Now enter your shipping address.');
+      }
     } else {
       // Skip address step and go directly to summary
-      setCurrentStep(3);
+      if (proceedToStep3()) {
       toast.success('Personal information saved! Review your order and complete payment.');
+      }
     }
   };
 
@@ -648,6 +699,18 @@ function UnifiedCheckoutFlowContent({
 
 
   const handlePayLater = async () => {
+    // Check for conflicts before processing payment
+    if (isGroupBooking === false) {
+      const conflictCheck = checkForScheduleConflicts();
+      if (conflictCheck.hasConflicts) {
+        console.log('🚫 CONFLICT DETECTED - preventing payment processing');
+        setConflictingBookings(conflictCheck.conflictingBookings);
+        setOriginalConflictingBookings(conflictCheck.conflictingBookings);
+        setShowConflictResolution(true);
+        return;
+      }
+    }
+    
     setIsProcessing(true);
     
     try {
@@ -1068,7 +1131,7 @@ function UnifiedCheckoutFlowContent({
                           }
                         });
                         setGroupMembers(members);
-                        setCurrentStep(3);
+                        proceedToStep3();
                       }}
                       className={`px-8 py-3 text-lg ${
                         isGroupBooking === true 
@@ -1092,7 +1155,7 @@ function UnifiedCheckoutFlowContent({
                           setShowConflictResolution(true);
                         } else {
                           console.log('🔍 No duplicates found, proceeding to personal info');
-                          setCurrentStep(3);
+                          proceedToStep3();
                         }
                       }}
                       className={`px-8 py-3 text-lg ${
@@ -2395,8 +2458,36 @@ function UnifiedCheckoutFlowContent({
                     setOriginalConflictingBookings([]);
                     // Change to group booking
                     setIsGroupBooking(true);
-                    setCurrentStep(3);
-                    toast.success('Changed to group booking! You can now proceed with personal information.');
+                    
+                    // Initialize group members like the normal group booking flow
+                    const packageItems = cartItems.filter(item => item.type === 'package');
+                    const members: Array<{
+                      id: string;
+                      packageId: string;
+                      firstName: string;
+                      lastName: string;
+                      email: string;
+                      phone: string;
+                      countryCode: string;
+                    }> = [];
+                    packageItems.forEach((item, packageIndex) => {
+                      const quantity = item.quantity || 1;
+                      for (let i = 0; i < quantity; i++) {
+                        members.push({
+                          id: `member-${packageIndex}-${i}`,
+                          packageId: item.id,
+                          firstName: '',
+                          lastName: '',
+                          email: '',
+                          phone: '',
+                          countryCode: 'PE' // Default to Peru
+                        });
+                      }
+                    });
+                    setGroupMembers(members);
+                    
+                    proceedToStep3(); // Use the same function as normal group booking flow
+                    toast.success('Changed to group booking! You can now proceed with group member information.');
                   }}
                   className="flex-1 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium"
                 >
@@ -2410,7 +2501,7 @@ function UnifiedCheckoutFlowContent({
                       setConflictingBookings([]);
                       setOriginalConflictingBookings([]);
                       // Continue with individual booking (resolve conflicts manually)
-                      setCurrentStep(3);
+                      proceedToStep3();
                       toast.success('Continuing checkout! You can manage your bookings in the next step.');
                     }}
                     className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
