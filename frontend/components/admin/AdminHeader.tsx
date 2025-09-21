@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Settings, LogOut, User, Bug, Home, ShoppingCart } from 'lucide-react';
+// Icons removed as requested
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -22,9 +22,6 @@ export function AdminHeader({ onClose, isModal = false }: AdminHeaderProps) {
     <header className="admin-header">
       <div className="admin-header__container">
         <div className="admin-header__brand">
-          <div className="admin-header__icon">
-            <Settings size={20} />
-          </div>
           <div className="admin-header__title">
             <h1 className="admin-header__title-text">Admin Dashboard</h1>
             <p className="admin-header__subtitle">Welcome back, {user.email}</p>
@@ -38,7 +35,6 @@ export function AdminHeader({ onClose, isModal = false }: AdminHeaderProps) {
             className="admin-header__button admin-header__button--ecommerce"
             title="Ecommerce Dashboard"
           >
-            <ShoppingCart size={16} />
             Ecommerce
           </button>
 
@@ -48,7 +44,6 @@ export function AdminHeader({ onClose, isModal = false }: AdminHeaderProps) {
             className="admin-header__button admin-header__button--back"
             title="Back to main page"
           >
-            <Home size={16} />
             Main Page
           </button>
 
@@ -59,7 +54,6 @@ export function AdminHeader({ onClose, isModal = false }: AdminHeaderProps) {
                 onClick={openReport}
                 className="admin-header__button admin-header__button--bug"
               >
-                <Bug size={16} />
                 Report Bug
               </button>
             )}
@@ -79,7 +73,6 @@ export function AdminHeader({ onClose, isModal = false }: AdminHeaderProps) {
           {isAdmin && (
             <Link href="/account">
               <button className="admin-header__button admin-header__button--account">
-                <User size={16} />
                 My Account
               </button>
             </Link>
@@ -89,7 +82,6 @@ export function AdminHeader({ onClose, isModal = false }: AdminHeaderProps) {
             onClick={signOut}
             className="admin-header__button admin-header__button--logout"
           >
-            <LogOut size={16} />
             Sign Out
           </button>
         </div>

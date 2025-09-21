@@ -3,6 +3,7 @@
 import React from 'react';
 import { CentralizedHeader } from './CentralizedHeader';
 import { Footer } from './Footer';
+import { CartSidebar } from './CartSidebar';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -32,6 +33,7 @@ export function AppLayout({
       </main>
       
       {showFooter && <Footer />}
+      <CartSidebar />
     </div>
   );
 }

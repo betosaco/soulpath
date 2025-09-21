@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Menu, X, LogIn, Settings, User, Package, Calendar } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import '@/styles/unified-component-styles.css';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useTranslations, useLanguage } from '@/hooks/useTranslations';
+import { CartIcon } from './CartIcon';
 
 interface CentralizedHeaderProps {
   user?: { email: string } | null;
@@ -118,7 +119,6 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                 whileTap={{ scale: 0.95 }}
                 className="hidden sm:flex items-center space-x-1 header-button-account"
               >
-                <Calendar size={14} className="text-gray-600" />
                 <span>{getTranslation('nav.schedule', 'Schedule')}</span>
               </motion.button>
             </Link>
@@ -130,7 +130,6 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                 whileTap={{ scale: 0.95 }}
                 className="hidden sm:flex items-center space-x-1 header-button-account"
               >
-                <Package size={14} className="text-gray-600" />
                 <span>{getTranslation('nav.packages', 'Packages')}</span>
               </motion.button>
             </Link>
@@ -143,7 +142,6 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                 whileTap={{ scale: 0.95 }}
                 className="hidden sm:flex items-center space-x-1 header-button-account"
               >
-                <User size={14} className="text-gray-600" />
                 <span>{getTranslation('common.account', 'Account')}</span>
               </motion.button>
             )}
@@ -156,7 +154,6 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                 whileTap={{ scale: 0.95 }}
                 className="hidden sm:flex items-center space-x-1 header-button-account"
               >
-                <Settings size={14} className="text-gray-600" />
                 <span>{getTranslation('common.dashboard', 'Dashboard')}</span>
               </motion.button>
             ) : (
@@ -166,11 +163,13 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                 whileTap={{ scale: 0.95 }}
                 className="hidden sm:flex items-center space-x-1 header-button-language-inactive"
               >
-                <LogIn size={14} className="text-gray-600" />
                 <span>{getTranslation('common.login', 'Login')}</span>
               </motion.button>
             )}
           </div>
+
+          {/* Cart Icon */}
+          <CartIcon className="hidden sm:block" />
 
           {/* Language Selector - Desktop */}
           <div className="hidden sm:flex items-center space-x-2">
@@ -282,7 +281,6 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                       onClick={() => setIsMenuOpen(false)}
                       className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30 mobile-touch-feedback"
                     >
-                      <Calendar size={18} className="text-gray-800" />
                       <span className="text-base sm:text-lg font-medium">{getTranslation('nav.schedule', 'Schedule')}</span>
                     </motion.button>
                   </Link>
@@ -294,10 +292,14 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                       onClick={() => setIsMenuOpen(false)}
                       className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30 mobile-touch-feedback"
                     >
-                      <Package size={18} className="text-gray-800" />
                       <span className="text-base sm:text-lg font-medium">{getTranslation('nav.packages', 'Packages')}</span>
                     </motion.button>
                   </Link>
+
+                  {/* Cart Icon - Mobile */}
+                  <div className="flex justify-center">
+                    <CartIcon className="sm:hidden" />
+                  </div>
 
                   {user && !isAdmin && (
                     <Link href="/account">
@@ -307,7 +309,6 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                         onClick={() => setIsMenuOpen(false)}
                         className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30"
                       >
-                        <User size={18} className="text-gray-800" />
                         <span className="text-base sm:text-lg font-medium">{getTranslation('common.account', 'Account')}</span>
                       </motion.button>
                     </Link>
@@ -326,7 +327,6 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                     whileTap={{ scale: 0.98 }}
                     className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30"
                   >
-                    <LogIn size={18} className="text-gray-800" />
                     <span className="text-base sm:text-lg font-medium">
                       {user && isAdmin ? getTranslation('common.dashboard', 'Dashboard') : getTranslation('common.login', 'Login')}
                     </span>

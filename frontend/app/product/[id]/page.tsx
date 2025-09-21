@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import { ChevronLeftIcon, ChevronRightIcon, ShoppingCartIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/outline';
 import { AppLayout } from '@/components/AppLayout';
-import { LoadingState } from '@/components/LoadingState';
+import { useCart } from '@/lib/cart-context';
 
 interface Product {
   id: string;
@@ -36,17 +36,34 @@ interface CartItem {
 
 export default function ProductPage() {
   const params = useParams();
-  const productId = params.id as string;
+  const productId = params?.id as string;
+  const { addToCart, cartItems, getTotalItems, setIsCartOpen } = useCart();
+  
+  console.log('🛒 ProductPage rendered, params:', params, 'productId:', productId);
   
   const [product, setProduct] = useState<Product | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Safety check for params
+  if (!params || !productId) {
+    return (
+      <AppLayout className="min-h-screen bg-white">
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-400 mx-auto mb-4"></div>
+            <p className="text-gray-600 text-lg">Loading product...</p>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
 
   // Fetch product from API
   useEffect(() => {
+    if (!productId) return;
+    
     const fetchProduct = async () => {
       try {
         setLoading(true);
@@ -89,27 +106,18 @@ export default function ProductPage() {
     }
   };
 
-  const addToCart = () => {
+  const handleAddToCart = () => {
     if (product && product.status === 'ACTIVE' && product.stock > 0) {
-      const existingItem = cartItems.find(item => item.id === product.id);
-      
-      if (existingItem) {
-        setCartItems(cartItems.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        ));
-      } else {
-        setCartItems([...cartItems, {
+      // Add the item quantity times to the cart
+      for (let i = 0; i < quantity; i++) {
+        addToCart({
           id: product.id,
           name: product.name,
           price: product.price,
-          quantity: quantity,
-          image: product.images[0]
-        }]);
+          image: product.images[0] || '/images/placeholder.jpg',
+          sku: product.sku
+        });
       }
-      
-      setIsCartOpen(true);
       
       // Show success feedback
       const button = document.querySelector('[data-add-to-cart]') as HTMLButtonElement;
@@ -122,29 +130,24 @@ export default function ProductPage() {
           button.classList.remove('bg-green-600');
         }, 2000);
       }
+      
+      // Reset quantity after adding
+      setQuantity(1);
     }
   };
 
-  const removeFromCart = (itemId: string) => {
-    setCartItems(cartItems.filter(item => item.id !== itemId));
-  };
-
-  const updateQuantity = (itemId: string, newQuantity: number) => {
-    if (newQuantity <= 0) {
-      removeFromCart(itemId);
-    } else {
-      setCartItems(cartItems.map(item =>
-        item.id === itemId ? { ...item, quantity: newQuantity } : item
-      ));
-    }
-  };
-
-  const getTotalPrice = () => {
-    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-  };
 
   if (loading) {
-    return <LoadingState message="Loading product..." />;
+    return (
+      <AppLayout className="min-h-screen bg-white">
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-400 mx-auto mb-4"></div>
+            <p className="text-gray-600 text-lg">Loading product...</p>
+          </div>
+        </div>
+      </AppLayout>
+    );
   }
 
   if (!product) {
@@ -162,97 +165,6 @@ export default function ProductPage() {
 
   return (
     <AppLayout className="min-h-screen bg-gray-50">
-      {/* Shopping Cart Sidebar */}
-      <div className={`fixed inset-y-0 right-0 z-50 w-96 bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${
-        isCartOpen ? 'translate-x-0' : 'translate-x-full'
-      }`}>
-        <div className="flex flex-col h-full">
-          {/* Cart Header */}
-          <div className="flex items-center justify-between p-6 border-b">
-            <h2 className="text-xl font-semibold">Shopping Cart</h2>
-            <button
-              onClick={() => setIsCartOpen(false)}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              ×
-            </button>
-          </div>
-
-          {/* Cart Items */}
-          <div className="flex-1 overflow-y-auto p-6">
-            {cartItems.length === 0 ? (
-              <p className="text-gray-500 text-center">Your cart is empty</p>
-            ) : (
-              <div className="space-y-4">
-                {cartItems.map((item) => (
-                  <div key={item.id} className="flex items-center space-x-4 p-4 border rounded-lg">
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      width={60}
-                      height={60}
-                      className="rounded-md object-cover"
-                    />
-                    <div className="flex-1">
-                      <h3 className="font-medium text-sm">{item.name}</h3>
-                      <p className="text-gray-600 text-sm">S/. {item.price}</p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="p-1 rounded-full hover:bg-gray-100"
-                      >
-                        <MinusIcon className="h-4 w-4" />
-                      </button>
-                      <span className="w-8 text-center">{item.quantity}</span>
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="p-1 rounded-full hover:bg-gray-100"
-                      >
-                        <PlusIcon className="h-4 w-4" />
-                      </button>
-                    </div>
-                    <button
-                      onClick={() => removeFromCart(item.id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Cart Footer */}
-          {cartItems.length > 0 && (
-            <div className="border-t p-6">
-              <div className="flex justify-between text-lg font-semibold mb-4">
-                <span>Total:</span>
-                <span>S/. {getTotalPrice().toFixed(2)}</span>
-              </div>
-              <button
-                onClick={() => {
-                  // Save cart to localStorage and redirect to checkout
-                  localStorage.setItem('cart', JSON.stringify(cartItems));
-                  window.location.href = '/checkout';
-                }}
-                className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors"
-              >
-                Proceed to Checkout
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Cart Overlay */}
-      {isCartOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={() => setIsCartOpen(false)}
-        />
-      )}
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -407,7 +319,7 @@ export default function ProductPage() {
 
               <div className="flex space-x-4">
                 <button
-                  onClick={addToCart}
+                  onClick={handleAddToCart}
                   data-add-to-cart
                   disabled={product.status !== 'ACTIVE' || product.stock <= 0}
                   className="flex-1 bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center space-x-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
@@ -426,7 +338,7 @@ export default function ProductPage() {
                   onClick={() => setIsCartOpen(true)}
                   className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                  View Cart ({cartItems.length})
+                  View Cart ({getTotalItems()})
                 </button>
               </div>
             </div>

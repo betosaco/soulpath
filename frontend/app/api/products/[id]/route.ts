@@ -30,6 +30,7 @@ export async function GET(
         category: true,
         tags: true,
         images: true,
+        status: true,
         isFeatured: true,
         isPopular: true,
         seoTitle: true,
