@@ -1580,10 +1580,27 @@ function UnifiedCheckoutFlowContent({
                                 );
                                 setGroupMembers(updatedMembers);
                               }}
-                              placeholder="Enter your email address"
-                              className="h-14 text-lg mobile-touch-target"
+                              onBlur={async () => {
+                                if (member.email) {
+                                  const error = await validateEmailWithMessage(member.email);
+                                  const updatedMembers = groupMembers.map(m => 
+                                    m.id === member.id ? { ...m, emailError: error } : m
+                                  );
+                                  setGroupMembers(updatedMembers);
+                                }
+                              }}
+                              className={`h-14 px-4 text-lg border-2 text-black placeholder-gray-400 focus:ring-2 focus:ring-primary/20 rounded-lg transition-all duration-200 mobile-touch-target ${
+                                member.emailError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-primary'
+                              }`}
+                              placeholder="your.email@example.com"
                               required
                             />
+                            {member.emailError && (
+                              <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                                <AlertCircle className="w-4 h-4" />
+                                {member.emailError}
+                              </p>
+                            )}
                           </div>
                           
                           <div className="md:col-span-2">

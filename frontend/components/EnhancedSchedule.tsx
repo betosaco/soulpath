@@ -154,7 +154,6 @@ export function EnhancedSchedule({
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedTeacher, setSelectedTeacher] = useState<string>('all');
   const [selectedService, setSelectedService] = useState<string>('all');
-  const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
   const [searchTerm, setSearchTerm] = useState('');
 
   // Fetch schedule slots
@@ -395,24 +394,10 @@ export function EnhancedSchedule({
           
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setViewMode('week')}
-              className={`px-6 py-3 text-lg font-medium border-2 rounded-lg transition-all duration-200 ${
-                viewMode === 'week' 
-                  ? 'bg-primary text-white border-primary' 
-                  : 'text-primary border-primary hover:bg-orange-500 hover:text-white hover:border-orange-500'
-              }`}
+              onClick={() => window.location.href = '/checkout'}
+              className="px-6 py-3 text-lg font-medium rounded-lg transition-all duration-200 bg-[#6ea058] text-white hover:bg-[#5a8a47] hover:scale-105 active:scale-95"
             >
-              Week View
-            </button>
-            <button
-              onClick={() => setViewMode('month')}
-              className={`px-6 py-3 text-lg font-medium border-2 rounded-lg transition-all duration-200 ${
-                viewMode === 'month' 
-                  ? 'bg-primary text-white border-primary' 
-                  : 'text-primary border-primary hover:bg-orange-500 hover:text-white hover:border-orange-500'
-              }`}
-            >
-              Month View
+              Proceed to Checkout
             </button>
           </div>
         </div>
