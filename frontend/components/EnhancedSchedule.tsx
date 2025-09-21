@@ -54,6 +54,7 @@ interface ScheduleSlot {
   serviceType: ServiceType;
   venue: Venue;
   dayOfWeek: string;
+  conflictReason?: string;
 }
 
 interface EnhancedScheduleProps {
@@ -110,8 +111,23 @@ export function EnhancedSchedule({
     }
   };
 
-  // Use the onBookSlot prop if provided, otherwise use default behavior
-  const handleSlotClick = onBookSlot || handleBookSlot;
+  // Enhanced slot click handler that clears conflicts
+  const handleSlotClickWithConflictClear = (slot: ScheduleSlot) => {
+    // Clear conflicting schedule from sessionStorage when user selects a new slot
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('conflictingSchedule');
+    }
+    
+    // Use the onBookSlot prop if provided, otherwise use default behavior
+    if (onBookSlot) {
+      onBookSlot(slot);
+    } else {
+      handleBookSlot(slot);
+    }
+  };
+  
+  // Use the enhanced handler
+  const handleSlotClick = handleSlotClickWithConflictClear;
   
   // Check if a slot is already booked
   const isSlotBooked = (slot: ScheduleSlot) => {
@@ -185,11 +201,34 @@ export function EnhancedSchedule({
         if (data.message && data.message.includes('mock data')) {
           console.log('📝 Using mock data - database unavailable');
         }
-        setSlots(data.slots);
+        // Check for conflicting schedules and mark them as unavailable
+        const processedSlots = data.slots.map((slot: ScheduleSlot) => {
+          // Check if this slot conflicts with a schedule that needs to be changed
+          if (typeof window !== 'undefined') {
+            const conflictingSchedule = sessionStorage.getItem('conflictingSchedule');
+            if (conflictingSchedule) {
+              try {
+                const conflict = JSON.parse(conflictingSchedule);
+                if (slot.date === conflict.date && slot.time === conflict.time) {
+                  return {
+                    ...slot,
+                    isAvailable: false,
+                    conflictReason: 'Schedule conflict - please choose a different time'
+                  };
+                }
+              } catch (error) {
+                console.error('Error parsing conflicting schedule:', error);
+              }
+            }
+          }
+          return slot;
+        });
+        
+        setSlots(processedSlots);
         // Only call onSlotsChange if the slots actually changed
-        if (JSON.stringify(data.slots) !== JSON.stringify(previousSlotsRef.current)) {
-          previousSlotsRef.current = data.slots;
-          onSlotsChange?.(data.slots);
+        if (JSON.stringify(processedSlots) !== JSON.stringify(previousSlotsRef.current)) {
+          previousSlotsRef.current = processedSlots;
+          onSlotsChange?.(processedSlots);
         }
       } else {
         console.error('❌ API error:', data.error);
@@ -571,9 +610,10 @@ export function EnhancedSchedule({
                             <button
                               disabled
                               className="w-full px-4 py-2 bg-gray-100 text-gray-500 rounded-lg cursor-not-allowed flex items-center justify-center gap-2"
+                              title={slot.conflictReason || 'Not Available'}
                             >
                               <AlertCircle className="h-4 w-4" />
-                              Not Available
+                              {slot.conflictReason ? 'Schedule Conflict' : 'Not Available'}
                             </button>
                           )}
                         </div>

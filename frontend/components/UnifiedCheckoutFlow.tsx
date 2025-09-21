@@ -118,6 +118,11 @@ function UnifiedCheckoutFlowContent({
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [isCartLoading, setIsCartLoading] = useState(true);
   
+  // State for conflict resolution
+  const [showConflictResolution, setShowConflictResolution] = useState(false);
+  const [conflictingBookings, setConflictingBookings] = useState<any[]>([]);
+  const [originalConflictingBookings, setOriginalConflictingBookings] = useState<any[]>([]);
+  
   // Currency configuration
   const currencyCode = 'PEN'; // Default to Peruvian Soles
   
@@ -212,6 +217,30 @@ function UnifiedCheckoutFlowContent({
     }
   }, []); // Only run once on mount, not on every cart change
 
+  // Handle URL step parameter for returning from schedule selection
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const stepParam = urlParams.get('step');
+      
+      if (stepParam) {
+        const step = parseInt(stepParam);
+        if (!isNaN(step) && step >= 0 && step <= 4) {
+          console.log('🔍 Setting step from URL parameter:', step);
+          
+          // If user has already decided on group booking and we're trying to go to step 2 (group booking),
+          // skip to step 3 (personal info) instead
+          if (step === 2 && isGroupBooking !== null) {
+            console.log('🔍 Skipping group booking step, going to personal info (step 3)');
+            setCurrentStep(3);
+          } else {
+            setCurrentStep(step);
+          }
+        }
+      }
+    }
+  }, [isGroupBooking]);
+
   // Handle cart loading state
   useEffect(() => {
     // Set cart loading to false after a short delay to ensure cart is loaded
@@ -221,6 +250,95 @@ function UnifiedCheckoutFlowContent({
     
     return () => clearTimeout(timer);
   }, []);
+
+  // Check if conflicts are resolved and proceed to next step
+  React.useEffect(() => {
+    if (conflictingBookings.length === 0 && showConflictResolution) {
+      // All conflicts resolved, proceed to personal info step
+      setShowConflictResolution(false);
+      setCurrentStep(2);
+      toast.success('All conflicts resolved! Proceeding to personal information.');
+    }
+  }, [conflictingBookings, showConflictResolution]);
+
+  // Monitor cart changes and update conflicting bookings when schedules are removed
+  React.useEffect(() => {
+    if (showConflictResolution && conflictingBookings.length > 0) {
+      // Check if any of the conflicting bookings still exist in the cart
+      const updatedConflictingBookings = conflictingBookings.filter(booking => {
+        const cartItem = cartItems.find(item => item.id === booking.packageId);
+        if (!cartItem) return false; // Package was removed entirely
+        
+        if (booking.bookingIndex !== undefined) {
+          // Check if the specific booking still exists
+          const bookings = Array.isArray(cartItem.bookingDetails) ? cartItem.bookingDetails : [];
+          return bookings[booking.bookingIndex] && 
+                 bookings[booking.bookingIndex].selectedDate === booking.selectedDate &&
+                 bookings[booking.bookingIndex].selectedTime === booking.selectedTime;
+        }
+        
+        return true; // Keep if we can't determine the specific booking
+      });
+      
+      // Update conflicting bookings if any were removed
+      if (updatedConflictingBookings.length !== conflictingBookings.length) {
+        setConflictingBookings(updatedConflictingBookings);
+        console.log('🔄 Updated conflicting bookings after cart change:', updatedConflictingBookings.length);
+      }
+    }
+  }, [cartItems, showConflictResolution, conflictingBookings]);
+
+  // Function to check for duplicate schedules across packages
+  const checkForExistingDuplicateSchedules = useCallback(() => {
+    try {
+      const packageItems = cartItems.filter(item => item.type === 'package');
+      if (packageItems.length <= 1) {
+        return { hasDuplicates: false, conflictingBookings: [] };
+      }
+
+      // Collect all bookings from all packages
+      const allBookings: any[] = [];
+      packageItems.forEach((packageItem: any) => {
+        if (packageItem.bookingDetails && Array.isArray(packageItem.bookingDetails)) {
+          packageItem.bookingDetails.forEach((booking: any, bookingIndex: number) => {
+            const bookingWithPackage = {
+              ...booking,
+              packageId: packageItem.id,
+              packageName: packageItem.name,
+              packageType: packageItem.packageType,
+              bookingIndex: bookingIndex
+            };
+            allBookings.push(bookingWithPackage);
+          });
+        }
+      });
+
+      // Group bookings by date and time
+      const scheduleGroups: { [key: string]: any[] } = {};
+      allBookings.forEach(booking => {
+        const key = `${booking.selectedDate}-${booking.selectedTime}`;
+        if (!scheduleGroups[key]) {
+          scheduleGroups[key] = [];
+        }
+        scheduleGroups[key].push(booking);
+      });
+
+      // Find groups with more than one booking (duplicates)
+      const duplicateGroups = Object.values(scheduleGroups).filter(group => group.length > 1);
+      
+      if (duplicateGroups.length > 0) {
+        return {
+          hasDuplicates: true,
+          conflictingBookings: duplicateGroups.flat()
+        };
+      }
+      
+      return { hasDuplicates: false, conflictingBookings: [] };
+    } catch (error) {
+      console.error('Error checking for duplicate schedules:', error);
+      return { hasDuplicates: false, conflictingBookings: [] };
+    }
+  }, [cartItems]);
 
   // Update cart items with booking details when schedule data is available
   useEffect(() => {
@@ -964,7 +1082,18 @@ function UnifiedCheckoutFlowContent({
                       onClick={() => {
                         setIsGroupBooking(false);
                         setGroupMembers([]);
-                        setCurrentStep(3);
+                        
+                        // Check for schedule conflicts when choosing individual booking
+                        const duplicateCheck = checkForExistingDuplicateSchedules();
+                        if (duplicateCheck.hasDuplicates) {
+                          console.log('🔍 Duplicates found in checkout, showing conflict resolution UI');
+                          setConflictingBookings(duplicateCheck.conflictingBookings);
+                          setOriginalConflictingBookings(duplicateCheck.conflictingBookings);
+                          setShowConflictResolution(true);
+                        } else {
+                          console.log('🔍 No duplicates found, proceeding to personal info');
+                          setCurrentStep(3);
+                        }
                       }}
                       className={`px-8 py-3 text-lg ${
                         isGroupBooking === false 
@@ -2153,6 +2282,147 @@ function UnifiedCheckoutFlowContent({
           )}
         </AnimatePresence>
       </div>
+
+      {/* Conflict Resolution Modal */}
+      {showConflictResolution && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Schedule Conflict Detected
+              </h3>
+              <p className="text-gray-600 mb-6">
+                You have multiple packages booked for the same schedule. For individual bookings, 
+                each package must have a different schedule. Please choose an action for each conflicting booking:
+              </p>
+              
+              <div className="space-y-4">
+                {conflictingBookings.map((booking, index) => (
+                  <div key={index} className="border border-red-200 rounded-lg p-4 bg-red-50">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900">{booking.packageName}</h4>
+                        <p className="text-sm text-gray-600">
+                          {booking.selectedDate} at {booking.selectedTime}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {booking.serviceType} • {booking.teacher} • {booking.venue}
+                        </p>
+                      </div>
+                      <div className="flex gap-2 ml-4">
+                        <button
+                          onClick={() => {
+                            // Close modal and navigate to schedule page to edit this specific booking
+                            console.log('🔧 CONFLICT RESOLUTION - Change Schedule clicked');
+                            console.log('🔧 CONFLICT RESOLUTION - booking object:', booking);
+                            console.log('🔧 CONFLICT RESOLUTION - booking.packageId:', booking.packageId);
+                            console.log('🔧 CONFLICT RESOLUTION - booking.bookingIndex:', booking.bookingIndex);
+                            
+                            setShowConflictResolution(false);
+                            setConflictingBookings([]);
+                            
+                            if (typeof window !== 'undefined') {
+                              console.log('🔧 CONFLICT RESOLUTION - Setting session storage...');
+                              sessionStorage.setItem('isEditingSchedule', 'true');
+                              sessionStorage.setItem('editingPackageId', booking.packageId);
+                              sessionStorage.setItem('editingBookingIndex', booking.bookingIndex?.toString() || '0');
+                              // Store conflicting schedule to mark as unavailable
+                              sessionStorage.setItem('conflictingSchedule', JSON.stringify({
+                                date: booking.selectedDate,
+                                time: booking.selectedTime,
+                                reason: 'conflict'
+                              }));
+                              // Set flag to return to checkout after schedule selection
+                              sessionStorage.setItem('returnToCheckout', 'true');
+                              sessionStorage.setItem('checkoutStep', '3'); // User info step
+                              
+                              console.log('🔧 CONFLICT RESOLUTION - Session storage set, redirecting...');
+                              console.log('🔧 CONFLICT RESOLUTION - Final session storage check:');
+                              console.log('  isEditingSchedule:', sessionStorage.getItem('isEditingSchedule'));
+                              console.log('  editingPackageId:', sessionStorage.getItem('editingPackageId'));
+                              console.log('  editingBookingIndex:', sessionStorage.getItem('editingBookingIndex'));
+                              console.log('  returnToCheckout:', sessionStorage.getItem('returnToCheckout'));
+                              console.log('  checkoutStep:', sessionStorage.getItem('checkoutStep'));
+                              
+                              window.location.href = '/schedule';
+                            }
+                          }}
+                          className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+                        >
+                          Change Schedule
+                        </button>
+                        <button
+                          onClick={() => {
+                            // Remove this booking
+                            if (cartContext && booking.packageId) {
+                              if (booking.bookingIndex !== undefined) {
+                                cartContext.removeBookingFromPackage(booking.packageId, booking.bookingIndex);
+                              } else {
+                                cartContext.removeBookingDetails(booking.packageId);
+                              }
+                              
+                              // Remove from conflicting bookings list
+                              const newConflicts = conflictingBookings.filter((_, i) => i !== index);
+                              setConflictingBookings(newConflicts);
+                              
+                              // If no more conflicts, close modal and proceed to user info step
+                              if (newConflicts.length === 0) {
+                                setShowConflictResolution(false);
+                                setConflictingBookings([]);
+                                setOriginalConflictingBookings([]);
+                                setCurrentStep(3); // Go to user info step
+                                toast.success('All conflicts resolved! Proceeding to user information.');
+                              } else {
+                                toast.success('Booking removed successfully');
+                              }
+                            }
+                          }}
+                          className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => {
+                    setShowConflictResolution(false);
+                    setConflictingBookings([]);
+                    setOriginalConflictingBookings([]);
+                    // Change to group booking
+                    setIsGroupBooking(true);
+                    setCurrentStep(3);
+                    toast.success('Changed to group booking! You can now proceed with personal information.');
+                  }}
+                  className="flex-1 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium"
+                >
+                  Change to Group Booking
+                </button>
+                {/* Show Continue Checkout button only if items have been removed */}
+                {conflictingBookings.length < originalConflictingBookings.length && (
+                  <button
+                    onClick={() => {
+                      setShowConflictResolution(false);
+                      setConflictingBookings([]);
+                      setOriginalConflictingBookings([]);
+                      // Continue with individual booking (resolve conflicts manually)
+                      setCurrentStep(3);
+                      toast.success('Continuing checkout! You can manage your bookings in the next step.');
+                    }}
+                    className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                  >
+                    Continue Checkout
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </AppLayout>
   );
 }

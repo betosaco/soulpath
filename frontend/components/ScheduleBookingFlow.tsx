@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Calendar,
@@ -270,6 +270,31 @@ export function ScheduleBookingFlow({
   const [isEditingSchedule, setIsEditingSchedule] = useState(false);
   const [editingPackageId, setEditingPackageId] = useState<string | null>(null);
   
+  // Initialize editing mode from session storage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const sessionEditingSchedule = sessionStorage.getItem('isEditingSchedule');
+      const sessionEditingPackageId = sessionStorage.getItem('editingPackageId');
+      
+      console.log('🚀 INITIALIZING EDITING MODE from session storage:', {
+        sessionEditingSchedule,
+        sessionEditingPackageId
+      });
+      
+      // Check for valid values (not "null" string)
+      if (sessionEditingSchedule === 'true' && sessionEditingPackageId && sessionEditingPackageId !== 'null') {
+        console.log('🎯 SETTING EDITING MODE from session storage');
+        setIsEditingSchedule(true);
+        setEditingPackageId(sessionEditingPackageId);
+      } else {
+        console.log('❌ NOT SETTING EDITING MODE - invalid session storage values');
+        console.log('  sessionEditingSchedule === "true":', sessionEditingSchedule === 'true');
+        console.log('  sessionEditingPackageId exists:', !!sessionEditingPackageId);
+        console.log('  sessionEditingPackageId !== "null":', sessionEditingPackageId !== 'null');
+      }
+    }
+  }, []);
+  
   // State for package selection when multiple packages exist
   const [showPackageSelection, setShowPackageSelection] = useState(false);
   const [selectedScheduleForPackage, setSelectedScheduleForPackage] = useState<ScheduleSlot | null>(null);
@@ -368,9 +393,7 @@ export function ScheduleBookingFlow({
         console.log('✅ Setting editing mode for package:', packageId);
         setIsEditingSchedule(true);
         setEditingPackageId(packageId);
-        // Clear the editing flags
-        sessionStorage.removeItem('isEditingSchedule');
-        sessionStorage.removeItem('editingPackageId');
+        // Don't clear session storage here - we need it for editing mode detection
       } else if (isAddingMore) {
         // Check if there are multiple packages
         const packageItems = cartContext?.cartItems?.filter(item => item.type === 'package') || [];
@@ -547,6 +570,145 @@ export function ScheduleBookingFlow({
     console.log('🎯 All cart items:', JSON.stringify(cartContext?.cartItems, null, 2));
     
     setFormData(prev => ({ ...prev, selectedSchedule: slot }));
+    
+    // FIRST: Check if we're in editing mode (returning from conflict resolution)
+    // Check both component state and session storage for robustness
+    const sessionEditingSchedule = sessionStorage.getItem('isEditingSchedule');
+    const sessionEditingPackageId = sessionStorage.getItem('editingPackageId');
+    
+    // Handle "null" string case from session storage
+    const validSessionEditingPackageId = sessionEditingPackageId && sessionEditingPackageId !== 'null' ? sessionEditingPackageId : null;
+    const validSessionEditingSchedule = sessionEditingSchedule === 'true';
+    
+    const isInEditingMode = (editingPackageId || validSessionEditingPackageId) && (isEditingSchedule || validSessionEditingSchedule);
+    
+    console.log('🔍 EDITING MODE CHECK (FIRST):');
+    console.log('  Component state - editingPackageId:', editingPackageId, 'isEditingSchedule:', isEditingSchedule);
+    console.log('  Session storage - editingPackageId:', sessionEditingPackageId, 'isEditingSchedule:', sessionEditingSchedule);
+    console.log('  Valid session values - editingPackageId:', validSessionEditingPackageId, 'isEditingSchedule:', validSessionEditingSchedule);
+    console.log('  Final decision - isInEditingMode:', isInEditingMode);
+    console.log('  Raw session storage values:');
+    console.log('    isEditingSchedule:', `"${sessionStorage.getItem('isEditingSchedule')}"`);
+    console.log('    editingPackageId:', `"${sessionStorage.getItem('editingPackageId')}"`);
+    console.log('    editingBookingIndex:', `"${sessionStorage.getItem('editingBookingIndex')}"`);
+    console.log('    returnToCheckout:', `"${sessionStorage.getItem('returnToCheckout')}"`);
+    console.log('    checkoutStep:', `"${sessionStorage.getItem('checkoutStep')}"`);
+    
+    // If we're in editing mode, handle it immediately and return
+    if (isInEditingMode) {
+      const packageIdToUse = editingPackageId || validSessionEditingPackageId;
+      console.log('🎯 EDITING MODE DETECTED - using packageId:', packageIdToUse);
+      
+      if (!packageIdToUse) {
+        console.log('❌ ERROR: packageIdToUse is null, cannot proceed with editing');
+        return;
+      }
+      
+      const cartItems = cartContext?.cartItems || [];
+      const currentItem = cartItems.find(item => item.id === packageIdToUse);
+      console.log('🎯 Found currentItem:', currentItem);
+      
+      if (currentItem && cartContext) {
+        const newBookingDetails = {
+          selectedDate: slot.date,
+          selectedTime: slot.time,
+          teacher: slot.teacher?.name,
+          dayOfWeek: slot.dayOfWeek,
+          serviceType: slot.serviceType?.name,
+          venue: slot.venue?.name,
+          scheduleSlotId: slot.id
+        };
+
+        // Check for duplicate booking within the same package only (exclude current booking being edited)
+        const currentPackageBookings = (currentItem.bookingDetails || []).filter((_, index) => {
+          const editingIndex = sessionStorage.getItem('editingBookingIndex');
+          return editingIndex ? index !== parseInt(editingIndex) : true;
+        });
+        
+        const isDuplicate = currentPackageBookings.some(booking => 
+          booking.selectedDate === newBookingDetails.selectedDate && 
+          booking.selectedTime === newBookingDetails.selectedTime
+        );
+        
+        if (isDuplicate) {
+          toast.error('This package already has a booking for this time slot. Please select a different slot.');
+          return;
+        }
+
+        // Check if this is updating an existing booking or adding a new one
+        const editingIndex = sessionStorage.getItem('editingBookingIndex');
+        if (editingIndex !== null) {
+          const index = parseInt(editingIndex);
+          
+          // Remove the old booking and add the new one
+          cartContext.removeBookingFromPackage(packageIdToUse, index);
+          cartContext.addBookingToPackage(packageIdToUse, newBookingDetails);
+          toast.success('Schedule updated successfully!');
+          
+          // Clear editing flags
+          sessionStorage.removeItem('isEditingSchedule');
+          sessionStorage.removeItem('editingPackageId');
+          sessionStorage.removeItem('editingBookingIndex');
+          sessionStorage.removeItem('conflictingSchedule');
+          
+          // Check if user should return to checkout
+          const returnToCheckout = sessionStorage.getItem('returnToCheckout');
+          console.log('🔧 EDIT MODE - returnToCheckout:', returnToCheckout);
+          
+          if (returnToCheckout === 'true') {
+            const checkoutStep = sessionStorage.getItem('checkoutStep');
+            console.log('🔧 EDIT MODE - checkoutStep:', checkoutStep);
+            const step = checkoutStep ? parseInt(checkoutStep as string) : 3;
+            console.log('🔧 EDIT MODE - redirecting to step:', step);
+            
+            // Clear the return flags
+            sessionStorage.removeItem('returnToCheckout');
+            sessionStorage.removeItem('checkoutStep');
+            
+            // Redirect to checkout with the correct step
+            window.location.href = `/checkout?step=${step}`;
+            return;
+          }
+        } else {
+          // This is adding a new booking to an existing package
+          const currentBookings = currentItem.bookingDetails || [];
+          
+          // Check if this package has already booked this specific slot
+          const hasAlreadyBookedThisSlot = currentBookings.some(booking => 
+            booking.selectedDate === newBookingDetails.selectedDate && 
+            booking.selectedTime === newBookingDetails.selectedTime
+          );
+
+          if (hasAlreadyBookedThisSlot) {
+            toast.error('This package has already booked this time slot. Please select a different slot.');
+            return;
+          }
+
+          // Add booking to the single package
+          cartContext.addBookingToPackage(packageIdToUse, newBookingDetails);
+          cartContext.setIsCartOpen(true);
+          toast.success('Class added to your package!');
+          
+          // Check if user should return to checkout
+          const returnToCheckout = sessionStorage.getItem('returnToCheckout');
+          if (returnToCheckout === 'true') {
+            const checkoutStep = sessionStorage.getItem('checkoutStep');
+            const step = checkoutStep ? parseInt(checkoutStep as string) : 3;
+            
+            // Clear the return flags
+            sessionStorage.removeItem('returnToCheckout');
+            sessionStorage.removeItem('checkoutStep');
+            
+            // Redirect to checkout with the correct step
+            window.location.href = `/checkout?step=${step}`;
+            return;
+          }
+        }
+      }
+      
+      // IMPORTANT: Return early to prevent normal flow and modal
+      return;
+    }
     
     // Get all package items
     const allPackageItems = cartContext?.cartItems?.filter(item => item.type === 'package') || [];
