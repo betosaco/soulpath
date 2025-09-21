@@ -160,6 +160,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         if (item.id === packageId && item.type === 'package') {
           // Ensure currentBookings is always an array
           const currentBookings = Array.isArray(item.bookingDetails) ? item.bookingDetails : [];
+          
+          // Check if package has reached its session limit
+          const packageSessions = item.sessions || 1; // Default to 1 if not specified
+          if (currentBookings.length >= packageSessions) {
+            console.warn(`Package ${item.name} has reached its session limit (${packageSessions}). Cannot add more bookings.`);
+            return item; // Return unchanged item if limit reached
+          }
+          
           return {
             ...item,
             bookingDetails: [...currentBookings, bookingDetails]

@@ -1808,26 +1808,139 @@ function UnifiedCheckoutFlowContent({
                         required
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="email">Email *</Label>
+                    <div className="md:col-span-2">
+                      <Label htmlFor="email" className="text-black text-lg font-medium mb-2 block">Email Address *</Label>
                       <Input
                         id="email"
                         type="email"
                         value={formData.clientEmail}
                         onChange={(e) => setFormData(prev => ({ ...prev, clientEmail: e.target.value }))}
-                        placeholder="Enter your email address"
+                        onBlur={handleEmailBlur}
+                        className={`h-14 px-4 text-lg border-2 text-black placeholder-gray-400 focus:ring-2 focus:ring-primary/20 rounded-lg transition-all duration-200 mobile-touch-target ${
+                          emailError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-primary'
+                        }`}
+                        placeholder="your.email@example.com"
                         required
                       />
+                      {emailError && (
+                        <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                          <AlertCircle className="w-4 h-4" />
+                          {emailError}
+                        </p>
+                      )}
                     </div>
-                    <div>
-                      <Label htmlFor="phone">Phone *</Label>
-                      <Input
-                        id="phone"
-                        value={formData.clientPhone}
-                        onChange={(e) => setFormData(prev => ({ ...prev, clientPhone: e.target.value }))}
-                        placeholder="Enter your phone number"
-                        required
-                      />
+                    <div className="md:col-span-2">
+                      <Label htmlFor="phone" className="text-black text-lg font-medium mb-2 block">Phone Number *</Label>
+                      <div className="flex gap-2 mobile-input-group">
+                        {/* Country Code Dropdown */}
+                        <div className="relative country-dropdown mobile-country-dropdown">
+                          <button
+                            type="button"
+                            onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
+                            className="h-14 w-36 px-3 flex items-center space-x-2 border-2 border-gray-300 bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent mobile-touch-target rounded-lg transition-all duration-200 hover:scale-105 active:scale-95"
+                          >
+                            <span className="text-lg">{selectedCountry.flag}</span>
+                            <span className="text-sm text-gray-700 font-medium">{selectedCountry.code}</span>
+                            <svg className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isCountryDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </button>
+                          
+                          {/* Right Side Mobile Menu */}
+                          {isCountryDropdownOpen && (
+                            <>
+                              {/* Minimal Backdrop - No Page Movement */}
+                              <div 
+                                className="fixed inset-0 bg-black bg-opacity-20 z-40 animate-[fadeIn_0.2s_ease-out_forwards]"
+                                onClick={() => {
+                                  setIsCountryDropdownOpen(false);
+                                  setCountrySearchTerm('');
+                                }}
+                              />
+                              
+                              {/* Side Menu - Smooth Slide */}
+                              <div className="fixed top-0 right-0 h-full w-96 bg-white shadow-2xl z-50 transform translate-x-full animate-[slideInRight_0.3s_cubic-bezier(0.25,0.46,0.45,0.94)_forwards] flex flex-col">
+                                {/* Header */}
+                                <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+                                  <h3 className="text-lg font-semibold text-gray-900">Select Country</h3>
+                                  <button
+                                    onClick={() => {
+                                      setIsCountryDropdownOpen(false);
+                                      setCountrySearchTerm('');
+                                    }}
+                                    className="p-2 hover:bg-gray-200 rounded-full transition-colors duration-150"
+                                  >
+                                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                  </button>
+                                </div>
+                                
+                                {/* Search Bar */}
+                                <div className="p-4 border-b border-gray-200 flex-shrink-0">
+                                  <div className="relative">
+                                    <input
+                                      type="text"
+                                      placeholder="Search countries..."
+                                      value={countrySearchTerm}
+                                      onChange={(e) => setCountrySearchTerm(e.target.value)}
+                                      className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    />
+                                    <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                  </div>
+                                </div>
+                                
+                                {/* Country List */}
+                                <div className="flex-1 overflow-y-auto">
+                                  <div className="p-2">
+                                    {countries
+                                      .filter(country => 
+                                        country.name.toLowerCase().includes(countrySearchTerm.toLowerCase()) ||
+                                        country.code.includes(countrySearchTerm)
+                                      )
+                                      .map((country) => (
+                                        <button
+                                          key={`${country.code}-${country.name}-${country.country}`}
+                                          type="button"
+                                          onClick={() => {
+                                            setFormData(prev => ({ ...prev, countryCode: country.code }));
+                                            setIsCountryDropdownOpen(false);
+                                            setCountrySearchTerm('');
+                                          }}
+                                          className={`w-full flex items-center space-x-3 px-4 py-3 text-left hover:bg-gray-100 rounded-lg transition-colors duration-150 ${
+                                            formData.countryCode === country.code ? 'bg-primary/10 text-primary' : 'text-gray-700'
+                                          }`}
+                                        >
+                                          <span className="text-xl">{country.flag}</span>
+                                          <div className="flex-1">
+                                            <div className="font-medium">{country.name}</div>
+                                            <div className="text-sm text-gray-500">{country.code}</div>
+                                          </div>
+                                          {formData.countryCode === country.code && (
+                                            <svg className="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                            </svg>
+                                          )}
+                                        </button>
+                                      ))}
+                                  </div>
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                        
+                        <Input
+                          id="phone"
+                          value={formData.clientPhone}
+                          onChange={(e) => setFormData(prev => ({ ...prev, clientPhone: e.target.value }))}
+                          placeholder="Enter phone number"
+                          className="flex-1 h-14 text-lg mobile-touch-target"
+                          required
+                        />
+                      </div>
                     </div>
                   </div>
                   
@@ -1835,8 +1948,8 @@ function UnifiedCheckoutFlowContent({
                     <Button
                       onClick={() => {
                         // Validate form
-                        if (!formData.clientName || !formData.clientEmail || !formData.clientPhone) {
-                          toast.error('Please fill in all required fields.');
+                        if (!formData.clientName || !formData.clientEmail || !formData.clientPhone || !formData.countryCode || emailError) {
+                          toast.error('Please fill in all required fields and ensure email is valid.');
                           return;
                         }
                         

@@ -1039,13 +1039,13 @@ export function ScheduleBookingFlow({
         scheduleSlotId: slot.id
       };
 
-      // Check if we haven't reached the package quantity limit
+      // Check if we haven't reached the package session limit
       const currentBookings = Array.isArray(singlePackage.bookingDetails) ? singlePackage.bookingDetails : [];
-      // Use both quantity (sessions count) and sessions field for validation
-      const packageQuantity = singlePackage.quantity || singlePackage.sessions || 1;
+      // Use sessions field for validation (this represents the number of sessions the package includes)
+      const packageSessions = singlePackage.sessions || 1;
       
-      if (currentBookings.length >= packageQuantity) {
-        toast.error(`You've reached the maximum number of classes for this package (${packageQuantity}).`);
+      if (currentBookings.length >= packageSessions) {
+        toast.error(`You've reached the maximum number of sessions for this package (${packageSessions}). Please choose a different package or remove existing bookings.`);
         return;
       }
 
@@ -1086,20 +1086,6 @@ export function ScheduleBookingFlow({
     }
   };
 
-  // Helper function to check which packages already have the selected schedule booked
-  const getPackagesWithSelectedSchedule = () => {
-    if (!selectedScheduleForPackage || !cartContext?.cartItems) return [];
-    
-    return cartContext.cartItems
-      .filter(item => item.type === 'package')
-      .filter(packageItem => {
-        const currentBookings = Array.isArray(packageItem.bookingDetails) ? packageItem.bookingDetails : [];
-        return currentBookings.some(booking => 
-          booking.selectedDate === selectedScheduleForPackage.date && 
-          booking.selectedTime === selectedScheduleForPackage.time
-        );
-      });
-  };
 
   const handlePackageSelectionForBooking = (packageId: string) => {
     if (!cartContext || !selectedScheduleForPackage) return;
@@ -1119,12 +1105,12 @@ export function ScheduleBookingFlow({
       scheduleSlotId: selectedScheduleForPackage.id
     };
     
-    // Check if package has capacity
+    // Check if package has reached its session limit
     const currentBookings = Array.isArray(selectedPackage.bookingDetails) ? selectedPackage.bookingDetails : [];
-    const packageSessions = selectedPackage.sessions || selectedPackage.quantity || 1;
+    const packageSessions = selectedPackage.sessions || 1;
     
     if (currentBookings.length >= packageSessions) {
-      toast.error(`Package is full (${packageSessions}/${packageSessions} sessions used).`);
+      toast.error(`This package has reached its session limit (${packageSessions}). Please choose a different package or remove existing bookings.`);
       return;
     }
     
