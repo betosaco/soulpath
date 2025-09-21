@@ -96,27 +96,6 @@ interface ScheduleBookingFlowProps {
   onStepChange?: (step: number) => void;
 }
 
-// Helper function to check for duplicate schedule bookings across different package types
-const checkForDuplicateScheduleAcrossPackages = (selectedSchedule: ScheduleSlot, currentPackageId: string, cartItems: any[]) => {
-  const packageItems = cartItems.filter(item => item.type === 'package' && item.id !== currentPackageId);
-  
-  for (const packageItem of packageItems) {
-    const currentBookings = Array.isArray(packageItem.bookingDetails) ? packageItem.bookingDetails : [];
-    const hasSameSchedule = currentBookings.some((booking: any) => 
-      booking.selectedDate === selectedSchedule.date && 
-      booking.selectedTime === selectedSchedule.time
-    );
-    
-    if (hasSameSchedule) {
-      return {
-        hasDuplicate: true,
-        conflictingPackage: packageItem
-      };
-    }
-  }
-  
-  return { hasDuplicate: false, conflictingPackage: null };
-};
 
 // Helper function to check for existing duplicate schedules across all packages
 const checkForExistingDuplicateSchedules = (cartContext?: any) => {
@@ -271,43 +250,6 @@ const handleDuplicateScheduleConflict = (conflictingBookings: any[], setIsGroupB
   });
 };
 
-// Helper function to handle duplicate schedule conflict for package selection
-const handlePackageDuplicateScheduleConflict = (conflictingPackage: any, selectedSchedule: ScheduleSlot) => {
-  const packageName = conflictingPackage.name;
-  const scheduleTime = `${selectedSchedule.date} at ${selectedSchedule.time}`;
-  
-  // Show warning message instead of dialog
-  toast.warning(
-    `You already have a booking for ${scheduleTime} with ${packageName}. ` +
-    `Please select a different schedule slot to avoid conflicts.`,
-    {
-      duration: 5000,
-      action: {
-        label: 'Change Schedule',
-        onClick: () => {
-          // Set up editing mode for the conflicting package
-          if (typeof window !== 'undefined') {
-            sessionStorage.setItem('isEditingSchedule', 'true');
-            sessionStorage.setItem('editingPackageId', conflictingPackage.id);
-            // Find the booking index for this schedule
-            const bookingIndex = conflictingPackage.bookingDetails?.findIndex((booking: any) => 
-              booking.selectedDate === selectedSchedule.date && 
-              booking.selectedTime === selectedSchedule.time
-            );
-            if (bookingIndex !== undefined && bookingIndex >= 0) {
-              sessionStorage.setItem('editingBookingIndex', bookingIndex.toString());
-            }
-          }
-          
-          // Navigate to schedule page for editing
-          if (typeof window !== 'undefined') {
-            window.location.href = '/schedule';
-          }
-        }
-      }
-    }
-  );
-};
 
 export function ScheduleBookingFlow({ 
   startDate, 
@@ -331,7 +273,6 @@ export function ScheduleBookingFlow({
   // State for package selection when multiple packages exist
   const [showPackageSelection, setShowPackageSelection] = useState(false);
   const [selectedScheduleForPackage, setSelectedScheduleForPackage] = useState<ScheduleSlot | null>(null);
-  const [justAddedBooking, setJustAddedBooking] = useState(false);
   const [isGroupBooking, setIsGroupBooking] = useState<boolean | null>(null); // null = not decided, true = group, false = individual
   
   // Debug modal state changes
@@ -603,29 +544,16 @@ export function ScheduleBookingFlow({
 
   const handleScheduleSelect = (slot: ScheduleSlot) => {
     console.log('🎯 SCHEDULE SELECTED:', slot);
-    console.log('🎯 Current editingPackageId:', editingPackageId);
-    console.log('🎯 Current showPackageSelection:', showPackageSelection);
-    console.log('🎯 Current selectedScheduleForPackage:', selectedScheduleForPackage?.id);
     console.log('🎯 All cart items:', JSON.stringify(cartContext?.cartItems, null, 2));
-    console.log('🎯 Package count:', cartContext?.cartItems?.filter(item => item.type === 'package').length || 0);
     
     setFormData(prev => ({ ...prev, selectedSchedule: slot }));
     
-    // First check if we should show modal for multiple packages or multi-session packages
+    // Get all package items
     const allPackageItems = cartContext?.cartItems?.filter(item => item.type === 'package') || [];
-    const totalPackageQuantity = allPackageItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
-    const hasMultiSessionPackage = allPackageItems.some(item => (item.sessions || 1) > 1);
-    const shouldShowModal = allPackageItems.length > 1 || totalPackageQuantity > 1 || hasMultiSessionPackage;
     
-    if (shouldShowModal) {
-      console.log('🎯 Modal needed - multiple packages, multiple quantities, or multi-session packages detected');
-      console.log('🎯 Package details:', allPackageItems.map(p => ({ 
-        id: p.id, 
-        name: p.name, 
-        sessions: p.sessions, 
-        quantity: p.quantity 
-      })));
-      // Clear editing mode when showing modal for multiple packages
+    // Simple logic: if there are packages, show modal
+    if (allPackageItems.length > 0) {
+      console.log('🎯 Showing modal for package selection');
       setEditingPackageId(null);
       setSelectedScheduleForPackage(slot);
       setShowPackageSelection(true);
@@ -961,27 +889,12 @@ export function ScheduleBookingFlow({
   };
 
   const handlePackageSelectionForBooking = (packageId: string) => {
-    if (!cartContext) return;
+    if (!cartContext || !selectedScheduleForPackage) return;
     
-    const cartItems = cartContext.cartItems || [];
-    const selectedPackage = cartItems.find(item => item.id === packageId);
-    
-    console.log('🔍 Package selection for booking:');
-    console.log('🔍 - Selected package ID:', packageId);
-    console.log('🔍 - Selected package:', selectedPackage);
-    console.log('🔍 - Selected schedule:', selectedScheduleForPackage);
-    console.log('🔍 - All cart items:', cartItems.map(item => ({ id: item.id, name: item.name, bookings: item.bookingDetails?.length || 0 })));
-    
+    const selectedPackage = cartContext.cartItems?.find(item => item.id === packageId);
     if (!selectedPackage) return;
     
-    // If no schedule is selected yet, just set the editing package and close modal
-    if (!selectedScheduleForPackage) {
-      console.log('🔍 No schedule selected yet, setting editing package and closing modal');
-      setEditingPackageId(packageId);
-      setShowPackageSelection(false);
-      toast.info('Package selected! Now choose a schedule slot.');
-      return;
-    }
+    console.log('🔍 Adding booking to package:', packageId);
     
     const newBookingDetails = {
       selectedDate: selectedScheduleForPackage.date,
@@ -993,87 +906,41 @@ export function ScheduleBookingFlow({
       scheduleSlotId: selectedScheduleForPackage.id
     };
     
-    // Check if we haven't reached the package quantity limit
+    // Check if package has capacity
     const currentBookings = Array.isArray(selectedPackage.bookingDetails) ? selectedPackage.bookingDetails : [];
-    // Use both quantity (sessions count) and sessions field for validation
-    const packageQuantity = selectedPackage.quantity || selectedPackage.sessions || 1;
+    const packageSessions = selectedPackage.sessions || selectedPackage.quantity || 1;
     
-    if (currentBookings.length >= packageQuantity) {
-      toast.error(`You've reached the maximum number of classes for this package (${packageQuantity}).`);
+    if (currentBookings.length >= packageSessions) {
+      toast.error(`Package is full (${packageSessions}/${packageSessions} sessions used).`);
       return;
     }
-
-    // Check if this specific package has already booked this specific slot
-    // This prevents the same package from booking the same slot twice
+    
+    // Check for duplicate slot booking
     const hasAlreadyBookedThisSlot = currentBookings.some(booking => 
       booking.selectedDate === selectedScheduleForPackage.date && 
       booking.selectedTime === selectedScheduleForPackage.time
     );
     
-    console.log('🔍 Slot validation:');
-    console.log('🔍 - Package current bookings:', currentBookings.length);
-    console.log('🔍 - Package sessions limit:', packageQuantity);
-    console.log('🔍 - Slot to book:', selectedScheduleForPackage.date, selectedScheduleForPackage.time);
-    console.log('🔍 - Has already booked this slot:', hasAlreadyBookedThisSlot);
-    console.log('🔍 - Existing bookings for this slot:', currentBookings.filter(booking => 
-      booking.selectedDate === selectedScheduleForPackage.date && 
-      booking.selectedTime === selectedScheduleForPackage.time
-    ));
-    
     if (hasAlreadyBookedThisSlot) {
-      toast.error('This package has already booked this time slot. Please select a different slot or package.');
+      toast.error('This package has already booked this time slot.');
       return;
     }
-
-    // Check for duplicate schedule bookings across different package types only when user has declared it's not a group booking
-    if (isGroupBooking === false) {
-      const duplicateScheduleCheck = checkForDuplicateScheduleAcrossPackages(selectedScheduleForPackage, packageId, cartItems);
-      if (duplicateScheduleCheck.hasDuplicate) {
-        handlePackageDuplicateScheduleConflict(duplicateScheduleCheck.conflictingPackage, selectedScheduleForPackage);
-        return;
-      }
-    }
-
-    // Per-package validation is now handled above
-    console.log('🔍 Modal package validation passed - adding booking to package');
     
-    // Add booking to selected package
+    // Add booking to package
     cartContext.addBookingToPackage(packageId, newBookingDetails);
     
-    // Open sidecart to show updated bookings
+    // Open sidecart
     if (cartContext.setIsCartOpen) {
       cartContext.setIsCartOpen(true);
     }
     
-    // Check if this is a multi-session package that can accept more bookings
-    const packageSessions = selectedPackage.sessions || selectedPackage.quantity || 1;
+    // Show success message
     const updatedBookings = [...currentBookings, newBookingDetails];
-    const canBookMore = updatedBookings.length < packageSessions;
+    toast.success(`Class added! (${updatedBookings.length}/${packageSessions} used)`);
     
-    if (canBookMore) {
-      // Keep modal open for more bookings
-      console.log('🔍 Multi-session package - keeping modal open for more bookings');
-      console.log('🔍 Current bookings after adding:', updatedBookings.length);
-      console.log('🔍 Package sessions limit:', packageSessions);
-      
-      // Set flag to show booking was just added
-      setJustAddedBooking(true);
-      setSelectedScheduleForPackage(null);
-      
-      toast.success(`Class added! (${updatedBookings.length}/${packageSessions} used) Click on another schedule slot to book more classes.`);
-      
-      // Clear the flag after a delay
-      setTimeout(() => {
-        setJustAddedBooking(false);
-      }, 3000);
-    } else {
-      // Close modal when package is full
-      console.log('🔍 Package is full - closing modal');
-      setShowPackageSelection(false);
-      setSelectedScheduleForPackage(null);
-      setJustAddedBooking(false);
-      toast.success(`All classes booked! (${packageSessions}/${packageSessions} used) Continue to checkout.`);
-    }
+    // Close modal - user can click another schedule slot to book more
+    setShowPackageSelection(false);
+    setSelectedScheduleForPackage(null);
   };
 
   const handlePackageSelect = (pkg: PackagePrice) => {
@@ -1752,11 +1619,9 @@ export function ScheduleBookingFlow({
                 Select Package for Booking
               </h3>
               <p className="text-sm text-gray-600 mb-6">
-                {justAddedBooking ? 
-                  'Great! Class added successfully. Click on another schedule slot to book more classes.' :
-                  selectedScheduleForPackage ? 
-                    `You have packages with available slots. Which package would you like to add this class (${selectedScheduleForPackage.date} at ${selectedScheduleForPackage.time}) to?` :
-                    'You have packages in your cart. Click on a schedule slot first, then select which package to use for booking.'
+                {selectedScheduleForPackage ? 
+                  `Which package would you like to add this class (${selectedScheduleForPackage.date} at ${selectedScheduleForPackage.time}) to?` :
+                  'Select a schedule slot first, then choose which package to use for booking.'
                 }
               </p>
               
@@ -1782,8 +1647,7 @@ export function ScheduleBookingFlow({
                     const packageCapacity = packageItem.sessions || packageItem.quantity || 1;
                     const hasCapacity = currentBookings.length < packageCapacity;
                     
-                    // For modal display, allow selection if package has capacity AND a schedule is selected
-                    // The specific slot validation happens in handlePackageSelectionForBooking
+                    // Allow selection if package has capacity and schedule is selected
                     const canBookThisSlot = hasCapacity && selectedScheduleForPackage !== null;
                     
                     console.log(`🔍 Modal - Package ${packageItem.name}:`, {
@@ -1816,9 +1680,7 @@ export function ScheduleBookingFlow({
                           </p>
                             <p className="text-xs text-gray-500 mt-1">
                             {packageItem.bookingDetails?.length || 0} / {packageCapacity} classes booked
-                            {justAddedBooking ? (
-                              <span className="text-blue-600 font-medium"> • Click another schedule slot</span>
-                            ) : !selectedScheduleForPackage ? (
+                            {!selectedScheduleForPackage ? (
                               <span className="text-yellow-600 font-medium"> • Select a schedule first</span>
                             ) : canBookThisSlot ? (
                               <span className="text-green-600 font-medium"> • Available</span>
@@ -1866,3 +1728,4 @@ export function ScheduleBookingFlow({
     </div>
   );
 }
+
