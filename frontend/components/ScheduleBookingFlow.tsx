@@ -1052,8 +1052,10 @@ export function ScheduleBookingFlow({
     if (canBookMore) {
       // Keep modal open for more bookings
       console.log('🔍 Multi-session package - keeping modal open for more bookings');
+      console.log('🔍 Current bookings after adding:', updatedBookings.length);
+      console.log('🔍 Package sessions limit:', packageSessions);
       setSelectedScheduleForPackage(null); // Clear selected schedule for next selection
-      toast.success(`Class added! (${updatedBookings.length}/${packageSessions} used) Select another schedule or continue to checkout.`);
+      toast.success(`Class added! (${updatedBookings.length}/${packageSessions} used) Click on another schedule slot to book more classes.`);
     } else {
       // Close modal when package is full
       console.log('🔍 Package is full - closing modal');
@@ -1741,7 +1743,7 @@ export function ScheduleBookingFlow({
               <p className="text-sm text-gray-600 mb-6">
                 {selectedScheduleForPackage ? 
                   `You have packages with available slots. Which package would you like to add this class (${selectedScheduleForPackage.date} at ${selectedScheduleForPackage.time}) to?` :
-                  'You have multiple packages in your cart. Select which package you want to use for booking a class.'
+                  'You have packages in your cart. Click on a schedule slot first, then select which package to use for booking.'
                 }
               </p>
               
@@ -1767,9 +1769,9 @@ export function ScheduleBookingFlow({
                     const packageCapacity = packageItem.sessions || packageItem.quantity || 1;
                     const hasCapacity = currentBookings.length < packageCapacity;
                     
-                    // For modal display, allow selection if package has capacity
+                    // For modal display, allow selection if package has capacity AND a schedule is selected
                     // The specific slot validation happens in handlePackageSelectionForBooking
-                    const canBookThisSlot = hasCapacity;
+                    const canBookThisSlot = hasCapacity && selectedScheduleForPackage !== null;
                     
                     console.log(`🔍 Modal - Package ${packageItem.name}:`, {
                       id: packageItem.id,
@@ -1801,7 +1803,9 @@ export function ScheduleBookingFlow({
                           </p>
                             <p className="text-xs text-gray-500 mt-1">
                             {packageItem.bookingDetails?.length || 0} / {packageCapacity} classes booked
-                            {canBookThisSlot ? (
+                            {!selectedScheduleForPackage ? (
+                              <span className="text-yellow-600 font-medium"> • Select a schedule first</span>
+                            ) : canBookThisSlot ? (
                               <span className="text-green-600 font-medium"> • Available</span>
                             ) : (
                               <span className="text-red-500 font-medium"> • Full</span>
