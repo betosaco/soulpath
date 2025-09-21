@@ -888,6 +888,21 @@ export function ScheduleBookingFlow({
     }
   };
 
+  // Helper function to check which packages already have the selected schedule booked
+  const getPackagesWithSelectedSchedule = () => {
+    if (!selectedScheduleForPackage || !cartContext?.cartItems) return [];
+    
+    return cartContext.cartItems
+      .filter(item => item.type === 'package')
+      .filter(packageItem => {
+        const currentBookings = Array.isArray(packageItem.bookingDetails) ? packageItem.bookingDetails : [];
+        return currentBookings.some(booking => 
+          booking.selectedDate === selectedScheduleForPackage.date && 
+          booking.selectedTime === selectedScheduleForPackage.time
+        );
+      });
+  };
+
   const handlePackageSelectionForBooking = (packageId: string) => {
     if (!cartContext || !selectedScheduleForPackage) return;
     
@@ -1625,6 +1640,43 @@ export function ScheduleBookingFlow({
                 }
               </p>
               
+              {/* Show conflict information if any packages already have this schedule */}
+              {(() => {
+                const conflictingPackages = getPackagesWithSelectedSchedule();
+                if (conflictingPackages.length > 0) {
+                  return (
+                    <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <div className="flex items-start">
+                        <div className="flex-shrink-0">
+                          <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="ml-3">
+                          <h4 className="text-sm font-medium text-yellow-800">
+                            Schedule Already Booked
+                          </h4>
+                          <div className="mt-1 text-sm text-yellow-700">
+                            <p>The following packages already have this schedule booked:</p>
+                            <ul className="mt-1 list-disc list-inside">
+                              {conflictingPackages.map(pkg => (
+                                <li key={pkg.id} className="font-medium">
+                                  {pkg.name} ({pkg.bookingDetails?.length || 0}/{pkg.sessions || pkg.quantity || 1} used)
+                                </li>
+                              ))}
+                            </ul>
+                            <p className="mt-2 text-xs">
+                              You can still book this schedule with other packages, or select a different time slot.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+              
               
               <div className="space-y-3">
                 {(() => {
@@ -1647,8 +1699,15 @@ export function ScheduleBookingFlow({
                     const packageCapacity = packageItem.sessions || packageItem.quantity || 1;
                     const hasCapacity = currentBookings.length < packageCapacity;
                     
-                    // Allow selection if package has capacity and schedule is selected
-                    const canBookThisSlot = hasCapacity && selectedScheduleForPackage !== null;
+                    // Check if this package already has this specific schedule booked
+                    const hasThisScheduleBooked = selectedScheduleForPackage ? 
+                      currentBookings.some(booking => 
+                        booking.selectedDate === selectedScheduleForPackage.date && 
+                        booking.selectedTime === selectedScheduleForPackage.time
+                      ) : false;
+                    
+                    // Allow selection if package has capacity, schedule is selected, and doesn't already have this schedule
+                    const canBookThisSlot = hasCapacity && selectedScheduleForPackage !== null && !hasThisScheduleBooked;
                     
                     console.log(`🔍 Modal - Package ${packageItem.name}:`, {
                       id: packageItem.id,
@@ -1682,6 +1741,8 @@ export function ScheduleBookingFlow({
                             {packageItem.bookingDetails?.length || 0} / {packageCapacity} classes booked
                             {!selectedScheduleForPackage ? (
                               <span className="text-yellow-600 font-medium"> • Select a schedule first</span>
+                            ) : hasThisScheduleBooked ? (
+                              <span className="text-orange-600 font-medium"> • Already has this schedule</span>
                             ) : canBookThisSlot ? (
                               <span className="text-green-600 font-medium"> • Available</span>
                             ) : (
