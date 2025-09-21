@@ -331,6 +331,7 @@ export function ScheduleBookingFlow({
   // State for package selection when multiple packages exist
   const [showPackageSelection, setShowPackageSelection] = useState(false);
   const [selectedScheduleForPackage, setSelectedScheduleForPackage] = useState<ScheduleSlot | null>(null);
+  const [justAddedBooking, setJustAddedBooking] = useState(false);
   const [isGroupBooking, setIsGroupBooking] = useState<boolean | null>(null); // null = not decided, true = group, false = individual
   
   // Debug modal state changes
@@ -1054,13 +1055,23 @@ export function ScheduleBookingFlow({
       console.log('🔍 Multi-session package - keeping modal open for more bookings');
       console.log('🔍 Current bookings after adding:', updatedBookings.length);
       console.log('🔍 Package sessions limit:', packageSessions);
-      setSelectedScheduleForPackage(null); // Clear selected schedule for next selection
+      
+      // Set flag to show booking was just added
+      setJustAddedBooking(true);
+      setSelectedScheduleForPackage(null);
+      
       toast.success(`Class added! (${updatedBookings.length}/${packageSessions} used) Click on another schedule slot to book more classes.`);
+      
+      // Clear the flag after a delay
+      setTimeout(() => {
+        setJustAddedBooking(false);
+      }, 3000);
     } else {
       // Close modal when package is full
       console.log('🔍 Package is full - closing modal');
       setShowPackageSelection(false);
       setSelectedScheduleForPackage(null);
+      setJustAddedBooking(false);
       toast.success(`All classes booked! (${packageSessions}/${packageSessions} used) Continue to checkout.`);
     }
   };
@@ -1741,9 +1752,11 @@ export function ScheduleBookingFlow({
                 Select Package for Booking
               </h3>
               <p className="text-sm text-gray-600 mb-6">
-                {selectedScheduleForPackage ? 
-                  `You have packages with available slots. Which package would you like to add this class (${selectedScheduleForPackage.date} at ${selectedScheduleForPackage.time}) to?` :
-                  'You have packages in your cart. Click on a schedule slot first, then select which package to use for booking.'
+                {justAddedBooking ? 
+                  'Great! Class added successfully. Click on another schedule slot to book more classes.' :
+                  selectedScheduleForPackage ? 
+                    `You have packages with available slots. Which package would you like to add this class (${selectedScheduleForPackage.date} at ${selectedScheduleForPackage.time}) to?` :
+                    'You have packages in your cart. Click on a schedule slot first, then select which package to use for booking.'
                 }
               </p>
               
@@ -1803,7 +1816,9 @@ export function ScheduleBookingFlow({
                           </p>
                             <p className="text-xs text-gray-500 mt-1">
                             {packageItem.bookingDetails?.length || 0} / {packageCapacity} classes booked
-                            {!selectedScheduleForPackage ? (
+                            {justAddedBooking ? (
+                              <span className="text-blue-600 font-medium"> • Click another schedule slot</span>
+                            ) : !selectedScheduleForPackage ? (
                               <span className="text-yellow-600 font-medium"> • Select a schedule first</span>
                             ) : canBookThisSlot ? (
                               <span className="text-green-600 font-medium"> • Available</span>
