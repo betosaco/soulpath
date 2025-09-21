@@ -610,13 +610,14 @@ export function ScheduleBookingFlow({
     
     setFormData(prev => ({ ...prev, selectedSchedule: slot }));
     
-    // First check if we should show modal for multiple packages (before checking editing mode)
+    // First check if we should show modal for multiple packages or multi-session packages
     const allPackageItems = cartContext?.cartItems?.filter(item => item.type === 'package') || [];
     const totalPackageQuantity = allPackageItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
-    const shouldShowModal = allPackageItems.length > 1 || totalPackageQuantity > 1;
+    const hasMultiSessionPackage = allPackageItems.some(item => (item.sessions || 1) > 1);
+    const shouldShowModal = allPackageItems.length > 1 || totalPackageQuantity > 1 || hasMultiSessionPackage;
     
     if (shouldShowModal) {
-      console.log('🎯 Modal needed - multiple packages or multiple quantities detected');
+      console.log('🎯 Modal needed - multiple packages, multiple quantities, or multi-session packages detected');
       console.log('🎯 Package details:', allPackageItems.map(p => ({ 
         id: p.id, 
         name: p.name, 
@@ -630,46 +631,6 @@ export function ScheduleBookingFlow({
       return;
     }
     
-    // For single matpass with multiple sessions, allow multiple bookings without modal
-    if (allPackageItems.length === 1 && allPackageItems[0] && (allPackageItems[0].sessions || 1) > 1) {
-      console.log('🎯 Single matpass with multiple sessions - allowing multiple bookings');
-      const singlePackage = allPackageItems[0];
-      const packageSessions = singlePackage.sessions || 1;
-      
-      // Check if this package has already booked this specific slot
-      const currentBookings = Array.isArray(singlePackage.bookingDetails) ? singlePackage.bookingDetails : [];
-      const hasAlreadyBookedThisSlot = currentBookings.some(booking => 
-        booking.selectedDate === slot.date && 
-        booking.selectedTime === slot.time
-      );
-      
-      if (hasAlreadyBookedThisSlot) {
-        toast.error('This package has already booked this time slot. Please select a different slot.');
-        return;
-      }
-      
-      // Check if we haven't reached the package sessions limit
-      if (currentBookings.length >= packageSessions) {
-        toast.error(`You've reached the maximum number of classes for this package (${packageSessions}).`);
-        return;
-      }
-      
-      // Add booking to the single package
-      const newBookingDetails = {
-        selectedDate: slot.date,
-        selectedTime: slot.time,
-        teacher: slot.teacher?.name,
-        dayOfWeek: slot.dayOfWeek,
-        serviceType: slot.serviceType?.name,
-        venue: slot.venue?.name,
-        scheduleSlotId: slot.id
-      };
-      
-      cartContext.addBookingToPackage(singlePackage.id, newBookingDetails);
-      cartContext.setIsCartOpen(true);
-      toast.success(`Class added to your ${packageSessions}-session package! (${currentBookings.length + 1}/${packageSessions} used)`);
-      return;
-    }
     
     // If we're in editing mode or adding more bookings, update the cart item
     if (editingPackageId) {
