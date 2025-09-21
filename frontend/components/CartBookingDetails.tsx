@@ -48,9 +48,11 @@ export function CartBookingDetails({
 
   const formatDate = (dateString: string) => {
     try {
-      const date = new Date(dateString);
+      // Parse the date string as local date to avoid timezone issues
+      const [year, month, day] = dateString.split('-').map(Number);
+      const date = new Date(year, month - 1, day); // month is 0-indexed
       return date.toLocaleDateString('en-US', {
-        weekday: 'short',
+        weekday: 'long',
         month: 'short',
         day: 'numeric'
       });
