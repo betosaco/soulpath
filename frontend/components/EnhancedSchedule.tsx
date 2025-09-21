@@ -120,8 +120,10 @@ export function EnhancedSchedule({
     
     // Use the onBookSlot prop if provided, otherwise use default behavior
     if (onBookSlot) {
+      console.log('🎯 Calling onBookSlot prop with slot:', slot);
       onBookSlot(slot);
     } else {
+      console.log('🎯 Using default handleBookSlot with slot:', slot);
       handleBookSlot(slot);
     }
   };
@@ -162,6 +164,7 @@ export function EnhancedSchedule({
       setLoading(true);
       setError(null);
       console.log('🔄 Starting fetchSlots function...');
+      console.log('🔍 Props received:', { startDate, endDate, customStartDate, customEndDate });
       
       const start = customStartDate || startDate;
       const end = customEndDate || endDate;
@@ -194,6 +197,8 @@ export function EnhancedSchedule({
 
       const data = await response.json();
       console.log('📊 Response data:', data);
+      console.log('📊 Response success:', data.success);
+      console.log('📊 Response slots length:', data.slots?.length || 0);
       
       if (data.success) {
         console.log('✅ Setting slots:', data.slots.length, 'slots');
@@ -257,13 +262,12 @@ export function EnhancedSchedule({
 
   // Fetch slots when component mounts or date range changes
   useEffect(() => {
-    if (startDate && endDate) {
-      fetchSlots(startDate, endDate);
-    } else {
-      // If no date range provided, fetch all available slots
-      fetchSlots();
-    }
-  }, [startDate, endDate, fetchSlots]);
+    console.log('🔄 useEffect triggered - startDate:', startDate, 'endDate:', endDate);
+    console.log('🔄 Component mounted, fetching slots...');
+    
+    // Always fetch slots on mount
+    fetchSlots();
+  }, []); // Empty dependency array to run only on mount
 
   // Reload slots when reloadTrigger changes
   useEffect(() => {
@@ -351,12 +355,42 @@ export function EnhancedSchedule({
   // Debug logging
   console.log('🔍 EnhancedSchedule render - loading:', loading, 'slots:', slots?.length || 0, 'error:', error);
 
-  if (loading) {
+  // Ensure component hydrates properly
+  const [isHydrated, setIsHydrated] = useState(false);
+  
+  useEffect(() => {
+    console.log('🔄 Component hydrated, setting isHydrated to true');
+    setIsHydrated(true);
+  }, []);
+
+  // Show loading state only if not hydrated or actually loading
+  if (!isHydrated || loading) {
     return (
       <div className={`enhanced-schedule ${className} bg-white`}>
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
           <span className="ml-2 text-lg">Loading schedule...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // If no slots and not loading, show empty state
+  if (!slots || slots.length === 0) {
+    return (
+      <div className={`enhanced-schedule ${className} bg-white`}>
+        <div className="flex items-center justify-center py-12 text-center">
+          <div>
+            <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No classes available</h3>
+            <p className="text-gray-600 mb-4">There are no classes scheduled for the selected period.</p>
+            <button 
+              onClick={() => fetchSlots()}
+              className="bg-[#6ea058] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#5a8a47] focus:ring-2 focus:ring-[#6ea058] focus:outline-none transition-colors"
+            >
+              Refresh Schedule
+            </button>
+          </div>
         </div>
       </div>
     );

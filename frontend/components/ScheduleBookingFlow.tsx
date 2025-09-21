@@ -358,8 +358,10 @@ export function ScheduleBookingFlow({
   const maxBookingsPerSlot = useMemo(() => {
     const packageItems = cartContext?.cartItems.filter(item => item.type === 'package') || [];
     const total = packageItems.reduce((total, item) => total + (item.quantity || 1), 0);
-    console.log('🔍 maxBookingsPerSlot calculated:', total, 'from packages:', packageItems.map(p => ({ name: p.name, quantity: p.quantity })));
-    return total;
+    // Ensure at least 1 booking per slot is allowed, even when no packages are in cart
+    const result = Math.max(total, 1);
+    console.log('🔍 maxBookingsPerSlot calculated:', result, 'from packages:', packageItems.map(p => ({ name: p.name, quantity: p.quantity })));
+    return result;
   }, [cartContext?.cartItems]);
 
   // Create a reload trigger that updates when cart items change
@@ -722,6 +724,12 @@ export function ScheduleBookingFlow({
       return;
     }
     
+    // If there are no packages, proceed to normal flow (package selection step)
+    if (allPackageItems.length === 0) {
+      console.log('🎯 No packages detected, proceeding to package selection step');
+      // Continue to normal flow below
+    }
+    
     // If there's only one package, auto-select it and proceed
     if (allPackageItems.length === 1) {
       console.log('🎯 Single package detected, auto-selecting and proceeding');
@@ -1028,46 +1036,51 @@ export function ScheduleBookingFlow({
     const modalShown = triggerPackageModalIfNeeded(slot);
     
     if (!modalShown) {
-      const singlePackage = packageItems[0];
-      const newBookingDetails = {
-        selectedDate: slot.date,
-        selectedTime: slot.time,
-        teacher: slot.teacher?.name || 'TBA',
-        serviceType: slot.serviceType?.name || 'Class',
-        venue: slot.venue?.name || 'Studio',
-        dayOfWeek: slot.dayOfWeek,
-        scheduleSlotId: slot.id
-      };
+      // Only proceed if there are packages in the cart
+      if (packageItems.length === 0) {
+        console.log('🎯 No packages in cart, proceeding to package selection step');
+        // Continue to normal flow below - this will lead to package selection
+      } else {
+        const singlePackage = packageItems[0];
+        const newBookingDetails = {
+          selectedDate: slot.date,
+          selectedTime: slot.time,
+          teacher: slot.teacher?.name || 'TBA',
+          serviceType: slot.serviceType?.name || 'Class',
+          venue: slot.venue?.name || 'Studio',
+          dayOfWeek: slot.dayOfWeek,
+          scheduleSlotId: slot.id
+        };
 
-      // Check if we haven't reached the package session limit
-      const currentBookings = Array.isArray(singlePackage.bookingDetails) ? singlePackage.bookingDetails : [];
-      // Use sessions field for validation (this represents the number of sessions the package includes)
-      const packageSessions = singlePackage.sessions || 1;
-      
-      if (currentBookings.length >= packageSessions) {
-        toast.error(`You've reached the maximum number of sessions for this package (${packageSessions}). Please choose a different package or remove existing bookings.`);
-        return;
-      }
+        // Check if we haven't reached the package session limit
+        const currentBookings = Array.isArray(singlePackage.bookingDetails) ? singlePackage.bookingDetails : [];
+        // Use sessions field for validation (this represents the number of sessions the package includes)
+        const packageSessions = singlePackage.sessions || 1;
+        
+        if (currentBookings.length >= packageSessions) {
+          toast.error(`You've reached the maximum number of sessions for this package (${packageSessions}). Please choose a different package or remove existing bookings.`);
+          return;
+        }
 
-      // Check if this package has already booked this specific slot
+        // Check if this package has already booked this specific slot
         const hasAlreadyBookedThisSlot = currentBookings.some(booking => 
-        booking.selectedDate === newBookingDetails.selectedDate && 
-        booking.selectedTime === newBookingDetails.selectedTime
-      );
+          booking.selectedDate === newBookingDetails.selectedDate && 
+          booking.selectedTime === newBookingDetails.selectedTime
+        );
 
-      if (hasAlreadyBookedThisSlot) {
-        toast.error('This package has already booked this time slot. Please select a different slot.');
+        if (hasAlreadyBookedThisSlot) {
+          toast.error('This package has already booked this time slot. Please select a different slot.');
+          return;
+        }
+
+        // Add booking to the single package
+        cartContext.addBookingToPackage(singlePackage.id, newBookingDetails);
+        cartContext.setIsCartOpen(true);
+        toast.success('Class added to your package!');
         return;
       }
-
-      // Add booking to the single package
-      cartContext.addBookingToPackage(singlePackage.id, newBookingDetails);
-      cartContext.setIsCartOpen(true);
-      toast.success('Class added to your package!');
-      return;
     }
     // If modal was shown, the function will return early and modal will handle the booking
-    return;
     
     // Normal flow - check if we need group booking step
     const allCartItems = cartContext?.cartItems || [];
@@ -1075,14 +1088,19 @@ export function ScheduleBookingFlow({
     
     if (normalFlowPackageItems.length > 1) {
       // Multiple packages - go to group booking selection
-    setCurrentStep(1);
-    onStepChange?.(1);
+      setCurrentStep(1);
+      onStepChange?.(1);
       toast.success('Schedule selected! Now choose your booking type.');
-    } else {
-      // Single package or no packages - skip to package selection
+    } else if (normalFlowPackageItems.length === 1) {
+      // Single package - skip to package selection
       setCurrentStep(2);
       onStepChange?.(2);
-    toast.success('Schedule selected! Now choose your package.');
+      toast.success('Schedule selected! Now choose your package.');
+    } else {
+      // No packages - go to package selection step
+      setCurrentStep(2);
+      onStepChange?.(2);
+      toast.success('Schedule selected! Now choose your package.');
     }
   };
 
@@ -1197,19 +1215,27 @@ export function ScheduleBookingFlow({
       setIsCartOpen(true);
     }
     
-    // Check if there's only one package in cart - if so, stay on schedule step
-    const shouldShowModal = shouldShowPackageModal();
-    
-    if (!shouldShowModal) {
-      // Single package with quantity 1 - stay on schedule step for class selection
-      setCurrentStep(0);
-      onStepChange?.(0);
-      toast.success('Package selected! Now choose your class schedule.');
-    } else {
-      // Multiple packages - go to customer information step
+    // Check if we have a selected schedule (schedule-first flow)
+    if (formData.selectedSchedule) {
+      // Schedule was selected first, now package is selected - booking is complete
       setCurrentStep(3);
       onStepChange?.(3);
-      toast.success('Package selected! Please provide your information.');
+      toast.success('Package and schedule selected! Please provide your information.');
+    } else {
+      // Package selected first, check if we need to show modal
+      const shouldShowModal = shouldShowPackageModal();
+      
+      if (!shouldShowModal) {
+        // Single package with quantity 1 - stay on schedule step for class selection
+        setCurrentStep(0);
+        onStepChange?.(0);
+        toast.success('Package selected! Now choose your class schedule.');
+      } else {
+        // Multiple packages - go to customer information step
+        setCurrentStep(3);
+        onStepChange?.(3);
+        toast.success('Package selected! Please provide your information.');
+      }
     }
   };
 
