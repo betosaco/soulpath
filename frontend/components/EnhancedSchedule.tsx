@@ -394,7 +394,37 @@ export function EnhancedSchedule({
           
           <div className="flex items-center gap-2">
             <button
-              onClick={() => window.location.href = '/checkout'}
+              onClick={() => {
+                // Check if there are products in cart that require address
+                const cart = localStorage.getItem('cart');
+                if (cart) {
+                  try {
+                    const cartItems = JSON.parse(cart);
+                    const hasProducts = cartItems.some((item: any) => item.type === 'product');
+                    const hasPackages = cartItems.some((item: any) => item.type === 'package');
+                    
+                    if (hasPackages) {
+                      // If packages are in cart, go to step 2 (personal information)
+                      // The system will automatically determine if address is needed based on products
+                      window.location.href = '/checkout?step=2';
+                    } else if (hasProducts) {
+                      // If only products (no packages), go to step 2 (personal information)
+                      // The system will automatically determine if address is needed
+                      window.location.href = '/checkout?step=2';
+                    } else {
+                      // No items, go to default checkout
+                      window.location.href = '/checkout';
+                    }
+                  } catch (error) {
+                    console.error('Error parsing cart:', error);
+                    // Fallback to default checkout
+                    window.location.href = '/checkout';
+                  }
+                } else {
+                  // No cart items, go to default checkout
+                  window.location.href = '/checkout';
+                }
+              }}
               className="px-6 py-3 text-lg font-medium rounded-lg transition-all duration-200 bg-[#6ea058] text-white hover:bg-[#5a8a47] hover:scale-105 active:scale-95"
             >
               Proceed to Checkout

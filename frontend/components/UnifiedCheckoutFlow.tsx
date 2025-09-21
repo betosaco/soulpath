@@ -210,6 +210,7 @@ function UnifiedCheckoutFlowContent({
     email: string;
     phone: string;
     countryCode: string;
+    emailError?: string;
   }>>([]);
 
   // Load schedule and package data from sessionStorage on component mount
@@ -551,7 +552,7 @@ function UnifiedCheckoutFlowContent({
     // If user is editing schedule from order summary, go straight back to order summary
     if (isEditingSchedule) {
       setIsEditingSchedule(false);
-      setCurrentStep(requiresAddress() ? 4 : 3); // Go back to order summary
+      setCurrentStep(5); // Go back to order summary
       toast.success('Schedule updated! Review your order and complete payment.');
       return;
     }
@@ -609,7 +610,7 @@ function UnifiedCheckoutFlowContent({
     // If user is editing customer info from order summary, go straight back to order summary
     if (isEditingCustomerInfo) {
       setIsEditingCustomerInfo(false);
-      setCurrentStep(requiresAddress() ? 4 : 3); // Go back to order summary
+      setCurrentStep(5); // Go back to order summary
       toast.success('Personal information updated! Review your order and complete payment.');
       return;
     }
@@ -617,20 +618,39 @@ function UnifiedCheckoutFlowContent({
     // If user is editing billing document from order summary, go straight back to order summary
     if (isEditingBillingDocument) {
       setIsEditingBillingDocument(false);
-      setCurrentStep(requiresAddress() ? 4 : 3); // Go back to order summary
+      setCurrentStep(5); // Go back to order summary
       toast.success('Billing document updated! Review your order and complete payment.');
       return;
     }
 
     if (requiresAddress()) {
-      if (proceedToStep3()) {
+      // Check for conflicts first, then go to address step (step 4)
+      if (isGroupBooking === false) {
+        const conflictCheck = checkForScheduleConflicts();
+        if (conflictCheck.hasConflicts) {
+          console.log('🚫 CONFLICT DETECTED - preventing checkout progression');
+          setConflictingBookings(conflictCheck.conflictingBookings);
+          setOriginalConflictingBookings(conflictCheck.conflictingBookings);
+          setShowConflictResolution(true);
+          return;
+        }
+      }
+      setCurrentStep(4); // Go to address step
       toast.success('Personal information saved! Now enter your shipping address.');
-      }
     } else {
-      // Skip address step and go directly to summary
-      if (proceedToStep3()) {
-      toast.success('Personal information saved! Review your order and complete payment.');
+      // Skip address step and go directly to summary (step 5)
+      if (isGroupBooking === false) {
+        const conflictCheck = checkForScheduleConflicts();
+        if (conflictCheck.hasConflicts) {
+          console.log('🚫 CONFLICT DETECTED - preventing checkout progression');
+          setConflictingBookings(conflictCheck.conflictingBookings);
+          setOriginalConflictingBookings(conflictCheck.conflictingBookings);
+          setShowConflictResolution(true);
+          return;
+        }
       }
+      setCurrentStep(5); // Go to order summary step
+      toast.success('Personal information saved! Review your order and complete payment.');
     }
   };
 
@@ -643,12 +663,14 @@ function UnifiedCheckoutFlowContent({
     // If user is editing address from order summary, go straight back to order summary
     if (isEditingAddress) {
       setIsEditingAddress(false);
-      setCurrentStep(4); // Go back to order summary
+      // Go back to order summary step (always step 5)
+      setCurrentStep(5);
       toast.success('Shipping address updated! Review your order and complete payment.');
       return;
     }
 
-    setCurrentStep(4);
+    // Go to order summary step (always step 5)
+    setCurrentStep(5);
     toast.success('Address saved! Review your order and complete payment.');
   };
 
@@ -1301,7 +1323,7 @@ function UnifiedCheckoutFlowContent({
                           onClick={() => {
                             setIsEditingBillingDocument(false);
                             // Go back to summary step
-                            setCurrentStep(requiresAddress() ? 4 : 3);
+                            setCurrentStep(5);
                           }}
                           className="flex-1 h-12 text-lg"
                         >
@@ -1312,7 +1334,7 @@ function UnifiedCheckoutFlowContent({
                           onClick={() => {
                             setIsEditingBillingDocument(false);
                             // Go back to summary step
-                            setCurrentStep(requiresAddress() ? 4 : 3);
+                            setCurrentStep(5);
                             toast.success('Billing document updated successfully');
                           }}
                           className="flex-1 h-12 text-lg bg-primary hover:bg-primary/90"
@@ -1584,7 +1606,7 @@ function UnifiedCheckoutFlowContent({
                                 if (member.email) {
                                   const error = await validateEmailWithMessage(member.email);
                                   const updatedMembers = groupMembers.map(m => 
-                                    m.id === member.id ? { ...m, emailError: error } : m
+                                    m.id === member.id ? { ...m, emailError: error || undefined } : m
                                   );
                                   setGroupMembers(updatedMembers);
                                 }
@@ -2110,20 +2132,7 @@ function UnifiedCheckoutFlowContent({
           )}
 
           {/* Order Summary & Payment */}
-          {currentStep === (() => {
-            const packageCount = cartItems.filter(item => item.type === 'package').length;
-            const totalPackageQuantity = cartItems
-              .filter(item => item.type === 'package')
-              .reduce((sum, item) => sum + (item.quantity || 1), 0);
-            
-            if (packageCount > 1 || totalPackageQuantity > 1) {
-              // Group booking flow: group question (2) -> personal/group members (3) -> address (4) -> summary (5)
-              return requiresAddress() ? 5 : 4;
-            } else {
-              // Single package flow: personal (2) -> address (3) -> summary (4)
-              return requiresAddress() ? 4 : 3;
-            }
-          })() && (
+          {currentStep === 5 && (
             <motion.div
               key="summary"
               initial={{ opacity: 0, x: 20 }}
