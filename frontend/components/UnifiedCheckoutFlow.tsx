@@ -15,7 +15,7 @@ import {
   User,
   Calendar,
   MapPin,
-  Clock,
+  Clock as ClockIcon,
   FileText
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,6 +28,7 @@ import { toast } from 'sonner';
 import { validateEmailWithMessage } from '@/lib/email-validation';
 import { AppLayout } from '@/components/AppLayout';
 import { countries } from '@/lib/countries';
+import { CartBookingDetails } from '@/components/CartBookingDetails';
 import { useCart, CartItem } from '@/lib/cart-context';
 import { EnhancedSchedule } from './EnhancedSchedule';
 
@@ -96,7 +97,14 @@ function UnifiedCheckoutFlowContent({
 }: UnifiedCheckoutFlowProps) {
   const { language } = useLanguage();
   const { t } = useTranslations(undefined, language);
-  const { cartItems, requiresAddress, clearCart, updateQuantity, removeFromCart } = useCart();
+  const cartContext = useCart();
+  
+  // Safety checks to prevent undefined errors
+  if (!cartContext) {
+    return <div>Loading...</div>;
+  }
+  
+  const { cartItems, requiresAddress, clearCart, addToCart, updateQuantity, removeFromCart } = cartContext;
   const [currentStep, setCurrentStep] = useState(0);
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [countrySearchTerm, setCountrySearchTerm] = useState('');
@@ -108,6 +116,7 @@ function UnifiedCheckoutFlowContent({
   const [isEditingBillingDocument, setIsEditingBillingDocument] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [isCartLoading, setIsCartLoading] = useState(true);
   
   // Currency configuration
   const currencyCode = 'PEN'; // Default to Peruvian Soles
@@ -129,12 +138,25 @@ function UnifiedCheckoutFlowContent({
     ruc: '',
     companyName: '',
     // Additional fields
-    notes: ''
+    notes: '',
+    editingMemberId: ''
   });
 
   // Schedule data from enhanced packages flow
   const [scheduleData, setScheduleData] = useState<ScheduleSlot | null>(null);
   const [selectedPackageForBooking, setSelectedPackageForBooking] = useState<any>(null);
+  
+  // Group booking state
+  const [isGroupBooking, setIsGroupBooking] = useState<boolean | null>(null);
+  const [groupMembers, setGroupMembers] = useState<Array<{
+    id: string;
+    packageId: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    countryCode: string;
+  }>>([]);
 
   // Load schedule and package data from sessionStorage on component mount
   useEffect(() => {
@@ -184,14 +206,45 @@ function UnifiedCheckoutFlowContent({
         // No packages, start with personal info step
         setCurrentStep(2);
       }
+      
+      // Cart loading is complete
+      setIsCartLoading(false);
     }
   }, []); // Only run once on mount, not on every cart change
+
+  // Handle cart loading state
+  useEffect(() => {
+    // Set cart loading to false after a short delay to ensure cart is loaded
+    const timer = setTimeout(() => {
+      setIsCartLoading(false);
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Update cart items with booking details when schedule data is available
+  useEffect(() => {
+    if (scheduleData && cartItems.length > 0) {
+      // Find package items that don't have booking details yet
+      const packageItems = cartItems.filter(item => item.type === 'package' && !item.bookingDetails);
+      
+      if (packageItems.length > 0) {
+        // Note: We can't directly modify cartItems here as it's managed by the cart context
+        // Instead, we'll rely on the display logic to show booking details from scheduleData
+        console.log('Schedule data available for booking details:', scheduleData);
+      }
+    }
+  }, [scheduleData, cartItems]);
 
   // Get selected country
   const selectedCountry = countries.find(c => c.code === formData.countryCode) || countries[0];
 
   // Helper function to safely access nested translation properties
   const getTranslation = useCallback((path: string, fallback: string = ''): string => {
+    if (!t || typeof t !== 'object') {
+      return fallback;
+    }
+    
     const keys = path.split('.');
     let value: unknown = t;
     
@@ -229,6 +282,20 @@ function UnifiedCheckoutFlowContent({
         id: 'package-selection', 
         title: getTranslation('bookingFlow.selectPackageForBooking', 'Choose Package for Booking'), 
         description: getTranslation('bookingFlow.selectPackageForBookingDesc', 'Select which package to use for this booking'), 
+        completed: false 
+      });
+    }
+    
+    // If there are multiple packages OR a single package with quantity > 1, add group booking step
+    const totalPackageQuantity = cartItems
+      .filter(item => item.type === 'package')
+      .reduce((sum, item) => sum + (item.quantity || 1), 0);
+    
+    if (packageCount > 1 || totalPackageQuantity > 1) {
+      baseSteps.push({ 
+        id: 'group-booking', 
+        title: 'Group Booking', 
+        description: 'Is this a group booking? Each person will need their own information', 
         completed: false 
       });
     }
@@ -466,6 +533,25 @@ function UnifiedCheckoutFlowContent({
     setIsProcessing(true);
     
     try {
+      // Extract schedule details from cart items (handle multiple bookings)
+      let scheduleDetails = null;
+      const packageWithBooking = cartItems.find(item => 
+        item.type === 'package' && item.bookingDetails && Array.isArray(item.bookingDetails) && item.bookingDetails.length > 0
+      );
+      
+      if (packageWithBooking && packageWithBooking.bookingDetails && packageWithBooking.bookingDetails.length > 0) {
+        // Pass all booking details to the API
+        scheduleDetails = packageWithBooking.bookingDetails.map(booking => ({
+          selectedDate: booking.selectedDate,
+          selectedTime: booking.selectedTime,
+          teacher: booking.teacher,
+          serviceType: booking.serviceType,
+          venue: booking.venue,
+          dayOfWeek: booking.dayOfWeek,
+          scheduleSlotId: booking.scheduleSlotId
+        }));
+      }
+
       // Create unified order without payment
       const orderData = {
         customerInfo: {
@@ -490,7 +576,8 @@ function UnifiedCheckoutFlowContent({
         totalAmount: calculateTotal(),
         currency: currencyCode,
         paymentIntentId: undefined, // No payment for pay later - API will set status to PENDING
-        notes: formData.notes
+        notes: formData.notes,
+        scheduleDetails: scheduleDetails
       };
 
       // Log order data for debugging
@@ -591,8 +678,24 @@ function UnifiedCheckoutFlowContent({
     }
   };
 
+  // Show loading state while cart is being loaded
+  if (isCartLoading) {
+    return (
+      <AppLayout className="min-h-screen bg-white">
+        <div className="min-h-screen flex items-center justify-center bg-white">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading checkout...</p>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
   // Redirect to products if cart is empty (but not when redirecting after order completion)
-  if (cartItems.length === 0 && !isRedirecting) {
+  // Also check if we have schedule data in sessionStorage to avoid showing empty cart during schedule selection
+  const hasScheduleData = typeof window !== 'undefined' && sessionStorage.getItem('selectedSchedule');
+  if (cartItems.length === 0 && !isRedirecting && !hasScheduleData) {
     return (
       <AppLayout className="min-h-screen bg-white">
         <div className="min-h-screen flex items-center justify-center bg-white">
@@ -671,14 +774,6 @@ function UnifiedCheckoutFlowContent({
           {/* Step 1: Schedule Selection (only if packages in cart, no schedule data, and not direct checkout, OR when editing schedule) */}
           {(() => {
             const shouldShowSchedule = currentStep === 0 && cartItems.some(item => item.type === 'package') && (isEditingSchedule || !scheduleData) && !isDirectCheckout;
-            console.log('Schedule step condition:', {
-              currentStep,
-              hasPackages: cartItems.some(item => item.type === 'package'),
-              isEditingSchedule,
-              hasScheduleData: !!scheduleData,
-              isDirectCheckout,
-              shouldShowSchedule
-            });
             return shouldShowSchedule;
           })() && (
             <motion.div
@@ -797,8 +892,102 @@ function UnifiedCheckoutFlowContent({
             </motion.div>
           )}
 
-          {/* Personal Information */}
-          {currentStep === 2 && (
+          {/* Group Booking Question */}
+          {currentStep === 2 && (() => {
+            const packageCount = cartItems.filter(item => item.type === 'package').length;
+            const totalPackageQuantity = cartItems
+              .filter(item => item.type === 'package')
+              .reduce((sum, item) => sum + (item.quantity || 1), 0);
+            return packageCount > 1 || totalPackageQuantity > 1;
+          })() && (
+            <motion.div
+              key="group-booking"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="max-w-2xl mx-auto mobile-step-content mobile-form-container"
+            >
+              <Card className="card-base">
+                <CardHeader>
+                  <CardTitle 
+                    className="text-2xl text-primary text-center"
+                    style={{ fontFamily: 'var(--font-heading)' }}
+                  >
+                    Group Booking
+                  </CardTitle>
+                  <p className="text-center text-gray-600 mt-2">
+                    Is this a group booking? Each person will need their own information.
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex justify-center space-x-4">
+                    <Button
+                      onClick={() => {
+                        setIsGroupBooking(true);
+                        // Initialize group members for each package and quantity
+                        const packageItems = cartItems.filter(item => item.type === 'package');
+                        const members: Array<{
+                          id: string;
+                          packageId: string;
+                          firstName: string;
+                          lastName: string;
+                          email: string;
+                          phone: string;
+                          countryCode: string;
+                        }> = [];
+                        packageItems.forEach((item, packageIndex) => {
+                          const quantity = item.quantity || 1;
+                          for (let i = 0; i < quantity; i++) {
+                            members.push({
+                              id: `member-${packageIndex}-${i}`,
+                              packageId: item.id,
+                              firstName: '',
+                              lastName: '',
+                              email: '',
+                              phone: '',
+                              countryCode: 'PE' // Default to Peru
+                            });
+                          }
+                        });
+                        setGroupMembers(members);
+                        setCurrentStep(3);
+                      }}
+                      className={`px-8 py-3 text-lg ${
+                        isGroupBooking === true 
+                          ? 'bg-primary text-white' 
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      Yes
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setIsGroupBooking(false);
+                        setGroupMembers([]);
+                        setCurrentStep(3);
+                      }}
+                      className={`px-8 py-3 text-lg ${
+                        isGroupBooking === false 
+                          ? 'bg-primary text-white' 
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      No
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Personal Information - Single Package or Non-Group */}
+          {currentStep === 2 && (() => {
+            const packageCount = cartItems.filter(item => item.type === 'package').length;
+            const totalPackageQuantity = cartItems
+              .filter(item => item.type === 'package')
+              .reduce((sum, item) => sum + (item.quantity || 1), 0);
+            return packageCount <= 1 && totalPackageQuantity <= 1;
+          })() && (
             <motion.div
               key="personal"
               initial={{ opacity: 0, x: 20 }}
@@ -1050,7 +1239,7 @@ function UnifiedCheckoutFlowContent({
                                   )
                                   .map((country, index) => (
                                     <button
-                                      key={`${country.code}-${country.country}`}
+                                      key={`${country.code}-${country.name}-${country.country}`}
                                       type="button"
                                       onClick={() => {
                                         setFormData(prev => ({ ...prev, countryCode: country.code }));
@@ -1112,7 +1301,371 @@ function UnifiedCheckoutFlowContent({
           )}
 
           {/* Shipping Address */}
-          {currentStep === 3 && requiresAddress() && (
+          {/* Group Member Information */}
+          {currentStep === 3 && isGroupBooking && (() => {
+            const packageCount = cartItems.filter(item => item.type === 'package').length;
+            const totalPackageQuantity = cartItems
+              .filter(item => item.type === 'package')
+              .reduce((sum, item) => sum + (item.quantity || 1), 0);
+            return packageCount > 1 || totalPackageQuantity > 1;
+          })() && (
+            <motion.div
+              key="group-members"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="max-w-4xl mx-auto mobile-step-content mobile-form-container"
+            >
+              <Card className="card-base">
+                <CardHeader>
+                  <CardTitle 
+                    className="text-2xl text-primary text-center"
+                    style={{ fontFamily: 'var(--font-heading)' }}
+                  >
+                    Group Member Information
+                  </CardTitle>
+                  <p className="text-center text-gray-600 mt-2">
+                    Please provide information for each person using a package.
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-8">
+                  {groupMembers.map((member, index) => {
+                    const packageItem = cartItems.find(item => item.id === member.packageId);
+                    const selectedCountry = countries.find(c => c.code === member.countryCode) || countries[0];
+                    
+                    return (
+                      <div key={member.id} className="border border-gray-200 rounded-lg p-6">
+                        <h3 className="text-lg font-semibold text-primary mb-6">
+                          Person {index + 1} - {packageItem?.name || 'Package'}
+                        </h3>
+                        
+                        {/* Personal Information */}
+                        <div className="space-y-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor={`firstName-${member.id}`} className="text-black text-lg font-medium mb-2 block">First Name *</Label>
+                              <Input
+                                id={`firstName-${member.id}`}
+                                value={member.firstName}
+                                onChange={(e) => {
+                                  const updatedMembers = groupMembers.map(m => 
+                                    m.id === member.id ? { ...m, firstName: e.target.value } : m
+                                  );
+                                  setGroupMembers(updatedMembers);
+                                }}
+                                placeholder="Enter first name"
+                                className="h-14 text-lg mobile-touch-target"
+                                required
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor={`lastName-${member.id}`} className="text-black text-lg font-medium mb-2 block">Last Name *</Label>
+                              <Input
+                                id={`lastName-${member.id}`}
+                                value={member.lastName}
+                                onChange={(e) => {
+                                  const updatedMembers = groupMembers.map(m => 
+                                    m.id === member.id ? { ...m, lastName: e.target.value } : m
+                                  );
+                                  setGroupMembers(updatedMembers);
+                                }}
+                                placeholder="Enter last name"
+                                className="h-14 text-lg mobile-touch-target"
+                                required
+                              />
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor={`email-${member.id}`} className="text-black text-lg font-medium mb-2 block">Email Address *</Label>
+                            <Input
+                              id={`email-${member.id}`}
+                              type="email"
+                              value={member.email}
+                              onChange={(e) => {
+                                const updatedMembers = groupMembers.map(m => 
+                                  m.id === member.id ? { ...m, email: e.target.value } : m
+                                );
+                                setGroupMembers(updatedMembers);
+                              }}
+                              placeholder="Enter your email address"
+                              className="h-14 text-lg mobile-touch-target"
+                              required
+                            />
+                          </div>
+                          
+                          <div className="md:col-span-2">
+                            <Label htmlFor={`phone-${member.id}`} className="text-black text-lg font-medium mb-2 block">Phone Number *</Label>
+                            <div className="flex gap-2 mobile-input-group">
+                              {/* Country Code Dropdown */}
+                              <div className="relative country-dropdown mobile-country-dropdown">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    // Close other dropdowns and open this one
+                                    setIsCountryDropdownOpen(false);
+                                    setCountrySearchTerm('');
+                                    // Set a flag to indicate which member's dropdown is open
+                                    setFormData(prev => ({ ...prev, editingMemberId: member.id }));
+                                    setIsCountryDropdownOpen(true);
+                                  }}
+                                  className="h-14 w-36 px-3 flex items-center space-x-2 border-2 border-gray-300 bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent mobile-touch-target rounded-lg transition-all duration-200 hover:scale-105 active:scale-95"
+                                >
+                                  <span className="text-lg">{selectedCountry.flag}</span>
+                                  <span className="text-sm text-gray-700 font-medium">{selectedCountry.code}</span>
+                                  <svg className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isCountryDropdownOpen && formData.editingMemberId === member.id ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                  </svg>
+                                </button>
+                                
+                                {/* Country Dropdown Menu */}
+                                {isCountryDropdownOpen && formData.editingMemberId === member.id && (
+                                  <>
+                                    {/* Backdrop */}
+                                    <div 
+                                      className="fixed inset-0 bg-black bg-opacity-20 z-40 animate-[fadeIn_0.2s_ease-out_forwards]"
+                                      onClick={() => {
+                                        setIsCountryDropdownOpen(false);
+                                        setCountrySearchTerm('');
+                                        setFormData(prev => ({ ...prev, editingMemberId: '' }));
+                                      }}
+                                    />
+                                    
+                                    {/* Side Menu */}
+                                    <div className="fixed top-0 right-0 h-full w-96 bg-white shadow-2xl z-50 transform translate-x-full animate-[slideInRight_0.3s_cubic-bezier(0.25,0.46,0.45,0.94)_forwards] flex flex-col">
+                                      {/* Header */}
+                                      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+                                        <h3 className="text-lg font-semibold text-gray-900">Select Country</h3>
+                                        <button
+                                          onClick={() => {
+                                            setIsCountryDropdownOpen(false);
+                                            setCountrySearchTerm('');
+                                            setFormData(prev => ({ ...prev, editingMemberId: '' }));
+                                          }}
+                                          className="p-2 hover:bg-gray-200 rounded-full transition-colors duration-150"
+                                        >
+                                          <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                          </svg>
+                                        </button>
+                                      </div>
+                                      
+                                      {/* Search Bar */}
+                                      <div className="p-4 border-b border-gray-200 flex-shrink-0">
+                                        <div className="relative">
+                                          <input
+                                            type="text"
+                                            placeholder="Search countries..."
+                                            value={countrySearchTerm}
+                                            onChange={(e) => setCountrySearchTerm(e.target.value)}
+                                            className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                          />
+                                          <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                          </svg>
+                                        </div>
+                                      </div>
+                                      
+                                      {/* Country List */}
+                                      <div className="flex-1 overflow-y-auto">
+                                        <div className="p-2">
+                                          {countries
+                                            .filter(country => 
+                                              country.name.toLowerCase().includes(countrySearchTerm.toLowerCase()) ||
+                                              country.code.includes(countrySearchTerm)
+                                            )
+                                            .map((country) => (
+                                              <button
+                                                key={`${country.code}-${country.name}-${country.country}`}
+                                                type="button"
+                                                onClick={() => {
+                                                  const updatedMembers = groupMembers.map(m => 
+                                                    m.id === member.id ? { ...m, countryCode: country.code } : m
+                                                  );
+                                                  setGroupMembers(updatedMembers);
+                                                  setIsCountryDropdownOpen(false);
+                                                  setCountrySearchTerm('');
+                                                  setFormData(prev => ({ ...prev, editingMemberId: '' }));
+                                                }}
+                                                className={`w-full flex items-center space-x-3 px-4 py-3 text-left hover:bg-gray-100 rounded-lg transition-colors duration-150 ${
+                                                  member.countryCode === country.code ? 'bg-primary/10 text-primary' : 'text-gray-700'
+                                                }`}
+                                              >
+                                                <span className="text-xl">{country.flag}</span>
+                                                <div className="flex-1">
+                                                  <div className="font-medium">{country.name}</div>
+                                                  <div className="text-sm text-gray-500">{country.code}</div>
+                                                </div>
+                                                {member.countryCode === country.code && (
+                                                  <svg className="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                  </svg>
+                                                )}
+                                              </button>
+                                            ))}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                              
+                              <Input
+                                id={`phone-${member.id}`}
+                                value={member.phone}
+                                onChange={(e) => {
+                                  const updatedMembers = groupMembers.map(m => 
+                                    m.id === member.id ? { ...m, phone: e.target.value } : m
+                                  );
+                                  setGroupMembers(updatedMembers);
+                                }}
+                                placeholder="Enter phone number"
+                                className="flex-1 h-14 text-lg mobile-touch-target"
+                                required
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  
+                  <div className="flex justify-center pt-4">
+                    <Button
+                      onClick={() => {
+                        // Validate all group members
+                        const isValid = groupMembers.every(member => 
+                          member.firstName && member.lastName && member.email && member.phone && member.countryCode
+                        );
+                        
+                        if (!isValid) {
+                          toast.error('Please fill in all required fields for each group member.');
+                          return;
+                        }
+                        
+                        // Move to next step
+                        if (requiresAddress()) {
+                          setCurrentStep(4);
+                        } else {
+                          setCurrentStep(5);
+                        }
+                      }}
+                      className="px-8 py-3 text-lg"
+                    >
+                      Continue
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Personal Information - Group Booking (No) */}
+          {currentStep === 3 && !isGroupBooking && (() => {
+            const packageCount = cartItems.filter(item => item.type === 'package').length;
+            const totalPackageQuantity = cartItems
+              .filter(item => item.type === 'package')
+              .reduce((sum, item) => sum + (item.quantity || 1), 0);
+            return packageCount > 1 || totalPackageQuantity > 1;
+          })() && (
+            <motion.div
+              key="personal-group"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="max-w-2xl mx-auto mobile-step-content mobile-form-container"
+            >
+              <Card className="card-base">
+                <CardHeader>
+                  <CardTitle 
+                    className="text-2xl text-primary text-center"
+                    style={{ fontFamily: 'var(--font-heading)' }}
+                  >
+                    Personal Information
+                  </CardTitle>
+                  <p className="text-center text-gray-600 mt-2">
+                    Provide your contact details for all packages.
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Same personal information form as single package */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="firstName">First Name *</Label>
+                      <Input
+                        id="firstName"
+                        value={formData.clientName.split(' ')[0] || ''}
+                        onChange={(e) => setFormData(prev => ({ 
+                          ...prev, 
+                          clientName: e.target.value + ' ' + (prev.clientName.split(' ').slice(1).join(' ') || '')
+                        }))}
+                        placeholder="Enter your first name"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="lastName">Last Name *</Label>
+                      <Input
+                        id="lastName"
+                        value={formData.clientName.split(' ').slice(1).join(' ') || ''}
+                        onChange={(e) => setFormData(prev => ({ 
+                          ...prev, 
+                          clientName: (prev.clientName.split(' ')[0] || '') + ' ' + e.target.value
+                        }))}
+                        placeholder="Enter your last name"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="email">Email *</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.clientEmail}
+                        onChange={(e) => setFormData(prev => ({ ...prev, clientEmail: e.target.value }))}
+                        placeholder="Enter your email address"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="phone">Phone *</Label>
+                      <Input
+                        id="phone"
+                        value={formData.clientPhone}
+                        onChange={(e) => setFormData(prev => ({ ...prev, clientPhone: e.target.value }))}
+                        placeholder="Enter your phone number"
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-center pt-4">
+                    <Button
+                      onClick={() => {
+                        // Validate form
+                        if (!formData.clientName || !formData.clientEmail || !formData.clientPhone) {
+                          toast.error('Please fill in all required fields.');
+                          return;
+                        }
+                        
+                        // Move to next step
+                        if (requiresAddress()) {
+                          setCurrentStep(4);
+                        } else {
+                          setCurrentStep(5);
+                        }
+                      }}
+                      className="px-8 py-3 text-lg"
+                    >
+                      Continue
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
+          {currentStep === 4 && requiresAddress() && (
             <motion.div
               key="address"
               initial={{ opacity: 0, x: 20 }}
@@ -1235,7 +1788,20 @@ function UnifiedCheckoutFlowContent({
           )}
 
           {/* Order Summary & Payment */}
-          {currentStep === (requiresAddress() ? 4 : 3) && (
+          {currentStep === (() => {
+            const packageCount = cartItems.filter(item => item.type === 'package').length;
+            const totalPackageQuantity = cartItems
+              .filter(item => item.type === 'package')
+              .reduce((sum, item) => sum + (item.quantity || 1), 0);
+            
+            if (packageCount > 1 || totalPackageQuantity > 1) {
+              // Group booking flow: group question (2) -> personal/group members (3) -> address (4) -> summary (5)
+              return requiresAddress() ? 5 : 4;
+            } else {
+              // Single package flow: personal (2) -> address (3) -> summary (4)
+              return requiresAddress() ? 4 : 3;
+            }
+          })() && (
             <motion.div
               key="summary"
               initial={{ opacity: 0, x: 20 }}
@@ -1411,7 +1977,8 @@ function UnifiedCheckoutFlowContent({
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {cartItems.map((item) => (
-                      <div key={item.id} className="flex items-center space-x-4 p-3 border rounded-lg">
+                      <div key={item.id} className="space-y-3">
+                        <div className="flex items-center space-x-4 p-3 border rounded-lg">
                         <div className="w-12 h-12 bg-gray-200 rounded-md flex-shrink-0">
                           <Image 
                             src={item.image} 
@@ -1456,8 +2023,28 @@ function UnifiedCheckoutFlowContent({
                                   variant="outline"
                                   size="sm"
                                   onClick={() => {
+                                    if (item.type === 'package') {
+                                      // For packages, create a new package instead of incrementing quantity
+                                      const uniqueId = `${item.sku}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                                      addToCart({
+                                        id: uniqueId,
+                                        name: item.name,
+                                        price: item.price,
+                                        image: item.image,
+                                        sku: item.sku,
+                                        currency: item.currency,
+                                        type: item.type,
+                                        sessions: item.sessions,
+                                        duration: item.duration,
+                                        packageType: item.packageType,
+                                        maxGroupSize: item.maxGroupSize
+                                      });
+                                      toast.success(`${item.name} added to cart`);
+                                    } else {
+                                      // For products, increment quantity
                                     updateQuantity(item.id, item.quantity + 1);
                                     toast.success('Quantity updated');
+                                    }
                                   }}
                                   className="h-6 w-6 p-0 text-xs"
                                 >
@@ -1480,6 +2067,20 @@ function UnifiedCheckoutFlowContent({
                           <p className="font-semibold text-sm">{formatCurrency(item.price * item.quantity, item.currency)}</p>
                           <p className="text-xs text-gray-500">{formatCurrency(item.price, item.currency)} each</p>
                         </div>
+                        </div>
+                        
+                        {/* Show booking details for packages */}
+                        {item.type === 'package' && item.bookingDetails && item.bookingDetails.length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-gray-100">
+                            <CartBookingDetails
+                              bookingDetails={item.bookingDetails}
+                              packageSessions={item.sessions}
+                              packageId={item.id}
+                              showActions={false}
+                            />
+                          </div>
+                        )}
+                        
                       </div>
                     ))}
                   </CardContent>
@@ -1524,7 +2125,7 @@ function UnifiedCheckoutFlowContent({
                         disabled={isProcessing}
                         className="w-full py-4 text-lg font-medium bg-orange-500 hover:bg-orange-600 text-white transition-all duration-200 flex items-center justify-center gap-2 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                       >
-                        <Clock className="w-5 h-5" />
+                        <ClockIcon className="w-5 h-5" />
                         {isProcessing ? 'Processing...' : 'Complete Order - Pay Later'}
                       </Button>
                     </div>

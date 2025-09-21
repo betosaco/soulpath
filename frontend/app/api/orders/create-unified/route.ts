@@ -45,7 +45,7 @@ interface OrderRequest {
     venue?: string;
     dayOfWeek?: string;
     scheduleSlotId?: number;
-  };
+  }[];
 }
 
 export async function POST(request: NextRequest) {
@@ -205,6 +205,9 @@ export async function POST(request: NextRequest) {
               quantity: item.quantity,
               price: item.price,
               total: item.price * item.quantity
+            },
+            include: {
+              product: true
             }
           });
           orderItems.push(orderItem);
@@ -247,6 +250,13 @@ export async function POST(request: NextRequest) {
                 duration: item.duration,
                 packageType: item.packageType,
                 maxGroupSize: item.maxGroupSize
+              }
+            },
+            include: {
+              packagePrice: {
+                include: {
+                  packageDefinition: true
+                }
               }
             }
           });
@@ -304,66 +314,115 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get schedule details from the request
+    // Get order items with proper relations
+    const orderItemsWithRelations = await prisma.orderItem.findMany({
+      where: { orderId: result.order.id },
+      include: {
+        product: true,
+        packagePrice: {
+          include: {
+            packageDefinition: true
+          }
+        }
+      }
+    });
+
+    // Get schedule details from the request (now supports multiple bookings)
     let scheduleDetails = orderData.scheduleDetails || null;
     
-    // If schedule details are provided and there's a package, create a booking
-    let bookingResult = null;
-    if (scheduleDetails && scheduleDetails.scheduleSlotId && result.userPackages.length > 0) {
+    // If schedule details are provided and there's a package, create bookings
+    let bookingResults = [];
+    if (scheduleDetails && Array.isArray(scheduleDetails) && scheduleDetails.length > 0 && result.userPackages.length > 0) {
       try {
         // Find the first available user package for booking
         const userPackage = result.userPackages[0];
         
-        // Create the booking
-        const booking = await prisma.booking.create({
-          data: {
-            userId: result.order.customerId,
-            userPackageId: userPackage.id,
-            scheduleSlotId: scheduleDetails.scheduleSlotId,
-            sessionType: scheduleDetails.serviceType || 'Yoga Class',
-            notes: orderData.notes || '',
-            status: 'confirmed'
-          },
-          include: {
-            scheduleSlot: {
+        // Create multiple bookings for each schedule detail
+        for (const scheduleDetail of scheduleDetails) {
+          if (scheduleDetail.scheduleSlotId) {
+            // Create the booking
+            const booking = await prisma.booking.create({
+              data: {
+                userId: result.order.customerId!,
+                userPackageId: userPackage.id,
+                scheduleSlotId: scheduleDetail.scheduleSlotId,
+                sessionType: scheduleDetail.serviceType || 'Yoga Class',
+                notes: orderData.notes || '',
+                status: 'confirmed'
+              },
               include: {
-                scheduleTemplate: {
+                scheduleSlot: {
                   include: {
-                    sessionDuration: true,
-                    teacher: true,
-                    venue: true
+                    scheduleTemplate: {
+                      include: {
+                        sessionDuration: true,
+                        venue: true
+                      }
+                    }
                   }
-                }
+                },
+                userPackage: {
+                  include: {
+                    packagePrice: {
+                      include: {
+                        packageDefinition: true
+                      }
+                    }
+                  }
+                },
+                teacher: true,
+                venue: true
               }
-            },
-            userPackage: {
+            });
+            
+            // Update schedule slot booked count
+            await prisma.scheduleSlot.update({
+              where: { id: scheduleDetail.scheduleSlotId },
+              data: { bookedCount: { increment: 1 } }
+            });
+            
+            // Get the booking with proper relations
+            const bookingWithRelations = await prisma.booking.findUnique({
+              where: { id: booking.id },
               include: {
-                packagePrice: {
+                scheduleSlot: {
                   include: {
-                    packageDefinition: true
+                    scheduleTemplate: {
+                      include: {
+                        sessionDuration: true,
+                        venue: true
+                      }
+                    }
                   }
-                }
+                },
+                userPackage: {
+                  include: {
+                    packagePrice: {
+                      include: {
+                        packageDefinition: true
+                      }
+                    }
+                  }
+                },
+                teacher: true,
+                venue: true
               }
-            }
+            });
+            
+            bookingResults.push(bookingWithRelations);
+            console.log('✅ Booking created successfully:', booking.id);
           }
-        });
+        }
         
-        // Update schedule slot booked count
-        await prisma.scheduleSlot.update({
-          where: { id: scheduleDetails.scheduleSlotId },
-          data: { bookedCount: { increment: 1 } }
-        });
-        
-        // Update user package sessions used
+        // Update user package sessions used (total number of bookings)
         await prisma.userPackage.update({
           where: { id: userPackage.id },
-          data: { sessionsUsed: { increment: 1 } }
+          data: { sessionsUsed: { increment: bookingResults.length } }
         });
         
-        bookingResult = booking;
-        console.log('✅ Booking created successfully:', booking.id);
+        console.log(`✅ Created ${bookingResults.length} bookings successfully`);
       } catch (bookingError) {
-        console.error('Error creating booking:', bookingError);
+        console.error('Error creating bookings:', bookingError);
         // Don't fail the order creation if booking fails
       }
     }
@@ -373,7 +432,7 @@ export async function POST(request: NextRequest) {
       const orderUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/order-confirmation?orderId=${result.order.id}`;
       
       // Format order items for email
-      const emailOrderItems = result.orderItems.map(item => {
+      const emailOrderItems = orderItemsWithRelations.map(item => {
         if (item.itemType === 'PRODUCT' && item.product) {
           return {
             name: item.product.name,
@@ -400,7 +459,7 @@ export async function POST(request: NextRequest) {
 
       // Get package booking details from the order items
       let packageBookingDetails = null;
-      const packageItem = result.orderItems.find(item => item.itemType === 'PACKAGE' && item.packagePrice);
+      const packageItem = orderItemsWithRelations.find(item => item.itemType === 'PACKAGE' && item.packagePrice);
       if (packageItem && packageItem.packagePrice) {
         packageBookingDetails = {
           packageName: packageItem.packagePrice.packageDefinition.name,
@@ -411,25 +470,27 @@ export async function POST(request: NextRequest) {
         };
       }
 
-      // Prepare enhanced schedule details if booking was created
+      // Prepare enhanced schedule details if bookings were created
       let enhancedScheduleDetails = scheduleDetails;
-      if (bookingResult) {
-        enhancedScheduleDetails = {
-          selectedDate: bookingResult.scheduleSlot?.startTime.toLocaleDateString('es-ES', {
+      if (bookingResults && bookingResults.length > 0) {
+        // Use the first booking for the main schedule details in email
+        const firstBooking = bookingResults[0];
+        enhancedScheduleDetails = [{
+          selectedDate: firstBooking.scheduleSlot?.startTime.toLocaleDateString('es-ES', {
             weekday: 'long',
             year: 'numeric',
             month: 'long',
             day: 'numeric'
-          }) || scheduleDetails?.selectedDate,
-          selectedTime: bookingResult.scheduleSlot?.startTime.toLocaleTimeString('es-ES', {
+          }) || scheduleDetails?.[0]?.selectedDate,
+          selectedTime: firstBooking.scheduleSlot?.startTime.toLocaleTimeString('es-ES', {
             hour: '2-digit',
             minute: '2-digit'
-          }) || scheduleDetails?.selectedTime,
-          teacher: bookingResult.scheduleSlot?.scheduleTemplate?.teacher?.name || scheduleDetails?.teacher,
-          serviceType: bookingResult.sessionType || scheduleDetails?.serviceType,
-          venue: bookingResult.scheduleSlot?.scheduleTemplate?.venue?.name || scheduleDetails?.venue,
-          dayOfWeek: bookingResult.scheduleSlot?.scheduleTemplate?.dayOfWeek || scheduleDetails?.dayOfWeek
-        };
+          }) || scheduleDetails?.[0]?.selectedTime,
+          teacher: firstBooking.teacher?.name || scheduleDetails?.[0]?.teacher,
+          serviceType: firstBooking.sessionType || scheduleDetails?.[0]?.serviceType,
+          venue: firstBooking.venue?.name || scheduleDetails?.[0]?.venue,
+          dayOfWeek: firstBooking.scheduleSlot?.scheduleTemplate?.dayOfWeek || scheduleDetails?.[0]?.dayOfWeek
+        }];
       }
 
       const emailData = {
@@ -451,9 +512,9 @@ export async function POST(request: NextRequest) {
         paymentStatusText: result.order.paymentStatus === 'COMPLETED' ? 'Completado' : 
                           result.order.paymentStatus === 'PENDING' ? 'Pendiente' : result.order.paymentStatus,
         billingDocumentType: result.order.billingDocumentType || 'boleta_simple',
-        dni: result.order.dni,
-        ruc: result.order.ruc,
-        companyName: result.order.companyName,
+        dni: result.order.dni || undefined,
+        ruc: result.order.ruc || undefined,
+        companyName: result.order.companyName || undefined,
         orderItems: emailOrderItems,
         subtotal: Number(result.order.subtotal),
         tax_amount: Number(result.order.taxAmount),
@@ -473,43 +534,46 @@ export async function POST(request: NextRequest) {
         // Don't fail the order creation if email fails
       });
 
-      // If a booking was created, also send booking confirmation email
-      if (bookingResult) {
+      // If bookings were created, also send booking confirmation emails
+      if (bookingResults && bookingResults.length > 0) {
         try {
-          const bookingEmailData = {
-            customerName: result.order.customerName,
-            customerEmail: result.order.customerEmail,
-            bookingId: bookingResult.id.toString(),
-            bookingDate: bookingResult.scheduleSlot?.startTime.toLocaleDateString('es-ES', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            }) || '',
-            bookingTime: bookingResult.scheduleSlot?.startTime.toLocaleTimeString('es-ES', {
-              hour: '2-digit',
-              minute: '2-digit'
-            }) || '',
-            sessionType: bookingResult.sessionType,
-            instructor: bookingResult.scheduleSlot?.scheduleTemplate?.teacher?.name || 'Por asignar',
-            venue: bookingResult.scheduleSlot?.scheduleTemplate?.venue?.name || 'MatMax Yoga Studio',
-            duration: bookingResult.scheduleSlot?.scheduleTemplate?.sessionDuration?.duration_minutes || 60,
-            packageName: bookingResult.userPackage?.packagePrice?.packageDefinition?.name || 'Paquete de Yoga',
-            packageDescription: bookingResult.userPackage?.packagePrice?.packageDefinition?.description || '',
-            sessionsUsed: bookingResult.userPackage?.sessionsUsed || 0,
-            sessionsRemaining: (bookingResult.userPackage?.packagePrice?.packageDefinition?.sessionsCount || 0) - (bookingResult.userPackage?.sessionsUsed || 0),
-            packageType: bookingResult.userPackage?.packagePrice?.packageDefinition?.packageType || 'INDIVIDUAL',
-            bookingUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/bookings`,
-            language: orderData.customerInfo.language || 'es'
-          };
+          // Send booking confirmation email for each booking
+          for (const bookingResult of bookingResults) {
+            const bookingEmailData = {
+              customerName: result.order.customerName,
+              customerEmail: result.order.customerEmail,
+              bookingId: bookingResult.id.toString(),
+              bookingDate: bookingResult.scheduleSlot?.startTime.toLocaleDateString('es-ES', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              }) || '',
+              bookingTime: bookingResult.scheduleSlot?.startTime.toLocaleTimeString('es-ES', {
+                hour: '2-digit',
+                minute: '2-digit'
+              }) || '',
+              sessionType: bookingResult.sessionType,
+              instructor: bookingResult.teacher?.name || 'Por asignar',
+              venue: bookingResult.venue?.name || 'MatMax Yoga Studio',
+              duration: bookingResult.scheduleSlot?.scheduleTemplate?.sessionDuration?.duration_minutes || 60,
+              packageName: bookingResult.userPackage?.packagePrice?.packageDefinition?.name || 'Paquete de Yoga',
+              packageDescription: bookingResult.userPackage?.packagePrice?.packageDefinition?.description || '',
+              sessionsUsed: bookingResult.userPackage?.sessionsUsed || 0,
+              sessionsRemaining: (bookingResult.userPackage?.packagePrice?.packageDefinition?.sessionsCount || 0) - (bookingResult.userPackage?.sessionsUsed || 0),
+              packageType: bookingResult.userPackage?.packagePrice?.packageDefinition?.packageType || 'INDIVIDUAL',
+              bookingUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/bookings`,
+              language: orderData.customerInfo.language || 'es'
+            };
 
-          // Send booking confirmation email asynchronously
-          sendBookingConfirmationEmail(bookingEmailData).catch(error => {
-            console.error('Failed to send booking confirmation email:', error);
-            // Don't fail the order creation if email fails
-          });
+            // Send booking confirmation email asynchronously
+            sendBookingConfirmationEmail(bookingEmailData).catch(error => {
+              console.error('Failed to send booking confirmation email:', error);
+              // Don't fail the order creation if email fails
+            });
+          }
         } catch (bookingEmailError) {
-          console.error('Error preparing booking confirmation email:', bookingEmailError);
+          console.error('Error preparing booking confirmation emails:', bookingEmailError);
           // Don't fail the order creation if email preparation fails
         }
       }
@@ -528,17 +592,17 @@ export async function POST(request: NextRequest) {
       currency: result.order.currency,
       items: orderData.items,
       userPackages: result.userPackages,
-      booking: bookingResult ? {
-        id: bookingResult.id,
-        sessionType: bookingResult.sessionType,
-        status: bookingResult.status,
+      bookings: bookingResults.map(booking => ({
+        id: booking.id,
+        sessionType: booking.sessionType,
+        status: booking.status,
         scheduleSlot: {
-          startTime: bookingResult.scheduleSlot?.startTime,
-          endTime: bookingResult.scheduleSlot?.endTime,
-          teacher: bookingResult.scheduleSlot?.scheduleTemplate?.teacher?.name,
-          venue: bookingResult.scheduleSlot?.scheduleTemplate?.venue?.name
+          startTime: booking.scheduleSlot?.startTime,
+          endTime: booking.scheduleSlot?.endTime,
+          teacher: booking.teacher?.name,
+          venue: booking.venue?.name
         }
-      } : null
+      }))
     };
     
     console.log('Order created successfully, returning response:', successResponse);

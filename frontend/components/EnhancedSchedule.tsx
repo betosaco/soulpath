@@ -10,7 +10,8 @@ import {
   Search,
   BookOpen,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  CheckCircle
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -62,6 +63,12 @@ interface EnhancedScheduleProps {
   startDate?: Date;
   endDate?: Date;
   onSlotsChange?: (slots: ScheduleSlot[]) => void;
+  existingBookings?: Array<{
+    selectedDate: string;
+    selectedTime: string;
+  }>;
+  maxBookingsPerSlot?: number; // Maximum number of times a slot can be booked
+  reloadTrigger?: number; // Triggers a reload when this value changes
 }
 
 export function EnhancedSchedule({ 
@@ -69,7 +76,10 @@ export function EnhancedSchedule({
   className = '',
   startDate,
   endDate,
-  onSlotsChange
+  onSlotsChange,
+  existingBookings = [],
+  maxBookingsPerSlot = 1,
+  reloadTrigger
 }: EnhancedScheduleProps) {
   // Handle slot booking - redirect to account booking page
   const handleBookSlot = (slot: ScheduleSlot) => {
@@ -102,6 +112,25 @@ export function EnhancedSchedule({
 
   // Use the onBookSlot prop if provided, otherwise use default behavior
   const handleSlotClick = onBookSlot || handleBookSlot;
+  
+  // Check if a slot is already booked
+  const isSlotBooked = (slot: ScheduleSlot) => {
+    return existingBookings.some(booking => 
+      booking.selectedDate === slot.date && 
+      booking.selectedTime === slot.time
+    );
+  };
+
+  const getSlotBookingCount = (slot: ScheduleSlot) => {
+    return existingBookings.filter(booking => 
+      booking.selectedDate === slot.date && booking.selectedTime === slot.time
+    ).length;
+  };
+
+  const canBookMore = (slot: ScheduleSlot) => {
+    const currentBookings = getSlotBookingCount(slot);
+    return currentBookings < maxBookingsPerSlot;
+  };
   const [slots, setSlots] = useState<ScheduleSlot[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -197,6 +226,18 @@ export function EnhancedSchedule({
       fetchSlots();
     }
   }, [startDate, endDate, fetchSlots]);
+
+  // Reload slots when reloadTrigger changes
+  useEffect(() => {
+    if (reloadTrigger !== undefined) {
+      console.log('🔄 Reload trigger changed, refetching slots...', reloadTrigger);
+      if (startDate && endDate) {
+        fetchSlots(startDate, endDate);
+      } else {
+        fetchSlots();
+      }
+    }
+  }, [reloadTrigger, startDate, endDate, fetchSlots]);
 
   // Get unique teachers and services for filters
   const teachers = [...new Set((slots || []).map(slot => slot.teacher.name))];
@@ -431,14 +472,14 @@ export function EnhancedSchedule({
                         key={slot.id}
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className={`schedule-slot card-base card-hover hover-scale ${!slot.isAvailable ? 'schedule-slot--unavailable' : ''}`}
+                        className={`schedule-slot card-base card-hover hover-scale ${!slot.isAvailable ? 'schedule-slot--unavailable' : ''} ${isSlotBooked(slot) ? 'schedule-slot--booked opacity-75' : ''}`}
                       >
                         <div className="schedule-slot__header">
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-2xl">
                               {getServiceIcon(slot.serviceType.name)}
                             </span>
-                            <div>
+                            <div className="flex-1">
                               <h4 className="font-semibold text-gray-900">
                                 {slot.serviceType.name}
                               </h4>
@@ -449,6 +490,14 @@ export function EnhancedSchedule({
                                 </span>
                               </div>
                             </div>
+                            {isSlotBooked(slot) && (
+                              <div className="flex items-center gap-1 text-green-600">
+                                <CheckCircle className="h-4 w-4" />
+                                <span className="text-xs font-medium">
+                                  Selected ({getSlotBookingCount(slot)}/{maxBookingsPerSlot})
+                                </span>
+                              </div>
+                            )}
                           </div>
                           
                         </div>
@@ -498,14 +547,26 @@ export function EnhancedSchedule({
 
                         <div className="schedule-slot__actions">
                           {slot.isAvailable ? (
-                            <button
-                              onClick={() => handleSlotClick(slot)}
-                              className="w-full bg-[#6ea058] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#5a8a47] focus:ring-2 focus:ring-[#6ea058] focus:outline-none transition-colors flex items-center justify-center gap-2"
-                              disabled={slot.bookedCount >= slot.capacity}
-                            >
-                              <BookOpen className="h-4 w-4" />
-                              {slot.bookedCount >= slot.capacity ? 'Fully Booked' : 'Book Session'}
-                            </button>
+                            !canBookMore(slot) ? (
+                              <button
+                                disabled
+                                className="w-full px-4 py-2 bg-gray-200 text-gray-500 rounded-lg cursor-not-allowed flex items-center justify-center gap-2 opacity-60"
+                              >
+                                <CheckCircle className="h-4 w-4" />
+                                Max Bookings Reached ({getSlotBookingCount(slot)}/{maxBookingsPerSlot})
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleSlotClick(slot)}
+                                className="w-full bg-[#6ea058] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#5a8a47] focus:ring-2 focus:ring-[#6ea058] focus:outline-none transition-colors flex items-center justify-center gap-2"
+                                disabled={slot.bookedCount >= slot.capacity}
+                              >
+                                <BookOpen className="h-4 w-4" />
+                                {slot.bookedCount >= slot.capacity ? 'Fully Booked' : 
+                                 isSlotBooked(slot) ? `Book More (${getSlotBookingCount(slot)}/${maxBookingsPerSlot})` : 
+                                 'Book Session'}
+                              </button>
+                            )
                           ) : (
                             <button
                               disabled

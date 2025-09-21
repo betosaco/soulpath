@@ -17,7 +17,7 @@ export async function GET(
       );
     }
 
-    // Fetch order with all related data
+    // Fetch order with all related data including bookings
     const order = await prisma.order.findUnique({
       where: { id: orderId },
       include: {
@@ -32,7 +32,18 @@ export async function GET(
             }
           }
         },
-        customer: true
+        customer: true,
+        bookings: {
+          include: {
+            scheduleSlot: {
+              include: {
+                teacher: true,
+                serviceType: true,
+                venue: true
+              }
+            }
+          }
+        }
       }
     });
 
@@ -72,6 +83,18 @@ export async function GET(
       return null;
     }).filter(Boolean);
 
+    // Format booking details
+    const bookingDetails = order.bookings.map((booking: any) => ({
+      id: booking.id,
+      selectedDate: booking.scheduleSlot.date,
+      selectedTime: booking.scheduleSlot.time,
+      teacher: booking.scheduleSlot.teacher?.name,
+      serviceType: booking.scheduleSlot.serviceType?.name,
+      venue: booking.scheduleSlot.venue?.name,
+      dayOfWeek: booking.scheduleSlot.dayOfWeek,
+      scheduleSlotId: booking.scheduleSlot.id
+    }));
+
     // Format the response
     const response = {
       success: true,
@@ -84,6 +107,11 @@ export async function GET(
         customerName: order.customerName,
         customerEmail: order.customerEmail,
         customerPhone: order.customerPhone,
+        // Billing document fields
+        billingDocumentType: order.billingDocumentType,
+        dni: order.dni,
+        ruc: order.ruc,
+        companyName: order.companyName,
         subtotal: Number(order.subtotal),
         taxAmount: Number(order.taxAmount),
         shippingAmount: Number(order.shippingAmount),
@@ -94,7 +122,8 @@ export async function GET(
         shippingAddress: order.shippingAddress as any,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         billingAddress: order.billingAddress as any,
-        orderItems
+        orderItems,
+        bookingDetails
       }
     };
 

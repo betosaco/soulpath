@@ -7,7 +7,7 @@ import { useCart, CartItem } from '@/lib/cart-context';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { } = useCart();
+  const { cartItems } = useCart();
 
   const handleCheckoutComplete = (orderData: {
     orderId: string;

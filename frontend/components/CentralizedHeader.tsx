@@ -139,6 +139,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={handleMenuItemClick}
                 className="hidden sm:flex items-center space-x-1 header-button-account"
               >
                 <span>{getTranslation('nav.packages', 'Packages')}</span>
@@ -311,20 +312,21 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                     </motion.button>
                   </Link>
 
-                  <Link href="/packages">
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={handleMenuItemClick}
-                      className={`w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] border border-gray-200 mobile-touch-feedback ${
-                        isActiveRoute('/packages') 
-                          ? 'text-[#6ea058] font-bold' 
-                          : 'text-black hover:text-[#6ea058]'
-                      }`}
-                    >
-                      <span className="text-base sm:text-lg font-medium">{getTranslation('nav.packages', 'Packages')}</span>
-                    </motion.button>
-                  </Link>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      handleMenuItemClick();
+                      window.location.href = '/packages';
+                    }}
+                    className={`w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] border border-gray-200 mobile-touch-feedback ${
+                      isActiveRoute('/packages') 
+                        ? 'text-[#6ea058] font-bold' 
+                        : 'text-black hover:text-[#6ea058]'
+                    }`}
+                  >
+                    <span className="text-base sm:text-lg font-medium">{getTranslation('nav.packages', 'Packages')}</span>
+                  </motion.button>
 
                   <Link href="/products">
                     <motion.button

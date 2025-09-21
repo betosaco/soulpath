@@ -78,7 +78,7 @@ export function PackagesBookingFlow() {
   const { packages, loading: packagesLoading, error: packagesError } = usePackages('PEN');
   const { language } = useLanguage();
   const { t } = useTranslations(undefined, language);
-  const { addToCart } = useCart();
+  const { addToCart, cartItems, setIsCartOpen } = useCart();
   const [currentStep, setCurrentStep] = useState(0);
 
   // Icon diagnostic - remove after testing
@@ -134,9 +134,13 @@ export function PackagesBookingFlow() {
   const handlePackageSelect = (pkg: PackagePrice) => {
     setFormData(prev => ({ ...prev, selectedPackage: pkg }));
     
+    // Always create new package item with unique ID (no merging)
+    // This allows multiple packages of the same type to be treated separately
+    const uniqueId = `${pkg.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
     // Add package to cart
     addToCart({
-      id: pkg.id.toString(),
+      id: uniqueId,
       name: pkg.packageDefinition.name,
       price: pkg.price,
       image: '/images/products/yoga-journal-1.jpg', // Default package image
@@ -149,8 +153,27 @@ export function PackagesBookingFlow() {
       maxGroupSize: pkg.packageDefinition.maxGroupSize
     });
     
-    // Redirect to unified checkout
-    window.location.href = '/checkout';
+    toast.success(`${pkg.packageDefinition.name} added to cart`);
+    
+    // All packages should go to schedule page for class selection
+    // Set up session storage for adding bookings to this package
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('isAddingMoreBookings', 'true');
+      // Check if there are already other packages in cart
+      const existingPackages = cartItems.filter(item => item.type === 'package');
+      if (existingPackages.length > 0) {
+        // Multiple packages - don't set specific package ID, let schedule page show modal
+        sessionStorage.removeItem('addingToPackageId');
+      } else {
+        // First package - set specific package ID
+        sessionStorage.setItem('addingToPackageId', uniqueId);
+      }
+      localStorage.setItem('isCartOpen', 'true');
+    }
+    if (setIsCartOpen) {
+      setIsCartOpen(true);
+    }
+    window.location.href = '/schedule';
   };
 
   const handleScheduleSelect = (slot: ScheduleSlot) => {
@@ -172,7 +195,13 @@ export function PackagesBookingFlow() {
       serviceType: slot.serviceType
     }));
     
-    // Redirect to unified checkout
+    // Keep sidecart open and redirect to unified checkout
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('isCartOpen', 'true');
+    }
+    if (setIsCartOpen) {
+      setIsCartOpen(true);
+    }
     window.location.href = '/checkout';
   };
 

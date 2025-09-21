@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
-import { replacePlaceholders } from '@/lib/communication/placeholders';
+// import { replacePlaceholders } from '@/lib/communication/placeholders';
+import { sendBookingConfirmationEmail } from '@/lib/send-booking-confirmation-email';
 
 
 // Zod schema for booking creation
@@ -360,76 +361,75 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Booking created successfully');
 
-    // Send booking confirmation using communication templates
+    // Send booking confirmation email
     try {
-      // Get booking confirmation template
-      const bookingTemplate = await prisma.communicationTemplate.findFirst({
-        where: {
-          templateKey: 'booking_confirmation',
-          type: 'email',
-          isActive: true
-        },
-        include: {
-          translations: true
-        }
-      });
-
-      if (bookingTemplate && user.email) {
-        // Get user details for template replacement
-        const userDetails = await prisma.user.findUnique({
-          where: { id: user.id },
-          select: {
-            fullName: true,
-            email: true,
-            phone: true,
-            birthDate: true,
-            birthTime: true,
-            birthPlace: true,
-            language: true
+      if (user.email) {
+        // Get complete booking details with package information
+        const completeBooking = await prisma.booking.findUnique({
+          where: { id: result.id },
+          include: {
+            scheduleSlot: {
+              include: {
+                scheduleTemplate: {
+                  include: {
+                    sessionDuration: true,
+                    venue: true
+                  }
+                }
+              }
+            },
+            userPackage: {
+              include: {
+                packagePrice: {
+                  include: {
+                    packageDefinition: true
+                  }
+                }
+              }
+            },
+            teacher: true,
+            venue: true
           }
         });
 
-        if (userDetails) {
-          // Prepare template data
-          const templateData = {
-            userName: userDetails.fullName || 'User',
-            userEmail: userDetails.email || '',
-            bookingId: result.id.toString(),
-            language: userDetails.language || 'English',
-            adminEmail: 'admin@soulpath.lat',
-            submissionDate: new Date().toLocaleDateString(),
-            birthDate: userDetails.birthDate?.toISOString().split('T')[0] || '',
-            birthTime: userDetails.birthTime?.toString().substring(0, 5) || '',
-            birthPlace: userDetails.birthPlace || '',
-            clientQuestion: notes || 'No specific question provided',
-            bookingDate: result.scheduleSlot?.startTime.toISOString().split('T')[0] || '',
-            bookingTime: result.scheduleSlot?.startTime.toTimeString().substring(0, 5) || '',
-            sessionType: sessionType
+        if (completeBooking) {
+          const bookingData = {
+            customerName: 'Usuario',
+            customerEmail: user.email,
+            bookingId: completeBooking.id.toString(),
+            bookingDate: completeBooking.scheduleSlot?.startTime.toLocaleDateString('es-ES', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            }) || '',
+            bookingTime: completeBooking.scheduleSlot?.startTime.toLocaleTimeString('es-ES', {
+              hour: '2-digit',
+              minute: '2-digit'
+            }) || '',
+            sessionType: completeBooking.sessionType,
+            instructor: completeBooking.teacher?.name || 'Por asignar',
+            venue: completeBooking.venue?.name || 'MatMax Yoga Studio',
+            duration: completeBooking.scheduleSlot?.scheduleTemplate?.sessionDuration?.duration_minutes || 60,
+            packageName: completeBooking.userPackage?.packagePrice?.packageDefinition?.name || 'Paquete de Yoga',
+            packageDescription: completeBooking.userPackage?.packagePrice?.packageDefinition?.description || '',
+            sessionsUsed: completeBooking.userPackage?.sessionsUsed || 0,
+            sessionsRemaining: (completeBooking.userPackage?.packagePrice?.packageDefinition?.sessionsCount || 0) - (completeBooking.userPackage?.sessionsUsed || 0),
+            packageType: completeBooking.userPackage?.packagePrice?.packageDefinition?.packageType || 'INDIVIDUAL',
+            bookingUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/bookings`,
+            language: 'es'
           };
 
-          // Get the appropriate translation
-          const userLanguage = userDetails.language?.toLowerCase() || 'en';
-          const translation = bookingTemplate.translations.find(t => 
-            t.language === userLanguage
-          ) || bookingTemplate.translations[0];
-
-          if (translation) {
-            // Replace placeholders in subject and content
-            const subject = replacePlaceholders(translation.subject || '', templateData);
-            const content = replacePlaceholders(translation.content || '', templateData);
-
-            // TODO: Send email using your email service
-            console.log('📧 Booking confirmation email prepared:', {
-              to: userDetails.email,
-              subject,
-              content: content.substring(0, 100) + '...'
-            });
-          }
+          // Send email asynchronously (don't wait for it to complete)
+          sendBookingConfirmationEmail(bookingData).catch(error => {
+            console.error('Failed to send booking confirmation email:', error);
+            // Don't fail the booking creation if email fails
+          });
         }
       }
-    } catch (templateError) {
-      console.error('Error sending booking confirmation:', templateError);
-      // Don't fail the booking creation if template sending fails
+    } catch (emailError) {
+      console.error('Error sending booking confirmation email:', emailError);
+      // Don't fail the booking creation if email fails
     }
 
     return NextResponse.json({

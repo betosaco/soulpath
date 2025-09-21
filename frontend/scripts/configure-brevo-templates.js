@@ -47,6 +47,189 @@ async function configureBrevoTemplates() {
     // Create email templates for different scenarios
     const templates = [
       {
+        templateKey: 'order_confirmation',
+        name: 'Order Confirmation Email',
+        description: 'Email sent when a new order is created',
+        type: 'email',
+        category: 'order',
+        subject: '¡Gracias por tu pedido! - MatMax Yoga Studio',
+        htmlContent: `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Confirmación de Pedido - MatMax</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #E24A4A; color: white; padding: 30px 20px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { padding: 30px 20px; background: #f9f9f9; }
+        .order-info { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #E24A4A; }
+        .billing-info { background: #f8f9fa; padding: 15px; margin: 15px 0; border-radius: 5px; }
+        .items-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .items-table th, .items-table td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        .items-table th { background-color: #f8f9fa; font-weight: bold; }
+        .total-section { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; text-align: right; }
+        .footer { text-align: center; padding: 20px; color: #666; background: #f8f9fa; border-radius: 0 0 10px 10px; }
+        .button { display: inline-block; padding: 12px 24px; background: #E24A4A; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .status-confirmed { background: #d4edda; color: #155724; }
+        .status-pending { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧘‍♀️ MatMax Yoga Studio</h1>
+            <h2>¡Pedido Confirmado!</h2>
+        </div>
+        
+        <div class="content">
+            <p>Hola <strong>{{customer_name}}</strong>,</p>
+            
+            <p>¡Gracias por tu pedido! Hemos recibido tu solicitud y la estamos procesando.</p>
+            
+            <div class="order-info">
+                <h3>📋 Detalles del Pedido</h3>
+                <p><strong>Número de Pedido:</strong> {{order_number}}</p>
+                <p><strong>Fecha:</strong> {{order_date}}</p>
+                <p><strong>Estado:</strong> <span class="status-badge status-{{order_status}}">{{order_status_text}}</span></p>
+                <p><strong>Estado de Pago:</strong> <span class="status-badge status-{{payment_status}}">{{payment_status_text}}</span></p>
+            </div>
+
+            <div class="billing-info">
+                <h4>📄 Información de Facturación</h4>
+                <p><strong>Documento:</strong> {{billing_document_type}}</p>
+                {{#if dni}}<p><strong>DNI:</strong> {{dni}}</p>{{/if}}
+                {{#if ruc}}<p><strong>RUC:</strong> {{ruc}}</p>{{/if}}
+                {{#if company_name}}<p><strong>Empresa:</strong> {{company_name}}</p>{{/if}}
+            </div>
+
+            <h3>🛍️ Artículos del Pedido</h3>
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Artículo</th>
+                        <th>Cantidad</th>
+                        <th>Precio Unitario</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each order_items}}
+                    <tr>
+                        <td>
+                            <strong>{{name}}</strong><br>
+                            <small>{{type_text}}</small>
+                            {{#if sessions}}<br><small>{{sessions}} sesiones</small>{{/if}}
+                        </td>
+                        <td>{{quantity}}</td>
+                        <td>{{currency}} {{unit_price}}</td>
+                        <td><strong>{{currency}} {{total_price}}</strong></td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+
+            <div class="total-section">
+                <p><strong>Subtotal: {{currency}} {{subtotal}}</strong></p>
+                {{#if tax_amount}}<p>Impuestos: {{currency}} {{tax_amount}}</p>{{/if}}
+                {{#if shipping_amount}}<p>Envío: {{currency}} {{shipping_amount}}</p>{{/if}}
+                <hr>
+                <h3>Total: {{currency}} {{total_amount}}</h3>
+            </div>
+
+            {{#if shipping_address}}
+            <div class="order-info">
+                <h3>📍 Dirección de Envío</h3>
+                <p>{{shipping_address.address}}<br>
+                {{shipping_address.city}}, {{shipping_address.state}} {{shipping_address.zipCode}}<br>
+                {{shipping_address.country}}</p>
+            </div>
+            {{/if}}
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{order_url}}" class="button">Ver Detalles del Pedido</a>
+            </div>
+
+            <p>Si tienes alguna pregunta sobre tu pedido, no dudes en contactarnos.</p>
+        </div>
+        
+        <div class="footer">
+            <p><strong>MatMax Yoga Studio</strong></p>
+            <p>📧 info@matmax.store | 📞 +51 999 999 999</p>
+        </div>
+    </div>
+</body>
+</html>`,
+        textContent: `
+Confirmación de Pedido - MatMax Yoga Studio
+
+Hola {{customer_name}},
+
+¡Gracias por tu pedido! Hemos recibido tu solicitud y la estamos procesando.
+
+DETALLES DEL PEDIDO:
+- Número de Pedido: {{order_number}}
+- Fecha: {{order_date}}
+- Estado: {{order_status_text}}
+- Estado de Pago: {{payment_status_text}}
+
+INFORMACIÓN DE FACTURACIÓN:
+- Documento: {{billing_document_type}}
+{{#if dni}}- DNI: {{dni}}{{/if}}
+{{#if ruc}}- RUC: {{ruc}}{{/if}}
+{{#if company_name}}- Empresa: {{company_name}}{{/if}}
+
+ARTÍCULOS DEL PEDIDO:
+{{#each order_items}}
+- {{name}} ({{type_text}}) - Cantidad: {{quantity}} - {{currency}} {{unit_price}} cada uno - Total: {{currency}} {{total_price}}
+{{/each}}
+
+RESUMEN:
+- Subtotal: {{currency}} {{subtotal}}
+{{#if tax_amount}}- Impuestos: {{currency}} {{tax_amount}}{{/if}}
+{{#if shipping_amount}}- Envío: {{currency}} {{shipping_amount}}{{/if}}
+- TOTAL: {{currency}} {{total_amount}}
+
+{{#if shipping_address}}
+DIRECCIÓN DE ENVÍO:
+{{shipping_address.address}}
+{{shipping_address.city}}, {{shipping_address.state}} {{shipping_address.zipCode}}
+{{shipping_address.country}}
+{{/if}}
+
+Ver detalles del pedido: {{order_url}}
+
+Si tienes alguna pregunta sobre tu pedido, no dudes en contactarnos.
+
+MatMax Yoga Studio
+📧 info@matmax.store | 📞 +51 999 999 999
+        `,
+        placeholders: [
+          'customer_name',
+          'order_number',
+          'order_date',
+          'order_status',
+          'order_status_text',
+          'payment_status',
+          'payment_status_text',
+          'billing_document_type',
+          'dni',
+          'ruc',
+          'company_name',
+          'order_items',
+          'subtotal',
+          'tax_amount',
+          'shipping_amount',
+          'total_amount',
+          'currency',
+          'shipping_address',
+          'order_url'
+        ],
+        isActive: true
+      },
+      {
         templateKey: 'package_purchase_confirmation',
         name: 'Confirmación de Compra de Paquete',
         description: 'Email enviado cuando un cliente compra un paquete de yoga',
@@ -410,21 +593,21 @@ MatMax Yoga Studio
     for (const template of templates) {
       const createdTemplate = await prisma.communicationTemplate.upsert({
         where: { 
-          name: template.name 
+          templateKey: template.templateKey 
         },
         update: {
-          subject: template.subject,
-          htmlContent: template.htmlContent,
-          textContent: template.textContent,
-          placeholders: template.placeholders,
+          name: template.name,
+          description: template.description,
+          type: template.type || 'email',
+          category: template.category,
           isActive: template.isActive
         },
         create: {
+          templateKey: template.templateKey,
           name: template.name,
-          subject: template.subject,
-          htmlContent: template.htmlContent,
-          textContent: template.textContent,
-          placeholders: template.placeholders,
+          description: template.description,
+          type: template.type || 'email',
+          category: template.category,
           isActive: template.isActive
         }
       });

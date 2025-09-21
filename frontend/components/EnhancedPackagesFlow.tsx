@@ -21,6 +21,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { EnhancedSchedule } from './EnhancedSchedule';
 import { usePackages, PackagePrice } from '@/hooks/usePackages';
+
+interface PackageInstance extends PackagePrice {
+  instanceId: string;
+  instanceNumber: number;
+}
 import { useLanguage, useTranslations } from '@/hooks/useTranslations';
 import { toast } from 'sonner';
 import { useCart } from '@/lib/cart-context';
@@ -69,7 +74,7 @@ interface ScheduleSlot {
 interface BookingFormData {
   selectedPackages: PackagePrice[];
   selectedSchedule: ScheduleSlot | null;
-  selectedPackageForBooking: PackagePrice | null;
+  selectedPackageForBooking: PackageInstance | null;
 }
 
 interface BookingStep {
@@ -84,7 +89,7 @@ export function EnhancedPackagesFlow() {
   
   const { language } = useLanguage();
   const { t } = useTranslations(undefined, language);
-  const { addToCart, cartItems, removeFromCart, updateQuantity } = useCart();
+  const { addToCart, cartItems, removeFromCart, updateQuantity, setIsCartOpen } = useCart();
   // Get packages from cart
   const cartPackages = cartItems.filter(item => item.type === 'package');
 
@@ -101,6 +106,21 @@ export function EnhancedPackagesFlow() {
     // Always start at package selection step (step 0) to allow adding more packages
     setCurrentStep(0);
   }, []); // Empty dependency array - only run once on mount
+
+  // Restore selected schedule from sessionStorage on mount
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedSchedule = sessionStorage.getItem('selectedSchedule');
+      if (savedSchedule) {
+        try {
+          const scheduleData = JSON.parse(savedSchedule);
+          setFormData(prev => ({ ...prev, selectedSchedule: scheduleData }));
+        } catch (error) {
+          console.error('Error parsing saved schedule:', error);
+        }
+      }
+    }
+  }, []);
 
   // Helper function to safely access nested translation properties
   const getTranslation = useCallback((path: string, fallback: string = ''): string => {
@@ -153,8 +173,12 @@ export function EnhancedPackagesFlow() {
   }, [getTranslation, cartPackages.length]);
 
   const handleAddPackage = (pkg: PackagePrice) => {
+    // Always create new package item with unique ID (no merging)
+    // This allows multiple packages of the same type to be treated separately
+    const uniqueId = `${pkg.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
     addToCart({
-      id: pkg.id.toString(),
+      id: uniqueId,
       name: pkg.packageDefinition.name,
       price: Number(pkg.price),
       image: '/images/products/yoga-journal-1.jpg',
@@ -169,8 +193,30 @@ export function EnhancedPackagesFlow() {
     
     toast.success(`${pkg.packageDefinition.name} added to cart`);
     
-    // Automatically proceed to schedule selection step
-    setCurrentStep(1);
+    // All packages should go to schedule page for class selection
+    // Set up session storage for adding bookings to this package
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('isAddingMoreBookings', 'true');
+      // Check if there are already other packages in cart
+      const existingPackages = cartItems.filter(item => item.type === 'package');
+      console.log('🔍 Adding new package - existing packages:', existingPackages.length);
+      console.log('🔍 New package ID:', uniqueId);
+      
+      if (existingPackages.length > 0) {
+        // Multiple packages - don't set specific package ID, let schedule page show modal
+        console.log('✅ Multiple packages detected - removing addingToPackageId');
+        sessionStorage.removeItem('addingToPackageId');
+      } else {
+        // First package - set specific package ID
+        console.log('✅ First package - setting addingToPackageId:', uniqueId);
+        sessionStorage.setItem('addingToPackageId', uniqueId);
+      }
+      localStorage.setItem('isCartOpen', 'true');
+    }
+    if (setIsCartOpen) {
+      setIsCartOpen(true);
+    }
+    window.location.href = '/schedule';
   };
 
   const handleRemovePackage = (packageId: string) => {
@@ -183,7 +229,20 @@ export function EnhancedPackagesFlow() {
   };
 
   const handleScheduleSelect = (slot: ScheduleSlot) => {
+    console.log('Schedule selected:', slot);
     setFormData(prev => ({ ...prev, selectedSchedule: slot }));
+    
+    // Store schedule in sessionStorage immediately to prevent loss on re-render
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('selectedSchedule', JSON.stringify({
+        selectedDate: slot.date,
+        selectedTime: slot.time,
+        teacher: slot.teacher,
+        dayOfWeek: slot.dayOfWeek,
+        serviceType: slot.serviceType,
+        venue: slot.venue
+      }));
+    }
     
     // Calculate total package quantity (including multiple quantities of same package)
     const totalPackageQuantity = cartPackages.reduce((sum, item) => sum + item.quantity, 0);
@@ -192,9 +251,25 @@ export function EnhancedPackagesFlow() {
     if (totalPackageQuantity === 1) {
       const packageData = packages.find(pkg => pkg.id.toString() === cartPackages[0].id);
       if (packageData) {
-        setFormData(prev => ({ ...prev, selectedPackageForBooking: packageData }));
-        // Go directly to checkout
-        handleProceedToCheckout();
+        // Create package instance with instanceId for tracking
+        const packageInstance: PackageInstance = {
+          ...packageData,
+          instanceId: `${packageData.id}-0`,
+          instanceNumber: 1
+        };
+        setFormData(prev => ({ ...prev, selectedPackageForBooking: packageInstance }));
+        // Store package data in sessionStorage
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('selectedPackageForBooking', JSON.stringify(packageData));
+        }
+        // Keep sidecart open and go directly to checkout
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('isCartOpen', 'true');
+        }
+        if (setIsCartOpen) {
+          setIsCartOpen(true);
+        }
+        window.location.href = '/checkout';
         return;
       }
     }
@@ -238,7 +313,13 @@ export function EnhancedPackagesFlow() {
       sessionStorage.setItem('selectedPackageForBooking', JSON.stringify(formData.selectedPackageForBooking));
     }
     
-    // Redirect to checkout
+    // Keep sidecart open and redirect to checkout
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('isCartOpen', 'true');
+    }
+    if (setIsCartOpen) {
+      setIsCartOpen(true);
+    }
     window.location.href = '/checkout';
   };
 

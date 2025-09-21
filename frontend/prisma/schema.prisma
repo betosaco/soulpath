@@ -1128,6 +1128,11 @@ model Order {
   customerName    String         @map("customer_name") @db.VarChar(255)
   customerEmail   String         @map("customer_email") @db.VarChar(255)
   customerPhone   String?        @map("customer_phone") @db.VarChar(20)
+  // Billing document fields
+  billingDocumentType String?    @map("billing_document_type") @db.VarChar(20) // 'boleta', 'boleta_simple', 'factura'
+  dni             String?        @db.VarChar(20)
+  ruc             String?        @db.VarChar(20)
+  companyName     String?        @map("company_name") @db.VarChar(255)
   status          OrderStatus    @default(PENDING)
   paymentStatus   PaymentStatus  @default(PENDING) @map("payment_status")
   shippingStatus  ShippingStatus @default(PENDING) @map("shipping_status")

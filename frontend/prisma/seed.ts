@@ -1012,7 +1012,6 @@ async function main() {
         currencyCode: 'PEN',
         paymentMethod: 'stripe',
         paymentStatus: 'COMPLETED',
-        transactionId: 'txn_test_123',
         notes: 'Test purchase for John Doe - 01 MATPASS',
         purchasedAt: new Date(),
         confirmedAt: new Date()
@@ -1027,7 +1026,6 @@ async function main() {
         currencyCode: 'PEN',
         paymentMethod: 'cash',
         paymentStatus: 'COMPLETED',
-        transactionId: 'txn_test_456',
         notes: 'Test purchase for Maria Garcia - 04 MATPASS',
         purchasedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
         confirmedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
@@ -1036,7 +1034,79 @@ async function main() {
   ]);
   console.log('✅ Test purchases created:', purchases.length);
 
-  // 18. Create test user packages
+  // 18. Create test orders and order items first
+  console.log('🛒 Creating test orders and order items...');
+  const orders = await Promise.all([
+    prisma.order.upsert({
+      where: { id: 'order-1' },
+      update: {},
+      create: {
+        orderNumber: 'ORD-001',
+        customerId: clients[0].id,
+        customerName: clients[0].fullName,
+        customerEmail: clients[0].email,
+        customerPhone: clients[0].phone,
+        billingDocumentType: 'boleta_simple',
+        status: 'CONFIRMED',
+        paymentStatus: 'COMPLETED',
+        subtotal: 60.00,
+        total: 60.00,
+        currency: 'PEN',
+        notes: 'Test order for John Doe - 01 MATPASS'
+      }
+    }),
+    prisma.order.upsert({
+      where: { id: 'order-2' },
+      update: {},
+      create: {
+        orderNumber: 'ORD-002',
+        customerId: clients[1].id,
+        customerName: clients[1].fullName,
+        customerEmail: clients[1].email,
+        customerPhone: clients[1].phone,
+        billingDocumentType: 'boleta_simple',
+        status: 'CONFIRMED',
+        paymentStatus: 'COMPLETED',
+        subtotal: 190.00,
+        total: 190.00,
+        currency: 'PEN',
+        notes: 'Test order for Maria Garcia - 04 MATPASS'
+      }
+    })
+  ]);
+  console.log('✅ Test orders created:', orders.length);
+
+  // 18.1. Create order items
+  console.log('📦 Creating test order items...');
+  const orderItems = await Promise.all([
+    prisma.orderItem.upsert({
+      where: { id: 'item-1' },
+      update: {},
+      create: {
+        orderId: orders[0].id,
+        itemType: 'PACKAGE',
+        packagePriceId: packagePrices[0].id,
+        quantity: 1,
+        price: 60.00,
+        total: 60.00
+      }
+    }),
+    prisma.orderItem.upsert({
+      where: { id: 'item-2' },
+      update: {},
+      create: {
+        orderId: orders[1].id,
+        itemType: 'PACKAGE',
+        packagePriceId: packagePrices[1].id,
+        quantity: 1,
+        price: 190.00,
+        total: 190.00
+      }
+    })
+  ]);
+  console.log('✅ Test order items created:', orderItems.length);
+
+  // 18.2. Create test user packages with orderItemId
   console.log('📦 Creating test user packages...');
   const userPackages = await Promise.all([
     prisma.userPackage.upsert({
@@ -1044,7 +1114,7 @@ async function main() {
       update: {},
       create: {
         userId: clients[0].id,
-        purchaseId: 1,
+        orderItemId: orderItems[0].id,
         packagePriceId: 1,
         quantity: 1,
         sessionsUsed: 0,
@@ -1057,7 +1127,7 @@ async function main() {
       update: {},
       create: {
         userId: clients[1].id,
-        purchaseId: 2,
+        orderItemId: orderItems[1].id,
         packagePriceId: 2,
         quantity: 1,
         sessionsUsed: 1,
@@ -1109,13 +1179,10 @@ async function main() {
         userId: clients[0].id,
         purchaseId: 1,
         amount: 50.00,
-        currencyCode: 'PEN',
+        currency: 'PEN',
         paymentMethod: 'stripe',
-        paymentStatus: 'COMPLETED',
-        transactionId: 'txn_123456789',
-        notes: '01 MATPASS payment - Credit card',
-        paymentDate: new Date(),
-        confirmedAt: new Date()
+        status: 'COMPLETED',
+        paymentStatus: 'COMPLETED'
       }
     }),
     // Maria Garcia's payment history
@@ -1126,13 +1193,10 @@ async function main() {
         userId: clients[1].id,
         purchaseId: 2,
         amount: 210.00,
-        currencyCode: 'PEN',
+        currency: 'PEN',
         paymentMethod: 'cash',
-        paymentStatus: 'COMPLETED',
-        transactionId: null,
-        notes: '04 MATPASS payment - Cash',
-        paymentDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-        confirmedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+        status: 'COMPLETED',
+        paymentStatus: 'COMPLETED'
       }
     })
   ]);

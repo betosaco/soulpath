@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { defaultTranslations } from '@/lib/data/translations';
 
 export function useLanguage() {
@@ -31,6 +31,7 @@ export function useLanguage() {
 export function useTranslations(initialContent?: Record<string, unknown>, language?: 'en' | 'es') {
   const [content, setContent] = useState(initialContent || defaultTranslations);
   const [isLoading, setIsLoading] = useState(false); // Changed from true to false
+  const hasFetchedRef = useRef(false); // Track if we've already fetched translations
   
   // Use provided language or fallback to default
   const currentLanguage = language || 'en';
@@ -116,18 +117,22 @@ export function useTranslations(initialContent?: Record<string, unknown>, langua
     } else {
       // Ensure we have default translations first
       setContent(defaultTranslations);
-      // Then fetch from backend in the background
-      console.log('🔄 Fetching fresh content from backend for language:', currentLanguage);
-      fetchTranslations();
+      // Only fetch from backend if we haven't fetched yet
+      if (!hasFetchedRef.current) {
+        console.log('🔄 Fetching fresh content from backend for language:', currentLanguage);
+        hasFetchedRef.current = true;
+        fetchTranslations();
+      }
     }
-  }, [initialContent, currentLanguage]); // Only depend on these two values
+  }, [initialContent, currentLanguage]); // Remove content from dependencies to prevent infinite loop
 
   // Separate useEffect to handle language changes specifically
   useEffect(() => {
     if (content && Object.keys(content).length > 0) {
+      // Only log when language actually changes, not on every content update
       console.log(`🔄 Language changed to: ${currentLanguage}, content available:`, Object.keys(content));
     }
-  }, [currentLanguage, content]);
+  }, [currentLanguage]); // Remove content from dependencies to prevent repeated logging
 
   const updateContent = async (newContent: Record<string, unknown>) => {
     try {
@@ -162,8 +167,26 @@ export function useTranslations(initialContent?: Record<string, unknown>, langua
   };
 
   // Get the current language translations, fallback to English if current language not found
-  const t = (content?.[currentLanguage as keyof typeof content] || content?.en || defaultTranslations[currentLanguage as keyof typeof defaultTranslations] || defaultTranslations.en);
+  const getTranslations = () => {
+    if (content && typeof content === 'object') {
+      // Try current language first
+      if (content[currentLanguage as keyof typeof content] && typeof content[currentLanguage as keyof typeof content] === 'object') {
+        return content[currentLanguage as keyof typeof content];
+      }
+      // Fallback to English
+      if (content.en && typeof content.en === 'object') {
+        return content.en;
+      }
+    }
+    // Final fallback to default translations
+    return defaultTranslations[currentLanguage as keyof typeof defaultTranslations] || defaultTranslations.en;
+  };
+  
+  const t = getTranslations();
+  
+  // Ensure t is always an object and not undefined
+  const safeT = t && typeof t === 'object' ? t : defaultTranslations.en;
 
 
-  return { t, updateContent, isLoading, content, reloadTranslations };
+  return { t: safeT, updateContent, isLoading, content, reloadTranslations };
 }
