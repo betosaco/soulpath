@@ -35,6 +35,8 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  console.log('🛒 ProductsPage component rendered, loading:', loading, 'products:', products.length, 'error:', error);
+
   // Fetch products from API
   useEffect(() => {
     const fetchProducts = async () => {
@@ -42,6 +44,7 @@ export default function ProductsPage() {
         setLoading(true);
         console.log('🛒 Fetching products...');
         const response = await fetch('/api/products?limit=50');
+        console.log('🛒 Response status:', response.status);
         const data = await response.json();
         console.log('🛒 Products response:', data);
         
