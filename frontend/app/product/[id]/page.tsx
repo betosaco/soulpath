@@ -27,18 +27,11 @@ interface Product {
   tags: string[];
 }
 
-interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-}
 
 export default function ProductPage() {
   const params = useParams();
   const productId = params?.id as string;
-  const { addToCart, cartItems, getTotalItems, removeFromCart, updateQuantity, getTotalPrice, isCartOpen, setIsCartOpen } = useCart();
+  const { addToCart, getTotalItems, setIsCartOpen } = useCart();
   
   console.log('🛒 ProductPage rendered, params:', params, 'productId:', productId);
   
@@ -47,23 +40,13 @@ export default function ProductPage() {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
 
-  // Safety check for params
-  if (!params || !productId) {
-    return (
-      <AppLayout className="min-h-screen bg-white">
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-400 mx-auto mb-4"></div>
-            <p className="text-gray-600 text-lg">Loading product...</p>
-          </div>
-        </div>
-      </AppLayout>
-    );
-  }
-
   // Fetch product from API
   useEffect(() => {
-    if (!productId) return;
+    // Safety check for params
+    if (!params || !productId) {
+      setLoading(false);
+      return;
+    }
     
     const fetchProduct = async () => {
       try {
@@ -90,10 +73,22 @@ export default function ProductPage() {
       }
     };
 
-    if (productId) {
-      fetchProduct();
-    }
-  }, [productId]);
+    fetchProduct();
+  }, [productId, params]);
+
+  // Safety check for params - moved after hooks
+  if (!params || !productId) {
+    return (
+      <AppLayout className="min-h-screen bg-white">
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-400 mx-auto mb-4"></div>
+            <p className="text-gray-600 text-lg">Loading product...</p>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
 
   const nextImage = () => {
     if (product) {
@@ -117,10 +112,10 @@ export default function ProductPage() {
           price: product.price,
           image: product.images[0] || '/images/products/yoga-journal-1.jpg',
           sku: product.sku,
-          currency: product.currency || 'PEN',
+          currency: 'PEN',
           type: 'product',
           stock: product.stock,
-          weight: product.weight,
+          weight: product.weight?.toString(),
           dimensions: product.dimensions
         });
       }
@@ -170,7 +165,7 @@ export default function ProductPage() {
   }
 
   return (
-    <AppLayout className="min-h-screen bg-gray-50">
+    <AppLayout className="min-h-screen bg-white">
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

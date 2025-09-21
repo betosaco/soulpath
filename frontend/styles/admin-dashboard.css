@@ -490,7 +490,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.1);
+  background: white;
   backdrop-filter: blur(2px);
   text-align: center;
   z-index: 10;

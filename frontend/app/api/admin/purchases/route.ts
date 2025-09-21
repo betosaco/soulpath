@@ -265,11 +265,11 @@ export async function POST(request: NextRequest) {
         data: {
           userId,
           totalAmount,
-          currencyCode,
+          currency: currencyCode,
           paymentMethod,
           paymentStatus: 'PENDING',
-          transactionId,
-          notes
+          notes,
+          purchasedAt: new Date()
         }
       });
 
@@ -278,6 +278,7 @@ export async function POST(request: NextRequest) {
         return tx.userPackage.create({
           data: {
             userId,
+            orderItemId: `order-${purchase.id}-${pkg.packagePriceId}`,
             purchaseId: purchase.id,
             packagePriceId: pkg.packagePriceId,
             quantity: pkg.quantity,
@@ -294,12 +295,12 @@ export async function POST(request: NextRequest) {
       // Create payment record
       const paymentRecord = await tx.paymentRecord.create({
         data: {
-          userId,
           purchaseId: purchase.id,
+          userId,
           amount: totalAmount,
-          currencyCode,
+          currency: currencyCode,
           paymentMethod,
-          paymentStatus: 'PENDING',
+          status: 'PENDING',
           transactionId
         }
       });

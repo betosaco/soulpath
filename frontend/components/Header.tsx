@@ -24,7 +24,6 @@ interface HeaderProps {
 export function Header({ 
   language, 
   setLanguage, 
-  scrollToSection, 
   t, 
   isMenuOpen, 
   setIsMenuOpen, 

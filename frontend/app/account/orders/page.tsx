@@ -6,17 +6,14 @@ import {
   Package,
   ShoppingCart,
   Calendar,
-  ArrowRight,
   Search,
-  Filter,
   Eye
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AppLayout } from '@/components/AppLayout';
-import { toast } from 'sonner';
 
 interface OrderSummary {
   id: string;
@@ -100,7 +97,7 @@ export default function OrdersPage() {
   if (loading) {
     return (
       <AppLayout>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-white flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-gray-600">Loading your orders...</p>
@@ -113,7 +110,7 @@ export default function OrdersPage() {
   if (error) {
     return (
       <AppLayout>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-white flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Orders</h1>
             <p className="text-gray-600 mb-6">{error}</p>

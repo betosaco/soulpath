@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { motion } from 'framer-motion';
 import { CentralizedHeader } from '@/components/CentralizedHeader';
+import { CartSidebar } from '@/components/CartSidebar';
 import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
@@ -64,16 +65,7 @@ export default function LoginPage() {
       />
 
       {/* Login Section */}
-      <section className="relative min-h-screen flex items-center justify-center pt-24">
-        {/* Background Image with Overlay - Same as home page */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: 'url("/matmaxstudio.png")',
-          }}
-        >
-          <div className="absolute inset-0 bg-black bg-opacity-60"></div>
-        </div>
+      <section className="relative min-h-screen flex items-center justify-center pt-24 bg-white">
 
         {/* Login Form */}
         <div className="relative z-10 w-full max-w-md mx-4">
@@ -81,7 +73,7 @@ export default function LoginPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="bg-white/95 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-white/20"
+            className="bg-white rounded-2xl p-8 shadow-2xl border border-gray-200"
           >
             {/* Header */}
             <div className="text-center mb-8">
@@ -205,6 +197,9 @@ export default function LoginPage() {
           </motion.div>
         </div>
       </section>
+      
+      {/* Cart Sidebar */}
+      <CartSidebar />
     </div>
   );
 }

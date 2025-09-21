@@ -1,10 +1,11 @@
 'use client';
 
 import React from 'react';
-import { XMarkIcon, PlusIcon, MinusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, PlusIcon, MinusIcon, TrashIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { useCart } from '@/lib/cart-context';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export function CartSidebar() {
   const {
@@ -18,23 +19,50 @@ export function CartSidebar() {
   } = useCart();
 
   const totalPrice = getTotalPrice();
-
-  if (!isCartOpen) return null;
+  
+  // Check if there are packages in the cart
+  const packageItems = cartItems.filter(item => item.type === 'package');
+  const hasPackages = packageItems.length > 0;
+  const packageCount = packageItems.length;
 
   return (
-    <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-50"
-        onClick={() => setIsCartOpen(false)}
-      />
-      
-      {/* Sidebar */}
-      <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out">
+    <AnimatePresence>
+      {isCartOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black bg-opacity-50 z-50"
+            onClick={() => setIsCartOpen(false)}
+          />
+          
+          {/* Sidebar */}
+          <motion.div
+            initial={{ x: '100%', opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: '100%', opacity: 0 }}
+            transition={{ 
+              type: 'spring', 
+              damping: 25, 
+              stiffness: 200,
+              duration: 0.3 
+            }}
+            className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-xl z-50"
+          >
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Shopping Cart</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-gray-900">Shopping Cart</h2>
+              {hasPackages && (
+                <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full font-medium">
+                  {packageCount} package{packageCount > 1 ? 's' : ''} ready to book
+                </span>
+              )}
+            </div>
             <button
               onClick={() => setIsCartOpen(false)}
               className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
@@ -56,9 +84,20 @@ export function CartSidebar() {
                 <p className="text-sm text-gray-400 mt-1">Add some products to get started</p>
               </div>
             ) : (
-              <div className="space-y-4">
-                {cartItems.map((item) => (
-                  <div key={item.id} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
+              <motion.div 
+                className="space-y-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
+              >
+                {cartItems.map((item, index) => (
+                  <motion.div 
+                    key={item.id} 
+                    className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.2, delay: index * 0.05 }}
+                  >
                     <div className="flex-shrink-0">
                       <Image
                         src={item.image || '/images/products/yoga-journal-1.jpg'}
@@ -114,15 +153,20 @@ export function CartSidebar() {
                     <div className="text-sm font-medium text-gray-900">
                       {item.currency === 'PEN' ? 'S/ ' : item.currency + ' '}{(item.price * item.quantity).toFixed(2)}
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             )}
           </div>
 
           {/* Footer */}
           {cartItems.length > 0 && (
-            <div className="border-t border-gray-200 p-4 space-y-4">
+            <motion.div 
+              className="border-t border-gray-200 p-4 space-y-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.2 }}
+            >
               <div className="flex justify-between items-center">
                 <span className="text-lg font-semibold text-gray-900">Total:</span>
                 <span className="text-lg font-bold text-[#6ea058]">
@@ -131,10 +175,41 @@ export function CartSidebar() {
               </div>
               
               <div className="space-y-2">
+                {/* Book a Class Now button - only show if there are packages */}
+                {hasPackages && (
+                  <Link
+                    href="/packages/enhanced"
+                    className="w-full bg-orange-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-orange-700 transition-colors text-center block flex items-center justify-center gap-2"
+                    onClick={() => {
+                      // Clear direct checkout flag for booking flow
+                      if (typeof window !== 'undefined') {
+                        sessionStorage.removeItem('isDirectCheckout');
+                      }
+                      setIsCartOpen(false);
+                    }}
+                  >
+                    <CalendarDaysIcon className="h-5 w-5" />
+                    Book a Class Now
+                    {packageCount > 1 && (
+                      <span className="text-xs bg-orange-500 px-2 py-1 rounded-full">
+                        {packageCount} packages
+                      </span>
+                    )}
+                  </Link>
+                )}
+                
                 <Link
                   href="/checkout"
                   className="w-full bg-[#6ea058] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#5a8a4a] transition-colors text-center block"
-                  onClick={() => setIsCartOpen(false)}
+                  onClick={() => {
+                    // Set direct checkout flag and clear schedule data
+                    if (typeof window !== 'undefined') {
+                      sessionStorage.setItem('isDirectCheckout', 'true');
+                      sessionStorage.removeItem('selectedSchedule');
+                      sessionStorage.removeItem('selectedPackageForBooking');
+                    }
+                    setIsCartOpen(false);
+                  }}
                 >
                   Proceed to Checkout
                 </Link>
@@ -146,10 +221,12 @@ export function CartSidebar() {
                   Clear Cart
                 </button>
               </div>
-            </div>
+            </motion.div>
           )}
         </div>
-      </div>
-    </>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }

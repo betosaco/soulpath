@@ -119,10 +119,11 @@ export async function POST(request: NextRequest) {
       data: {
         userId: user.id,
         totalAmount: totalAmount,
-        currencyCode: packagePrice.currency.code,
+        currency: packagePrice.currency.code,
         paymentMethod: paymentMethod.name,
         paymentStatus: 'PENDING',
-        notes: notes
+        notes: notes,
+        purchasedAt: new Date()
       }
     });
 
@@ -135,6 +136,7 @@ export async function POST(request: NextRequest) {
       userPackage = await prisma.userPackage.create({
         data: {
           userId: user.id,
+          orderItemId: `purchase-${purchase.id}-${packagePriceId}`,
           purchaseId: purchase.id,
           packagePriceId: packagePriceId,
           quantity: quantity,
@@ -170,10 +172,10 @@ export async function POST(request: NextRequest) {
         purchase: {
           id: purchase.id,
           totalAmount: purchase.totalAmount,
-          currencyCode: purchase.currencyCode,
+          currencyCode: purchase.currency,
           paymentMethod: purchase.paymentMethod,
           paymentStatus: purchase.paymentStatus,
-          notes: purchase.notes,
+          notes: purchase.notes || '',
           purchasedAt: purchase.purchasedAt,
           package: {
             name: packagePrice.packageDefinition.name,

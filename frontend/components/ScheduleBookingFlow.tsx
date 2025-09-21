@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Calendar,
@@ -12,9 +12,6 @@ import {
   CheckCircle,
   AlertCircle,
   Users,
-  MapPin,
-  CreditCard,
-  Shield
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -141,7 +138,6 @@ export function ScheduleBookingFlow({
         id: pkg.id.toString(),
         name: pkg.packageDefinition.name,
         price: pkg.price,
-        quantity: 1,
         image: '/images/products/yoga-journal-1.jpg', // Default package image
         sku: `PKG-${pkg.id}`,
         currency: pkg.currency?.code || 'PEN',
@@ -180,26 +176,6 @@ export function ScheduleBookingFlow({
 
 
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      month: 'long', 
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
-
-  const formatTime = (timeString: string) => {
-    const [hours, minutes] = timeString.split(':');
-    const date = new Date();
-    date.setHours(parseInt(hours), parseInt(minutes));
-    return date.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit',
-      hour12: true 
-    });
-  };
 
   return (
     <div className="min-h-screen bg-white">

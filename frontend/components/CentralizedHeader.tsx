@@ -6,9 +6,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import '@/styles/unified-component-styles.css';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useTranslations, useLanguage } from '@/hooks/useTranslations';
 import { CartIcon } from './CartIcon';
+import { useCart } from '@/lib/cart-context';
 
 interface CentralizedHeaderProps {
   user?: { email: string } | null;
@@ -19,7 +20,23 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
   const { language, setLanguage } = useLanguage();
   const { t } = useTranslations(undefined, language);
   const router = useRouter();
+  const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { setIsCartOpen } = useCart();
+
+  // Function to check if a route is active
+  const isActiveRoute = (route: string) => {
+    if (route === '/') {
+      return pathname === '/';
+    }
+    return pathname.startsWith(route);
+  };
+
+  // Function to handle menu item clicks - closes both mobile menu and cart
+  const handleMenuItemClick = () => {
+    setIsMenuOpen(false);
+    setIsCartOpen(false);
+  };
   
 
   // Helper function to safely access nested translation properties
@@ -38,12 +55,6 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
     return typeof current === 'string' ? current : fallback;
   };
 
-  const scrollToSection = (section: string) => {
-    const element = document.getElementById(section);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
 
   // Handle touch gestures for closing menu
   useEffect(() => {
@@ -189,7 +200,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
               className={`px-3 py-1 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation ${
                 language === 'en' 
                   ? 'bg-[#6ea058] text-white shadow-sm' 
-                  : 'text-gray-600 hover:text-[#6ea058] hover:bg-[#6ea058]/10'
+                  : 'text-gray-600 hover:text-[#6ea058]'
               }`}
             >
               EN
@@ -200,7 +211,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
               className={`px-3 py-1 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation ${
                 language === 'es' 
                   ? 'bg-[#6ea058] text-white shadow-sm' 
-                  : 'text-gray-600 hover:text-[#6ea058] hover:bg-[#6ea058]/10'
+                  : 'text-gray-600 hover:text-[#6ea058]'
               }`}
             >
               ES
@@ -289,8 +300,12 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      onClick={() => setIsMenuOpen(false)}
-                      className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30 mobile-touch-feedback"
+                      onClick={handleMenuItemClick}
+                      className={`w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] border border-gray-200 mobile-touch-feedback ${
+                        isActiveRoute('/schedule') 
+                          ? 'text-[#6ea058] font-bold' 
+                          : 'text-black hover:text-[#6ea058]'
+                      }`}
                     >
                       <span className="text-base sm:text-lg font-medium">{getTranslation('nav.schedule', 'Schedule')}</span>
                     </motion.button>
@@ -300,8 +315,12 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      onClick={() => setIsMenuOpen(false)}
-                      className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30 mobile-touch-feedback"
+                      onClick={handleMenuItemClick}
+                      className={`w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] border border-gray-200 mobile-touch-feedback ${
+                        isActiveRoute('/packages') 
+                          ? 'text-[#6ea058] font-bold' 
+                          : 'text-black hover:text-[#6ea058]'
+                      }`}
                     >
                       <span className="text-base sm:text-lg font-medium">{getTranslation('nav.packages', 'Packages')}</span>
                     </motion.button>
@@ -311,8 +330,12 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      onClick={() => setIsMenuOpen(false)}
-                      className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30 mobile-touch-feedback"
+                      onClick={handleMenuItemClick}
+                      className={`w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] border border-gray-200 mobile-touch-feedback ${
+                        isActiveRoute('/products') 
+                          ? 'text-[#6ea058] font-bold' 
+                          : 'text-black hover:text-[#6ea058]'
+                      }`}
                     >
                       <span className="text-base sm:text-lg font-medium">{getTranslation('nav.products', 'Products')}</span>
                     </motion.button>
@@ -328,8 +351,12 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                       <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => setIsMenuOpen(false)}
-                        className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30"
+                        onClick={handleMenuItemClick}
+                        className={`w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] border border-gray-200 ${
+                          isActiveRoute('/account') 
+                            ? 'text-[#6ea058] font-bold' 
+                            : 'text-black hover:text-[#6ea058]'
+                        }`}
                       >
                         <span className="text-base sm:text-lg font-medium">{getTranslation('common.account', 'Account')}</span>
                       </motion.button>
@@ -343,11 +370,16 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                       } else {
                         router.push('/login');
                       }
-                      setIsMenuOpen(false);
+                      handleMenuItemClick();
                     }}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30"
+                    className={`w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] border border-gray-200 ${
+                      (user && isAdmin && isActiveRoute('/admin')) || 
+                      (!user && isActiveRoute('/login'))
+                        ? 'text-[#6ea058] font-bold' 
+                        : 'text-black hover:text-[#6ea058]'
+                    }`}
                   >
                     <span className="text-base sm:text-lg font-medium">
                       {user && isAdmin ? getTranslation('common.dashboard', 'Dashboard') : getTranslation('common.login', 'Login')}
@@ -363,7 +395,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                       className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation min-h-[40px] min-w-[40px] flex items-center justify-center ${
                         language === 'en' 
                           ? 'bg-[#6ea058] text-white shadow-sm' 
-                          : 'text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 border border-gray-200'
+                          : 'text-black hover:text-[#6ea058] border border-gray-200'
                       }`}
                     >
                       EN
@@ -374,7 +406,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                       className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation min-h-[40px] min-w-[40px] flex items-center justify-center ${
                         language === 'es' 
                           ? 'bg-[#6ea058] text-white shadow-sm' 
-                          : 'text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 border border-gray-200'
+                          : 'text-black hover:text-[#6ea058] border border-gray-200'
                       }`}
                     >
                       ES

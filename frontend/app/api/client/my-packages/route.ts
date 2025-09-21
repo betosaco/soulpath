@@ -131,15 +131,15 @@ export async function GET(request: NextRequest) {
         quantity: pkg.quantity,
         expiresAt: pkg.expiresAt,
         isActive: pkg.isActive,
-        purchaseDate: pkg.purchase.purchasedAt,
+        purchaseDate: pkg.purchase?.purchasedAt,
         price: pkg.packagePrice.price,
         sessionDuration: pkg.packagePrice.packageDefinition.sessionDuration.duration_minutes,
         packageType: pkg.packagePrice.packageDefinition.packageType,
         maxGroupSize: pkg.packagePrice.packageDefinition.maxGroupSize,
         currency: pkg.packagePrice.currency.symbol,
         currencyCode: pkg.packagePrice.currency.code,
-        paymentStatus: pkg.purchase.paymentStatus,
-        totalAmount: pkg.purchase.totalAmount
+        paymentStatus: pkg.purchase?.paymentStatus,
+        totalAmount: pkg.purchase?.totalAmount
       };
     });
 

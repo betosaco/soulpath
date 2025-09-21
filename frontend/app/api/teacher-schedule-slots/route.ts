@@ -129,10 +129,9 @@ export async function GET(request: NextRequest) {
       // Format date as YYYY-MM-DD
       const date = startTime.toISOString().split('T')[0];
       
-      // Format time as HH:MM in 24-hour format - adjust for EST display (subtract 5 hours)
-      const adjustedTime = new Date(startTime.getTime() - (5 * 60 * 60 * 1000)); // Subtract 5 hours
-      const hours = adjustedTime.getHours().toString().padStart(2, '0');
-      const minutes = adjustedTime.getMinutes().toString().padStart(2, '0');
+      // Format time as HH:MM in 24-hour format - times are already in correct timezone
+      const hours = startTime.getHours().toString().padStart(2, '0');
+      const minutes = startTime.getMinutes().toString().padStart(2, '0');
       const time = `${hours}:${minutes}`;
       
       // Get the actual day of week from the date

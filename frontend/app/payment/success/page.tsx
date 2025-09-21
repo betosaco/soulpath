@@ -22,7 +22,7 @@ export default function PaymentSuccessPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#191970] to-[#0A0A23]">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-[#FFD700] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-[#C0C0C0]">Processing payment...</p>
@@ -32,7 +32,7 @@ export default function PaymentSuccessPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#191970] to-[#0A0A23] p-4">
+    <div className="min-h-screen flex items-center justify-center bg-white p-4">
       <BaseCard className="max-w-md w-full">
         <div className="text-center p-8">
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">

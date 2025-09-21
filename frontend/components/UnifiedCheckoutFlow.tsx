@@ -12,7 +12,8 @@ import {
   ShoppingCart,
   Package,
   Truck,
-  User
+  User,
+  Calendar
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,12 +28,53 @@ import { countries } from '@/lib/countries';
 import { useCart, CartItem } from '@/lib/cart-context';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { EnhancedSchedule } from './EnhancedSchedule';
 
 interface BookingStep {
   id: string;
   title: string;
   description: string;
   completed: boolean;
+}
+
+interface Teacher {
+  id: number;
+  name: string;
+  bio?: string;
+  shortBio?: string;
+  experience: number;
+  avatarUrl?: string;
+}
+
+interface ServiceType {
+  id: number;
+  name: string;
+  description?: string;
+  shortDescription?: string;
+  duration: number;
+  difficulty?: string;
+  color?: string;
+  icon?: string;
+}
+
+interface Venue {
+  id: number;
+  name: string;
+  address?: string;
+  city?: string;
+}
+
+interface ScheduleSlot {
+  id: number;
+  date: string;
+  time: string;
+  isAvailable: boolean;
+  capacity: number;
+  bookedCount: number;
+  duration: number;
+  teacher: Teacher;
+  serviceType: ServiceType;
+  venue: Venue;
 }
 
 interface UnifiedCheckoutFlowProps {
@@ -112,7 +154,7 @@ function PaymentForm({
         toast.error(error.message || 'Payment failed. Please try again.');
       } else if (paymentIntent.status === 'succeeded') {
         toast.success('Payment successful!');
-        onPaymentSuccess(paymentIntent.id);
+        onPaymentSuccess();
       }
     } catch (error) {
       console.error('Payment error:', error);
@@ -187,6 +229,9 @@ function UnifiedCheckoutFlowContent({
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [countrySearchTerm, setCountrySearchTerm] = useState('');
   const [emailError, setEmailError] = useState<string | null>(null);
+  const [isDirectCheckout, setIsDirectCheckout] = useState(false);
+  const [isEditingSchedule, setIsEditingSchedule] = useState(false);
+  const [isEditingCustomerInfo, setIsEditingCustomerInfo] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   
   // Currency configuration
@@ -206,6 +251,61 @@ function UnifiedCheckoutFlowContent({
     // Additional fields
     notes: ''
   });
+
+  // Schedule data from enhanced packages flow
+  const [scheduleData, setScheduleData] = useState<ScheduleSlot | null>(null);
+  const [selectedPackageForBooking, setSelectedPackageForBooking] = useState<any>(null);
+
+  // Load schedule and package data from sessionStorage on component mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedSchedule = sessionStorage.getItem('selectedSchedule');
+      const isDirectCheckoutFlag = sessionStorage.getItem('isDirectCheckout') === 'true';
+      
+      // Set direct checkout flag
+      setIsDirectCheckout(isDirectCheckoutFlag);
+      
+      if (savedSchedule) {
+        try {
+          setScheduleData(JSON.parse(savedSchedule));
+        } catch (error) {
+          console.error('Error parsing schedule data:', error);
+        }
+      }
+      
+      const savedPackage = sessionStorage.getItem('selectedPackageForBooking');
+      if (savedPackage) {
+        try {
+          setSelectedPackageForBooking(JSON.parse(savedPackage));
+        } catch (error) {
+          console.error('Error parsing package data:', error);
+        }
+      }
+      
+      // Determine the correct starting step based on cart contents and saved data
+      const packageCount = cartItems.filter(item => item.type === 'package').length;
+      
+      if (isDirectCheckoutFlag) {
+        // Direct checkout: always go to personal info step
+        setCurrentStep(2);
+      } else if (savedSchedule) {
+        // If we have schedule data from packages flow, determine the correct starting step
+        if (packageCount > 1 && !savedPackage) {
+          // Multiple packages but no package selected: go to package selection step
+          setCurrentStep(1);
+        } else {
+          // Single package or package already selected: go to personal info step
+          setCurrentStep(2);
+        }
+      } else if (packageCount > 0) {
+        // If there are packages but no schedule data, start with schedule selection
+        setCurrentStep(0);
+      } else {
+        // No packages, start with personal info step
+        setCurrentStep(2);
+      }
+    }
+  }, [cartItems]);
 
   // Get selected country
   const selectedCountry = countries.find(c => c.code === formData.countryCode) || countries[0];
@@ -227,18 +327,60 @@ function UnifiedCheckoutFlowContent({
   }, [t]);
 
   const steps: BookingStep[] = React.useMemo(() => {
-    const baseSteps = [
-      { id: 'personal', title: getTranslation('bookingFlow.personalInfo', 'Personal Information'), description: getTranslation('bookingFlow.personalInfoDesc', 'Provide your contact details'), completed: false }
-    ];
+    const baseSteps = [];
     
-    if (requiresAddress()) {
-      baseSteps.push({ id: 'address', title: 'Shipping Address', description: 'Enter your delivery information', completed: false });
+    // Check if there are packages in the cart
+    const hasPackages = cartItems.some(item => item.type === 'package');
+    const packageCount = cartItems.filter(item => item.type === 'package').length;
+    
+    // If there are packages and no schedule data yet, add schedule selection step
+    if (hasPackages && !scheduleData) {
+      baseSteps.push({ 
+        id: 'schedule', 
+        title: getTranslation('bookingFlow.selectSchedule', 'Select Schedule'), 
+        description: getTranslation('bookingFlow.selectScheduleDesc', 'Choose your preferred date and time'), 
+        completed: false 
+      });
     }
     
-    baseSteps.push({ id: 'summary', title: 'Order Summary', description: 'Review your order and complete payment', completed: false });
+    // If there are multiple packages and no package selected yet, add package selection step
+    if (packageCount > 1 && !selectedPackageForBooking) {
+      baseSteps.push({ 
+        id: 'package-selection', 
+        title: getTranslation('bookingFlow.selectPackageForBooking', 'Choose Package for Booking'), 
+        description: getTranslation('bookingFlow.selectPackageForBookingDesc', 'Select which package to use for this booking'), 
+        completed: false 
+      });
+    }
+    
+    // Always add personal information step
+    baseSteps.push({ 
+      id: 'personal', 
+      title: getTranslation('bookingFlow.personalInfo', 'Personal Information'), 
+      description: getTranslation('bookingFlow.personalInfoDesc', 'Provide your contact details'), 
+      completed: false 
+    });
+    
+    // Add address step if required
+    if (requiresAddress()) {
+      baseSteps.push({ 
+        id: 'address', 
+        title: 'Shipping Address', 
+        description: 'Enter your delivery information', 
+        completed: false 
+      });
+    }
+    
+    // Always add order summary step
+    baseSteps.push({ 
+      id: 'summary', 
+      title: 'Order Summary', 
+      description: 'Review your order and complete payment', 
+      completed: false 
+    });
     
     return baseSteps;
-  }, [getTranslation, requiresAddress]);
+  }, [getTranslation, requiresAddress, cartItems, scheduleData, selectedPackageForBooking]);
 
   // Close dropdown when clicking outside and prevent page scroll
   useEffect(() => {
@@ -279,6 +421,66 @@ function UnifiedCheckoutFlowContent({
     }
   };
 
+  const handleScheduleSelect = (slot: ScheduleSlot) => {
+    setScheduleData(slot);
+    // Store in sessionStorage for persistence
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('selectedSchedule', JSON.stringify({
+        selectedDate: slot.date,
+        selectedTime: slot.time,
+        teacher: slot.teacher,
+        serviceType: slot.serviceType,
+        venue: slot.venue
+      }));
+    }
+    
+    // If user is editing schedule from order summary, go straight back to order summary
+    if (isEditingSchedule) {
+      setIsEditingSchedule(false);
+      setCurrentStep(requiresAddress() ? 4 : 3); // Go back to order summary
+      toast.success('Schedule updated! Review your order and complete payment.');
+      return;
+    }
+    
+    // Check if there are multiple package quantities (different types OR multiple quantities of same type)
+    const packageItems = cartItems.filter(item => item.type === 'package');
+    const totalPackageQuantity = packageItems.reduce((sum, item) => sum + item.quantity, 0);
+    
+    if (totalPackageQuantity > 1) {
+      // If multiple package quantities, go to package selection step
+      setCurrentStep(1);
+      toast.success('Schedule selected! Now choose which package to use for this booking.');
+    } else if (totalPackageQuantity === 1) {
+      // If only one package quantity, auto-select it and go to personal info
+      const packageItem = packageItems[0];
+      if (packageItem) {
+        setSelectedPackageForBooking(packageItem);
+        // Store in sessionStorage
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('selectedPackageForBooking', JSON.stringify(packageItem));
+        }
+      }
+      setCurrentStep(2); // Go to personal info (step 2)
+      toast.success('Schedule selected! Now provide your personal information.');
+    } else {
+      // No packages, go to personal info
+      setCurrentStep(2);
+      toast.success('Schedule selected! Now provide your personal information.');
+    }
+  };
+
+  const handlePackageSelectionForBooking = (packageInstance: any) => {
+    setSelectedPackageForBooking(packageInstance);
+    // Store in sessionStorage
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('selectedPackageForBooking', JSON.stringify(packageInstance));
+    }
+    
+    // Go to personal information step
+    setCurrentStep(2);
+    toast.success(`Package ${packageInstance.instanceNumber} selected! Now provide your personal information.`);
+  };
+
   const handleProceedToAddress = () => {
     if (!formData.clientName || !formData.clientEmail || !formData.clientPhone) {
       toast.error(getTranslation('bookingFlow.fillRequiredFields', 'Please fill in all required fields'));
@@ -290,12 +492,20 @@ function UnifiedCheckoutFlowContent({
       return;
     }
 
+    // If user is editing customer info from order summary, go straight back to order summary
+    if (isEditingCustomerInfo) {
+      setIsEditingCustomerInfo(false);
+      setCurrentStep(requiresAddress() ? 4 : 3); // Go back to order summary
+      toast.success('Personal information updated! Review your order and complete payment.');
+      return;
+    }
+
     if (requiresAddress()) {
-      setCurrentStep(1);
+      setCurrentStep(3);
       toast.success('Personal information saved! Now enter your shipping address.');
     } else {
-      // Skip address step and go directly to summary (step 1 when no address required)
-      setCurrentStep(1);
+      // Skip address step and go directly to summary
+      setCurrentStep(3);
       toast.success('Personal information saved! Review your order and complete payment.');
     }
   };
@@ -306,7 +516,7 @@ function UnifiedCheckoutFlowContent({
       return;
     }
 
-    setCurrentStep(2);
+    setCurrentStep(4);
     toast.success('Address saved! Review your order and complete payment.');
   };
 
@@ -353,7 +563,7 @@ function UnifiedCheckoutFlowContent({
           email: formData.clientEmail,
           phone: formData.clientPhone,
           countryCode: formData.countryCode,
-          language: formData.language
+          // language: formData.language // Removed as not in formData interface
         },
         shippingAddress: requiresAddress() ? {
           address: formData.address,
@@ -412,8 +622,8 @@ function UnifiedCheckoutFlowContent({
   // Redirect to products if cart is empty
   if (cartItems.length === 0) {
     return (
-      <AppLayout className="min-h-screen bg-gray-50">
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <AppLayout className="min-h-screen bg-white">
+        <div className="min-h-screen flex items-center justify-center bg-white">
           <div className="text-center">
             <ShoppingCart className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Your cart is empty</h1>
@@ -431,7 +641,7 @@ function UnifiedCheckoutFlowContent({
   }
 
   return (
-    <AppLayout className="min-h-screen bg-gray-50">
+    <AppLayout className="min-h-screen bg-white">
       {/* Progress Steps */}
       <div className="bg-gray-50 py-6">
         <div className="container mx-auto px-4">
@@ -471,8 +681,126 @@ function UnifiedCheckoutFlowContent({
       {/* Step Content */}
       <div className="container mx-auto px-4 py-8 mobile-step-container">
         <AnimatePresence mode="wait">
-          {/* Step 1: Personal Information */}
-          {currentStep === 0 && (
+          {/* Step 1: Schedule Selection (only if packages in cart, no schedule data, and not direct checkout, OR when editing schedule) */}
+          {currentStep === 0 && cartItems.some(item => item.type === 'package') && (!scheduleData || isEditingSchedule) && !isDirectCheckout && (
+            <motion.div
+              key="schedule"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="max-w-6xl mx-auto mobile-step-content"
+            >
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-primary mb-4">
+                  {getTranslation('bookingFlow.selectSchedule', 'Select Your Schedule')}
+                </h2>
+                <p className="text-xl text-muted">
+                  {getTranslation('bookingFlow.selectScheduleDesc', 'Choose your preferred date and time for your package')}
+                </p>
+              </div>
+
+              <div className="bg-white rounded-lg shadow-lg p-6">
+                <EnhancedSchedule
+                  onBookSlot={handleScheduleSelect}
+                  showBookingButton={false}
+                />
+              </div>
+            </motion.div>
+          )}
+
+          {/* Step 2: Package Selection (only if multiple package quantities in cart) */}
+          {currentStep === 1 && cartItems.filter(item => item.type === 'package').reduce((sum, item) => sum + item.quantity, 0) > 1 && (
+            <motion.div
+              key="package-selection"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="max-w-4xl mx-auto mobile-step-content"
+            >
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-primary mb-4">
+                  {getTranslation('bookingFlow.selectPackageForBooking', 'Choose Package for Booking')}
+                </h2>
+                <p className="text-xl text-muted">
+                  {getTranslation('bookingFlow.selectPackageForBookingDesc', 'Select which package to use for this booking')}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {cartItems
+                  .filter(item => item.type === 'package')
+                  .map((packageItem) => {
+                    // Create individual package instances for selection
+                    const packageInstances = Array.from({ length: packageItem.quantity }, (_, index) => ({
+                      ...packageItem,
+                      instanceId: `${packageItem.id}-${index}`,
+                      instanceNumber: index + 1
+                    }));
+                    
+                    return packageInstances.map((instance) => (
+                      <Card
+                        key={instance.instanceId}
+                        className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
+                          selectedPackageForBooking?.instanceId === instance.instanceId
+                            ? 'ring-2 ring-primary bg-primary/5'
+                            : 'hover:shadow-md'
+                        }`}
+                        onClick={() => handlePackageSelectionForBooking(instance)}
+                      >
+                        <CardContent className="p-6">
+                          <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-xl font-semibold text-primary">
+                              {instance.name}
+                              {instance.quantity > 1 && (
+                                <span className="ml-2 text-sm text-gray-500">
+                                  (Instance {instance.instanceNumber} of {instance.quantity})
+                                </span>
+                              )}
+                            </h3>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-primary">
+                                {new Intl.NumberFormat('es-PE', {
+                                  style: 'currency',
+                                  currency: 'PEN'
+                                }).format(instance.price)}
+                              </p>
+                              <p className="text-sm text-muted">
+                                Package {instance.instanceNumber}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          {(instance as any).description && (
+                            <p className="text-muted mb-4 line-clamp-3">
+                              {(instance as any).description}
+                            </p>
+                          )}
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Package className="w-4 h-4 text-primary" />
+                              <span className="text-sm text-muted">
+                                {(instance as any).sessionsCount || 'Multiple'} sessions
+                              </span>
+                            </div>
+                            
+                            {selectedPackageForBooking?.instanceId === instance.instanceId && (
+                              <div className="flex items-center gap-2 text-primary">
+                                <CheckCircle className="w-5 h-5" />
+                                <span className="font-medium">Selected</span>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ));
+                  }).flat()}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Personal Information */}
+          {currentStep === 2 && (
             <motion.div
               key="personal"
               initial={{ opacity: 0, x: 20 }}
@@ -656,8 +984,8 @@ function UnifiedCheckoutFlowContent({
             </motion.div>
           )}
 
-          {/* Step 2: Shipping Address */}
-          {currentStep === 1 && requiresAddress() && (
+          {/* Shipping Address */}
+          {currentStep === 3 && requiresAddress() && (
             <motion.div
               key="address"
               initial={{ opacity: 0, x: 20 }}
@@ -778,8 +1106,8 @@ function UnifiedCheckoutFlowContent({
             </motion.div>
           )}
 
-          {/* Step 3: Order Summary & Payment */}
-          {currentStep === (requiresAddress() ? 2 : 1) && (
+          {/* Order Summary & Payment */}
+          {currentStep === (requiresAddress() ? 4 : 3) && (
             <motion.div
               key="summary"
               initial={{ opacity: 0, x: 20 }}
@@ -796,10 +1124,26 @@ function UnifiedCheckoutFlowContent({
                 {/* Customer Information */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <User className="w-5 h-5" />
-                      Customer Information
-                    </CardTitle>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center gap-2">
+                        <User className="w-5 h-5" />
+                        Customer Information
+                      </CardTitle>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          // Set editing flag and go back to personal information step
+                          setIsEditingCustomerInfo(true);
+                          setCurrentStep(2); // Go to personal information step
+                          toast.info('You can now edit your personal information');
+                        }}
+                        className="text-primary border-primary hover:bg-primary hover:text-white"
+                      >
+                        <User className="w-4 h-4 mr-2" />
+                        Edit
+                      </Button>
+                    </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div>
@@ -826,6 +1170,62 @@ function UnifiedCheckoutFlowContent({
                     )}
                   </CardContent>
                 </Card>
+
+                {/* Schedule Information */}
+                {scheduleData && (
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center gap-2">
+                          <Calendar className="w-5 h-5" />
+                          Booking Schedule
+                        </CardTitle>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            // Set editing flag and go back to schedule selection step
+                            setIsEditingSchedule(true);
+                            setCurrentStep(0);
+                            toast.info('You can now select a different schedule');
+                          }}
+                          className="text-primary border-primary hover:bg-primary hover:text-white"
+                        >
+                          <Calendar className="w-4 h-4 mr-2" />
+                          Edit Schedule
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div>
+                        <p className="text-sm text-gray-600">Date</p>
+                        <p className="font-medium">{(scheduleData as any).selectedDate || scheduleData.date}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Time</p>
+                        <p className="font-medium">{(scheduleData as any).selectedTime || scheduleData.time}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Teacher</p>
+                        <p className="font-medium">{scheduleData.teacher?.name || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Service</p>
+                        <p className="font-medium">{scheduleData.serviceType?.name || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Venue</p>
+                        <p className="font-medium">{scheduleData.venue?.name || 'N/A'}</p>
+                      </div>
+                      {selectedPackageForBooking && (
+                        <div>
+                          <p className="text-sm text-gray-600">Package for Booking</p>
+                          <p className="font-medium">{selectedPackageForBooking.name}</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Order Items */}
                 <Card>
@@ -924,7 +1324,11 @@ function UnifiedCheckoutFlowContent({
                 <Button
                   variant="outline"
                   onClick={() => {
-                    setCurrentStep(requiresAddress() ? 1 : 0);
+                    if (requiresAddress()) {
+                      setCurrentStep(3);
+                    } else {
+                      setCurrentStep(2);
+                    }
                   }}
                   className="px-8 py-4 text-lg font-medium text-primary border-2 border-primary hover:bg-primary hover:text-white rounded-lg transition-all duration-200 flex items-center gap-2 hover:scale-105 active:scale-95"
                 >
@@ -942,6 +1346,7 @@ function UnifiedCheckoutFlowContent({
 
 // Main export with Stripe Elements wrapper
 export function UnifiedCheckoutFlow(props: UnifiedCheckoutFlowProps) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [stripePromise, setStripePromise] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -965,7 +1370,7 @@ export function UnifiedCheckoutFlow(props: UnifiedCheckoutFlowProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-gray-600">Loading payment system...</p>
@@ -976,7 +1381,7 @@ export function UnifiedCheckoutFlow(props: UnifiedCheckoutFlowProps) {
 
   if (!stripePromise) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <AlertCircle className="w-8 h-8 text-red-600" />

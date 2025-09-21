@@ -221,12 +221,15 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
     // Calculate additional metrics
     const totalSpent = totalPurchaseAmount._sum.totalAmount || 0;
-    const totalSessionsUsed = activePackages.reduce((sum, pkg) => sum + (pkg.sessionsUsed || 0), 0);
-    const totalSessionsAvailable = activePackages.reduce((sum, pkg) => sum + ((pkg.quantity || 0) * pkg.packagePrice.packageDefinition.sessionsCount), 0);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const totalSessionsUsed = activePackages.reduce((sum: number, pkg: any) => sum + (pkg.sessionsUsed || 0), 0);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const totalSessionsAvailable = activePackages.reduce((sum: number, pkg: any) => sum + ((pkg.quantity || 0) * pkg.packagePrice.packageDefinition.sessionsCount), 0);
     const sessionsRemaining = totalSessionsAvailable - totalSessionsUsed;
 
     // Process packages data
-    const processedActivePackages = activePackages.map(pkg => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const processedActivePackages = activePackages.map((pkg: any) => ({
       id: pkg.id,
       packageName: pkg.packagePrice.packageDefinition.name,
       packageType: pkg.packagePrice.packageDefinition.packageType,
@@ -240,7 +243,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       createdAt: pkg.createdAt
     }));
 
-    const processedPastPackages = pastPackages.map(pkg => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const processedPastPackages = pastPackages.map((pkg: any) => ({
       id: pkg.id,
       packageName: pkg.packagePrice.packageDefinition.name,
       packageType: pkg.packagePrice.packageDefinition.packageType,
@@ -254,7 +258,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     }));
 
     // Process bookings data
-    const processedRecentBookings = recentBookings.map(booking => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const processedRecentBookings = recentBookings.map((booking: any) => ({
       id: booking.id,
       sessionDate: booking.createdAt,
       sessionTime: booking.scheduleSlot?.startTime || booking.teacherScheduleSlot?.startTime,
@@ -264,7 +269,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       createdAt: booking.createdAt
     }));
 
-    const processedUpcomingBookings = upcomingBookings.map(booking => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const processedUpcomingBookings = upcomingBookings.map((booking: any) => ({
       id: booking.id,
       sessionDate: booking.createdAt,
       sessionTime: booking.scheduleSlot?.startTime || booking.teacherScheduleSlot?.startTime,

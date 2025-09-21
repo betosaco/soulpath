@@ -60,7 +60,6 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         data: {
           ...updateData,
           paymentStatus: updateData.paymentStatus ? updateData.paymentStatus.toUpperCase() as 'PENDING' | 'COMPLETED' | 'FAILED' | 'CANCELLED' : undefined,
-          confirmedAt: updateData.confirmedAt ? new Date(updateData.confirmedAt) : undefined
         }
       });
 
@@ -69,8 +68,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         await tx.paymentRecord.updateMany({
           where: { purchaseId: purchaseId },
           data: {
-            paymentStatus: updateData.paymentStatus.toUpperCase() as 'PENDING' | 'COMPLETED' | 'FAILED' | 'CANCELLED',
-            confirmedAt: updateData.paymentStatus === 'completed' ? new Date() : null
+            status: updateData.paymentStatus.toUpperCase() as 'PENDING' | 'COMPLETED' | 'FAILED' | 'CANCELLED',
           }
         });
       }
@@ -175,7 +173,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
     // Check if there are active bookings
     const hasActiveBookings = existingPurchase.userPackages.some(
-      pkg => pkg.bookings.length > 0
+      (pkg: { bookings: unknown[] }) => pkg.bookings.length > 0
     );
 
     if (hasActiveBookings) {

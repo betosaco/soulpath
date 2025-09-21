@@ -149,7 +149,7 @@ export class ScheduleDuplicateChecker {
             id: exactMatch.id,
             date: '', // Not available in this context
             time: `${exactMatch.startTime}-${exactMatch.endTime}`,
-            teacherId: (exactMatch as any).teacherId?.toString() || '',
+            teacherId: (exactMatch as { teacherId?: number }).teacherId?.toString() || '',
             serviceTypeId: '', // Not available in teacherSchedule
             venueId: exactMatch.venueId?.toString() || ''
           },
@@ -259,7 +259,7 @@ export class ScheduleDuplicateChecker {
             id: overlap.id,
             date: '', // Not available in this context
             time: `${overlap.startTime}-${overlap.endTime}`,
-            teacherId: (overlap as any).teacherId?.toString() || '',
+            teacherId: (overlap as { teacherId?: number }).teacherId?.toString() || '',
             serviceTypeId: '', // Not available in teacherSchedule
             venueId: overlap.venueId?.toString() || ''
           },
@@ -299,7 +299,7 @@ export class ScheduleDuplicateChecker {
             id: schedule.id,
             date: '', // Not available in this context
             time: `${schedule.startTime}-${schedule.endTime}`,
-            teacherId: (schedule as any).teacherId?.toString() || '',
+            teacherId: (schedule as { teacherId?: number }).teacherId?.toString() || '',
             serviceTypeId: '', // Not available in teacherSchedule
             venueId: schedule.venueId.toString()
           },
@@ -338,7 +338,7 @@ export class ScheduleDuplicateChecker {
             id: schedule.id,
             date: '', // Not available in this context
             time: `${schedule.startTime}-${schedule.endTime}`,
-            teacherId: (schedule as any).teacherId?.toString() || '',
+            teacherId: (schedule as { teacherId?: number }).teacherId?.toString() || '',
             serviceTypeId: '', // Not available in teacherSchedule
             venueId: schedule.venueId?.toString() || ''
           },
@@ -419,8 +419,8 @@ export class ScheduleDuplicateChecker {
       id: s.id,
       date: '', // Not available in this context
       time: `${s.startTime}-${s.endTime}`,
-      teacherId: (s as any).teacherId?.toString() || '',
-      serviceTypeId: (s as any).serviceTypeId?.toString() || '',
+      teacherId: (s as { teacherId?: number }).teacherId?.toString() || '',
+      serviceTypeId: (s as { serviceTypeId?: number }).serviceTypeId?.toString() || '',
       venueId: s.venueId?.toString() || ''
     })));
 

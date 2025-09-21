@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -21,7 +21,7 @@ export async function GET(
     const order = await prisma.order.findUnique({
       where: { id: orderId },
       include: {
-        orderItems: {
+        items: {
           include: {
             product: true,
             packagePrice: {
@@ -44,7 +44,8 @@ export async function GET(
     }
 
     // Transform order items to match frontend format
-    const orderItems = order.orderItems.map(item => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const orderItems = order.items.map((item: any) => {
       if (item.itemType === 'PRODUCT' && item.product) {
         return {
           id: item.product.id,
@@ -89,7 +90,9 @@ export async function GET(
         total: Number(order.total),
         currency: order.currency,
         createdAt: order.createdAt.toISOString(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         shippingAddress: order.shippingAddress as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         billingAddress: order.billingAddress as any,
         orderItems
       }

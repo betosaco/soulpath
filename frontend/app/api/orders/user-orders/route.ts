@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     const orders = await prisma.order.findMany({
       where: { customerId: userId },
       include: {
-        orderItems: {
+        items: {
           include: {
             product: true,
             packagePrice: {
@@ -37,8 +37,10 @@ export async function GET(request: NextRequest) {
 
     // Transform orders to summary format
     const orderSummaries = orders.map(order => {
-      const hasProducts = order.orderItems.some(item => item.itemType === 'PRODUCT');
-      const hasPackages = order.orderItems.some(item => item.itemType === 'PACKAGE');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const hasProducts = order.items.some((item: any) => item.itemType === 'PRODUCT');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const hasPackages = order.items.some((item: any) => item.itemType === 'PACKAGE');
       
       return {
         id: order.id,
@@ -49,7 +51,8 @@ export async function GET(request: NextRequest) {
         total: Number(order.total),
         currency: order.currency,
         createdAt: order.createdAt.toISOString(),
-        itemCount: order.orderItems.reduce((sum, item) => sum + item.quantity, 0),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        itemCount: order.items.reduce((sum: number, item: any) => sum + item.quantity, 0),
         hasProducts,
         hasPackages
       };

@@ -156,9 +156,10 @@ export async function POST(request: NextRequest) {
       data: {
         userId: user.id,
         totalAmount: packagePrice.price,
-        currencyCode: packagePrice.currency.code,
+        currency: packagePrice.currency.code,
         paymentMethod: paymentMethod.type || 'custom',
-        paymentStatus: 'COMPLETED'
+        paymentStatus: 'COMPLETED',
+        purchasedAt: new Date()
       }
     });
 
@@ -166,6 +167,7 @@ export async function POST(request: NextRequest) {
     const userPackage = await prisma.userPackage.create({
       data: {
         userId: user.id,
+        orderItemId: `calendly-${purchase.id}-${packagePrice.id}`,
         purchaseId: purchase.id,
         packagePriceId: packagePrice.id,
         quantity: 1,

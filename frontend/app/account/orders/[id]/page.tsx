@@ -7,17 +7,14 @@ import {
   CheckCircle,
   Package,
   ShoppingCart,
-  Calendar,
   User,
   MapPin,
   CreditCard,
-  ArrowLeft,
-  ArrowRight
+  ArrowLeft
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/AppLayout';
-import { toast } from 'sonner';
 
 interface OrderItem {
   id: string;
@@ -133,7 +130,7 @@ export default function OrderDetailsPage() {
   if (loading) {
     return (
       <AppLayout>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-white flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-gray-600">Loading order details...</p>
@@ -146,7 +143,7 @@ export default function OrderDetailsPage() {
   if (error || !order) {
     return (
       <AppLayout>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-white flex items-center justify-center">
           <div className="text-center">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="w-8 h-8 text-red-600" />

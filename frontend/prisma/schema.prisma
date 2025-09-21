@@ -164,6 +164,7 @@ model User {
   orders           Order[]           @relation("CustomerOrders")
   otpVerifications OtpVerification[]
   userPackages     UserPackage[]
+  purchases        Purchase[]
 
   @@index([email], map: "idx_users_email")
   @@index([status], map: "idx_users_status")
@@ -548,6 +549,7 @@ model UserPackage {
   userId         String       @map("user_id")
   orderItemId    String       @map("order_item_id")
   packagePriceId Int          @map("package_price_id")
+  purchaseId     Int?         @map("purchase_id")
   quantity       Int?         @default(1)
   sessionsUsed   Int?         @default(0) @map("sessions_used")
   isActive       Boolean?     @default(true) @map("is_active")
@@ -558,9 +560,11 @@ model UserPackage {
   orderItem      OrderItem    @relation(fields: [orderItemId], references: [id], onDelete: Cascade, onUpdate: Restrict)
   packagePrice   PackagePrice @relation(fields: [packagePriceId], references: [id], onDelete: Cascade, onUpdate: Restrict)
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  purchase       Purchase?    @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
 
   @@index([userId], map: "idx_user_packages_user_id")
   @@index([orderItemId], map: "idx_user_packages_order_item_id")
+  @@index([purchaseId], map: "idx_user_packages_purchase_id")
   @@index([isActive], map: "idx_user_packages_active")
   @@index([userId, isActive], map: "idx_user_packages_user_active")
   @@index([expiresAt], map: "idx_user_packages_expires")
@@ -1366,4 +1370,50 @@ enum CustomerStatus {
 enum OrderItemType {
   PRODUCT
   PACKAGE
+}
+
+model Purchase {
+  id              Int            @id @default(autoincrement())
+  userId          String         @map("user_id")
+  totalAmount     Decimal        @map("total_amount") @db.Decimal(10, 2)
+  currency        String         @default("PEN") @db.VarChar(3)
+  currencyCode    String?        @map("currency_code") @db.VarChar(3)
+  paymentStatus   PaymentStatus  @map("payment_status")
+  paymentMethod   String?        @map("payment_method") @db.VarChar(50)
+  paymentId       String?        @map("payment_id") @db.VarChar(255)
+  purchasedAt     DateTime       @map("purchased_at") @db.Timestamptz(6)
+  confirmedAt     DateTime?      @map("confirmed_at") @db.Timestamptz(6)
+  notes           String?
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userPackages    UserPackage[]
+  paymentRecords  PaymentRecord[]
+
+  @@index([userId], map: "idx_purchases_user_id")
+  @@index([paymentStatus], map: "idx_purchases_payment_status")
+  @@index([purchasedAt], map: "idx_purchases_purchased_at")
+  @@map("purchases")
+}
+
+model PaymentRecord {
+  id              Int            @id @default(autoincrement())
+  purchaseId      Int            @map("purchase_id")
+  userId          String?        @map("user_id")
+  amount          Decimal        @db.Decimal(10, 2)
+  currency        String         @default("PEN") @db.VarChar(3)
+  paymentMethod   String         @map("payment_method") @db.VarChar(50)
+  paymentId       String?        @map("payment_id") @db.VarChar(255)
+  status          PaymentStatus
+  paymentStatus   PaymentStatus? @map("payment_status")
+  transactionId   String?        @map("transaction_id") @db.VarChar(255)
+  gatewayResponse Json?          @map("gateway_response")
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  purchase        Purchase       @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+
+  @@index([purchaseId], map: "idx_payment_records_purchase_id")
+  @@index([status], map: "idx_payment_records_status")
+  @@index([paymentId], map: "idx_payment_records_payment_id")
+  @@map("payment_records")
 }

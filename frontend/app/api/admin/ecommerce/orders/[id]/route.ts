@@ -143,7 +143,7 @@ export async function DELETE(
     for (const item of order.items) {
       await prisma.inventoryLog.create({
         data: {
-          productId: item.productId,
+          productId: item.productId!,
           type: 'IN',
           quantity: item.quantity,
           reason: 'Order cancelled',
@@ -153,7 +153,7 @@ export async function DELETE(
 
       // Update product stock
       await prisma.product.update({
-        where: { id: item.productId },
+        where: { id: item.productId || undefined },
         data: {
           stock: {
             increment: item.quantity

@@ -72,7 +72,7 @@ export function MobileMenu({
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="w-full flex items-center space-x-4 text-gray-700 hover:text-[#6ea058] hover:bg-[#6ea058]/10 transition-all duration-200 px-6 py-4 rounded-xl border border-gray-200 hover:border-[#6ea058]/30 touch-manipulation font-medium text-base"
+                      className="w-full flex items-center space-x-4 text-gray-700 hover:text-[#6ea058] transition-all duration-200 px-6 py-4 rounded-xl border border-gray-200 touch-manipulation font-medium text-base"
                     >
                       <Calendar size={20} className="text-gray-600" />
                       <span>Schedule</span>
@@ -83,7 +83,7 @@ export function MobileMenu({
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="w-full flex items-center space-x-4 text-gray-700 hover:text-[#6ea058] hover:bg-[#6ea058]/10 transition-all duration-200 px-6 py-4 rounded-xl border border-gray-200 hover:border-[#6ea058]/30 touch-manipulation font-medium text-base"
+                      className="w-full flex items-center space-x-4 text-gray-700 hover:text-[#6ea058] transition-all duration-200 px-6 py-4 rounded-xl border border-gray-200 touch-manipulation font-medium text-base"
                     >
                       <BookOpen size={20} className="text-gray-600" />
                       <span>Booking</span>

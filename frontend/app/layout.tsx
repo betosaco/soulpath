@@ -38,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${poppins.variable} ${roboto.variable}`}>
       <head>
-        <script src="https://static.micuentaweb.pe/static/js/krypton-client/V4.0/ext/neon.js"></script>
+        <script src="https://static.micuentaweb.pe/static/js/krypton-client/V4.0/ext/neon.js" async></script>
       </head>
       <body className={cn(
         "antialiased",

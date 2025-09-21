@@ -186,12 +186,15 @@ export function EnhancedSchedule({
       console.log('🏁 Setting loading to false');
       setLoading(false);
     }
-  }, [startDate, endDate]);
+  }, [startDate, endDate, onSlotsChange]);
 
   // Fetch slots when component mounts or date range changes
   useEffect(() => {
     if (startDate && endDate) {
       fetchSlots(startDate, endDate);
+    } else {
+      // If no date range provided, fetch all available slots
+      fetchSlots();
     }
   }, [startDate, endDate, fetchSlots]);
 
@@ -271,7 +274,7 @@ export function EnhancedSchedule({
 
   if (loading) {
     return (
-      <div className={`enhanced-schedule ${className}`}>
+      <div className={`enhanced-schedule ${className} bg-white`}>
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
           <span className="ml-2 text-lg">Loading schedule...</span>

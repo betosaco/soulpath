@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 
 export default function TestProductsPage() {
   const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [products, setProducts] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -66,7 +67,7 @@ export default function TestProductsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <div className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-8">Our Products</h1>

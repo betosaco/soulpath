@@ -196,7 +196,7 @@ export default function PaymentMethodsPage() {
 
   if (loading) {
     return (
-      <div className={`flex items-center justify-center min-h-[400px] text-[${colors.text.secondary}]`}>
+      <div className={`flex items-center justify-center min-h-[400px] bg-white text-[${colors.text.secondary}]`}>
         Loading payment methods...
       </div>
     );

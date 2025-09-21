@@ -73,6 +73,7 @@ export default function ProductsPage() {
 
         if (data.success && data.data) {
           // Convert price from string to number for proper formatting
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const productsWithNumericPrice = data.data.map((product: any) => ({
             ...product,
             price: parseFloat(product.price),
@@ -96,7 +97,7 @@ export default function ProductsPage() {
   if (loading) {
     return (
       <AppLayout>
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="min-h-screen flex items-center justify-center bg-white">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-400 mx-auto mb-4"></div>
             <p className="text-gray-600 text-lg">Loading products...</p>
@@ -109,7 +110,7 @@ export default function ProductsPage() {
   if (error) {
     return (
       <AppLayout>
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="min-h-screen flex items-center justify-center bg-white">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Products</h1>
             <p className="text-gray-600">{error}</p>
@@ -127,7 +128,7 @@ export default function ProductsPage() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-white">
         <div className="py-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

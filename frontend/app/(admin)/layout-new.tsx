@@ -26,7 +26,7 @@ export default function AdminLayout({
   // Show loading while checking authentication
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#0a0a23] via-[#1a1a2e] to-[#16213e]">
+      <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-[#FFD700] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-[#FFD700] text-lg font-semibold">Loading...</p>
@@ -38,7 +38,7 @@ export default function AdminLayout({
   // Show unauthorized message for non-admin users
   if (!user || !isAdmin) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#0a0a23] via-[#1a1a2e] to-[#16213e]">
+      <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="text-center max-w-md mx-auto p-8">
           <Shield className="w-16 h-16 text-red-500 mx-auto mb-6" />
           <h1 className="text-2xl font-bold text-white mb-4">Access Denied</h1>

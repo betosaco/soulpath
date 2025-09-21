@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma';
 // Zod schemas for user package validation
 const createUserPackageSchema = z.object({
   userId: z.string().cuid('Invalid user ID format'),
+  orderItemId: z.string().min(1, 'Order item ID is required'),
   purchaseId: z.number().int().positive('Purchase ID must be positive'),
   packagePriceId: z.number().int().positive('Package price ID must be positive'),
   quantity: z.number().int().positive('Quantity must be positive').default(1),

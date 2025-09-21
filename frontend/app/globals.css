@@ -277,7 +277,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.1);
+  background: white;
   backdrop-filter: blur(2px);
   color: var(--admin-text-primary);
   z-index: 10;
@@ -798,6 +798,8 @@
 @media (prefers-color-scheme: dark) {
   :root {
     /* Override any light theme colors if needed */
+    --background: 0 0% 9%;
+    --foreground: 0 0% 98%;
   }
 }
 
@@ -898,8 +900,7 @@
 }
 
 .header-button-language-inactive:hover {
-  background-color: #6ea058;
-  color: var(--color-text-inverse);
+  color: #6ea058;
 }
 
 .header-button-account {
@@ -913,8 +914,7 @@
 }
 
 .header-button-account:hover {
-  background-color: var(--color-primary-600);
-  transform: scale(1.05);
+  color: #6ea058;
 }
 
 .header-button-menu {
@@ -926,8 +926,7 @@
 }
 
 .header-button-menu:hover {
-  background-color: var(--color-primary-600);
-  transform: scale(1.05);
+  color: #6ea058;
 }
 
 .dashboard-tabs-list {

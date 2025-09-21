@@ -4,7 +4,7 @@ import { CartItem } from '@/lib/cart-context';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia',
+  apiVersion: '2025-08-27.basil',
 });
 
 const prisma = new PrismaClient();
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify payment intent if provided
-    let paymentIntent;
+    let paymentIntent: Stripe.PaymentIntent | undefined;
     if (orderData.paymentIntentId) {
       try {
         paymentIntent = await stripe.paymentIntents.retrieve(orderData.paymentIntentId);
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
           customerPhone: orderData.customerInfo.phone,
           status: 'CONFIRMED',
           paymentStatus: paymentIntent ? 'COMPLETED' : 'PENDING',
-          shippingStatus: orderData.shippingAddress ? 'PENDING' : 'NOT_REQUIRED',
+          shippingStatus: orderData.shippingAddress ? 'PENDING' : 'PENDING',
           subtotal: subtotal,
           taxAmount: tax,
           shippingAmount: shipping,
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
             state: orderData.shippingAddress.state,
             zipCode: orderData.shippingAddress.zipCode,
             country: orderData.shippingAddress.country
-          } : null,
+          } : undefined,
           billingAddress: {
             address: orderData.shippingAddress?.address || 'N/A',
             city: orderData.shippingAddress?.city || 'N/A',
