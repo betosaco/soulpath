@@ -95,7 +95,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
       <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-0 flex items-center justify-between header-container h-10">
         <motion.div 
           className="flex items-center space-x-2 cursor-pointer touch-manipulation min-h-[24px] min-w-[24px] flex items-center justify-center"
-          onClick={() => scrollToSection('home')}
+          onClick={() => router.push('/')}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -131,6 +131,17 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                 className="hidden sm:flex items-center space-x-1 header-button-account"
               >
                 <span>{getTranslation('nav.packages', 'Packages')}</span>
+              </motion.button>
+            </Link>
+
+            {/* Products Link */}
+            <Link href="/products">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="hidden sm:flex items-center space-x-1 header-button-account"
+              >
+                <span>{getTranslation('nav.products', 'Products')}</span>
               </motion.button>
             </Link>
 
@@ -293,6 +304,17 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                       className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30 mobile-touch-feedback"
                     >
                       <span className="text-base sm:text-lg font-medium">{getTranslation('nav.packages', 'Packages')}</span>
+                    </motion.button>
+                  </Link>
+
+                  <Link href="/products">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setIsMenuOpen(false)}
+                      className="w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] text-black hover:text-[#6ea058] hover:bg-[#6ea058]/10 active:bg-[#6ea058]/15 border border-gray-200 hover:border-[#6ea058]/30 mobile-touch-feedback"
+                    >
+                      <span className="text-base sm:text-lg font-medium">{getTranslation('nav.products', 'Products')}</span>
                     </motion.button>
                   </Link>
 

@@ -8,17 +8,21 @@ export function useLanguage() {
 
   useEffect(() => {
     // Load language preference from localStorage
-    const savedLanguage = localStorage.getItem('language');
-    if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'es')) {
-      setLanguage(savedLanguage as 'en' | 'es');
+    if (typeof window !== 'undefined') {
+      const savedLanguage = localStorage.getItem('language');
+      if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'es')) {
+        setLanguage(savedLanguage as 'en' | 'es');
+      }
     }
   }, []);
 
   const changeLanguage = React.useCallback((newLanguage: 'en' | 'es') => {
     console.log('🔄 Changing language from', language, 'to', newLanguage);
     setLanguage(newLanguage);
-    localStorage.setItem('language', newLanguage);
-    console.log('💾 Language saved to localStorage:', newLanguage);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('language', newLanguage);
+      console.log('💾 Language saved to localStorage:', newLanguage);
+    }
   }, [language]);
 
   return { language, setLanguage: changeLanguage };
@@ -33,6 +37,11 @@ export function useTranslations(initialContent?: Record<string, unknown>, langua
 
   // Fetch translations from backend CMS
   const fetchTranslations = async () => {
+    // Skip fetch during SSR to prevent webpack errors
+    if (typeof window === 'undefined') {
+      return;
+    }
+    
     try {
       // Don't set loading state for background fetch
       // Add cache-busting parameter to ensure fresh content

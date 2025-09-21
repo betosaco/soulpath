@@ -61,7 +61,7 @@ export function CartSidebar() {
                   <div key={item.id} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
                     <div className="flex-shrink-0">
                       <Image
-                        src={item.image || '/images/placeholder-product.jpg'}
+                        src={item.image || '/images/products/yoga-journal-1.jpg'}
                         alt={item.name}
                         width={60}
                         height={60}
@@ -72,7 +72,21 @@ export function CartSidebar() {
                       <h3 className="text-sm font-medium text-gray-900 truncate">
                         {item.name}
                       </h3>
-                      <p className="text-sm text-gray-500">${item.price.toFixed(2)}</p>
+                      <p className="text-sm text-gray-500">
+                        {item.currency === 'PEN' ? 'S/ ' : item.currency + ' '}{item.price.toFixed(2)}
+                      </p>
+                      {item.type === 'package' && (
+                        <div className="text-xs text-gray-400 mt-1">
+                          {item.sessions && `${item.sessions} sessions`}
+                          {item.duration && ` • ${item.duration} min each`}
+                          {item.packageType && ` • ${item.packageType}`}
+                        </div>
+                      )}
+                      {item.type === 'product' && item.sku && (
+                        <div className="text-xs text-gray-400 mt-1">
+                          SKU: {item.sku}
+                        </div>
+                      )}
                       <div className="flex items-center space-x-2 mt-2">
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
@@ -98,7 +112,7 @@ export function CartSidebar() {
                       </div>
                     </div>
                     <div className="text-sm font-medium text-gray-900">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      {item.currency === 'PEN' ? 'S/ ' : item.currency + ' '}{(item.price * item.quantity).toFixed(2)}
                     </div>
                   </div>
                 ))}
@@ -112,7 +126,7 @@ export function CartSidebar() {
               <div className="flex justify-between items-center">
                 <span className="text-lg font-semibold text-gray-900">Total:</span>
                 <span className="text-lg font-bold text-[#6ea058]">
-                  ${totalPrice.toFixed(2)}
+                  {cartItems.length > 0 && cartItems[0].currency === 'PEN' ? 'S/ ' : cartItems.length > 0 ? cartItems[0].currency + ' ' : ''}{totalPrice.toFixed(2)}
                 </span>
               </div>
               

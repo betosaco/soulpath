@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { AppLayout } from '@/components/AppLayout';
 import { ScheduleBookingFlow } from '@/components/ScheduleBookingFlow';
 import { ScheduleNavigator } from '@/components/ScheduleNavigator';
@@ -25,12 +25,12 @@ export default function SchedulePage() {
   const [totalSlots, setTotalSlots] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
 
-  const handleDateChange = (startDate: Date, endDate: Date) => {
+  const handleDateChange = useCallback((startDate: Date, endDate: Date) => {
     setCurrentStartDate(startDate);
     setCurrentEndDate(endDate);
-  };
+  }, []);
 
-  const handleSlotsChange = (slots: Array<{
+  const handleSlotsChange = useCallback((slots: Array<{
     id: number;
     date: string;
     time: string;
@@ -52,11 +52,11 @@ export default function SchedulePage() {
     };
   }>) => {
     setTotalSlots(slots.length);
-  };
+  }, []);
 
-  const handleStepChange = (step: number) => {
+  const handleStepChange = useCallback((step: number) => {
     setCurrentStep(step);
-  };
+  }, []);
 
   return (
     <AppLayout>

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   CheckCircle,
@@ -11,6 +11,7 @@ import {
   User,
   MapPin,
   CreditCard,
+  ArrowLeft,
   ArrowRight
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -62,9 +63,9 @@ interface OrderDetails {
   orderItems: OrderItem[];
 }
 
-export default function OrderConfirmationPage() {
-  const searchParams = useSearchParams();
-  const orderId = searchParams.get('orderId');
+export default function OrderDetailsPage() {
+  const params = useParams();
+  const orderId = params.id as string;
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -115,6 +116,20 @@ export default function OrderConfirmationPage() {
     });
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'confirmed':
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   if (loading) {
     return (
       <AppLayout>
@@ -138,12 +153,20 @@ export default function OrderConfirmationPage() {
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Order Not Found</h1>
             <p className="text-gray-600 mb-6">{error || 'The order you are looking for does not exist.'}</p>
-            <Button
-              onClick={() => window.location.href = '/'}
-              className="bg-primary hover:bg-primary/90 text-white"
-            >
-              Return Home
-            </Button>
+            <div className="flex gap-4 justify-center">
+              <Button
+                onClick={() => window.location.href = '/account/orders'}
+                variant="outline"
+              >
+                Back to Orders
+              </Button>
+              <Button
+                onClick={() => window.location.href = '/'}
+                className="bg-primary hover:bg-primary/90 text-white"
+              >
+                Return Home
+              </Button>
+            </div>
           </div>
         </div>
       </AppLayout>
@@ -154,26 +177,39 @@ export default function OrderConfirmationPage() {
     <AppLayout>
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="container mx-auto px-4 max-w-6xl">
-          {/* Success Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-8"
-          >
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-10 h-10 text-green-600" />
+          {/* Header */}
+          <div className="mb-8">
+            <Button
+              onClick={() => window.location.href = '/account/orders'}
+              variant="outline"
+              className="mb-4 flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Orders
+            </Button>
+            
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  Order #{order.orderNumber}
+                </h1>
+                <p className="text-gray-600">
+                  Placed on {formatDate(order.createdAt)}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
+                  {order.status}
+                </span>
+                <span className="text-2xl font-bold text-gray-900">
+                  {formatCurrency(order.total, order.currency)}
+                </span>
+              </div>
             </div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Order Confirmed!</h1>
-            <p className="text-xl text-gray-600 mb-2">
-              Thank you for your purchase, {order.customerName}!
-            </p>
-            <p className="text-gray-500">
-              Order #{order.orderNumber} • {formatDate(order.createdAt)}
-            </p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Order Summary */}
+            {/* Order Details */}
             <div className="lg:col-span-2 space-y-6">
               {/* Order Items */}
               <Card>
@@ -248,8 +284,8 @@ export default function OrderConfirmationPage() {
                       <p className="font-medium">{order.customerPhone}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Order Status</p>
-                      <p className="font-medium capitalize">{order.status.toLowerCase()}</p>
+                      <p className="text-sm text-gray-500">Payment Status</p>
+                      <p className="font-medium capitalize">{order.paymentStatus.toLowerCase()}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -271,6 +307,15 @@ export default function OrderConfirmationPage() {
                         {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}
                       </p>
                       <p className="text-gray-600">{order.shippingAddress.country}</p>
+                      <div className="mt-3">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          order.shippingStatus === 'DELIVERED' ? 'bg-green-100 text-green-800' :
+                          order.shippingStatus === 'SHIPPED' ? 'bg-blue-100 text-blue-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {order.shippingStatus}
+                        </span>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -322,64 +367,18 @@ export default function OrderConfirmationPage() {
                 </CardContent>
               </Card>
 
-              {/* Next Steps */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>What's Next?</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-xs font-semibold text-primary">1</span>
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm">Email Confirmation</p>
-                        <p className="text-xs text-gray-600">
-                          You'll receive an email confirmation shortly with your order details.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-xs font-semibold text-primary">2</span>
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm">Package Activation</p>
-                        <p className="text-xs text-gray-600">
-                          Your yoga packages are now active in your account and ready to use.
-                        </p>
-                      </div>
-                    </div>
-                    {order.shippingAddress && (
-                      <div className="flex items-start gap-3">
-                        <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <span className="text-xs font-semibold text-primary">3</span>
-                        </div>
-                        <div>
-                          <p className="font-medium text-sm">Shipping</p>
-                          <p className="text-xs text-gray-600">
-                            Your products will be shipped to the address provided.
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
               {/* Action Buttons */}
               <div className="space-y-3">
                 <Button
                   onClick={() => window.location.href = '/account/orders'}
-                  className="w-full bg-primary hover:bg-primary/90 text-white"
+                  variant="outline"
+                  className="w-full"
                 >
-                  View All Orders
+                  Back to Orders
                 </Button>
                 <Button
                   onClick={() => window.location.href = '/schedule'}
-                  variant="outline"
-                  className="w-full"
+                  className="w-full bg-primary hover:bg-primary/90 text-white"
                 >
                   Book a Session
                 </Button>

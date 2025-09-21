@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Calendar, 
@@ -105,6 +105,7 @@ export function EnhancedSchedule({
   const [slots, setSlots] = useState<ScheduleSlot[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const previousSlotsRef = useRef<ScheduleSlot[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedTeacher, setSelectedTeacher] = useState<string>('all');
   const [selectedService, setSelectedService] = useState<string>('all');
@@ -156,7 +157,11 @@ export function EnhancedSchedule({
           console.log('📝 Using mock data - database unavailable');
         }
         setSlots(data.slots);
-        onSlotsChange?.(data.slots);
+        // Only call onSlotsChange if the slots actually changed
+        if (JSON.stringify(data.slots) !== JSON.stringify(previousSlotsRef.current)) {
+          previousSlotsRef.current = data.slots;
+          onSlotsChange?.(data.slots);
+        }
       } else {
         console.error('❌ API error:', data.error);
         setError(data.error || 'Failed to fetch schedule');
@@ -181,13 +186,9 @@ export function EnhancedSchedule({
       console.log('🏁 Setting loading to false');
       setLoading(false);
     }
-  }, [startDate, endDate, onSlotsChange]);
+  }, [startDate, endDate]);
 
-  useEffect(() => {
-    fetchSlots();
-  }, [fetchSlots]);
-
-  // Refetch when date range changes
+  // Fetch slots when component mounts or date range changes
   useEffect(() => {
     if (startDate && endDate) {
       fetchSlots(startDate, endDate);

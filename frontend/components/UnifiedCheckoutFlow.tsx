@@ -9,7 +9,10 @@ import {
   CheckCircle,
   AlertCircle,
   CreditCard,
-  ShoppingCart
+  ShoppingCart,
+  Package,
+  Truck,
+  User
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,36 +23,10 @@ import { useLanguage, useTranslations } from '@/hooks/useTranslations';
 import { toast } from 'sonner';
 import { validateEmailWithMessage } from '@/lib/email-validation';
 import { AppLayout } from '@/components/AppLayout';
-// Payment integration will be added here
 import { countries } from '@/lib/countries';
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  currency: string;
-  comparePrice?: number | null;
-  images: string[];
-  category: string;
-  stock: number;
-  status: 'ACTIVE' | 'INACTIVE' | 'OUT_OF_STOCK' | 'DISCONTINUED';
-  shortDescription?: string;
-  isFeatured: boolean;
-  isPopular: boolean;
-  sku?: string;
-  weight?: number;
-  dimensions?: string;
-  tags: string[];
-}
-
-interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  currency: string;
-  quantity: number;
-  image: string;
-}
+import { useCart, CartItem } from '@/lib/cart-context';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
 interface BookingStep {
   id: string;
@@ -58,10 +35,7 @@ interface BookingStep {
   completed: boolean;
 }
 
-interface ProductCheckoutFlowProps {
-  product: Product;
-  cartItems: CartItem[];
-  onStepChange?: (step: number) => void;
+interface UnifiedCheckoutFlowProps {
   onCheckoutComplete?: (orderData: {
     orderId: string;
     status: string;
@@ -71,17 +45,152 @@ interface ProductCheckoutFlowProps {
   }) => void;
 }
 
-export function ProductCheckoutFlow({
-  product,
-  cartItems,
-  onStepChange
-}: ProductCheckoutFlowProps) {
+// Stripe Payment Form Component
+function PaymentForm({ 
+  onPaymentSuccess, 
+  isProcessing, 
+  setIsProcessing,
+  totalAmount,
+  currencyCode 
+}: {
+  onPaymentSuccess: () => void;
+  isProcessing: boolean;
+  setIsProcessing: (processing: boolean) => void;
+  totalAmount: number;
+  currencyCode: string;
+}) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    // Create payment intent when component mounts
+    const createPaymentIntent = async () => {
+      try {
+        const response = await fetch('/api/orders/create-payment-intent', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            amount: Math.round(totalAmount * 100), // Convert to cents
+            currency: currencyCode.toLowerCase(),
+          }),
+        });
+
+        const { client_secret } = await response.json();
+        setClientSecret(client_secret);
+      } catch (error) {
+        console.error('Error creating payment intent:', error);
+        toast.error('Failed to initialize payment. Please try again.');
+      }
+    };
+
+    createPaymentIntent();
+  }, [totalAmount, currencyCode]);
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (!stripe || !elements || !clientSecret) {
+      return;
+    }
+
+    setIsLoading(true);
+    setIsProcessing(true);
+
+    try {
+      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: elements.getElement(CardElement)!,
+        }
+      });
+
+      if (error) {
+        console.error('Payment failed:', error);
+        toast.error(error.message || 'Payment failed. Please try again.');
+      } else if (paymentIntent.status === 'succeeded') {
+        toast.success('Payment successful!');
+        onPaymentSuccess(paymentIntent.id);
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast.error('Payment failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-4">
+        <Label htmlFor="card-element" className="text-lg font-medium">
+          Card Information
+        </Label>
+        <div className="p-4 border border-gray-300 rounded-lg">
+          <CardElement
+            id="card-element"
+            options={{
+              style: {
+                base: {
+                  fontSize: '16px',
+                  color: '#424770',
+                  '::placeholder': {
+                    color: '#aab7c4',
+                  },
+                },
+                invalid: {
+                  color: '#9e2146',
+                },
+              },
+            }}
+          />
+        </div>
+      </div>
+
+      <Button
+        type="submit"
+        disabled={!stripe || !clientSecret || isLoading || isProcessing}
+        className="w-full bg-primary hover:bg-primary/90 text-white px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-2 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+      >
+        {isLoading || isProcessing ? (
+          <>
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+            Processing...
+          </>
+        ) : (
+          <>
+            <CreditCard className="w-5 h-5" />
+            Complete Order - {new Intl.NumberFormat('en-US', {
+              style: 'currency',
+              currency: currencyCode,
+              minimumFractionDigits: 2
+            }).format(totalAmount)}
+          </>
+        )}
+      </Button>
+    </form>
+  );
+}
+
+// Stripe will be initialized in the component
+
+function UnifiedCheckoutFlowContent({
+  onCheckoutComplete
+}: UnifiedCheckoutFlowProps) {
   const { language } = useLanguage();
   const { t } = useTranslations(undefined, language);
+  const { cartItems, requiresAddress, clearCart } = useCart();
   const [currentStep, setCurrentStep] = useState(0);
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [countrySearchTerm, setCountrySearchTerm] = useState('');
   const [emailError, setEmailError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Currency configuration
+  const currencyCode = 'PEN'; // Default to Peruvian Soles
   
   const [formData, setFormData] = useState({
     clientName: '',
@@ -117,11 +226,19 @@ export function ProductCheckoutFlow({
     return typeof value === 'string' ? value : fallback;
   }, [t]);
 
-  const steps: BookingStep[] = React.useMemo(() => [
-    { id: 'personal', title: getTranslation('bookingFlow.personalInfo', 'Personal Information'), description: getTranslation('bookingFlow.personalInfoDesc', 'Provide your contact details'), completed: false },
-    { id: 'address', title: 'Shipping Address', description: 'Enter your delivery information', completed: false },
-    { id: 'summary', title: 'Order Summary', description: 'Review your order and complete payment', completed: false }
-  ], [getTranslation]);
+  const steps: BookingStep[] = React.useMemo(() => {
+    const baseSteps = [
+      { id: 'personal', title: getTranslation('bookingFlow.personalInfo', 'Personal Information'), description: getTranslation('bookingFlow.personalInfoDesc', 'Provide your contact details'), completed: false }
+    ];
+    
+    if (requiresAddress()) {
+      baseSteps.push({ id: 'address', title: 'Shipping Address', description: 'Enter your delivery information', completed: false });
+    }
+    
+    baseSteps.push({ id: 'summary', title: 'Order Summary', description: 'Review your order and complete payment', completed: false });
+    
+    return baseSteps;
+  }, [getTranslation, requiresAddress]);
 
   // Close dropdown when clicking outside and prevent page scroll
   useEffect(() => {
@@ -173,9 +290,14 @@ export function ProductCheckoutFlow({
       return;
     }
 
-    setCurrentStep(1);
-    onStepChange?.(1);
-    toast.success('Personal information saved! Now enter your shipping address.');
+    if (requiresAddress()) {
+      setCurrentStep(1);
+      toast.success('Personal information saved! Now enter your shipping address.');
+    } else {
+      // Skip address step and go directly to summary (step 1 when no address required)
+      setCurrentStep(1);
+      toast.success('Personal information saved! Review your order and complete payment.');
+    }
   };
 
   const handleProceedToSummary = () => {
@@ -185,44 +307,10 @@ export function ProductCheckoutFlow({
     }
 
     setCurrentStep(2);
-    onStepChange?.(2);
     toast.success('Address saved! Review your order and complete payment.');
   };
 
-  // Payment success handler will be implemented when payment integration is added
-  // Payment success handler will be implemented when payment integration is added
-  /*
-  const handlePaymentSuccess = (paymentData: {
-    orderId: string;
-    status: string;
-    amount?: number;
-    currency?: string;
-    transactionId?: string;
-  }) => {
-    console.log('✅ Payment successful:', paymentData);
-    toast.success('¡Pago exitoso! Tu pedido ha sido confirmado.');
-    
-    const orderData = {
-      orderId: paymentData.orderId,
-      status: paymentData.status,
-      amount: paymentData.amount || Math.round(calculateTotal() * 100),
-      currency: product.currency || 'PEN',
-      items: cartItems
-    };
-    
-    onCheckoutComplete?.(orderData);
-  };
-  */
-
   const calculateSubtotal = () => {
-    // Validate that all cart items use the same currency as the product
-    const invalidItems = cartItems.filter(item => item.currency !== product.currency);
-    if (invalidItems.length > 0) {
-      console.warn('Cart contains items with different currencies:', invalidItems);
-      // For now, convert all items to product currency (assuming same value)
-      // In a real app, you'd need proper currency conversion
-    }
-
     return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
 
@@ -238,7 +326,7 @@ export function ProductCheckoutFlow({
     return calculateSubtotal() + calculateTax() + calculateShipping();
   };
 
-  const formatCurrency = (amount: number, currency: string = product.currency) => {
+  const formatCurrency = (amount: number, currency: string = 'PEN') => {
     const currencyCode = currency.toUpperCase();
 
     // Special handling for Peruvian Soles - display as S/.
@@ -253,6 +341,94 @@ export function ProductCheckoutFlow({
       minimumFractionDigits: 2
     }).format(amount);
   };
+
+  const handlePaymentSuccess = async (paymentIntentId?: string) => {
+    setIsProcessing(true);
+    
+    try {
+      // Create unified order
+      const orderData = {
+        customerInfo: {
+          name: formData.clientName,
+          email: formData.clientEmail,
+          phone: formData.clientPhone,
+          countryCode: formData.countryCode,
+          language: formData.language
+        },
+        shippingAddress: requiresAddress() ? {
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          zipCode: formData.zipCode,
+          country: formData.country
+        } : null,
+        items: cartItems,
+        totalAmount: calculateTotal(),
+        currency: currencyCode,
+        paymentIntentId: paymentIntentId,
+        notes: formData.notes
+      };
+
+      const response = await fetch('/api/orders/create-unified', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success('Order completed successfully!');
+        
+        const orderResult = {
+          orderId: result.orderId,
+          status: result.status,
+          amount: result.totalAmount,
+          currency: result.currency,
+          items: cartItems
+        };
+
+        // Clear cart
+        clearCart();
+        
+        // Call completion handler
+        onCheckoutComplete?.(orderResult);
+        
+        // Redirect to order confirmation
+        window.location.href = `/order-confirmation?orderId=${result.orderId}`;
+      } else {
+        throw new Error(result.error || 'Failed to create order');
+      }
+    } catch (error) {
+      console.error('Payment processing error:', error);
+      toast.error('Failed to process payment. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Redirect to products if cart is empty
+  if (cartItems.length === 0) {
+    return (
+      <AppLayout className="min-h-screen bg-gray-50">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="text-center">
+            <ShoppingCart className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Your cart is empty</h1>
+            <p className="text-gray-600 mb-4">Add some items to your cart to proceed with checkout.</p>
+            <Button
+              onClick={() => window.location.href = '/products'}
+              className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors"
+            >
+              Continue Shopping
+            </Button>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout className="min-h-screen bg-gray-50">
@@ -327,6 +503,27 @@ export function ProductCheckoutFlow({
                         required
                       />
                     </div>
+                    <div>
+                      <Label htmlFor="clientEmail" className="text-black text-lg font-medium mb-2 block">Email Address *</Label>
+                      <Input
+                        id="clientEmail"
+                        type="email"
+                        value={formData.clientEmail}
+                        onChange={(e) => handleInputChange('clientEmail', e.target.value)}
+                        onBlur={handleEmailBlur}
+                        className={`h-14 px-4 text-lg border-2 text-black placeholder-gray-400 focus:ring-2 focus:ring-primary/20 rounded-lg transition-all duration-200 ${
+                          emailError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-primary'
+                        }`}
+                        placeholder="your.email@example.com"
+                        required
+                      />
+                      {emailError && (
+                        <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                          <AlertCircle className="w-4 h-4" />
+                          {emailError}
+                        </p>
+                      )}
+                    </div>
                     <div className="md:col-span-2">
                       <Label htmlFor="clientPhone" className="text-black text-lg font-medium mb-2 block">Phone Number *</Label>
                       <div className="flex gap-2 mobile-input-group">
@@ -400,7 +597,7 @@ export function ProductCheckoutFlow({
                                   )
                                   .map((country, index) => (
                                     <button
-                                      key={country.code}
+                                      key={`${country.code}-${country.country}`}
                                       type="button"
                                       onClick={() => {
                                         setFormData(prev => ({ ...prev, countryCode: country.code }));
@@ -444,35 +641,13 @@ export function ProductCheckoutFlow({
                     </div>
                   </div>
 
-                  <div>
-                    <Label htmlFor="clientEmail" className="text-black text-lg font-medium mb-2 block">Email Address *</Label>
-                    <Input
-                      id="clientEmail"
-                      type="email"
-                      value={formData.clientEmail}
-                      onChange={(e) => handleInputChange('clientEmail', e.target.value)}
-                      onBlur={handleEmailBlur}
-                      className={`h-14 px-4 text-lg border-2 text-black placeholder-gray-400 focus:ring-2 focus:ring-primary/20 rounded-lg transition-all duration-200 ${
-                        emailError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-primary'
-                      }`}
-                      placeholder="your.email@example.com"
-                      required
-                    />
-                    {emailError && (
-                      <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                        <AlertCircle className="w-4 h-4" />
-                        {emailError}
-                      </p>
-                    )}
-                  </div>
-
                   <div className="flex justify-end pt-4">
                     <Button
                       onClick={handleProceedToAddress}
                       disabled={!formData.clientName || !formData.clientEmail || !formData.clientPhone || !!emailError}
                       className="px-8 py-4 text-lg font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-all duration-200 flex items-center gap-2 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                     >
-                      Continue to Address
+                      {requiresAddress() ? 'Continue to Address' : 'Continue to Summary'}
                       <ArrowRight className="w-5 h-5" />
                     </Button>
                   </div>
@@ -482,7 +657,7 @@ export function ProductCheckoutFlow({
           )}
 
           {/* Step 2: Shipping Address */}
-          {currentStep === 1 && (
+          {currentStep === 1 && requiresAddress() && (
             <motion.div
               key="address"
               initial={{ opacity: 0, x: 20 }}
@@ -583,7 +758,6 @@ export function ProductCheckoutFlow({
                       variant="outline"
                       onClick={() => {
                         setCurrentStep(0);
-                        onStepChange?.(0);
                       }}
                       className="px-8 py-4 text-lg font-medium text-primary border-2 border-primary hover:bg-primary hover:text-white rounded-lg transition-all duration-200 flex items-center gap-2 hover:scale-105 active:scale-95"
                     >
@@ -605,7 +779,7 @@ export function ProductCheckoutFlow({
           )}
 
           {/* Step 3: Order Summary & Payment */}
-          {currentStep === 2 && (
+          {currentStep === (requiresAddress() ? 2 : 1) && (
             <motion.div
               key="summary"
               initial={{ opacity: 0, x: 20 }}
@@ -618,45 +792,112 @@ export function ProductCheckoutFlow({
                 <p className="text-gray-600">Review your order and complete your payment securely.</p>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Order Summary */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Customer Information */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <User className="w-5 h-5" />
+                      Customer Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <p className="text-sm text-gray-600">Full Name</p>
+                      <p className="font-medium">{formData.clientName}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Email Address</p>
+                      <p className="font-medium">{formData.clientEmail}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Phone Number</p>
+                      <p className="font-medium">{formData.countryCode} {formData.clientPhone}</p>
+                    </div>
+                    {requiresAddress() && (
+                      <div>
+                        <p className="text-sm text-gray-600">Shipping Address</p>
+                        <div className="text-sm">
+                          <p className="font-medium">{formData.address}</p>
+                          <p>{formData.city}, {formData.state} {formData.zipCode}</p>
+                          <p>{formData.country}</p>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Order Items */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <ShoppingCart className="w-5 h-5" />
-                      Order Details
+                      Order Items
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {cartItems.map((item) => (
-                      <div key={item.id} className="flex items-center space-x-4 p-4 border rounded-lg">
-                        <div className="w-16 h-16 bg-gray-200 rounded-md flex-shrink-0">
+                      <div key={item.id} className="flex items-center space-x-4 p-3 border rounded-lg">
+                        <div className="w-12 h-12 bg-gray-200 rounded-md flex-shrink-0">
                           <Image 
                             src={item.image} 
                             alt={item.name}
-                            width={64}
-                            height={64}
+                            width={48}
+                            height={48}
                             className="w-full h-full object-cover rounded-md"
                           />
                         </div>
-                        <div className="flex-1">
-                          <h3 className="font-medium">{item.name}</h3>
-                          <p className="text-gray-600 text-sm">Qty: {item.quantity}</p>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-medium text-sm truncate">{item.name}</h3>
+                            {item.type === 'package' && (
+                              <Package className="w-3 h-3 text-primary flex-shrink-0" />
+                            )}
+                            {item.type === 'product' && (
+                              <Truck className="w-3 h-3 text-blue-500 flex-shrink-0" />
+                            )}
+                          </div>
+                          <div className="text-xs text-gray-600 space-y-1">
+                            <p>Qty: {item.quantity}</p>
+                            {item.type === 'package' && item.sessions && (
+                              <p>{item.sessions} sessions</p>
+                            )}
+                            {item.type === 'package' && item.duration && (
+                              <p>{item.duration} min each</p>
+                            )}
+                            {item.type === 'package' && item.packageType && (
+                              <p className="capitalize">{item.packageType.toLowerCase()}</p>
+                            )}
+                          </div>
                         </div>
-                        <p className="font-semibold">{formatCurrency(item.price * item.quantity, item.currency)}</p>
+                        <div className="text-right">
+                          <p className="font-semibold text-sm">{formatCurrency(item.price * item.quantity, item.currency)}</p>
+                          <p className="text-xs text-gray-500">{formatCurrency(item.price, item.currency)} each</p>
+                        </div>
                       </div>
                     ))}
+                  </CardContent>
+                </Card>
 
-                    <div className="border-t pt-4 space-y-2">
-                      <div className="flex justify-between">
-                        <span>Subtotal:</span>
+                {/* Order Summary & Payment */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <CreditCard className="w-5 h-5" />
+                      Payment Summary
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Subtotal ({cartItems.length} item{cartItems.length !== 1 ? 's' : ''}):</span>
                         <span>{formatCurrency(calculateSubtotal())}</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between text-sm">
                         <span>Shipping:</span>
                         <span>{formatCurrency(calculateShipping())}</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between text-sm">
                         <span>Tax (IGV 18%):</span>
                         <span>{formatCurrency(calculateTax())}</span>
                       </div>
@@ -665,33 +906,15 @@ export function ProductCheckoutFlow({
                         <span>{formatCurrency(calculateTotal())}</span>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
 
-                {/* Payment Form */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <CreditCard className="w-5 h-5" />
-                      Payment Information
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="p-8 text-center">
-                      <div className="mb-6">
-                        <CreditCard className="w-16 h-16 text-muted mx-auto mb-4" />
-                        <h3 className="text-xl font-semibold text-primary mb-2">Payment Integration</h3>
-                        <p className="text-muted">
-                          Payment processing will be integrated here. 
-                          The form will be added when a new payment provider is selected.
-                        </p>
-                      </div>
-                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                        <p className="text-yellow-800 text-sm">
-                          <strong>Note:</strong> Payment integration is currently being updated. 
-                          Please contact support for assistance with payments.
-                        </p>
-                      </div>
+                    <div className="pt-4">
+                      <PaymentForm
+                        onPaymentSuccess={handlePaymentSuccess}
+                        isProcessing={isProcessing}
+                        setIsProcessing={setIsProcessing}
+                        totalAmount={calculateTotal()}
+                        currencyCode={currencyCode}
+                      />
                     </div>
                   </CardContent>
                 </Card>
@@ -701,13 +924,12 @@ export function ProductCheckoutFlow({
                 <Button
                   variant="outline"
                   onClick={() => {
-                    setCurrentStep(1);
-                    onStepChange?.(1);
+                    setCurrentStep(requiresAddress() ? 1 : 0);
                   }}
                   className="px-8 py-4 text-lg font-medium text-primary border-2 border-primary hover:bg-primary hover:text-white rounded-lg transition-all duration-200 flex items-center gap-2 hover:scale-105 active:scale-95"
                 >
                   <ArrowLeft className="w-5 h-5 text-primary" />
-                  Back to Address
+                  {requiresAddress() ? 'Back to Address' : 'Back to Personal Info'}
                 </Button>
               </div>
             </motion.div>
@@ -715,5 +937,66 @@ export function ProductCheckoutFlow({
         </AnimatePresence>
       </div>
     </AppLayout>
+  );
+}
+
+// Main export with Stripe Elements wrapper
+export function UnifiedCheckoutFlow(props: UnifiedCheckoutFlowProps) {
+  const [stripePromise, setStripePromise] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const initStripe = async () => {
+      try {
+        const stripe = await loadStripe(
+          process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_51placeholder'
+        );
+        setStripePromise(stripe);
+      } catch (error) {
+        console.error('Failed to initialize Stripe:', error);
+        setStripePromise(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initStripe();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading payment system...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!stripePromise) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-8 h-8 text-red-600" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Payment System Unavailable</h1>
+          <p className="text-gray-600 mb-6">Unable to load payment system. Please check your configuration.</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Elements stripe={stripePromise}>
+      <UnifiedCheckoutFlowContent {...props} />
+    </Elements>
   );
 }

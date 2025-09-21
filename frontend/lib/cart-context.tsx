@@ -9,6 +9,17 @@ export interface CartItem {
   quantity: number;
   image: string;
   sku?: string;
+  currency: string;
+  type: 'product' | 'package';
+  // Package-specific fields
+  sessions?: number;
+  duration?: number;
+  packageType?: string;
+  maxGroupSize?: number;
+  // Product-specific fields
+  stock?: number;
+  weight?: string;
+  dimensions?: string;
 }
 
 interface CartContextType {
@@ -21,6 +32,8 @@ interface CartContextType {
   getTotalPrice: () => number;
   isCartOpen: boolean;
   setIsCartOpen: (open: boolean) => void;
+  hasMixedItems: () => boolean;
+  requiresAddress: () => boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -31,19 +44,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Load cart from localStorage on mount
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      try {
-        setCartItems(JSON.parse(savedCart));
-      } catch (error) {
-        console.error('Error loading cart from localStorage:', error);
+    if (typeof window !== 'undefined') {
+      const savedCart = localStorage.getItem('cart');
+      if (savedCart) {
+        try {
+          setCartItems(JSON.parse(savedCart));
+        } catch (error) {
+          console.error('Error loading cart from localStorage:', error);
+        }
       }
     }
   }, []);
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cartItems));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('cart', JSON.stringify(cartItems));
+    }
   }, [cartItems]);
 
   const addToCart = (item: Omit<CartItem, 'quantity'>) => {
@@ -60,6 +77,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         return [...prevItems, { ...item, quantity: 1 }];
       }
     });
+    
+    // Automatically open cart sidebar when item is added
+    setIsCartOpen(true);
   };
 
   const removeFromCart = (id: string) => {
@@ -91,6 +111,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
 
+  const hasMixedItems = () => {
+    const hasProducts = cartItems.some(item => item.type === 'product');
+    const hasPackages = cartItems.some(item => item.type === 'package');
+    return hasProducts && hasPackages;
+  };
+
+  const requiresAddress = () => {
+    // Address is required if any physical product is present
+    return cartItems.some(item => item.type === 'product');
+  };
+
   const value: CartContextType = {
     cartItems,
     addToCart,
@@ -101,6 +132,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     getTotalPrice,
     isCartOpen,
     setIsCartOpen,
+    hasMixedItems,
+    requiresAddress,
   };
 
   return (

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { ChevronLeftIcon, ChevronRightIcon, ShoppingCartIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/outline';
 import { AppLayout } from '@/components/AppLayout';
 import { useCart } from '@/lib/cart-context';
+import { Button } from '@/components/ui/button';
 
 interface Product {
   id: string;
@@ -37,7 +38,7 @@ interface CartItem {
 export default function ProductPage() {
   const params = useParams();
   const productId = params?.id as string;
-  const { addToCart, cartItems, getTotalItems, setIsCartOpen } = useCart();
+  const { addToCart, cartItems, getTotalItems, removeFromCart, updateQuantity, getTotalPrice, isCartOpen, setIsCartOpen } = useCart();
   
   console.log('🛒 ProductPage rendered, params:', params, 'productId:', productId);
   
@@ -114,8 +115,13 @@ export default function ProductPage() {
           id: product.id,
           name: product.name,
           price: product.price,
-          image: product.images[0] || '/images/placeholder.jpg',
-          sku: product.sku
+          image: product.images[0] || '/images/products/yoga-journal-1.jpg',
+          sku: product.sku,
+          currency: product.currency || 'PEN',
+          type: 'product',
+          stock: product.stock,
+          weight: product.weight,
+          dimensions: product.dimensions
         });
       }
       
@@ -183,18 +189,22 @@ export default function ProductPage() {
               {/* Navigation Arrows */}
               {product.images.length > 1 && (
                 <>
-                  <button
+                  <Button
                     onClick={prevImage}
+                    variant="ghost"
+                    size="sm"
                     className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 transition-all"
                   >
                     <ChevronLeftIcon className="h-6 w-6" />
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={nextImage}
+                    variant="ghost"
+                    size="sm"
                     className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 transition-all"
                   >
                     <ChevronRightIcon className="h-6 w-6" />
-                  </button>
+                  </Button>
                 </>
               )}
             </div>
@@ -203,11 +213,12 @@ export default function ProductPage() {
             {product.images.length > 1 && (
               <div className="grid grid-cols-3 gap-4">
                 {product.images.map((image, index) => (
-                  <button
+                  <Button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
-                    className={`aspect-square rounded-lg overflow-hidden border-2 ${
-                      currentImageIndex === index ? 'border-green-600' : 'border-gray-200'
+                    variant="ghost"
+                    className={`aspect-square rounded-lg overflow-hidden border-2 p-0 ${
+                      currentImageIndex === index ? 'border-primary ring-2 ring-primary ring-offset-2' : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
                     <Image
@@ -217,7 +228,7 @@ export default function ProductPage() {
                       height={200}
                       className="object-cover w-full h-full"
                     />
-                  </button>
+                  </Button>
                 ))}
               </div>
             )}
@@ -294,21 +305,25 @@ export default function ProductPage() {
               <div className="flex items-center space-x-4">
                 <label className="text-lg font-semibold">Quantity:</label>
                 <div className="flex items-center border rounded-lg">
-                  <button
+                  <Button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    variant="ghost"
+                    size="sm"
                     className="p-2 hover:bg-gray-100"
                     disabled={product.status !== 'ACTIVE' || product.stock <= 0}
                   >
                     <MinusIcon className="h-5 w-5" />
-                  </button>
+                  </Button>
                   <span className="px-4 py-2 border-x">{quantity}</span>
-                  <button
+                  <Button
                     onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                    variant="ghost"
+                    size="sm"
                     className="p-2 hover:bg-gray-100"
                     disabled={product.status !== 'ACTIVE' || product.stock <= 0 || quantity >= product.stock}
                   >
                     <PlusIcon className="h-5 w-5" />
-                  </button>
+                  </Button>
                 </div>
                 {product.stock > 0 && (
                   <span className="text-sm text-gray-500">
@@ -318,11 +333,11 @@ export default function ProductPage() {
               </div>
 
               <div className="flex space-x-4">
-                <button
+                <Button
                   onClick={handleAddToCart}
                   data-add-to-cart
                   disabled={product.status !== 'ACTIVE' || product.stock <= 0}
-                  className="flex-1 bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center space-x-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="flex-1"
                 >
                   <ShoppingCartIcon className="h-5 w-5" />
                   <span>
@@ -333,13 +348,13 @@ export default function ProductPage() {
                         : 'Not Available'
                     }
                   </span>
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => setIsCartOpen(true)}
-                  className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  variant="outline"
                 >
                   View Cart ({getTotalItems()})
-                </button>
+                </Button>
               </div>
             </div>
 
