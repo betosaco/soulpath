@@ -98,10 +98,8 @@ export function EnhancedPackagesFlow() {
 
   // Set initial step based on cart contents (only once on mount)
   React.useEffect(() => {
-    if (cartPackages.length > 0) {
-      // If there are packages in cart, start at schedule step (step 1)
-      setCurrentStep(1);
-    }
+    // Always start at package selection step (step 0) to allow adding more packages
+    setCurrentStep(0);
   }, []); // Empty dependency array - only run once on mount
 
   // Helper function to safely access nested translation properties
