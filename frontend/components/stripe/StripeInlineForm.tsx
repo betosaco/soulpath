@@ -6,6 +6,7 @@ import { Elements, CardElement, useStripe, useElements } from '@stripe/react-str
 import { BaseButton } from '@/components/ui/BaseButton';
 import { BaseCard } from '@/components/ui/BaseCard';
 import { CreditCard, Lock, Shield, CheckCircle, Link as LinkIcon, AlertCircle, Loader2 } from 'lucide-react';
+import { TermsAndConditionsModal } from '@/components/TermsAndConditionsModal';
 
 interface StripeInlineFormProps {
   amount: number; // Amount in cents
@@ -62,6 +63,10 @@ function StripeFormInner({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  
+  // Terms and Conditions state
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [email, setEmail] = useState(customerEmail || '');
 
   // Create payment intent on mount
@@ -108,6 +113,17 @@ function StripeFormInner({
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
+    // Check if terms are accepted first
+    if (!termsAccepted) {
+      setShowTermsModal(true);
+      return;
+    }
+
+    // Process payment if terms are accepted
+    await processPayment();
+  };
+
+  const processPayment = async () => {
     if (!stripe || !elements || !clientSecret) {
       setError('Payment system not ready');
       return;
@@ -278,6 +294,22 @@ function StripeFormInner({
         By clicking &ldquo;Pay&rdquo;, you agree to our terms of service and privacy policy.
       </p>
     </form>
+
+    {/* Terms and Conditions Modal */}
+    <TermsAndConditionsModal
+      isOpen={showTermsModal}
+      onClose={() => setShowTermsModal(false)}
+      onAccept={() => {
+        setTermsAccepted(true);
+        setShowTermsModal(false);
+        processPayment();
+      }}
+      onDecline={() => {
+        setShowTermsModal(false);
+        setError('You must accept the terms and conditions to proceed with your payment.');
+      }}
+      allowClose={true}
+    />
   );
 }
 
