@@ -116,8 +116,8 @@ export function Header({
           )}
         </motion.div>
         
-        <div className="flex items-center justify-center sm:justify-end space-x-2 sm:space-x-4 lg:space-x-6 flex-1 sm:flex-none">
-          {/* Mobile Language Selector - Centered */}
+        <div className="flex items-center justify-end space-x-2 sm:space-x-4 lg:space-x-6">
+          {/* Mobile Language Selector */}
           <div className="flex sm:hidden items-center space-x-1">
             <button 
               onClick={() => setLanguage('en')}

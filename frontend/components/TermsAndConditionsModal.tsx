@@ -299,29 +299,29 @@ export function TermsAndConditionsModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-2 sm:p-4 bg-black bg-opacity-50">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col"
+            className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] flex flex-col mx-2 sm:mx-0"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <div className="flex items-center space-x-4">
-                <h2 className="text-xl font-bold text-gray-900">
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-4 flex-1 min-w-0">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 truncate">
                   {currentContent.title}
                 </h2>
-                <span className="text-sm text-gray-500">
+                <span className="text-xs sm:text-sm text-gray-500">
                   {currentContent.lastUpdated}
                 </span>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 flex-shrink-0">
                 {/* Language Toggle */}
                 <div className="flex space-x-1 bg-gray-200 rounded-lg p-1">
                   <button
                     onClick={() => setActiveTab('es')}
-                    className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                    className={`px-2 sm:px-3 py-1 rounded-md text-xs sm:text-sm font-medium transition-colors ${
                       activeTab === 'es'
                         ? 'bg-white text-gray-900 shadow-sm'
                         : 'text-gray-600 hover:text-gray-900'
@@ -331,7 +331,7 @@ export function TermsAndConditionsModal({
                   </button>
                   <button
                     onClick={() => setActiveTab('en')}
-                    className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                    className={`px-2 sm:px-3 py-1 rounded-md text-xs sm:text-sm font-medium transition-colors ${
                       activeTab === 'en'
                         ? 'bg-white text-gray-900 shadow-sm'
                         : 'text-gray-600 hover:text-gray-900'
@@ -343,30 +343,30 @@ export function TermsAndConditionsModal({
                 {allowClose && (
                   <button
                     onClick={onClose}
-                    className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="p-1 sm:p-2 text-gray-400 hover:text-gray-600 transition-colors touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-4 h-4 sm:w-5 sm:h-5" />
                   </button>
                 )}
               </div>
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6">
-              <div className="space-y-6">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+              <div className="space-y-4 sm:space-y-6">
                 {currentContent.sections.map((section, index) => (
-                  <div key={index} className="space-y-3">
-                    <h3 className="text-lg font-semibold text-gray-900">
+                  <div key={index} className="space-y-2 sm:space-y-3">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900">
                       {section.title}
                     </h3>
                     {section.subtitle && (
-                      <h4 className="text-md font-medium text-gray-800">
+                      <h4 className="text-sm sm:text-md font-medium text-gray-800">
                         {section.subtitle}
                       </h4>
                     )}
-                    <ul className="space-y-2">
+                    <ul className="space-y-1 sm:space-y-2">
                       {section.content.map((item, itemIndex) => (
-                        <li key={itemIndex} className="text-gray-700 leading-relaxed text-sm">
+                        <li key={itemIndex} className="text-gray-700 leading-relaxed text-xs sm:text-sm">
                           {item}
                         </li>
                       ))}
@@ -377,28 +377,30 @@ export function TermsAndConditionsModal({
             </div>
 
             {/* Footer with Accept/Decline buttons */}
-            <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
-              <div className="text-sm text-gray-600">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-6 border-t border-gray-200 bg-gray-50 space-y-3 sm:space-y-0">
+              <div className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
                 {activeTab === 'es' 
                   ? 'Al continuar, acepta estos términos y condiciones.'
                   : 'By continuing, you accept these terms and conditions.'
                 }
               </div>
-              <div className="flex space-x-3">
+              <div className="flex space-x-2 sm:space-x-3">
                 <Button
                   variant="outline"
                   onClick={onDecline}
-                  className="flex items-center gap-2 px-6 py-2 text-red-600 border-red-300 hover:bg-red-50"
+                  className="flex items-center gap-1 sm:gap-2 px-3 sm:px-6 py-2 text-red-600 border-red-300 hover:bg-red-50 text-xs sm:text-sm touch-manipulation min-h-[44px] flex-1 sm:flex-none"
                 >
-                  <XCircle className="w-4 h-4" />
-                  {activeTab === 'es' ? 'Rechazar' : 'Decline'}
+                  <XCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">{activeTab === 'es' ? 'Rechazar' : 'Decline'}</span>
+                  <span className="sm:hidden">{activeTab === 'es' ? 'No' : 'No'}</span>
                 </Button>
                 <Button
                   onClick={onAccept}
-                  className="flex items-center gap-2 px-6 py-2 bg-green-600 hover:bg-green-700 text-white"
+                  className="flex items-center gap-1 sm:gap-2 px-3 sm:px-6 py-2 bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm touch-manipulation min-h-[44px] flex-1 sm:flex-none"
                 >
-                  <Check className="w-4 h-4" />
-                  {activeTab === 'es' ? 'Aceptar' : 'Accept'}
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">{activeTab === 'es' ? 'Aceptar' : 'Accept'}</span>
+                  <span className="sm:hidden">{activeTab === 'es' ? 'Sí' : 'Yes'}</span>
                 </Button>
               </div>
             </div>

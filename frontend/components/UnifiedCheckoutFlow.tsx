@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowRight,
@@ -33,6 +32,7 @@ import { CartBookingDetails } from '@/components/CartBookingDetails';
 import { useCart, CartItem } from '@/lib/cart-context';
 import { EnhancedSchedule } from './EnhancedSchedule';
 import { TermsAndConditionsModal } from './TermsAndConditionsModal';
+import { PrivacyPolicyModal } from './PrivacyPolicyModal';
 
 interface BookingStep {
   id: string;
@@ -123,6 +123,9 @@ function UnifiedCheckoutFlowContent({
   // Terms and Conditions state
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  
+  // Privacy Policy state
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   
   // State for conflict resolution
   const [showConflictResolution, setShowConflictResolution] = useState(false);
@@ -1016,7 +1019,7 @@ function UnifiedCheckoutFlowContent({
       </div>
 
       {/* Step Content */}
-      <div className="container mx-auto px-4 py-8 mobile-step-container mobile-content mobile-scrollable">
+      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8 mobile-step-container mobile-content mobile-scrollable">
         <AnimatePresence mode="wait">
           {/* Step 1: Schedule Selection (only if packages in cart, no schedule data, and not direct checkout, OR when editing schedule) */}
           {(() => {
@@ -1028,7 +1031,7 @@ function UnifiedCheckoutFlowContent({
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="max-w-6xl mx-auto mobile-step-content"
+              className="max-w-6xl mx-auto mobile-step-content w-full"
             >
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-primary mb-4">
@@ -1055,7 +1058,7 @@ function UnifiedCheckoutFlowContent({
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="max-w-4xl mx-auto mobile-step-content"
+              className="max-w-4xl mx-auto mobile-step-content w-full"
             >
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-primary mb-4">
@@ -1255,7 +1258,7 @@ function UnifiedCheckoutFlowContent({
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="max-w-2xl mx-auto mobile-step-content mobile-form-container"
+              className="max-w-2xl mx-auto mobile-step-content mobile-form-container w-full"
             >
               <Card className="card-base">
                 <CardHeader>
@@ -1576,7 +1579,7 @@ function UnifiedCheckoutFlowContent({
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="max-w-4xl mx-auto mobile-step-content mobile-form-container"
+              className="max-w-4xl mx-auto mobile-step-content mobile-form-container w-full"
             >
               <Card className="card-base">
                 <CardHeader>
@@ -2063,7 +2066,7 @@ function UnifiedCheckoutFlowContent({
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="max-w-2xl mx-auto mobile-step-content mobile-form-container"
+              className="max-w-2xl mx-auto mobile-step-content mobile-form-container w-full"
             >
               <Card className="card-base">
                 <CardHeader>
@@ -2186,7 +2189,7 @@ function UnifiedCheckoutFlowContent({
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="max-w-6xl mx-auto mobile-step-content"
+              className="max-w-6xl mx-auto mobile-step-content w-full"
             >
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-primary mb-4" style={{ fontFamily: 'var(--font-heading)' }}>Order Summary</h2>
@@ -2358,7 +2361,7 @@ function UnifiedCheckoutFlowContent({
                     {cartItems.map((item) => (
                       <div key={item.id} className="space-y-3">
                         <div className="flex items-center space-x-4 p-3 border rounded-lg">
-                        <div className="w-12 h-12 bg-gray-200 rounded-md flex-shrink-0">
+                        <div className="w-12 h-12 bg-gray-200 rounded-md flex-shrink-0 hidden sm:block">
                           <Image 
                             src={item.image} 
                             alt={item.name}
@@ -2520,9 +2523,13 @@ function UnifiedCheckoutFlowContent({
                               Terms and Conditions
                             </button>
                             {' '}and{' '}
-                            <Link href="/privacy" className="text-orange-600 hover:text-orange-700 underline font-medium">
+                            <button
+                              type="button"
+                              onClick={() => setShowPrivacyModal(true)}
+                              className="text-orange-600 hover:text-orange-700 underline font-medium"
+                            >
                               Privacy Policy
-                            </Link>
+                            </button>
                           </label>
                         </div>
                       </div>
@@ -2752,6 +2759,19 @@ function UnifiedCheckoutFlowContent({
         onDecline={() => {
           setShowTermsModal(false);
           toast.error('You must accept the terms and conditions to proceed with your order.');
+        }}
+        allowClose={true}
+      />
+
+      {/* Privacy Policy Modal */}
+      <PrivacyPolicyModal
+        isOpen={showPrivacyModal}
+        onClose={() => setShowPrivacyModal(false)}
+        onAccept={() => {
+          setShowPrivacyModal(false);
+        }}
+        onDecline={() => {
+          setShowPrivacyModal(false);
         }}
         allowClose={true}
       />

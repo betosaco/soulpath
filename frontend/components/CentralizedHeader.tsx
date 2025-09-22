@@ -120,7 +120,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
           />
         </motion.div>
         
-        <div className="flex items-center justify-center sm:justify-end space-x-2 sm:space-x-4 lg:space-x-6 flex-1 sm:flex-none">
+        <div className="flex items-center justify-end space-x-2 sm:space-x-4 lg:space-x-6">
           {/* Desktop Navigation */}
           <div className="hidden sm:flex items-center space-x-2 sm:space-x-4 lg:space-x-6">
             {/* Schedule Link */}

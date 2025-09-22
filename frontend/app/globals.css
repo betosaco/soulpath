@@ -2721,6 +2721,39 @@ html, body {
     justify-content: center !important;
     align-items: center !important;
   }
+  
+  /* Mobile checkout form centering */
+  .mobile-step-container {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    min-height: 100vh;
+    min-height: 100svh;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+  
+  .mobile-step-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+  
+  .mobile-form-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 1rem !important;
+  }
+  
+  .mobile-form-container .card-base {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
 
   /* Mobile-specific animations */
   @keyframes mobileSlideIn {
