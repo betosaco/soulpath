@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
     whereClause.startTime = {
       ...(whereClause.startTime || {}),
       gte: dateStart,
-      lt: dateEnd
+      lte: dateEnd
     };
 
     console.log('📅 Date range:', {
