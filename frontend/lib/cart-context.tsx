@@ -38,7 +38,7 @@ interface CartContextType {
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   removeBookingDetails: (id: string) => void;
-  addBookingToPackage: (packageId: string, bookingDetails: CartItem['bookingDetails'][0]) => void;
+  addBookingToPackage: (packageId: string, bookingDetails: NonNullable<CartItem['bookingDetails']>[0]) => void;
   removeBookingFromPackage: (packageId: string, bookingIndex: number) => void;
   clearCart: () => void;
   getTotalItems: () => number;
@@ -154,7 +154,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     );
   }, []);
 
-  const addBookingToPackage = useCallback((packageId: string, bookingDetails: CartItem['bookingDetails'][0]) => {
+  const addBookingToPackage = useCallback((packageId: string, bookingDetails: NonNullable<CartItem['bookingDetails']>[0]) => {
     setCartItems(prevItems =>
       prevItems.map(item => {
         if (item.id === packageId && item.type === 'package') {

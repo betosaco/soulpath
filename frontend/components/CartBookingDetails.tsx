@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Calendar, Clock, MapPin, User, Users, X, Edit3 } from 'lucide-react';
+import { Calendar, Clock, MapPin, User, X, Edit3 } from 'lucide-react';
 
 interface BookingDetails {
   selectedDate?: string;
@@ -26,13 +26,13 @@ interface CartBookingDetailsProps {
 
 export function CartBookingDetails({ 
   bookingDetails, 
-  className = '',
-  onRemove,
-  onEdit,
+  className = '', 
+  onRemove, 
+  onEdit, 
   onAddMore,
   showActions = false,
   packageSessions = 0,
-  packageId
+  packageId: _packageId
 }: CartBookingDetailsProps) {
   // Handle both single booking and array of bookings
   const bookings = Array.isArray(bookingDetails) ? bookingDetails : [bookingDetails];

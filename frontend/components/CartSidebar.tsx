@@ -16,7 +16,6 @@ export function CartSidebar() {
     updateQuantity,
     removeFromCart,
     removeBookingDetails,
-    addBookingToPackage,
     removeBookingFromPackage,
     clearCart,
     getTotalPrice,

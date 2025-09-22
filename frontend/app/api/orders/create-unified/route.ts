@@ -255,7 +255,11 @@ export async function POST(request: NextRequest) {
             include: {
               packagePrice: {
                 include: {
-                  packageDefinition: true
+                  packageDefinition: {
+                    include: {
+                      sessionDuration: true
+                    }
+                  }
                 }
               }
             }
@@ -321,7 +325,11 @@ export async function POST(request: NextRequest) {
         product: true,
         packagePrice: {
           include: {
-            packageDefinition: true
+            packageDefinition: {
+              include: {
+                sessionDuration: true
+              }
+            }
           }
         }
       }
@@ -365,7 +373,11 @@ export async function POST(request: NextRequest) {
                   include: {
                     packagePrice: {
                       include: {
-                        packageDefinition: true
+                        packageDefinition: {
+                    include: {
+                      sessionDuration: true
+                    }
+                  }
                       }
                     }
                   }
@@ -399,7 +411,11 @@ export async function POST(request: NextRequest) {
                   include: {
                     packagePrice: {
                       include: {
-                        packageDefinition: true
+                        packageDefinition: {
+                    include: {
+                      sessionDuration: true
+                    }
+                  }
                       }
                     }
                   }
@@ -436,7 +452,7 @@ export async function POST(request: NextRequest) {
         if (item.itemType === 'PRODUCT' && item.product) {
           return {
             name: item.product.name,
-            description: item.product.description,
+            description: item.product.description || undefined,
             type_text: 'Producto',
             quantity: item.quantity,
             unit_price: Number(item.price),
@@ -445,7 +461,7 @@ export async function POST(request: NextRequest) {
         } else if (item.itemType === 'PACKAGE' && item.packagePrice) {
           return {
             name: item.packagePrice.packageDefinition.name,
-            description: item.packagePrice.packageDefinition.description,
+            description: item.packagePrice.packageDefinition.description || undefined,
             type_text: 'Paquete de Yoga',
             quantity: item.quantity,
             unit_price: Number(item.price),
@@ -463,7 +479,7 @@ export async function POST(request: NextRequest) {
       if (packageItem && packageItem.packagePrice) {
         packageBookingDetails = {
           packageName: packageItem.packagePrice.packageDefinition.name,
-          packageDescription: packageItem.packagePrice.packageDefinition.description,
+          packageDescription: packageItem.packagePrice.packageDefinition.description || undefined,
           sessionsCount: packageItem.packagePrice.packageDefinition.sessionsCount,
           durationMinutes: packageItem.packagePrice.packageDefinition.sessionDuration?.duration_minutes,
           packageType: packageItem.packagePrice.packageDefinition.packageType
@@ -475,22 +491,24 @@ export async function POST(request: NextRequest) {
       if (bookingResults && bookingResults.length > 0) {
         // Use the first booking for the main schedule details in email
         const firstBooking = bookingResults[0];
-        enhancedScheduleDetails = [{
-          selectedDate: firstBooking.scheduleSlot?.startTime.toLocaleDateString('es-ES', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          }) || scheduleDetails?.[0]?.selectedDate,
-          selectedTime: firstBooking.scheduleSlot?.startTime.toLocaleTimeString('es-ES', {
-            hour: '2-digit',
-            minute: '2-digit'
-          }) || scheduleDetails?.[0]?.selectedTime,
-          teacher: firstBooking.teacher?.name || scheduleDetails?.[0]?.teacher,
-          serviceType: firstBooking.sessionType || scheduleDetails?.[0]?.serviceType,
-          venue: firstBooking.venue?.name || scheduleDetails?.[0]?.venue,
-          dayOfWeek: firstBooking.scheduleSlot?.scheduleTemplate?.dayOfWeek || scheduleDetails?.[0]?.dayOfWeek
-        }];
+        if (firstBooking) {
+          enhancedScheduleDetails = [{
+            selectedDate: firstBooking.scheduleSlot?.startTime ? firstBooking.scheduleSlot.startTime.toLocaleDateString('es-ES', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            }) : scheduleDetails?.[0]?.selectedDate,
+            selectedTime: firstBooking.scheduleSlot?.startTime ? firstBooking.scheduleSlot.startTime.toLocaleTimeString('es-ES', {
+              hour: '2-digit',
+              minute: '2-digit'
+            }) : scheduleDetails?.[0]?.selectedTime,
+            teacher: firstBooking.teacher?.name || scheduleDetails?.[0]?.teacher,
+            serviceType: firstBooking.sessionType || scheduleDetails?.[0]?.serviceType,
+            venue: firstBooking.venue?.name || scheduleDetails?.[0]?.venue,
+            dayOfWeek: firstBooking.scheduleSlot?.scheduleTemplate?.dayOfWeek || scheduleDetails?.[0]?.dayOfWeek
+          }];
+        }
       }
 
       const emailData = {
@@ -515,16 +533,16 @@ export async function POST(request: NextRequest) {
         dni: result.order.dni || undefined,
         ruc: result.order.ruc || undefined,
         companyName: result.order.companyName || undefined,
-        orderItems: emailOrderItems,
+        orderItems: emailOrderItems.filter(item => item !== null),
         subtotal: Number(result.order.subtotal),
         tax_amount: Number(result.order.taxAmount),
         shipping_amount: Number(result.order.shippingAmount),
         total_amount: Number(result.order.total),
         currency: result.order.currency,
-        notes: result.order.notes,
+        notes: result.order.notes || undefined,
         shipping_address: result.order.shippingAddress as any,
-        scheduleDetails: enhancedScheduleDetails,
-        packageBookingDetails: packageBookingDetails,
+        scheduleDetails: enhancedScheduleDetails?.[0] || undefined,
+        packageBookingDetails: packageBookingDetails || undefined,
         order_url: orderUrl
       };
 
@@ -539,21 +557,23 @@ export async function POST(request: NextRequest) {
         try {
           // Send booking confirmation email for each booking
           for (const bookingResult of bookingResults) {
+            if (!bookingResult) continue;
+            
             const bookingEmailData = {
               customerName: result.order.customerName,
               customerEmail: result.order.customerEmail,
-              bookingId: bookingResult.id.toString(),
-              bookingDate: bookingResult.scheduleSlot?.startTime.toLocaleDateString('es-ES', {
+              bookingId: bookingResult.id?.toString() || '',
+              bookingDate: bookingResult.scheduleSlot?.startTime ? bookingResult.scheduleSlot.startTime.toLocaleDateString('es-ES', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
-              }) || '',
-              bookingTime: bookingResult.scheduleSlot?.startTime.toLocaleTimeString('es-ES', {
+              }) : '',
+              bookingTime: bookingResult.scheduleSlot?.startTime ? bookingResult.scheduleSlot.startTime.toLocaleTimeString('es-ES', {
                 hour: '2-digit',
                 minute: '2-digit'
-              }) || '',
-              sessionType: bookingResult.sessionType,
+              }) : '',
+              sessionType: bookingResult.sessionType || '',
               instructor: bookingResult.teacher?.name || 'Por asignar',
               venue: bookingResult.venue?.name || 'MatMax Yoga Studio',
               duration: bookingResult.scheduleSlot?.scheduleTemplate?.sessionDuration?.duration_minutes || 60,
@@ -592,7 +612,7 @@ export async function POST(request: NextRequest) {
       currency: result.order.currency,
       items: orderData.items,
       userPackages: result.userPackages,
-      bookings: bookingResults.map(booking => ({
+      bookings: bookingResults.filter((booking): booking is NonNullable<typeof booking> => booking !== null).map(booking => ({
         id: booking.id,
         sessionType: booking.sessionType,
         status: booking.status,

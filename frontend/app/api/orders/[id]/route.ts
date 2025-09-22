@@ -29,21 +29,26 @@ export async function GET(
                 packageDefinition: true,
                 currency: true
               }
-            }
-          }
-        },
-        customer: true,
-        bookings: {
-          include: {
-            scheduleSlot: {
+            },
+            userPackages: {
               include: {
-                teacher: true,
-                serviceType: true,
-                venue: true
+                bookings: {
+                  include: {
+                    scheduleSlot: {
+                      include: {
+                        scheduleTemplate: true
+                      }
+                    },
+                    teacher: true,
+                    serviceType: true,
+                    venue: true
+                  }
+                }
               }
             }
           }
-        }
+        },
+        customer: true
       }
     });
 
@@ -83,17 +88,20 @@ export async function GET(
       return null;
     }).filter(Boolean);
 
-    // Format booking details
-    const bookingDetails = order.bookings.map((booking: any) => ({
-      id: booking.id,
-      selectedDate: booking.scheduleSlot.date,
-      selectedTime: booking.scheduleSlot.time,
-      teacher: booking.scheduleSlot.teacher?.name,
-      serviceType: booking.scheduleSlot.serviceType?.name,
-      venue: booking.scheduleSlot.venue?.name,
-      dayOfWeek: booking.scheduleSlot.dayOfWeek,
-      scheduleSlotId: booking.scheduleSlot.id
-    }));
+    // Format booking details - collect from all userPackages
+    const bookingDetails = order.items
+      .flatMap((item: any) => item.userPackages || [])
+      .flatMap((userPackage: any) => userPackage.bookings || [])
+      .map((booking: any) => ({
+        id: booking.id,
+        selectedDate: booking.scheduleSlot?.startTime ? new Date(booking.scheduleSlot.startTime).toLocaleDateString() : undefined,
+        selectedTime: booking.scheduleSlot?.startTime ? new Date(booking.scheduleSlot.startTime).toLocaleTimeString() : undefined,
+        teacher: booking.teacher?.name,
+        serviceType: booking.serviceType?.name,
+        venue: booking.venue?.name,
+        dayOfWeek: booking.scheduleSlot?.scheduleTemplate?.dayOfWeek,
+        scheduleSlotId: booking.scheduleSlot?.id
+      }));
 
     // Format the response
     const response = {
