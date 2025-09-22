@@ -5,6 +5,10 @@ interface EmailData {
   text?: string;
 }
 
+interface EmailDataWithBCC extends EmailData {
+  bcc?: string;
+}
+
 interface BrevoConfig {
   apiKey: string;
   senderEmail: string;
@@ -58,6 +62,59 @@ export class BrevoEmailService {
       return true;
     } catch (error) {
       console.error('Failed to send email via Brevo:', error);
+      return false;
+    }
+  }
+
+  async sendEmailWithBCC(emailData: EmailDataWithBCC): Promise<boolean> {
+    try {
+      const payload: any = {
+        sender: {
+          name: this.config.senderName,
+          email: this.config.senderEmail
+        },
+        to: [
+          {
+            email: emailData.to,
+            name: emailData.to.split('@')[0] // Use email prefix as name
+          }
+        ],
+        subject: emailData.subject,
+        htmlContent: emailData.html,
+        textContent: emailData.text || this.stripHtml(emailData.html)
+      };
+
+      // Add BCC if provided
+      if (emailData.bcc) {
+        payload.bcc = [
+          {
+            email: emailData.bcc,
+            name: emailData.bcc.split('@')[0]
+          }
+        ];
+      }
+
+      const response = await fetch(`${this.baseUrl}/smtp/email`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'api-key': this.config.apiKey
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Brevo API error:', errorData);
+        throw new Error(`Brevo API error: ${response.status} - ${errorData.message || 'Unknown error'}`);
+      }
+
+      const result = await response.json();
+      console.log('Email with BCC sent successfully via Brevo:', result);
+      return true;
+    } catch (error) {
+      console.error('Failed to send email with BCC via Brevo:', error);
       return false;
     }
   }

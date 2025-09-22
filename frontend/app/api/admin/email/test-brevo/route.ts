@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
 
     // Test email data
     const testEmailData = {
-      to: 'bestosaco@gmail.com',
+      to: 'betosaco@gmail.com',
       subject: '🧪 Test Email from SoulPath - Brevo Integration',
       html: `
         <!DOCTYPE html>
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
 
                     <p><strong>Test Details:</strong></p>
                     <ul>
-                        <li><strong>Sent to:</strong> bestosaco@gmail.com</li>
+                        <li><strong>Sent to:</strong> betosaco@gmail.com</li>
                         <li><strong>Sent from:</strong> SoulPath Email Service</li>
                         <li><strong>Timestamp:</strong> ${new Date().toLocaleString()}</li>
                         <li><strong>Service:</strong> Brevo (Sendinblue)</li>
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
       console.log('✅ Test email sent successfully via Brevo');
       return NextResponse.json({
         success: true,
-        message: 'Test email sent successfully to bestosaco@gmail.com',
+        message: 'Test email sent successfully to betosaco@gmail.com',
         timestamp: new Date().toISOString(),
         recipient: testEmailData.to
       });

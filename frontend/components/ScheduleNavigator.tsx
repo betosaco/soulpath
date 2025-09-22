@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,140 +9,114 @@ interface ScheduleNavigatorProps {
   onDateChange: (startDate: Date, endDate: Date) => void;
   totalSlots?: number;
   isLoading?: boolean;
+  initialStartDate?: Date;
+  initialEndDate?: Date;
 }
 
 export function ScheduleNavigator({
   onDateChange,
   totalSlots = 0,
-  isLoading = false
+  isLoading = false,
+  initialStartDate,
+  initialEndDate
 }: ScheduleNavigatorProps) {
-  const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
-  const [currentDate, setCurrentDate] = useState(new Date());
+  // Initialize with provided dates or current week
+  const [currentStartDate, setCurrentStartDate] = useState<Date | null>(null);
+  const [currentEndDate, setCurrentEndDate] = useState<Date | null>(null);
 
-  // Calculate week start (Monday) and end (Sunday)
-  const getWeekStart = useCallback((date: Date) => {
-    const d = new Date(date);
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
-    return new Date(d.setDate(diff));
-  }, []);
+  // Set initial dates
+  useEffect(() => {
+    let start: Date;
+    let end: Date;
 
-  const getWeekEnd = useCallback((date: Date) => {
-    const weekStart = getWeekStart(date);
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 6);
-    return weekEnd;
-  }, [getWeekStart]);
-
-  // Calculate month start and end
-  const getMonthStart = useCallback((date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth(), 1);
-  }, []);
-
-  const getMonthEnd = useCallback((date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0);
-  }, []);
-
-  // Navigate functions
-  const navigatePrevious = () => {
-    const newDate = new Date(currentDate);
-    if (viewMode === 'week') {
-      newDate.setDate(newDate.getDate() - 7);
+    if (initialStartDate && initialEndDate) {
+      start = new Date(initialStartDate);
+      end = new Date(initialEndDate);
     } else {
-      newDate.setMonth(newDate.getMonth() - 1);
+      // Default to current week starting Monday
+      const today = new Date();
+      const monday = new Date(today);
+      const dayOfWeek = monday.getDay();
+      const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      monday.setDate(today.getDate() - daysToMonday);
+      monday.setHours(0, 0, 0, 0);
+
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      sunday.setHours(23, 59, 59, 999);
+
+      start = monday;
+      end = sunday;
     }
-    setCurrentDate(newDate);
-    updateDateRange(newDate);
+
+    setCurrentStartDate(start);
+    setCurrentEndDate(end);
+  }, [initialStartDate, initialEndDate]);
+
+  // Navigate to previous/next week
+  const navigateWeek = (direction: 'prev' | 'next') => {
+    if (!currentStartDate || !currentEndDate) return;
+
+    const days = direction === 'prev' ? -7 : 7;
+    const newStartDate = new Date(currentStartDate);
+    const newEndDate = new Date(currentEndDate);
+
+    newStartDate.setDate(newStartDate.getDate() + days);
+    newEndDate.setDate(newEndDate.getDate() + days);
+
+    setCurrentStartDate(newStartDate);
+    setCurrentEndDate(newEndDate);
+    onDateChange(newStartDate, newEndDate);
   };
 
-  const navigateNext = () => {
-    const newDate = new Date(currentDate);
-    if (viewMode === 'week') {
-      newDate.setDate(newDate.getDate() + 7);
-    } else {
-      newDate.setMonth(newDate.getMonth() + 1);
-    }
-    setCurrentDate(newDate);
-    updateDateRange(newDate);
-  };
+  const navigatePrevious = () => navigateWeek('prev');
+  const navigateNext = () => navigateWeek('next');
 
   const navigateToToday = () => {
+    // Calculate current week (Monday to Sunday)
     const today = new Date();
-    setCurrentDate(today);
-    updateDateRange(today);
-  };
+    const monday = new Date(today);
+    const dayOfWeek = monday.getDay();
+    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    monday.setDate(today.getDate() - daysToMonday);
+    monday.setHours(0, 0, 0, 0);
 
-  const updateDateRange = useCallback((date: Date) => {
-    let startDate: Date;
-    let endDate: Date;
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    sunday.setHours(23, 59, 59, 999);
 
-    if (viewMode === 'week') {
-      startDate = getWeekStart(date);
-      endDate = getWeekEnd(date);
-    } else {
-      startDate = getMonthStart(date);
-      endDate = getMonthEnd(date);
-    }
-
-    onDateChange(startDate, endDate);
-  }, [viewMode, onDateChange, getWeekStart, getWeekEnd, getMonthStart, getMonthEnd]);
-
-  // Handle view mode change
-  const handleViewModeChange = (mode: 'week' | 'month') => {
-    setViewMode(mode);
-    updateDateRange(currentDate);
+    setCurrentStartDate(monday);
+    setCurrentEndDate(sunday);
+    onDateChange(monday, sunday);
   };
 
   // Format date for display
   const formatDateRange = () => {
-    if (viewMode === 'week') {
-      const weekStart = getWeekStart(currentDate);
-      const weekEnd = getWeekEnd(currentDate);
-      return `${weekStart.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric' 
-      })} - ${weekEnd.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric',
-        year: 'numeric'
-      })}`;
-    } else {
-      return currentDate.toLocaleDateString('en-US', { 
-        month: 'long', 
-        year: 'numeric' 
-      });
+    if (!currentStartDate || !currentEndDate) {
+      return 'Loading...';
     }
+
+    return `${currentStartDate.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric'
+    })} - ${currentEndDate.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    })}`;
   };
 
-  // Initialize with current date range
+  // Call onDateChange when dates are set
   useEffect(() => {
-    updateDateRange(currentDate);
-  }, [currentDate, updateDateRange]);
+    if (currentStartDate && currentEndDate) {
+      onDateChange(currentStartDate, currentEndDate);
+    }
+  }, [currentStartDate, currentEndDate, onDateChange]);
 
   return (
     <Card className="mb-4">
       <CardContent className="pt-4">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-          {/* View Mode Toggle */}
-          <div className="flex items-center gap-1">
-            <Button
-              variant={viewMode === 'week' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handleViewModeChange('week')}
-              className="px-3 text-xs"
-            >
-              Week
-            </Button>
-            <Button
-              variant={viewMode === 'month' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handleViewModeChange('month')}
-              className="px-3 text-xs"
-            >
-              Month
-            </Button>
-          </div>
-
           {/* Navigation Controls */}
           <div className="flex items-center gap-2">
             <Button
@@ -154,7 +128,7 @@ export function ScheduleNavigator({
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            
+
             <div className="text-center min-w-[180px]">
               <div className="font-semibold text-base">
                 {formatDateRange()}

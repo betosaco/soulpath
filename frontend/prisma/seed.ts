@@ -736,7 +736,7 @@ async function main() {
       where: { id: 1 },
       update: {},
       create: {
-        scheduleTemplateId: 1, // Monday template
+        scheduleTemplateId: 7, // Monday template (actual ID from database)
         startTime: new Date('2024-01-01T09:00:00Z'),
         endTime: new Date('2024-01-01T17:00:00Z'),
         capacity: 3,
@@ -748,7 +748,7 @@ async function main() {
       where: { id: 2 },
       update: {},
       create: {
-        scheduleTemplateId: 2, // Tuesday template
+        scheduleTemplateId: 8, // Tuesday template (actual ID from database)
         startTime: new Date('2024-01-02T09:00:00Z'),
         endTime: new Date('2024-01-02T17:00:00Z'),
         capacity: 3,
@@ -1041,7 +1041,7 @@ async function main() {
       where: { id: 'order-1' },
       update: {},
       create: {
-        orderNumber: 'ORD-001',
+        orderNumber: `ORD-${Date.now()}-001`,
         customerId: clients[0].id,
         customerName: clients[0].fullName,
         customerEmail: clients[0].email,
@@ -1059,7 +1059,7 @@ async function main() {
       where: { id: 'order-2' },
       update: {},
       create: {
-        orderNumber: 'ORD-002',
+        orderNumber: `ORD-${Date.now()}-002`,
         customerId: clients[1].id,
         customerName: clients[1].fullName,
         customerEmail: clients[1].email,
@@ -1452,8 +1452,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 1, // Hatha Yoga
         dayOfWeek: 'Monday',
-        startTime: new Date('1970-01-01T03:15:00Z'), // 08:15 EST - 5 hours = 03:15 UTC
-        endTime: new Date('1970-01-01T04:15:00Z'), // 09:15 EST - 5 hours = 04:15 UTC
+        startTime: new Date('1970-01-01T03:15:00Z'), // 08:15 EST - 15 hours = 03:15 UTC (previous day)
+        endTime: new Date('1970-01-01T04:15:00Z'), // 09:15 EST - 15 hours = 04:15 UTC (previous day)
         isAvailable: true,
         maxBookings: 15
       }
@@ -1466,8 +1466,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 2, // Vinyasa Yoga
         dayOfWeek: 'Monday',
-        startTime: new Date('1970-01-01T04:30:00Z'), // 09:30 EST - 5 hours = 04:30 UTC
-        endTime: new Date('1970-01-01T05:30:00Z'), // 10:30 EST - 5 hours = 05:30 UTC
+        startTime: new Date('1970-01-01T04:30:00Z'), // 09:30 EST - 15 hours = 04:30 UTC (previous day)
+        endTime: new Date('1970-01-01T05:30:00Z'), // 10:30 EST - 15 hours = 05:30 UTC (previous day)
         isAvailable: true,
         maxBookings: 15
       }
@@ -1480,8 +1480,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 1, // Hatha Yoga
         dayOfWeek: 'Monday',
-        startTime: new Date('1970-01-01T12:30:00Z'), // 17:30 EST - 5 hours = 12:30 UTC
-        endTime: new Date('1970-01-01T13:30:00Z'), // 18:30 EST - 5 hours = 13:30 UTC
+        startTime: new Date('1970-01-01T12:30:00Z'), // 17:30 EST - 15 hours = 12:30 UTC
+        endTime: new Date('1970-01-01T13:30:00Z'), // 18:30 EST - 15 hours = 13:30 UTC
         isAvailable: true,
         maxBookings: 15
       }
@@ -1495,8 +1495,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 1, // Hatha Yoga
         dayOfWeek: 'Tuesday',
-        startTime: new Date('1970-01-01T12:30:00Z'), // 17:30 EST - 5 hours = 12:30 UTC
-        endTime: new Date('1970-01-01T13:30:00Z'), // 18:30 EST - 5 hours = 13:30 UTC
+        startTime: new Date('1970-01-01T12:30:00Z'), // 17:30 EST - 15 hours = 12:30 UTC
+        endTime: new Date('1970-01-01T13:30:00Z'), // 18:30 EST - 15 hours = 13:30 UTC
         isAvailable: true,
         maxBookings: 15
       }
@@ -1509,8 +1509,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 2, // Vinyasa Yoga
         dayOfWeek: 'Tuesday',
-        startTime: new Date('1970-01-01T13:45:00Z'), // 18:45 EST - 5 hours = 13:45 UTC
-        endTime: new Date('1970-01-01T14:45:00Z'), // 19:45 EST - 5 hours = 14:45 UTC
+        startTime: new Date('1970-01-01T13:45:00Z'), // 18:45 EST - 15 hours = 13:45 UTC
+        endTime: new Date('1970-01-01T14:45:00Z'), // 19:45 EST - 15 hours = 14:45 UTC
         isAvailable: true,
         maxBookings: 15
       }
@@ -1524,8 +1524,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 1, // Hatha Yoga
         dayOfWeek: 'Wednesday',
-        startTime: new Date('1970-01-01T03:15:00Z'), // 08:15 EST - 5 hours = 03:15 UTC
-        endTime: new Date('1970-01-01T04:15:00Z'), // 09:15 EST - 5 hours = 04:15 UTC
+        startTime: new Date('1970-01-01T03:15:00Z'), // 08:15 EST - 15 hours = 03:15 UTC (previous day)
+        endTime: new Date('1970-01-01T04:15:00Z'), // 09:15 EST - 15 hours = 04:15 UTC (previous day)
         isAvailable: true,
         maxBookings: 15
       }
@@ -1538,8 +1538,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 2, // Vinyasa Yoga
         dayOfWeek: 'Wednesday',
-        startTime: new Date('1970-01-01T04:30:00Z'), // 09:30 EST - 5 hours = 04:30 UTC
-        endTime: new Date('1970-01-01T05:30:00Z'), // 10:30 EST - 5 hours = 05:30 UTC
+        startTime: new Date('1970-01-01T04:30:00Z'), // 09:30 EST - 15 hours = 04:30 UTC (previous day)
+        endTime: new Date('1970-01-01T05:30:00Z'), // 10:30 EST - 15 hours = 05:30 UTC (previous day)
         isAvailable: true,
         maxBookings: 15
       }
@@ -1552,8 +1552,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 1, // Hatha Yoga
         dayOfWeek: 'Wednesday',
-        startTime: new Date('1970-01-01T12:30:00Z'), // 17:30 EST - 5 hours = 12:30 UTC
-        endTime: new Date('1970-01-01T13:30:00Z'), // 18:30 EST - 5 hours = 13:30 UTC
+        startTime: new Date('1970-01-01T12:30:00Z'), // 17:30 EST - 15 hours = 12:30 UTC
+        endTime: new Date('1970-01-01T13:30:00Z'), // 18:30 EST - 15 hours = 13:30 UTC
         isAvailable: true,
         maxBookings: 15
       }
@@ -1567,8 +1567,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 1, // Hatha Yoga
         dayOfWeek: 'Thursday',
-        startTime: new Date('1970-01-01T12:30:00Z'), // 17:30 EST - 5 hours = 12:30 UTC
-        endTime: new Date('1970-01-01T13:30:00Z'), // 18:30 EST - 5 hours = 13:30 UTC
+        startTime: new Date('1970-01-01T12:30:00Z'), // 17:30 EST - 15 hours = 12:30 UTC
+        endTime: new Date('1970-01-01T13:30:00Z'), // 18:30 EST - 15 hours = 13:30 UTC
         isAvailable: true,
         maxBookings: 15
       }
@@ -1581,8 +1581,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 2, // Vinyasa Yoga
         dayOfWeek: 'Thursday',
-        startTime: new Date('1970-01-01T13:45:00Z'), // 18:45 EST - 5 hours = 13:45 UTC
-        endTime: new Date('1970-01-01T14:45:00Z'), // 19:45 EST - 5 hours = 14:45 UTC
+        startTime: new Date('1970-01-01T13:45:00Z'), // 18:45 EST - 15 hours = 13:45 UTC
+        endTime: new Date('1970-01-01T14:45:00Z'), // 19:45 EST - 15 hours = 14:45 UTC
         isAvailable: true,
         maxBookings: 15
       }
@@ -1596,8 +1596,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 1, // Hatha Yoga
         dayOfWeek: 'Friday',
-        startTime: new Date('1970-01-01T03:15:00Z'), // 08:15 EST - 5 hours = 03:15 UTC
-        endTime: new Date('1970-01-01T04:15:00Z'), // 09:15 EST - 5 hours = 04:15 UTC
+        startTime: new Date('1970-01-01T03:15:00Z'), // 08:15 EST - 15 hours = 03:15 UTC (previous day)
+        endTime: new Date('1970-01-01T04:15:00Z'), // 09:15 EST - 15 hours = 04:15 UTC (previous day)
         isAvailable: true,
         maxBookings: 15
       }
@@ -1610,8 +1610,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 2, // Vinyasa Yoga
         dayOfWeek: 'Friday',
-        startTime: new Date('1970-01-01T04:30:00Z'), // 09:30 EST - 5 hours = 04:30 UTC
-        endTime: new Date('1970-01-01T05:30:00Z'), // 10:30 EST - 5 hours = 05:30 UTC
+        startTime: new Date('1970-01-01T04:30:00Z'), // 09:30 EST - 15 hours = 04:30 UTC (previous day)
+        endTime: new Date('1970-01-01T05:30:00Z'), // 10:30 EST - 15 hours = 05:30 UTC (previous day)
         isAvailable: true,
         maxBookings: 15
       }
@@ -1624,8 +1624,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 1, // Hatha Yoga
         dayOfWeek: 'Friday',
-        startTime: new Date('1970-01-01T12:30:00Z'), // 17:30 EST - 5 hours = 12:30 UTC
-        endTime: new Date('1970-01-01T13:30:00Z'), // 18:30 EST - 5 hours = 13:30 UTC
+        startTime: new Date('1970-01-01T12:30:00Z'), // 17:30 EST - 15 hours = 12:30 UTC
+        endTime: new Date('1970-01-01T13:30:00Z'), // 18:30 EST - 15 hours = 13:30 UTC
         isAvailable: true,
         maxBookings: 15
       }
@@ -1639,8 +1639,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 1, // Hatha Yoga
         dayOfWeek: 'Saturday',
-        startTime: new Date('1970-01-01T03:30:00Z'), // 08:30 EST - 5 hours = 03:30 UTC
-        endTime: new Date('1970-01-01T04:30:00Z'), // 09:30 EST - 5 hours = 04:30 UTC
+        startTime: new Date('1970-01-01T03:30:00Z'), // 08:30 EST - 15 hours = 03:30 UTC (previous day)
+        endTime: new Date('1970-01-01T04:30:00Z'), // 09:30 EST - 15 hours = 04:30 UTC (previous day)
         isAvailable: true,
         maxBookings: 15
       }
@@ -1653,8 +1653,8 @@ async function main() {
         venueId: venue.id,
         serviceTypeId: 2, // Vinyasa Yoga
         dayOfWeek: 'Saturday',
-        startTime: new Date('1970-01-01T04:45:00Z'), // 09:45 EST - 5 hours = 04:45 UTC
-        endTime: new Date('1970-01-01T05:45:00Z'), // 10:45 EST - 5 hours = 05:45 UTC
+        startTime: new Date('1970-01-01T04:45:00Z'), // 09:45 EST - 15 hours = 04:45 UTC (previous day)
+        endTime: new Date('1970-01-01T05:45:00Z'), // 10:45 EST - 15 hours = 05:45 UTC (previous day)
         isAvailable: true,
         maxBookings: 15
       }
@@ -1672,8 +1672,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[0].id, // Monday 08:15 Hatha
-        startTime: new Date('2025-10-06T08:15:00Z'), // 08:15 EST - 5 hours = 08:15 UTC
-        endTime: new Date('2025-10-06T09:15:00Z'), // 09:15 EST - 5 hours = 09:15 UTC
+        startTime: new Date('2025-10-06T03:15:00Z'), // 08:15 EST - 15 hours = 03:15 UTC (previous day)
+        endTime: new Date('2025-10-06T04:15:00Z'), // 09:15 EST - 15 hours = 04:15 UTC (previous day)
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -1684,8 +1684,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[1].id, // Monday 09:30 Vinyasa
-        startTime: new Date('2025-10-06T09:30:00Z'), // 09:30 EST - 5 hours = 09:30 UTC
-        endTime: new Date('2025-10-06T10:30:00Z'), // 10:30 EST - 5 hours = 10:30 UTC
+        startTime: new Date('2025-10-06T04:30:00Z'), // 09:30 EST - 15 hours = 04:30 UTC (previous day)
+        endTime: new Date('2025-10-06T05:30:00Z'), // 10:30 EST - 15 hours = 05:30 UTC (previous day)
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -1696,8 +1696,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[2].id, // Monday 17:30 Hatha
-        startTime: new Date('2025-10-06T17:30:00Z'), // 17:30 EST - 5 hours = 17:30 UTC
-        endTime: new Date('2025-10-06T18:30:00Z'), // 18:30 EST - 5 hours = 18:30 UTC
+        startTime: new Date('2025-10-06T12:30:00Z'), // 17:30 EST - 15 hours = 12:30 UTC
+        endTime: new Date('2025-10-06T13:30:00Z'), // 18:30 EST - 15 hours = 13:30 UTC
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -1709,8 +1709,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[3].id, // Tuesday 17:30 Hatha
-        startTime: new Date('2025-10-07T17:30:00Z'), // 17:30 EST - 5 hours = 17:30 UTC
-        endTime: new Date('2025-10-07T18:30:00Z'), // 18:30 EST - 5 hours = 18:30 UTC
+        startTime: new Date('2025-10-07T12:30:00Z'), // 17:30 EST - 15 hours = 12:30 UTC
+        endTime: new Date('2025-10-07T13:30:00Z'), // 18:30 EST - 15 hours = 13:30 UTC
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -1721,8 +1721,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[4].id, // Tuesday 18:45 Vinyasa
-        startTime: new Date('2025-10-07T18:45:00Z'), // 18:45 EST - 5 hours = 18:45 UTC
-        endTime: new Date('2025-10-07T19:45:00Z'), // 19:45 EST - 5 hours = 19:45 UTC
+        startTime: new Date('2025-10-07T13:45:00Z'), // 18:45 EST - 15 hours = 13:45 UTC
+        endTime: new Date('2025-10-07T14:45:00Z'), // 19:45 EST - 15 hours = 14:45 UTC
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -1734,8 +1734,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[5].id, // Wednesday 08:15 Hatha
-        startTime: new Date('2025-10-08T08:15:00Z'), // 08:15 EST - 5 hours = 08:15 UTC
-        endTime: new Date('2025-10-08T09:15:00Z'), // 09:15 EST - 5 hours = 09:15 UTC
+        startTime: new Date('2025-10-08T03:15:00Z'), // 08:15 EST - 15 hours = 03:15 UTC (previous day)
+        endTime: new Date('2025-10-08T04:15:00Z'), // 09:15 EST - 15 hours = 04:15 UTC (previous day)
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -1746,8 +1746,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[6].id, // Wednesday 09:30 Vinyasa
-        startTime: new Date('2025-10-08T09:30:00Z'), // 09:30 EST - 5 hours = 09:30 UTC
-        endTime: new Date('2025-10-08T10:30:00Z'), // 10:30 EST - 5 hours = 10:30 UTC
+        startTime: new Date('2025-10-08T04:30:00Z'), // 09:30 EST - 15 hours = 04:30 UTC (previous day)
+        endTime: new Date('2025-10-08T05:30:00Z'), // 10:30 EST - 15 hours = 05:30 UTC (previous day)
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -1758,8 +1758,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[7].id, // Wednesday 17:30 Hatha
-        startTime: new Date('2025-10-08T17:30:00Z'), // 17:30 EST - 5 hours = 17:30 UTC
-        endTime: new Date('2025-10-08T18:30:00Z'), // 18:30 EST - 5 hours = 18:30 UTC
+        startTime: new Date('2025-10-08T12:30:00Z'), // 17:30 EST - 15 hours = 12:30 UTC
+        endTime: new Date('2025-10-08T13:30:00Z'), // 18:30 EST - 15 hours = 13:30 UTC
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -1771,8 +1771,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[8].id, // Thursday 17:30 Hatha
-        startTime: new Date('2025-10-09T17:30:00Z'), // 17:30 EST - 5 hours = 17:30 UTC
-        endTime: new Date('2025-10-09T18:30:00Z'), // 18:30 EST - 5 hours = 18:30 UTC
+        startTime: new Date('2025-10-09T12:30:00Z'), // 17:30 EST - 15 hours = 12:30 UTC
+        endTime: new Date('2025-10-09T13:30:00Z'), // 18:30 EST - 15 hours = 13:30 UTC
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -1783,8 +1783,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[9].id, // Thursday 18:45 Vinyasa
-        startTime: new Date('2025-10-09T18:45:00Z'), // 18:45 EST - 5 hours = 18:45 UTC
-        endTime: new Date('2025-10-09T19:45:00Z'), // 19:45 EST - 5 hours = 19:45 UTC
+        startTime: new Date('2025-10-09T13:45:00Z'), // 18:45 EST - 15 hours = 13:45 UTC
+        endTime: new Date('2025-10-09T14:45:00Z'), // 19:45 EST - 15 hours = 14:45 UTC
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -1796,8 +1796,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[10].id, // Friday 08:15 Hatha
-        startTime: new Date('2025-10-10T08:15:00Z'), // 08:15 EST - 5 hours = 08:15 UTC
-        endTime: new Date('2025-10-10T09:15:00Z'), // 09:15 EST - 5 hours = 09:15 UTC
+        startTime: new Date('2025-10-10T03:15:00Z'), // 08:15 EST - 15 hours = 03:15 UTC (previous day)
+        endTime: new Date('2025-10-10T04:15:00Z'), // 09:15 EST - 15 hours = 04:15 UTC (previous day)
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -1808,8 +1808,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[11].id, // Friday 09:30 Vinyasa
-        startTime: new Date('2025-10-10T09:30:00Z'), // 09:30 EST - 5 hours = 09:30 UTC
-        endTime: new Date('2025-10-10T10:30:00Z'), // 10:30 EST - 5 hours = 10:30 UTC
+        startTime: new Date('2025-10-10T04:30:00Z'), // 09:30 EST - 15 hours = 04:30 UTC (previous day)
+        endTime: new Date('2025-10-10T05:30:00Z'), // 10:30 EST - 15 hours = 05:30 UTC (previous day)
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -1820,8 +1820,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[12].id, // Friday 17:30 Hatha
-        startTime: new Date('2025-10-10T17:30:00Z'), // 17:30 EST - 5 hours = 17:30 UTC
-        endTime: new Date('2025-10-10T18:30:00Z'), // 18:30 EST - 5 hours = 18:30 UTC
+        startTime: new Date('2025-10-10T12:30:00Z'), // 17:30 EST - 15 hours = 12:30 UTC
+        endTime: new Date('2025-10-10T13:30:00Z'), // 18:30 EST - 15 hours = 13:30 UTC
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -1833,8 +1833,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[13].id, // Saturday 08:30 Hatha
-        startTime: new Date('2025-10-11T08:30:00Z'), // 08:30 EST - 5 hours = 08:30 UTC
-        endTime: new Date('2025-10-11T09:30:00Z'), // 09:30 EST - 5 hours = 09:30 UTC
+        startTime: new Date('2025-10-11T03:30:00Z'), // 08:30 EST - 15 hours = 03:30 UTC (previous day)
+        endTime: new Date('2025-10-11T04:30:00Z'), // 09:30 EST - 15 hours = 04:30 UTC (previous day)
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -1845,8 +1845,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[14].id, // Saturday 09:45 Vinyasa
-        startTime: new Date('2025-10-11T09:45:00Z'), // 09:45 EST - 5 hours = 09:45 UTC
-        endTime: new Date('2025-10-11T10:45:00Z'), // 10:45 EST - 5 hours = 10:45 UTC
+        startTime: new Date('2025-10-11T04:45:00Z'), // 09:45 EST - 15 hours = 04:45 UTC (previous day)
+        endTime: new Date('2025-10-11T05:45:00Z'), // 10:45 EST - 15 hours = 05:45 UTC (previous day)
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -1864,8 +1864,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[0].id, // Monday 08:15 Hatha
-        startTime: new Date('2025-09-01T08:15:00Z'), // 08:15 EST - 5 hours = 08:15 UTC
-        endTime: new Date('2025-09-01T09:15:00Z'), // 09:15 EST - 5 hours = 09:15 UTC
+        startTime: new Date('2025-09-01T03:15:00Z'), // 08:15 EST - 15 hours = 03:15 UTC (previous day)
+        endTime: new Date('2025-09-01T04:15:00Z'), // 09:15 EST - 15 hours = 04:15 UTC (previous day)
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -1876,8 +1876,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[1].id, // Monday 09:30 Vinyasa
-        startTime: new Date('2025-09-01T09:30:00Z'), // 09:30 EST - 5 hours = 09:30 UTC
-        endTime: new Date('2025-09-01T10:30:00Z'), // 10:30 EST - 5 hours = 10:30 UTC
+        startTime: new Date('2025-09-01T04:30:00Z'), // 09:30 EST - 15 hours = 04:30 UTC (previous day)
+        endTime: new Date('2025-09-01T05:30:00Z'), // 10:30 EST - 15 hours = 05:30 UTC (previous day)
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -1888,8 +1888,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[2].id, // Monday 17:30 Hatha
-        startTime: new Date('2025-09-01T17:30:00Z'), // 17:30 EST - 5 hours = 17:30 UTC
-        endTime: new Date('2025-09-01T18:30:00Z'), // 18:30 EST - 5 hours = 18:30 UTC
+        startTime: new Date('2025-09-01T12:30:00Z'), // 17:30 EST - 15 hours = 12:30 UTC
+        endTime: new Date('2025-09-01T13:30:00Z'), // 18:30 EST - 15 hours = 13:30 UTC
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -1901,8 +1901,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[3].id, // Tuesday 17:30 Hatha
-        startTime: new Date('2025-09-02T17:30:00Z'), // 17:30 EST - 5 hours = 17:30 UTC
-        endTime: new Date('2025-09-02T18:30:00Z'), // 18:30 EST - 5 hours = 18:30 UTC
+        startTime: new Date('2025-09-02T12:30:00Z'), // 17:30 EST - 15 hours = 12:30 UTC
+        endTime: new Date('2025-09-02T13:30:00Z'), // 18:30 EST - 15 hours = 13:30 UTC
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -1913,8 +1913,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[4].id, // Tuesday 18:45 Vinyasa
-        startTime: new Date('2025-09-02T18:45:00Z'), // 18:45 EST - 5 hours = 18:45 UTC
-        endTime: new Date('2025-09-02T19:45:00Z'), // 19:45 EST - 5 hours = 19:45 UTC
+        startTime: new Date('2025-09-02T13:45:00Z'), // 18:45 EST - 15 hours = 13:45 UTC
+        endTime: new Date('2025-09-02T14:45:00Z'), // 19:45 EST - 15 hours = 14:45 UTC
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -1926,8 +1926,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[5].id, // Wednesday 08:15 Hatha
-        startTime: new Date('2025-09-03T08:15:00Z'), // 08:15 EST - 5 hours = 08:15 UTC
-        endTime: new Date('2025-09-03T09:15:00Z'), // 09:15 EST - 5 hours = 09:15 UTC
+        startTime: new Date('2025-09-03T03:15:00Z'), // 08:15 EST - 15 hours = 03:15 UTC (previous day)
+        endTime: new Date('2025-09-03T04:15:00Z'), // 09:15 EST - 15 hours = 04:15 UTC (previous day)
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -1938,8 +1938,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[6].id, // Wednesday 09:30 Vinyasa
-        startTime: new Date('2025-09-03T09:30:00Z'), // 09:30 EST - 5 hours = 09:30 UTC
-        endTime: new Date('2025-09-03T10:30:00Z'), // 10:30 EST - 5 hours = 10:30 UTC
+        startTime: new Date('2025-09-03T04:30:00Z'), // 09:30 EST - 15 hours = 04:30 UTC (previous day)
+        endTime: new Date('2025-09-03T05:30:00Z'), // 10:30 EST - 15 hours = 05:30 UTC (previous day)
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -1950,8 +1950,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[7].id, // Wednesday 17:30 Hatha
-        startTime: new Date('2025-09-03T17:30:00Z'), // 17:30 EST - 5 hours = 17:30 UTC
-        endTime: new Date('2025-09-03T18:30:00Z'), // 18:30 EST - 5 hours = 18:30 UTC
+        startTime: new Date('2025-09-03T12:30:00Z'), // 17:30 EST - 15 hours = 12:30 UTC
+        endTime: new Date('2025-09-03T13:30:00Z'), // 18:30 EST - 15 hours = 13:30 UTC
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -1975,8 +1975,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[9].id, // Thursday 18:45 Vinyasa
-        startTime: new Date('2025-09-04T18:45:00Z'), // 18:45 EST - 5 hours = 18:45 UTC
-        endTime: new Date('2025-09-04T19:45:00Z'), // 19:45 EST - 5 hours = 19:45 UTC
+        startTime: new Date('2025-09-04T13:45:00Z'), // 18:45 EST - 15 hours = 13:45 UTC
+        endTime: new Date('2025-09-04T14:45:00Z'), // 19:45 EST - 15 hours = 14:45 UTC
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -1988,8 +1988,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[10].id, // Friday 08:15 Hatha
-        startTime: new Date('2025-09-05T08:15:00Z'), // 08:15 EST - 5 hours = 08:15 UTC
-        endTime: new Date('2025-09-05T09:15:00Z'), // 09:15 EST - 5 hours = 09:15 UTC
+        startTime: new Date('2025-09-05T03:15:00Z'), // 08:15 EST - 15 hours = 03:15 UTC (previous day)
+        endTime: new Date('2025-09-05T04:15:00Z'), // 09:15 EST - 15 hours = 04:15 UTC (previous day)
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -2000,8 +2000,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[11].id, // Friday 09:30 Vinyasa
-        startTime: new Date('2025-09-05T09:30:00Z'), // 09:30 EST - 5 hours = 09:30 UTC
-        endTime: new Date('2025-09-05T10:30:00Z'), // 10:30 EST - 5 hours = 10:30 UTC
+        startTime: new Date('2025-09-05T04:30:00Z'), // 09:30 EST - 15 hours = 04:30 UTC (previous day)
+        endTime: new Date('2025-09-05T05:30:00Z'), // 10:30 EST - 15 hours = 05:30 UTC (previous day)
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -2012,8 +2012,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[12].id, // Friday 17:30 Hatha
-        startTime: new Date('2025-09-05T17:30:00Z'), // 17:30 EST - 5 hours = 17:30 UTC
-        endTime: new Date('2025-09-05T18:30:00Z'), // 18:30 EST - 5 hours = 18:30 UTC
+        startTime: new Date('2025-09-05T12:30:00Z'), // 17:30 EST - 15 hours = 12:30 UTC
+        endTime: new Date('2025-09-05T13:30:00Z'), // 18:30 EST - 15 hours = 13:30 UTC
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -2025,8 +2025,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[13].id, // Saturday 08:30 Hatha
-        startTime: new Date('2025-09-06T08:30:00Z'), // 08:30 EST - 5 hours = 08:30 UTC
-        endTime: new Date('2025-09-06T09:30:00Z'), // 09:30 EST - 5 hours = 09:30 UTC
+        startTime: new Date('2025-09-06T03:30:00Z'), // 08:30 EST - 15 hours = 03:30 UTC (previous day)
+        endTime: new Date('2025-09-06T04:30:00Z'), // 09:30 EST - 15 hours = 04:30 UTC (previous day)
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -2037,8 +2037,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[14].id, // Saturday 09:45 Vinyasa
-        startTime: new Date('2025-09-06T09:45:00Z'), // 09:45 EST - 5 hours = 09:45 UTC
-        endTime: new Date('2025-09-06T10:45:00Z'), // 10:45 EST - 5 hours = 10:45 UTC
+        startTime: new Date('2025-09-06T04:45:00Z'), // 09:45 EST - 15 hours = 04:45 UTC (previous day)
+        endTime: new Date('2025-09-06T05:45:00Z'), // 10:45 EST - 15 hours = 05:45 UTC (previous day)
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -2118,8 +2118,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[5].id, // Wednesday 08:15 Hatha
-        startTime: new Date('2025-09-17T13:15:00Z'), // 08:15 EST = 13:15 UTC
-        endTime: new Date('2025-09-17T14:15:00Z'), // 09:15 EST = 14:15 UTC
+        startTime: new Date('2025-09-17T03:15:00Z'), // 08:15 EST - 15 hours = 03:15 UTC (previous day)
+        endTime: new Date('2025-09-17T04:15:00Z'), // 09:15 EST - 15 hours = 04:15 UTC (previous day)
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -2130,8 +2130,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[6].id, // Wednesday 09:30 Vinyasa
-        startTime: new Date('2025-09-17T14:30:00Z'), // 09:30 EST = 14:30 UTC
-        endTime: new Date('2025-09-17T15:30:00Z'), // 10:30 EST = 15:30 UTC
+        startTime: new Date('2025-09-17T04:30:00Z'), // 09:30 EST - 15 hours = 04:30 UTC (previous day)
+        endTime: new Date('2025-09-17T05:30:00Z'), // 10:30 EST - 15 hours = 05:30 UTC (previous day)
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15
@@ -2142,8 +2142,8 @@ async function main() {
       update: {},
       create: {
         teacherScheduleId: teacherSchedules[7].id, // Wednesday 17:30 Hatha
-        startTime: new Date('2025-09-17T22:30:00Z'), // 17:30 EST = 22:30 UTC
-        endTime: new Date('2025-09-17T23:30:00Z'), // 18:30 EST = 23:30 UTC
+        startTime: new Date('2025-09-17T12:30:00Z'), // 17:30 EST - 15 hours = 12:30 UTC
+        endTime: new Date('2025-09-17T13:30:00Z'), // 18:30 EST - 15 hours = 13:30 UTC
         isAvailable: true,
         bookedCount: 0,
         maxBookings: 15

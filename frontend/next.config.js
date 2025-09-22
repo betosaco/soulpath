@@ -23,6 +23,10 @@ const nextConfig = {
     // Enable experimental features if needed
     optimizeCss: false, // Disable CSS optimization to prevent purging issues
   },
+  // Enable CSS generation but prevent differences
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
   // Note: swcMinify is deprecated in Next.js 15+, minification is handled by webpack config
   // Disable CSS optimization completely
   webpack: (config, { dev, isServer }) => {
@@ -32,11 +36,13 @@ const nextConfig = {
       '@': path.resolve(__dirname),
     };
 
-    // Disable CSS optimization
+    // Configure CSS handling to prevent differences between localhost and production
     if (!isServer) {
       config.optimization = {
         ...config.optimization,
-        minimize: false, // Disable minification
+        minimize: false, // Disable minification to prevent differences
+        usedExports: false, // Disable tree shaking
+        sideEffects: false, // Disable side effects detection
         splitChunks: {
           ...config.optimization.splitChunks,
           chunks: 'all',
@@ -55,6 +61,12 @@ const nextConfig = {
               priority: -10,
               chunks: 'all',
             },
+            styles: {
+              name: 'styles',
+              test: /\.(css|scss|sass)$/,
+              chunks: 'all',
+              enforce: true,
+            },
           },
         },
       };
@@ -64,14 +76,17 @@ const nextConfig = {
         ...config.performance,
         hints: false, // Disable performance hints that can cause preload warnings
       };
+      
+      // Disable CSS optimization plugins that cause differences
+      config.plugins = config.plugins.filter(plugin => {
+        return !plugin.constructor.name.includes('CssMinimizer') && 
+               !plugin.constructor.name.includes('OptimizeCssAssets');
+      });
     }
 
     return config;
   },
   // Optimize bundle and prevent preload warnings
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
-  },
   // Disable webpack bundle analyzer warnings
   generateBuildId: async () => {
     return 'build-' + Date.now();

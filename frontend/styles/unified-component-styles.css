@@ -89,21 +89,22 @@
 
 /* Legacy button classes for backward compatibility */
 .btn-primary {
+  background-color: var(--unified-primary);
+  color: var(--unified-primary-contrast);
+  border: none;
+  border-radius: var(--unified-radius-md);
+  padding: var(--unified-spacing-md) var(--unified-spacing-lg);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all var(--unified-transition-normal);
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--unified-spacing-sm);
-  padding: var(--unified-spacing-md) var(--unified-spacing-lg);
-  border: none;
-  border-radius: var(--unified-radius-md);
-  font-weight: 500;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all var(--unified-transition-normal);
-  background-color: var(--unified-primary);
-  color: var(--unified-primary-contrast);
-  box-shadow: var(--unified-shadow-sm);
   text-decoration: none;
+  height: 48px;
+  width: 180px;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -129,20 +130,22 @@
 }
 
 .btn-secondary {
+  background-color: var(--unified-bg-primary);
+  color: var(--unified-text-primary);
+  border: 1px solid var(--unified-border-medium);
+  border-radius: var(--unified-radius-md);
+  padding: var(--unified-spacing-md) var(--unified-spacing-lg);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all var(--unified-transition-normal);
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--unified-spacing-sm);
-  padding: var(--unified-spacing-md) var(--unified-spacing-lg);
-  border: 1px solid var(--unified-border-medium);
-  border-radius: var(--unified-radius-md);
-  font-weight: 500;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all var(--unified-transition-normal);
-  background-color: var(--unified-bg-surface);
-  color: var(--unified-text-primary);
   text-decoration: none;
+  height: 48px;
+  width: 180px;
 }
 
 .btn-secondary:hover:not(:disabled) {

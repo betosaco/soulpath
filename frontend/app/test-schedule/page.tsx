@@ -20,7 +20,7 @@ export default function TestSchedulePage() {
         setLoading(true);
         setError(null);
         
-        const response = await fetch('/api/teacher-schedule-slots?available=true&startDate=2025-09-15&endDate=2025-09-21');
+        const response = await fetch('/api/teacher-schedule-slots?available=true&startDate=2025-09-22&endDate=2025-09-28');
         console.log('📊 Response status:', response.status);
         
         const data = await response.json();

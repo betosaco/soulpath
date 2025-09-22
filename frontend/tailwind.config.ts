@@ -8,6 +8,7 @@ const config: Config = {
     './app/**/*.{js,ts,jsx,tsx,mdx}',
     './lib/**/*.{js,ts,jsx,tsx,mdx}',
     './hooks/**/*.{js,ts,jsx,tsx,mdx}',
+    './styles/**/*.css',
   ],
   safelist: [
     // Ensure important classes are not purged
@@ -190,8 +191,35 @@ const config: Config = {
     'section-content',
     'nav-dot-active',
     'fixed-element-backdrop',
+    // Unified component classes
+    'unified-button',
+    'unified-button--primary',
+    'unified-button--secondary',
+    'unified-button--outline',
+    'unified-form-input',
+    'unified-form-select',
+    'unified-form-textarea',
+    'unified-badge',
+    'unified-badge--primary',
+    'unified-tab',
+    'unified-tab--active',
+    'unified-menu-item',
+    'unified-menu-item--active',
+    'unified-filter-select',
+    'unified-search-input',
+    // Schedule management classes
+    'unified-schedule-management',
+    'unified-schedule-management__tab',
+    'unified-schedule-management__filter-select',
+    'unified-schedule-management__search-input',
+    'unified-schedule-management__add-button',
+    'unified-schedule-management__form-input',
+    'unified-schedule-management__form-textarea',
+    'unified-schedule-management__form-submit',
     // Add any other custom classes that might be purged
   ],
+  // Disable purging in production to prevent class removal
+  purge: false,
   theme: {
     extend: {
       colors: {

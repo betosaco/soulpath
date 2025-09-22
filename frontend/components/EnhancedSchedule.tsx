@@ -71,18 +71,21 @@ interface EnhancedScheduleProps {
   }>;
   maxBookingsPerSlot?: number; // Maximum number of times a slot can be booked
   reloadTrigger?: number; // Triggers a reload when this value changes
+  showFilters?: boolean; // Whether to show the header and filters
 }
 
-export function EnhancedSchedule({ 
-  onBookSlot, 
+export function EnhancedSchedule({
+  onBookSlot,
   className = '',
   startDate,
   endDate,
   onSlotsChange,
   existingBookings = [],
   maxBookingsPerSlot = 1,
-  reloadTrigger
+  reloadTrigger,
+  showFilters = true
 }: EnhancedScheduleProps) {
+  console.log('🔍 EnhancedSchedule render - startDate:', startDate, 'endDate:', endDate);
   // Handle slot booking - redirect to account booking page
   const handleBookSlot = (slot: ScheduleSlot) => {
     try {
@@ -436,57 +439,59 @@ export function EnhancedSchedule({
 
   return (
     <div className={`enhanced-schedule ${className}`}>
-      {/* Header */}
-      <div className="enhanced-schedule__header">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Class Schedule</h2>
-            <p className="text-gray-600">Book your favorite classes with our expert instructors</p>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                // Check if there are products in cart that require address
-                const cart = localStorage.getItem('cart');
-                if (cart) {
-                  try {
-                    const cartItems = JSON.parse(cart);
-                    const hasProducts = cartItems.some((item: any) => item.type === 'product');
-                    const hasPackages = cartItems.some((item: any) => item.type === 'package');
-                    
-                    if (hasPackages) {
-                      // If packages are in cart, go to step 2 (personal information)
-                      // The system will automatically determine if address is needed based on products
-                      window.location.href = '/checkout?step=2';
-                    } else if (hasProducts) {
-                      // If only products (no packages), go to step 2 (personal information)
-                      // The system will automatically determine if address is needed
-                      window.location.href = '/checkout?step=2';
+      {showFilters && (
+        <>
+          {/* Header */}
+          <div className="enhanced-schedule__header">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">Class Schedule</h2>
+                <p className="text-gray-600">Book your favorite classes with our expert instructors</p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    // Check if there are products in cart that require address
+                    const cart = localStorage.getItem('cart');
+                    if (cart) {
+                      try {
+                        const cartItems = JSON.parse(cart);
+                        const hasProducts = cartItems.some((item: any) => item.type === 'product');
+                        const hasPackages = cartItems.some((item: any) => item.type === 'package');
+
+                        if (hasPackages) {
+                          // If packages are in cart, go to step 2 (personal information)
+                          // The system will automatically determine if address is needed based on products
+                          window.location.href = '/checkout?step=2';
+                        } else if (hasProducts) {
+                          // If only products (no packages), go to step 2 (personal information)
+                          // The system will automatically determine if address is needed
+                          window.location.href = '/checkout?step=2';
+                        } else {
+                          // No items, go to default checkout
+                          window.location.href = '/checkout';
+                        }
+                      } catch (error) {
+                        console.error('Error parsing cart:', error);
+                        // Fallback to default checkout
+                        window.location.href = '/checkout';
+                      }
                     } else {
-                      // No items, go to default checkout
+                      // No cart items, go to default checkout
                       window.location.href = '/checkout';
                     }
-                  } catch (error) {
-                    console.error('Error parsing cart:', error);
-                    // Fallback to default checkout
-                    window.location.href = '/checkout';
-                  }
-                } else {
-                  // No cart items, go to default checkout
-                  window.location.href = '/checkout';
-                }
-              }}
-              className="px-6 py-3 text-lg font-medium rounded-lg transition-all duration-200 bg-[#6ea058] text-white hover:bg-[#5a8a47] hover:scale-105 active:scale-95"
-            >
-              Proceed to Checkout
-            </button>
-          </div>
-        </div>
+                  }}
+                  className="px-6 py-3 text-lg font-medium rounded-lg transition-all duration-200 bg-[#6ea058] text-white hover:bg-[#5a8a47] hover:scale-105 active:scale-95"
+                >
+                  Proceed to Checkout
+                </button>
+              </div>
+            </div>
 
-        {/* Filters */}
-        <div className="enhanced-schedule__filters">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            {/* Filters */}
+            <div className="enhanced-schedule__filters">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             {/* Search */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -543,6 +548,8 @@ export function EnhancedSchedule({
           </div>
         </div>
       </div>
+      </>
+      )}
 
       {/* Schedule Content */}
       <div className="enhanced-schedule__content">

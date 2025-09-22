@@ -235,8 +235,40 @@ export async function POST(request: NextRequest) {
 
         } else if (item.type === 'package') {
           // Handle package order item
-          const packagePriceId = parseInt(item.id);
-          
+          console.log('Processing package item:', {
+            id: item.id,
+            name: item.name,
+            type: item.type,
+            idType: typeof item.id
+          });
+
+          let packagePriceId = parseInt(item.id);
+
+          // If parsing fails, try to find the package by name or other criteria
+          if (isNaN(packagePriceId) || packagePriceId <= 0) {
+            console.log('Failed to parse packagePriceId, attempting to find package by name...');
+
+            // Try to find the package price by package name and price
+            const packagePrice = await tx.packagePrice.findFirst({
+              where: {
+                packageDefinition: {
+                  name: item.name
+                },
+                price: item.price,
+                isActive: true
+              }
+            });
+
+            if (!packagePrice) {
+              throw new Error(`Could not find package "${item.name}" with price ${item.price}. Original ID: ${item.id}`);
+            }
+
+            packagePriceId = packagePrice.id;
+            console.log('Found packagePriceId by name lookup:', packagePriceId);
+          }
+
+          console.log('Using packagePriceId:', packagePriceId);
+
           const orderItem = await tx.orderItem.create({
             data: {
               orderId: order.id,

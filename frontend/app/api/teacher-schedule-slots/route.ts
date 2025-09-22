@@ -63,6 +63,10 @@ export async function GET(request: NextRequest) {
       dateStart = startOfWeek;
       dateEnd = new Date(startOfWeek);
       dateEnd.setDate(startOfWeek.getDate() + 7); // Show one week
+      
+      // Set timezone to UTC to match database
+      dateStart.setUTCHours(0, 0, 0, 0);
+      dateEnd.setUTCHours(23, 59, 59, 999);
     }
 
     whereClause.startTime = {
@@ -78,6 +82,8 @@ export async function GET(request: NextRequest) {
       startTime: dateStart.toISOString(),
       endTime: dateEnd.toISOString()
     });
+    
+    console.log('🔍 Where clause:', JSON.stringify(whereClause, null, 2));
 
     // Fetch schedule slots from database
     const slots = await prisma.teacherScheduleSlot.findMany({
@@ -123,22 +129,24 @@ export async function GET(request: NextRequest) {
       ]
     });
 
-    // Transform the data to match the expected format - times are already stored in EST
+    // Transform the data to match the expected format - display EST times (UTC-5)
     const transformedSlots = slots.map(slot => {
-      // Times are already stored in EST format, no conversion needed
+      // Convert UTC time to EST (subtract 5 hours since EST is UTC-5)
       const startTime = new Date(slot.startTime);
-      
+      const estTime = new Date(startTime.getTime() - (5 * 60 * 60 * 1000)); // Subtract 5 hours for EST
+
       // Format date as YYYY-MM-DD
-      const date = startTime.toISOString().split('T')[0];
-      
-      // Format time as HH:MM in 24-hour format - times are already in correct timezone
-      const hours = startTime.getHours().toString().padStart(2, '0');
-      const minutes = startTime.getMinutes().toString().padStart(2, '0');
+      const date = estTime.toISOString().split('T')[0];
+
+      // Format time as HH:MM in 24-hour format
+      const hours = estTime.getUTCHours().toString().padStart(2, '0');
+      const minutes = estTime.getUTCMinutes().toString().padStart(2, '0');
       const time = `${hours}:${minutes}`;
-      
-      // Get the actual day of week from the date
-      const actualDayOfWeek = startTime.toLocaleDateString('en-US', { 
-        weekday: 'long'
+
+      // Get the actual day of week from EST date
+      const actualDayOfWeek = estTime.toLocaleDateString('en-US', {
+        weekday: 'long',
+        timeZone: 'UTC'
       });
       
       return {

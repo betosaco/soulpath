@@ -799,6 +799,8 @@ model CommunicationConfig {
   labsmobile_username String?   @default("") @map("labsmobile_username")
   labsmobile_token    String?   @default("") @map("labsmobile_token")
   sms_sender_name     String?   @default("SoulPath") @map("sms_sender_name")
+  order_confirmation_template_id Int? @default(1) @map("order_confirmation_template_id")
+  booking_confirmation_template_id Int? @default(2) @map("booking_confirmation_template_id")
 
   @@map("communication_config")
 }

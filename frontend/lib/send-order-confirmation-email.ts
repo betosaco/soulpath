@@ -1,6 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { createEmailService } from '@/lib/brevo-email-service';
 
 interface OrderEmailData {
   customerName: string;
@@ -61,13 +59,11 @@ interface OrderEmailData {
 
 export async function sendOrderConfirmationEmail(orderData: OrderEmailData): Promise<boolean> {
   try {
-    // Get email configuration from database
-    const config = await prisma.communicationConfig.findFirst({
-      where: { id: 1 }
-    });
+    // Get email configuration using the same method as createEmailService
+    const emailService = await createEmailService();
 
-    if (!config?.brevo_api_key || !config.email_enabled) {
-      console.error('Email configuration not found or disabled');
+    if (!emailService) {
+      console.error('Email service not available - Brevo configuration not found');
       return false;
     }
 
@@ -101,7 +97,7 @@ export async function sendOrderConfirmationEmail(orderData: OrderEmailData): Pro
       </tr>
     `).join('');
 
-    // Create HTML email content
+    // Generate HTML content for the email
     const htmlContent = `
 <!DOCTYPE html>
 <html>
@@ -132,12 +128,12 @@ export async function sendOrderConfirmationEmail(orderData: OrderEmailData): Pro
             <h1>🧘‍♀️ MatMax Yoga Studio</h1>
             <h2>¡Pedido Confirmado!</h2>
         </div>
-        
+
         <div class="content">
             <p>Hola <strong>${orderData.customerName}</strong>,</p>
-            
+
             <p>¡Gracias por tu pedido! Hemos recibido tu solicitud y la estamos procesando.</p>
-            
+
             <div class="order-info">
                 <h3>📋 Detalles del Pedido</h3>
                 <p><strong>Número de Pedido:</strong> ${orderData.orderNumber}</p>
@@ -226,10 +222,11 @@ export async function sendOrderConfirmationEmail(orderData: OrderEmailData): Pro
 
             <p>Si tienes alguna pregunta sobre tu pedido, no dudes en contactarnos.</p>
         </div>
-        
+
         <div class="footer">
             <p><strong>MatMax Yoga Studio</strong></p>
-            <p>📧 info@matmax.store | 📞 +51 999 999 999</p>
+            <p>📍 Calle Alcanfores 425, Miraflores - Lima, PE</p>
+            <p>📧 info@matmax.store | 📱 WhatsApp: +51 916 172 368</p>
         </div>
     </div>
 </body>
@@ -308,50 +305,30 @@ Ver detalles del pedido: ${orderData.order_url}
 Si tienes alguna pregunta sobre tu pedido, no dudes en contactarnos.
 
 MatMax Yoga Studio
-📧 info@matmax.store | 📞 +51 999 999 999
+📍 Calle Alcanfores 425, Miraflores - Lima, PE
+📧 info@matmax.store | 📱 WhatsApp: +51 916 172 368
     `;
 
-    // Send email via Brevo API
-    const emailPayload = {
-      sender: {
-        name: config.sender_name || 'MatMax Yoga Studio',
-        email: config.sender_email || 'noreply@matmax.store'
-      },
-      to: [
-        {
-          email: orderData.customerEmail,
-          name: orderData.customerName
-        }
-      ],
+    // Send email using Brevo service with BCC to info@matmax.store
+    const emailResult = await emailService.sendEmailWithBCC({
+      to: orderData.customerEmail,
+      bcc: 'info@matmax.store',
       subject: '¡Gracias por tu pedido! - MatMax Yoga Studio',
-      htmlContent: htmlContent,
-      textContent: textContent
-    };
-
-    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'api-key': config.brevo_api_key
-      },
-      body: JSON.stringify(emailPayload)
+      html: htmlContent,
+      text: textContent
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Brevo API error:', errorData);
+    if (!emailResult) {
+      console.error('Failed to send order confirmation email');
       return false;
     }
 
-    const result = await response.json();
-    console.log('Order confirmation email sent successfully:', result.messageId);
+    console.log('Order confirmation email sent successfully');
+    console.log('Email sent to:', orderData.customerEmail, 'with BCC to: info@matmax.store');
     return true;
 
   } catch (error) {
     console.error('Failed to send order confirmation email:', error);
     return false;
-  } finally {
-    await prisma.$disconnect();
   }
 }

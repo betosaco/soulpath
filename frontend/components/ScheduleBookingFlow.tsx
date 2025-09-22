@@ -1376,7 +1376,7 @@ export function ScheduleBookingFlow({
                 )}
               </div>
               
-              <EnhancedSchedule 
+              <EnhancedSchedule
                 onBookSlot={handleScheduleSelect}
                 showBookingButton={false}
                 className="max-w-full"
@@ -1386,6 +1386,7 @@ export function ScheduleBookingFlow({
                 existingBookings={existingBookings}
                 maxBookingsPerSlot={maxBookingsPerSlot}
                 reloadTrigger={reloadTrigger}
+                showFilters={false}
               />
               
               {/* Continue to Checkout button when adding more bookings */}
