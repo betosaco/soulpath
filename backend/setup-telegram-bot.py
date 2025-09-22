@@ -12,7 +12,7 @@ import json
 from typing import Dict, Any, Optional
 
 # Telegram Bot Configuration
-BOT_TOKEN = "8381849581:AAG7bQxK23l5m2MeKJDnMIpGEzy0SeEYSig"
+BOT_TOKEN = "8361218732:AAHWcGk9kMZNNNtJvzZjUelSl5WftCXQoBU"
 BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
 class TelegramBotSetup:

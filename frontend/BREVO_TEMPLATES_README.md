@@ -69,6 +69,7 @@ The email system has been updated to use Brevo's template system instead of hard
 **Available Variables:**
 - `customerName` - Customer's full name
 - `customerEmail` - Customer's email address
+- `customerPhone` - Customer's phone number
 - `bookingId` - Booking ID
 - `bookingDate` - Booking date
 - `bookingTime` - Booking time
@@ -265,6 +266,15 @@ WHERE id = 1;
             <p>Hola <strong>{{params.customerName}}</strong>,</p>
 
             <p>¡Tu reserva ha sido confirmada exitosamente! Te esperamos en MatMax Yoga Studio.</p>
+
+            <div class="booking-info">
+                <h3>👤 Información del Cliente</h3>
+                <p><strong>Nombre:</strong> {{params.customerName}}</p>
+                <p><strong>Email:</strong> {{params.customerEmail}}</p>
+                {{#if params.customerPhone}}
+                <p><strong>Teléfono:</strong> {{params.customerPhone}}</p>
+                {{/if}}
+            </div>
 
             <div class="booking-info">
                 <h3>📅 Detalles de tu Clase</h3>

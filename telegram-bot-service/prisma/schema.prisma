@@ -1,0 +1,1425 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Amenity {
+  id           Int            @id @default(autoincrement())
+  name         String         @unique @db.VarChar(100)
+  description  String?
+  icon         String?        @db.VarChar(50)
+  category     String?        @db.VarChar(50)
+  isActive     Boolean        @default(true) @map("is_active")
+  displayOrder Int?           @default(0) @map("display_order")
+  createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  venues       VenueAmenity[]
+
+  @@index([isActive], map: "idx_amenities_active")
+  @@index([category], map: "idx_amenities_category")
+  @@map("amenities")
+}
+
+model Specialty {
+  id            Int                @id @default(autoincrement())
+  name          String             @unique @db.VarChar(100)
+  description   String?
+  category      String?            @db.VarChar(50)
+  serviceTypeId Int?               @map("service_type_id")
+  isActive      Boolean            @default(true) @map("is_active")
+  displayOrder  Int?               @default(0) @map("display_order")
+  createdAt     DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  serviceType   ServiceType?       @relation(fields: [serviceTypeId], references: [id], onUpdate: Restrict)
+  teachers      TeacherSpecialty[]
+
+  @@index([isActive], map: "idx_specialties_active")
+  @@index([category], map: "idx_specialties_category")
+  @@index([serviceTypeId], map: "idx_specialties_service_type")
+  @@map("specialties")
+}
+
+model Language {
+  id           Int               @id @default(autoincrement())
+  name         String            @db.VarChar(100)
+  code         String            @unique @db.VarChar(10)
+  nativeName   String?           @map("native_name") @db.VarChar(100)
+  isActive     Boolean           @default(true) @map("is_active")
+  displayOrder Int?              @default(0) @map("display_order")
+  createdAt    DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  teachers     TeacherLanguage[]
+
+  @@index([isActive], map: "idx_languages_active")
+  @@index([code], map: "idx_languages_code")
+  @@map("languages")
+}
+
+model Testimonial {
+  id            Int          @id @default(autoincrement())
+  text          String
+  authorName    String       @map("author_name") @db.VarChar(100)
+  authorTitle   String?      @map("author_title") @db.VarChar(100)
+  authorImage   String?      @map("author_image") @db.VarChar(500)
+  rating        Int?         @db.SmallInt
+  isVerified    Boolean      @default(false) @map("is_verified")
+  isActive      Boolean      @default(true) @map("is_active")
+  displayOrder  Int?         @default(0) @map("display_order")
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  serviceTypeId Int?         @map("service_type_id")
+  teacherId     Int?         @map("teacher_id")
+  serviceType   ServiceType? @relation(fields: [serviceTypeId], references: [id], onDelete: Cascade)
+  teacher       Teacher?     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@index([isActive], map: "idx_testimonials_active")
+  @@index([serviceTypeId], map: "idx_testimonials_service_type")
+  @@index([teacherId], map: "idx_testimonials_teacher")
+  @@index([rating], map: "idx_testimonials_rating")
+  @@map("testimonials")
+}
+
+model FAQ {
+  id            Int          @id @default(autoincrement())
+  question      String       @db.VarChar(500)
+  answer        String
+  category      String?      @db.VarChar(100)
+  isActive      Boolean      @default(true) @map("is_active")
+  displayOrder  Int?         @default(0) @map("display_order")
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  serviceTypeId Int?         @map("service_type_id")
+  teacherId     Int?         @map("teacher_id")
+  serviceType   ServiceType? @relation(fields: [serviceTypeId], references: [id], onDelete: Cascade)
+  teacher       Teacher?     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@index([isActive], map: "idx_faqs_active")
+  @@index([serviceTypeId], map: "idx_faqs_service_type")
+  @@index([teacherId], map: "idx_faqs_teacher")
+  @@index([category], map: "idx_faqs_category")
+  @@map("faqs")
+}
+
+model ServicePrice {
+  id                  Int                @id @default(autoincrement())
+  price               Decimal            @db.Decimal(10, 2)
+  currency            String             @default("USD") @db.VarChar(3)
+  pricingType         String             @map("pricing_type") @db.VarChar(50)
+  isActive            Boolean            @default(true) @map("is_active")
+  validFrom           DateTime?          @map("valid_from") @db.Timestamptz(6)
+  validTo             DateTime?          @map("valid_to") @db.Timestamptz(6)
+  createdAt           DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  serviceTypeId       Int                @map("service_type_id")
+  venueId             Int?               @map("venue_id")
+  teacherId           Int?               @map("teacher_id")
+  packageDefinitionId Int?               @map("package_definition_id")
+  packageDefinition   PackageDefinition? @relation(fields: [packageDefinitionId], references: [id], onDelete: Cascade)
+  serviceType         ServiceType        @relation(fields: [serviceTypeId], references: [id], onDelete: Cascade)
+  teacher             Teacher?           @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  venue               Venue?             @relation(fields: [venueId], references: [id], onDelete: Cascade)
+
+  @@index([serviceTypeId], map: "idx_service_prices_service_type")
+  @@index([venueId], map: "idx_service_prices_venue")
+  @@index([teacherId], map: "idx_service_prices_teacher")
+  @@index([isActive], map: "idx_service_prices_active")
+  @@index([pricingType], map: "idx_service_prices_pricing_type")
+  @@map("service_prices")
+}
+
+model User {
+  id               String            @id @default(cuid())
+  email            String            @unique
+  password         String?
+  fullName         String?           @map("full_name")
+  avatarUrl        String?           @map("avatar_url")
+  role             UserRole          @default(USER)
+  phone            String?
+  status           UserStatus        @default(ACTIVE)
+  birthDate        DateTime?         @map("birth_date") @db.Date
+  birthTime        DateTime?         @map("birth_time") @db.Time(6)
+  birthPlace       String?           @map("birth_place")
+  question         String?
+  language         String?           @default("en")
+  adminNotes       String?           @map("admin_notes")
+  scheduledDate    DateTime?         @map("scheduled_date") @db.Date
+  scheduledTime    DateTime?         @map("scheduled_time") @db.Time(6)
+  sessionType      String?           @map("session_type")
+  lastReminderSent DateTime?         @map("last_reminder_sent") @db.Timestamptz(6)
+  lastBooking      DateTime?         @map("last_booking") @db.Timestamptz(6)
+  notes            String?
+  createdAt        DateTime?         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime?         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  bookings         Booking[]
+  bugComments      BugComment[]      @relation("BugCommentAuthor")
+  assignedBugs     BugReport[]       @relation("BugReportAssignee")
+  reportedBugs     BugReport[]       @relation("BugReportReporter")
+  conversationLogs ConversationLog[]
+  customerProfile  Customer?         @relation("CustomerProfile")
+  orders           Order[]           @relation("CustomerOrders")
+  otpVerifications OtpVerification[]
+  purchases        Purchase[]
+  userPackages     UserPackage[]
+
+  @@index([email], map: "idx_users_email")
+  @@index([status], map: "idx_users_status")
+  @@index([createdAt], map: "idx_users_created_at")
+  @@index([role], map: "idx_users_role")
+  @@index([phone], map: "idx_users_phone")
+  @@index([language], map: "idx_users_language")
+  @@map("users")
+}
+
+model Venue {
+  id                Int                @id @default(autoincrement())
+  name              String             @db.VarChar(255)
+  description       String?
+  address           String?
+  city              String?            @db.VarChar(100)
+  country           String?            @db.VarChar(100)
+  capacity          Int                @default(10)
+  maxGroupSize      Int?               @map("max_group_size")
+  isActive          Boolean?           @default(true) @map("is_active")
+  displayOrder      Int?               @default(0) @map("display_order")
+  featured          Boolean?           @default(false) @map("featured")
+  createdAt         DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime?          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  bookings          Booking[]
+  scheduleTemplates ScheduleTemplate[]
+  servicePrices     ServicePrice[]
+  teacherSchedules  TeacherSchedule[]
+  teachers          Teacher[]
+  amenities         VenueAmenity[]
+
+  @@index([isActive], map: "idx_venues_active")
+  @@index([displayOrder], map: "idx_venues_order")
+  @@index([featured], map: "idx_venues_featured")
+  @@map("venues")
+}
+
+model VenueAmenity {
+  id        Int      @id @default(autoincrement())
+  venueId   Int      @map("venue_id")
+  amenityId Int      @map("amenity_id")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  amenity   Amenity  @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+  venue     Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade)
+
+  @@unique([venueId, amenityId])
+  @@index([venueId], map: "idx_venue_amenities_venue")
+  @@index([amenityId], map: "idx_venue_amenities_amenity")
+  @@map("venue_amenities")
+}
+
+model Teacher {
+  id               Int                    @id @default(autoincrement())
+  name             String                 @db.VarChar(255)
+  email            String?                @unique @db.VarChar(255)
+  phone            String?                @db.VarChar(20)
+  bio              String?
+  shortBio         String?                @map("short_bio") @db.VarChar(500)
+  experience       Int?                   @default(0)
+  avatarUrl        String?                @map("avatar_url")
+  coverImage       String?                @map("cover_image")
+  galleryImages    String[]               @default([]) @map("gallery_images")
+  videoUrl         String?                @map("video_url")
+  thumbnailUrl     String?                @map("thumbnail_url")
+  website          String?                @db.VarChar(255)
+  instagram        String?                @db.VarChar(255)
+  facebook         String?                @db.VarChar(255)
+  linkedin         String?                @db.VarChar(255)
+  teachingStyle    String?                @map("teaching_style")
+  philosophy       String?
+  approach         String?
+  maxStudents      Int?                   @default(10) @map("max_students")
+  minStudents      Int?                   @default(1) @map("min_students")
+  preferredTimes   String[]               @default([]) @map("preferred_times")
+  isActive         Boolean?               @default(true) @map("is_active")
+  displayOrder     Int?                   @default(0) @map("display_order")
+  featured         Boolean?               @default(false) @map("featured")
+  slug             String?                @unique @db.VarChar(255)
+  metaTitle        String?                @map("meta_title") @db.VarChar(255)
+  metaDescription  String?                @map("meta_description") @db.VarChar(500)
+  createdAt        DateTime?              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime?              @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  venueId          Int?                   @map("venue_id")
+  bookings         Booking[]
+  faqs             FAQ[]
+  servicePrices    ServicePrice[]
+  certifications   TeacherCertification[]
+  languages        TeacherLanguage[]
+  teacherSchedules TeacherSchedule[]
+  serviceTypes     TeacherServiceType[]
+  specialties      TeacherSpecialty[]
+  venue            Venue?                 @relation(fields: [venueId], references: [id], onUpdate: Restrict)
+  testimonials     Testimonial[]
+
+  @@index([isActive], map: "idx_teachers_active")
+  @@index([displayOrder], map: "idx_teachers_order")
+  @@index([featured], map: "idx_teachers_featured")
+  @@index([venueId], map: "idx_teachers_venue")
+  @@index([slug], map: "idx_teachers_slug")
+  @@map("teachers")
+}
+
+model TeacherSpecialty {
+  id                Int          @id @default(autoincrement())
+  teacherId         Int          @map("teacher_id")
+  specialtyId       Int          @map("specialty_id")
+  serviceTypeId     Int?         @map("service_type_id")
+  level             String?      @db.VarChar(50)
+  yearsExperience   Int?         @map("years_experience")
+  certification     String?      @db.VarChar(255)
+  certificationDate DateTime?    @map("certification_date") @db.Date
+  notes             String?
+  isVerified        Boolean?     @default(false) @map("is_verified")
+  createdAt         DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  serviceType       ServiceType? @relation(fields: [serviceTypeId], references: [id], onUpdate: Restrict)
+  specialty         Specialty    @relation(fields: [specialtyId], references: [id], onDelete: Cascade)
+  teacher           Teacher      @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, specialtyId, serviceTypeId])
+  @@index([teacherId], map: "idx_teacher_specialties_teacher")
+  @@index([specialtyId], map: "idx_teacher_specialties_specialty")
+  @@index([serviceTypeId], map: "idx_teacher_specialties_service_type")
+  @@map("teacher_specialties")
+}
+
+model TeacherServiceType {
+  id            Int         @id @default(autoincrement())
+  teacherId     Int         @map("teacher_id")
+  serviceTypeId Int         @map("service_type_id")
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  serviceType   ServiceType @relation(fields: [serviceTypeId], references: [id], onDelete: Cascade)
+  teacher       Teacher     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, serviceTypeId])
+  @@index([teacherId], map: "idx_teacher_service_types_teacher")
+  @@index([serviceTypeId], map: "idx_teacher_service_types_service_type")
+  @@map("teacher_service_types")
+}
+
+model TeacherLanguage {
+  id         Int      @id @default(autoincrement())
+  teacherId  Int      @map("teacher_id")
+  languageId Int      @map("language_id")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  language   Language @relation(fields: [languageId], references: [id], onDelete: Cascade)
+  teacher    Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, languageId])
+  @@index([teacherId], map: "idx_teacher_languages_teacher")
+  @@index([languageId], map: "idx_teacher_languages_language")
+  @@map("teacher_languages")
+}
+
+model TeacherCertification {
+  id                  Int       @id @default(autoincrement())
+  teacherId           Int       @map("teacher_id")
+  name                String    @db.VarChar(255)
+  issuingOrganization String    @map("issuing_organization") @db.VarChar(255)
+  issueDate           DateTime? @map("issue_date") @db.Date
+  expiryDate          DateTime? @map("expiry_date") @db.Date
+  credentialId        String?   @map("credential_id") @db.VarChar(100)
+  credentialUrl       String?   @map("credential_url") @db.VarChar(500)
+  description         String?
+  isVerified          Boolean?  @default(false) @map("is_verified")
+  displayOrder        Int?      @default(0) @map("display_order")
+  createdAt           DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  teacher             Teacher   @relation(fields: [teacherId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@index([teacherId], map: "idx_teacher_certifications_teacher")
+  @@index([isVerified], map: "idx_teacher_certifications_verified")
+  @@index([displayOrder], map: "idx_teacher_certifications_order")
+  @@map("teacher_certifications")
+}
+
+model ServiceType {
+  id                 Int                  @id @default(autoincrement())
+  name               String               @db.VarChar(100)
+  description        String?
+  shortDescription   String?              @map("short_description") @db.VarChar(255)
+  category           ServiceCategory
+  duration           Int?                 @default(60)
+  maxParticipants    Int?                 @map("max_participants")
+  minParticipants    Int?                 @default(1) @map("min_participants")
+  requirements       String[]             @default([])
+  benefits           String[]             @default([])
+  difficulty         ServiceDifficulty?
+  price              Decimal?             @db.Decimal(10, 2)
+  currencyId         Int?                 @map("currency_id")
+  isActive           Boolean?             @default(true) @map("is_active")
+  displayOrder       Int?                 @default(0) @map("display_order")
+  featured           Boolean?             @default(false) @map("featured")
+  color              String?              @db.VarChar(7)
+  icon               String?              @db.VarChar(50)
+  coverImage         String?              @map("cover_image")
+  galleryImages      String[]             @default([]) @map("gallery_images")
+  videoUrl           String?              @map("video_url")
+  thumbnailUrl       String?              @map("thumbnail_url")
+  content            String?
+  highlights         String[]             @default([])
+  metaTitle          String?              @map("meta_title") @db.VarChar(255)
+  metaDescription    String?              @map("meta_description") @db.VarChar(500)
+  slug               String?              @unique @db.VarChar(255)
+  createdAt          DateTime?            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime?            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  bookings           Booking[]
+  faqs               FAQ[]
+  packageServices    PackageService[]
+  servicePrices      ServicePrice[]
+  currency           Currency?            @relation("ServiceTypeCurrency", fields: [currencyId], references: [id], onUpdate: Restrict)
+  specialties        Specialty[]
+  teacherSchedules   TeacherSchedule[]
+  teachers           TeacherServiceType[]
+  teacherSpecialties TeacherSpecialty[]
+  testimonials       Testimonial[]
+
+  @@index([category], map: "idx_service_types_category")
+  @@index([isActive], map: "idx_service_types_active")
+  @@index([displayOrder], map: "idx_service_types_order")
+  @@index([featured], map: "idx_service_types_featured")
+  @@index([difficulty], map: "idx_service_types_difficulty")
+  @@index([currencyId], map: "idx_service_types_currency")
+  @@index([slug], map: "idx_service_types_slug")
+  @@map("service_types")
+}
+
+model PackageService {
+  id                  Int               @id @default(autoincrement())
+  packageDefinitionId Int               @map("package_definition_id")
+  serviceTypeId       Int               @map("service_type_id")
+  sessionsIncluded    Int?              @default(1) @map("sessions_included")
+  isActive            Boolean?          @default(true) @map("is_active")
+  createdAt           DateTime?         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime?         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  packageDefinition   PackageDefinition @relation(fields: [packageDefinitionId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  serviceType         ServiceType       @relation(fields: [serviceTypeId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@unique([packageDefinitionId, serviceTypeId])
+  @@index([packageDefinitionId], map: "idx_package_services_package")
+  @@index([serviceTypeId], map: "idx_package_services_service")
+  @@map("package_services")
+}
+
+model TeacherSchedule {
+  id                   Int                   @id @default(autoincrement())
+  teacherId            Int                   @map("teacher_id")
+  venueId              Int                   @map("venue_id")
+  serviceTypeId        Int?                  @map("service_type_id")
+  dayOfWeek            String                @map("day_of_week") @db.VarChar(20)
+  startTime            DateTime              @map("start_time") @db.Time(6)
+  endTime              DateTime              @map("end_time") @db.Time(6)
+  isAvailable          Boolean?              @default(true) @map("is_available")
+  maxBookings          Int?                  @default(1) @map("max_bookings")
+  createdAt            DateTime?             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime?             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  teacherScheduleSlots TeacherScheduleSlot[]
+  serviceType          ServiceType?          @relation(fields: [serviceTypeId], references: [id], onUpdate: Restrict)
+  teacher              Teacher               @relation(fields: [teacherId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  venue                Venue                 @relation(fields: [venueId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@index([teacherId], map: "idx_teacher_schedules_teacher")
+  @@index([venueId], map: "idx_teacher_schedules_venue")
+  @@index([serviceTypeId], map: "idx_teacher_schedules_service_type")
+  @@index([dayOfWeek], map: "idx_teacher_schedules_day")
+  @@index([isAvailable], map: "idx_teacher_schedules_available")
+  @@map("teacher_schedules")
+}
+
+model TeacherScheduleSlot {
+  id                Int             @id @default(autoincrement())
+  teacherScheduleId Int             @map("teacher_schedule_id")
+  startTime         DateTime        @map("start_time") @db.Timestamptz(6)
+  endTime           DateTime        @map("end_time") @db.Timestamptz(6)
+  isAvailable       Boolean?        @default(true) @map("is_available")
+  bookedCount       Int?            @default(0) @map("booked_count")
+  maxBookings       Int?            @default(1) @map("max_bookings")
+  createdAt         DateTime?       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime?       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  bookings          Booking[]
+  teacherSchedule   TeacherSchedule @relation(fields: [teacherScheduleId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@index([startTime], map: "idx_teacher_schedule_slots_start_time")
+  @@index([isAvailable, startTime], map: "idx_teacher_schedule_slots_available_start_time")
+  @@index([endTime], map: "idx_teacher_schedule_slots_end_time")
+  @@index([isAvailable], map: "idx_teacher_schedule_slots_available")
+  @@index([bookedCount], map: "idx_teacher_schedule_slots_booked_count")
+  @@map("teacher_schedule_slots")
+}
+
+model PackageDefinition {
+  id                Int              @id @default(autoincrement())
+  name              String           @db.VarChar(255)
+  description       String?
+  sessionsCount     Int              @map("sessions_count")
+  sessionDurationId Int              @map("session_duration_id")
+  packageType       String           @map("package_type") @db.VarChar(20)
+  maxGroupSize      Int?             @map("max_group_size")
+  isActive          Boolean?         @default(true) @map("is_active")
+  isPopular         Boolean?         @default(false) @map("is_popular")
+  displayOrder      Int?             @default(0) @map("display_order")
+  featured          Boolean?         @default(false) @map("featured")
+  isGlobal          Boolean?         @default(true) @map("is_global")
+  createdAt         DateTime?        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime?        @default(now()) @map("updated_at") @db.Timestamptz(6)
+  sessionDuration   SessionDuration  @relation("PackageDefinitionSessionDuration", fields: [sessionDurationId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  packagePrices     PackagePrice[]
+  packageServices   PackageService[]
+  servicePrices     ServicePrice[]
+
+  @@index([isActive], map: "idx_package_definitions_active")
+  @@index([isPopular], map: "idx_package_definitions_popular")
+  @@index([displayOrder], map: "idx_package_definitions_order")
+  @@index([featured], map: "idx_package_definitions_featured")
+  @@index([isGlobal], map: "idx_package_definitions_global")
+  @@map("package_definitions")
+}
+
+model PackagePrice {
+  id                  Int               @id @default(autoincrement())
+  packageDefinitionId Int               @map("package_definition_id")
+  currencyId          Int               @map("currency_id")
+  price               Decimal           @db.Decimal(10, 2)
+  pricingMode         String            @map("pricing_mode") @db.VarChar(20)
+  isActive            Boolean?          @default(true) @map("is_active")
+  createdAt           DateTime?         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime?         @default(now()) @map("updated_at") @db.Timestamptz(6)
+  orderItems          OrderItem[]
+  currency            Currency          @relation("PackagePriceCurrency", fields: [currencyId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  packageDefinition   PackageDefinition @relation(fields: [packageDefinitionId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  userPackages        UserPackage[]
+
+  @@unique([packageDefinitionId, currencyId])
+  @@index([currencyId], map: "idx_package_prices_currency")
+  @@map("package_prices")
+}
+
+model ScheduleTemplate {
+  id                Int              @id @default(autoincrement())
+  venueId           Int?             @map("venue_id")
+  dayOfWeek         String           @map("day_of_week") @db.VarChar(20)
+  startTime         String           @map("start_time") @db.VarChar(10)
+  endTime           String           @map("end_time") @db.VarChar(10)
+  capacity          Int?             @default(3)
+  isAvailable       Boolean?         @default(true) @map("is_available")
+  sessionDurationId Int?             @map("session_duration_id")
+  autoAvailable     Boolean?         @default(true) @map("auto_available")
+  createdAt         DateTime?        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime?        @default(now()) @map("updated_at") @db.Timestamptz(6)
+  scheduleSlots     ScheduleSlot[]
+  sessionDuration   SessionDuration? @relation("ScheduleTemplateSessionDuration", fields: [sessionDurationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  venue             Venue?           @relation(fields: [venueId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@index([venueId], map: "idx_schedule_templates_venue")
+  @@index([dayOfWeek], map: "idx_schedule_templates_day")
+  @@map("schedule_templates")
+}
+
+model ScheduleSlot {
+  id                 Int              @id @default(autoincrement())
+  scheduleTemplateId Int              @map("schedule_template_id")
+  startTime          DateTime         @map("start_time") @db.Timestamptz(6)
+  endTime            DateTime         @map("end_time") @db.Timestamptz(6)
+  capacity           Int?             @default(3)
+  bookedCount        Int?             @default(0) @map("booked_count")
+  isAvailable        Boolean?         @default(true) @map("is_available")
+  createdAt          DateTime?        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime?        @default(now()) @map("updated_at") @db.Timestamptz(6)
+  bookings           Booking[]
+  scheduleTemplate   ScheduleTemplate @relation(fields: [scheduleTemplateId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@index([startTime], map: "idx_schedule_slots_start_time")
+  @@index([isAvailable, startTime], map: "idx_schedule_slots_available_start_time")
+  @@index([endTime], map: "idx_schedule_slots_end_time")
+  @@index([isAvailable], map: "idx_schedule_slots_available")
+  @@index([bookedCount], map: "idx_schedule_slots_booked_count")
+  @@map("schedule_slots")
+}
+
+model UserPackage {
+  id             Int          @id @default(autoincrement())
+  userId         String       @map("user_id")
+  orderItemId    String       @map("order_item_id")
+  packagePriceId Int          @map("package_price_id")
+  purchaseId     Int?         @map("purchase_id")
+  quantity       Int?         @default(1)
+  sessionsUsed   Int?         @default(0) @map("sessions_used")
+  isActive       Boolean?     @default(true) @map("is_active")
+  expiresAt      DateTime?    @map("expires_at") @db.Timestamptz(6)
+  createdAt      DateTime?    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime?    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  bookings       Booking[]
+  orderItem      OrderItem    @relation(fields: [orderItemId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  packagePrice   PackagePrice @relation(fields: [packagePriceId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  purchase       Purchase?    @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@index([userId], map: "idx_user_packages_user_id")
+  @@index([orderItemId], map: "idx_user_packages_order_item_id")
+  @@index([purchaseId], map: "idx_user_packages_purchase_id")
+  @@index([isActive], map: "idx_user_packages_active")
+  @@index([userId, isActive], map: "idx_user_packages_user_active")
+  @@index([expiresAt], map: "idx_user_packages_expires")
+  @@map("user_packages")
+}
+
+model Booking {
+  id                    Int                  @id @default(autoincrement())
+  userId                String               @map("user_id")
+  userPackageId         Int                  @map("user_package_id")
+  scheduleSlotId        Int?                 @map("schedule_slot_id")
+  teacherScheduleSlotId Int?                 @map("teacher_schedule_slot_id")
+  venueId               Int?                 @map("venue_id")
+  teacherId             Int?                 @map("teacher_id")
+  serviceTypeId         Int?                 @map("service_type_id")
+  sessionType           String               @map("session_type")
+  status                String?              @default("confirmed")
+  notes                 String?
+  cancelledAt           DateTime?            @map("cancelled_at") @db.Timestamptz(6)
+  cancelledReason       String?              @map("cancelled_reason")
+  reminderSent          Boolean?             @default(false) @map("reminder_sent")
+  reminderSentAt        DateTime?            @map("reminder_sent_at") @db.Timestamptz(6)
+  createdAt             DateTime?            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime?            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  scheduleSlot          ScheduleSlot?        @relation(fields: [scheduleSlotId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  serviceType           ServiceType?         @relation(fields: [serviceTypeId], references: [id], onUpdate: Restrict)
+  teacher               Teacher?             @relation(fields: [teacherId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  teacherScheduleSlot   TeacherScheduleSlot? @relation(fields: [teacherScheduleSlotId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  user                  User                 @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  userPackage           UserPackage          @relation(fields: [userPackageId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  venue                 Venue?               @relation(fields: [venueId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@index([userId], map: "idx_bookings_user_id")
+  @@index([userPackageId], map: "idx_bookings_user_package_id")
+  @@index([scheduleSlotId], map: "idx_bookings_schedule_slot_id")
+  @@index([teacherScheduleSlotId], map: "idx_bookings_teacher_schedule_slot_id")
+  @@index([venueId], map: "idx_bookings_venue_id")
+  @@index([teacherId], map: "idx_bookings_teacher_id")
+  @@index([serviceTypeId], map: "idx_bookings_service_type_id")
+  @@index([status], map: "idx_bookings_status")
+  @@index([createdAt], map: "idx_bookings_created_at")
+  @@index([userId, status], map: "idx_bookings_user_status")
+  @@index([userId, createdAt], map: "idx_bookings_user_created")
+  @@index([venueId, teacherId], map: "idx_bookings_venue_teacher")
+  @@index([teacherId, serviceTypeId], map: "idx_bookings_teacher_service")
+  @@map("bookings")
+}
+
+model Currency {
+  id             Int               @id @default(autoincrement())
+  code           String            @unique @db.VarChar(3)
+  name           String            @db.VarChar(50)
+  symbol         String            @db.VarChar(5)
+  is_default     Boolean?          @default(false)
+  exchange_rate  Decimal?          @default(1.000000) @db.Decimal(10, 6)
+  createdAt      DateTime?         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime?         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  packagePrices  PackagePrice[]    @relation("PackagePriceCurrency")
+  paymentMethods payment_methods[]
+  rates          Rate[]
+  serviceTypes   ServiceType[]     @relation("ServiceTypeCurrency")
+
+  @@map("currencies")
+}
+
+model SessionDuration {
+  id                 Int                 @id @default(autoincrement())
+  name               String              @db.VarChar(100)
+  duration_minutes   Int
+  description        String?
+  isActive           Boolean?            @default(true) @map("is_active")
+  createdAt          DateTime?           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime?           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  packageDefinitions PackageDefinition[] @relation("PackageDefinitionSessionDuration")
+  rates              Rate[]
+  scheduleTemplates  ScheduleTemplate[]  @relation("ScheduleTemplateSessionDuration")
+
+  @@map("session_durations")
+}
+
+model Rate {
+  id                     Int             @id @default(autoincrement())
+  currencyId             Int             @map("currency_id")
+  sessionDurationId      Int             @map("session_duration_id")
+  sessionType            String          @map("session_type") @db.VarChar(50)
+  base_price             Decimal         @db.Decimal(10, 2)
+  group_discount_percent Decimal?        @default(0) @db.Decimal(5, 2)
+  min_group_size         Int?            @default(1)
+  max_group_size         Int?            @default(10)
+  isActive               Boolean?        @default(true) @map("is_active")
+  createdAt              DateTime?       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt              DateTime?       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  currency               Currency        @relation(fields: [currencyId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  sessionDuration        SessionDuration @relation(fields: [sessionDurationId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@unique([currencyId, sessionDurationId, sessionType])
+  @@map("rates")
+}
+
+model PaymentMethodConfig {
+  id                   Int       @id @default(autoincrement())
+  name                 String    @db.VarChar(100)
+  type                 String?   @default("custom") @db.VarChar(50)
+  description          String?
+  icon                 String?   @db.VarChar(100)
+  requiresConfirmation Boolean?  @default(false) @map("requires_confirmation")
+  autoAssignPackage    Boolean?  @default(true) @map("auto_assign_package")
+  isActive             Boolean?  @default(true) @map("is_active")
+  createdAt            DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  providerConfig       Json?     @map("provider_config")
+
+  @@index([isActive], map: "idx_payment_method_configs_active")
+  @@index([name], map: "idx_payment_method_configs_name")
+  @@index([type], map: "idx_payment_method_configs_type")
+  @@map("payment_method_configs")
+}
+
+model EmailTemplate {
+  id          Int       @id @default(autoincrement())
+  templateKey String    @unique @map("template_key")
+  subject     String
+  body        String
+  language    String?   @default("en")
+  createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([templateKey], map: "idx_email_templates_key")
+  @@map("email_templates")
+}
+
+model LogoSettings {
+  id        Int       @id @default(autoincrement())
+  type      String?   @default("text")
+  text      String?   @default("SOULPATH")
+  imageUrl  String?   @map("image_url")
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("logo_settings")
+}
+
+model Seo {
+  id          Int       @id @default(autoincrement())
+  title       String?   @default("SOULPATH - Wellness & Healing")
+  description String?   @default("Your journey to wellness starts here. Professional wellness services in a peaceful environment.")
+  keywords    String?   @default("wellness, healing, therapy, meditation, soulpath")
+  ogImage     String?   @map("og_image")
+  createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("seo")
+}
+
+model Image {
+  id        Int       @id @default(autoincrement())
+  name      String
+  url       String
+  altText   String?   @map("alt_text")
+  category  String?   @default("general")
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("images")
+}
+
+model ProfileImage {
+  id        Int       @id @default(autoincrement())
+  key       String    @unique
+  url       String
+  altText   String?   @map("alt_text")
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("profile_images")
+}
+
+model Content {
+  id                Int       @id @default(autoincrement())
+  heroTitleEn       String?   @default("Welcome to SOULPATH") @map("hero_title_en")
+  heroTitleEs       String?   @default("Bienvenido a SOULPATH") @map("hero_title_es")
+  heroSubtitleEn    String?   @default("Your journey to wellness starts here") @map("hero_subtitle_en")
+  heroSubtitleEs    String?   @default("Tu camino al bienestar comienza aquí") @map("hero_subtitle_es")
+  aboutTitleEn      String?   @default("About Us") @map("about_title_en")
+  aboutTitleEs      String?   @default("Sobre Nosotros") @map("about_title_es")
+  aboutContentEn    String?   @default("We are dedicated to helping you achieve your wellness goals.") @map("about_content_en")
+  aboutContentEs    String?   @default("Estamos dedicados a ayudarte a alcanzar tus metas de bienestar.") @map("about_content_es")
+  approachTitleEn   String?   @default("Our Approach") @map("approach_title_en")
+  approachTitleEs   String?   @default("Nuestro Enfoque") @map("approach_title_es")
+  approachContentEn String?   @default("We use a holistic approach to wellness.") @map("approach_content_en")
+  approachContentEs String?   @default("Usamos un enfoque holístico para el bienestar.") @map("approach_content_es")
+  servicesTitleEn   String?   @default("Our Services") @map("services_title_en")
+  servicesTitleEs   String?   @default("Nuestros Servicios") @map("services_title_es")
+  servicesContentEn String?   @default("Professional wellness services in a peaceful environment.") @map("services_content_en")
+  servicesContentEs String?   @default("Servicios profesionales de bienestar en un ambiente pacífico.") @map("services_content_es")
+  createdAt         DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("content")
+}
+
+model Section {
+  id            Int       @id @default(autoincrement())
+  sectionId     String    @unique @map("section_id")
+  type          String    @default("content") @db.VarChar(50)
+  title         String    @db.VarChar(255)
+  description   String?
+  icon          String    @default("Circle") @db.VarChar(50)
+  component     String    @db.VarChar(100)
+  order         Int       @default(0)
+  enabled       Boolean   @default(true)
+  mobileConfig  Json?     @map("mobile_config")
+  desktopConfig Json?     @map("desktop_config")
+  createdAt     DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime? @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([enabled, order], map: "idx_sections_enabled_order")
+  @@map("sections")
+}
+
+model CommunicationConfig {
+  id                  Int       @id @default(autoincrement())
+  createdAt           DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  email_enabled       Boolean?  @default(true) @map("email_enabled")
+  brevo_api_key       String?   @default("") @map("brevo_api_key")
+  sender_email        String?   @default("noreply@soulpath.lat") @map("sender_email")
+  sender_name         String?   @default("SOULPATH") @map("sender_name")
+  admin_email         String?   @default("admin@soulpath.lat") @map("admin_email")
+  sms_enabled         Boolean?  @default(false) @map("sms_enabled")
+  sms_provider        String?   @default("labsmobile") @map("sms_provider")
+  labsmobile_username String?   @default("") @map("labsmobile_username")
+  labsmobile_token    String?   @default("") @map("labsmobile_token")
+  sms_sender_name     String?   @default("SoulPath") @map("sms_sender_name")
+  order_confirmation_template_id Int? @default(1) @map("order_confirmation_template_id")
+  booking_confirmation_template_id Int? @default(2) @map("booking_confirmation_template_id")
+
+  @@map("communication_config")
+}
+
+model CommunicationTemplate {
+  id           Int                                @id @default(autoincrement())
+  templateKey  String                             @unique @map("template_key")
+  name         String
+  description  String?
+  type         String
+  category     String?
+  isActive     Boolean                            @default(true) @map("is_active")
+  isDefault    Boolean                            @default(false) @map("is_default")
+  createdAt    DateTime?                          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime?                          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  translations CommunicationTemplateTranslation[]
+
+  @@index([type], map: "idx_communication_templates_type")
+  @@index([category], map: "idx_communication_templates_category")
+  @@index([isActive], map: "idx_communication_templates_active")
+  @@map("communication_templates")
+}
+
+model CommunicationTemplateTranslation {
+  id         Int                   @id @default(autoincrement())
+  templateId Int                   @map("template_id")
+  language   String
+  subject    String?
+  content    String
+  createdAt  DateTime?             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime?             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  template   CommunicationTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@unique([templateId, language], map: "idx_template_translations_unique")
+  @@index([language], map: "idx_template_translations_language")
+  @@map("communication_template_translations")
+}
+
+model BugReport {
+  id          String          @id @default(dbgenerated("(gen_random_uuid())::text"))
+  title       String          @db.VarChar(255)
+  description String
+  screenshot  String?
+  annotations Json?
+  status      bug_status?     @default(OPEN)
+  priority    priority_level? @default(MEDIUM)
+  category    String?         @db.VarChar(100)
+  reporterId  String?         @map("reporter_id")
+  assignedTo  String?         @map("assigned_to")
+  createdAt   DateTime?       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime?       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  resolvedAt  DateTime?       @map("resolved_at") @db.Timestamptz(6)
+  archivedAt  DateTime?       @map("archived_at") @db.Timestamptz(6)
+  comments    BugComment[]
+  assignee    User?           @relation("BugReportAssignee", fields: [assignedTo], references: [id], onUpdate: Restrict)
+  reporter    User?           @relation("BugReportReporter", fields: [reporterId], references: [id], onUpdate: Restrict)
+
+  @@index([status], map: "idx_bug_reports_status")
+  @@index([priority], map: "idx_bug_reports_priority")
+  @@index([reporterId], map: "idx_bug_reports_reporter")
+  @@index([assignedTo], map: "idx_bug_reports_assignee")
+  @@index([createdAt], map: "idx_bug_reports_created")
+  @@map("bug_reports")
+}
+
+model BugComment {
+  id          String    @id @default(dbgenerated("(gen_random_uuid())::text"))
+  content     String
+  authorId    String    @map("author_id")
+  bugReportId String    @map("bug_report_id")
+  createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  author      User      @relation("BugCommentAuthor", fields: [authorId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  bugReport   BugReport @relation(fields: [bugReportId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@index([bugReportId], map: "idx_bug_comments_bug_report")
+  @@index([authorId], map: "idx_bug_comments_author")
+  @@map("bug_comments")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model group_booking_tiers {
+  id               Int       @id @default(autoincrement())
+  name             String    @db.VarChar(100)
+  min_participants Int
+  max_participants Int
+  discount_percent Decimal?  @default(0) @db.Decimal(5, 2)
+  description      String?
+  is_active        Boolean?  @default(true)
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime? @default(now()) @db.Timestamptz(6)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model kv_store_f839855f {
+  key   String @id
+  value Json
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model MatMax {
+  id         BigInt    @id @default(autoincrement())
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model payment_methods {
+  id          Int       @id @default(autoincrement())
+  name        String    @db.VarChar(100)
+  description String?
+  currency_id Int
+  is_active   Boolean?  @default(true)
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime? @default(now()) @db.Timestamptz(6)
+  currencies  Currency  @relation(fields: [currency_id], references: [id], onDelete: Cascade, onUpdate: Restrict)
+}
+
+model SmsConfiguration {
+  id         Int      @id @default(autoincrement())
+  provider   String   @default("labsmobile")
+  username   String
+  tokenApi   String   @map("token_api")
+  senderName String?  @map("sender_name")
+  isActive   Boolean  @default(true) @map("is_active")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("sms_configurations")
+}
+
+model OtpVerification {
+  id          Int      @id @default(autoincrement())
+  userId      String?  @map("user_id")
+  phoneNumber String   @map("phone_number")
+  countryCode String   @map("country_code")
+  otpCode     String   @map("otp_code")
+  isVerified  Boolean  @default(false) @map("is_verified")
+  expiresAt   DateTime @map("expires_at") @db.Timestamptz(6)
+  attempts    Int      @default(0)
+  maxAttempts Int      @default(3) @map("max_attempts")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@index([phoneNumber], map: "idx_otp_verifications_phone")
+  @@index([userId], map: "idx_otp_verifications_user")
+  @@index([expiresAt], map: "idx_otp_verifications_expires")
+  @@map("otp_verifications")
+}
+
+model ExternalAPIConfig {
+  id             String    @id @default(cuid())
+  name           String    @unique
+  provider       String
+  category       String
+  apiKey         String?   @map("api_key")
+  apiSecret      String?   @map("api_secret")
+  apiUrl         String?   @map("api_url")
+  webhookUrl     String?   @map("webhook_url")
+  webhookSecret  String?   @map("webhook_secret")
+  config         Json?
+  isActive       Boolean   @default(false) @map("is_active")
+  testMode       Boolean   @default(true) @map("test_mode")
+  description    String?
+  version        String?
+  rateLimit      Int?      @map("rate_limit")
+  timeout        Int?      @default(30000)
+  lastTestedAt   DateTime? @map("last_tested_at") @db.Timestamptz(6)
+  lastTestResult String?   @map("last_test_result")
+  healthStatus   String?   @default("unknown") @map("health_status")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdBy      String?   @map("created_by")
+  updatedBy      String?   @map("updated_by")
+
+  @@index([name], map: "idx_external_api_configs_name")
+  @@index([category], map: "idx_external_api_configs_category")
+  @@index([isActive], map: "idx_external_api_configs_active")
+  @@map("external_api_configs")
+}
+
+model APIConfigAudit {
+  id          String   @id @default(cuid())
+  configId    String   @map("config_id")
+  action      String
+  oldValues   Json?    @map("old_values")
+  newValues   Json?    @map("new_values")
+  performedBy String   @map("performed_by")
+  ipAddress   String?  @map("ip_address")
+  userAgent   String?  @map("user_agent")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([configId], map: "idx_api_config_audit_config_id")
+  @@index([performedBy], map: "idx_api_config_audit_performed_by")
+  @@index([createdAt], map: "idx_api_config_audit_created_at")
+  @@map("api_config_audits")
+}
+
+model ConversationLog {
+  id                  Int            @id @default(autoincrement())
+  sessionId           String         @map("session_id")
+  userId              String?        @map("user_id")
+  userMessage         String         @map("user_message")
+  botResponse         String?        @map("bot_response")
+  timestamp           DateTime       @default(now()) @map("timestamp") @db.Timestamptz(6)
+  rasaIntent          String?        @map("rasa_intent")
+  rasaConfidence      Decimal?       @map("rasa_confidence") @db.Decimal(5, 4)
+  rasaEntities        Json?          @map("rasa_entities")
+  responseGenerator   String         @map("response_generator")
+  bookingStep         String?        @map("booking_step")
+  bookingDataSnapshot Json?          @map("booking_data_snapshot")
+  modelVersion        String?        @map("model_version")
+  user                User?          @relation(fields: [userId], references: [id])
+  feedback            UserFeedback[]
+
+  @@index([sessionId], map: "idx_conversation_logs_session_id")
+  @@index([rasaIntent], map: "idx_conversation_logs_rasa_intent")
+  @@index([timestamp], map: "idx_conversation_logs_timestamp")
+  @@map("conversation_logs")
+}
+
+model UserFeedback {
+  id                  Int             @id @default(autoincrement())
+  conversationLogId   Int             @map("conversation_log_id")
+  sessionId           String          @map("session_id")
+  rating              Int
+  comment             String?
+  createdAt           DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  reviewedForTraining Boolean         @default(false) @map("reviewed_for_training")
+  conversationLog     ConversationLog @relation(fields: [conversationLogId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId], map: "idx_user_feedback_session_id")
+  @@index([rating], map: "idx_user_feedback_rating")
+  @@map("user_feedback")
+}
+
+model MlModelPerformance {
+  id                   Int       @id @default(autoincrement())
+  modelVersion         String    @unique @map("model_version")
+  evaluationResults    Json?     @map("evaluation_results")
+  bookingSuccessRate   Decimal?  @map("booking_success_rate") @db.Decimal(5, 4)
+  avgConversationTurns Decimal?  @map("avg_conversation_turns") @db.Decimal(5, 2)
+  deploymentDate       DateTime? @map("deployment_date") @db.Timestamptz(6)
+  isActiveProduction   Boolean   @default(false) @map("is_active_production")
+  isActiveAbTest       Boolean   @default(false) @map("is_active_ab_test")
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([modelVersion], map: "idx_ml_model_performance_model_version")
+  @@map("ml_model_performance")
+}
+
+model AbTestExperiment {
+  id                  Int                @id @default(autoincrement())
+  experimentName      String             @map("experiment_name")
+  modelAVersion       String             @map("model_a_version")
+  modelBVersion       String             @map("model_b_version")
+  trafficSplit        Decimal            @default(0.50) @map("traffic_split") @db.Decimal(3, 2)
+  startDate           DateTime           @default(now()) @map("start_date") @db.Timestamptz(6)
+  endDate             DateTime?          @map("end_date") @db.Timestamptz(6)
+  status              String             @default("active")
+  successMetric       String             @map("success_metric")
+  winningModelVersion String?            @map("winning_model_version")
+  finalResults        Json?              @map("final_results")
+  assignments         AbTestAssignment[]
+
+  @@index([status], map: "idx_ab_test_experiments_status")
+  @@map("ab_test_experiments")
+}
+
+model AbTestAssignment {
+  id            Int              @id @default(autoincrement())
+  experimentId  Int              @map("experiment_id")
+  sessionId     String           @map("session_id")
+  assignedModel String           @map("assigned_model")
+  createdAt     DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  experiment    AbTestExperiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+
+  @@unique([experimentId, sessionId], map: "idx_ab_test_assignments_unique")
+  @@index([sessionId], map: "idx_ab_test_assignments_session_id")
+  @@map("ab_test_assignments")
+}
+
+model Product {
+  id               String         @id @default(cuid())
+  name             String         @db.VarChar(255)
+  description      String?
+  shortDescription String?        @map("short_description") @db.VarChar(500)
+  sku              String?        @unique @db.VarChar(100)
+  price            Decimal        @db.Decimal(10, 2)
+  comparePrice     Decimal?       @map("compare_price") @db.Decimal(10, 2)
+  costPrice        Decimal?       @map("cost_price") @db.Decimal(10, 2)
+  currency         String         @default("PEN") @db.VarChar(3)
+  stock            Int            @default(0)
+  minStock         Int?           @default(10) @map("min_stock")
+  maxStock         Int?           @map("max_stock")
+  weight           Decimal?       @db.Decimal(8, 2)
+  dimensions       String?        @db.VarChar(100)
+  category         String?        @db.VarChar(100)
+  tags             String[]       @default([])
+  images           String[]       @default([])
+  status           ProductStatus  @default(ACTIVE)
+  isDigital        Boolean        @default(false) @map("is_digital")
+  isFeatured       Boolean        @default(false) @map("is_featured")
+  isPopular        Boolean        @default(false) @map("is_popular")
+  seoTitle         String?        @map("seo_title") @db.VarChar(255)
+  seoDescription   String?        @map("seo_description") @db.VarChar(500)
+  slug             String?        @unique @db.VarChar(255)
+  createdAt        DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  inventoryLogs    InventoryLog[]
+  orderItems       OrderItem[]
+
+  @@index([status], map: "idx_products_status")
+  @@index([category], map: "idx_products_category")
+  @@index([isFeatured], map: "idx_products_featured")
+  @@index([isPopular], map: "idx_products_popular")
+  @@index([slug], map: "idx_products_slug")
+  @@index([sku], map: "idx_products_sku")
+  @@map("products")
+}
+
+model Order {
+  id                  String         @id @default(cuid())
+  orderNumber         String         @unique @map("order_number") @db.VarChar(50)
+  customerId          String?        @map("customer_id")
+  customerName        String         @map("customer_name") @db.VarChar(255)
+  customerEmail       String         @map("customer_email") @db.VarChar(255)
+  customerPhone       String?        @map("customer_phone") @db.VarChar(20)
+  billingDocumentType String?        @map("billing_document_type") @db.VarChar(20)
+  dni                 String?        @db.VarChar(20)
+  ruc                 String?        @db.VarChar(20)
+  companyName         String?        @map("company_name") @db.VarChar(255)
+  status              OrderStatus    @default(PENDING)
+  paymentStatus       PaymentStatus  @default(PENDING) @map("payment_status")
+  shippingStatus      ShippingStatus @default(PENDING) @map("shipping_status")
+  subtotal            Decimal        @db.Decimal(10, 2)
+  taxAmount           Decimal        @default(0) @map("tax_amount") @db.Decimal(10, 2)
+  shippingAmount      Decimal        @default(0) @map("shipping_amount") @db.Decimal(10, 2)
+  discountAmount      Decimal        @default(0) @map("discount_amount") @db.Decimal(10, 2)
+  total               Decimal        @db.Decimal(10, 2)
+  currency            String         @default("PEN") @db.VarChar(3)
+  notes               String?
+  shippingAddress     Json?          @map("shipping_address")
+  billingAddress      Json?          @map("billing_address")
+  paymentMethod       String?        @map("payment_method") @db.VarChar(50)
+  paymentId           String?        @map("payment_id") @db.VarChar(255)
+  trackingNumber      String?        @map("tracking_number") @db.VarChar(100)
+  shippedAt           DateTime?      @map("shipped_at") @db.Timestamptz(6)
+  deliveredAt         DateTime?      @map("delivered_at") @db.Timestamptz(6)
+  createdAt           DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  orderHistory        OrderHistory[]
+  items               OrderItem[]
+  customer            User?          @relation("CustomerOrders", fields: [customerId], references: [id])
+
+  @@index([status], map: "idx_orders_status")
+  @@index([paymentStatus], map: "idx_orders_payment_status")
+  @@index([shippingStatus], map: "idx_orders_shipping_status")
+  @@index([customerId], map: "idx_orders_customer_id")
+  @@index([createdAt], map: "idx_orders_created_at")
+  @@index([orderNumber], map: "idx_orders_order_number")
+  @@map("orders")
+}
+
+model OrderItem {
+  id              String        @id @default(cuid())
+  orderId         String        @map("order_id")
+  itemType        OrderItemType @map("item_type")
+  productId       String?       @map("product_id")
+  packagePriceId  Int?          @map("package_price_id")
+  quantity        Int
+  price           Decimal       @db.Decimal(10, 2)
+  total           Decimal       @db.Decimal(10, 2)
+  packageMetadata Json?         @map("package_metadata")
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  order           Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  packagePrice    PackagePrice? @relation(fields: [packagePriceId], references: [id])
+  product         Product?      @relation(fields: [productId], references: [id])
+  userPackages    UserPackage[]
+
+  @@index([orderId], map: "idx_order_items_order_id")
+  @@index([productId], map: "idx_order_items_product_id")
+  @@index([packagePriceId], map: "idx_order_items_package_price_id")
+  @@index([itemType], map: "idx_order_items_item_type")
+  @@map("order_items")
+}
+
+model OrderHistory {
+  id        String   @id @default(cuid())
+  orderId   String   @map("order_id")
+  status    String   @db.VarChar(50)
+  notes     String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId], map: "idx_order_history_order_id")
+  @@index([createdAt], map: "idx_order_history_created_at")
+  @@map("order_history")
+}
+
+model InventoryLog {
+  id        String        @id @default(cuid())
+  productId String        @map("product_id")
+  type      InventoryType
+  quantity  Int
+  reason    String?       @db.VarChar(255)
+  reference String?       @db.VarChar(100)
+  notes     String?
+  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  product   Product       @relation(fields: [productId], references: [id])
+
+  @@index([productId], map: "idx_inventory_logs_product_id")
+  @@index([type], map: "idx_inventory_logs_type")
+  @@index([createdAt], map: "idx_inventory_logs_created_at")
+  @@map("inventory_logs")
+}
+
+model Customer {
+  id          String         @id @default(cuid())
+  userId      String?        @unique @map("user_id")
+  email       String         @unique @db.VarChar(255)
+  firstName   String         @map("first_name") @db.VarChar(100)
+  lastName    String         @map("last_name") @db.VarChar(100)
+  phone       String?        @db.VarChar(20)
+  dateOfBirth DateTime?      @map("date_of_birth") @db.Date
+  totalOrders Int            @default(0) @map("total_orders")
+  totalSpent  Decimal        @default(0) @map("total_spent") @db.Decimal(10, 2)
+  lastOrderAt DateTime?      @map("last_order_at") @db.Timestamptz(6)
+  status      CustomerStatus @default(ACTIVE)
+  notes       String?
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user        User?          @relation("CustomerProfile", fields: [userId], references: [id])
+
+  @@index([email], map: "idx_customers_email")
+  @@index([status], map: "idx_customers_status")
+  @@index([totalSpent], map: "idx_customers_total_spent")
+  @@map("customers")
+}
+
+model Purchase {
+  id             Int             @id @default(autoincrement())
+  userId         String          @map("user_id")
+  totalAmount    Decimal         @map("total_amount") @db.Decimal(10, 2)
+  currency       String          @default("PEN") @db.VarChar(3)
+  currencyCode   String?         @map("currency_code") @db.VarChar(3)
+  paymentStatus  PaymentStatus   @map("payment_status")
+  paymentMethod  String?         @map("payment_method") @db.VarChar(50)
+  paymentId      String?         @map("payment_id") @db.VarChar(255)
+  purchasedAt    DateTime        @map("purchased_at") @db.Timestamptz(6)
+  confirmedAt    DateTime?       @map("confirmed_at") @db.Timestamptz(6)
+  notes          String?
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  paymentRecords PaymentRecord[]
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userPackages   UserPackage[]
+
+  @@index([userId], map: "idx_purchases_user_id")
+  @@index([paymentStatus], map: "idx_purchases_payment_status")
+  @@index([purchasedAt], map: "idx_purchases_purchased_at")
+  @@map("purchases")
+}
+
+model PaymentRecord {
+  id              Int            @id @default(autoincrement())
+  purchaseId      Int            @map("purchase_id")
+  userId          String?        @map("user_id")
+  amount          Decimal        @db.Decimal(10, 2)
+  currency        String         @default("PEN") @db.VarChar(3)
+  paymentMethod   String         @map("payment_method") @db.VarChar(50)
+  paymentId       String?        @map("payment_id") @db.VarChar(255)
+  status          PaymentStatus
+  paymentStatus   PaymentStatus? @map("payment_status")
+  transactionId   String?        @map("transaction_id") @db.VarChar(255)
+  gatewayResponse Json?          @map("gateway_response")
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  purchase        Purchase       @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+
+  @@index([purchaseId], map: "idx_payment_records_purchase_id")
+  @@index([status], map: "idx_payment_records_status")
+  @@index([paymentId], map: "idx_payment_records_payment_id")
+  @@map("payment_records")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+  SUSPENDED
+}
+
+enum ServiceCategory {
+  CLASS
+  WORKSHOP
+  TRAINING_PROGRAM
+  RETREAT
+  CONSULTATION
+}
+
+enum ServiceDifficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  ALL_LEVELS
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum SessionType {
+  INDIVIDUAL
+  GROUP
+  SEMI_PRIVATE
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+enum PackageType {
+  FIXED
+  FLEXIBLE
+  UNLIMITED
+}
+
+enum bug_status {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+  ARCHIVED
+}
+
+enum priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum priority_level {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+  OUT_OF_STOCK
+  DISCONTINUED
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+  REFUNDED
+}
+
+enum ShippingStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  IN_TRANSIT
+  DELIVERED
+  FAILED_DELIVERY
+  RETURNED
+}
+
+enum InventoryType {
+  IN
+  OUT
+  ADJUSTMENT
+  RETURN
+  DAMAGE
+  TRANSFER
+}
+
+enum CustomerStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+}
+
+enum OrderItemType {
+  PRODUCT
+  PACKAGE
+}

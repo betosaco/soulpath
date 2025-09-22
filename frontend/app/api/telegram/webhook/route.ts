@@ -156,6 +156,20 @@ export async function POST(request: NextRequest) {
 
       console.log(`💬 Processing message from ${userInfo?.first_name || 'Unknown'}: ${text}`);
 
+      // Register or update Telegram user
+      try {
+        await registerTelegramUser({
+          telegramChatId: chatId.toString(),
+          telegramUserId: userInfo?.id?.toString(),
+          telegramUsername: userInfo?.username,
+          telegramFirstName: userInfo?.first_name,
+          telegramLastName: userInfo?.last_name
+        });
+      } catch (registrationError) {
+        console.error('Error registering Telegram user:', registrationError);
+        // Continue with message processing even if registration fails
+      }
+
       // Crear contexto de conversación
       const conversationContext = {
         userId: chatId.toString(),
@@ -163,9 +177,17 @@ export async function POST(request: NextRequest) {
         conversationHistory: []
       };
 
+      // Check for special commands first
+      const lowerText = text.toLowerCase().trim();
+
+      // Handle registration command
+      if (lowerText === '/register' || lowerText === '/start register' || lowerText.startsWith('/link')) {
+        await handleRegistrationCommand(chatId.toString(), userInfo);
+        return NextResponse.json({ status: 'ok' });
+      }
+
       // Check if this is a package request first (before trying orchestrator)
-      const lowerText = text.toLowerCase();
-      const isPackageRequest = lowerText.includes('paquetes') || lowerText.includes('packages') || 
+      const isPackageRequest = lowerText.includes('paquetes') || lowerText.includes('packages') ||
                               lowerText.includes('lista') || lowerText.includes('list') ||
                               lowerText.includes('mostrar') || lowerText.includes('show') ||
                               lowerText.includes('ver') || lowerText.includes('see') ||
@@ -317,7 +339,7 @@ export async function POST(request: NextRequest) {
 }
 
 async function sendTelegramMessage(chatId: string, text: string): Promise<void> {
-  const botToken = process.env.TELEGRAM_BOT_TOKEN || '8381849581:AAG7bQxK23l5m2MeKJDnMIpGEzy0SeEYSig';
+  const botToken = process.env.TELEGRAM_BOT_TOKEN || '8361218732:AAHWcGk9kMZNNNtJvzZjUelSl5WftCXQoBU';
   const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
 
   try {
@@ -345,7 +367,7 @@ async function sendTelegramMessage(chatId: string, text: string): Promise<void> 
 }
 
 async function answerCallbackQuery(callbackQueryId: string): Promise<void> {
-  const botToken = process.env.TELEGRAM_BOT_TOKEN || '8381849581:AAG7bQxK23l5m2MeKJDnMIpGEzy0SeEYSig';
+  const botToken = process.env.TELEGRAM_BOT_TOKEN || '8361218732:AAHWcGk9kMZNNNtJvzZjUelSl5WftCXQoBU';
   const url = `https://api.telegram.org/bot${botToken}/answerCallbackQuery`;
 
   try {
@@ -367,5 +389,68 @@ async function answerCallbackQuery(callbackQueryId: string): Promise<void> {
     }
   } catch (error) {
     console.error('❌ Error answering callback query:', error);
+  }
+}
+
+async function registerTelegramUser(telegramData: {
+  telegramChatId: string;
+  telegramUserId?: string;
+  telegramUsername?: string;
+  telegramFirstName?: string;
+  telegramLastName?: string;
+}): Promise<void> {
+  try {
+    // First, try to find existing Telegram user by chat ID
+    const existingTelegramUserResponse = await fetch(`${getBaseUrl()}/api/telegram/register-user?telegramChatId=${telegramData.telegramChatId}`);
+    const existingTelegramUserData = await existingTelegramUserResponse.json();
+
+    if (existingTelegramUserData.success && existingTelegramUserData.telegramUser) {
+      // User already exists, update their last interaction
+      console.log('📱 Telegram user already registered, updating last interaction');
+      return; // No need to register again
+    }
+
+    // For new users, we need their system user ID. This would typically come from a login flow
+    // For now, we'll create a placeholder registration that can be linked later
+    // In a production system, users would need to authenticate first
+
+    console.log('📱 New Telegram user detected, but no system user ID available yet');
+    // You could send a message asking them to login/register first
+
+  } catch (error) {
+    console.error('❌ Error checking Telegram user registration:', error);
+  }
+}
+
+async function handleRegistrationCommand(chatId: string, userInfo: any): Promise<void> {
+  try {
+    const welcomeMessage = `
+🤖 <b>Welcome to SoulPath Telegram Bot!</b>
+
+Hello ${userInfo?.first_name || 'there'}! 👋
+
+To receive order notifications and updates via Telegram, you need to link your account:
+
+1. Log in to your SoulPath account at ${getBaseUrl().replace('/api/telegram/webhook', '')}
+2. Go to your account settings
+3. Look for "Telegram Notifications" or "Link Telegram"
+4. Follow the instructions to connect your Telegram account
+
+Once linked, you'll receive:
+✅ Order confirmations
+📦 Shipping updates
+🔔 Status notifications
+🎁 Special offers
+
+If you don't have an account yet, please register first!
+
+Questions? Reply to this message or contact support.
+    `.trim();
+
+    await sendTelegramMessage(chatId, welcomeMessage);
+    console.log(`✅ Registration welcome message sent to ${chatId}`);
+
+  } catch (error) {
+    console.error('❌ Error handling registration command:', error);
   }
 }

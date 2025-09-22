@@ -393,9 +393,19 @@ export async function POST(request: NextRequest) {
         });
 
         if (completeBooking) {
+          // Fetch complete user details including name and phone
+          const userDetails = await prisma.user.findUnique({
+            where: { id: user.id },
+            select: {
+              name: true,
+              phone: true
+            }
+          });
+
           const bookingData = {
-            customerName: 'Usuario',
+            customerName: userDetails?.name || 'Usuario',
             customerEmail: user.email,
+            customerPhone: userDetails?.phone || '',
             bookingId: completeBooking.id.toString(),
             bookingDate: completeBooking.scheduleSlot?.startTime.toLocaleDateString('es-ES', {
               weekday: 'long',

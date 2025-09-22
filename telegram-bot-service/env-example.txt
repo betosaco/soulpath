@@ -1,0 +1,23 @@
+# Telegram Bot Service Environment Variables
+
+# Telegram Bot Configuration
+# Get this token from @BotFather on Telegram
+TELEGRAM_BOT_TOKEN=8361218732:AAHWcGk9kMZNNNtJvzZjUelSl5WftCXQoBU
+
+# Database Configuration
+# PostgreSQL connection string
+DATABASE_URL=postgresql://username:password@localhost:5432/soulpath_db
+DIRECT_URL=postgresql://username:password@localhost:5432/soulpath_db
+
+# Server Configuration
+PORT=3001
+NODE_ENV=development
+
+# Optional: Logging Level
+LOG_LEVEL=info
+
+# Optional: Redis URL (if using caching)
+REDIS_URL=redis://localhost:6379
+
+# Optional: External API URLs (if needed)
+MAIN_APP_URL=https://your-main-app.vercel.app

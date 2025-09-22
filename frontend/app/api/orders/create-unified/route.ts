@@ -4,6 +4,7 @@ import { CartItem } from '@/lib/cart-context';
 import Stripe from 'stripe';
 import { sendOrderConfirmationEmail } from '@/lib/send-order-confirmation-email';
 import { sendBookingConfirmationEmail } from '@/lib/send-booking-confirmation-email';
+import { createTelegramOrderService, OrderDetails } from '@/lib/services/telegram-order-service';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-08-27.basil',
@@ -475,11 +476,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Send order confirmation email
+    // Send order confirmation email and Telegram notification
     try {
       const orderUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/order-confirmation?orderId=${result.order.id}`;
-      
-      // Format order items for email
+
+      // Format order items for email and Telegram
       const emailOrderItems = orderItemsWithRelations.map(item => {
         if (item.itemType === 'PRODUCT' && item.product) {
           return {
@@ -504,6 +505,32 @@ export async function POST(request: NextRequest) {
         }
         return null;
       }).filter(Boolean);
+
+      // Format order items for Telegram
+      const telegramOrderItems = orderItemsWithRelations.map(item => {
+        if (item.itemType === 'PRODUCT' && item.product) {
+          return {
+            name: item.product.name,
+            description: item.product.description || undefined,
+            type: 'PRODUCT' as const,
+            quantity: item.quantity,
+            price: Number(item.price),
+            total: Number(item.price) * item.quantity
+          };
+        } else if (item.itemType === 'PACKAGE' && item.packagePrice) {
+          return {
+            name: item.packagePrice.packageDefinition.name,
+            description: item.packagePrice.packageDefinition.description || undefined,
+            type: 'PACKAGE' as const,
+            quantity: item.quantity,
+            price: Number(item.price),
+            total: Number(item.price) * item.quantity,
+            sessions: item.packagePrice.packageDefinition.sessionsCount,
+            duration: item.packagePrice.packageDefinition.sessionDuration?.duration_minutes
+          };
+        }
+        return null;
+      }).filter((item): item is NonNullable<typeof item> => item !== null);
 
       // Get package booking details from the order items
       let packageBookingDetails = null;
@@ -546,6 +573,7 @@ export async function POST(request: NextRequest) {
       const emailData = {
         customerName: result.order.customerName,
         customerEmail: result.order.customerEmail,
+        customerPhone: result.order.customerPhone,
         orderNumber: result.order.orderNumber,
         orderId: result.order.id,
         orderDate: result.order.createdAt.toLocaleDateString('es-ES', {
@@ -628,6 +656,102 @@ export async function POST(request: NextRequest) {
           console.error('Error preparing booking confirmation emails:', bookingEmailError);
           // Don't fail the order creation if email preparation fails
         }
+      }
+
+      // Send Telegram order confirmation notification to business account (info@matmax.store)
+      try {
+      // Always send notifications to info@matmax.store for ALL orders
+      const businessUser = await prisma.$queryRaw`
+        SELECT id FROM users WHERE email = 'info@matmax.store' LIMIT 1
+      ` as any[];
+
+      if (businessUser.length > 0) {
+        const telegramUsers = await prisma.$queryRaw`
+          SELECT * FROM telegram_users
+          WHERE user_id = ${businessUser[0].id}
+          AND is_active = true
+          LIMIT 1
+        ` as any[];
+
+        const telegramUser = telegramUsers[0];
+
+        if (telegramUser) {
+          console.log('📱 Sending Telegram order confirmation to business account (info@matmax.store):', telegramUser.telegramChatId);
+
+          // Prepare order details for Telegram (matching email format)
+          const telegramOrderDetails: OrderDetails = {
+            orderId: result.order.id,
+            orderNumber: result.order.orderNumber,
+            customerName: result.order.customerName,
+            customerEmail: result.order.customerEmail,
+            customerPhone: result.order.customerPhone,
+            orderDate: result.order.createdAt.toLocaleDateString('es-ES', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            }),
+            orderStatus: result.order.status.toLowerCase(),
+            orderStatusText: result.order.status === 'CONFIRMED' ? 'Confirmado' : result.order.status,
+            paymentStatus: result.order.paymentStatus.toLowerCase(),
+            paymentStatusText: result.order.paymentStatus === 'COMPLETED' ? 'Completado' :
+                              result.order.paymentStatus === 'PENDING' ? 'Pendiente' : result.order.paymentStatus,
+            billingDocumentType: result.order.billingDocumentType || 'boleta_simple',
+            dni: result.order.dni || undefined,
+            ruc: result.order.ruc || undefined,
+            companyName: result.order.companyName || undefined,
+            items: emailOrderItems, // Use the same formatted items as email
+            subtotal: Number(result.order.subtotal),
+            taxAmount: Number(result.order.taxAmount),
+            shippingAmount: Number(result.order.shippingAmount),
+            total: Number(result.order.total),
+            currency: result.order.currency,
+            notes: result.order.notes || undefined,
+            shippingAddress: result.order.shippingAddress ? {
+              address: result.order.shippingAddress.address,
+              city: result.order.shippingAddress.city,
+              state: result.order.shippingAddress.state,
+              zipCode: result.order.shippingAddress.zipCode,
+              country: result.order.shippingAddress.country
+            } : undefined,
+            scheduleDetails: enhancedScheduleDetails?.map(schedule => ({
+              selectedDate: schedule.selectedDate,
+              selectedTime: schedule.selectedTime,
+              teacher: schedule.teacher,
+              serviceType: schedule.serviceType,
+              venue: schedule.venue
+            })),
+            packageBookingDetails: packageBookingDetails || undefined
+          };
+
+          // Send Telegram notification to MatMax Bot Service
+          const telegramResponse = await fetch('https://telemax-1kpe0zyxd-matmaxworlds-projects.vercel.app/api/orders/send-notification', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              orderDetails: telegramOrderDetails,
+              telegramChatId: telegramUser.telegramChatId
+            }),
+          });
+
+          if (telegramResponse.ok) {
+            console.log('✅ Telegram order confirmation sent successfully');
+          } else {
+            console.error('❌ Failed to send Telegram order confirmation to business account');
+          }
+        } else {
+          console.log('⚠️ Business account (info@matmax.store) does not have Telegram linked');
+        }
+      } else {
+        console.log('⚠️ Business account (info@matmax.store) not found');
+      }
+      } catch (telegramError) {
+        console.error('Error sending Telegram order notification:', telegramError);
+        // Don't fail the order creation if Telegram notification fails
       }
 
     } catch (emailError) {

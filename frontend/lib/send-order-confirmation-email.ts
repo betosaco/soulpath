@@ -3,6 +3,7 @@ import { createEmailService } from '@/lib/brevo-email-service';
 interface OrderEmailData {
   customerName: string;
   customerEmail: string;
+  customerPhone?: string;
   orderNumber: string;
   orderId: string;
   orderDate: string;
@@ -135,6 +136,13 @@ export async function sendOrderConfirmationEmail(orderData: OrderEmailData): Pro
             <p>¡Gracias por tu pedido! Hemos recibido tu solicitud y la estamos procesando.</p>
 
             <div class="order-info">
+                <h3>👤 Información del Cliente</h3>
+                <p><strong>Nombre:</strong> ${orderData.customerName}</p>
+                <p><strong>Email:</strong> ${orderData.customerEmail}</p>
+                ${orderData.customerPhone ? `<p><strong>Teléfono:</strong> ${orderData.customerPhone}</p>` : ''}
+            </div>
+
+            <div class="order-info">
                 <h3>📋 Detalles del Pedido</h3>
                 <p><strong>Número de Pedido:</strong> ${orderData.orderNumber}</p>
                 <p><strong>ID de Pedido:</strong> ${orderData.orderId}</p>
@@ -240,6 +248,11 @@ Hola ${orderData.customerName},
 
 ¡Gracias por tu pedido! Hemos recibido tu solicitud y la estamos procesando.
 
+INFORMACIÓN DEL CLIENTE:
+Nombre: ${orderData.customerName}
+Email: ${orderData.customerEmail}
+${orderData.customerPhone ? `Teléfono: ${orderData.customerPhone}` : ''}
+
 DETALLES DEL PEDIDO:
 - Número de Pedido: ${orderData.orderNumber}
 - ID de Pedido: ${orderData.orderId}
@@ -309,10 +322,10 @@ MatMax Yoga Studio
 📧 info@matmax.store | 📱 WhatsApp: +51 916 172 368
     `;
 
-    // Send email using Brevo service with BCC to info@matmax.store
+    // Send email using Brevo service with BCC to alberto@matmax.world
     const emailResult = await emailService.sendEmailWithBCC({
       to: orderData.customerEmail,
-      bcc: 'info@matmax.store',
+      bcc: 'alberto@matmax.world',
       subject: '¡Gracias por tu pedido! - MatMax Yoga Studio',
       html: htmlContent,
       text: textContent

@@ -111,6 +111,8 @@
             "vercel:link": "vercel link",
             "vercel:env:add": "vercel env add REDIS_URL",
             "vercel:env:pull": "vercel env pull .env.local",
+            "deploy:telegram": "../deploy-telegram-bot-vercel.sh",
+            "setup:telegram-webhook": "../setup-telegram-webhook-vercel.sh",
             "test:duplicates": "node scripts/test-duplicate-prevention.js",
             "test:css": "node scripts/test-css-build.js",
             "compare:rendering": "node scripts/compare-rendering.js",

@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
+import { TelegramAccountLink } from '@/components/TelegramAccountLink';
 
 interface ClientProfile {
   id: string;
@@ -321,6 +322,11 @@ export default function ProfilePage() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Telegram Account Linking */}
+      <div className="mt-8">
+        <TelegramAccountLink />
       </div>
     </div>
   );

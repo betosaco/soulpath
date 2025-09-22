@@ -3,6 +3,7 @@ import { createEmailService } from '@/lib/brevo-email-service';
 interface BookingEmailData {
   customerName: string;
   customerEmail: string;
+  customerPhone?: string;
   bookingId: string;
   bookingDate: string;
   bookingTime: string;
@@ -29,40 +30,156 @@ export async function sendBookingConfirmationEmail(bookingData: BookingEmailData
       return false;
     }
 
-    // Prepare template variables for Brevo
-    const templateVars = {
-      // Customer information
-      customerName: bookingData.customerName,
-      customerEmail: bookingData.customerEmail,
+    // Generate HTML content for the booking confirmation email
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Confirmación de Reserva - MatMax</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 0 auto; background-color: white; border-radius: 10px; overflow: hidden; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #4A90E2, #357ABD); color: white; padding: 30px 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .content { padding: 30px 20px; }
+        .customer-info { background-color: #f8f9fa; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #4A90E2; }
+        .booking-info { background-color: #e8f4fd; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #4A90E2; }
+        .package-info { background-color: #fff3cd; padding: 15px; margin: 15px 0; border-radius: 5px; }
+        .instructions { background-color: #d1ecf1; padding: 15px; margin: 15px 0; border-radius: 5px; }
+        .footer { background-color: #f8f9fa; padding: 20px; text-align: center; color: #666; border-top: 1px solid #dee2e6; }
+        .button { display: inline-block; padding: 12px 24px; background-color: #4A90E2; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+        .highlight { font-weight: bold; color: #4A90E2; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧘‍♀️ MatMax Yoga Studio</h1>
+            <h2>¡Reserva Confirmada!</h2>
+        </div>
 
-      // Booking details
-      bookingId: bookingData.bookingId,
-      bookingDate: bookingData.bookingDate,
-      bookingTime: bookingData.bookingTime,
-      sessionType: bookingData.sessionType,
-      instructor: bookingData.instructor || '',
-      venue: bookingData.venue || '',
-      duration: bookingData.duration,
-      bookingStatus: 'Confirmada',
+        <div class="content">
+            <p>Hola <strong>${bookingData.customerName}</strong>,</p>
 
-      // Package information
-      packageName: bookingData.packageName,
-      packageDescription: bookingData.packageDescription || '',
-      packageType: bookingData.packageType,
-      sessionsUsed: bookingData.sessionsUsed,
-      sessionsRemaining: bookingData.sessionsRemaining,
+            <p>¡Tu reserva ha sido confirmada exitosamente! Te esperamos en MatMax Yoga Studio.</p>
 
-      // URLs and contact
-      bookingUrl: bookingData.bookingUrl,
-      contactEmail: 'info@matmax.store',
-      contactPhone: '+51 916 172 368',
-      contactAddress: 'Calle Alcanfores 425, Miraflores - Lima, PE',
-      language: bookingData.language || 'es'
-    };
+            <div class="customer-info">
+                <h3>👤 Información del Cliente</h3>
+                <p><strong>Nombre:</strong> ${bookingData.customerName}</p>
+                <p><strong>Email:</strong> ${bookingData.customerEmail}</p>
+                ${bookingData.customerPhone ? `<p><strong>Teléfono:</strong> ${bookingData.customerPhone}</p>` : ''}
+            </div>
 
-    // Send email using Brevo service
-    const emailResult = await emailService.sendEmail({
+            <div class="booking-info">
+                <h3>📅 Detalles de tu Clase</h3>
+                <p><strong>Fecha:</strong> ${bookingData.bookingDate}</p>
+                <p><strong>Hora:</strong> ${bookingData.bookingTime}</p>
+                <p><strong>Tipo de Clase:</strong> ${bookingData.sessionType}</p>
+                ${bookingData.instructor ? `<p><strong>Instructor:</strong> ${bookingData.instructor}</p>` : ''}
+                ${bookingData.venue ? `<p><strong>Ubicación:</strong> ${bookingData.venue}</p>` : ''}
+                <p><strong>Duración:</strong> ${bookingData.duration} minutos</p>
+                <p><strong>Número de Reserva:</strong> ${bookingData.bookingId}</p>
+                <p><strong>Estado:</strong> <span class="highlight">Confirmada</span></p>
+            </div>
+
+            <div class="package-info">
+                <h3>🎫 Información del Paquete Utilizado</h3>
+                <p><strong>Paquete:</strong> ${bookingData.packageName}</p>
+                ${bookingData.packageDescription ? `<p><strong>Descripción:</strong> ${bookingData.packageDescription}</p>` : ''}
+                <p><strong>Tipo de Paquete:</strong> ${bookingData.packageType}</p>
+                <p><strong>Sesiones Utilizadas:</strong> ${bookingData.sessionsUsed}</p>
+                <p><strong>Sesiones Restantes:</strong> ${bookingData.sessionsRemaining}</p>
+            </div>
+
+            <div class="instructions">
+                <h4>📋 Instrucciones Importantes:</h4>
+                <ul>
+                    <li>Llega 10 minutos antes de tu clase</li>
+                    <li>Trae tu propia colchoneta de yoga</li>
+                    <li>Usa ropa cómoda y flexible</li>
+                    <li>Evita comer 2 horas antes de la clase</li>
+                    <li>Mantén tu teléfono en silencio</li>
+                </ul>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="${bookingData.bookingUrl}" class="button">Ver Mis Reservas</a>
+            </div>
+
+            <p><strong>¿Necesitas cancelar o reprogramar?</strong><br>
+            Puedes hacerlo hasta 2 horas antes de tu clase desde tu cuenta o contactándonos.</p>
+
+            <p><strong>Contacto:</strong></p>
+            <ul>
+                <li>📧 info@matmax.store</li>
+                <li>📱 +51 916 172 368</li>
+                <li>📍 Calle Alcanfores 425, Miraflores - Lima, PE</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p>¡Te esperamos pronto! 🙏</p>
+            <p><strong>MatMax Yoga Studio</strong></p>
+        </div>
+    </div>
+</body>
+</html>`;
+
+    // Create text version
+    const textContent = `
+Confirmación de Reserva - MatMax Yoga Studio
+
+Hola ${bookingData.customerName},
+
+¡Tu reserva ha sido confirmada exitosamente! Te esperamos en MatMax Yoga Studio.
+
+INFORMACIÓN DEL CLIENTE:
+Nombre: ${bookingData.customerName}
+Email: ${bookingData.customerEmail}
+${bookingData.customerPhone ? `Teléfono: ${bookingData.customerPhone}` : ''}
+
+DETALLES DE TU CLASE:
+Fecha: ${bookingData.bookingDate}
+Hora: ${bookingData.bookingTime}
+Tipo de Clase: ${bookingData.sessionType}
+${bookingData.instructor ? `Instructor: ${bookingData.instructor}` : ''}
+${bookingData.venue ? `Ubicación: ${bookingData.venue}` : ''}
+Duración: ${bookingData.duration} minutos
+Número de Reserva: ${bookingData.bookingId}
+Estado: Confirmada
+
+INFORMACIÓN DEL PAQUETE UTILIZADO:
+Paquete: ${bookingData.packageName}
+${bookingData.packageDescription ? `Descripción: ${bookingData.packageDescription}` : ''}
+Tipo de Paquete: ${bookingData.packageType}
+Sesiones Utilizadas: ${bookingData.sessionsUsed}
+Sesiones Restantes: ${bookingData.sessionsRemaining}
+
+INSTRUCCIONES IMPORTANTES:
+- Llega 10 minutos antes de tu clase
+- Trae tu propia colchoneta de yoga
+- Usa ropa cómoda y flexible
+- Evita comer 2 horas antes de la clase
+- Mantén tu teléfono en silencio
+
+¿Necesitas cancelar o reprogramar?
+Puedes hacerlo hasta 2 horas antes de tu clase desde tu cuenta o contactándonos.
+
+CONTACTO:
+📧 info@matmax.store
+📱 +51 916 172 368
+📍 Calle Alcanfores 425, Miraflores - Lima, PE
+
+¡Te esperamos pronto!
+
+MatMax Yoga Studio
+`;
+
+    // Send email using Brevo service with BCC
+    const emailResult = await emailService.sendEmailWithBCC({
       to: bookingData.customerEmail,
+      bcc: 'alberto@matmax.world',
       subject: '¡Reserva Confirmada! - MatMax Yoga Studio',
       html: htmlContent,
       text: textContent
