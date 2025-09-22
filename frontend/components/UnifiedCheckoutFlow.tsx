@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowRight,
@@ -2498,20 +2499,48 @@ function UnifiedCheckoutFlowContent({
                         <p className="text-lg text-gray-700 mb-2">Complete your order and pay later</p>
                         <p className="text-sm text-gray-500">You'll receive payment instructions after order confirmation</p>
                       </div>
+                      
+                      {/* Terms and Conditions Checkbox */}
+                      <div className="mb-4 p-4 bg-gray-50 rounded-lg border">
+                        <div className="flex items-start space-x-3">
+                          <input
+                            type="checkbox"
+                            id="terms-checkbox"
+                            checked={termsAccepted}
+                            onChange={(e) => setTermsAccepted(e.target.checked)}
+                            className="mt-1 h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+                          />
+                          <label htmlFor="terms-checkbox" className="text-sm text-gray-700">
+                            I agree to the{' '}
+                            <button
+                              type="button"
+                              onClick={() => setShowTermsModal(true)}
+                              className="text-orange-600 hover:text-orange-700 underline font-medium"
+                            >
+                              Terms and Conditions
+                            </button>
+                            {' '}and{' '}
+                            <Link href="/privacy" className="text-orange-600 hover:text-orange-700 underline font-medium">
+                              Privacy Policy
+                            </Link>
+                          </label>
+                        </div>
+                      </div>
+                      
                       <Button
-                        onClick={() => {
-                          if (!termsAccepted) {
-                            setShowTermsModal(true);
-                          } else {
-                            handlePayLater();
-                          }
-                        }}
-                        disabled={isProcessing}
+                        onClick={handlePayLater}
+                        disabled={isProcessing || !termsAccepted}
                         className="w-full py-4 text-lg font-medium bg-orange-500 hover:bg-orange-600 text-white transition-all duration-200 flex items-center justify-center gap-2 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                       >
                         <ClockIcon className="w-5 h-5" />
                         {isProcessing ? 'Processing...' : 'Complete Order - Pay Later'}
                       </Button>
+                      
+                      {!termsAccepted && (
+                        <p className="text-sm text-red-600 text-center mt-2">
+                          Please accept the terms and conditions to proceed
+                        </p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
