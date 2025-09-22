@@ -977,9 +977,9 @@ function UnifiedCheckoutFlowContent({
   }
 
   return (
-    <AppLayout className="min-h-screen bg-white">
+    <AppLayout className="min-h-screen bg-white mobile-container mobile-scrollable">
       {/* Progress Steps */}
-      <div className="bg-gray-50 py-6">
+      <div className="bg-gray-50 py-6 mobile-content mobile-scrollable">
         <div className="container mx-auto px-4">
           <div className="flex justify-center">
             <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-4 overflow-x-auto max-w-full">
@@ -1015,7 +1015,7 @@ function UnifiedCheckoutFlowContent({
       </div>
 
       {/* Step Content */}
-      <div className="container mx-auto px-4 py-8 mobile-step-container">
+      <div className="container mx-auto px-4 py-8 mobile-step-container mobile-content mobile-scrollable">
         <AnimatePresence mode="wait">
           {/* Step 1: Schedule Selection (only if packages in cart, no schedule data, and not direct checkout, OR when editing schedule) */}
           {(() => {

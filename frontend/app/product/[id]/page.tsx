@@ -184,10 +184,10 @@ export default function ProductPage() {
   }
 
   return (
-    <AppLayout className="min-h-screen bg-white">
+    <AppLayout className="min-h-screen bg-white mobile-container mobile-scrollable">
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mobile-content mobile-scrollable">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Product Images */}
           <div className="space-y-4">

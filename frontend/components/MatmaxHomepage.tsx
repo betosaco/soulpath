@@ -25,9 +25,9 @@ export function MatmaxHomepage() {
   }, []);
 
   return (
-    <AppLayout className="min-h-screen bg-white">
+    <AppLayout className="min-h-screen bg-white mobile-container mobile-scrollable">
       {/* Hero Section */}
-      <section id="home" className="relative h-screen flex items-center justify-center overflow-hidden">
+      <section id="home" className="relative h-screen flex items-center justify-center overflow-hidden mobile-content mobile-scrollable">
         {/* Video Background with Image Fallback */}
         <div className="absolute inset-0">
           {/* Video Background - Desktop Only */}

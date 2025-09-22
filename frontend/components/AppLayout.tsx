@@ -22,13 +22,13 @@ export function AppLayout({
 }: AppLayoutProps) {
 
   return (
-    <div className={className}>
+    <div className={`${className} mobile-container mobile-scrollable`}>
       <CentralizedHeader 
         user={user} 
         isAdmin={isAdmin}
       />
       
-      <main className="pt-20">
+      <main className="pt-20 mobile-content mobile-scrollable">
         {children}
       </main>
       
