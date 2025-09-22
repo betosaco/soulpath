@@ -7,6 +7,7 @@ import { ChevronLeftIcon, ChevronRightIcon, ShoppingCartIcon, PlusIcon, MinusIco
 import { AppLayout } from '@/components/AppLayout';
 import { useCart } from '@/lib/cart-context';
 import { Button } from '@/components/ui/button';
+import { ColorSwatch } from '@/components/ColorSwatch';
 
 interface Product {
   id: string;
@@ -39,6 +40,7 @@ export default function ProductPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [selectedColor, setSelectedColor] = useState<string>('');
 
   // Fetch product from API
   useEffect(() => {
@@ -62,6 +64,11 @@ export default function ProductPage() {
             comparePrice: data.data.comparePrice ? parseFloat(data.data.comparePrice) : null
           };
           setProduct(productWithNumericPrice);
+          
+          // Set default color for products with color variants
+          if (productWithNumericPrice.tags?.includes('color-swatch') && productWithNumericPrice.images?.length > 1) {
+            setSelectedColor('black'); // Default to black (first image)
+          }
         } else {
           setProduct(null);
         }
@@ -102,15 +109,27 @@ export default function ProductPage() {
     }
   };
 
+  const handleColorChange = (color: string) => {
+    setSelectedColor(color);
+    if (product && product.tags?.includes('color-swatch')) {
+      // Update image index based on color selection
+      if (color === 'black') {
+        setCurrentImageIndex(0); // Black is first image
+      } else if (color === 'white') {
+        setCurrentImageIndex(1); // White is second image
+      }
+    }
+  };
+
   const handleAddToCart = () => {
     if (product && product.status === 'ACTIVE' && product.stock > 0) {
       // Add the item quantity times to the cart
       for (let i = 0; i < quantity; i++) {
         addToCart({
           id: product.id,
-          name: product.name,
+          name: product.name + (selectedColor ? ` (${selectedColor.charAt(0).toUpperCase() + selectedColor.slice(1)})` : ''),
           price: product.price,
-          image: product.images[0] || '/images/products/yoga-journal-1.jpg',
+          image: product.images[currentImageIndex] || product.images[0] || '/images/products/yoga-journal-1.jpg',
           sku: product.sku,
           currency: 'PEN',
           type: 'product',
@@ -255,6 +274,29 @@ export default function ProductPage() {
                 <h3 className="text-lg font-semibold mb-2">Overview</h3>
                 <p className="text-gray-700 leading-relaxed">{product.shortDescription}</p>
               </div>
+            )}
+
+            {/* Color Swatch for products with color variants */}
+            {product.tags?.includes('color-swatch') && product.images?.length > 1 && (
+              <ColorSwatch
+                colors={[
+                  {
+                    name: 'Black',
+                    value: 'black',
+                    image: product.images[0],
+                    available: true
+                  },
+                  {
+                    name: 'White',
+                    value: 'white',
+                    image: product.images[1],
+                    available: true
+                  }
+                ]}
+                selectedColor={selectedColor}
+                onColorChange={handleColorChange}
+                productName={product.name}
+              />
             )}
 
             <div>
