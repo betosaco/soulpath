@@ -14,6 +14,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import Image from 'next/image';
+import './EnhancedSchedule.css';
 
 interface Teacher {
   id: number;

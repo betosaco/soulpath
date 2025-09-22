@@ -23,12 +23,55 @@ const nextConfig = {
     // Enable experimental features if needed
     optimizeCss: false, // Disable CSS optimization to prevent purging issues
   },
+  // Note: swcMinify is deprecated in Next.js 15+, minification is handled by webpack config
+  // Disable CSS optimization completely
+  webpack: (config, { dev, isServer }) => {
+    // Configure webpack to handle module resolution
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname),
+    };
+
+    // Disable CSS optimization
+    if (!isServer) {
+      config.optimization = {
+        ...config.optimization,
+        minimize: false, // Disable minification
+        splitChunks: {
+          ...config.optimization.splitChunks,
+          chunks: 'all',
+          minSize: 20000,
+          maxSize: 244000,
+          cacheGroups: {
+            ...config.optimization.splitChunks.cacheGroups,
+            default: {
+              minChunks: 1,
+              priority: -20,
+              reuseExistingChunk: true,
+            },
+            vendor: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendors',
+              priority: -10,
+              chunks: 'all',
+            },
+          },
+        },
+      };
+
+      // Add performance hints to reduce preload warnings
+      config.performance = {
+        ...config.performance,
+        hints: false, // Disable performance hints that can cause preload warnings
+      };
+    }
+
+    return config;
+  },
   // Optimize bundle and prevent preload warnings
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
-  // Optimize for better performance
-  // swcMinify: true, // Deprecated in Next.js 15+
   // Disable webpack bundle analyzer warnings
   generateBuildId: async () => {
     return 'build-' + Date.now();
@@ -117,48 +160,6 @@ const nextConfig = {
         pathname: '/**',
       },
     ],
-  },
-  webpack: (config, { dev, isServer }) => {
-    // Configure webpack to handle module resolution
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      '@': path.resolve(__dirname),
-    };
-
-    // Optimize webpack chunk loading to prevent preload warnings
-    if (!isServer) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          ...config.optimization.splitChunks,
-          chunks: 'all',
-          minSize: 20000,
-          maxSize: 244000,
-          cacheGroups: {
-            ...config.optimization.splitChunks.cacheGroups,
-            default: {
-              minChunks: 1,
-              priority: -20,
-              reuseExistingChunk: true,
-            },
-            vendor: {
-              test: /[\\/]node_modules[\\/]/,
-              name: 'vendors',
-              priority: -10,
-              chunks: 'all',
-            },
-          },
-        },
-      };
-
-      // Add performance hints to reduce preload warnings
-      config.performance = {
-        ...config.performance,
-        hints: false, // Disable performance hints that can cause preload warnings
-      };
-    }
-
-    return config;
   },
 };
 

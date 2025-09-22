@@ -10,9 +10,7 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient({
   errorFormat: 'pretty',
   datasources: {
     db: {
-      url: process.env.NODE_ENV === 'development' 
-        ? 'postgresql://user:password@localhost:5432/wellness_db'
-        : process.env.DATABASE_URL
+      url: process.env.DATABASE_URL || 'postgresql://user:password@localhost:5432/wellness_db'
     }
   }
 });
@@ -59,9 +57,14 @@ const connect = async (): Promise<void> => {
 
 // Force connection on startup (server-side only, but not during build)
 if (typeof window === 'undefined' && process.env.NODE_ENV !== 'production' && !process.env.NEXT_PHASE) {
-  connect().catch(error => {
-    console.error('❌ Background connection failed:', error);
-  });
+  // Only attempt connection if DATABASE_URL is available
+  if (process.env.DATABASE_URL) {
+    connect().catch(error => {
+      console.error('❌ Background connection failed:', error);
+    });
+  } else {
+    console.log('⚠️  DATABASE_URL not found, skipping database connection');
+  }
 }
 
 // Wrapper for database operations

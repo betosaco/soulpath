@@ -79,6 +79,7 @@
             "@types/react": "^18.3.24",
             "@types/react-dom": "^18.3.7",
             "autoprefixer": "^10.4.21",
+            "cssnano": "^7.1.1",
             "eslint": "^8.57.0",
             "eslint-config-next": "^15.0.0",
             "postcss": "^8.5.6",
@@ -88,7 +89,7 @@
       },
       "scripts": {
             "dev": "next dev",
-            "build": "next build",
+            "build": "NEXT_PUBLIC_SUPABASE_URL=https://placeholder.supabase.co NEXT_PUBLIC_SUPABASE_ANON_KEY=placeholder_anon_key SUPABASE_SERVICE_ROLE_KEY=placeholder_service_key DATABASE_URL=postgresql://user:password@localhost:5432/wellness_db next build",
             "start": "next start",
             "lint": "eslint .",
             "deploy": "vercel --prod",
@@ -110,6 +111,7 @@
             "vercel:env:add": "vercel env add REDIS_URL",
             "vercel:env:pull": "vercel env pull .env.local",
             "test:duplicates": "node scripts/test-duplicate-prevention.js",
+            "test:css": "node scripts/test-css-build.js",
             "postinstall": "prisma generate"
       }
 }

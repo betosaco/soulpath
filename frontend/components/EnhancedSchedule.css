@@ -18,6 +18,7 @@
 /* Schedule Day */
 .schedule-day {
   @apply bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden;
+  margin-bottom: 1.5rem;
 }
 
 .schedule-day__header {
@@ -26,7 +27,10 @@
 
 /* Schedule Slot */
 .schedule-slot {
-  @apply p-4;
+  /* Remove padding to avoid conflict with card-base */
+  /* @apply p-4; */
+  position: relative;
+  overflow: hidden;
 }
 
 .schedule-slot--unavailable {
@@ -112,7 +116,8 @@
   }
   
   .schedule-slot {
-    @apply p-3;
+    /* Remove padding to avoid conflict with card-base */
+    /* @apply p-3; */
   }
   
   /* Add more margin between schedule boxes on mobile */
@@ -226,7 +231,11 @@
   overflow: hidden;
 }
 
-/* Hover Effects - Now handled by card-hover and hover-scale classes */
+/* Hover Effects - Combined card-hover and hover-scale for schedule slots */
+.schedule-slot.card-hover.hover-scale:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: var(--shadow-lg);
+}
 
 /* Focus States */
 .schedule-slot:focus-within {
