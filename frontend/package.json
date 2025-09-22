@@ -90,7 +90,7 @@
       },
       "scripts": {
             "dev": "next dev",
-            "build": "NEXT_PUBLIC_SUPABASE_URL=https://placeholder.supabase.co NEXT_PUBLIC_SUPABASE_ANON_KEY=placeholder_anon_key SUPABASE_SERVICE_ROLE_KEY=placeholder_service_key DATABASE_URL=postgresql://user:password@localhost:5432/wellness_db next build",
+            "build": "next build",
             "start": "next start",
             "lint": "eslint .",
             "deploy": "vercel --prod",
