@@ -664,23 +664,29 @@ export async function POST(request: NextRequest) {
 
       // Send Telegram order confirmation notification to business account (info@matmax.store)
       try {
-      // Always send notifications to info@matmax.store for ALL orders
-      const businessUser = await prisma.$queryRaw`
-        SELECT id FROM users WHERE email = 'info@matmax.store' LIMIT 1
-      ` as any[];
+        console.log('📱 Starting Telegram notification process for order:', result.order.id);
 
-      if (businessUser.length > 0) {
-        const telegramUsers = await prisma.$queryRaw`
-          SELECT * FROM telegram_users
-          WHERE user_id = ${businessUser[0].id}
-          AND is_active = true
-          LIMIT 1
+        // Always send notifications to info@matmax.store for ALL orders
+        const businessUser = await prisma.$queryRaw`
+          SELECT id FROM users WHERE email = 'info@matmax.store' LIMIT 1
         ` as any[];
 
-        const telegramUser = telegramUsers[0];
+        console.log('🏢 Business user lookup result:', businessUser.length > 0 ? 'Found' : 'Not found');
 
-        if (telegramUser) {
-          console.log('📱 Sending Telegram order confirmation to business account (info@matmax.store):', telegramUser.telegramChatId);
+        if (businessUser.length > 0) {
+          const telegramUsers = await prisma.$queryRaw`
+            SELECT * FROM telegram_users
+            WHERE user_id = ${businessUser[0].id}
+            AND is_active = true
+            LIMIT 1
+          ` as any[];
+
+          console.log('📱 Telegram user lookup result:', telegramUsers.length > 0 ? 'Found' : 'Not found');
+
+          const telegramUser = telegramUsers[0];
+
+          if (telegramUser) {
+            console.log('📱 Sending Telegram order confirmation to business account (info@matmax.store):', telegramUser.telegramChatId);
 
           // Prepare order details for Telegram (matching email format)
           const telegramOrderDetails: OrderDetails = {
@@ -731,6 +737,7 @@ export async function POST(request: NextRequest) {
           };
 
           // Send Telegram notification to MatMax Bot Service
+          console.log('📡 Calling bot service with chat ID:', telegramUser.telegramChatId);
           const telegramResponse = await fetch('https://telemax-1kpe0zyxd-matmaxworlds-projects.vercel.app/api/orders/send-notification', {
             method: 'POST',
             headers: {
@@ -742,10 +749,13 @@ export async function POST(request: NextRequest) {
             }),
           });
 
+          console.log('📡 Bot service response status:', telegramResponse.status);
           if (telegramResponse.ok) {
             console.log('✅ Telegram order confirmation sent successfully');
           } else {
-            console.error('❌ Failed to send Telegram order confirmation to business account');
+            console.error('❌ Failed to send Telegram order confirmation to business account, status:', telegramResponse.status);
+            const errorText = await telegramResponse.text();
+            console.error('❌ Bot service error:', errorText);
           }
         } else {
           console.log('⚠️ Business account (info@matmax.store) does not have Telegram linked');
