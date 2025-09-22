@@ -74,7 +74,9 @@ export async function GET(request: NextRequest) {
     console.log('📅 Date range:', {
       start: dateStart.toISOString().split('T')[0],
       end: dateEnd.toISOString().split('T')[0],
-      custom: !!(startDate && endDate)
+      custom: !!(startDate && endDate),
+      startTime: dateStart.toISOString(),
+      endTime: dateEnd.toISOString()
     });
 
     // Fetch schedule slots from database
@@ -165,7 +167,14 @@ export async function GET(request: NextRequest) {
       return a.time.localeCompare(b.time);
     });
 
-    console.log(`✅ Found ${transformedSlots.length} teacher schedule slots`);
+    console.log(`✅ Found ${slots.length} raw slots, ${transformedSlots.length} transformed slots`);
+    if (slots.length > 0) {
+      console.log('📅 First slot:', {
+        id: slots[0].id,
+        startTime: slots[0].startTime.toISOString(),
+        isAvailable: slots[0].isAvailable
+      });
+    }
 
     return NextResponse.json({
       success: true,
