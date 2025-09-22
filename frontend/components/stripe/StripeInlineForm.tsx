@@ -180,6 +180,7 @@ function StripeFormInner({
   };
 
   return (
+    <>
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Amount display */}
       <div className="bg-gray-50 rounded-lg p-4">
@@ -310,6 +311,7 @@ function StripeFormInner({
       }}
       allowClose={true}
     />
+  </>
   );
 }
 
