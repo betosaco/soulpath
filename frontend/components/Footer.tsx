@@ -16,7 +16,7 @@ export function Footer() {
     <footer className="bg-gradient-to-br from-gray-50 to-gray-100 border-t border-gray-200">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           {/* Brand & Description */}
           <div className="space-y-4">
             <h3 className="text-xl font-bold text-gray-900" style={{ fontFamily: 'var(--font-heading)' }}>
@@ -72,6 +72,21 @@ export function Footer() {
               </Link>
               <Link href="/account/book" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
                 {footer.bookSession || 'Book Session'}
+              </Link>
+            </nav>
+          </div>
+
+          {/* Legal Links */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wide" style={{ fontFamily: 'var(--font-heading)' }}>
+              {footer.legalTitle || 'Legal'}
+            </h4>
+            <nav className="space-y-2">
+              <Link href="/terms" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+                {footer.termsAndConditions || 'Terms & Conditions'}
+              </Link>
+              <Link href="/privacy" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+                {footer.privacyPolicy || 'Privacy Policy'}
               </Link>
             </nav>
           </div>

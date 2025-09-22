@@ -235,6 +235,9 @@ export const defaultTranslations = {
       packages: 'Packages',
       schedule: 'Schedule',
       bookSession: 'Book Session',
+      legalTitle: 'Legal',
+      termsAndConditions: 'Terms & Conditions',
+      privacyPolicy: 'Privacy Policy',
       contactTitle: 'Contact',
       copyright: '© 2024 Matmax Yoga Studio. All rights reserved.'
     },
@@ -478,6 +481,9 @@ export const defaultTranslations = {
       packages: 'Paquetes',
       schedule: 'Horarios',
       bookSession: 'Reservar Sesión',
+      legalTitle: 'Legal',
+      termsAndConditions: 'Términos y Condiciones',
+      privacyPolicy: 'Política de Privacidad',
       contactTitle: 'Contacto',
       copyright: '© 2024 Matmax Yoga Studio. Todos los derechos reservados.'
     },
