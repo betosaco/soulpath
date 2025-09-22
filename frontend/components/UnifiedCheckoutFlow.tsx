@@ -31,6 +31,7 @@ import { countries } from '@/lib/countries';
 import { CartBookingDetails } from '@/components/CartBookingDetails';
 import { useCart, CartItem } from '@/lib/cart-context';
 import { EnhancedSchedule } from './EnhancedSchedule';
+import { TermsAndConditionsModal } from './TermsAndConditionsModal';
 
 interface BookingStep {
   id: string;
@@ -117,6 +118,10 @@ function UnifiedCheckoutFlowContent({
   const [isProcessing, setIsProcessing] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [isCartLoading, setIsCartLoading] = useState(true);
+  
+  // Terms and Conditions state
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   
   // State for conflict resolution
   const [showConflictResolution, setShowConflictResolution] = useState(false);
@@ -2494,7 +2499,13 @@ function UnifiedCheckoutFlowContent({
                         <p className="text-sm text-gray-500">You'll receive payment instructions after order confirmation</p>
                       </div>
                       <Button
-                        onClick={handlePayLater}
+                        onClick={() => {
+                          if (!termsAccepted) {
+                            setShowTermsModal(true);
+                          } else {
+                            handlePayLater();
+                          }
+                        }}
                         disabled={isProcessing}
                         className="w-full py-4 text-lg font-medium bg-orange-500 hover:bg-orange-600 text-white transition-all duration-200 flex items-center justify-center gap-2 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                       >
@@ -2699,6 +2710,22 @@ function UnifiedCheckoutFlowContent({
           </div>
         </div>
       )}
+
+      {/* Terms and Conditions Modal */}
+      <TermsAndConditionsModal
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        onAccept={() => {
+          setTermsAccepted(true);
+          setShowTermsModal(false);
+          handlePayLater();
+        }}
+        onDecline={() => {
+          setShowTermsModal(false);
+          toast.error('You must accept the terms and conditions to proceed with your order.');
+        }}
+        allowClose={true}
+      />
     </AppLayout>
   );
 }
