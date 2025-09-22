@@ -738,7 +738,7 @@ export async function POST(request: NextRequest) {
 
           // Send Telegram notification to MatMax Bot Service
           console.log('📡 Calling bot service with chat ID:', telegramUser.telegramChatId);
-          const telegramResponse = await fetch('https://telemax-1kpe0zyxd-matmaxworlds-projects.vercel.app/api/orders/send-notification', {
+          const telegramResponse = await fetch('https://telemax-q6w6ogtij-matmaxworlds-projects.vercel.app/api/orders/send-notification', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
