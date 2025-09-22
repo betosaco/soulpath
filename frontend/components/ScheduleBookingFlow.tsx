@@ -305,6 +305,16 @@ export function ScheduleBookingFlow({
     console.log('🔍 Modal state changed - showPackageSelection:', showPackageSelection, 'selectedScheduleForPackage:', selectedScheduleForPackage?.id);
   }, [showPackageSelection, selectedScheduleForPackage]);
 
+  // Debug cart changes and force re-evaluation of package modal logic
+  React.useEffect(() => {
+    const packageItems = cartContext?.cartItems?.filter(item => item.type === 'package') || [];
+    console.log('🔍 Cart changed - package count:', packageItems.length, 'packages:', packageItems.map(p => ({ id: p.id, name: p.name, quantity: p.quantity })));
+    
+    // Force re-evaluation of modal logic when cart changes
+    const shouldShow = packageItems.length > 1 || packageItems.reduce((sum, item) => sum + (item.quantity || 1), 0) > 1;
+    console.log('🔍 Should show modal after cart change:', shouldShow);
+  }, [cartContext?.cartItems]);
+
   // Auto-redirect from group booking step if no multiple packages
   React.useEffect(() => {
     if (currentStep === 1) {
@@ -407,6 +417,11 @@ export function ScheduleBookingFlow({
           sessionStorage.removeItem('isAddingMoreBookings');
           sessionStorage.removeItem('addingToPackageId');
           setEditingPackageId(null);
+          // Reset to schedule selection step - modal will show when schedule is selected
+          setCurrentStep(0);
+          onStepChange?.(0);
+          setShowPackageSelection(false);
+          setSelectedScheduleForPackage(null);
         } else if (addingToPackageId) {
           // Single package - set editing mode
           console.log('✅ Single package - setting adding more mode for package:', addingToPackageId);
@@ -473,6 +488,11 @@ export function ScheduleBookingFlow({
         console.log('Setting multiple packages mode - removing specific package ID');
         sessionStorage.removeItem('addingToPackageId');
         setEditingPackageId(null);
+        // Reset to schedule selection step - modal will show when schedule is selected
+        setCurrentStep(0);
+        onStepChange?.(0);
+        setShowPackageSelection(false);
+        setSelectedScheduleForPackage(null);
       }
     }
   }, [cartContext?.cartItems, editingPackageId]);
@@ -518,6 +538,13 @@ export function ScheduleBookingFlow({
     
     const packageItems = cartContext.cartItems.filter(item => item.type === 'package');
     const totalPackageQuantity = packageItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    
+    console.log('🔍 shouldShowPackageModal check:', {
+      packageItemsCount: packageItems.length,
+      totalPackageQuantity,
+      shouldShow: packageItems.length > 1 || totalPackageQuantity > 1,
+      packageItems: packageItems.map(p => ({ id: p.id, name: p.name, quantity: p.quantity }))
+    });
     
     // Show modal only if: 
     // 1. Multiple package items OR 
@@ -714,6 +741,12 @@ export function ScheduleBookingFlow({
     
     // Get all package items
     const allPackageItems = cartContext?.cartItems?.filter(item => item.type === 'package') || [];
+    
+    console.log('🔍 Schedule selection - package count check:', {
+      allPackageItemsCount: allPackageItems.length,
+      allPackageItems: allPackageItems.map(p => ({ id: p.id, name: p.name, quantity: p.quantity })),
+      shouldShowModal: allPackageItems.length > 1
+    });
     
     // Only show modal if there are multiple packages
     if (allPackageItems.length > 1) {
@@ -1502,6 +1535,28 @@ export function ScheduleBookingFlow({
                       className="text-xs bg-green-200 hover:bg-green-300 text-green-800"
                     >
                       Test Package Modal
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        console.log('🧪 Testing schedule selection with mock slot...');
+          const mockSlot = {
+            id: 999,
+                          date: '2025-09-15',
+                          time: '09:00',
+                          teacher: { id: 1, name: 'Test Teacher', experience: 5 },
+                          serviceType: { id: 1, name: 'Yoga', duration: 60 },
+                          venue: { id: 1, name: 'Studio' },
+                          dayOfWeek: 'Monday',
+                          isAvailable: true,
+                          bookedCount: 0,
+                          capacity: 10,
+                          duration: 60
+                        };
+                        handleScheduleSelect(mockSlot);
+                      }}
+                      className="text-xs bg-blue-200 hover:bg-blue-300 text-blue-800 ml-2"
+                    >
+                      Test Schedule Selection
                     </Button>
                   </div>
                 </div>

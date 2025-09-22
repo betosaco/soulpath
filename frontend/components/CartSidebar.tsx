@@ -31,6 +31,9 @@ export function CartSidebar() {
   const hasPackages = packageItems.length > 0;
   const packageCount = packageItems.length;
   const packagesWithBooking = packageItems.filter(item => item.bookingDetails).length;
+  
+  // Debug logging
+  console.log('🔍 CartSidebar render - cartItems:', cartItems.length, 'packageItems:', packageItems.length, 'hasPackages:', hasPackages);
 
   return (
     <AnimatePresence>
@@ -182,6 +185,12 @@ export function CartSidebar() {
                                   maxGroupSize: item.maxGroupSize
                                 });
                                 toast.success(`${item.name} added to cart`);
+                                
+                                // Set session storage to indicate we're adding more bookings
+                                if (typeof window !== 'undefined') {
+                                  sessionStorage.setItem('isAddingMoreBookings', 'true');
+                                  // Don't set addingToPackageId - let the system handle multiple packages
+                                }
                               } else {
                                 // For products, increment quantity
                                 updateQuantity(item.id, item.quantity + 1);
@@ -277,10 +286,16 @@ export function CartSidebar() {
               </div>
               
               <div className="space-y-2">
-                {/* Book a Class Now button - only show if there are packages */}
+                {/* Book a Class Now button */}
                 {hasPackages && (
                   <button
-                    onClick={() => {
+                    onClick={(e) => {
+                      console.log('🎯 Book Now button clicked!');
+                      
+                      // Prevent any parent form submission or event bubbling
+                      e.preventDefault();
+                      e.stopPropagation();
+                      
                       // Clear direct checkout flag for booking flow
                       if (typeof window !== 'undefined') {
                         sessionStorage.removeItem('isDirectCheckout');
@@ -289,24 +304,68 @@ export function CartSidebar() {
                         const currentPath = window.location.pathname;
                         const isOnSchedulePage = currentPath === '/schedule';
                         
+                        console.log('🔍 Book Now clicked - currentPath:', currentPath, 'isOnSchedulePage:', isOnSchedulePage);
+                        console.log('🔍 Package items:', packageItems.length, packageItems.map(p => ({ id: p.id, name: p.name })));
+                        
                         if (isOnSchedulePage) {
-                          // Already on schedule page - just close sidecart and let existing page handle it
+                          // Already on schedule page - set up session storage for modal and close sidecart
+                          if (packageItems.length > 1) {
+                            // Multiple packages - show modal for package selection
+                            sessionStorage.setItem('isAddingMoreBookings', 'true');
+                            sessionStorage.removeItem('addingToPackageId');
+                            console.log('🔍 Multiple packages - will show modal for package selection');
+                          } else if (packageItems.length === 1) {
+                            // Single package - set specific package ID
+                            sessionStorage.setItem('isAddingMoreBookings', 'true');
+                            sessionStorage.setItem('addingToPackageId', packageItems[0].id);
+                            console.log('🔍 Single package - setting addingToPackageId:', packageItems[0].id);
+                          }
                           setIsCartOpen(false);
                         } else {
                           // Not on schedule page - set up session storage and navigate
+                          console.log('🔍 Not on schedule page - setting up navigation to /schedule');
                           if (packageItems.length > 0) {
                             sessionStorage.setItem('isAddingMoreBookings', 'true');
                             // Only set specific package ID if there's only one package
                             if (packageItems.length === 1) {
                               sessionStorage.setItem('addingToPackageId', packageItems[0].id);
+                              console.log('🔍 Single package - setting addingToPackageId:', packageItems[0].id);
                             } else {
                               // Multiple packages - don't set specific package ID, let schedule page show modal
                               sessionStorage.removeItem('addingToPackageId');
+                              console.log('🔍 Multiple packages - removed addingToPackageId');
                             }
                           }
                           // Navigate to schedule page
+                          console.log('🔍 Closing cart and navigating to /schedule');
                           setIsCartOpen(false);
-                          window.location.href = '/schedule';
+                          
+                          // Use multiple navigation methods to ensure it works
+                          try {
+                            console.log('🔍 Attempting navigation to /schedule...');
+                            
+                            // Method 1: Direct location change
+                            window.location.href = '/schedule';
+                            
+                            // Method 2: Fallback with timeout
+                            setTimeout(() => {
+                              if (window.location.pathname !== '/schedule') {
+                                console.log('🔍 Fallback navigation to /schedule');
+                                window.location.replace('/schedule');
+                              }
+                            }, 50);
+                            
+                            // Method 3: Force navigation after a short delay
+                            setTimeout(() => {
+                              console.log('🔍 Force navigation to /schedule');
+                              window.location.replace('/schedule');
+                            }, 200);
+                            
+                          } catch (error) {
+                            console.error('🔍 Navigation error:', error);
+                            // Method 4: Last resort
+                            window.location.replace('/schedule');
+                          }
                         }
                       }
                     }}

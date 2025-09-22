@@ -8,6 +8,13 @@ const globalForPrisma = globalThis as unknown as {
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({
   log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn', 'info'] : ['error'],
   errorFormat: 'pretty',
+  datasources: {
+    db: {
+      url: process.env.NODE_ENV === 'development' 
+        ? 'postgresql://user:password@localhost:5432/wellness_db'
+        : process.env.DATABASE_URL
+    }
+  }
 });
 
 if (process.env.NODE_ENV !== 'production') {

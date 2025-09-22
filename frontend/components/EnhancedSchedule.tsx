@@ -187,7 +187,6 @@ export function EnhancedSchedule({
       const response = await fetch(`/api/teacher-schedule-slots?${params.toString()}`);
       console.log('📡 Response status:', response.status);
       console.log('📡 Response ok:', response.ok);
-      console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -264,10 +263,28 @@ export function EnhancedSchedule({
   useEffect(() => {
     console.log('🔄 useEffect triggered - startDate:', startDate, 'endDate:', endDate);
     console.log('🔄 Component mounted, fetching slots...');
+    console.log('🔄 fetchSlots function:', typeof fetchSlots);
     
     // Always fetch slots on mount
-    fetchSlots();
-  }, []); // Empty dependency array to run only on mount
+    if (fetchSlots) {
+      fetchSlots();
+    } else {
+      console.error('❌ fetchSlots is not defined!');
+    }
+  }, [startDate, endDate]); // Depend only on startDate and endDate to avoid circular dependency
+
+  // Force fetch on mount as backup
+  useEffect(() => {
+    console.log('🔄 Force fetch useEffect triggered');
+    const timeoutId = setTimeout(() => {
+      console.log('🔄 Force fetch timeout triggered');
+      if (fetchSlots) {
+        fetchSlots();
+      }
+    }, 1000);
+    
+    return () => clearTimeout(timeoutId);
+  }, []); // Run only on mount
 
   // Reload slots when reloadTrigger changes
   useEffect(() => {
