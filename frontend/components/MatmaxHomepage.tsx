@@ -27,7 +27,7 @@ export function MatmaxHomepage() {
   return (
     <AppLayout className="min-h-screen bg-white mobile-container mobile-scrollable">
       {/* Hero Section */}
-      <section id="home" className="relative h-screen flex items-center justify-center overflow-hidden mobile-content mobile-scrollable">
+      <section id="home" className="relative h-screen flex items-center justify-center overflow-hidden mobile-content mobile-scrollable" style={{ height: '100vh', height: '100svh' }}>
         {/* Video Background with Image Fallback */}
         <div className="absolute inset-0">
           {/* Video Background - Desktop Only */}
@@ -97,41 +97,41 @@ export function MatmaxHomepage() {
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
+        <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto flex flex-col items-center justify-center min-h-full">
           {/* Logo */}
-          <div className="mb-8 flex justify-center">
+          <div className="mb-4 sm:mb-6 md:mb-8 flex justify-center">
             <Image
               src="/logo_matmax.png"
               alt="MatMax Yoga Studio Logo"
               width={200}
               height={200}
-              className="h-32 w-32 md:h-40 md:w-40 lg:h-48 lg:w-48 object-contain drop-shadow-2xl brightness-0 invert"
+              className="h-24 w-24 sm:h-32 sm:w-32 md:h-40 md:w-40 lg:h-48 lg:w-48 object-contain drop-shadow-2xl brightness-0 invert"
               priority
             />
           </div>
           
           <h1 
-            className="text-4xl md:text-6xl font-bold mb-6 leading-tight"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold mb-4 sm:mb-6 leading-tight px-2"
             style={{ fontFamily: 'var(--font-heading)' }}
           >
             {typeof translations?.hero === 'object' && translations.hero?.title || 'Find Your Flow, Transform Your Body & Mind'}
           </h1>
           <p 
-            className="text-xl mb-8 leading-relaxed"
+            className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 leading-relaxed px-4"
             style={{ fontFamily: 'var(--font-body)' }}
           >
             {typeof translations?.hero === 'object' && (translations.hero?.description || translations.hero?.subtitle) || 'Daily Vinyasa and Hatha Yoga for all levels.'}
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center w-full max-w-md sm:max-w-none">
             <a 
               href="/schedule"
-              className="btn-primary"
+              className="btn-primary w-full sm:w-auto px-6 py-3 text-center"
             >
               {typeof translations?.nav === 'object' && (translations.nav?.schedule || translations.nav?.session) || 'View Schedule'}
             </a>
             <a 
               href="/packages"
-              className="btn-secondary"
+              className="btn-secondary w-full sm:w-auto px-6 py-3 text-center"
             >
               {typeof translations?.nav === 'object' && translations.nav?.packages || 'View Packages'}
             </a>

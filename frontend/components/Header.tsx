@@ -57,8 +57,8 @@ export function Header({
       const deltaX = touchEndX - touchStartX;
       const deltaY = Math.abs(touchEndY - touchStartY);
       
-      // Swipe right to close (with minimum distance and prevent vertical scrolling conflicts)
-      if (deltaX > 100 && deltaY < 50 && touchStartX < 50) {
+      // Swipe left to close (with minimum distance and prevent vertical scrolling conflicts)
+      if (deltaX < -100 && deltaY < 50 && touchStartX > window.innerWidth - 50) {
         setIsMenuOpen(false);
       }
     };
@@ -86,7 +86,7 @@ export function Header({
   
   return (
     <header className="fixed top-0 left-0 right-0 z-[9997] bg-white shadow-sm border-b border-gray-200 safe-padding">
-      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-0 flex items-center justify-between header-container h-10">
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-0 flex items-center justify-between header-container h-8 sm:h-10">
         <motion.div 
           className="flex items-center space-x-2 cursor-pointer touch-manipulation min-h-[24px] min-w-[24px] flex items-center justify-center"
           onClick={() => router.push('/')}
@@ -283,11 +283,11 @@ export function Header({
               onClick={() => setIsMenuOpen(false)}
             />
             <motion.div
-              initial={{ x: '-100%' }}
+              initial={{ x: '100%' }}
               animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
+              exit={{ x: '100%' }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed top-0 left-0 h-full w-80 max-w-[90vw] bg-white shadow-xl z-[9999] mobile-menu mobile-scrollable"
+              className="fixed top-0 right-0 h-full w-80 max-w-[90vw] bg-white shadow-xl z-[9999] mobile-menu mobile-scrollable"
             >
               <div className="flex flex-col h-full p-4 sm:p-6 safe-padding">
                 <div className="flex items-center justify-between mb-6 sm:mb-8">

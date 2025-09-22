@@ -1827,6 +1827,20 @@ html, body {
     height: 100vh !important;
     overflow: hidden !important;
   }
+  
+  /* Hero section mobile optimization */
+  .mobile-content {
+    height: 100vh !important;
+    height: 100svh !important;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+  
+  /* Ensure hero starts immediately after header */
+  section#home {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
 }
 
 /* Mobile-specific improvements */
@@ -1848,7 +1862,8 @@ html, body {
   
   /* Mobile header improvements */
   .header-container {
-    padding: 0.5rem 1rem;
+    padding: 0.25rem 1rem;
+    min-height: 2rem;
   }
   
   /* Mobile navigation button improvements */
@@ -1943,7 +1958,7 @@ html, body {
   }
   
   .header-container {
-    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-top: max(0.5rem, env(safe-area-inset-top));
   }
 }
 
@@ -2681,6 +2696,30 @@ html, body {
     min-height: 100vh;
     min-height: 100svh;
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  
+  /* Hero section mobile fixes */
+  .mobile-content {
+    height: 100vh !important;
+    height: 100svh !important;
+    overflow: hidden !important;
+  }
+  
+  /* Ensure hero image starts immediately after header */
+  section#home {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    top: 0 !important;
+  }
+  
+  /* Mobile hero content centering */
+  .mobile-content .relative.z-10 {
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
   }
 
   /* Mobile-specific animations */

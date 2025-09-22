@@ -1,0 +1,129 @@
+/* Order Summary Section - Fix for dark vertical lines on mobile */
+
+/* Ensure all borders in order summary are light on mobile */
+.order-summary-section .border {
+  border-color: #f3f4f6 !important; /* gray-100 */
+}
+
+@media (min-width: 640px) {
+  .order-summary-section .border {
+    border-color: #e5e7eb !important; /* gray-200 */
+  }
+}
+
+/* Specific fixes for Card components */
+.order-summary-section [data-slot="card"] {
+  border-color: #f3f4f6 !important; /* gray-100 */
+}
+
+@media (min-width: 640px) {
+  .order-summary-section [data-slot="card"] {
+    border-color: #e5e7eb !important; /* gray-200 */
+  }
+}
+
+/* Fix for order item borders */
+.order-summary-section .border.rounded-lg {
+  border-color: #f3f4f6 !important; /* gray-100 */
+}
+
+@media (min-width: 640px) {
+  .order-summary-section .border.rounded-lg {
+    border-color: #e5e7eb !important; /* gray-200 */
+  }
+}
+
+/* Fix for total line border */
+.order-summary-section .border-t {
+  border-top-color: #f3f4f6 !important; /* gray-100 */
+}
+
+@media (min-width: 640px) {
+  .order-summary-section .border-t {
+    border-top-color: #e5e7eb !important; /* gray-200 */
+  }
+}
+
+/* Override any dark borders that might be coming from global styles */
+.order-summary-section * {
+  border-color: #f3f4f6 !important;
+}
+
+@media (min-width: 640px) {
+  .order-summary-section * {
+    border-color: #e5e7eb !important;
+  }
+}
+
+/* Ensure no dark shadows or backgrounds */
+.order-summary-section {
+  background: transparent !important;
+}
+
+.order-summary-section * {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Reset any dark colors that might be applied */
+.order-summary-section [class*="border-"] {
+  border-color: #f3f4f6 !important;
+}
+
+@media (min-width: 640px) {
+  .order-summary-section [class*="border-"] {
+    border-color: #e5e7eb !important;
+  }
+}
+
+/* Fix for product image containers */
+.order-summary-section .w-12.h-12 {
+  background-color: #f9fafb !important; /* gray-50 */
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.order-summary-section .w-12.h-12 img {
+  border-radius: 0.375rem !important; /* rounded-md */
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Ensure no dark backgrounds in image containers */
+.order-summary-section [class*="bg-gray-"] {
+  background-color: #f9fafb !important; /* gray-50 */
+}
+
+/* Remove any potential dark borders from images */
+.order-summary-section img {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Fix for terms and conditions container */
+.order-summary-section .bg-gray-50 {
+  border-color: #f3f4f6 !important; /* gray-100 */
+}
+
+@media (min-width: 640px) {
+  .order-summary-section .bg-gray-50 {
+    border-color: #e5e7eb !important; /* gray-200 */
+  }
+}
+
+/* Fix for Pay Later button - Green like cart sidebar */
+.order-summary-section button[class*="bg-[#6ea058]"] {
+  background-color: #6ea058 !important; /* green-600 */
+  color: #ffffff !important; /* white text */
+}
+
+.order-summary-section button[class*="bg-[#6ea058]"]:hover:not(:disabled) {
+  background-color: #5a8a4a !important; /* darker green */
+  color: #ffffff !important; /* white text */
+}
+
+.order-summary-section button[class*="bg-[#6ea058]"]:disabled {
+  background-color: #d1d5db !important; /* gray-300 */
+  color: #6b7280 !important; /* gray-500 */
+  opacity: 0.5 !important;
+}
