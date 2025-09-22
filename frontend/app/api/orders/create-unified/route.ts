@@ -14,6 +14,20 @@ const prisma = new PrismaClient({
   log: ['query', 'info', 'warn', 'error'],
 });
 
+interface GroupMember {
+  id: string;
+  packageId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  countryCode: string;
+  birthDate?: string;
+  birthTime?: string;
+  birthPlace?: string;
+  question?: string;
+}
+
 interface OrderRequest {
   customerInfo: {
     name: string;
@@ -47,6 +61,8 @@ interface OrderRequest {
     dayOfWeek?: string;
     scheduleSlotId?: number;
   }[];
+  groupMembers?: GroupMember[];
+  isGroupBooking?: boolean;
 }
 
 export async function POST(request: NextRequest) {
@@ -67,6 +83,8 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (!orderData.customerInfo || !orderData.items || orderData.items.length === 0) {
       console.log('Validation failed: Missing required order data');
+      console.log('Customer info:', orderData.customerInfo);
+      console.log('Items:', orderData.items);
       return NextResponse.json(
         { success: false, error: 'Missing required order data' },
         { status: 400 }
@@ -76,10 +94,40 @@ export async function POST(request: NextRequest) {
     // Validate customer info fields
     if (!orderData.customerInfo.name || !orderData.customerInfo.email || !orderData.customerInfo.phone) {
       console.log('Validation failed: Missing required customer info');
+      console.log('Customer name:', orderData.customerInfo.name);
+      console.log('Customer email:', orderData.customerInfo.email);
+      console.log('Customer phone:', orderData.customerInfo.phone);
       return NextResponse.json(
         { success: false, error: 'Missing required customer information' },
         { status: 400 }
       );
+    }
+
+    // Validate group booking data if present
+    if (orderData.isGroupBooking && orderData.groupMembers) {
+      console.log('Validating group booking data:', {
+        isGroupBooking: orderData.isGroupBooking,
+        groupMembersCount: orderData.groupMembers.length,
+        groupMembers: orderData.groupMembers.map(m => ({
+          firstName: m.firstName,
+          lastName: m.lastName,
+          email: m.email,
+          phone: m.phone,
+          packageId: m.packageId
+        }))
+      });
+
+      // Validate each group member
+      for (let i = 0; i < orderData.groupMembers.length; i++) {
+        const member = orderData.groupMembers[i];
+        if (!member.firstName || !member.lastName || !member.email || !member.phone || !member.packageId) {
+          console.log(`Validation failed: Missing required group member data for member ${i}:`, member);
+          return NextResponse.json(
+            { success: false, error: `Missing required information for group member ${i + 1}` },
+            { status: 400 }
+          );
+        }
+      }
     }
 
     // Verify payment intent if provided
@@ -317,6 +365,49 @@ export async function POST(request: NextRequest) {
               }
             });
             userPackages.push(userPackage);
+          }
+        }
+      }
+
+      // Handle group members for group bookings
+      if (orderData.isGroupBooking && orderData.groupMembers && orderData.groupMembers.length > 0) {
+        console.log('Processing group members:', orderData.groupMembers.length);
+        
+        for (const groupMember of orderData.groupMembers) {
+          // Create or find group member user
+          let groupMemberUser = await tx.user.findFirst({
+            where: { email: groupMember.email }
+          });
+
+          if (!groupMemberUser) {
+            groupMemberUser = await tx.user.create({
+              data: {
+                email: groupMember.email,
+                fullName: `${groupMember.firstName} ${groupMember.lastName}`,
+                phone: groupMember.countryCode 
+                  ? `${groupMember.countryCode} ${groupMember.phone}`
+                  : groupMember.phone,
+                role: 'USER',
+                status: 'ACTIVE'
+              }
+            });
+          }
+
+          // Find the corresponding package for this group member
+          const packageItem = orderData.items.find(item => item.id === groupMember.packageId);
+          if (packageItem && packageItem.type === 'package') {
+            // Find the user package for this group member
+            const groupMemberUserPackage = userPackages.find(up => 
+              up.packagePriceId === parseInt(packageItem.id)
+            );
+
+            if (groupMemberUserPackage) {
+              // Update the user package to belong to the group member
+              await tx.userPackage.update({
+                where: { id: groupMemberUserPackage.id },
+                data: { userId: groupMemberUser.id }
+              });
+            }
           }
         }
       }
@@ -607,7 +698,22 @@ export async function POST(request: NextRequest) {
         shipping_address: result.order.shippingAddress as any,
         scheduleDetails: enhancedScheduleDetails?.[0] || undefined,
         packageBookingDetails: packageBookingDetails || undefined,
-        order_url: orderUrl
+        order_url: orderUrl,
+        // Add group booking information
+        is_group_booking: orderData.isGroupBooking || false,
+        group_members_count: orderData.groupMembers?.length || 0,
+        group_members: orderData.groupMembers?.map(member => ({
+          first_name: member.firstName,
+          last_name: member.lastName,
+          email: member.email,
+          phone: member.phone,
+          country_code: member.countryCode,
+          package_name: orderData.items.find(item => item.id === member.packageId)?.name || 'Package',
+          birth_date: member.birthDate,
+          birth_time: member.birthTime,
+          birth_place: member.birthPlace,
+          question: member.question
+        })) || []
       };
 
       // Send email asynchronously (don't wait for it to complete)
@@ -667,102 +773,132 @@ export async function POST(request: NextRequest) {
         console.log('📱 Starting Telegram notification process for order:', result.order.id);
 
         // Always send notifications to info@matmax.store for ALL orders
-        const businessUser = await prisma.$queryRaw`
-          SELECT id FROM users WHERE email = 'info@matmax.store' LIMIT 1
-        ` as any[];
+        const businessUser = await prisma.user.findFirst({
+          where: { email: 'info@matmax.store' },
+          select: { id: true }
+        });
 
-        console.log('🏢 Business user lookup result:', businessUser.length > 0 ? 'Found' : 'Not found');
+        console.log('🏢 Business user lookup result:', businessUser ? 'Found' : 'Not found');
 
-        if (businessUser.length > 0) {
-          const telegramUsers = await prisma.$queryRaw`
-            SELECT * FROM telegram_users
-            WHERE user_id = ${businessUser[0].id}
-            AND is_active = true
-            LIMIT 1
-          ` as any[];
+        if (businessUser) {
+          console.log('🔍 Looking for Telegram user with userId:', businessUser.id);
+          
+          const telegramUser = await prisma.telegramUser.findFirst({
+            where: { 
+              userId: businessUser.id,
+              isActive: true
+            }
+          });
 
-          console.log('📱 Telegram user lookup result:', telegramUsers.length > 0 ? 'Found' : 'Not found');
-
-          const telegramUser = telegramUsers[0];
+          console.log('📱 Telegram user lookup result:', telegramUser ? 'Found' : 'Not found');
+          if (telegramUser) {
+            console.log('📱 Telegram user details:', {
+              id: telegramUser.id,
+              chatId: telegramUser.telegramChatId,
+              isActive: telegramUser.isActive
+            });
+          } else {
+            console.log('❌ No Telegram user found for business user:', businessUser.id);
+            // Let's also check if there are any Telegram users at all
+            const allTelegramUsers = await prisma.telegramUser.findMany({
+              where: { isActive: true },
+              select: { id: true, userId: true, telegramChatId: true, isActive: true }
+            });
+            console.log('📱 All active Telegram users:', allTelegramUsers);
+          }
 
           if (telegramUser) {
             console.log('📱 Sending Telegram order confirmation to business account (info@matmax.store):', telegramUser.telegramChatId);
 
-          // Prepare order details for Telegram (matching email format)
-          const telegramOrderDetails: OrderDetails = {
-            orderId: result.order.id,
-            orderNumber: result.order.orderNumber,
-            customerName: result.order.customerName,
-            customerEmail: result.order.customerEmail,
-            customerPhone: result.order.customerPhone,
-            orderDate: result.order.createdAt.toLocaleDateString('es-ES', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            }),
-            orderStatus: result.order.status.toLowerCase(),
-            orderStatusText: result.order.status === 'CONFIRMED' ? 'Confirmado' : result.order.status,
-            paymentStatus: result.order.paymentStatus.toLowerCase(),
-            paymentStatusText: result.order.paymentStatus === 'COMPLETED' ? 'Completado' :
-                              result.order.paymentStatus === 'PENDING' ? 'Pendiente' : result.order.paymentStatus,
-            billingDocumentType: result.order.billingDocumentType || 'boleta_simple',
-            dni: result.order.dni || undefined,
-            ruc: result.order.ruc || undefined,
-            companyName: result.order.companyName || undefined,
-            items: emailOrderItems, // Use the same formatted items as email
-            subtotal: Number(result.order.subtotal),
-            taxAmount: Number(result.order.taxAmount),
-            shippingAmount: Number(result.order.shippingAmount),
-            total: Number(result.order.total),
-            currency: result.order.currency,
-            notes: result.order.notes || undefined,
-            shippingAddress: result.order.shippingAddress ? {
-              address: result.order.shippingAddress.address,
-              city: result.order.shippingAddress.city,
-              state: result.order.shippingAddress.state,
-              zipCode: result.order.shippingAddress.zipCode,
-              country: result.order.shippingAddress.country
-            } : undefined,
-            scheduleDetails: enhancedScheduleDetails?.map(schedule => ({
-              selectedDate: schedule.selectedDate,
-              selectedTime: schedule.selectedTime,
-              teacher: schedule.teacher,
-              serviceType: schedule.serviceType,
-              venue: schedule.venue
-            })),
-            packageBookingDetails: packageBookingDetails || undefined
-          };
+            // Prepare order details for Telegram (matching email format)
+            const telegramOrderDetails: OrderDetails = {
+              orderId: result.order.id,
+              orderNumber: result.order.orderNumber,
+              customerName: result.order.customerName,
+              customerEmail: result.order.customerEmail,
+              customerPhone: result.order.customerPhone,
+              orderDate: result.order.createdAt.toLocaleDateString('es-ES', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              }),
+              orderStatus: result.order.status.toLowerCase(),
+              orderStatusText: result.order.status === 'CONFIRMED' ? 'Confirmado' : result.order.status,
+              paymentStatus: result.order.paymentStatus.toLowerCase(),
+              paymentStatusText: result.order.paymentStatus === 'COMPLETED' ? 'Completado' :
+                                result.order.paymentStatus === 'PENDING' ? 'Pendiente' : result.order.paymentStatus,
+              billingDocumentType: result.order.billingDocumentType || 'boleta_simple',
+              dni: result.order.dni || undefined,
+              ruc: result.order.ruc || undefined,
+              companyName: result.order.companyName || undefined,
+              items: emailOrderItems, // Use the same formatted items as email
+              subtotal: Number(result.order.subtotal),
+              taxAmount: Number(result.order.taxAmount),
+              shippingAmount: Number(result.order.shippingAmount),
+              total: Number(result.order.total),
+              currency: result.order.currency,
+              notes: result.order.notes || undefined,
+              shippingAddress: result.order.shippingAddress ? {
+                address: result.order.shippingAddress.address,
+                city: result.order.shippingAddress.city,
+                state: result.order.shippingAddress.state,
+                zipCode: result.order.shippingAddress.zipCode,
+                country: result.order.shippingAddress.country
+              } : undefined,
+              scheduleDetails: enhancedScheduleDetails?.map(schedule => ({
+                selectedDate: schedule.selectedDate,
+                selectedTime: schedule.selectedTime,
+                teacher: schedule.teacher,
+                serviceType: schedule.serviceType,
+                venue: schedule.venue
+              })),
+              packageBookingDetails: packageBookingDetails || undefined,
+              // Add group booking information
+              isGroupBooking: orderData.isGroupBooking || false,
+              groupMembers: orderData.groupMembers?.map(member => ({
+                firstName: member.firstName,
+                lastName: member.lastName,
+                email: member.email,
+                phone: member.phone,
+                countryCode: member.countryCode,
+                packageName: orderData.items.find(item => item.id === member.packageId)?.name || 'Package',
+                birthDate: member.birthDate,
+                birthTime: member.birthTime,
+                birthPlace: member.birthPlace,
+                question: member.question
+              })) || []
+            };
 
-          // Send Telegram notification to MatMax Bot Service
-          console.log('📡 Calling bot service with chat ID:', telegramUser.telegramChatId);
-          const telegramResponse = await fetch('https://telemax-q6w6ogtij-matmaxworlds-projects.vercel.app/api/orders/send-notification', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              orderDetails: telegramOrderDetails,
-              telegramChatId: telegramUser.telegramChatId
-            }),
-          });
+            // Send Telegram notification to MatMax Bot Service
+            console.log('📡 Calling bot service with chat ID:', telegramUser.telegramChatId);
+            const telegramResponse = await fetch('https://telemax-q6w6ogtij-matmaxworlds-projects.vercel.app/api/orders/send-notification', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                orderDetails: telegramOrderDetails,
+                telegramChatId: telegramUser.telegramChatId
+              }),
+            });
 
-          console.log('📡 Bot service response status:', telegramResponse.status);
-          if (telegramResponse.ok) {
-            console.log('✅ Telegram order confirmation sent successfully');
+            console.log('📡 Bot service response status:', telegramResponse.status);
+            if (telegramResponse.ok) {
+              console.log('✅ Telegram order confirmation sent successfully');
+            } else {
+              console.error('❌ Failed to send Telegram order confirmation to business account, status:', telegramResponse.status);
+              const errorText = await telegramResponse.text();
+              console.error('❌ Bot service error:', errorText);
+            }
           } else {
-            console.error('❌ Failed to send Telegram order confirmation to business account, status:', telegramResponse.status);
-            const errorText = await telegramResponse.text();
-            console.error('❌ Bot service error:', errorText);
+            console.log('⚠️ Business account (info@matmax.store) does not have Telegram linked');
           }
         } else {
-          console.log('⚠️ Business account (info@matmax.store) does not have Telegram linked');
+          console.log('⚠️ Business account (info@matmax.store) not found');
         }
-      } else {
-        console.log('⚠️ Business account (info@matmax.store) not found');
-      }
       } catch (telegramError) {
         console.error('Error sending Telegram order notification:', telegramError);
         // Don't fail the order creation if Telegram notification fails

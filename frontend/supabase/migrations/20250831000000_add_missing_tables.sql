@@ -158,7 +158,7 @@ ON CONFLICT (code) DO NOTHING;
 INSERT INTO session_durations (name, duration_minutes, description) VALUES
 ('Standard Session', 60, 'Standard 1-hour wellness session'),
 ('Extended Session', 90, 'Extended 1.5-hour wellness session'),
-('Quick Session', 30, 'Quick 30-minute wellness session')
+('1 Hour Session', 60, 'Standard 1-hour wellness class')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO package_definitions (name, description, sessions_count, session_duration_id, package_type) VALUES

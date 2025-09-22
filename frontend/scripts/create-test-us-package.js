@@ -48,7 +48,7 @@ async function createTestUsPackage() {
       where: { id: 999 }, // Use a high ID to ensure it appears first
       update: {
         name: 'Test Us - Only Today!',
-        description: 'Special promotional package - 1 session of 60 minutes. Limited time offer!',
+        description: 'Special promotional package - 1 session of 1 hour. Limited time offer!',
         sessionsCount: 1,
         sessionDurationId: sessionDuration.id,
         packageType: 'individual',
@@ -60,7 +60,7 @@ async function createTestUsPackage() {
       },
       create: {
         name: 'Test Us - Only Today!',
-        description: 'Special promotional package - 1 session of 60 minutes. Limited time offer!',
+        description: 'Special promotional package - 1 session of 1 hour. Limited time offer!',
         sessionsCount: 1,
         sessionDurationId: sessionDuration.id,
         packageType: 'individual',

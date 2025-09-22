@@ -42,7 +42,7 @@ async function createLocalTestUsPackage() {
       where: { id: 6 }, // Use same ID as cloud
       update: {
         name: 'Test Us - Only Today!',
-        description: 'Special promotional package - 1 session of 60 minutes. Limited time offer!',
+        description: 'Special promotional package - 1 session of 1 hour. Limited time offer!',
         sessionsCount: 1,
         sessionDurationId: sessionDuration.id,
         packageType: 'individual',
@@ -54,7 +54,7 @@ async function createLocalTestUsPackage() {
       },
       create: {
         name: 'Test Us - Only Today!',
-        description: 'Special promotional package - 1 session of 60 minutes. Limited time offer!',
+        description: 'Special promotional package - 1 session of 1 hour. Limited time offer!',
         sessionsCount: 1,
         sessionDurationId: sessionDuration.id,
         packageType: 'individual',

@@ -131,7 +131,7 @@ export default function PackagesPage() {
               <div className="space-y-2">
                 <div className="flex items-center space-x-2 text-sm text-gray-400">
                   <ClockIcon className="w-4 h-4" />
-                  <span>{pkg.sessionDuration?.duration_minutes || 'N/A'} minutes per session</span>
+                  <span>{pkg.sessionDuration?.duration_minutes === 60 ? '1 hour' : `${pkg.sessionDuration?.duration_minutes || 'N/A'} minutes`} per session</span>
                 </div>
                 <div className="flex items-center space-x-2 text-sm text-gray-400">
                   <CalendarIcon className="w-4 h-4" />

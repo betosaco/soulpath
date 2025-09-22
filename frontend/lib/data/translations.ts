@@ -105,7 +105,7 @@ export const defaultTranslations = {
       wellnessFocus: 'Wellness Focus',
       wellnessFocusDescription: 'Evidence-based approaches to physical and mental wellness through yoga and mindfulness.',
       flexibleScheduling: 'Flexible Scheduling',
-      flexibleSchedulingDescription: '60-minute sessions with 30-day validity, designed to fit your busy lifestyle.',
+      flexibleSchedulingDescription: '1-hour sessions with 30-day validity, designed to fit your busy lifestyle.',
       getInTouch: 'Get in Touch',
       getInTouchDescription: 'Ready to start your wellness journey? We\'d love to hear from you and answer any questions you might have.',
       location: 'Location',

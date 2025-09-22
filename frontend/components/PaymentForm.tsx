@@ -107,7 +107,7 @@ export function PaymentForm({
       packageData: {
         ...packageData,
         id: parseInt(packageData.id),
-        description: `${packageData.sessions} session(s) of ${packageData.duration} minutes each`,
+        description: `${packageData.sessions} session(s) of ${packageData.duration === 60 ? '1 hour' : `${packageData.duration} minutes`} each`,
         sessionsCount: packageData.sessions,
         packageType: 'individual',
         maxGroupSize: 1,

@@ -71,7 +71,7 @@ class ActionFetchPackages(Action):
             message += f"**{i}. {name}**{popular_badge}\n"
             message += f"   💰 Price: {price_text}\n"
             message += f"   📅 Sessions: {sessions}\n"
-            message += f"   ⏱️ Duration: {duration} minutes each\n"
+            message += f"   ⏱️ Duration: {duration} hour each\n" if duration == 60 else f"   ⏱️ Duration: {duration} minutes each\n"
             message += f"   📝 {description}\n\n"
         
         message += "💫 **Ready to book?** Just let me know which package interests you, and I'll help you get started!"

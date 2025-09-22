@@ -322,24 +322,14 @@ async function main() {
       where: { id: 1 },
       update: {},
       create: {
-        name: '30 Minutes',
-        duration_minutes: 30,
-        description: 'Quick wellness session',
+        name: '1 Hour',
+        duration_minutes: 60,
+        description: 'Standard 1-hour wellness class',
         isActive: true
       }
     }),
     prisma.sessionDuration.upsert({
       where: { id: 2 },
-      update: {},
-      create: {
-        name: '60 Minutes',
-        duration_minutes: 60,
-        description: 'Standard wellness session',
-        isActive: true
-      }
-    }),
-    prisma.sessionDuration.upsert({
-      where: { id: 3 },
       update: {},
       create: {
         name: '90 Minutes',
@@ -349,12 +339,22 @@ async function main() {
       }
     }),
     prisma.sessionDuration.upsert({
-      where: { id: 4 },
+      where: { id: 3 },
       update: {},
       create: {
         name: '120 Minutes',
         duration_minutes: 120,
         description: 'Comprehensive wellness session',
+        isActive: true
+      }
+    }),
+    prisma.sessionDuration.upsert({
+      where: { id: 4 },
+      update: {},
+      create: {
+        name: '150 Minutes',
+        duration_minutes: 150,
+        description: 'Intensive wellness session',
         isActive: true
       }
     })
@@ -370,7 +370,7 @@ async function main() {
       update: {},
       create: {
         currencyId: 1, // USD
-        sessionDurationId: 1, // 30 minutes
+        sessionDurationId: 1, // 1 hour
         sessionType: 'individual',
         base_price: 50.00,
         group_discount_percent: 0,
@@ -384,7 +384,7 @@ async function main() {
       update: {},
       create: {
         currencyId: 1, // USD
-        sessionDurationId: 2, // 60 minutes
+        sessionDurationId: 2, // 90 minutes
         sessionType: 'individual',
         base_price: 80.00,
         group_discount_percent: 0,
@@ -398,7 +398,7 @@ async function main() {
       update: {},
       create: {
         currencyId: 1, // USD
-        sessionDurationId: 3, // 90 minutes
+        sessionDurationId: 1, // 90 minutes
         sessionType: 'individual',
         base_price: 120.00,
         group_discount_percent: 0,
@@ -413,7 +413,7 @@ async function main() {
       update: {},
       create: {
         currencyId: 2, // EUR
-        sessionDurationId: 1, // 30 minutes - different duration to avoid conflict
+        sessionDurationId: 1, // 1 hour - different duration to avoid conflict
         sessionType: 'group',
         base_price: 60.00,
         group_discount_percent: 25.00,
@@ -432,9 +432,9 @@ async function main() {
       where: { id: 1 },
       update: {
         name: '01 MATPASS',
-        description: '1 session of 60 minutes',
+        description: '1 session of 1 hour',
         sessionsCount: 1,
-        sessionDurationId: 3,
+        sessionDurationId: 1,
         packageType: 'individual',
         maxGroupSize: 1,
         isActive: true,
@@ -442,9 +442,9 @@ async function main() {
       },
       create: {
         name: '01 MATPASS',
-        description: '1 session of 60 minutes',
+        description: '1 session of 1 hour',
         sessionsCount: 1,
-        sessionDurationId: 3,
+        sessionDurationId: 1,
         packageType: 'individual',
         maxGroupSize: 1,
         isActive: true,
@@ -455,9 +455,9 @@ async function main() {
       where: { id: 2 },
       update: {
         name: '04 MATPASS',
-        description: '4 sessions of 60 minutes each',
+        description: '4 sessions of 1 hour each',
         sessionsCount: 4,
-        sessionDurationId: 3,
+        sessionDurationId: 1,
         packageType: 'individual',
         maxGroupSize: 1,
         isActive: true,
@@ -465,9 +465,9 @@ async function main() {
       },
       create: {
         name: '04 MATPASS',
-        description: '4 sessions of 60 minutes each',
+        description: '4 sessions of 1 hour each',
         sessionsCount: 4,
-        sessionDurationId: 3,
+        sessionDurationId: 1,
         packageType: 'individual',
         maxGroupSize: 1,
         isActive: true,
@@ -478,9 +478,9 @@ async function main() {
       where: { id: 3 },
       update: {
         name: '08 MATPASS',
-        description: '8 sessions of 60 minutes each',
+        description: '8 sessions of 1 hour each',
         sessionsCount: 8,
-        sessionDurationId: 3,
+        sessionDurationId: 1,
         packageType: 'individual',
         maxGroupSize: 1,
         isActive: true,
@@ -488,9 +488,9 @@ async function main() {
       },
       create: {
         name: '08 MATPASS',
-        description: '8 sessions of 60 minutes each',
+        description: '8 sessions of 1 hour each',
         sessionsCount: 8,
-        sessionDurationId: 3,
+        sessionDurationId: 1,
         packageType: 'individual',
         maxGroupSize: 1,
         isActive: true,
@@ -501,9 +501,9 @@ async function main() {
       where: { id: 4 },
       update: {
         name: '12 MATPASS',
-        description: '12 sessions of 60 minutes each',
+        description: '12 sessions of 1 hour each',
         sessionsCount: 12,
-        sessionDurationId: 3,
+        sessionDurationId: 1,
         packageType: 'individual',
         maxGroupSize: 1,
         isActive: true,
@@ -511,9 +511,9 @@ async function main() {
       },
       create: {
         name: '12 MATPASS',
-        description: '12 sessions of 60 minutes each',
+        description: '12 sessions of 1 hour each',
         sessionsCount: 12,
-        sessionDurationId: 3,
+        sessionDurationId: 1,
         packageType: 'individual',
         maxGroupSize: 1,
         isActive: true,
@@ -524,9 +524,9 @@ async function main() {
       where: { id: 5 },
       update: {
         name: '24 MATPASS',
-        description: '24 sessions of 60 minutes each',
+        description: '24 sessions of 1 hour each',
         sessionsCount: 24,
-        sessionDurationId: 3,
+        sessionDurationId: 1,
         packageType: 'individual',
         maxGroupSize: 1,
         isActive: true,
@@ -534,9 +534,9 @@ async function main() {
       },
       create: {
         name: '24 MATPASS',
-        description: '24 sessions of 60 minutes each',
+        description: '24 sessions of 1 hour each',
         sessionsCount: 24,
-        sessionDurationId: 3,
+        sessionDurationId: 1,
         packageType: 'individual',
         maxGroupSize: 1,
         isActive: true,
@@ -657,7 +657,7 @@ async function main() {
         endTime: '17:00',
         capacity: 3,
         isAvailable: true,
-        sessionDurationId: 3, // 60 minutes
+        sessionDurationId: 1, // 1 hour
         autoAvailable: true
       }
     }),
@@ -670,7 +670,7 @@ async function main() {
         endTime: '17:00',
         capacity: 3,
         isAvailable: true,
-        sessionDurationId: 3, // 60 minutes
+        sessionDurationId: 1, // 1 hour
         autoAvailable: true
       }
     }),
@@ -683,7 +683,7 @@ async function main() {
         endTime: '17:00',
         capacity: 3,
         isAvailable: true,
-        sessionDurationId: 3, // 60 minutes
+        sessionDurationId: 1, // 1 hour
         autoAvailable: true
       }
     }),
@@ -696,7 +696,7 @@ async function main() {
         endTime: '17:00',
         capacity: 3,
         isAvailable: true,
-        sessionDurationId: 3, // 60 minutes
+        sessionDurationId: 1, // 1 hour
         autoAvailable: true
       }
     }),
@@ -709,7 +709,7 @@ async function main() {
         endTime: '17:00',
         capacity: 3,
         isAvailable: true,
-        sessionDurationId: 3, // 60 minutes
+        sessionDurationId: 1, // 1 hour
         autoAvailable: true
       }
     }),
@@ -722,7 +722,7 @@ async function main() {
         endTime: '16:00',
         capacity: 3,
         isAvailable: true,
-        sessionDurationId: 3, // 60 minutes
+        sessionDurationId: 1, // 1 hour
         autoAvailable: true
       }
     })

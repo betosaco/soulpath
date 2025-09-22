@@ -41,7 +41,7 @@ async function fixLocalPackageOrder() {
       testUsPackage = await prisma.packageDefinition.create({
         data: {
           name: 'Test Us - Only Today!',
-          description: 'Special promotional package - 1 session of 60 minutes. Limited time offer!',
+          description: 'Special promotional package - 1 session of 1 hour. Limited time offer!',
           sessionsCount: 1,
           sessionDurationId: 3, // 60 minutes
           packageType: 'individual',

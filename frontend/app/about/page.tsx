@@ -336,7 +336,7 @@ Could you help me? Thank you!`;
                   </CardHeader>
                   <CardContent>
                     <p className="text-gray-600 leading-relaxed">
-                      {getTranslation('about.flexibleSchedulingDescription', '60-minute sessions with 30-day validity, designed to fit your busy lifestyle.')}
+                      {getTranslation('about.flexibleSchedulingDescription', '1-hour sessions with 30-day validity, designed to fit your busy lifestyle.')}
                     </p>
                   </CardContent>
                 </Card>

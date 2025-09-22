@@ -211,6 +211,10 @@ function UnifiedCheckoutFlowContent({
     phone: string;
     countryCode: string;
     emailError?: string;
+    birthDate?: string;
+    birthTime?: string;
+    birthPlace?: string;
+    question?: string;
   }>>([]);
 
   // Load schedule and package data from sessionStorage on component mount
@@ -780,13 +784,18 @@ function UnifiedCheckoutFlowContent({
         currency: currencyCode,
         paymentIntentId: undefined, // No payment for pay later - API will set status to PENDING
         notes: formData.notes,
-        scheduleDetails: scheduleDetails
+        scheduleDetails: scheduleDetails,
+        // Add group members data for group bookings
+        groupMembers: isGroupBooking ? groupMembers : undefined,
+        isGroupBooking: isGroupBooking || false
       };
 
       // Log order data for debugging
-      console.log('Order data being sent:', orderData);
+      console.log('Order data being sent:', JSON.stringify(orderData, null, 2));
       console.log('Cart items:', cartItems);
       console.log('Calculated total:', calculateTotal());
+      console.log('Is group booking:', isGroupBooking);
+      console.log('Group members:', groupMembers);
 
       const response = await fetch('/api/orders/create-unified', {
         method: 'POST',
@@ -799,6 +808,18 @@ function UnifiedCheckoutFlowContent({
       // Log response details before parsing
       console.log('Response status:', response.status);
       console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      
+      // Log error response if not ok
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API Error Response:', errorText);
+        try {
+          const errorJson = JSON.parse(errorText);
+          console.error('Parsed error:', errorJson);
+        } catch (e) {
+          console.error('Could not parse error as JSON:', e);
+        }
+      }
       
       // Check if response is ok
       if (!response.ok) {
@@ -1137,6 +1158,10 @@ function UnifiedCheckoutFlowContent({
                           email: string;
                           phone: string;
                           countryCode: string;
+                          birthDate?: string;
+                          birthTime?: string;
+                          birthPlace?: string;
+                          question?: string;
                         }> = [];
                         packageItems.forEach((item, packageIndex) => {
                           const quantity = item.quantity || 1;
@@ -2608,6 +2633,10 @@ function UnifiedCheckoutFlowContent({
                       email: string;
                       phone: string;
                       countryCode: string;
+                      birthDate?: string;
+                      birthTime?: string;
+                      birthPlace?: string;
+                      question?: string;
                     }> = [];
                     packageItems.forEach((item, packageIndex) => {
                       const quantity = item.quantity || 1;

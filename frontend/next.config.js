@@ -101,19 +101,19 @@ const nextConfig = {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: https: blob:",
-      `connect-src 'self' ${isDevelopment ? 'http://localhost:* ws://localhost:* ' : ''}https://*.vercel.app https://matmax.world https://www.matmax.world https://api.stripe.com https://js.stripe.com`,
-      "frame-src 'self'",
+      `connect-src 'self' ${isDevelopment ? 'http://localhost:* ws://localhost:* ' : ''}https://*.vercel.app https://matmax.world https://www.matmax.world https://api.stripe.com https://js.stripe.com https://static.micuentaweb.pe`,
+      "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://checkout.stripe.com",
       "object-src 'none'",
       "base-uri 'self'",
-      "form-action 'self' https://*.vercel.app",
+      "form-action 'self' https://*.vercel.app https://checkout.stripe.com",
       "frame-ancestors 'none'",
       "upgrade-insecure-requests"
     ];
 
-    // Add script-src with or without unsafe-eval based on environment
+    // Add script-src with payment providers and unsafe-eval for production
     const scriptSrc = isDevelopment
-      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com"
-      : "script-src 'self' 'unsafe-inline' https://js.stripe.com";
+      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://static.micuentaweb.pe"
+      : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://static.micuentaweb.pe";
 
     return [
       {

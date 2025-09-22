@@ -300,7 +300,7 @@ export function PackagesBookingFlow() {
                           </div>
                           <div className="flex items-center text-sm">
                             <Clock className="w-4 h-4 mr-2 text-primary" />
-                            <span className="text-muted">{pkg.packageDefinition.sessionDuration.duration_minutes} minutes each</span>
+                            <span className="text-muted">{pkg.packageDefinition.sessionDuration.duration_minutes === 60 ? '1 hour' : `${pkg.packageDefinition.sessionDuration.duration_minutes} minutes`} each</span>
                           </div>
                           <div className="flex items-center text-sm">
                             <Calendar className="w-4 h-4 mr-2 text-primary" />

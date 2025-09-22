@@ -165,6 +165,7 @@ model User {
   otpVerifications OtpVerification[]
   purchases        Purchase[]
   userPackages     UserPackage[]
+  telegramUsers    TelegramUser[]
 
   @@index([email], map: "idx_users_email")
   @@index([status], map: "idx_users_status")
@@ -1417,6 +1418,26 @@ enum CustomerStatus {
   ACTIVE
   INACTIVE
   BLOCKED
+}
+
+model TelegramUser {
+  id                String    @id @default(cuid())
+  userId            String?   @map("user_id")
+  telegramChatId    String    @map("telegram_chat_id") @db.VarChar(50)
+  telegramUserId    String?   @map("telegram_user_id") @db.VarChar(50)
+  telegramUsername  String?   @map("telegram_username") @db.VarChar(100)
+  telegramFirstName String?   @map("telegram_first_name") @db.VarChar(100)
+  telegramLastName  String?   @map("telegram_last_name") @db.VarChar(100)
+  isActive          Boolean   @default(true) @map("is_active")
+  lastInteraction   DateTime? @map("last_interaction") @db.Timestamptz(6)
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user              User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "idx_telegram_users_user_id")
+  @@index([telegramChatId], map: "idx_telegram_users_telegram_chat_id")
+  @@index([isActive], map: "idx_telegram_users_active")
+  @@map("telegram_users")
 }
 
 enum OrderItemType {

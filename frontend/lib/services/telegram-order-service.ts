@@ -28,6 +28,21 @@ export interface OrderDetails {
   shippingAddress?: Address;
   scheduleDetails?: ScheduleDetail[];
   packageBookingDetails?: PackageBookingDetails;
+  isGroupBooking?: boolean;
+  groupMembers?: GroupMember[];
+}
+
+export interface GroupMember {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  countryCode: string;
+  packageName: string;
+  birthDate?: string;
+  birthTime?: string;
+  birthPlace?: string;
+  question?: string;
 }
 
 export interface OrderItem {
@@ -160,7 +175,7 @@ Thank you for choosing SoulPath! 🙏
     const itemsText = order.items.map(item => {
       const typeEmoji = item.type_text === 'Paquete de Yoga' ? '📚' : '🛍️';
       const sessionsInfo = item.type_text === 'Paquete de Yoga' && item.sessions ?
-        `\n   📅 ${item.sessions} sessions${item.duration_minutes ? ` (${item.duration_minutes}min each)` : ''}` : '';
+        `\n   📅 ${item.sessions} sessions${item.duration_minutes ? ` (${item.duration_minutes === 60 ? '1 hour' : `${item.duration_minutes}min`} each)` : ''}` : '';
 
       return `${typeEmoji} <b>${item.name}</b>
    💰 ${item.unit_price.toFixed(2)} ${order.currency} × ${item.quantity} = ${(item.total_price).toFixed(2)} ${order.currency}${sessionsInfo}`;
@@ -185,7 +200,7 @@ ${order.companyName ? `🏢 Company: ${order.companyName}` : ''}` : '';
       `\n📚 <b>Package Details:</b>
    📦 ${order.packageBookingDetails.packageName}
    📅 ${order.packageBookingDetails.sessionsCount} sessions
-   ⏱️ ${order.packageBookingDetails.durationMinutes || 'N/A'} minutes each
+   ⏱️ ${order.packageBookingDetails.durationMinutes === 60 ? '1 hour' : `${order.packageBookingDetails.durationMinutes || 'N/A'} minutes`} each
    🎯 Type: ${order.packageBookingDetails.packageType}` : '';
 
     const addressText = order.shippingAddress ?

@@ -131,6 +131,27 @@ async function configureBrevoTemplates() {
                 </tbody>
             </table>
 
+            {{#if is_group_booking}}
+            <div class="order-info">
+                <h3>👥 Información del Grupo</h3>
+                <p>Este es un pedido grupal con {{group_members_count}} miembros:</p>
+                <div class="group-members">
+                    {{#each group_members}}
+                    <div class="group-member" style="background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #E24A4A;">
+                        <h4>👤 {{first_name}} {{last_name}}</h4>
+                        <p><strong>📧 Email:</strong> {{email}}</p>
+                        <p><strong>📱 Teléfono:</strong> {{country_code}} {{phone}}</p>
+                        <p><strong>📦 Paquete:</strong> {{package_name}}</p>
+                        {{#if birth_date}}<p><strong>🎂 Fecha de Nacimiento:</strong> {{birth_date}}</p>{{/if}}
+                        {{#if birth_time}}<p><strong>🕐 Hora de Nacimiento:</strong> {{birth_time}}</p>{{/if}}
+                        {{#if birth_place}}<p><strong>📍 Lugar de Nacimiento:</strong> {{birth_place}}</p>{{/if}}
+                        {{#if question}}<p><strong>❓ Pregunta Específica:</strong> {{question}}</p>{{/if}}
+                    </div>
+                    {{/each}}
+                </div>
+            </div>
+            {{/if}}
+
             <div class="total-section">
                 <p><strong>Subtotal: {{currency}} {{subtotal}}</strong></p>
                 {{#if tax_amount}}<p>Impuestos: {{currency}} {{tax_amount}}</p>{{/if}}
@@ -185,6 +206,23 @@ ARTÍCULOS DEL PEDIDO:
 {{#each order_items}}
 - {{name}} ({{type_text}}) - Cantidad: {{quantity}} - {{currency}} {{unit_price}} cada uno - Total: {{currency}} {{total_price}}
 {{/each}}
+
+{{#if is_group_booking}}
+INFORMACIÓN DEL GRUPO:
+Este es un pedido grupal con {{group_members_count}} miembros:
+
+{{#each group_members}}
+👤 {{first_name}} {{last_name}}
+   📧 Email: {{email}}
+   📱 Teléfono: {{country_code}} {{phone}}
+   📦 Paquete: {{package_name}}
+   {{#if birth_date}}🎂 Fecha de Nacimiento: {{birth_date}}{{/if}}
+   {{#if birth_time}}🕐 Hora de Nacimiento: {{birth_time}}{{/if}}
+   {{#if birth_place}}📍 Lugar de Nacimiento: {{birth_place}}{{/if}}
+   {{#if question}}❓ Pregunta Específica: {{question}}{{/if}}
+
+{{/each}}
+{{/if}}
 
 RESUMEN:
 - Subtotal: {{currency}} {{subtotal}}

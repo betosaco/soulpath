@@ -281,9 +281,9 @@ Here are our available packages:
 • Monthly Unlimited - $150
 
 <b>🏠 Private Sessions</b>
-• 1-on-1 Yoga - $60/hour
-• Couples Session - $80/hour
-• Small Group (3-4 people) - $25/person
+• 1-on-1 Yoga - $60/1-hour session
+• Couples Session - $80/1-hour session
+• Small Group (3-4 people) - $25/person per 1-hour session
 
 <b>🎯 Specialty Classes</b>
 • Meditation & Mindfulness - $30
@@ -361,6 +361,18 @@ ${order.companyName ? `🏢 Company: ${order.companyName}` : ''}` : '';
    ⏱️ ${order.packageBookingDetails.durationMinutes || 'N/A'} minutes each
    🎯 Type: ${order.packageBookingDetails.packageType}` : '';
 
+    const groupBookingText = order.isGroupBooking && order.groupMembers && order.groupMembers.length > 0 ?
+      `\n👥 <b>Group Booking (${order.groupMembers.length} members):</b>
+${order.groupMembers.map((member, index) => `
+   ${index + 1}. 👤 <b>${member.firstName} ${member.lastName}</b>
+      📧 ${member.email}
+      📱 ${member.countryCode} ${member.phone}
+      📦 ${member.packageName || 'Package'}
+      ${member.birthDate ? `🎂 ${member.birthDate}` : ''}
+      ${member.birthTime ? `🕐 ${member.birthTime}` : ''}
+      ${member.birthPlace ? `📍 ${member.birthPlace}` : ''}
+      ${member.question ? `❓ ${member.question}` : ''}`).join('')}` : '';
+
     const addressText = order.shippingAddress ?
       `\n🚚 <b>Shipping Address:</b>
    ${order.shippingAddress.address}
@@ -388,7 +400,7 @@ ${itemsText}
 💵 <b>Subtotal:</b> ${order.subtotal.toFixed(2)} ${order.currency}
 🧾 <b>Tax (IGV):</b> ${order.taxAmount.toFixed(2)} ${order.currency}
 🚚 <b>Shipping:</b> ${order.shippingAmount.toFixed(2)} ${order.currency}
-💳 <b>Total: ${order.total.toFixed(2)} ${order.currency}</b>${packageBookingText}${scheduleText}${addressText}${notesText}
+💳 <b>Total: ${order.total.toFixed(2)} ${order.currency}</b>${packageBookingText}${groupBookingText}${scheduleText}${addressText}${notesText}
 
 Thank you for your order at MatMax! 🙏
 We will contact you soon with next steps.
