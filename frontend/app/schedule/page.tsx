@@ -11,7 +11,9 @@ export default function SchedulePage() {
     const today = new Date();
     const day = today.getDay();
     const diff = today.getDate() - day + (day === 0 ? -6 : 1); // Monday
-    return new Date(today.setDate(diff));
+    const monday = new Date(today);
+    monday.setDate(diff - 1); // Adjust to get the correct Monday
+    return monday;
   });
   
   const [currentEndDate, setCurrentEndDate] = useState<Date>(() => {
