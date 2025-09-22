@@ -115,7 +115,7 @@ export function BookingSummaryPage({
       minute: '2-digit' 
     })}
 • Duración: ${packageData?.sessionDuration || 60} minutos
-• Tipo de servicio: ${schedule.serviceType?.name || 'Spiritual Reading'}
+• Tipo de servicio: ${schedule.serviceType?.name || 'Yoga Session'}
 • Descripción: ${schedule.serviceType?.description || 'Servicio de bienestar'}
 • Dificultad: ${schedule.serviceType?.difficulty || 'Todos los niveles'}
 

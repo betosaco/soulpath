@@ -144,7 +144,7 @@ export function EmailManagement() {
         </div>
         <div class="content">
             <h2>Thank you for your booking, {{userName}}!</h2>
-            <p>We're excited to guide you through your astrological reading. Your booking has been received and is being processed.</p>
+            <p>We're excited to guide you through your yoga session. Your booking has been received and is being processed.</p>
             
             <div class="booking-details">
                 <h3>📋 Booking Details</h3>
@@ -161,7 +161,7 @@ export function EmailManagement() {
             {{#if videoConferenceLink}}
             <div class="video-link">
                 <h3>🎥 Your Video Conference Link</h3>
-                <p>Join your astrology reading session using the link below:</p>
+                <p>Join your yoga session using the link below:</p>
                 <a href="{{VIDEO_LINK}}" target="_blank">Join Video Session</a>
                 <p><small>This link will be active 15 minutes before your scheduled session.</small></p>
             </div>
@@ -298,11 +298,11 @@ export function EmailManagement() {
         <div class="content">
             <div class="reminder-alert">
                 <h3>⏰ Upcoming Session</h3>
-                <p>This is a friendly reminder about your upcoming astrology reading.</p>
+                <p>This is a friendly reminder about your upcoming yoga session.</p>
             </div>
 
             <h2>Hello {{userName}},</h2>
-            <p>We're looking forward to your astrology reading session!</p>
+            <p>We're looking forward to your yoga session!</p>
             
             <div class="booking-details">
                 <h3>📅 Session Details</h3>
@@ -454,7 +454,7 @@ export function EmailManagement() {
         <div class="content">
             <div class="alert">
                 <h3>📋 New Client Booking Received</h3>
-                <p>A new astrology reading has been booked. Please review the details below and schedule the session.</p>
+                <p>A new yoga session has been booked. Please review the details below and schedule the session.</p>
             </div>
 
             <div class="booking-details">

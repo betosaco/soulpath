@@ -58,7 +58,7 @@ async function configureBrevoTemplates() {
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Confirmación de Pedido - MatMax</title>
+    <title>Confirmación de Pedido - MatMax Yoga Studio</title>
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -152,6 +152,31 @@ async function configureBrevoTemplates() {
             </div>
             {{/if}}
 
+            {{#if schedule_details}}
+            <div class="order-info">
+                <h3>📅 Detalles de las Reservas</h3>
+                {{#each schedule_details}}
+                <div style="background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #E24A4A;">
+                    <h4>📅 Sesión {{@index_plus_1}}</h4>
+                    <p><strong>Fecha:</strong> {{selected_date}}</p>
+                    <p><strong>Hora:</strong> {{selected_time}}</p>
+                    <p><strong>Día:</strong> {{day_of_week}}</p>
+                    <p><strong>Instructor:</strong> {{teacher}}</p>
+                    <p><strong>Tipo de Clase:</strong> {{service_type}}</p>
+                    <p><strong>Ubicación:</strong> {{venue}}</p>
+                    {{#if ../is_group_booking}}
+                    <p><strong>📦 Paquetes para esta sesión:</strong></p>
+                    <ul>
+                        {{#each ../group_members}}
+                        <li>{{@index_plus_1}}. <strong>{{first_name}} {{last_name}}</strong> - {{package_name}}</li>
+                        {{/each}}
+                    </ul>
+                    {{/if}}
+                </div>
+                {{/each}}
+            </div>
+            {{/if}}
+
             <div class="total-section">
                 <p><strong>Subtotal: {{currency}} {{subtotal}}</strong></p>
                 {{#if tax_amount}}<p>Impuestos: {{currency}} {{tax_amount}}</p>{{/if}}
@@ -202,7 +227,26 @@ INFORMACIÓN DE FACTURACIÓN:
 {{#if ruc}}- RUC: {{ruc}}{{/if}}
 {{#if company_name}}- Empresa: {{company_name}}{{/if}}
 
-ARTÍCULOS DEL PEDIDO:
+{{#if schedule_details}}
+DETALLES DE LAS RESERVAS:
+{{#each schedule_details}}
+Sesión {{@index_plus_1}}:
+- Fecha: {{selected_date}}
+- Hora: {{selected_time}}
+- Día: {{day_of_week}}
+- Instructor: {{teacher}}
+- Tipo de Clase: {{service_type}}
+- Ubicación: {{venue}}
+{{#if ../is_group_booking}}
+- Paquetes para esta sesión:
+{{#each ../group_members}}
+  {{@index_plus_1}}. {{first_name}} {{last_name}} - {{package_name}}
+{{/each}}
+{{/if}}
+
+{{/each}}
+
+{{/if}}ARTÍCULOS DEL PEDIDO:
 {{#each order_items}}
 - {{name}} ({{type_text}}) - Cantidad: {{quantity}} - {{currency}} {{unit_price}} cada uno - Total: {{currency}} {{total_price}}
 {{/each}}
@@ -263,7 +307,11 @@ MatMax Yoga Studio
           'total_amount',
           'currency',
           'shipping_address',
-          'order_url'
+          'order_url',
+          'schedule_details',
+          'is_group_booking',
+          'group_members_count',
+          'group_members'
         ],
         isActive: true
       },
@@ -279,7 +327,7 @@ MatMax Yoga Studio
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Confirmación de Compra - MatMax</title>
+    <title>Confirmación de Compra - MatMax Yoga Studio</title>
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -430,7 +478,7 @@ MatMax Yoga Studio
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Confirmación de Reserva - MatMax</title>
+    <title>Confirmación de Reserva - MatMax Yoga Studio</title>
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -556,7 +604,7 @@ MatMax Yoga Studio
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Recordatorio de Clase - MatMax</title>
+    <title>Recordatorio de Clase - MatMax Yoga Studio</title>
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }

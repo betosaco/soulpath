@@ -36,7 +36,7 @@ export async function sendBookingConfirmationEmail(bookingData: BookingEmailData
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Confirmación de Reserva - MatMax</title>
+    <title>Confirmación de Reserva - MatMax Yoga Studio</title>
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
         .container { max-width: 600px; margin: 0 auto; background-color: white; border-radius: 10px; overflow: hidden; box-shadow: 0 0 10px rgba(0,0,0,0.1); }

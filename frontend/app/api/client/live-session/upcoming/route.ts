@@ -24,8 +24,8 @@ export async function GET(request: NextRequest) {
     const upcomingSessions = [
       {
         id: 'session-1',
-        title: 'Spiritual Guidance Session',
-        description: 'One-on-one spiritual guidance and consultation',
+        title: 'Yoga Wellness Session',
+        description: 'One-on-one yoga and wellness consultation',
         startTime: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // 2 hours from now
         endTime: new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString(), // 3 hours from now
         duration: 60,
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
       {
         id: 'session-3',
         title: 'Live Q&A Session',
-        description: 'Ask questions and receive spiritual guidance',
+        description: 'Ask questions and receive yoga and wellness guidance',
         startTime: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
         endTime: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 minutes from now
         duration: 60,

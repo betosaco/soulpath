@@ -26,7 +26,7 @@ function transformFlatContentToNested(flatContent: Record<string, string>): Tran
     // Hero section
     nestedContent.en.hero = {
       title: flatContent.heroTitleEn || 'MatMax Yoga Studio',
-      tagline: 'Transform your life through spiritual guidance and healing',
+      tagline: 'Transform your life through mindful movement and breath',
       description: flatContent.heroSubtitleEn || 'Daily Vinyasa and Hatha Yoga for all levels.',
       ctaPrimary: 'Book Your Session',
       ctaSecondary: 'Learn More',

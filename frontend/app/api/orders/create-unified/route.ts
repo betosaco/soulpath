@@ -690,13 +690,13 @@ export async function POST(request: NextRequest) {
         companyName: result.order.companyName || undefined,
         orderItems: emailOrderItems.filter(item => item !== null),
         subtotal: Number(result.order.subtotal),
-        tax_amount: Number(result.order.taxAmount),
-        shipping_amount: Number(result.order.shippingAmount),
-        total_amount: Number(result.order.total),
+        taxAmount: Number(result.order.taxAmount),
+        shippingAmount: Number(result.order.shippingAmount),
+        totalAmount: Number(result.order.total),
         currency: result.order.currency,
         notes: result.order.notes || undefined,
         shipping_address: result.order.shippingAddress as any,
-        scheduleDetails: enhancedScheduleDetails?.[0] || undefined,
+        scheduleDetails: enhancedScheduleDetails || scheduleDetails || undefined,
         packageBookingDetails: packageBookingDetails || undefined,
         order_url: orderUrl,
         // Add group booking information
@@ -707,7 +707,7 @@ export async function POST(request: NextRequest) {
           last_name: member.lastName,
           email: member.email,
           phone: member.phone,
-          country_code: member.countryCode,
+          country_code: member.countryCode, // This is the phone prefix like "+51"
           package_name: orderData.items.find(item => item.id === member.packageId)?.name || 'Package',
           birth_date: member.birthDate,
           birth_time: member.birthTime,
@@ -863,7 +863,7 @@ export async function POST(request: NextRequest) {
                 lastName: member.lastName,
                 email: member.email,
                 phone: member.phone,
-                countryCode: member.countryCode,
+                countryCode: member.countryCode, // This is the phone prefix like "+51"
                 packageName: orderData.items.find(item => item.id === member.packageId)?.name || 'Package',
                 birthDate: member.birthDate,
                 birthTime: member.birthTime,
@@ -874,7 +874,8 @@ export async function POST(request: NextRequest) {
 
             // Send Telegram notification to MatMax Bot Service
             console.log('📡 Calling bot service with chat ID:', telegramUser.telegramChatId);
-            const telegramResponse = await fetch('https://telemax-q6w6ogtij-matmaxworlds-projects.vercel.app/api/orders/send-notification', {
+            console.log('📡 Telegram order details:', JSON.stringify(telegramOrderDetails, null, 2));
+            const telegramResponse = await fetch('https://telemax-p2m6q066b-matmaxworlds-projects.vercel.app/api/orders/send-notification', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

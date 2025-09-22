@@ -297,7 +297,7 @@ export function CustomerBookingFlow({ initialSlotData }: CustomerBookingFlowProp
         isAvailable: true,
         capacity: 1,
         bookedCount: 0,
-        sessionType: 'Spiritual Reading',
+        sessionType: 'Yoga Session',
         price: 8000, // $80 USD in cents
         // teacher: {
         //   name: 'Spiritual Guide',
@@ -860,7 +860,7 @@ export function CustomerBookingFlow({ initialSlotData }: CustomerBookingFlowProp
                         value={formData.question}
                         onChange={(e) => handleFormChange('question', e.target.value)}
                         className="bg-white border-gray-300 text-gray-900 min-h-[100px] mobile-input mobile-focus"
-                        placeholder="What would you like to explore in your reading?"
+                        placeholder="What would you like to explore in your yoga session?"
                         required
                       />
                   </div>

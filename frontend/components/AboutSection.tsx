@@ -112,7 +112,7 @@ export function AboutSection({ t }: AboutSectionProps) {
                   ) : (
                     <Image
                       src={profileImage}
-                      alt="José Garfias - Cosmic Navigator and Astrologer"
+                      alt="José Garfias - Yoga Instructor and Wellness Guide"
                       fill
                       className="object-cover object-center rounded-full"
                       style={{

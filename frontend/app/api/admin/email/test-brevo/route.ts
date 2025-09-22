@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
         <body>
             <div class="container">
                 <div class="header">
-                    <h1>✨ SoulPath Astrology ✨</h1>
+                    <h1>✨ MatMax Yoga Studio ✨</h1>
                     <p>Brevo Email Service Test</p>
                 </div>
                 <div class="content">
@@ -77,8 +77,8 @@ export async function POST(request: NextRequest) {
                     <p>If you received this email, the integration is working perfectly! 🚀</p>
                 </div>
                 <div class="footer">
-                    <p>© 2024 SoulPath Astrology - José Garfias<br>
-                    Guiding souls through the wisdom of the stars</p>
+                    <p>© 2024 MatMax Yoga Studio - José Garfias<br>
+                    Guiding souls through mindful movement and breath</p>
                 </div>
             </div>
         </body>

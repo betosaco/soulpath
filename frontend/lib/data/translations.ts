@@ -11,7 +11,7 @@ export const defaultTranslations = {
     },
     hero: {
       title: 'Find Your Flow, Transform Your Body & Mind',
-      tagline: 'Transform your life through spiritual guidance and healing',
+      tagline: 'Transform your life through mindful movement and breath',
       description: 'Daily Vinyasa and Hatha Yoga for all levels.',
       ctaPrimary: 'Book Your Session',
       ctaSecondary: 'Learn More'

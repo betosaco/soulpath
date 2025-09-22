@@ -109,8 +109,8 @@ export default function ScheduleBookingPage() {
           bookedCount: 0,
           isAvailable: true,
           serviceType: {
-            name: 'Spiritual Reading',
-            description: 'Personalized spiritual consultation and guidance',
+            name: 'Yoga Session',
+            description: 'Personalized yoga and wellness consultation',
             difficulty: 'All Levels'
           },
           teacher: {
@@ -481,7 +481,7 @@ ${formData.specialRequests}
                         value={formData.question}
                         onChange={(e) => setFormData(prev => ({ ...prev, question: e.target.value }))}
                         className="mt-1"
-                        placeholder="What would you like to explore in your reading?"
+                        placeholder="What would you like to explore in your yoga session?"
                         rows={3}
                       />
                     </div>

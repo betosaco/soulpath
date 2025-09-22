@@ -56,7 +56,7 @@ interface SeoSettings {
 const defaultSeoSettings: SeoSettings = {
   title: 'MatMax Yoga Studio',
   description: 'Yoga classes for all levels. Build strength, flexibility, and inner peace with MatMax Yoga Studio.',
-  keywords: 'yoga, yoga classes, wellness, meditation, flexibility, strength, balance',
+  keywords: 'yoga, yoga classes, wellness, meditation, flexibility, strength, balance, mindfulness, yoga studio, yoga practice',
   author: 'MatMax Yoga Studio',
   
   ogTitle: 'MatMax Yoga Studio',

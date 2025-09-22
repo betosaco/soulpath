@@ -346,12 +346,22 @@ ${order.ruc ? `🏢 RUC: ${order.ruc}` : ''}
 ${order.companyName ? `🏢 Company: ${order.companyName}` : ''}` : '';
 
     const scheduleText = order.scheduleDetails && order.scheduleDetails.length > 0 ?
-      order.scheduleDetails.map(schedule => {
-        return `📅 <b>Scheduled Session:</b>
+      order.scheduleDetails.map((schedule, index) => {
+        let sessionText = `📅 <b>Scheduled Session ${index + 1}:</b>
    🗓️ ${schedule.selectedDate || 'TBD'}
    🕐 ${schedule.selectedTime || 'TBD'}
    👨‍🏫 ${schedule.teacher || 'TBD'}
    🏠 ${schedule.venue || 'MatMax Wellness Studio'}`;
+        
+        // For group bookings, show which packages are applied to this session
+        if (order.isGroupBooking && order.groupMembers && order.groupMembers.length > 0) {
+          sessionText += `\n   📦 <b>Packages for this session:</b>`;
+          order.groupMembers.forEach((member, memberIndex) => {
+            sessionText += `\n      ${memberIndex + 1}. ${member.firstName} ${member.lastName} - ${member.packageName || 'Package'}`;
+          });
+        }
+        
+        return sessionText;
       }).join('\n\n') : '';
 
     const packageBookingText = order.packageBookingDetails ?
@@ -367,11 +377,11 @@ ${order.groupMembers.map((member, index) => `
    ${index + 1}. 👤 <b>${member.firstName} ${member.lastName}</b>
       📧 ${member.email}
       📱 ${member.countryCode} ${member.phone}
-      📦 ${member.packageName || 'Package'}
-      ${member.birthDate ? `🎂 ${member.birthDate}` : ''}
-      ${member.birthTime ? `🕐 ${member.birthTime}` : ''}
-      ${member.birthPlace ? `📍 ${member.birthPlace}` : ''}
-      ${member.question ? `❓ ${member.question}` : ''}`).join('')}` : '';
+      📦 <b>Package:</b> ${member.packageName || 'Package'}
+      ${member.birthDate ? `🎂 <b>Birth Date:</b> ${member.birthDate}` : ''}
+      ${member.birthTime ? `🕐 <b>Birth Time:</b> ${member.birthTime}` : ''}
+      ${member.birthPlace ? `📍 <b>Birth Place:</b> ${member.birthPlace}` : ''}
+      ${member.question ? `❓ <b>Question:</b> ${member.question}` : ''}`).join('')}` : '';
 
     const addressText = order.shippingAddress ?
       `\n🚚 <b>Shipping Address:</b>

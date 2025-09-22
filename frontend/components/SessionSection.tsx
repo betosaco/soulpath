@@ -37,7 +37,7 @@ export function SessionSection({ t, scrollToSection }: SessionSectionProps) {
             </p>
 
             <div className="space-y-3 sm:space-y-4 mb-8 sm:mb-10">
-              {(typeof t.session === 'object' && t.session?.deliverables && Array.isArray(t.session.deliverables) ? t.session.deliverables : ['Personalized Reading', 'Detailed Analysis', 'Follow-up Support']).map((item: string, index: number) => {
+              {(typeof t.session === 'object' && t.session?.deliverables && Array.isArray(t.session.deliverables) ? t.session.deliverables : ['Personalized Yoga Session', 'Detailed Wellness Analysis', 'Follow-up Support']).map((item: string, index: number) => {
                 const Icon = deliverableIcons[index];
                 return (
                   <motion.div 
@@ -109,10 +109,10 @@ export function SessionSection({ t, scrollToSection }: SessionSectionProps) {
                 className="text-center mt-3 sm:mt-6"
               >
                 <p className="text-[#FFD700] font-heading text-sm sm:text-base lg:text-lg">
-                  Your Cosmic Blueprint
+                  Your Wellness Journey
                 </p>
                 <p className="text-[#EAEAEA]/60 text-xs sm:text-sm mt-1 sm:mt-2">
-                  Personalized astrological analysis
+                  Personalized wellness analysis
                 </p>
               </motion.div>
             </div>

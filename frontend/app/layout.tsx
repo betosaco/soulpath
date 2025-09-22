@@ -7,17 +7,28 @@ import { CartProvider } from '@/lib/cart-context';
 
 export const metadata: Metadata = {
   title: 'MatMax Yoga Studio',
-  description: 'Strategic astrological counsel to navigate your life\'s most pivotal moments.',
-  keywords: ['astrology', 'counseling', 'spiritual guidance'],
+  description: 'Yoga classes for all levels. Build strength, flexibility, and inner peace with MatMax Yoga Studio.',
+  keywords: ['yoga', 'yoga classes', 'wellness', 'meditation', 'flexibility', 'strength', 'balance', 'mindfulness'],
   openGraph: {
     title: 'MatMax Yoga Studio',
-    description: 'Strategic astrological counsel to navigate your life\'s most pivotal moments.',
+    description: 'Yoga classes for all levels. Build strength, flexibility, and inner peace with MatMax Yoga Studio.',
     type: 'website',
+    url: 'https://matmax.store',
+    siteName: 'MatMax Yoga Studio',
+    images: [
+      {
+        url: '/matmaxstudio.png',
+        width: 1200,
+        height: 630,
+        alt: 'MatMax Yoga Studio',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'MatMax Yoga Studio',
-    description: 'Strategic astrological counsel to navigate your life\'s most pivotal moments.',
+    description: 'Yoga classes for all levels. Build strength, flexibility, and inner peace with MatMax Yoga Studio.',
+    images: ['/matmaxstudio.png'],
   },
 };
 

@@ -760,18 +760,31 @@ function UnifiedCheckoutFlowContent({
       }
 
       // Create unified order without payment
+      // For group bookings, use the first group member's info as main customer info
+      const mainCustomerInfo = isGroupBooking && groupMembers.length > 0 ? {
+        name: `${groupMembers[0].firstName} ${groupMembers[0].lastName}`,
+        email: groupMembers[0].email,
+        phone: groupMembers[0].phone,
+        countryCode: groupMembers[0].countryCode,
+        language: 'en',
+        billingDocumentType: formData.billingDocumentType,
+        dni: formData.dni,
+        ruc: formData.ruc,
+        companyName: formData.companyName
+      } : {
+        name: formData.clientName,
+        email: formData.clientEmail,
+        phone: formData.clientPhone,
+        countryCode: formData.countryCode,
+        language: 'en', // Add required language field
+        billingDocumentType: formData.billingDocumentType,
+        dni: formData.dni,
+        ruc: formData.ruc,
+        companyName: formData.companyName
+      };
+
       const orderData = {
-        customerInfo: {
-          name: formData.clientName,
-          email: formData.clientEmail,
-          phone: formData.clientPhone,
-          countryCode: formData.countryCode,
-          language: 'en', // Add required language field
-          billingDocumentType: formData.billingDocumentType,
-          dni: formData.dni,
-          ruc: formData.ruc,
-          companyName: formData.companyName
-        },
+        customerInfo: mainCustomerInfo,
         shippingAddress: requiresAddress() ? {
           address: formData.address,
           city: formData.city,
@@ -791,6 +804,10 @@ function UnifiedCheckoutFlowContent({
       };
 
       // Log order data for debugging
+      console.log('Form data:', formData);
+      console.log('Main customer info being sent:', mainCustomerInfo);
+      console.log('Is group booking:', isGroupBooking);
+      console.log('Group members count:', groupMembers.length);
       console.log('Order data being sent:', JSON.stringify(orderData, null, 2));
       console.log('Cart items:', cartItems);
       console.log('Calculated total:', calculateTotal());
@@ -1173,7 +1190,7 @@ function UnifiedCheckoutFlowContent({
                               lastName: '',
                               email: '',
                               phone: '',
-                              countryCode: 'PE' // Default to Peru
+                              countryCode: '+51' // Default to Peru
                             });
                           }
                         });
@@ -2648,7 +2665,7 @@ function UnifiedCheckoutFlowContent({
                           lastName: '',
                           email: '',
                           phone: '',
-                          countryCode: 'PE' // Default to Peru
+                          countryCode: '+51' // Default to Peru
                         });
                       }
                     });

@@ -1,9 +1,9 @@
-import { createEmailService } from '@/lib/brevo-email-service';
+import { createEmailService } from './brevo-email-service';
 
-interface OrderEmailData {
+export interface OrderEmailData {
   customerName: string;
   customerEmail: string;
-  customerPhone?: string;
+  customerPhone: string;
   orderNumber: string;
   orderId: string;
   orderDate: string;
@@ -26,9 +26,9 @@ interface OrderEmailData {
     duration_minutes?: number;
   }>;
   subtotal: number;
-  tax_amount: number;
-  shipping_amount: number;
-  total_amount: number;
+  taxAmount: number;
+  shippingAmount: number;
+  totalAmount: number;
   currency: string;
   notes?: string;
   shipping_address?: {
@@ -38,23 +38,36 @@ interface OrderEmailData {
     zipCode: string;
     country: string;
   };
-  // Schedule booking details
-  scheduleDetails?: {
-    selectedDate?: string;
-    selectedTime?: string;
-    teacher?: string;
-    serviceType?: string;
-    venue?: string;
-    dayOfWeek?: string;
-  };
-  // Package booking details
+  scheduleDetails?: Array<{
+    selectedDate: string;
+    selectedTime: string;
+    dayOfWeek: string;
+    teacher: string;
+    serviceType: string;
+    venue: string;
+  }>;
   packageBookingDetails?: {
-    packageName?: string;
-    packageDescription?: string;
-    sessionsCount?: number;
-    durationMinutes?: number;
-    packageType?: string;
+    packageName: string;
+    packageDescription: string;
+    sessionsCount: number;
+    durationMinutes: number;
+    packageType: string;
   };
+  // Group booking fields
+  is_group_booking?: boolean;
+  group_members_count?: number;
+  group_members?: Array<{
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone: string;
+    country_code: string;
+    package_name: string;
+    birth_date?: string;
+    birth_time?: string;
+    birth_place?: string;
+    question?: string;
+  }>;
   order_url: string;
 }
 
@@ -104,7 +117,7 @@ export async function sendOrderConfirmationEmail(orderData: OrderEmailData): Pro
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Confirmación de Pedido - MatMax</title>
+    <title>Confirmación de Pedido - MatMax Yoga Studio</title>
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -129,28 +142,18 @@ export async function sendOrderConfirmationEmail(orderData: OrderEmailData): Pro
             <h1>🧘‍♀️ MatMax Yoga Studio</h1>
             <h2>¡Pedido Confirmado!</h2>
         </div>
-
+        
         <div class="content">
             <p>Hola <strong>${orderData.customerName}</strong>,</p>
-
+            
             <p>¡Gracias por tu pedido! Hemos recibido tu solicitud y la estamos procesando.</p>
-
-            <div class="order-info">
-                <h3>👤 Información del Cliente</h3>
-                <p><strong>Nombre:</strong> ${orderData.customerName}</p>
-                <p><strong>Email:</strong> ${orderData.customerEmail}</p>
-                ${orderData.customerPhone ? `<p><strong>Teléfono:</strong> ${orderData.customerPhone}</p>` : ''}
-            </div>
-
+            
             <div class="order-info">
                 <h3>📋 Detalles del Pedido</h3>
                 <p><strong>Número de Pedido:</strong> ${orderData.orderNumber}</p>
-                <p><strong>ID de Pedido:</strong> ${orderData.orderId}</p>
                 <p><strong>Fecha:</strong> ${orderData.orderDate}</p>
                 <p><strong>Estado:</strong> <span class="status-badge status-${orderData.orderStatus}">${orderData.orderStatusText}</span></p>
                 <p><strong>Estado de Pago:</strong> <span class="status-badge status-${orderData.paymentStatus}">${orderData.paymentStatusText}</span></p>
-                <p><strong>Método de Pago:</strong> ${orderData.paymentStatus === 'COMPLETED' ? 'Pago Procesado' : 'Pendiente de Pago'}</p>
-                ${orderData.notes ? `<p><strong>Notas:</strong> ${orderData.notes}</p>` : ''}
             </div>
 
             <div class="billing-info">
@@ -158,15 +161,28 @@ export async function sendOrderConfirmationEmail(orderData: OrderEmailData): Pro
                 <p><strong>Documento:</strong> ${formatBillingDocument(orderData.billingDocumentType, orderData.dni, orderData.ruc, orderData.companyName)}</p>
             </div>
 
-            ${orderData.scheduleDetails ? `
+            ${orderData.scheduleDetails && orderData.scheduleDetails.length > 0 ? `
             <div class="order-info">
-                <h3>📅 Detalles de la Reserva</h3>
-                <p><strong>Fecha:</strong> ${orderData.scheduleDetails.selectedDate || 'No especificada'}</p>
-                <p><strong>Hora:</strong> ${orderData.scheduleDetails.selectedTime || 'No especificada'}</p>
-                <p><strong>Día:</strong> ${orderData.scheduleDetails.dayOfWeek || 'No especificado'}</p>
-                <p><strong>Instructor:</strong> ${orderData.scheduleDetails.teacher || 'No especificado'}</p>
-                <p><strong>Tipo de Clase:</strong> ${orderData.scheduleDetails.serviceType || 'No especificado'}</p>
-                <p><strong>Ubicación:</strong> ${orderData.scheduleDetails.venue || 'No especificada'}</p>
+                <h3>📅 Detalles de las Reservas</h3>
+                ${orderData.scheduleDetails.map((schedule, index) => `
+                <div style="background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #E24A4A;">
+                    <h4>📅 Sesión ${index + 1}</h4>
+                    <p><strong>Fecha:</strong> ${schedule.selectedDate || 'No especificada'}</p>
+                    <p><strong>Hora:</strong> ${schedule.selectedTime || 'No especificada'}</p>
+                    <p><strong>Día:</strong> ${schedule.dayOfWeek || 'No especificado'}</p>
+                    <p><strong>Instructor:</strong> ${schedule.teacher || 'No especificado'}</p>
+                    <p><strong>Tipo de Clase:</strong> ${schedule.serviceType || 'No especificado'}</p>
+                    <p><strong>Ubicación:</strong> ${schedule.venue || 'No especificada'}</p>
+                    ${orderData.is_group_booking && orderData.group_members && orderData.group_members.length > 0 ? `
+                    <p><strong>📦 Paquetes para esta sesión:</strong></p>
+                    <ul>
+                        ${orderData.group_members.map((member, memberIndex) => `
+                        <li>${memberIndex + 1}. <strong>${member.first_name} ${member.last_name}</strong> - ${member.package_name}</li>
+                        `).join('')}
+                    </ul>
+                    ` : ''}
+                </div>
+                `).join('')}
             </div>
             ` : ''}
 
@@ -178,41 +194,63 @@ export async function sendOrderConfirmationEmail(orderData: OrderEmailData): Pro
                 <p><strong>Sesiones Incluidas:</strong> ${orderData.packageBookingDetails.sessionsCount || 'No especificado'}</p>
                 <p><strong>Duración por Sesión:</strong> ${orderData.packageBookingDetails.durationMinutes || 'No especificado'} minutos</p>
                 <p><strong>Tipo de Paquete:</strong> ${orderData.packageBookingDetails.packageType || 'No especificado'}</p>
-                <p><strong>Estado del Paquete:</strong> <span class="status-badge status-confirmed">Activo</span></p>
+                <p><strong>Estado del Paquete:</strong> Activo</p>
                 <p><strong>Válido hasta:</strong> ${new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('es-ES')}</p>
-                <div style="background: #e8f5e8; padding: 15px; border-radius: 5px; margin: 10px 0;">
-                    <h4>🎯 Próximos Pasos:</h4>
-                    <ul style="margin: 10px 0; padding-left: 20px;">
-                        <li>Tu paquete ya está activo en tu cuenta</li>
-                        <li>Puedes reservar clases desde tu panel de usuario</li>
-                        <li>Las sesiones no utilizadas expiran en 30 días</li>
-                        <li>Recibirás un email de confirmación cuando reserves una clase</li>
-                    </ul>
+                
+                <h4>Próximos Pasos:</h4>
+                <ul>
+                    <li>Tu paquete ya está activo en tu cuenta</li>
+                    <li>Puedes reservar clases desde tu panel de usuario</li>
+                    <li>Las sesiones no utilizadas expiran en 30 días</li>
+                    <li>Recibirás un email de confirmación cuando reserves una clase</li>
+                </ul>
+            </div>
+            ` : ''}
+
+            ${orderData.is_group_booking && orderData.group_members && orderData.group_members.length > 0 ? `
+            <div class="order-info">
+                <h3>👥 Información del Grupo</h3>
+                <p>Este es un pedido grupal con ${orderData.group_members_count} miembros:</p>
+                <div class="group-members">
+                    ${orderData.group_members.map(member => `
+                    <div class="group-member" style="background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #E24A4A;">
+                        <h4>👤 ${member.first_name} ${member.last_name}</h4>
+                        <p><strong>📧 Email:</strong> ${member.email}</p>
+                        <p><strong>📱 Teléfono:</strong> ${member.country_code} ${member.phone}</p>
+                        <p><strong>📦 Paquete:</strong> ${member.package_name}</p>
+                        ${member.birth_date ? `<p><strong>🎂 Fecha de Nacimiento:</strong> ${member.birth_date}</p>` : ''}
+                        ${member.birth_time ? `<p><strong>🕐 Hora de Nacimiento:</strong> ${member.birth_time}</p>` : ''}
+                        ${member.birth_place ? `<p><strong>📍 Lugar de Nacimiento:</strong> ${member.birth_place}</p>` : ''}
+                        ${member.question ? `<p><strong>❓ Pregunta Específica:</strong> ${member.question}</p>` : ''}
+                    </div>
+                    `).join('')}
                 </div>
             </div>
             ` : ''}
 
-            <h3>🛍️ Artículos del Pedido</h3>
-            <table class="items-table">
-                <thead>
-                    <tr>
-                        <th>Artículo</th>
-                        <th>Cantidad</th>
-                        <th>Precio Unitario</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${orderItemsHtml}
-                </tbody>
-            </table>
+            <div class="order-info">
+                <h3>🛍️ Artículos del Pedido</h3>
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>Artículo</th>
+                            <th>Cantidad</th>
+                            <th>Precio Unitario</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${orderItemsHtml}
+                    </tbody>
+                </table>
+            </div>
 
             <div class="total-section">
                 <p><strong>Subtotal: ${orderData.currency} ${orderData.subtotal.toFixed(2)}</strong></p>
-                ${orderData.tax_amount > 0 ? `<p>Impuestos: ${orderData.currency} ${orderData.tax_amount.toFixed(2)}</p>` : ''}
-                ${orderData.shipping_amount > 0 ? `<p>Envío: ${orderData.currency} ${orderData.shipping_amount.toFixed(2)}</p>` : ''}
+                ${orderData.taxAmount > 0 ? `<p>Impuestos: ${orderData.currency} ${orderData.taxAmount.toFixed(2)}</p>` : ''}
+                ${orderData.shippingAmount > 0 ? `<p>Envío: ${orderData.currency} ${orderData.shippingAmount.toFixed(2)}</p>` : ''}
                 <hr>
-                <h3>Total: ${orderData.currency} ${orderData.total_amount.toFixed(2)}</h3>
+                <h3>Total: ${orderData.currency} ${orderData.totalAmount.toFixed(2)}</h3>
             </div>
 
             ${orderData.shipping_address ? `
@@ -230,17 +268,16 @@ export async function sendOrderConfirmationEmail(orderData: OrderEmailData): Pro
 
             <p>Si tienes alguna pregunta sobre tu pedido, no dudes en contactarnos.</p>
         </div>
-
+        
         <div class="footer">
             <p><strong>MatMax Yoga Studio</strong></p>
-            <p>📍 Calle Alcanfores 425, Miraflores - Lima, PE</p>
-            <p>📧 info@matmax.store | 📱 WhatsApp: +51 916 172 368</p>
+            <p>📧 info@matmax.store | 📞 +51 999 999 999</p>
         </div>
     </div>
 </body>
 </html>`;
 
-    // Create text version
+    // Generate text content for the email
     const textContent = `
 Confirmación de Pedido - MatMax Yoga Studio
 
@@ -248,31 +285,29 @@ Hola ${orderData.customerName},
 
 ¡Gracias por tu pedido! Hemos recibido tu solicitud y la estamos procesando.
 
-INFORMACIÓN DEL CLIENTE:
-Nombre: ${orderData.customerName}
-Email: ${orderData.customerEmail}
-${orderData.customerPhone ? `Teléfono: ${orderData.customerPhone}` : ''}
-
 DETALLES DEL PEDIDO:
 - Número de Pedido: ${orderData.orderNumber}
-- ID de Pedido: ${orderData.orderId}
 - Fecha: ${orderData.orderDate}
 - Estado: ${orderData.orderStatusText}
 - Estado de Pago: ${orderData.paymentStatusText}
-- Método de Pago: ${orderData.paymentStatus === 'COMPLETED' ? 'Pago Procesado' : 'Pendiente de Pago'}
-${orderData.notes ? `- Notas: ${orderData.notes}` : ''}
 
 INFORMACIÓN DE FACTURACIÓN:
 - Documento: ${formatBillingDocument(orderData.billingDocumentType, orderData.dni, orderData.ruc, orderData.companyName)}
 
-${orderData.scheduleDetails ? `
-DETALLES DE LA RESERVA:
-- Fecha: ${orderData.scheduleDetails.selectedDate || 'No especificada'}
-- Hora: ${orderData.scheduleDetails.selectedTime || 'No especificada'}
-- Día: ${orderData.scheduleDetails.dayOfWeek || 'No especificado'}
-- Instructor: ${orderData.scheduleDetails.teacher || 'No especificado'}
-- Tipo de Clase: ${orderData.scheduleDetails.serviceType || 'No especificado'}
-- Ubicación: ${orderData.scheduleDetails.venue || 'No especificada'}
+${orderData.scheduleDetails && orderData.scheduleDetails.length > 0 ? `
+DETALLES DE LAS RESERVAS:
+${orderData.scheduleDetails.map((schedule, index) => `
+Sesión ${index + 1}:
+- Fecha: ${schedule.selectedDate || 'No especificada'}
+- Hora: ${schedule.selectedTime || 'No especificada'}
+- Día: ${schedule.dayOfWeek || 'No especificado'}
+- Instructor: ${schedule.teacher || 'No especificado'}
+- Tipo de Clase: ${schedule.serviceType || 'No especificado'}
+- Ubicación: ${schedule.venue || 'No especificada'}
+${orderData.is_group_booking && orderData.group_members && orderData.group_members.length > 0 ? `
+- Paquetes para esta sesión:
+${orderData.group_members.map((member, memberIndex) => `  ${memberIndex + 1}. ${member.first_name} ${member.last_name} - ${member.package_name}`).join('\n')}` : ''}
+`).join('\n')}
 
 ` : ''}${orderData.packageBookingDetails ? `
 DETALLES DEL PAQUETE COMPRADO:
@@ -290,6 +325,21 @@ PRÓXIMOS PASOS:
 - Las sesiones no utilizadas expiran en 30 días
 - Recibirás un email de confirmación cuando reserves una clase
 
+` : ''}${orderData.is_group_booking && orderData.group_members && orderData.group_members.length > 0 ? `
+INFORMACIÓN DEL GRUPO:
+Este es un pedido grupal con ${orderData.group_members_count} miembros:
+
+${orderData.group_members.map(member => `
+👤 ${member.first_name} ${member.last_name}
+📧 Email: ${member.email}
+📱 Teléfono: ${member.country_code} ${member.phone}
+📦 Paquete: ${member.package_name}
+${member.birth_date ? `🎂 Fecha de Nacimiento: ${member.birth_date}` : ''}
+${member.birth_time ? `🕐 Hora de Nacimiento: ${member.birth_time}` : ''}
+${member.birth_place ? `📍 Lugar de Nacimiento: ${member.birth_place}` : ''}
+${member.question ? `❓ Pregunta Específica: ${member.question}` : ''}
+`).join('\n')}
+
 ` : ''}ARTÍCULOS DEL PEDIDO:
 ${orderData.orderItems.map(item => {
   let itemText = `- ${item.name} (${item.type_text})`;
@@ -302,9 +352,9 @@ ${orderData.orderItems.map(item => {
 
 RESUMEN:
 - Subtotal: ${orderData.currency} ${orderData.subtotal.toFixed(2)}
-${orderData.tax_amount > 0 ? `- Impuestos: ${orderData.currency} ${orderData.tax_amount.toFixed(2)}` : ''}
-${orderData.shipping_amount > 0 ? `- Envío: ${orderData.currency} ${orderData.shipping_amount.toFixed(2)}` : ''}
-- TOTAL: ${orderData.currency} ${orderData.total_amount.toFixed(2)}
+${orderData.taxAmount > 0 ? `- Impuestos: ${orderData.currency} ${orderData.taxAmount.toFixed(2)}` : ''}
+${orderData.shippingAmount > 0 ? `- Envío: ${orderData.currency} ${orderData.shippingAmount.toFixed(2)}` : ''}
+- TOTAL: ${orderData.currency} ${orderData.totalAmount.toFixed(2)}
 
 ${orderData.shipping_address ? `
 DIRECCIÓN DE ENVÍO:
@@ -318,8 +368,7 @@ Ver detalles del pedido: ${orderData.order_url}
 Si tienes alguna pregunta sobre tu pedido, no dudes en contactarnos.
 
 MatMax Yoga Studio
-📍 Calle Alcanfores 425, Miraflores - Lima, PE
-📧 info@matmax.store | 📱 WhatsApp: +51 916 172 368
+📧 info@matmax.store | 📞 +51 999 999 999
     `;
 
     // Send email using Brevo service with BCC to alberto@matmax.world
@@ -332,16 +381,14 @@ MatMax Yoga Studio
     });
 
     if (!emailResult) {
-      console.error('Failed to send order confirmation email');
+      console.error('❌ Failed to send order confirmation email');
       return false;
     }
 
-    console.log('Order confirmation email sent successfully');
-    console.log('Email sent to:', orderData.customerEmail, 'with BCC to: info@matmax.store');
+    console.log('✅ Order confirmation email sent successfully');
     return true;
-
   } catch (error) {
-    console.error('Failed to send order confirmation email:', error);
+    console.error('❌ Error sending order confirmation email:', error);
     return false;
   }
 }

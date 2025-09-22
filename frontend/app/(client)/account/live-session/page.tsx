@@ -396,7 +396,7 @@ export default function LiveSessionPage() {
       <div className="container mx-auto p-6">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-4">Live Sessions</h1>
-          <p className="text-gray-400 text-lg">Join your spiritual guidance sessions</p>
+          <p className="text-gray-400 text-lg">Join your yoga and wellness sessions</p>
         </div>
 
         {/* Configuration Status */}
