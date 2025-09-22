@@ -201,7 +201,7 @@ ${order.companyName ? `🏢 Company: ${order.companyName}` : ''}` : '';
 
 👤 <b>Customer:</b> ${order.customerName}
 📧 <b>Email:</b> ${order.customerEmail}
-${order.customerPhone ? `📱 <b>Phone:</b> ${order.customerPhone}` : ''}
+${order.customerPhone ? `📱 <b>Phone:</b> ${order.customerPhone} | <a href="https://wa.me/${order.customerPhone.replace(/[^0-9]/g, '')}">💬 WhatsApp</a>` : ''}
 
 📦 <b>Order Details:</b>
    🆔 ${order.orderNumber}

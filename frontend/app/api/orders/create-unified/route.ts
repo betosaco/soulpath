@@ -137,7 +137,9 @@ export async function POST(request: NextRequest) {
           data: {
             email: orderData.customerInfo.email,
             fullName: orderData.customerInfo.name,
-            phone: orderData.customerInfo.phone,
+            phone: orderData.customerInfo.countryCode
+              ? `${orderData.customerInfo.countryCode} ${orderData.customerInfo.phone}`
+              : orderData.customerInfo.phone,
             role: 'USER',
             status: 'ACTIVE'
           }
@@ -158,7 +160,9 @@ export async function POST(request: NextRequest) {
           customerId: customer.id,
           customerName: orderData.customerInfo.name,
           customerEmail: orderData.customerInfo.email,
-          customerPhone: orderData.customerInfo.phone,
+          customerPhone: orderData.customerInfo.countryCode
+            ? `${orderData.customerInfo.countryCode} ${orderData.customerInfo.phone}`
+            : orderData.customerInfo.phone,
           // Billing document fields
           billingDocumentType: orderData.customerInfo.billingDocumentType || 'boleta_simple',
           dni: orderData.customerInfo.dni || null,
