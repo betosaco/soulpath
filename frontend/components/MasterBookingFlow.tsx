@@ -57,7 +57,6 @@
  * ───────────────────────
  * • Different packages CAN book the same time slot
  * • Each package can only book each slot once
- * • Visual feedback: Blue notice "📦 Previously booked by: [Package Name]"
  * • "Book Session" button remains available for other packages
  *
  * VALIDATION RULES:
@@ -82,9 +81,8 @@
  * • Visual feedback: orange background + lock icon (single package only)
  *
  * PACKAGE NOTICES:
- * • Shows which package already booked a slot (multiple packages only)
- * • Appears above "Book Session" button
- * • Allows cross-package booking with clear information
+ * • Cross-package booking allowed without visual notices
+ * • "Book Session" button remains available for all packages
  */
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -883,7 +881,6 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
    * MULTIPLE PACKAGES RULES:
    * • Different packages CAN book the same time slot
    * • Each package can only book each slot once
-   * • Visual feedback: Blue notice "📦 Previously booked by: [Package Name]"
    * • "Book Session" button remains available for other packages
    * 
    * VALIDATION RULES:
