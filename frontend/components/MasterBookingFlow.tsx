@@ -1,79 +1,114 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  ArrowRight,
-  ArrowLeft,
-  CheckCircle,
-  AlertCircle,
-  CreditCard,
-  ShoppingCart,
-  Package,
-  Truck,
-  User,
-  Calendar,
-  MapPin,
-  Clock as ClockIcon,
-  FileText,
-  Star
-} from 'lucide-react';
+/**
+ * ========================================================================================
+ * MASTER BOOKING FLOW COMPONENT - ORGANIZED BY SCENARIOS AND LOGIC FLOWS
+ * ========================================================================================
+ *
+ * This component implements the Master Booking Process with multiple entry points and flows.
+ * The flow can be initiated from different starting points and follows different paths based
+ * on user actions and system state.
+ *
+ * FLOW SCENARIOS OVERVIEW:
+ * ==========. . ==============
+ *
+ * SCENARIO A: SCHEDULE-FIRST FLOW (from /schedule page)
+ * ---------------------------------------------------
+ * 1. User clicks "Book Now" from homepage/schedule page
+ * 2. User selects 1 time slot from schedule
+ * 3. User selects a package for that slot
+ * 4. Goes to customer info → checkout
+ * 5. After checkout, user can "Book More" to add sessions
+ *
+ * SCENARIO B: PACKAGE-FIRST FLOW (from /packages page)
+ * ---------------------------------------------------
+ * 1. User selects package(s) first
+ * 2. User clicks "Book Now" from cart
+ * 3. User goes to schedule page to select time  
+ vb * 5. Goes to customer info → checkout
+ * 
+ * SCENARIO C: ADD MORE BOOKINGS FLOW (from cart "Book Now")
+ * -------------------------------------------------------
+ * 1. User has packages in cart with some sessions already booked
+ * 2. User clicks "Book Now" from cart
+ * 3. Schedule page reloads with previously booked slots LOCKED
+ * 4. User can only book remaining slots for existing packages
+ * 5. After booking, cart opens to show progress
+ *
+ * SCENARIO D: MULTIPLE PACKAGES FLOW
+ * ----------------------------------
+ * 1. User has multiple packages in cart
+ * 2. When booking slots, system shows package selection modal
+ * 3. User chooses which package to assign the slot to
+ * 4. System prevents duplicate slots within same package
+ *
+ * STATE MANAGEMENT FLOWS:
+ * =======================
+ *
+ * FLOW STATE DETECTION:
+ * - sessionStorage flags: isAddingMoreBookings, addingToPackageId, bookingFlowType
+ * - initialStep prop: 0=packages, 1=schedule
+ * - Cart state: packages with bookingDetails
+ *
+ * LOCKED TIME SLOTS:
+ * - Automatically calculated from cart bookingDetails
+ * - Prevents duplicate booking of same slot by same package
+ * - Visual feedback: orange background + lock icon
+ *
+ * VALIDATION FLOWS:
+ * - Per-step validation before allowing navigation
+ * - Package limits, duplicate slots, required fields
+ * - Enhanced email/name/address validation
+ */
+
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useLanguage, useTranslations } from '@/hooks/useTranslations';
 import { toast } from 'sonner';
-import { validateEmailWithMessage } from '@/lib/email-validation';
+import { 
+  ShoppingCart, 
+  Calendar, 
+  User, 
+  Truck, 
+  CreditCard, 
+  CheckCircle, 
+  Package,
+  ArrowLeft,
+  ArrowRight
+} from 'lucide-react';
 import { useCart, useCartUI } from '@/store/appStore';
-import { usePackages, PackagePrice } from '@/hooks/usePackagesQuery';
+import { usePackages } from '@/hooks/usePackagesQuery';
 import { EnhancedSchedule } from './EnhancedSchedule';
 import { StripeInlineForm } from './stripe/StripeInlineForm';
-import { PaymentErrorBoundary } from './PaymentErrorBoundary';
-import { Result } from './Result';
-import { countries } from '@/lib/countries';
 
-// Types
-interface Teacher {
-  id: number;
+// =============================================================================
+// TYPES AND INTERFACES
+// =============================================================================
+
+interface CartItem {
+  id: string;
   name: string;
-  bio?: string;
-  shortBio?: string;
-  experience: number;
-  avatarUrl?: string;
-}
-
-interface ServiceType {
-  id: number;
-  name: string;
-  description?: string;
-  shortDescription?: string;
-  duration: number;
-  difficulty?: string;
-  color?: string;
-  icon?: string;
-}
-
-interface Venue {
-  id: number;
-  name: string;
-  address?: string;
-  city?: string;
-}
-
-interface ScheduleSlot {
-  id: number;
-  date: string;
-  time: string;
-  isAvailable: boolean;
-  capacity: number;
-  bookedCount: number;
-  duration: number;
-  teacher: Teacher;
-  serviceType: ServiceType;
-  venue: Venue;
-  dayOfWeek: string;
+  price: number;
+  quantity: number;
+  image: string;
+  currency: string;
+  type: 'product' | 'package';
+  sessions?: number;
+  duration?: number;
+  packageType?: string;
+  maxGroupSize?: number;
+  bookingDetails?: Array<{
+    selectedDate?: string;
+    selectedTime?: string;
+    teacher?: string;
+    dayOfWeek?: string;
+    serviceType?: string;
+    venue?: string;
+    scheduleSlotId?: number;
+  }>;
 }
 
 interface BookingStep {
@@ -81,7 +116,7 @@ interface BookingStep {
   title: string;
   description: string;
   completed: boolean;
-  icon: React.ComponentType<any>;
+  icon: any;
 }
 
 interface CustomerFormData {
@@ -89,11 +124,7 @@ interface CustomerFormData {
   email: string;
   phone: string;
   birthDate: string;
-  birthTime: string;
   birthPlace: string;
-  question: string;
-  specialRequests: string;
-  language: 'en' | 'es';
 }
 
 interface ShippingFormData {
@@ -114,69 +145,98 @@ interface MasterBookingFlowProps {
     currency: string;
     items: CartItem[];
   }) => void;
+  initialStep?: number; // 0=packages, 1=schedule
+  isDirectCheckout?: boolean; // When coming from cart with all sessions booked
 }
 
-/**
- * MasterBookingFlow - Unified booking and checkout experience
- * 
- * This component consolidates all booking flows into a single, coherent process:
- * 1. Package & Product Selection
- * 2. Scheduling (conditional for packages)
- * 3. Customer Information & Shipping (conditional)
- * 4. Payment
- * 5. Confirmation
- * 
- * Features:
- * - Mobile-first responsive design
- * - Unified cart management
- * - Conditional step rendering based on cart contents
- * - Integrated payment processing
- * - Comprehensive form validation
- */
-export function MasterBookingFlow({ onCheckoutComplete }: MasterBookingFlowProps) {
-  const { language } = useLanguage();
-  const { t } = useTranslations(undefined, language);
-  const cartContext = useCart();
+// =============================================================================
+// MAIN COMPONENT
+// =============================================================================
+
+export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirectCheckout = false }: MasterBookingFlowProps) {
+  // =============================================================================
+  // HOOKS AND EXTERNAL STATE
+  // =============================================================================
+  const { items: cartItems, addItem: addToCart, removeItem: removeFromCart, updateQuantity, getTotalPrice, requiresAddress, addBookingToPackage } = useCart();
+  const { openCart } = useCartUI();
   const { data: packages, isLoading: packagesLoading } = usePackages('PEN');
   
-  // State management - always call hooks at the top level
-  const [currentStep, setCurrentStep] = useState(0);
-  const [isProcessing, setIsProcessing] = useState(false);
+  // =============================================================================
+  // STATE MANAGEMENT - ORGANIZED BY FLOW SCENARIOS
+  // =============================================================================
+
+  // SCENARIO A & B: BASIC FLOW STATE
+  // Initialize with prop-based logic to avoid hydration mismatch
+  const [currentStep, setCurrentStep] = useState(() => {
+    // FLOW DETECTION LOGIC:
+    // - Check isDirectCheckout prop (when coming from cart with all sessions booked)
+    // - Fall back to initialStep prop (0=packages, 1=schedule)
+
+    console.log('🔍 FLOW DETECTION - Initial render:', {
+      isDirectCheckout, initialStep,
+      scenario: isDirectCheckout ? 'D (Direct Checkout)' : 'Standard flow'
+    });
+
+    // SCENARIO D: Direct checkout - user has all sessions booked, go to customer info
+    if (isDirectCheckout) {
+      console.log('🔍 SCENARIO D: Direct checkout - routing to customer info step');
+      return 2; // SCENARIO D: Go directly to customer info step
+    }
+
+    console.log('🔍 Using initialStep prop:', initialStep);
+    return initialStep;
+  });
+
+  // PAYMENT AND ORDER STATE
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
-  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
-  const [orderData, setOrderData] = useState<any>(null);
+  const [orderData, setOrderData] = useState<{ orderNumber: string; total: number; items: Array<{ name: string; quantity: number; price: number }> } | null>(null);
   
-  // Safety checks
-  if (!cartContext) {
-    return <div>Loading cart...</div>;
-  }
+  // SCENARIO A: SCHEDULE-FIRST FLOW STATE
+  // - Used when user selects schedule first, then chooses package
+  const [, setFlowType] = useState<'schedule-first' | 'package-first' | null>(null);
+  const [selectedSchedules, setSelectedSchedules] = useState<Array<{
+    selectedDate: string;
+    selectedTime: string;
+    teacher: string;
+    dayOfWeek: string;
+    serviceType: string;
+    venue: string;
+    scheduleSlotId: number;
+  }>>([]);
 
-  const {
-    cartItems,
-    addToCart,
-    removeFromCart,
-    updateQuantity,
-    clearCart,
-    getTotalPrice,
-    getTotalItems,
-    hasMixedItems,
-    requiresAddress
-  } = cartContext;
+  // SCENARIO C: ADD MORE BOOKINGS FLOW STATE
+  // - Activated when user clicks "Book Now" from cart with existing bookings
+  const [isAddingMoreBookings, setIsAddingMoreBookings] = useState(false);
+  const [addingToPackageId, setAddingToPackageId] = useState<string | null>(null);
 
-  // Form data
+  // SCENARIO D: MULTIPLE PACKAGES FLOW STATE
+  // - Shows modal when user has multiple packages and needs to choose which one for a booking
+  const [showPackageSelectionModal, setShowPackageSelectionModal] = useState(false);
+
+  // LOCKED TIME SLOTS STATE (USED IN SCENARIO C)
+  // - Prevents booking same slot twice under same package
+  // - Calculated from cartItems bookingDetails
+  const [lockedTimeSlots, setLockedTimeSlots] = useState<Array<{
+    selectedDate: string;
+    selectedTime: string;
+    packageId: string;
+  }>>([]);
+
+  // Force re-render trigger for UI updates
+  const [forceUpdate, setForceUpdate] = useState(0);
+
+  // =============================================================================
+  // FORM DATA STATE
+  // =============================================================================
   const [customerData, setCustomerData] = useState<CustomerFormData>({
     name: '',
     email: '',
     phone: '',
     birthDate: '',
-    birthTime: '',
-    birthPlace: '',
-    question: '',
-    specialRequests: '',
-    language: language
+    birthPlace: ''
   });
 
-  const [shippingData, setShippingData] = useState<ShippingFormData>({
+  const [shippingData, setShippingFormData] = useState<ShippingFormData>({
     firstName: '',
     lastName: '',
     address: '',
@@ -186,94 +246,356 @@ export function MasterBookingFlow({ onCheckoutComplete }: MasterBookingFlowProps
     country: 'PE'
   });
 
-  // Validation state
-  const [emailError, setEmailError] = useState<string | null>(null);
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  // =============================================================================
+  // FLOW DETECTION AND STATE SYNCHRONIZATION - SCENARIO MANAGEMENT
+  // =============================================================================
 
-  // Helper function to safely access nested translation properties
-  const getTranslation = useCallback((path: string, fallback: string = ''): string => {
-    const keys = path.split('.');
-    let current: Record<string, unknown> = (t && typeof t === 'object') ? t as Record<string, unknown> : {};
+  /**
+   * HYDRATION-SAFE FLOW DETECTION
+   * ------------------------------
+   * Handles sessionStorage checks after hydration to avoid server/client mismatches.
+   * Note: isDirectCheckout is handled via props in initial state, not sessionStorage.
+   */
+  useEffect(() => {
+    // Only run on client side to avoid hydration mismatch
+    if (typeof window !== 'undefined') {
+      const isAddingMore = sessionStorage.getItem('isAddingMoreBookings') === 'true';
+      const flowType = sessionStorage.getItem('bookingFlowType');
 
-    for (const key of keys) {
-      if (current && typeof current === 'object' && key in current) {
-        current = current[key] as Record<string, unknown>;
-      } else {
-        return fallback;
+      console.log('🔍 FLOW DETECTION - Post-hydration:', {
+        isAddingMore, flowType, isDirectCheckout,
+        scenario: isAddingMore ? 'C (Add More)' : flowType === 'schedule-first' ? 'A (Schedule-first)' : flowType === 'package-first' ? 'B (Package-first)' : 'Standard flow'
+      });
+
+      if (isAddingMore) {
+        console.log('🔍 SCENARIO C: Add more bookings - routing to schedule step');
+        setCurrentStep(1); // SCENARIO C: Go directly to schedule step
+      }
+      // SCENARIO A: Schedule-first flow starts with schedule selection
+      else if (flowType === 'schedule-first') {
+        setCurrentStep(1); // Start with schedule selection
+      }
+      // SCENARIO B: Package-first flow starts with package selection
+      else if (flowType === 'package-first') {
+        setCurrentStep(0); // Start with package selection
       }
     }
+  }, []); // Empty dependency array - only run once after hydration
 
-    return typeof current === 'string' ? current : fallback;
-  }, [t]);
+  /**
+   * SCENARIO C: ADD MORE BOOKINGS DETECTION
+   * ------------------------------------------
+   * Detects when user clicks "Book Now" from cart and activates add more bookings mode.
+   * This happens on component mount and when cart state changes.
+   */
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const isAddingMore = sessionStorage.getItem('isAddingMoreBookings') === 'true';
+      const packageId = sessionStorage.getItem('addingToPackageId');
+      const detectedFlowType = sessionStorage.getItem('bookingFlowType');
+      const lockedSlotsData = sessionStorage.getItem('lockedTimeSlots');
+      
+      console.log('🔍 SCENARIO DETECTION - Component mount:', {
+        isAddingMore, packageId, detectedFlowType, hasLockedSlots: !!lockedSlotsData
+      });
+      
+      if (isAddingMore) {
+        // SCENARIO C ACTIVATION: Add more bookings mode
+        console.log('🎯 SCENARIO C: Activating add more bookings flow');
+        setIsAddingMoreBookings(true);
+        setAddingToPackageId(packageId);
+        setFlowType('package-first'); // Adding more is always package-first
+        setCurrentStep(1); // Route to schedule step
 
-  // Define steps based on cart contents
-  const steps: BookingStep[] = React.useMemo(() => {
+        // LOCKED SLOTS: Load from cart to prevent duplicate bookings
+        const existingLockedSlots = cartItems
+          .filter(item => item.type === 'package' && item.bookingDetails)
+          .flatMap(item =>
+            (item.bookingDetails || []).map(booking => ({
+              selectedDate: booking.selectedDate || '',
+              selectedTime: booking.selectedTime || '',
+              packageId: item.id
+            }))
+          );
+        setLockedTimeSlots(existingLockedSlots);
+
+        // CLEANUP: Clear sessionStorage flags after activation
+        sessionStorage.removeItem('isAddingMoreBookings');
+        sessionStorage.removeItem('addingToPackageId');
+        sessionStorage.removeItem('bookingFlowType');
+        
+        console.log('🔒 Locked slots loaded for add more bookings:', existingLockedSlots.length);
+      }
+      else if (detectedFlowType) {
+        // SCENARIO A/B: Initial flow type detection
+        console.log('🎯 SCENARIO A/B: Flow type detected:', detectedFlowType);
+        setFlowType(detectedFlowType as 'schedule-first' | 'package-first');
+        sessionStorage.removeItem('bookingFlowType');
+      }
+
+      // LOCKED SLOTS: Restore from sessionStorage if available
+      if (lockedSlotsData) {
+        try {
+          const parsed = JSON.parse(lockedSlotsData);
+          setLockedTimeSlots(parsed);
+          sessionStorage.removeItem('lockedTimeSlots');
+          console.log('🔒 Locked slots restored from sessionStorage:', parsed.length);
+        } catch (error) {
+          console.error('❌ Error parsing locked time slots:', error);
+        }
+      }
+    }
+  }, [cartItems]); // Re-run when cart changes to update locked slots
+
+  /**
+   * SCENARIO C: REAL-TIME FLOW ACTIVATION
+   * --------------------------------------
+   * Listens for sessionStorage changes to detect "Book Now" clicks from cart.
+   * This handles cases where the user is already on the schedule page.
+   */
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === 'isAddingMoreBookings' && e.newValue === 'true') {
+          console.log('🔄 REAL-TIME: Book Now clicked from cart - activating add more bookings');
+
+          const packageId = sessionStorage.getItem('addingToPackageId');
+          
+          // SCENARIO C: Activate add more bookings mode
+          setIsAddingMoreBookings(true);
+          setAddingToPackageId(packageId);
+          setFlowType('package-first');
+          setCurrentStep(1);
+          
+          // LOCKED SLOTS: Load from current cart state
+          const existingLockedSlots = cartItems
+            .filter(item => item.type === 'package' && item.bookingDetails)
+            .flatMap(item =>
+              (item.bookingDetails || []).map(booking => ({
+                selectedDate: booking.selectedDate || '',
+                selectedTime: booking.selectedTime || '',
+                packageId: item.id
+              }))
+            );
+          setLockedTimeSlots(existingLockedSlots);
+
+          // CLEANUP: Clear flags
+          sessionStorage.removeItem('isAddingMoreBookings');
+          sessionStorage.removeItem('addingToPackageId');
+          
+          console.log('🎯 Add more bookings activated via storage event');
+        }
+      };
+
+      // POLLING FALLBACK: For same-tab changes (storage events don't fire for same tab)
+      const interval = setInterval(() => {
+        const isAddingMore = sessionStorage.getItem('isAddingMoreBookings') === 'true';
+        if (isAddingMore && !isAddingMoreBookings) {
+          console.log('🔄 POLLING: Detected add more bookings mode');
+
+          const packageId = sessionStorage.getItem('addingToPackageId');
+          
+          // SCENARIO C: Activate add more bookings mode
+          setIsAddingMoreBookings(true);
+          setAddingToPackageId(packageId);
+          setFlowType('package-first');
+          setCurrentStep(1);
+          
+          // LOCKED SLOTS: Load from current cart state
+          const existingLockedSlots = cartItems
+            .filter(item => item.type === 'package' && item.bookingDetails)
+            .flatMap(item =>
+              (item.bookingDetails || []).map(booking => ({
+                selectedDate: booking.selectedDate || '',
+                selectedTime: booking.selectedTime || '',
+                packageId: item.id
+              }))
+            );
+          setLockedTimeSlots(existingLockedSlots);
+
+          // CLEANUP: Clear flags
+          sessionStorage.removeItem('isAddingMoreBookings');
+          sessionStorage.removeItem('addingToPackageId');
+          
+          console.log('🎯 Add more bookings activated via polling');
+        }
+      }, 100); // Check every 100ms
+
+      // EVENT LISTENERS
+      window.addEventListener('storage', handleStorageChange);
+
+      return () => {
+        window.removeEventListener('storage', handleStorageChange);
+        clearInterval(interval);
+      };
+    }
+  }, [isAddingMoreBookings, cartItems]);
+
+  /**
+   * LOCKED TIME SLOTS SYNCHRONIZATION
+   * ----------------------------------
+   * Keeps locked time slots in sync with cart state.
+   * Recalculates whenever cart items change.
+   */
+  useEffect(() => {
+    updateLockedTimeSlots();
+    setForceUpdate(prev => prev + 1); // Force re-render of UI components
+    console.log('🔄 Locked time slots synchronized with cart changes');
+  }, [cartItems]);
+
+  // Auto-progress to customer info when all sessions are booked (only from schedule step)
+  useEffect(() => {
+    const maxReached = isAtMaxSessions();
+    const currentStepIsSchedule = currentStep === 1; // Schedule step
+
+    if (maxReached && currentStepIsSchedule) {
+      console.log('🎯 Auto-progressing to customer info - all sessions booked from schedule step');
+      setTimeout(() => {
+        setCurrentStep(2); // Go to customer info step
+        openCart(); // Open cart
+      }, 1500); // Delay to show success state
+    }
+  }, [cartItems]); // Only depend on cartItems, not currentStep to avoid re-triggering on navigation
+
+  // =============================================================================
+  // EVENT HANDLERS - ORGANIZED BY SCENARIO
+  // =============================================================================
+
+  /**
+   * SCENARIO B/C: BOOK NOW FROM CART
+   * --------------------------------
+   * Handles "Book Now" button clicks from shopping cart.
+   * Routes to schedule page for booking additional sessions.
+   *
+   * SCENARIO B: Package-first → Schedule (initial booking)
+   * SCENARIO C: Add more bookings (existing bookings)
+   */
+  const handleBookNowClick = () => {
+    // Check if all sessions are already booked
+    if (isAtMaxSessions()) {
+      toast.error('All available sessions have been booked. Please proceed to checkout.');
+      console.log('🚫 Book Now blocked - all sessions already booked');
+      return;
+    }
+
+    const packageItems = cartItems.filter(item => item.type === 'package');
+
+    if (packageItems.length === 0) {
+      toast.error('Please add a package to your cart before booking sessions.');
+      return;
+    }
+
+    // SCENARIO C: Add more bookings mode activation
+    console.log('🎯 BOOK NOW: Activating add more bookings mode');
+
+    if (packageItems.length === 1) {
+      // SINGLE PACKAGE: Direct assignment
+      const packageId = packageItems[0].id;
+      console.log('📦 Single package detected:', packageId);
+
+      setAddingToPackageId(packageId);
+      setIsAddingMoreBookings(true);
+      setFlowType('package-first');
+      setCurrentStep(1); // Route to schedule step
+
+      // PERSISTENCE: Store state for cross-page navigation
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('isAddingMoreBookings', 'true');
+        sessionStorage.setItem('addingToPackageId', packageId);
+        sessionStorage.setItem('bookingFlowType', 'package-first');
+      }
+
+      toast.success('Ready to book sessions for your package!');
+    } else {
+      // MULTIPLE PACKAGES: Modal selection (Scenario D)
+      console.log('📦 Multiple packages detected - showing selection modal');
+
+      setIsAddingMoreBookings(true);
+      setAddingToPackageId(null); // No specific package selected yet
+      setFlowType('package-first');
+      setCurrentStep(1); // Route to schedule step
+
+      // PERSISTENCE: Store state for cross-page navigation
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('isAddingMoreBookings', 'true');
+        sessionStorage.removeItem('addingToPackageId'); // Clear specific package
+        sessionStorage.setItem('bookingFlowType', 'package-first');
+      }
+
+      toast.success('Ready to book sessions! You can select which package to use for each booking.');
+    }
+  };
+
+  // =============================================================================
+  // STEP DEFINITIONS AND NAVIGATION
+  // =============================================================================
+
+  /**
+   * STEP CONFIGURATION
+   * ------------------
+   * Defines the booking flow steps based on current scenario and requirements.
+   * Dynamic steps: shipping is optional, confirmation is final.
+   */
+  const steps: BookingStep[] = useMemo(() => {
     const baseSteps: BookingStep[] = [
       {
         id: 'packages',
-        title: getTranslation('bookingFlow.selectPackages', 'Select Packages & Products'),
-        description: getTranslation('bookingFlow.selectPackagesDesc', 'Add items to your cart'),
+        title: 'Select Packages & Products',
+        description: 'Add items to your cart',
         completed: false,
         icon: ShoppingCart
+      },
+      {
+        id: 'schedule',
+        title: 'Select Schedule',
+        description: 'Choose your preferred date and time',
+        completed: false,
+        icon: Calendar
+      },
+      {
+        id: 'customer',
+        title: 'Customer Information',
+        description: 'Provide your details',
+        completed: false,
+        icon: User
       }
     ];
 
-    // Add scheduling step if cart has packages
-    const hasPackages = cartItems.some(item => item.type === 'package');
-    if (hasPackages) {
-      baseSteps.push({
-        id: 'schedule',
-        title: getTranslation('bookingFlow.selectSchedule', 'Select Schedule'),
-        description: getTranslation('bookingFlow.selectScheduleDesc', 'Choose your preferred date and time'),
-        completed: false,
-        icon: Calendar
-      });
-    }
-
-    // Add customer info step
-    baseSteps.push({
-      id: 'customer',
-      title: getTranslation('bookingFlow.customerInfo', 'Customer Information'),
-      description: getTranslation('bookingFlow.customerInfoDesc', 'Provide your details'),
-      completed: false,
-      icon: User
-    });
-
-    // Add shipping step if required
+    // CONDITIONAL STEP: Shipping only if physical products require address
     if (requiresAddress()) {
       baseSteps.push({
         id: 'shipping',
-        title: getTranslation('bookingFlow.shipping', 'Shipping Address'),
-        description: getTranslation('bookingFlow.shippingDesc', 'Provide shipping details'),
+        title: 'Shipping Address',
+        description: 'Provide shipping details',
         completed: false,
         icon: Truck
       });
     }
 
-    // Add payment step
-    baseSteps.push({
-      id: 'payment',
-      title: getTranslation('bookingFlow.payment', 'Payment'),
-      description: getTranslation('bookingFlow.paymentDesc', 'Complete your purchase'),
-      completed: false,
-      icon: CreditCard
-    });
-
-    // Add confirmation step
-    baseSteps.push({
-      id: 'confirmation',
-      title: getTranslation('bookingFlow.confirmation', 'Confirmation'),
-      description: getTranslation('bookingFlow.confirmationDesc', 'Order confirmed'),
-      completed: false,
-      icon: CheckCircle
-    });
+    // FINAL STEPS: Always present
+    baseSteps.push(
+      {
+        id: 'payment',
+        title: 'Payment',
+        description: 'Complete your purchase',
+        completed: false,
+        icon: CreditCard
+      },
+      {
+        id: 'confirmation',
+        title: 'Confirmation',
+        description: 'Order confirmed',
+        completed: false,
+        icon: CheckCircle
+      }
+    );
 
     return baseSteps;
-  }, [cartItems, requiresAddress, getTranslation]);
+  }, [requiresAddress]);
 
-  // Update step completion status
-  const updateStepCompletion = useCallback(() => {
-    const updatedSteps = steps.map((step, index) => {
+  // Update step completion
+  const completedSteps = useMemo(() => {
+    return steps.map((step) => {
       let completed = false;
       
       switch (step.id) {
@@ -281,143 +603,236 @@ export function MasterBookingFlow({ onCheckoutComplete }: MasterBookingFlowProps
           completed = cartItems.length > 0;
           break;
         case 'schedule':
-          completed = !cartItems.some(item => item.type === 'package') || 
-                     cartItems.every(item => 
-                       item.type !== 'package' || 
-                       (item.bookingDetails && item.bookingDetails.length > 0)
-                     );
+          // For schedule page (initialStep === 1), completed if 1 schedule selected
+          if (initialStep === 1) {
+            completed = selectedSchedules.length === 1;
+          } else if (isAddingMoreBookings) {
+            // For "add more bookings" mode, completed if all packages are at max sessions
+            completed = isAtMaxSessions();
+          } else {
+            // For other flows, check if packages have booking details
+            const packageItems = cartItems.filter(item => item.type === 'package');
+            completed = packageItems.length === 0 || packageItems.every(item => 
+              item.bookingDetails && item.bookingDetails.length > 0
+            );
+          }
           break;
         case 'customer':
-          completed = customerData.name && customerData.email && customerData.birthDate && customerData.birthPlace;
+          completed = !!(customerData.name && customerData.email && customerData.birthDate && customerData.birthPlace);
           break;
         case 'shipping':
           completed = !requiresAddress() || 
-                     (shippingData.firstName && shippingData.lastName && shippingData.address && shippingData.city);
+                     !!(shippingData.firstName && shippingData.lastName && shippingData.address && shippingData.city);
           break;
         case 'payment':
           completed = paymentStatus === 'success';
           break;
         case 'confirmation':
-          completed = paymentStatus === 'success' && orderData;
+          completed = paymentStatus === 'success' && !!orderData;
           break;
       }
       
       return { ...step, completed };
     });
-    
-    return updatedSteps;
-  }, [steps, cartItems, customerData, shippingData, requiresAddress, paymentStatus, orderData]);
-
-  const completedSteps = updateStepCompletion();
+  }, [steps, cartItems, customerData, shippingData, paymentStatus, orderData, selectedSchedules, initialStep, requiresAddress]);
 
   // Navigation functions
   const nextStep = () => {
     if (currentStep < steps.length - 1) {
+      console.log(`➡️ Navigating from step ${currentStep} to step ${currentStep + 1}`);
       setCurrentStep(currentStep + 1);
     }
   };
 
   const prevStep = () => {
     if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+      const targetStep = currentStep - 1;
+
+      // Prevent going back to schedule step (step 1) when all sessions are booked
+      if (targetStep === 1 && isAtMaxSessions()) {
+        console.log('🚫 Preventing navigation to schedule step - all sessions booked');
+        toast.info('All available sessions have been booked. You can proceed to checkout or go back to packages.');
+        return;
+      }
+
+      console.log(`⬅️ Navigating from step ${currentStep} to step ${targetStep}`);
+      setCurrentStep(targetStep);
     }
   };
 
-  // Validation functions
-  const validateEmail = async (email: string) => {
-    if (!email) {
-      setEmailError('Email is required');
-      return false;
+  // Update sessionStorage when currentStep changes to communicate with cart sidebar
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Store current step info for cart sidebar to detect checkout state
+      sessionStorage.setItem('currentCheckoutStep', currentStep.toString());
+      sessionStorage.setItem('currentStepId', steps[currentStep]?.id || '');
+
+      // Clear the step info when component unmounts or user leaves checkout
+      return () => {
+        sessionStorage.removeItem('currentCheckoutStep');
+        sessionStorage.removeItem('currentStepId');
+      };
     }
-    
-    const result = await validateEmailWithMessage(email);
-    if (!result.isValid) {
-      setEmailError(result.message);
-      return false;
-    }
-    
-    setEmailError(null);
-    return true;
-  };
+  }, [currentStep, steps]);
 
-  const validateCurrentStep = async () => {
-    const currentStepData = steps[currentStep];
-    let isValid = true;
-    const errors: Record<string, string> = {};
-
-    switch (currentStepData.id) {
-      case 'packages':
-        if (cartItems.length === 0) {
-          toast.error('Please add at least one item to your cart');
-          isValid = false;
-        }
-        break;
-        
-      case 'customer':
-        if (!customerData.name) errors.name = 'Name is required';
-        if (!customerData.email) errors.email = 'Email is required';
-        if (!customerData.birthDate) errors.birthDate = 'Birth date is required';
-        if (!customerData.birthPlace) errors.birthPlace = 'Birth place is required';
-        
-        if (customerData.email) {
-          const emailValid = await validateEmail(customerData.email);
-          if (!emailValid) isValid = false;
-        }
-        
-        if (Object.keys(errors).length > 0) isValid = false;
-        break;
-        
-      case 'shipping':
-        if (requiresAddress()) {
-          if (!shippingData.firstName) errors.firstName = 'First name is required';
-          if (!shippingData.lastName) errors.lastName = 'Last name is required';
-          if (!shippingData.address) errors.address = 'Address is required';
-          if (!shippingData.city) errors.city = 'City is required';
-          
-          if (Object.keys(errors).length > 0) isValid = false;
-        }
-        break;
-    }
-
-    setFormErrors(errors);
-    return isValid;
-  };
-
-  // Handle step navigation
-  const handleNext = async () => {
-    const isValid = await validateCurrentStep();
-    if (isValid) {
-      nextStep();
-    }
-  };
-
-  // Handle package selection
-  const handleAddPackage = (pkg: PackagePrice) => {
-    addToCart({
-      id: pkg.id.toString(),
-      name: pkg.name,
-      price: pkg.price,
-      quantity: 1,
-      image: pkg.image || '/placeholder-package.jpg',
-      currency: 'PEN',
-      type: 'package',
-      sessions: pkg.sessions,
-      duration: pkg.duration,
-      packageType: pkg.packageType,
-      maxGroupSize: pkg.maxGroupSize
+  /**
+   * SCENARIO A/B: PACKAGE SELECTION
+   * -------------------------------
+   * Handles package selection from packages page.
+   * Different behavior based on current flow scenario.
+   *
+   * SCENARIO A: Schedule-first - package selected after schedule
+   * SCENARIO B: Package-first - package selected first, then schedule
+   */
+  const handleAddPackage = (pkg: any) => {
+    console.log('📦 PACKAGE SELECTION:', {
+      packageName: pkg.packageDefinition.name,
+      packageType: pkg.packageDefinition.packageType,
+      sessionsCount: pkg.packageDefinition.sessionsCount,
+      hasSelectedSchedules: selectedSchedules.length > 0,
+      scenario: selectedSchedules.length > 0 ? 'A (Schedule-first)' : 'B (Package-first)'
     });
-    toast.success(`${pkg.name} added to cart`);
+
+    const packageData = {
+      id: pkg.id.toString(),
+      name: pkg.packageDefinition.name,
+      price: pkg.price,
+      image: '/placeholder-package.jpg',
+      currency: 'PEN',
+      type: 'package' as const,
+      sessions: pkg.packageDefinition.sessionsCount || 1,
+      duration: pkg.packageDefinition.sessionDuration?.duration_minutes || 60,
+      packageType: pkg.packageDefinition.packageType || 'standard',
+      maxGroupSize: pkg.packageDefinition.maxGroupSize || 1,
+      // SCENARIO A: Assign selected schedule to package
+      bookingDetails: selectedSchedules.length > 0 ? selectedSchedules : undefined
+    };
+
+    // Debug package creation for matpass packages
+    if (pkg.packageDefinition.packageType === 'matpass' || pkg.packageDefinition.name?.toLowerCase().includes('mat')) {
+      console.log('📦 CREATING MATPASS PACKAGE:', {
+        originalData: {
+          id: pkg.id,
+          name: pkg.packageDefinition.name,
+          packageType: pkg.packageDefinition.packageType,
+          sessionsCount: pkg.packageDefinition.sessionsCount
+        },
+        createdPackage: {
+          id: packageData.id,
+          name: packageData.name,
+          sessions: packageData.sessions,
+          packageType: packageData.packageType,
+          bookingDetails: packageData.bookingDetails
+        }
+      });
+    }
+
+    addToCart(packageData);
+    
+    if (selectedSchedules.length > 0) {
+      // SCENARIO A: Schedule-first flow completion
+      console.log('🎯 SCENARIO A: Schedule-first flow - package added with schedule');
+      toast.success(`${pkg.packageDefinition.name} added to cart with 1 scheduled session`);
+
+      setSelectedSchedules([]); // Clear schedules (now in package)
+      updateLockedTimeSlots(); // Update locked slots
+
+      // OPEN CART: After first booking
+      setTimeout(() => {
+        openCart();
+      }, 500);
+
+      setCurrentStep(2); // Skip to customer info
+    } else {
+      // SCENARIO B: Package-first flow initiation
+      console.log('🎯 SCENARIO B: Package-first flow - routing to schedule selection');
+      setFlowType('package-first');
+      toast.success(`${pkg.packageDefinition.name} added to cart. Now select your schedule.`);
+      setCurrentStep(1); // Go to schedule step
+    }
   };
 
-  // Handle payment success
-  const handlePaymentSuccess = (paymentData: any) => {
-    setPaymentStatus('success');
-    setOrderData(paymentData);
-    setCurrentStep(steps.length - 1); // Go to confirmation step
+  /**
+   * SCENARIO A/C: SCHEDULE SELECTION
+   * --------------------------------
+   * Handles schedule selection from schedule page.
+   * Different behavior based on current scenario.
+   *
+   * SCENARIO A: Schedule-first - select slot, then choose package
+   * SCENARIO C: Add more bookings - book additional slots for packages
+   */
+  const handleScheduleSelection = (slot: any) => {
+    console.log('📅 SCHEDULE SELECTION:', {
+      slot: `${slot.date} ${slot.time}`,
+      isLocked: isTimeSlotLocked(slot.date, slot.time),
+      isAddingMore: isAddingMoreBookings,
+      scenario: isAddingMoreBookings ? 'C (Add More)' : 'A (Schedule-first)'
+    });
+
+    // VALIDATION: Check if slot is already locked
+    if (isTimeSlotLocked(slot.date, slot.time)) {
+      toast.error('This time slot is already booked. Please select a different time slot.');
+      return;
+    }
+
+    // SCENARIO C: Add more bookings mode
+    if (isAddingMoreBookings) {
+      handleAddMoreBookings(slot);
+      return;
+    }
+
+    // SCENARIO A: Schedule-first validation
+    if (selectedSchedules.length >= 1) {
+      toast.error('You can only select 1 time slot. Please go to packages to continue.');
+      return;
+    }
     
+    // SCENARIO A: Store schedule and route to packages
+    const newSchedule = {
+      selectedDate: slot.date,
+      selectedTime: slot.time,
+      teacher: slot.teacher.name,
+      dayOfWeek: new Date(slot.date).toLocaleDateString('en-US', { weekday: 'long' }),
+      serviceType: slot.serviceType.name,
+      venue: slot.venue.name,
+      scheduleSlotId: slot.id
+    };
+    
+    setSelectedSchedules([newSchedule]);
+    setFlowType('schedule-first');
+    toast.success(`Selected ${slot.serviceType.name} for ${slot.date} at ${slot.time}. Going to package selection...`);
+    
+    // ROUTING: Auto-navigate to packages after selection
+    setTimeout(() => {
+      setCurrentStep(0); // Go to packages step
+    }, 1000);
+  };
+
+  // =============================================================================
+  // PAYMENT AND ORDER HANDLING
+  // =============================================================================
+
+  /**
+   * PAYMENT SUCCESS HANDLER
+   * -----------------------
+   * Processes successful payment completion.
+   * Updates order status and triggers completion callback.
+   */
+  const handlePaymentSuccess = (paymentIntentId: string) => {
+    setPaymentStatus('success');
+    setOrderData({
+      orderNumber: `ORD-${Date.now()}`,
+      total: getTotalPrice(),
+      items: cartItems.map(item => ({
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price
+      }))
+    });
+
     if (onCheckoutComplete) {
       onCheckoutComplete({
-        orderId: paymentData.id,
+        orderId: paymentIntentId,
         status: 'completed',
         amount: getTotalPrice(),
         currency: 'PEN',
@@ -426,13 +841,300 @@ export function MasterBookingFlow({ onCheckoutComplete }: MasterBookingFlowProps
     }
   };
 
-  // Handle payment error
-  const handlePaymentError = (error: any) => {
-    setPaymentStatus('error');
-    toast.error('Payment failed. Please try again.');
+  // =============================================================================
+  // PACKAGE MANAGEMENT HELPERS
+  // =============================================================================
+
+  /**
+   * PACKAGE CAPACITY CALCULATIONS
+   * ------------------------------
+   * Functions to manage package session limits and availability.
+   */
+  const getPackageRemainingSessions = (packageId: string) => {
+    const pkg = cartItems.find(item => item.id === packageId && item.type === 'package');
+    if (!pkg) return 0;
+    
+    const totalSessions = pkg.sessions || 1;
+    const scheduledSessions = pkg.bookingDetails?.length || 0;
+    const remaining = Math.max(0, totalSessions - scheduledSessions);
+
+    // Debug packages when they're at max capacity
+    if (remaining <= 0) {
+      console.log('🏁 Package at max capacity:', {
+        packageId,
+        name: pkg.name,
+        totalSessions,
+        scheduledSessions: pkg.bookingDetails?.length || 0
+      });
+    }
+
+    return remaining;
   };
 
-  // Render step content
+  const isPackageAtMaxSessions = (packageId: string) => {
+    return getPackageRemainingSessions(packageId) <= 0;
+  };
+
+  const getTotalRemainingSessions = () => {
+    if (addingToPackageId) {
+      return getPackageRemainingSessions(addingToPackageId);
+    }
+    
+    // If no specific package, calculate for all packages
+    return cartItems
+      .filter(item => item.type === 'package')
+      .reduce((total, item) => total + getPackageRemainingSessions(item.id), 0);
+  };
+
+  const isAtMaxSessions = () => {
+    // Check if ALL packages in cart have reached their maximum sessions
+    const packageItems = cartItems.filter(item => item.type === 'package');
+    if (packageItems.length === 0) return false;
+
+    // Button should be disabled only when EVERY package has reached its max sessions
+    const result = packageItems.every(item => isPackageAtMaxSessions(item.id));
+
+    // Always log current state for debugging
+    console.log('🔍 isAtMaxSessions CHECK:', {
+      packageCount: packageItems.length,
+      result,
+      packages: packageItems.map(pkg => ({
+        id: pkg.id,
+        name: pkg.name,
+        type: pkg.packageType,
+        sessions: pkg.sessions,
+        booked: pkg.bookingDetails?.length || 0,
+        atMax: isPackageAtMaxSessions(pkg.id),
+        remaining: getPackageRemainingSessions(pkg.id)
+      }))
+    });
+
+    return result;
+  };
+
+
+  // =============================================================================
+  // LOCKED TIME SLOTS MANAGEMENT (SCENARIO C)
+  // =============================================================================
+
+  /**
+   * LOCKED SLOTS VALIDATION
+   * ------------------------
+   * Functions to prevent duplicate bookings within the same package.
+   */
+  const isTimeSlotLocked = (date: string, time: string, packageId?: string) => {
+    return lockedTimeSlots.some(slot =>
+      slot.selectedDate === date &&
+      slot.selectedTime === time &&
+      (!packageId || slot.packageId === packageId)
+    );
+  };
+
+  const isTimeSlotBookedByPackage = (date: string, time: string, packageId: string) => {
+    const pkg = cartItems.find(item => item.id === packageId && item.type === 'package');
+    if (!pkg || !pkg.bookingDetails) return false;
+
+    return pkg.bookingDetails.some(booking =>
+      booking.selectedDate === date && booking.selectedTime === time
+    );
+  };
+
+  const getAvailablePackagesForSlot = (date: string, time: string) => {
+    return cartItems
+      .filter(item =>
+        item.type === 'package' &&
+        getPackageRemainingSessions(item.id) > 0 &&
+        !isTimeSlotBookedByPackage(date, time, item.id)
+      );
+  };
+
+  const updateLockedTimeSlots = () => {
+    const newLockedSlots = cartItems
+      .filter(item => item.type === 'package' && item.bookingDetails)
+      .flatMap(item =>
+        (item.bookingDetails || []).map(booking => ({
+              selectedDate: booking.selectedDate || '',
+              selectedTime: booking.selectedTime || '',
+          packageId: item.id
+        }))
+      );
+    setLockedTimeSlots(newLockedSlots);
+
+    // PERSISTENCE: Store in session storage for cross-page navigation
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('lockedTimeSlots', JSON.stringify(newLockedSlots));
+    }
+
+    console.log('🔒 Updated locked time slots:', newLockedSlots.length);
+  };
+
+  /**
+   * SCENARIO C: ADD MORE BOOKINGS HANDLER
+   * -------------------------------------
+   * Handles additional schedule bookings when user is in "add more bookings" mode.
+   * Routes to cart after booking for user to continue or checkout.
+   */
+  const handleAddMoreBookings = (slot: any) => {
+    console.log('🎯 ADD MORE BOOKINGS:', {
+      slot: `${slot.date} ${slot.time}`,
+      addingToPackageId,
+      availablePackages: getAvailablePackagesForSlot(slot.date, slot.time).length
+    });
+
+    // VALIDATION: Check if all packages are at max capacity
+    if (isAtMaxSessions()) {
+      toast.error('All packages have reached their maximum number of sessions.');
+      return;
+    }
+
+    // VALIDATION: Check if slot is already locked
+    if (isTimeSlotLocked(slot.date, slot.time)) {
+      toast.error('This time slot is already booked. Please select a different time slot.');
+      return;
+    }
+
+    const newSchedule = {
+      selectedDate: slot.date,
+      selectedTime: slot.time,
+      teacher: slot.teacher.name,
+      dayOfWeek: new Date(slot.date).toLocaleDateString('en-US', { weekday: 'long' }),
+      serviceType: slot.serviceType.name,
+      venue: slot.venue.name,
+      scheduleSlotId: slot.id
+    };
+
+    // SCENARIO C1: Single package mode
+    if (addingToPackageId) {
+      // VALIDATION: Check for duplicate booking in this package
+      if (isTimeSlotBookedByPackage(slot.date, slot.time, addingToPackageId)) {
+        toast.error('This package has already booked this time slot. Please select a different slot.');
+        return;
+      }
+
+      // BOOKING: Add to specific package
+      addBookingToPackage(addingToPackageId, newSchedule);
+      
+      const pkg = cartItems.find(item => item.id === addingToPackageId);
+      toast.success(`Added session for ${slot.date} at ${slot.time} to ${pkg?.name || 'package'}`);
+
+      // UPDATE: Locked slots
+      updateLockedTimeSlots();
+
+      // OPEN CART: After each booking
+      setTimeout(() => {
+        openCart();
+      }, 500);
+
+      // NOTE: Allow users to continue booking until they reach package maximums
+
+    } else {
+      // SCENARIO C2/D: Multiple packages mode
+      const availablePackages = getAvailablePackagesForSlot(slot.date, slot.time);
+      
+      if (availablePackages.length === 0) {
+        toast.error('No packages available for this time slot. All packages have either reached capacity or already booked this slot.');
+        return;
+      }
+      else if (availablePackages.length === 1) {
+        // DIRECT ASSIGNMENT: Only one package available
+        addBookingToPackage(availablePackages[0].id, newSchedule);
+        toast.success(`Added session for ${slot.date} at ${slot.time} to ${availablePackages[0].name}`);
+
+      // UPDATE: Locked slots
+      updateLockedTimeSlots();
+
+      // CHECK IF MAXIMUM REACHED: If all packages now have maximum bookings, proceed to checkout
+      const maxReachedAfterBooking = isAtMaxSessions();
+      console.log('🔍 After booking - max check:', {
+        maxReachedAfterBooking,
+        currentStep,
+        willProceedToCustomerInfo: maxReachedAfterBooking
+      });
+      if (maxReachedAfterBooking) {
+        console.log('🎯 MAXIMUM REACHED - Auto-proceeding to customer info step');
+        setTimeout(() => {
+          console.log('🚀 Setting currentStep to 2 (Customer Info)');
+          setCurrentStep(2); // Go to customer info step
+          openCart(); // Open cart
+          console.log('🛒 Cart opened');
+        }, 1000);
+        return; // Don't continue with normal cart opening logic
+      }
+
+      // OPEN CART: After each booking (if not at maximum)
+      setTimeout(() => {
+        openCart();
+      }, 500);
+
+      } else {
+        // SCENARIO D: Multiple packages - show selection modal
+        setSelectedSchedules(prev => [...prev, newSchedule]);
+        setShowPackageSelectionModal(true);
+        toast.success(`Selected ${slot.serviceType.name} for ${slot.date} at ${slot.time}. Please choose a package.`);
+      }
+    }
+  };
+
+  /**
+   * SCENARIO D: PACKAGE SELECTION FROM MODAL
+   * ----------------------------------------
+   * Handles package selection when multiple packages are available for a booking.
+   * Closes modal and routes to cart after selection.
+   */
+  const handlePackageSelection = (packageId: string) => {
+    if (selectedSchedules.length > 0) {
+      const schedule = selectedSchedules[selectedSchedules.length - 1];
+
+      console.log('📦 PACKAGE SELECTION FROM MODAL:', {
+        packageId,
+        slot: `${schedule.selectedDate} ${schedule.selectedTime}`,
+        isDuplicate: isTimeSlotBookedByPackage(schedule.selectedDate, schedule.selectedTime, packageId)
+      });
+
+      // VALIDATION: Check for duplicate booking
+      if (isTimeSlotBookedByPackage(schedule.selectedDate, schedule.selectedTime, packageId)) {
+        toast.error('This package has already booked this time slot. Please select a different package.');
+        return;
+      }
+
+      // BOOKING: Add to selected package
+      addBookingToPackage(packageId, schedule);
+      
+      const pkg = cartItems.find(item => item.id === packageId);
+      toast.success(`Added session to ${pkg?.name || 'package'}`);
+      
+      // UPDATE: Locked slots
+      updateLockedTimeSlots();
+      setSelectedSchedules(prev => prev.slice(0, -1));
+      setShowPackageSelectionModal(false);
+
+      // CHECK IF MAXIMUM REACHED: If all packages now have maximum bookings, proceed to checkout
+      const maxReachedAfterBooking = isAtMaxSessions();
+      if (maxReachedAfterBooking) {
+        setTimeout(() => {
+          setCurrentStep(2); // Go to customer info step
+          openCart(); // Open cart
+        }, 1000);
+        return; // Don't continue with normal cart opening logic
+      }
+
+      // OPEN CART: After each booking (if not at maximum)
+      setTimeout(() => {
+        openCart();
+      }, 500);
+    }
+  };
+
+  // =============================================================================
+  // STEP RENDERING AND VALIDATION
+  // =============================================================================
+
+  /**
+   * STEP CONTENT RENDERING
+   * ----------------------
+   * Renders the appropriate UI for each step based on current scenario.
+   * Different content is shown depending on flow type and step.
+   */
   const renderStepContent = () => {
     const currentStepData = steps[currentStep];
     
@@ -442,12 +1144,42 @@ export function MasterBookingFlow({ onCheckoutComplete }: MasterBookingFlowProps
           <div className="space-y-6">
             <div className="text-center">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {getTranslation('bookingFlow.selectPackages', 'Select Packages & Products')}
+                Select Packages & Products
               </h2>
               <p className="text-gray-600">
-                {getTranslation('bookingFlow.selectPackagesDesc', 'Add items to your cart')}
+                Add items to your cart
               </p>
             </div>
+
+            {/* Show selected schedules if coming from schedule-first flow */}
+            {selectedSchedules.length > 0 && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-blue-800 mb-2">
+                  Your Selected Schedules
+                </h3>
+                <p className="text-blue-700 mb-3">
+                  You've selected {selectedSchedules.length} time slot(s). Now choose a package that matches your needs.
+                </p>
+                <div className="space-y-2">
+                  {selectedSchedules.map((schedule, index) => (
+                    <div key={index} className="flex justify-between items-center bg-blue-100 p-2 rounded">
+                      <span className="text-blue-800">
+                        {schedule.selectedDate} at {schedule.selectedTime} - {schedule.serviceType}
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => {
+                          setSelectedSchedules(prev => prev.filter((_, i) => i !== index));
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Packages Grid */}
             {packagesLoading ? (
@@ -456,11 +1188,11 @@ export function MasterBookingFlow({ onCheckoutComplete }: MasterBookingFlowProps
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {packages.map((pkg) => (
+                {packages?.map((pkg: any) => (
                   <Card key={pkg.id} className="unified-card">
                     <CardHeader>
-                      <CardTitle className="unified-card__title">{pkg.name}</CardTitle>
-                      <p className="unified-card__subtitle">{pkg.description}</p>
+                      <CardTitle className="unified-card__title">{pkg.packageDefinition.name}</CardTitle>
+                      <p className="unified-card__subtitle">{pkg.packageDefinition.description}</p>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
@@ -469,7 +1201,7 @@ export function MasterBookingFlow({ onCheckoutComplete }: MasterBookingFlowProps
                             S/ {pkg.price.toFixed(2)}
                           </span>
                           <span className="text-sm text-gray-500">
-                            {pkg.sessions} sessions
+                            {pkg.packageDefinition.sessionsCount || 1} sessions
                           </span>
                         </div>
                         <Button 
@@ -494,8 +1226,9 @@ export function MasterBookingFlow({ onCheckoutComplete }: MasterBookingFlowProps
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {cartItems.map((item) => (
-                      <div key={item.id} className="flex items-center justify-between">
+                    {cartItems.map((item: any, index: number) => (
+                      <div key={`${item.id}-${index}`} className="space-y-2">
+                        <div className="flex items-center justify-between">
                         <span>{item.name}</span>
                         <div className="flex items-center space-x-2">
                           <Button
@@ -505,7 +1238,7 @@ export function MasterBookingFlow({ onCheckoutComplete }: MasterBookingFlowProps
                           >
                             -
                           </Button>
-                          <span>{item.quantity}</span>
+                          <span className="w-8 text-center">{item.quantity}</span>
                           <Button
                             size="sm"
                             variant="outline"
@@ -521,14 +1254,92 @@ export function MasterBookingFlow({ onCheckoutComplete }: MasterBookingFlowProps
                             Remove
                           </Button>
                         </div>
+                        </div>
+                        {/* Show booking details for packages */}
+                        {item.type === 'package' && item.bookingDetails && item.bookingDetails.length > 0 && (
+                          <div className="ml-4 p-2 bg-green-50 border border-green-200 rounded text-sm">
+                            <div className="text-green-800 font-semibold mb-1">Scheduled Sessions:</div>
+                            {item.bookingDetails.map((booking: any, bookingIndex: number) => (
+                              <div key={bookingIndex} className="text-green-700">
+                                {booking.selectedDate} at {booking.selectedTime} - {booking.serviceType}
+                              </div>
+                            ))}
+                            <div className="text-green-600 text-xs mt-1">
+                              {item.bookingDetails.length} / {item.sessions || 1} sessions scheduled
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
-                    <div className="border-t pt-2 mt-4">
-                      <div className="flex justify-between font-bold">
-                        <span>Total:</span>
-                        <span>S/ {getTotalPrice().toFixed(2)}</span>
-                      </div>
+                    <div className="flex justify-between font-bold">
+                      <span>Total:</span>
+                      <span>S/ {getTotalPrice().toFixed(2)}</span>
                     </div>
+                    
+                    {/* Book Now Button */}
+                    {cartItems.some(item => item.type === 'package') && (() => {
+                      const atMax = isAtMaxSessions();
+                      const packageItems = cartItems.filter(item => item.type === 'package');
+
+                      // More detailed debugging
+                      console.log('🎯 BOOK NOW BUTTON RENDER:', {
+                        timestamp: new Date().toISOString(),
+                        atMax,
+                        buttonDisabled: atMax,
+                        buttonText: atMax ? 'All Sessions Booked' : 'Book Now',
+                        cartItemsCount: cartItems.length,
+                        packageItemsCount: packageItems.length,
+                        forceUpdate: forceUpdate,
+                        packagesDetailed: packageItems.map(pkg => ({
+                          id: pkg.id,
+                          name: pkg.name,
+                          sessions: pkg.sessions,
+                          booked: pkg.bookingDetails?.length || 0,
+                          remaining: getPackageRemainingSessions(pkg.id),
+                          atMax: isPackageAtMaxSessions(pkg.id)
+                        }))
+                      });
+
+                      return (
+                        <div className="mt-4 pt-4 border-t">
+                          <Button
+                            key={`book-now-${forceUpdate}-${atMax ? 'disabled' : 'enabled'}`}
+                            onClick={handleBookNowClick}
+                            className={`w-full text-white ${
+                              atMax
+                                ? 'bg-gray-500 hover:bg-gray-500 cursor-not-allowed border border-gray-600'
+                                : 'bg-green-600 hover:bg-green-700'
+                            }`}
+                            disabled={atMax}
+                          >
+                            {atMax ? (
+                              <>
+                                <CheckCircle className="w-4 h-4 mr-2" />
+                                All Sessions Booked
+                              </>
+                            ) : (
+                              <>
+                                <Calendar className="w-4 h-4 mr-2" />
+                                Book Now
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      );
+                    })()}
+                    {isAtMaxSessions() && (
+                      <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center justify-center space-x-2">
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                          <p className="text-green-800 font-medium text-center">
+                            All Sessions Booked - Ready to Checkout!
+                          </p>
+                        </div>
+                        <p className="text-green-600 text-sm text-center mt-1">
+                          You have successfully booked all available sessions for your packages.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -537,29 +1348,285 @@ export function MasterBookingFlow({ onCheckoutComplete }: MasterBookingFlowProps
         );
 
       case 'schedule':
+        // For schedule page (initialStep === 1), show direct schedule access
+        if (initialStep === 1) {
+          return (
+            <div className="space-y-6">
+              <div className="text-center">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  Book Your Wellness Session
+                </h2>
+                <p className="text-gray-600">
+                  Choose 1 time slot, then select a package (1, 4, 8, 12, or 24 sessions)
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                {/* Direct Schedule Access */}
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-orange-800 mb-2">
+                    Direct Schedule Access
+                  </h3>
+                  <p className="text-orange-700 mb-3">
+                    Choose 1 time slot, then select a package (1, 4, 8, 12, or 24 sessions) to continue.
+                  </p>
+                  {selectedSchedules.length > 0 && (
+                    <div className="mt-3">
+                      <h4 className="font-semibold text-orange-800 mb-2">Selected Schedule:</h4>
+                      <div className="space-y-2">
+                        {selectedSchedules.map((schedule, index) => (
+                          <div key={index} className="flex justify-between items-center bg-orange-100 p-2 rounded">
+                            <span className="text-orange-800">
+                              {schedule.selectedDate} at {schedule.selectedTime} - {schedule.serviceType}
+                            </span>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => {
+                                setSelectedSchedules([]);
+                              }}
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <p className="text-green-800 text-sm">
+                          ✅ Schedule selected! Redirecting to package selection...
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Schedule component - hide after selection to prevent multiple selections */}
+                {selectedSchedules.length === 0 && (
+                <EnhancedSchedule
+                  onBookSlot={handleScheduleSelection}
+                  showFilters={true}
+                  existingBookings={selectedSchedules}
+                    lockedTimeSlots={lockedTimeSlots}
+                />
+                )}
+              </div>
+            </div>
+          );
+        }
+
+        // For "add more bookings" mode
+        if (isAddingMoreBookings) {
+          const remainingSessions = getTotalRemainingSessions();
+          const isMaxReached = isAtMaxSessions();
+          
+          return (
+            <div className="space-y-6">
+              <div className="text-center">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  Book Additional Sessions
+                </h2>
+                <p className="text-gray-600">
+                  {isMaxReached 
+                    ? "All packages have reached their maximum sessions"
+                    : `You can book ${remainingSessions} more session${remainingSessions !== 1 ? 's' : ''}`
+                  }
+                </p>
+              </div>
+
+              {/* Enhanced Session Progress */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-lg font-semibold text-blue-800">
+                  Session Progress
+                </h3>
+                  <div className="text-sm text-blue-600">
+                    {getTotalRemainingSessions()} sessions remaining
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {cartItems
+                    .filter(item => item.type === 'package')
+                    .map((pkg, index) => {
+                      const scheduled = pkg.bookingDetails?.length || 0;
+                      const total = pkg.sessions || 1;
+                      const remaining = total - scheduled;
+                      
+                      const progressPercentage = (scheduled / total) * 100;
+                      
+                      return (
+                        <div key={index} className="bg-blue-100 p-3 rounded-lg">
+                          <div className="flex justify-between items-center mb-2">
+                          <span className="text-blue-800 font-medium">{pkg.name}</span>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-blue-700 text-sm">
+                              {scheduled}/{total} sessions
+                            </span>
+                            {remaining > 0 && (
+                              <span className="text-green-600 text-sm font-semibold">
+                                {remaining} remaining
+                              </span>
+                            )}
+                            {remaining === 0 && (
+                              <span className="text-red-600 text-sm font-semibold">
+                                  ✓ Complete
+                              </span>
+                            )}
+                            </div>
+                          </div>
+                          {/* Progress bar */}
+                          <div className="w-full bg-blue-200 rounded-full h-2">
+                            <div 
+                              className={`h-2 rounded-full transition-all duration-300 ${
+                                progressPercentage === 100 ? 'bg-green-500' : 'bg-blue-500'
+                              }`}
+                              style={{ width: `${progressPercentage}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+
+              {/* Schedule Component with locked time slots */}
+              {!isMaxReached && (
+                <EnhancedSchedule
+                  onBookSlot={handleAddMoreBookings}
+                  showFilters={true}
+                  existingBookings={cartItems
+                    .filter(item => item.type === 'package')
+                    .flatMap(item => (item.bookingDetails || []).map(booking => ({
+                      selectedDate: booking.selectedDate || '',
+                      selectedTime: booking.selectedTime || '',
+                      packageName: item.name,
+                      packageId: item.id
+                    })))
+                  }
+                  lockedTimeSlots={lockedTimeSlots}
+                  hasMultiplePackages={cartItems.filter(item => item.type === 'package').length > 1}
+                />
+              )}
+
+              {/* Max Sessions Reached - Auto proceed to next step */}
+              {isMaxReached && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+                  <h3 className="text-lg font-semibold text-green-800 mb-2">
+                    🎉 All Sessions Booked!
+                  </h3>
+                  <p className="text-green-700 mb-4">
+                    You have successfully booked all available sessions for your packages.
+                  </p>
+                  <Button 
+                    onClick={() => {
+                      setCurrentStep(2); // Go to customer info step
+                      openCart(); // Open cart
+                    }}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    <ArrowRight className="w-4 h-4 mr-2" />
+                    Continue to Checkout
+                  </Button>
+                </div>
+              )}
+
+            </div>
+          );
+        }
+
+        // For other flows, show package-based scheduling
+        const packageItems = cartItems.filter((item: any) => item.type === 'package');
+        
         return (
           <div className="space-y-6">
             <div className="text-center">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {getTranslation('bookingFlow.selectSchedule', 'Select Schedule')}
+                Select Schedule
               </h2>
               <p className="text-gray-600">
-                {getTranslation('bookingFlow.selectScheduleDesc', 'Choose your preferred date and time')}
+                Choose your preferred date and time
               </p>
             </div>
-            <EnhancedSchedule
-              onBookSlot={(slot) => {
-                // Handle slot booking for packages in cart
-                const packageItems = cartItems.filter(item => item.type === 'package');
-                if (packageItems.length > 0) {
-                  // Add booking details to the first package
-                  const firstPackage = packageItems[0];
-                  // This would need to be implemented in the cart context
-                  toast.success(`Scheduled for ${slot.date} at ${slot.time}`);
-                }
-              }}
-              showFilters={true}
-            />
+
+            {packageItems.length === 0 ? (
+              <div className="text-center py-8">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-yellow-800 mb-2">
+                    No Packages Selected
+                  </h3>
+                  <p className="text-yellow-700 mb-4">
+                    Please go back and select a package first before scheduling your sessions.
+                  </p>
+                  <Button 
+                    onClick={() => setCurrentStep(0)}
+                    className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                  >
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Back to Package Selection
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Show selected packages */}
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-green-800 mb-2">
+                    Selected Packages
+                  </h3>
+                  <div className="space-y-2">
+                    {packageItems.map((item: any, index: number) => (
+                      <div key={`${item.id}-${index}`} className="flex justify-between items-center">
+                        <span className="text-green-700">{item.name}</span>
+                        <span className="text-green-600 font-semibold">
+                          {item.bookingDetails?.length || 0} / {item.sessions || 1} sessions scheduled
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Schedule component */}
+                <EnhancedSchedule
+                  onBookSlot={(slot) => {
+                    const packageNeedingSessions = packageItems.find((item: any) => 
+                      !item.bookingDetails || item.bookingDetails.length < (item.sessions || 1)
+                    );
+                    
+                    if (packageNeedingSessions) {
+                      const updatedPackage = {
+                        ...packageNeedingSessions,
+                        bookingDetails: [
+                          ...(packageNeedingSessions.bookingDetails || []),
+                          {
+                            selectedDate: slot.date,
+                            selectedTime: slot.time,
+                            teacher: slot.teacher.name,
+                            dayOfWeek: new Date(slot.date).toLocaleDateString('en-US', { weekday: 'long' }),
+                            serviceType: slot.serviceType.name,
+                            venue: slot.venue.name,
+                            scheduleSlotId: slot.id
+                          }
+                        ]
+                      };
+                      
+                      addToCart(updatedPackage);
+                      toast.success(`Scheduled ${slot.serviceType.name} for ${slot.date} at ${slot.time}`);
+
+                      // OPEN CART: After first booking
+                      setTimeout(() => {
+                        if (typeof window !== 'undefined') {
+                          localStorage.setItem('isCartOpen', 'true');
+                        }
+                      }, 500);
+                    } else {
+                      toast.info('All sessions for your packages have been scheduled');
+                    }
+                  }}
+                  showFilters={true}
+                  existingBookings={packageItems.flatMap((item: any) => item.bookingDetails || [])}
+                  lockedTimeSlots={lockedTimeSlots}
+                />
+              </div>
+            )}
           </div>
         );
 
@@ -568,33 +1635,31 @@ export function MasterBookingFlow({ onCheckoutComplete }: MasterBookingFlowProps
           <div className="space-y-6">
             <div className="text-center">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {getTranslation('bookingFlow.customerInfo', 'Customer Information')}
+                Customer Information
               </h2>
               <p className="text-gray-600">
-                {getTranslation('bookingFlow.customerInfoDesc', 'Provide your details')}
+                Provide your details
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="unified-form-group">
                 <Label htmlFor="name" className="unified-form-label">
-                  {getTranslation('forms.name', 'Full Name')} *
+                  Full Name *
                 </Label>
                 <Input
                   id="name"
+                  type="text"
                   value={customerData.name}
                   onChange={(e) => setCustomerData(prev => ({ ...prev, name: e.target.value }))}
                   className="unified-form-input"
-                  placeholder="Enter your full name"
+                  required
                 />
-                {formErrors.name && (
-                  <p className="text-red-500 text-sm">{formErrors.name}</p>
-                )}
               </div>
 
               <div className="unified-form-group">
                 <Label htmlFor="email" className="unified-form-label">
-                  {getTranslation('forms.email', 'Email')} *
+                  Email *
                 </Label>
                 <Input
                   id="email"
@@ -602,29 +1667,26 @@ export function MasterBookingFlow({ onCheckoutComplete }: MasterBookingFlowProps
                   value={customerData.email}
                   onChange={(e) => setCustomerData(prev => ({ ...prev, email: e.target.value }))}
                   className="unified-form-input"
-                  placeholder="Enter your email"
+                  required
                 />
-                {emailError && (
-                  <p className="text-red-500 text-sm">{emailError}</p>
-                )}
               </div>
 
               <div className="unified-form-group">
                 <Label htmlFor="phone" className="unified-form-label">
-                  {getTranslation('forms.phone', 'Phone')}
+                  Phone
                 </Label>
                 <Input
                   id="phone"
+                  type="tel"
                   value={customerData.phone}
                   onChange={(e) => setCustomerData(prev => ({ ...prev, phone: e.target.value }))}
                   className="unified-form-input"
-                  placeholder="Enter your phone number"
                 />
               </div>
 
               <div className="unified-form-group">
                 <Label htmlFor="birthDate" className="unified-form-label">
-                  {getTranslation('forms.birthDate', 'Birth Date')} *
+                  Birth Date *
                 </Label>
                 <Input
                   id="birthDate"
@@ -632,68 +1694,23 @@ export function MasterBookingFlow({ onCheckoutComplete }: MasterBookingFlowProps
                   value={customerData.birthDate}
                   onChange={(e) => setCustomerData(prev => ({ ...prev, birthDate: e.target.value }))}
                   className="unified-form-input"
-                />
-                {formErrors.birthDate && (
-                  <p className="text-red-500 text-sm">{formErrors.birthDate}</p>
-                )}
-              </div>
-
-              <div className="unified-form-group">
-                <Label htmlFor="birthTime" className="unified-form-label">
-                  {getTranslation('forms.birthTime', 'Birth Time')}
-                </Label>
-                <Input
-                  id="birthTime"
-                  type="time"
-                  value={customerData.birthTime}
-                  onChange={(e) => setCustomerData(prev => ({ ...prev, birthTime: e.target.value }))}
-                  className="unified-form-input"
+                  required
                 />
               </div>
 
-              <div className="unified-form-group">
+              <div className="unified-form-group md:col-span-2">
                 <Label htmlFor="birthPlace" className="unified-form-label">
-                  {getTranslation('forms.birthPlace', 'Birth Place')} *
+                  Birth Place *
                 </Label>
                 <Input
                   id="birthPlace"
+                  type="text"
                   value={customerData.birthPlace}
                   onChange={(e) => setCustomerData(prev => ({ ...prev, birthPlace: e.target.value }))}
                   className="unified-form-input"
-                  placeholder="Enter your birth place"
+                  required
                 />
-                {formErrors.birthPlace && (
-                  <p className="text-red-500 text-sm">{formErrors.birthPlace}</p>
-                )}
               </div>
-            </div>
-
-            <div className="unified-form-group">
-              <Label htmlFor="question" className="unified-form-label">
-                {getTranslation('forms.question', 'Question/Focus Areas')}
-              </Label>
-              <textarea
-                id="question"
-                value={customerData.question}
-                onChange={(e) => setCustomerData(prev => ({ ...prev, question: e.target.value }))}
-                className="unified-form-textarea"
-                rows={3}
-                placeholder="What would you like to focus on during your session?"
-              />
-            </div>
-
-            <div className="unified-form-group">
-              <Label htmlFor="specialRequests" className="unified-form-label">
-                {getTranslation('forms.specialRequests', 'Special Requests')}
-              </Label>
-              <textarea
-                id="specialRequests"
-                value={customerData.specialRequests}
-                onChange={(e) => setCustomerData(prev => ({ ...prev, specialRequests: e.target.value }))}
-                className="unified-form-textarea"
-                rows={3}
-                placeholder="Any special requests or notes?"
-              />
             </div>
           </div>
         );
@@ -703,121 +1720,108 @@ export function MasterBookingFlow({ onCheckoutComplete }: MasterBookingFlowProps
           <div className="space-y-6">
             <div className="text-center">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {getTranslation('bookingFlow.shipping', 'Shipping Address')}
+                Shipping Address
               </h2>
               <p className="text-gray-600">
-                {getTranslation('bookingFlow.shippingDesc', 'Provide shipping details')}
+                Provide shipping details
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="unified-form-group">
                 <Label htmlFor="firstName" className="unified-form-label">
-                  {getTranslation('forms.firstName', 'First Name')} *
+                  First Name *
                 </Label>
                 <Input
                   id="firstName"
+                  type="text"
                   value={shippingData.firstName}
-                  onChange={(e) => setShippingData(prev => ({ ...prev, firstName: e.target.value }))}
+                  onChange={(e) => setShippingFormData(prev => ({ ...prev, firstName: e.target.value }))}
                   className="unified-form-input"
-                  placeholder="Enter your first name"
+                  required
                 />
-                {formErrors.firstName && (
-                  <p className="text-red-500 text-sm">{formErrors.firstName}</p>
-                )}
               </div>
 
               <div className="unified-form-group">
                 <Label htmlFor="lastName" className="unified-form-label">
-                  {getTranslation('forms.lastName', 'Last Name')} *
+                  Last Name *
                 </Label>
                 <Input
                   id="lastName"
+                  type="text"
                   value={shippingData.lastName}
-                  onChange={(e) => setShippingData(prev => ({ ...prev, lastName: e.target.value }))}
+                  onChange={(e) => setShippingFormData(prev => ({ ...prev, lastName: e.target.value }))}
                   className="unified-form-input"
-                  placeholder="Enter your last name"
+                  required
                 />
-                {formErrors.lastName && (
-                  <p className="text-red-500 text-sm">{formErrors.lastName}</p>
-                )}
               </div>
 
               <div className="unified-form-group md:col-span-2">
                 <Label htmlFor="address" className="unified-form-label">
-                  {getTranslation('forms.address', 'Address')} *
+                  Address *
                 </Label>
                 <Input
                   id="address"
+                  type="text"
                   value={shippingData.address}
-                  onChange={(e) => setShippingData(prev => ({ ...prev, address: e.target.value }))}
+                  onChange={(e) => setShippingFormData(prev => ({ ...prev, address: e.target.value }))}
                   className="unified-form-input"
-                  placeholder="Enter your address"
+                  required
                 />
-                {formErrors.address && (
-                  <p className="text-red-500 text-sm">{formErrors.address}</p>
-                )}
               </div>
 
               <div className="unified-form-group">
                 <Label htmlFor="city" className="unified-form-label">
-                  {getTranslation('forms.city', 'City')} *
+                  City *
                 </Label>
                 <Input
                   id="city"
+                  type="text"
                   value={shippingData.city}
-                  onChange={(e) => setShippingData(prev => ({ ...prev, city: e.target.value }))}
+                  onChange={(e) => setShippingFormData(prev => ({ ...prev, city: e.target.value }))}
                   className="unified-form-input"
-                  placeholder="Enter your city"
+                  required
                 />
-                {formErrors.city && (
-                  <p className="text-red-500 text-sm">{formErrors.city}</p>
-                )}
               </div>
 
               <div className="unified-form-group">
                 <Label htmlFor="state" className="unified-form-label">
-                  {getTranslation('forms.state', 'State/Province')}
+                  State
                 </Label>
                 <Input
                   id="state"
+                  type="text"
                   value={shippingData.state}
-                  onChange={(e) => setShippingData(prev => ({ ...prev, state: e.target.value }))}
+                  onChange={(e) => setShippingFormData(prev => ({ ...prev, state: e.target.value }))}
                   className="unified-form-input"
-                  placeholder="Enter your state"
                 />
               </div>
 
               <div className="unified-form-group">
                 <Label htmlFor="postalCode" className="unified-form-label">
-                  {getTranslation('forms.postalCode', 'Postal Code')}
+                  Postal Code
                 </Label>
                 <Input
                   id="postalCode"
+                  type="text"
                   value={shippingData.postalCode}
-                  onChange={(e) => setShippingData(prev => ({ ...prev, postalCode: e.target.value }))}
+                  onChange={(e) => setShippingFormData(prev => ({ ...prev, postalCode: e.target.value }))}
                   className="unified-form-input"
-                  placeholder="Enter your postal code"
                 />
               </div>
 
               <div className="unified-form-group">
                 <Label htmlFor="country" className="unified-form-label">
-                  {getTranslation('forms.country', 'Country')}
+                  Country
                 </Label>
-                <Select
-                  value={shippingData.country}
-                  onValueChange={(value) => setShippingData(prev => ({ ...prev, country: value }))}
-                >
-                  <SelectTrigger className="unified-form-select">
-                    <SelectValue placeholder="Select country" />
+                <Select value={shippingData.country} onValueChange={(value) => setShippingFormData(prev => ({ ...prev, country: value }))}>
+                  <SelectTrigger className="unified-form-input">
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {countries.map((country) => (
-                      <SelectItem key={country.code} value={country.code}>
-                        {country.name}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="PE">Peru</SelectItem>
+                    <SelectItem value="US">United States</SelectItem>
+                    <SelectItem value="CA">Canada</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -830,48 +1834,51 @@ export function MasterBookingFlow({ onCheckoutComplete }: MasterBookingFlowProps
           <div className="space-y-6">
             <div className="text-center">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {getTranslation('bookingFlow.payment', 'Payment')}
+                Payment
               </h2>
               <p className="text-gray-600">
-                {getTranslation('bookingFlow.paymentDesc', 'Complete your purchase')}
+                Complete your purchase
               </p>
             </div>
 
-            {/* Order Summary */}
-            <Card className="unified-card">
-              <CardHeader>
-                <CardTitle className="unified-card__title">Order Summary</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {cartItems.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between">
-                      <span>{item.name} x {item.quantity}</span>
-                      <span>S/ {(item.price * item.quantity).toFixed(2)}</span>
-                    </div>
-                  ))}
-                  <div className="border-t pt-2 mt-4">
-                    <div className="flex justify-between font-bold text-lg">
-                      <span>Total:</span>
-                      <span>S/ {getTotalPrice().toFixed(2)}</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div>
+                <StripeInlineForm
+                  amount={getTotalPrice() * 100}
+                  currency="PEN"
+                  description="Wellness Package Purchase"
+                  onSuccess={handlePaymentSuccess}
+                  onError={(error) => {
+                    console.error('Payment error:', error);
+                    toast.error('Payment failed. Please try again.');
+                  }}
+                />
+              </div>
 
-            {/* Payment Form */}
-            <PaymentErrorBoundary>
-              <StripeInlineForm
-                amount={getTotalPrice() * 100} // Convert to cents
-                currency="pen"
-                onSuccess={handlePaymentSuccess}
-                onError={handlePaymentError}
-                customerData={customerData}
-                shippingData={requiresAddress() ? shippingData : undefined}
-                cartItems={cartItems}
-              />
-            </PaymentErrorBoundary>
+              <div>
+                <Card className="unified-card">
+                  <CardHeader>
+                    <CardTitle className="unified-card__title">Order Summary</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {cartItems.map((item, index) => (
+                        <div key={`${item.id}-${index}`} className="flex items-center justify-between">
+                          <span>{item.name} x {item.quantity}</span>
+                          <span>S/ {(item.price * item.quantity).toFixed(2)}</span>
+                        </div>
+                      ))}
+                      <div className="border-t pt-2 mt-4">
+                        <div className="flex justify-between font-bold">
+                          <span>Total:</span>
+                          <span>S/ {getTotalPrice().toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </div>
         );
 
@@ -879,12 +1886,11 @@ export function MasterBookingFlow({ onCheckoutComplete }: MasterBookingFlowProps
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {getTranslation('bookingFlow.confirmation', 'Order Confirmed!')}
+                Order Confirmed!
               </h2>
               <p className="text-gray-600">
-                {getTranslation('bookingFlow.confirmationDesc', 'Your order has been successfully processed')}
+                Thank you for your purchase
               </p>
             </div>
 
@@ -894,35 +1900,27 @@ export function MasterBookingFlow({ onCheckoutComplete }: MasterBookingFlowProps
                   <CardTitle className="unified-card__title">Order Details</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span>Order ID:</span>
-                      <span className="font-mono">{orderData.id}</span>
+                  <div className="space-y-4">
+                    <div>
+                      <strong>Order Number:</strong> {orderData.orderNumber}
                     </div>
-                    <div className="flex justify-between">
-                      <span>Status:</span>
-                      <span className="text-green-600 font-semibold">Completed</span>
+                    <div>
+                      <strong>Total:</strong> S/ {orderData.total.toFixed(2)}
                     </div>
-                    <div className="flex justify-between">
-                      <span>Total:</span>
-                      <span>S/ {getTotalPrice().toFixed(2)}</span>
+                    <div>
+                      <strong>Items:</strong>
+                      <ul className="mt-2 space-y-1">
+                        {orderData.items.map((item, index) => (
+                          <li key={index} className="text-sm text-gray-600">
+                            {item.name} x {item.quantity} - S/ {(item.price * item.quantity).toFixed(2)}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             )}
-
-            <div className="text-center">
-              <Button
-                onClick={() => {
-                  clearCart();
-                  window.location.href = '/';
-                }}
-                className="btn-primary"
-              >
-                Continue Shopping
-              </Button>
-            </div>
           </div>
         );
 
@@ -931,40 +1929,192 @@ export function MasterBookingFlow({ onCheckoutComplete }: MasterBookingFlowProps
     }
   };
 
-  // Don't render if cart is empty and we're not on the first step
-  if (cartItems.length === 0 && currentStep > 0) {
-    return (
-      <div className="text-center py-12">
-        <ShoppingCart className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Cart is Empty</h3>
-        <p className="text-gray-600 mb-4">Please add items to your cart to continue</p>
-        <Button onClick={() => setCurrentStep(0)} className="btn-primary">
-          Browse Packages
-        </Button>
-      </div>
-    );
-  }
+  /**
+   * STEP VALIDATION LOGIC
+   * ---------------------
+   * Validates current step before allowing progression to next step.
+   * Different validation rules apply based on scenario and step.
+   */
+  const validateCurrentStep = () => {
+    const currentStepData = steps[currentStep];
+    
+    switch (currentStepData.id) {
+      case 'packages':
+        // VALIDATION: Ensure cart has items
+        if (cartItems.length === 0) {
+          toast.error('Please add at least one item to your cart');
+          return false;
+        }
+
+        // VALIDATION: Check package validity
+        const packageItems = cartItems.filter(item => item.type === 'package');
+        const invalidPackages = packageItems.filter(pkg => !pkg.sessions || pkg.sessions <= 0);
+        if (invalidPackages.length > 0) {
+          toast.error('Some packages have invalid session counts. Please remove and re-add them.');
+          return false;
+        }
+        break;
+        
+      case 'schedule':
+        if (initialStep === 1) {
+          // SCENARIO A: Schedule-first validation
+          if (selectedSchedules.length !== 1) {
+            toast.error('Please select exactly 1 time slot');
+            return false;
+          }
+        } else if (isAddingMoreBookings) {
+          // SCENARIO C: Add more bookings - allow partial bookings
+          if (isAtMaxSessions()) {
+            toast.success('All sessions have been booked!');
+          }
+          // Note: Allow proceeding even with partial bookings in this mode
+        } else {
+          // SCENARIO B: Package-first validation
+          const packageItems = cartItems.filter((item: any) => item.type === 'package');
+          const packagesWithoutBookings = packageItems.filter((item: any) => 
+            !item.bookingDetails || item.bookingDetails.length === 0
+          );
+          
+          if (packagesWithoutBookings.length > 0) {
+            toast.error('Please schedule sessions for all packages before continuing');
+            return false;
+          }
+
+          // VALIDATION: Check for duplicate slots within packages
+          const hasDuplicates = packageItems.some(pkg => {
+            if (!pkg.bookingDetails || pkg.bookingDetails.length <= 1) return false;
+
+            const timeSlots = pkg.bookingDetails.map((booking: any) =>
+              `${booking.selectedDate}-${booking.selectedTime}`
+            );
+            return new Set(timeSlots).size !== timeSlots.length;
+          });
+
+          if (hasDuplicates) {
+            toast.error('Duplicate time slots detected within the same package. Please remove duplicates before continuing.');
+            return false;
+          }
+        }
+        break;
+        
+      case 'customer':
+        if (!customerData.name || !customerData.email || !customerData.birthDate || !customerData.birthPlace) {
+          toast.error('Please fill in all required customer information');
+          return false;
+        }
+        
+        // Enhanced validation: Email format validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(customerData.email)) {
+          toast.error('Please enter a valid email address');
+          return false;
+        }
+        
+        // Enhanced validation: Birth date validation
+        const birthDate = new Date(customerData.birthDate);
+        const today = new Date();
+        if (birthDate >= today) {
+          toast.error('Birth date must be in the past');
+          return false;
+        }
+        
+        // Enhanced validation: Age validation (must be at least 13)
+        const age = today.getFullYear() - birthDate.getFullYear();
+        if (age < 13) {
+          toast.error('You must be at least 13 years old to make a purchase');
+          return false;
+        }
+        break;
+        
+      case 'shipping':
+        if (requiresAddress()) {
+          if (!shippingData.firstName || !shippingData.lastName || !shippingData.address || !shippingData.city) {
+            toast.error('Please fill in all required shipping information');
+            return false;
+          }
+          
+          // Enhanced validation: Name validation
+          if (shippingData.firstName.length < 2 || shippingData.lastName.length < 2) {
+            toast.error('First and last names must be at least 2 characters long');
+            return false;
+          }
+          
+          // Enhanced validation: Address validation
+          if (shippingData.address.length < 10) {
+            toast.error('Please provide a complete address (at least 10 characters)');
+            return false;
+          }
+        }
+        break;
+        
+      case 'payment':
+        // Enhanced validation: Final checkout validation
+        const finalPackageItems = cartItems.filter(item => item.type === 'package');
+        
+        // Check if all packages have at least one booking (unless it's a product-only purchase)
+        if (finalPackageItems.length > 0) {
+          const packagesWithoutBookings = finalPackageItems.filter(pkg => 
+            !pkg.bookingDetails || pkg.bookingDetails.length === 0
+          );
+          
+          if (packagesWithoutBookings.length > 0) {
+            toast.error('All packages must have at least one scheduled session before checkout');
+            return false;
+          }
+          
+          // Check for any duplicate time slots
+          const allBookings = finalPackageItems.flatMap(pkg => pkg.bookingDetails || []);
+          const timeSlots = allBookings.map(booking => 
+            `${booking.selectedDate}-${booking.selectedTime}`
+          );
+          const uniqueTimeSlots = new Set(timeSlots);
+          
+          if (timeSlots.length !== uniqueTimeSlots.size) {
+            toast.error('Duplicate time slots detected. Please remove duplicates before checkout.');
+            return false;
+          }
+        }
+        
+        // Check if total price is valid
+        if (getTotalPrice() <= 0) {
+          toast.error('Invalid total price. Please check your cart items.');
+          return false;
+        }
+        break;
+    }
+    
+    return true;
+  };
+
+  // Handle next step
+  const handleNext = () => {
+    if (validateCurrentStep()) {
+      nextStep();
+    }
+  };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto">
       {/* Progress Steps */}
       <div className="flex items-center justify-center space-x-2 sm:space-x-4 mb-8">
         {completedSteps.map((step, index) => (
           <div key={step.id} className="flex items-center">
             <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 ${
-              index <= currentStep 
-                ? 'border-green-600 bg-green-600 text-white' 
-                : 'border-gray-300 text-gray-400'
+              step.completed 
+                ? 'bg-green-600 border-green-600 text-white' 
+                : index === currentStep 
+                  ? 'border-green-600 text-green-600' 
+                  : 'border-gray-300 text-gray-400'
             }`}>
               {step.completed ? (
-                <CheckCircle size={16} className="sm:w-5 sm:h-5" />
+                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
               ) : (
-                <step.icon size={16} className="sm:w-5 sm:h-5" />
+                <step.icon className="w-4 h-4 sm:w-5 sm:h-5" />
               )}
             </div>
             {index < completedSteps.length - 1 && (
-              <div className={`w-8 sm:w-16 h-0.5 mx-1 sm:mx-2 ${
-                index < currentStep ? 'bg-green-600' : 'bg-gray-300'
+              <div className={`w-8 sm:w-12 h-0.5 ${
+                step.completed ? 'bg-green-600' : 'bg-gray-300'
               }`} />
             )}
           </div>
@@ -972,39 +2122,137 @@ export function MasterBookingFlow({ onCheckoutComplete }: MasterBookingFlowProps
       </div>
 
       {/* Step Content */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentStep}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.3 }}
-        >
-          {renderStepContent()}
-        </motion.div>
-      </AnimatePresence>
+      <div className="mb-8">
+        {renderStepContent()}
+      </div>
 
-      {/* Navigation */}
-      {currentStep < steps.length - 1 && (
-        <div className="flex justify-between mt-8">
-          <Button
-            onClick={prevStep}
-            disabled={currentStep === 0}
-            variant="outline"
-            className="btn-secondary"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Previous
-          </Button>
-          
+      {/* Enhanced Navigation with better UX */}
+      <div className="flex justify-between items-center">
+        <Button
+          onClick={prevStep}
+          disabled={currentStep === 0}
+          variant="outline"
+          className="flex items-center"
+          title={currentStep === 0 ? "You're at the first step" : "Go back to previous step"}
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Previous
+        </Button>
+
+        {/* Step indicator */}
+        <div className="text-center">
+          <p className="text-sm text-gray-600">
+            Step {currentStep + 1} of {steps.length}
+          </p>
+          <p className="text-xs text-gray-500">
+            {steps[currentStep].title}
+          </p>
+        </div>
+
+        {currentStep < steps.length - 1 ? (
           <Button
             onClick={handleNext}
-            disabled={isProcessing}
-            className="btn-primary"
+            className="flex items-center"
+            disabled={!validateCurrentStep()}
+            title={!validateCurrentStep() ? "Please complete the current step before continuing" : "Continue to next step"}
           >
             {currentStep === steps.length - 2 ? 'Complete Order' : 'Next'}
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
+        ) : (
+          <div className="text-center">
+            <p className="text-green-600 font-semibold">Order Complete!</p>
+          </div>
+        )}
+      </div>
+
+      {/* Enhanced Package Selection Modal */}
+      {showPackageSelectionModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Select Package for Booking</h3>
+              <div className="text-sm text-gray-500">
+                {selectedSchedules.length > 0 && (
+                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                    {selectedSchedules[selectedSchedules.length - 1].selectedDate} at {selectedSchedules[selectedSchedules.length - 1].selectedTime}
+                  </span>
+                )}
+              </div>
+            </div>
+            <p className="text-gray-600 mb-4">
+              You have multiple packages available. Which package would you like to use for this booking?
+            </p>
+            
+            <div className="space-y-3">
+              {selectedSchedules.length > 0 && (() => {
+                const currentSchedule = selectedSchedules[selectedSchedules.length - 1];
+                const availablePackages = getAvailablePackagesForSlot(currentSchedule.selectedDate, currentSchedule.selectedTime);
+                
+                return availablePackages.map((pkg) => {
+                  const remaining = getPackageRemainingSessions(pkg.id);
+                  const scheduled = pkg.bookingDetails?.length || 0;
+                  const total = pkg.sessions || 1;
+                  
+                  return (
+                    <button
+                      key={pkg.id}
+                      onClick={() => handlePackageSelection(pkg.id)}
+                      className="w-full p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition-all duration-200 text-left group"
+                      title={`Select ${pkg.name} for this booking`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900 group-hover:text-green-800">
+                            {pkg.name}
+                          </h4>
+                          <p className="text-sm text-gray-600">
+                            {scheduled}/{total} sessions booked
+                          </p>
+                          <p className="text-xs text-blue-600 font-medium">
+                            ✓ Available for {currentSchedule.selectedDate} at {currentSchedule.selectedTime}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-green-600 font-semibold text-lg">
+                            {remaining}
+                          </span>
+                          <p className="text-xs text-gray-500">remaining</p>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                });
+              })()}
+              
+              {selectedSchedules.length > 0 && (() => {
+                const currentSchedule = selectedSchedules[selectedSchedules.length - 1];
+                const availablePackages = getAvailablePackagesForSlot(currentSchedule.selectedDate, currentSchedule.selectedTime);
+                
+                if (availablePackages.length === 0) {
+                  return (
+                    <div className="text-center py-4 text-gray-500">
+                      <p>No packages available for this time slot.</p>
+                      <p className="text-sm">All packages have either reached capacity or already booked this slot.</p>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+            </div>
+            
+            <div className="flex justify-end space-x-3 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowPackageSelectionModal(false);
+                  setSelectedSchedules(prev => prev.slice(0, -1));
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>

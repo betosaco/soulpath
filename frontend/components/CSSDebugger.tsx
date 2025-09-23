@@ -4,7 +4,12 @@ import { useEffect, useState } from 'react';
 
 export default function CSSDebugger() {
   const [isVisible, setIsVisible] = useState(false);
-  const [cssInfo, setCssInfo] = useState<any>({});
+  const [cssInfo, setCssInfo] = useState<{
+    totalStylesheets?: number;
+    stylesheets?: Array<{ href?: string; rules?: number; disabled?: boolean }>;
+    computedStyles?: { body?: CSSStyleDeclaration; html?: CSSStyleDeclaration };
+    environment?: { nodeEnv?: string; isProduction?: boolean };
+  }>({});
 
   useEffect(() => {
     // Only show in development or when explicitly enabled
@@ -32,7 +37,8 @@ export default function CSSDebugger() {
         }
       };
       
-      setCssInfo(cssInfo);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setCssInfo(cssInfo as any);
     }
   }, []);
 
@@ -62,7 +68,7 @@ export default function CSSDebugger() {
       </div>
       
       <h4>Stylesheets:</h4>
-      {cssInfo.stylesheets?.map((sheet: any, index: number) => (
+      {cssInfo.stylesheets?.map((sheet: { href?: string; rules?: number; disabled?: boolean }, index: number) => (
         <div key={index} style={{ marginBottom: '5px', padding: '5px', background: 'rgba(255,255,255,0.1)' }}>
           <div><strong>#{index}:</strong> {sheet.href || 'Inline'}</div>
           <div>Rules: {sheet.rules}</div>

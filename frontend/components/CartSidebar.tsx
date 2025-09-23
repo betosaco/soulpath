@@ -1,18 +1,18 @@
 'use client';
 
 import React from 'react';
-import { XMarkIcon, PlusIcon, MinusIcon, TrashIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, PlusIcon, MinusIcon, TrashIcon, CalendarDaysIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { useCart, useCartUI } from '@/store/appStore';
+import { toast } from 'sonner';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CartBookingDetails } from './CartBookingDetails';
-import { toast } from 'sonner';
+// import { toast } from 'sonner';
 
 export function CartSidebar() {
   const {
     items: cartItems,
-    addItem,
     updateQuantity,
     removeItem,
     removeBookingDetails,
@@ -33,6 +33,18 @@ export function CartSidebar() {
   const hasPackages = packageItems.length > 0;
   const packageCount = packageItems.length;
   const packagesWithBooking = packageItems.filter(item => item.bookingDetails).length;
+
+  // Check if all packages have reached their maximum sessions
+  const isAtMaxSessions = () => {
+    if (packageItems.length === 0) return false;
+    return packageItems.every(item => {
+      const sessions = item.sessions || 1;
+      const booked = item.bookingDetails?.length || 0;
+      return booked >= sessions;
+    });
+  };
+
+  const allSessionsBooked = isAtMaxSessions();
   
   // Debug logging
   console.log('🔍 CartSidebar render - cartItems:', cartItems.length, 'packageItems:', packageItems.length, 'hasPackages:', hasPackages);
@@ -111,7 +123,7 @@ export function CartSidebar() {
               >
                 {cartItems.map((item, index) => (
                   <motion.div 
-                    key={item.id} 
+                    key={`${item.id}-${index}`} 
                     className="space-y-2"
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -172,7 +184,11 @@ export function CartSidebar() {
                             onClick={() => {
                               if (item.type === 'package') {
                                 // For packages, create a new package instead of incrementing quantity
-                                const uniqueId = `${item.sku}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                                // const uniqueId = `${item.sku}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                                // Note: addToCart function not available in this context
+                                // This functionality should be handled by the parent component
+                                console.log('Add to cart functionality not available in CartSidebar');
+                                /*
                                 addToCart({
                                   id: uniqueId,
                                   name: item.name,
@@ -187,6 +203,7 @@ export function CartSidebar() {
                                   maxGroupSize: item.maxGroupSize
                                 });
                                 toast.success(`${item.name} added to cart`);
+                                */
                                 
                                 // Set session storage to indicate we're adding more bookings
                                 if (typeof window !== 'undefined') {
@@ -222,7 +239,6 @@ export function CartSidebar() {
                         className="w-full"
                         showActions={true}
                         packageSessions={item.sessions}
-                        packageId={item.id}
                         onRemove={(index) => {
                           if (index !== undefined) {
                             removeBookingFromPackage(item.id, index);
@@ -288,12 +304,20 @@ export function CartSidebar() {
               </div>
               
               <div className="space-y-2">
-                {/* Book a Class Now button */}
+                {/* Book a Class Now / Proceed to Checkout button */}
                 {hasPackages && (
                   <button
+                    disabled={allSessionsBooked}
                     onClick={(e) => {
                       console.log('🎯 Book Now button clicked!');
-                      
+
+                      // Check if all sessions are already booked
+                      if (allSessionsBooked) {
+                        toast.error('All available sessions have been booked. Please proceed to checkout.');
+                        console.log('🚫 Book Now blocked - all sessions already booked');
+                        return;
+                      }
+
                       // Prevent any parent form submission or event bubbling
                       e.preventDefault();
                       e.stopPropagation();
@@ -314,11 +338,13 @@ export function CartSidebar() {
                           if (packageItems.length > 1) {
                             // Multiple packages - show modal for package selection
                             sessionStorage.setItem('isAddingMoreBookings', 'true');
+                            sessionStorage.setItem('bookingFlowType', 'add-more-bookings');
                             sessionStorage.removeItem('addingToPackageId');
                             console.log('🔍 Multiple packages - will show modal for package selection');
                           } else if (packageItems.length === 1) {
                             // Single package - set specific package ID
                             sessionStorage.setItem('isAddingMoreBookings', 'true');
+                            sessionStorage.setItem('bookingFlowType', 'add-more-bookings');
                             sessionStorage.setItem('addingToPackageId', packageItems[0].id);
                             console.log('🔍 Single package - setting addingToPackageId:', packageItems[0].id);
                           }
@@ -328,6 +354,7 @@ export function CartSidebar() {
                           console.log('🔍 Not on schedule page - setting up navigation to /schedule');
                           if (packageItems.length > 0) {
                             sessionStorage.setItem('isAddingMoreBookings', 'true');
+                            sessionStorage.setItem('bookingFlowType', 'add-more-bookings');
                             // Only set specific package ID if there's only one package
                             if (packageItems.length === 1) {
                               sessionStorage.setItem('addingToPackageId', packageItems[0].id);
@@ -342,63 +369,68 @@ export function CartSidebar() {
                           console.log('🔍 Closing cart and navigating to /schedule');
                           closeCart();
                           
-                          // Use multiple navigation methods to ensure it works
+                          // Navigate to unified booking flow
                           try {
                             console.log('🔍 Attempting navigation to /schedule...');
-                            
-                            // Method 1: Direct location change
                             window.location.href = '/schedule';
-                            
-                            // Method 2: Fallback with timeout
-                            setTimeout(() => {
-                              if (window.location.pathname !== '/schedule') {
-                                console.log('🔍 Fallback navigation to /schedule');
-                                window.location.replace('/schedule');
-                              }
-                            }, 50);
-                            
-                            // Method 3: Force navigation after a short delay
-                            setTimeout(() => {
-                              console.log('🔍 Force navigation to /schedule');
-                              window.location.replace('/schedule');
-                            }, 200);
-                            
                           } catch (error) {
                             console.error('🔍 Navigation error:', error);
-                            // Method 4: Last resort
                             window.location.replace('/schedule');
                           }
                         }
                       }
                     }}
-                    className="w-full bg-orange-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-orange-700 transition-colors text-center flex items-center justify-center gap-2"
+                    className={`w-full py-3 px-4 rounded-lg font-medium transition-colors text-center flex items-center justify-center gap-2 ${
+                      allSessionsBooked
+                        ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                        : 'bg-orange-600 text-white hover:bg-orange-700'
+                    }`}
                   >
-                    <CalendarDaysIcon className="h-5 w-5" />
-                    Book a Class Now
-                    {packageCount > 1 && (
+                    {allSessionsBooked ? (
+                      <CheckCircleIcon className="h-5 w-5" />
+                    ) : (
+                      <CalendarDaysIcon className="h-5 w-5" />
+                    )}
+                    {allSessionsBooked ? 'All Sessions Booked' : 'Book a Class Now'}
+                    {packageCount > 1 && !allSessionsBooked && (
                       <span className="text-xs bg-orange-500 px-2 py-1 rounded-full">
                         {packageCount} packages
                       </span>
                     )}
                   </button>
                 )}
-                
-                <Link
-                  href="/checkout"
-                  className="w-full bg-[#6ea058] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#5a8a4a] transition-colors text-center block"
+
+                <button
+                  className="w-full bg-[#6ea058] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#5a8a4a] transition-colors text-center"
                   onClick={() => {
-                    // Set direct checkout flag and clear schedule data
-                    if (typeof window !== 'undefined') {
-                      sessionStorage.setItem('isDirectCheckout', 'true');
-                      sessionStorage.removeItem('selectedSchedule');
-                      sessionStorage.removeItem('selectedPackageForBooking');
+                    // Check if we're already on the checkout page
+                    const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+                    const isOnCheckoutPage = currentPath === '/checkout';
+
+                    if (isOnCheckoutPage) {
+                      // Check if user is already in the customer info step (checkout step)
+                      const currentStepId = typeof window !== 'undefined' ? sessionStorage.getItem('currentStepId') : '';
+                      const isInCustomerInfoStep = currentStepId === 'customer';
+
+                      if (isInCustomerInfoStep) {
+                        // User is already in customer info step, just close the cart
+                        console.log('📍 Already in customer info step - just closing cart');
+                        closeCart();
+                      } else {
+                        // Already on checkout page but not in customer step, just close the cart
+                        console.log('📍 Already on checkout page - just closing cart');
+                        closeCart();
+                      }
+                    } else {
+                      // Navigate to checkout and close cart
+                      console.log('📍 Navigating to checkout page with directCheckout=true');
+                      closeCart();
+                      window.location.href = '/checkout?directCheckout=true';
                     }
-                    // Close sidecart when proceeding to checkout
-                    closeCart();
                   }}
                 >
                   Proceed to Checkout
-                </Link>
+                </button>
                 
                 <button
                   onClick={clearCart}

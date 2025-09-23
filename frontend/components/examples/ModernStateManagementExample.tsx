@@ -4,7 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ShoppingCart, Package, User, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import { usePackages } from '@/hooks/usePackagesQuery';
-import { useAuth } from '@/hooks/useAuthQuery';
+import { useAuthQuery } from '@/hooks/useAuthQuery';
 import { useCart, useCartUI, useUI } from '@/store/appStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,26 +22,26 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 export function ModernStateManagementExample() {
   // TanStack Query hooks for server state
   const { data: packages, isLoading: packagesLoading, error: packagesError } = usePackages('PEN');
-  const { user, isLoading: authLoading, isAuthenticated, signIn, signOut } = useAuth();
+  const { user, isLoading: authLoading, isAuthenticated, signIn, signOut } = useAuthQuery();
   
   // Zustand hooks for client state
   const { items: cartItems, addItem, removeItem, getTotalPrice, getTotalItems } = useCart();
   const { isCartOpen, toggleCart } = useCartUI();
   const { addToast } = useUI();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleAddToCart = (pkg: any) => {
     // Optimistic update - UI updates immediately
     addItem({
       id: pkg.id.toString(),
       name: pkg.packageDefinition.name,
       price: pkg.price,
-      quantity: 1,
       image: '/placeholder-package.jpg',
-      currency: pkg.currency.code,
+      currency: pkg.currency?.code || 'PEN',
       type: 'package',
-      sessions: pkg.packageDefinition.sessionsCount,
-      duration: pkg.packageDefinition.sessionDuration.duration_minutes,
-      packageType: pkg.packageDefinition.packageType,
+      sessions: pkg.packageDefinition.sessionsCount || 1,
+      duration: pkg.packageDefinition.sessionDuration?.duration_minutes || 60,
+      packageType: pkg.packageDefinition.packageType || 'standard',
     });
     
     // Show success toast
@@ -64,7 +64,7 @@ export function ModernStateManagementExample() {
   const handleLogin = async () => {
     try {
       await signIn('demo@example.com', 'password');
-    } catch (error) {
+    } catch {
       addToast({
         type: 'error',
         message: 'Login failed. Please try again.',
@@ -165,7 +165,8 @@ export function ModernStateManagementExample() {
               </div>
             ) : (
               <div className="unified-grid unified-grid-cols-1 md:unified-grid-cols-2 lg:unified-grid-cols-3 gap-4">
-                {packages?.slice(0, 6).map((pkg) => (
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                {(packages as any[])?.slice(0, 6).map((pkg: any) => (
                   <motion.div
                     key={pkg.id}
                     initial={{ opacity: 0, y: 20 }}

@@ -6,10 +6,7 @@ import { z } from 'zod';
 import { 
   User, 
   Mail, 
-  Phone, 
   Calendar, 
-  MapPin, 
-  CreditCard,
   CheckCircle,
   Star
 } from 'lucide-react';
@@ -144,9 +141,10 @@ export function UnifiedSystemExample() {
                 }}
                 onSubmit={handleSubmit}
                 submitButtonText="Send Message"
-                submitButtonIcon={Mail}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                submitButtonIcon={Mail as any}
               >
-                {({ values, errors, setValue, isSubmitting, isValid }) => (
+                {({ values, errors, setValue }) => (
                   <>
                     <FormSection title="Personal Information">
                       <div className="unified-grid unified-grid-cols-2">

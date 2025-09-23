@@ -22,7 +22,7 @@ export function PrivacyPolicyModal({
   allowClose = true
 }: PrivacyPolicyModalProps) {
   const { language } = useLanguage();
-  const { t } = useTranslations(undefined, language);
+  const { } = useTranslations(undefined, language);
   const [activeTab, setActiveTab] = useState<'es' | 'en'>('es');
 
   const privacyContent = {

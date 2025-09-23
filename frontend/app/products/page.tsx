@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { AppShell } from '@/components/AppShell';
 import { AppLayout } from '@/components/AppLayout';
 import { Button } from '@/components/ui/button';
-import { useCart } from '@/lib/cart-context';
+import { useCart } from '@/store/appStore';
 import { ShoppingCartIcon } from '@heroicons/react/24/outline';
 
 interface Product {
@@ -38,7 +39,7 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [error, setError] = useState<string | null>(null);
   
-  const { addToCart } = useCart();
+  const { addItem: addToCart } = useCart();
 
   const handleAddToCart = (product: Product) => {
     if (product.status === 'ACTIVE' && product.stock > 0) {
@@ -96,20 +97,20 @@ export default function ProductsPage() {
 
   if (loading) {
     return (
-      <AppLayout>
+      <AppShell>
         <div className="min-h-screen flex items-center justify-center bg-white">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-400 mx-auto mb-4"></div>
             <p className="text-gray-600 text-lg">Loading products...</p>
           </div>
         </div>
-      </AppLayout>
+      </AppShell>
     );
   }
 
   if (error) {
     return (
-      <AppLayout>
+      <AppShell>
         <div className="min-h-screen flex items-center justify-center bg-white">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Products</h1>
@@ -122,7 +123,7 @@ export default function ProductsPage() {
             </Button>
           </div>
         </div>
-      </AppLayout>
+      </AppShell>
     );
   }
 

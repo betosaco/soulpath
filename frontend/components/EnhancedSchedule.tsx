@@ -11,7 +11,8 @@ import {
   BookOpen,
   Loader2,
   AlertCircle,
-  CheckCircle
+  CheckCircle,
+  Lock
 } from 'lucide-react';
 import Image from 'next/image';
 import './EnhancedSchedule.css';
@@ -68,10 +69,18 @@ interface EnhancedScheduleProps {
   existingBookings?: Array<{
     selectedDate: string;
     selectedTime: string;
+    packageName?: string; // Name of the package that booked this slot
+    packageId?: string; // ID of the package that booked this slot
   }>;
+  lockedTimeSlots?: Array<{
+    selectedDate: string;
+    selectedTime: string;
+    packageId: string;
+  }>; // Time slots that are locked/disabled for specific packages
   maxBookingsPerSlot?: number; // Maximum number of times a slot can be booked
   reloadTrigger?: number; // Triggers a reload when this value changes
   showFilters?: boolean; // Whether to show the header and filters
+  hasMultiplePackages?: boolean; // Whether there are multiple packages in cart
 }
 
 export function EnhancedSchedule({
@@ -81,11 +90,15 @@ export function EnhancedSchedule({
   endDate,
   onSlotsChange,
   existingBookings = [],
+  lockedTimeSlots = [],
   maxBookingsPerSlot = 1,
   reloadTrigger,
-  showFilters = true
+  showFilters = true,
+  hasMultiplePackages = false
 }: EnhancedScheduleProps) {
   console.log('🔍 EnhancedSchedule render - startDate:', startDate, 'endDate:', endDate);
+  console.log('🔍 EnhancedSchedule - lockedTimeSlots:', lockedTimeSlots);
+  console.log('🔍 EnhancedSchedule - existingBookings:', existingBookings);
   // Handle slot booking - redirect to account booking page
   const handleBookSlot = (slot: ScheduleSlot) => {
     try {
@@ -117,6 +130,12 @@ export function EnhancedSchedule({
 
   // Enhanced slot click handler that clears conflicts
   const handleSlotClickWithConflictClear = (slot: ScheduleSlot) => {
+    // If there's only one package, prevent clicking on locked slots
+    if (!hasMultiplePackages && isSlotLocked(slot)) {
+      console.log('🚫 Slot is locked for single package, cannot be selected:', slot);
+      return;
+    }
+    
     // Clear conflicting schedule from sessionStorage when user selects a new slot
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem('conflictingSchedule');
@@ -143,6 +162,26 @@ export function EnhancedSchedule({
     );
   };
 
+  // Check if a slot is locked for a specific package
+  const isSlotLocked = (slot: ScheduleSlot, packageId?: string) => {
+    return lockedTimeSlots.some(lockedSlot => 
+      lockedSlot.selectedDate === slot.date && 
+      lockedSlot.selectedTime === slot.time &&
+      (!packageId || lockedSlot.packageId === packageId)
+    );
+  };
+
+  // Check if a slot is available for booking
+  const isSlotAvailable = (slot: ScheduleSlot) => {
+    // If there's only one package, use locked slots logic
+    if (!hasMultiplePackages) {
+      return slot.isAvailable && !isSlotLocked(slot);
+    }
+    // If there are multiple packages, allow booking regardless of locked status
+    // Package-specific validation will handle duplicates
+    return slot.isAvailable;
+  };
+
   const getSlotBookingCount = (slot: ScheduleSlot) => {
     return existingBookings.filter(booking => 
       booking.selectedDate === slot.date && booking.selectedTime === slot.time
@@ -152,6 +191,19 @@ export function EnhancedSchedule({
   const canBookMore = (slot: ScheduleSlot) => {
     const currentBookings = getSlotBookingCount(slot);
     return currentBookings < maxBookingsPerSlot;
+  };
+
+  // Get package information for a slot
+  const getSlotPackageInfo = (slot: ScheduleSlot) => {
+    const slotBookings = existingBookings.filter(booking => 
+      booking.selectedDate === slot.date && booking.selectedTime === slot.time
+    );
+    
+    if (slotBookings.length > 0) {
+      // Return the first package that booked this slot
+      return slotBookings[0];
+    }
+    return null;
   };
   const [slots, setSlots] = useState<ScheduleSlot[]>([]);
   const [loading, setLoading] = useState(true);
@@ -275,7 +327,7 @@ export function EnhancedSchedule({
     } else {
       console.error('❌ fetchSlots is not defined!');
     }
-  }, [startDate, endDate]); // Depend only on startDate and endDate to avoid circular dependency
+  }, [startDate, endDate, fetchSlots]); // Include fetchSlots in dependencies
 
   // Force fetch on mount as backup
   useEffect(() => {
@@ -288,7 +340,7 @@ export function EnhancedSchedule({
     }, 1000);
     
     return () => clearTimeout(timeoutId);
-  }, []); // Run only on mount
+  }, [fetchSlots]); // Include fetchSlots in dependencies
 
   // Reload slots when reloadTrigger changes
   useEffect(() => {
@@ -449,8 +501,8 @@ export function EnhancedSchedule({
                     if (cart) {
                       try {
                         const cartItems = JSON.parse(cart);
-                        const hasProducts = cartItems.some((item: any) => item.type === 'product');
-                        const hasPackages = cartItems.some((item: any) => item.type === 'package');
+                        const hasProducts = cartItems.some((item: { type: string }) => item.type === 'product');
+                        const hasPackages = cartItems.some((item: { type: string }) => item.type === 'package');
 
                         if (hasPackages) {
                           // If packages are in cart, go to step 2 (personal information)
@@ -577,7 +629,7 @@ export function EnhancedSchedule({
                         key={slot.id}
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className={`schedule-slot card-base card-hover hover-scale ${!slot.isAvailable ? 'schedule-slot--unavailable' : ''} ${isSlotBooked(slot) ? 'schedule-slot--booked opacity-75' : ''}`}
+                        className={`schedule-slot card-base card-hover hover-scale ${!slot.isAvailable ? 'schedule-slot--unavailable' : ''} ${isSlotBooked(slot) ? 'schedule-slot--booked opacity-75' : ''} ${!hasMultiplePackages && isSlotLocked(slot) ? 'schedule-slot--locked opacity-75' : ''}`}
                       >
                         <div className="schedule-slot__header">
                           <div className="flex items-center gap-2 mb-2">
@@ -600,6 +652,14 @@ export function EnhancedSchedule({
                                 <CheckCircle className="h-4 w-4" />
                                 <span className="text-xs font-medium">
                                   Selected ({getSlotBookingCount(slot)}/{maxBookingsPerSlot})
+                                </span>
+                              </div>
+                            )}
+                            {isSlotLocked(slot) && !isSlotBooked(slot) && (
+                              <div className="flex items-center gap-1 text-orange-600">
+                                <Lock className="h-4 w-4" />
+                                <span className="text-xs font-medium">
+                                  Previously Booked
                                 </span>
                               </div>
                             )}
@@ -651,8 +711,27 @@ export function EnhancedSchedule({
                         </div>
 
                         <div className="schedule-slot__actions">
+                          {/* Package notice for multiple packages */}
+                          {hasMultiplePackages && isSlotBooked(slot) && (
+                            <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                              <p className="text-xs text-blue-700">
+                                📦 Previously booked by: {getSlotPackageInfo(slot)?.packageName || 'Another package'}
+                              </p>
+                            </div>
+                          )}
+                          
                           {slot.isAvailable ? (
-                            !canBookMore(slot) ? (
+                            // Single package: show locked button if slot is locked
+                            !hasMultiplePackages && isSlotLocked(slot) ? (
+                              <button
+                                disabled
+                                className="w-full px-4 py-2 bg-orange-100 text-orange-700 rounded-lg cursor-not-allowed flex items-center justify-center gap-2 opacity-75"
+                                title="This time slot was previously booked and is locked"
+                              >
+                                <Lock className="h-4 w-4" />
+                                Previously Booked
+                              </button>
+                            ) : !canBookMore(slot) ? (
                               <button
                                 disabled
                                 className="w-full px-4 py-2 bg-gray-200 text-gray-500 rounded-lg cursor-not-allowed flex items-center justify-center gap-2 opacity-60"

@@ -1,7 +1,6 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useLanguage } from '@/hooks/useTranslations';
 import { CentralizedHeader } from './CentralizedHeader';
 
 interface HeaderContextType {
@@ -33,7 +32,6 @@ export function HeaderProvider({
   isAdmin = false, 
   scrollToSection: customScrollToSection 
 }: HeaderProviderProps) {
-  const { language, setLanguage } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const scrollToSection = customScrollToSection || ((section: string) => {

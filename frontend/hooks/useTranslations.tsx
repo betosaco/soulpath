@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { defaultTranslations } from '@/lib/data/translations';
 
 export function useLanguage() {
@@ -17,13 +17,13 @@ export function useLanguage() {
   }, []);
 
   const changeLanguage = React.useCallback((newLanguage: 'en' | 'es') => {
-    console.log('🔄 Changing language from', language, 'to', newLanguage);
+    console.log('🔄 Changing language to', newLanguage);
     setLanguage(newLanguage);
     if (typeof window !== 'undefined') {
       localStorage.setItem('language', newLanguage);
       console.log('💾 Language saved to localStorage:', newLanguage);
     }
-  }, [language]);
+  }, []); // Remove language dependency to prevent infinite loop
 
   return { language, setLanguage: changeLanguage };
 }
@@ -33,13 +33,19 @@ export function useTranslations(initialContent?: Record<string, unknown>, langua
   const [isLoading, setIsLoading] = useState(false); // Changed from true to false
   const hasFetchedRef = useRef(false); // Track if we've already fetched translations
   
-  // Use provided language or fallback to default
-  const currentLanguage = language || 'en';
+  // Use provided language or fallback to default - memoized to prevent unnecessary re-renders
+  const currentLanguage = useMemo(() => language || 'en', [language]);
 
   // Fetch translations from backend CMS
-  const fetchTranslations = async () => {
+  const fetchTranslations = React.useCallback(async () => {
     // Skip fetch during SSR to prevent webpack errors
     if (typeof window === 'undefined') {
+      return;
+    }
+    
+    // Prevent multiple simultaneous fetches
+    if (hasFetchedRef.current) {
+      console.log('🔍 Already fetched translations, skipping...');
       return;
     }
     
@@ -104,7 +110,7 @@ export function useTranslations(initialContent?: Record<string, unknown>, langua
       console.error('Error fetching translations:', error);
       // Don't update content if we already have defaults
     }
-  };
+  }, []);
 
   // Single useEffect to handle content initialization and language changes
   useEffect(() => {
@@ -117,14 +123,15 @@ export function useTranslations(initialContent?: Record<string, unknown>, langua
     } else {
       // Ensure we have default translations first
       setContent(defaultTranslations);
-      // Only fetch from backend if we haven't fetched yet
-      if (!hasFetchedRef.current) {
-        console.log('🔄 Fetching fresh content from backend for language:', currentLanguage);
-        hasFetchedRef.current = true;
-        fetchTranslations();
-      }
+      // Only fetch from backend if we haven't fetched yet and we're in the browser
+      // Temporarily disabled to test if this is causing the infinite loop
+      // if (!hasFetchedRef.current && typeof window !== 'undefined') {
+      //   console.log('🔄 Fetching fresh content from backend for language:', currentLanguage);
+      //   hasFetchedRef.current = true;
+      //   fetchTranslations();
+      // }
     }
-  }, [initialContent, currentLanguage]); // Remove content from dependencies to prevent infinite loop
+  }, [initialContent, fetchTranslations, currentLanguage]); // Include currentLanguage dependency
 
   // Separate useEffect to handle language changes specifically
   useEffect(() => {
@@ -132,7 +139,7 @@ export function useTranslations(initialContent?: Record<string, unknown>, langua
       // Only log when language actually changes, not on every content update
       console.log(`🔄 Language changed to: ${currentLanguage}, content available:`, Object.keys(content));
     }
-  }, [currentLanguage]); // Remove content from dependencies to prevent repeated logging
+  }, [currentLanguage, content]); // Include content in dependencies
 
   const updateContent = async (newContent: Record<string, unknown>) => {
     try {
@@ -162,12 +169,13 @@ export function useTranslations(initialContent?: Record<string, unknown>, langua
     }
   };
 
-  const reloadTranslations = () => {
+  const reloadTranslations = React.useCallback(() => {
+    hasFetchedRef.current = false; // Reset the fetch flag
     fetchTranslations();
-  };
+  }, [fetchTranslations]);
 
   // Get the current language translations, fallback to English if current language not found
-  const getTranslations = () => {
+  const t = useMemo(() => {
     if (content && typeof content === 'object') {
       // Try current language first
       if (content[currentLanguage as keyof typeof content] && typeof content[currentLanguage as keyof typeof content] === 'object') {
@@ -180,9 +188,7 @@ export function useTranslations(initialContent?: Record<string, unknown>, langua
     }
     // Final fallback to default translations
     return defaultTranslations[currentLanguage as keyof typeof defaultTranslations] || defaultTranslations.en;
-  };
-  
-  const t = getTranslations();
+  }, [content, currentLanguage]);
   
   // Ensure t is always an object and not undefined
   const safeT = t && typeof t === 'object' ? t : defaultTranslations.en;

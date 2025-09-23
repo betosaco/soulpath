@@ -4,7 +4,7 @@ import React from 'react';
 import { CentralizedHeader } from './CentralizedHeader';
 import { Footer } from './Footer';
 import { CartSidebar } from './CartSidebar';
-import { MobileScrollFix } from './MobileScrollFix';
+import { MobileViewportHandler } from './MobileViewportHandler';
 import { QueryProvider } from './providers/QueryProvider';
 
 interface AppShellProps {
@@ -36,8 +36,8 @@ export function AppShell({
 }: AppShellProps) {
   return (
     <QueryProvider>
-      {/* Mobile viewport and scroll fixes applied globally */}
-      <MobileScrollFix />
+      {/* Enhanced mobile viewport and touch handling */}
+      <MobileViewportHandler />
       
       <div className={`${className} mobile-container mobile-scrollable`}>
         {/* Centralized header with navigation, cart, and language switching */}

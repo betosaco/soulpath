@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { AppLayout } from '@/components/AppLayout';
+import { AppShell } from '@/components/AppShell';
 import { EcommerceDashboard } from '@/components/ecommerce/EcommerceDashboard';
 
 export default function EcommercePage() {
@@ -18,20 +18,20 @@ export default function EcommercePage() {
 
   if (loading) {
     return (
-      <AppLayout className="min-h-screen bg-white">
+      <AppShell className="min-h-screen bg-white">
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-400 mx-auto mb-4"></div>
             <p className="text-gray-600 text-lg">Loading ecommerce dashboard...</p>
           </div>
         </div>
-      </AppLayout>
+      </AppShell>
     );
   }
 
   return (
-    <AppLayout className="min-h-screen bg-white">
+    <AppShell className="min-h-screen bg-white">
       <EcommerceDashboard />
-    </AppLayout>
+    </AppShell>
   );
 }

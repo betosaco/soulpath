@@ -14,11 +14,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Calendar,
   Clock,
-  User,
   Package,
   ArrowRight,
-  ArrowLeft,
-  CheckCircle,
   AlertCircle,
   Users,
   Star,
@@ -30,13 +27,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { EnhancedSchedule } from './EnhancedSchedule';
 import { usePackages, PackagePrice } from '@/hooks/usePackages';
-import { useLanguage, useTranslations } from '@/hooks/useTranslations';
 import { toast } from 'sonner';
-import { useCart } from '@/lib/cart-context';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { countries } from '@/lib/countries';
-import { validateEmailWithMessage } from '@/lib/email-validation';
+import { useCart } from '@/store/appStore';
 // Payment integration will be added here
 
 interface Teacher {
@@ -105,7 +97,7 @@ interface ScheduleBookingFlowProps {
 
 
 // Helper function to check for existing duplicate schedules across all packages
-const checkForExistingDuplicateSchedules = (cartContext?: any) => {
+const checkForExistingDuplicateSchedules = (cartContext?: { cartItems?: Array<{ id: string; type: string; bookingDetails?: Array<{ scheduleSlotId: number; date: string; time: string }> }> }) => {
   console.log('🔍 checkForExistingDuplicateSchedules called');
   
   if (typeof window === 'undefined') {
@@ -113,7 +105,7 @@ const checkForExistingDuplicateSchedules = (cartContext?: any) => {
     return { hasDuplicates: false, conflictingBookings: [] };
   }
   
-  let cartItems: any[] = [];
+  let cartItems: Array<{ id: string; type: string; bookingDetails?: Array<{ scheduleSlotId: number; date: string; time: string }> }> = [];
   
   // Try to get cart items from context first, then localStorage
   if (cartContext?.cartItems) {
@@ -140,15 +132,16 @@ const checkForExistingDuplicateSchedules = (cartContext?: any) => {
   
   try {
     
-    const packageItems = cartItems.filter((item: any) => item.type === 'package');
+    const packageItems = cartItems.filter((item: { type: string }) => item.type === 'package');
     console.log('🔍 Package items:', packageItems);
     
     // Collect all bookings from all packages
-    const allBookings: any[] = [];
+    const allBookings: Array<{ scheduleSlotId: number; date: string; time: string; packageId: string; packageName: string }> = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     packageItems.forEach((packageItem: any) => {
       console.log('🔍 Processing package:', packageItem.name, 'bookings:', packageItem.bookingDetails);
       if (packageItem.bookingDetails && Array.isArray(packageItem.bookingDetails)) {
-        packageItem.bookingDetails.forEach((booking: any) => {
+        packageItem.bookingDetails.forEach((booking: { scheduleSlotId: number; date: string; time: string }) => {
           const bookingWithPackage = {
             ...booking,
             packageId: packageItem.id,
@@ -163,31 +156,45 @@ const checkForExistingDuplicateSchedules = (cartContext?: any) => {
     console.log('🔍 All bookings collected:', allBookings);
     console.log('🔍 Total bookings count:', allBookings.length);
     
-    // Group bookings by date and time
-    const scheduleGroups: { [key: string]: any[] } = {};
+    // Group bookings by package ID and date/time to only check for duplicates within the same package
+    const packageScheduleGroups: { [packageId: string]: { [key: string]: Array<{ scheduleSlotId: number; date: string; time: string; packageId: string; packageName: string }> } } = {};
+    
     allBookings.forEach(booking => {
-      const key = `${booking.selectedDate}-${booking.selectedTime}`;
-      console.log('🔍 Grouping booking:', booking, 'with key:', key);
-      if (!scheduleGroups[key]) {
-        scheduleGroups[key] = [];
+      const packageId = booking.packageId;
+      const key = `${booking.date}-${booking.time}`;
+      
+      if (!packageScheduleGroups[packageId]) {
+        packageScheduleGroups[packageId] = {};
       }
-      scheduleGroups[key].push(booking);
+      
+      if (!packageScheduleGroups[packageId][key]) {
+        packageScheduleGroups[packageId][key] = [];
+      }
+      
+      packageScheduleGroups[packageId][key].push(booking);
     });
     
-    console.log('🔍 Schedule groups:', scheduleGroups);
-    console.log('🔍 Schedule group keys:', Object.keys(scheduleGroups));
-    console.log('🔍 Schedule group sizes:', Object.entries(scheduleGroups).map(([key, group]) => ({ key, size: group.length })));
+    console.log('🔍 Package schedule groups:', packageScheduleGroups);
     
-    // Find groups with more than one booking (duplicates)
-    const duplicateGroups = Object.values(scheduleGroups).filter(group => group.length > 1);
-    console.log('🔍 Duplicate groups found:', duplicateGroups);
+    // Find groups with more than one booking within the same package (duplicates)
+    const duplicateGroups: Array<{ scheduleSlotId: number; date: string; time: string; packageId: string; packageName: string }> = [];
+    
+    Object.values(packageScheduleGroups).forEach(packageGroups => {
+      Object.values(packageGroups).forEach(group => {
+        if (group.length > 1) {
+          duplicateGroups.push(...group);
+        }
+      });
+    });
+    
+    console.log('🔍 Duplicate groups found within packages:', duplicateGroups);
     console.log('🔍 Number of duplicate groups:', duplicateGroups.length);
     
     if (duplicateGroups.length > 0) {
-      console.log('🔍 Returning duplicates:', duplicateGroups.flat());
+      console.log('🔍 Returning duplicates:', duplicateGroups);
       return {
         hasDuplicates: true,
-        conflictingBookings: duplicateGroups.flat()
+        conflictingBookings: duplicateGroups
       };
     }
     
@@ -200,13 +207,13 @@ const checkForExistingDuplicateSchedules = (cartContext?: any) => {
 };
 
 // Helper function to handle duplicate schedule conflict for existing bookings
-const handleDuplicateScheduleConflict = (conflictingBookings: any[], setIsGroupBooking?: (value: boolean) => void, setCurrentStep?: (step: number) => void, onStepChange?: (step: number) => void) => {
+const handleDuplicateScheduleConflict = (conflictingBookings: Array<{ scheduleSlotId: number; date: string; time: string; packageId: string; packageName: string }>, setIsGroupBooking?: (value: boolean) => void, setCurrentStep?: (step: number) => void, onStepChange?: (step: number) => void) => {
   if (conflictingBookings.length === 0) return;
   
   // Group conflicting bookings by schedule time
-  const scheduleGroups: { [key: string]: any[] } = {};
+  const scheduleGroups: { [key: string]: Array<{ scheduleSlotId: number; date: string; time: string; packageId: string; packageName: string }> } = {};
   conflictingBookings.forEach(booking => {
-    const key = `${booking.selectedDate}-${booking.selectedTime}`;
+    const key = `${booking.date}-${booking.time}`;
     if (!scheduleGroups[key]) {
       scheduleGroups[key] = [];
     }
@@ -265,11 +272,7 @@ export function ScheduleBookingFlow({
   onStepChange
 }: ScheduleBookingFlowProps = {}) {
   const { packages, loading: packagesLoading, error: packagesError } = usePackages('PEN');
-  const { language } = useLanguage();
-  const { t } = useTranslations(undefined, language);
-  const cartContext = useCart();
-  const addToCart = cartContext?.addToCart;
-  const setIsCartOpen = cartContext?.setIsCartOpen;
+  const { addItem: addToCart, openCart: setIsCartOpen, removeItem: removeFromCart, updateQuantity } = useCart();
   
   const [currentStep, setCurrentStep] = useState(0);
   
@@ -337,8 +340,6 @@ export function ScheduleBookingFlow({
   }, [currentStep, cartContext?.cartItems, onStepChange]);
   
   // Country dropdown state
-  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
-  const [countrySearchTerm, setCountrySearchTerm] = useState('');
   
   const [formData, setFormData] = useState<BookingFormData>({
     selectedSchedule: null,
@@ -356,28 +357,35 @@ export function ScheduleBookingFlow({
 
   // Calculate existing bookings from cart - this will update when cart changes
   const existingBookings = useMemo(() => {
-    const allExistingBookings = cartContext?.cartItems
-      .filter(item => item.type === 'package' && item.bookingDetails)
-      .flatMap(item => item.bookingDetails || []) || [];
+    const packageItems = cartContext?.cartItems.filter(item => item.type === 'package') || [];
+    
+    const allExistingBookings = packageItems
+      .filter(item => item.bookingDetails)
+      .flatMap(item => (item.bookingDetails || []).map(booking => ({
+        ...booking,
+        packageName: item.name,
+        packageId: item.id
+      }))) || [];
     
     const bookings = allExistingBookings
       .filter(booking => booking.selectedDate && booking.selectedTime)
       .map(booking => ({
         selectedDate: booking.selectedDate!,
-        selectedTime: booking.selectedTime!
+        selectedTime: booking.selectedTime!,
+        packageName: booking.packageName,
+        packageId: booking.packageId
     }));
     
     return bookings;
   }, [cartContext?.cartItems]);
 
-  // Calculate max bookings per slot - this will update when cart changes
-  // Now allows multiple bookings of the same slot based on package quantities
+  // Calculate max bookings per slot - allow unlimited bookings for different packages
+  // Multiple packages can book the same slot without restriction
   const maxBookingsPerSlot = useMemo(() => {
     const packageItems = cartContext?.cartItems.filter(item => item.type === 'package') || [];
-    const total = packageItems.reduce((total, item) => total + (item.quantity || 1), 0);
-    // Ensure at least 1 booking per slot is allowed, even when no packages are in cart
-    const result = Math.max(total, 1);
-    console.log('🔍 maxBookingsPerSlot calculated:', result, 'from packages:', packageItems.map(p => ({ name: p.name, quantity: p.quantity })));
+    // Allow unlimited bookings per slot - different packages can book the same slot
+    const result = 999; // Set to a high number to effectively allow unlimited bookings
+    console.log('🔍 maxBookingsPerSlot set to unlimited (999) to allow multiple packages to book same slot');
     return result;
   }, [cartContext?.cartItems]);
 
@@ -389,8 +397,6 @@ export function ScheduleBookingFlow({
     }, 0);
   }, [cartContext?.cartItems]);
 
-  // Get selected country
-  const selectedCountry = countries.find(c => c.code === formData.countryCode) || countries[0];
 
   // Check for editing mode or adding more bookings on mount
   React.useEffect(() => {
@@ -442,7 +448,7 @@ export function ScheduleBookingFlow({
         // Multiple packages - will show package selection modal when user selects a slot
       }
     }
-  }, []);
+  }, [onStepChange, cartContext?.cartItems]);
 
   // Listen for "Book a Class Now" clicks from sidecart
   React.useEffect(() => {
@@ -502,7 +508,7 @@ export function ScheduleBookingFlow({
         setSelectedScheduleForPackage(null);
       }
     }
-  }, [cartContext?.cartItems, editingPackageId]);
+  }, [cartContext?.cartItems, editingPackageId, cartContext, onStepChange]);
 
   // Alternative approach: Monitor cart changes with a different method
   React.useEffect(() => {
@@ -533,7 +539,7 @@ export function ScheduleBookingFlow({
     const interval = setInterval(checkCartChanges, 500);
     
     return () => clearInterval(interval);
-  }, [cartContext, editingPackageId]);
+  }, [cartContext, editingPackageId, onStepChange]);
 
   // ============================================================================
   // PACKAGE MODAL HANDLING - ONLY SHOW WHEN NEEDED
@@ -562,14 +568,15 @@ export function ScheduleBookingFlow({
   }, [cartContext?.cartItems]);
 
   // Function to trigger modal when user tries to book a schedule
-  const triggerPackageModalIfNeeded = useCallback((slot: any) => {
+  const triggerPackageModalIfNeeded = useCallback((slot: { id: number; date: string; time: string; teacher?: { name: string }; serviceType?: { name: string }; venue?: { name: string } }) => {
     const shouldShow = shouldShowPackageModal();
     console.log('🔍 Checking if modal should show:', shouldShow);
     console.log('🔍 Current cart items:', cartContext?.cartItems);
     
     if (shouldShow) {
       console.log('🔍 Multiple packages detected, showing package selection modal');
-      setSelectedScheduleForPackage(slot);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setSelectedScheduleForPackage(slot as any);
       setShowPackageSelection(true);
       return true; // Modal was shown
     }
@@ -577,21 +584,6 @@ export function ScheduleBookingFlow({
   }, [shouldShowPackageModal, cartContext?.cartItems]);
 
 
-  // Helper function to safely access nested translation properties
-  const getTranslation = useCallback((path: string, fallback: string = ''): string => {
-    const keys = path.split('.');
-    let current: Record<string, unknown> = (t && typeof t === 'object') ? t as Record<string, unknown> : {};
-
-    for (const key of keys) {
-      if (current && typeof current === 'object' && key in current) {
-        current = current[key] as Record<string, unknown>;
-      } else {
-        return fallback;
-      }
-    }
-
-    return typeof current === 'string' ? current : fallback;
-  }, [t]);
 
 
 
@@ -844,13 +836,11 @@ export function ScheduleBookingFlow({
           };
           
           // Remove the old item and add the updated one
-          cartContext.removeFromCart(editingPackageId);
-          cartContext.addToCart(updatedItem);
+          removeFromCart(editingPackageId);
+          addToCart(updatedItem);
           
           // Open sidecart to show updated booking
-          if (cartContext?.setIsCartOpen) {
-            cartContext.setIsCartOpen(true);
-          }
+          setIsCartOpen();
         } else {
           // Adding more bookings - check if we haven't reached the package limit
           const currentBookings = currentItem.bookingDetails || [];
@@ -1139,139 +1129,7 @@ export function ScheduleBookingFlow({
   };
 
 
-  const handlePackageSelectionForBooking = (packageId: string) => {
-    if (!cartContext || !selectedScheduleForPackage) return;
-    
-    const selectedPackage = cartContext.cartItems?.find(item => item.id === packageId);
-    if (!selectedPackage) return;
-    
-    console.log('🔍 Adding booking to package:', packageId);
-    
-    const newBookingDetails = {
-      selectedDate: selectedScheduleForPackage.date,
-      selectedTime: selectedScheduleForPackage.time,
-      teacher: selectedScheduleForPackage.teacher?.name,
-      dayOfWeek: selectedScheduleForPackage.dayOfWeek,
-      serviceType: selectedScheduleForPackage.serviceType?.name,
-      venue: selectedScheduleForPackage.venue?.name,
-      scheduleSlotId: selectedScheduleForPackage.id
-    };
-    
-    // Check if package has reached its session limit
-    const currentBookings = Array.isArray(selectedPackage.bookingDetails) ? selectedPackage.bookingDetails : [];
-    const packageSessions = selectedPackage.sessions || 1;
-    
-    if (currentBookings.length >= packageSessions) {
-      toast.error(`This package has reached its session limit (${packageSessions}). Please choose a different package or remove existing bookings.`);
-      return;
-    }
-    
-    // Check for duplicate slot booking
-    const hasAlreadyBookedThisSlot = currentBookings.some(booking => 
-      booking.selectedDate === selectedScheduleForPackage.date && 
-      booking.selectedTime === selectedScheduleForPackage.time
-    );
-    
-    if (hasAlreadyBookedThisSlot) {
-      toast.error('This package has already booked this time slot.');
-      return;
-    }
-    
-    // Add booking to package
-    cartContext.addBookingToPackage(packageId, newBookingDetails);
-    
-    // Open sidecart
-    if (cartContext.setIsCartOpen) {
-      cartContext.setIsCartOpen(true);
-    }
-    
-    // Show success message
-    const updatedBookings = [...currentBookings, newBookingDetails];
-    toast.success(`Class added! (${updatedBookings.length}/${packageSessions} used)`);
-    
-    // Close modal - user can click another schedule slot to book more
-    setShowPackageSelection(false);
-    setSelectedScheduleForPackage(null);
-  };
 
-  const handlePackageSelect = (pkg: PackagePrice) => {
-    setFormData(prev => ({ ...prev, selectedPackage: pkg }));
-    
-    // No duplicate validation needed here - multiple packages can book the same slot
-    // Individual package validation happens in handlePackageSelectionForBooking
-    
-    // Add package to cart
-    if (addToCart) {
-      addToCart({
-        id: pkg.id.toString(),
-        name: pkg.packageDefinition.name,
-        price: pkg.price,
-        image: '/images/products/yoga-journal-1.jpg', // Default package image
-        sku: `PKG-${pkg.id}`,
-        currency: pkg.currency?.code || 'PEN',
-        type: 'package',
-        sessions: pkg.packageDefinition.sessionsCount,
-        duration: pkg.packageDefinition.sessionDuration?.duration_minutes,
-        packageType: pkg.packageDefinition.packageType,
-        maxGroupSize: pkg.packageDefinition.maxGroupSize,
-        bookingDetails: formData.selectedSchedule ? [{
-          selectedDate: formData.selectedSchedule.date,
-          selectedTime: formData.selectedSchedule.time,
-          teacher: formData.selectedSchedule.teacher?.name,
-          dayOfWeek: formData.selectedSchedule.dayOfWeek,
-          serviceType: formData.selectedSchedule.serviceType?.name,
-          venue: formData.selectedSchedule.venue?.name,
-          scheduleSlotId: formData.selectedSchedule.id
-        }] : undefined
-      });
-    } else {
-      console.error('addToCart function is not available');
-    }
-    
-    // Store schedule selection in sessionStorage for checkout
-    if (formData.selectedSchedule && typeof window !== 'undefined') {
-      try {
-        sessionStorage.setItem('selectedSchedule', JSON.stringify({
-          selectedDate: formData.selectedSchedule.date,
-          selectedTime: formData.selectedSchedule.time,
-          teacher: formData.selectedSchedule.teacher,
-          dayOfWeek: formData.selectedSchedule.dayOfWeek,
-          serviceType: formData.selectedSchedule.serviceType,
-          venue: formData.selectedSchedule.venue
-        }));
-      } catch (error) {
-        console.error('Failed to store schedule in sessionStorage:', error);
-      }
-    }
-    
-    // Keep cart open
-    if (setIsCartOpen) {
-      setIsCartOpen(true);
-    }
-    
-    // Check if we have a selected schedule (schedule-first flow)
-    if (formData.selectedSchedule) {
-      // Schedule was selected first, now package is selected - booking is complete
-      setCurrentStep(3);
-      onStepChange?.(3);
-      toast.success('Package and schedule selected! Please provide your information.');
-    } else {
-      // Package selected first, check if we need to show modal
-      const shouldShowModal = shouldShowPackageModal();
-      
-      if (!shouldShowModal) {
-        // Single package with quantity 1 - stay on schedule step for class selection
-        setCurrentStep(0);
-        onStepChange?.(0);
-        toast.success('Package selected! Now choose your class schedule.');
-      } else {
-        // Multiple packages - go to customer information step
-        setCurrentStep(3);
-        onStepChange?.(3);
-        toast.success('Package selected! Please provide your information.');
-      }
-    }
-  };
 
 
 
@@ -1327,7 +1185,7 @@ export function ScheduleBookingFlow({
                 {isEditingSchedule && (
                   <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                     <p className="text-sm text-blue-800">
-                      You're editing the schedule for your package. Select a new time slot to update your booking.
+                      You&apos;re editing the schedule for your package. Select a new time slot to update your booking.
                     </p>
                   </div>
                 )}
@@ -1344,6 +1202,7 @@ export function ScheduleBookingFlow({
                 maxBookingsPerSlot={maxBookingsPerSlot}
                 reloadTrigger={reloadTrigger}
                 showFilters={false}
+                hasMultiplePackages={(cartContext?.cartItems?.filter(item => item.type === 'package').length || 0) > 1}
               />
               
               {/* Continue to Checkout button when adding more bookings */}
@@ -1427,7 +1286,8 @@ export function ScheduleBookingFlow({
                        // Check for conflicts after state is set
                        setTimeout(() => {
                          console.log('🔍 Checking for duplicate schedules after individual booking selection');
-                         const duplicateCheck = checkForExistingDuplicateSchedules(cartContext);
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                          const duplicateCheck = checkForExistingDuplicateSchedules(cartContext as any);
                          console.log('🔍 Duplicate check result:', duplicateCheck);
                          if (duplicateCheck.hasDuplicates) {
                            console.log('🔍 Duplicates found, showing conflict resolution');
@@ -1467,7 +1327,8 @@ export function ScheduleBookingFlow({
                       onClick={() => {
                         console.log('🔍 Testing duplicate detection...');
                         console.log('🔍 Current cart items:', cartContext?.cartItems);
-                        const testResult = checkForExistingDuplicateSchedules(cartContext);
+                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                         const testResult = checkForExistingDuplicateSchedules(cartContext as any);
                         console.log('🔍 Test result:', testResult);
                         toast.info(`Test result: ${testResult.hasDuplicates ? 'Duplicates found' : 'No duplicates'}`);
                       }}
@@ -1613,21 +1474,21 @@ export function ScheduleBookingFlow({
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={() => cartContext?.updateQuantity?.(pkg.id.toString(), cartItem.quantity - 1)}
+                                  onClick={() => updateQuantity(pkg.id.toString(), (cartItem?.quantity || 1) - 1)}
                                 >
                                   <Minus className="w-4 h-4" />
                                 </Button>
-                                <span className="font-semibold">{cartItem.quantity}</span>
+                                <span className="font-semibold">{cartItem?.quantity || 0}</span>
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={() => cartContext?.updateQuantity?.(pkg.id.toString(), cartItem.quantity + 1)}
+                                  onClick={() => updateQuantity(pkg.id.toString(), (cartItem?.quantity || 0) + 1)}
                                 >
                                   <Plus className="w-4 h-4" />
                                 </Button>
                               </div>
                               <Button
-                                onClick={() => cartContext?.removeFromCart?.(pkg.id.toString())}
+                                onClick={() => removeFromCart(pkg.id.toString())}
                                 variant="destructive"
                                 className="w-full"
                               >
@@ -1663,7 +1524,7 @@ export function ScheduleBookingFlow({
                                     }] : undefined
                                   };
 
-                                  addToCart(packageData);
+                                  addToCart({...packageData, type: 'package' as const});
                                   
                                   // Show success message
                                   toast.success(`${pkg.packageDefinition.name} added to cart${formData.selectedSchedule ? ' with selected schedule' : ''}`);

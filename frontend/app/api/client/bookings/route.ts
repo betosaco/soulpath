@@ -397,13 +397,14 @@ export async function POST(request: NextRequest) {
           const userDetails = await prisma.user.findUnique({
             where: { id: user.id },
             select: {
-              name: true,
+              id: true,
+              email: true,
               phone: true
             }
           });
 
           const bookingData = {
-            customerName: userDetails?.name || 'Usuario',
+            customerName: userDetails?.email || 'Usuario',
             customerEmail: user.email,
             customerPhone: userDetails?.phone || '',
             bookingId: completeBooking.id.toString(),

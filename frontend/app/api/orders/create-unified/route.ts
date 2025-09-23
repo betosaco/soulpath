@@ -4,7 +4,7 @@ import { CartItem } from '@/lib/cart-context';
 import Stripe from 'stripe';
 import { sendOrderConfirmationEmail } from '@/lib/send-order-confirmation-email';
 import { sendBookingConfirmationEmail } from '@/lib/send-booking-confirmation-email';
-import { createTelegramOrderService, OrderDetails } from '@/lib/services/telegram-order-service';
+import { OrderDetails } from '@/lib/services/telegram-order-service';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-08-27.basil',
@@ -464,10 +464,10 @@ export async function POST(request: NextRequest) {
     });
 
     // Get schedule details from the request (now supports multiple bookings)
-    let scheduleDetails = orderData.scheduleDetails || null;
+    const scheduleDetails = orderData.scheduleDetails || null;
     
     // If schedule details are provided and there's a package, create bookings
-    let bookingResults = [];
+    const bookingResults = [];
     if (scheduleDetails && Array.isArray(scheduleDetails) && scheduleDetails.length > 0 && result.userPackages.length > 0) {
       try {
         // Find the first available user package for booking
@@ -601,31 +601,6 @@ export async function POST(request: NextRequest) {
         return null;
       }).filter(Boolean);
 
-      // Format order items for Telegram
-      const telegramOrderItems = orderItemsWithRelations.map(item => {
-        if (item.itemType === 'PRODUCT' && item.product) {
-          return {
-            name: item.product.name,
-            description: item.product.description || undefined,
-            type: 'PRODUCT' as const,
-            quantity: item.quantity,
-            price: Number(item.price),
-            total: Number(item.price) * item.quantity
-          };
-        } else if (item.itemType === 'PACKAGE' && item.packagePrice) {
-          return {
-            name: item.packagePrice.packageDefinition.name,
-            description: item.packagePrice.packageDefinition.description || undefined,
-            type: 'PACKAGE' as const,
-            quantity: item.quantity,
-            price: Number(item.price),
-            total: Number(item.price) * item.quantity,
-            sessions: item.packagePrice.packageDefinition.sessionsCount,
-            duration: item.packagePrice.packageDefinition.sessionDuration?.duration_minutes
-          };
-        }
-        return null;
-      }).filter((item): item is NonNullable<typeof item> => item !== null);
 
       // Get package booking details from the order items
       let packageBookingDetails = null;
@@ -633,7 +608,7 @@ export async function POST(request: NextRequest) {
       if (packageItem && packageItem.packagePrice) {
         packageBookingDetails = {
           packageName: packageItem.packagePrice.packageDefinition.name,
-          packageDescription: packageItem.packagePrice.packageDefinition.description || undefined,
+          packageDescription: packageItem.packagePrice.packageDefinition.description || '',
           sessionsCount: packageItem.packagePrice.packageDefinition.sessionsCount,
           durationMinutes: packageItem.packagePrice.packageDefinition.sessionDuration?.duration_minutes,
           packageType: packageItem.packagePrice.packageDefinition.packageType
@@ -668,7 +643,7 @@ export async function POST(request: NextRequest) {
       const emailData = {
         customerName: result.order.customerName,
         customerEmail: result.order.customerEmail,
-        customerPhone: result.order.customerPhone,
+        customerPhone: result.order.customerPhone || '',
         orderNumber: result.order.orderNumber,
         orderId: result.order.id,
         orderDate: result.order.createdAt.toLocaleDateString('es-ES', {
@@ -695,8 +670,20 @@ export async function POST(request: NextRequest) {
         totalAmount: Number(result.order.total),
         currency: result.order.currency,
         notes: result.order.notes || undefined,
-        shipping_address: result.order.shippingAddress as any,
-        scheduleDetails: enhancedScheduleDetails || scheduleDetails || undefined,
+        shipping_address: result.order.shippingAddress ? {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          address: (result.order.shippingAddress as any).address || '',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          city: (result.order.shippingAddress as any).city || '',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          state: (result.order.shippingAddress as any).state || '',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          zipCode: (result.order.shippingAddress as any).zipCode || '',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          country: (result.order.shippingAddress as any).country || ''
+        } : undefined,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        scheduleDetails: (enhancedScheduleDetails || scheduleDetails || undefined) as any,
         packageBookingDetails: packageBookingDetails || undefined,
         order_url: orderUrl,
         // Add group booking information
@@ -816,7 +803,7 @@ export async function POST(request: NextRequest) {
               orderNumber: result.order.orderNumber,
               customerName: result.order.customerName,
               customerEmail: result.order.customerEmail,
-              customerPhone: result.order.customerPhone,
+              customerPhone: result.order.customerPhone || '',
               orderDate: result.order.createdAt.toLocaleDateString('es-ES', {
                 weekday: 'long',
                 year: 'numeric',
@@ -834,7 +821,7 @@ export async function POST(request: NextRequest) {
               dni: result.order.dni || undefined,
               ruc: result.order.ruc || undefined,
               companyName: result.order.companyName || undefined,
-              items: emailOrderItems, // Use the same formatted items as email
+              items: emailOrderItems.filter(item => item !== null), // Use the same formatted items as email
               subtotal: Number(result.order.subtotal),
               taxAmount: Number(result.order.taxAmount),
               shippingAmount: Number(result.order.shippingAmount),
@@ -842,11 +829,16 @@ export async function POST(request: NextRequest) {
               currency: result.order.currency,
               notes: result.order.notes || undefined,
               shippingAddress: result.order.shippingAddress ? {
-                address: result.order.shippingAddress.address,
-                city: result.order.shippingAddress.city,
-                state: result.order.shippingAddress.state,
-                zipCode: result.order.shippingAddress.zipCode,
-                country: result.order.shippingAddress.country
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                address: (result.order.shippingAddress as any).address,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                city: (result.order.shippingAddress as any).city,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                state: (result.order.shippingAddress as any).state,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                zipCode: (result.order.shippingAddress as any).zipCode,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                country: (result.order.shippingAddress as any).country
               } : undefined,
               scheduleDetails: enhancedScheduleDetails?.map(schedule => ({
                 selectedDate: schedule.selectedDate,
@@ -946,8 +938,8 @@ export async function POST(request: NextRequest) {
     
     // Check if it's a Prisma error
     if (error && typeof error === 'object' && 'code' in error) {
-      console.error('Prisma error code:', (error as any).code);
-      console.error('Prisma error meta:', (error as any).meta);
+      console.error('Prisma error code:', (error as { code?: string }).code);
+      console.error('Prisma error meta:', (error as { meta?: unknown }).meta);
     }
     
     return NextResponse.json(

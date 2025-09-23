@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, MessageCircle, CheckCircle, XCircle, Unlink } from 'lucide-react';
+import { Loader2, MessageCircle, CheckCircle, Unlink } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface TelegramUser {
@@ -193,11 +193,11 @@ export function TelegramAccountLink() {
             <div className="space-y-3">
               <h4 className="font-medium">How to link your account:</h4>
               <ol className="text-sm text-gray-600 space-y-1 list-decimal list-inside">
-                <li>Click "Open Telegram Bot" below</li>
+                <li>Click &quot;Open Telegram Bot&quot; below</li>
                 <li>In the bot chat, send the message: <code>/register</code></li>
                 <li>The bot will show you your Chat ID</li>
                 <li>Copy the Chat ID and paste it below</li>
-                <li>Click "Link with Chat ID"</li>
+                <li>Click &quot;Link with Chat ID&quot;</li>
               </ol>
             </div>
 
@@ -243,14 +243,14 @@ export function TelegramAccountLink() {
 
             {!status.linked && (
               <p className="text-xs text-gray-500 text-center">
-                Don't have Telegram? <a href="https://telegram.org" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Download Telegram</a>
+                Don&apos;t have Telegram? <a href="https://telegram.org" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Download Telegram</a>
               </p>
             )}
           </div>
         )}
 
         <div className="pt-4 border-t">
-          <h4 className="font-medium mb-2">What you'll receive:</h4>
+          <h4 className="font-medium mb-2">What you&apos;ll receive:</h4>
           <ul className="text-sm text-gray-600 space-y-1">
             <li>✅ Instant order confirmations</li>
             <li>✅ Payment status updates</li>

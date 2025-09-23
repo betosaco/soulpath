@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { MasterBookingFlow } from './MasterBookingFlow';
-import { AppLayout } from '@/components/AppLayout';
+import { AppShell } from '@/components/AppShell';
 
 interface UnifiedCheckoutFlowProps {
   onCheckoutComplete?: (orderData: {
@@ -10,8 +10,9 @@ interface UnifiedCheckoutFlowProps {
     status: string;
     amount: number;
     currency: string;
-    items: any[];
+    items: Array<{ name: string; quantity: number; price: number }>;
   }) => void;
+  isDirectCheckout?: boolean;
 }
 
 /**
@@ -29,14 +30,15 @@ interface UnifiedCheckoutFlowProps {
  * - Order confirmation
  */
 function UnifiedCheckoutFlowContent({
-  onCheckoutComplete
+  onCheckoutComplete,
+  isDirectCheckout = false
 }: UnifiedCheckoutFlowProps) {
   return (
-    <AppLayout showFooter={false}>
+    <AppShell showFooter={false}>
       <div className="min-h-screen bg-gray-50 py-8">
-        <MasterBookingFlow onCheckoutComplete={onCheckoutComplete} />
+        <MasterBookingFlow onCheckoutComplete={onCheckoutComplete} isDirectCheckout={isDirectCheckout} />
       </div>
-    </AppLayout>
+    </AppShell>
   );
 }
 

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 
 export default function TestSchedulePage() {
   const [loading, setLoading] = useState(true);
-  const [slots, setSlots] = useState<any[]>([]);
+  const [slots, setSlots] = useState<Array<{ id: number; date: string; time: string; teacher?: string; serviceType?: string; available: boolean }>>([]);
   const [error, setError] = useState<string | null>(null);
 
   // Ensure component hydrates properly
@@ -81,13 +81,13 @@ export default function TestSchedulePage() {
             className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
             onClick={() => {
               console.log('🎯 Slot clicked:', slot);
-              alert(`Selected: ${slot.date} at ${slot.time} with ${slot.teacher?.name}`);
+              alert(`Selected: ${slot.date} at ${slot.time} with ${slot.teacher}`);
             }}
           >
             <h3 className="font-semibold">{slot.date}</h3>
             <p className="text-gray-600">{slot.time}</p>
-            <p className="text-sm text-gray-500">{slot.teacher?.name}</p>
-            <p className="text-sm text-gray-500">{slot.serviceType?.name}</p>
+            <p className="text-sm text-gray-500">{slot.teacher}</p>
+            <p className="text-sm text-gray-500">{slot.serviceType}</p>
           </div>
         ))}
       </div>

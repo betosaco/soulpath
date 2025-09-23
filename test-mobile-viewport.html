@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Viewport Test - Group Booking Forms</title>
+    <style>
+        /* Import the mobile viewport styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            background: #0A0A23;
+            overflow-x: hidden;
+            overflow-y: auto;
+            width: 100%;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* Mobile form container that fits within viewport without scrolling */
+        .mobile-form-viewport {
+            height: 100vh;
+            height: 100svh;
+            height: calc(var(--vh, 1vh) * 100);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background: linear-gradient(135deg, #0A0A23 0%, #191970 50%, #0A0A23 100%);
+        }
+
+        .mobile-form-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .mobile-form-scrollable {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .mobile-form-container {
+            width: 100%;
+            max-width: 100vw;
+            height: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .card-base {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            max-height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .mobile-progress-steps {
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            margin-bottom: 1rem;
+        }
+
+        .mobile-progress-steps::-webkit-scrollbar {
+            display: none;
+        }
+
+        .progress-step {
+            flex-shrink: 0;
+            min-width: 60px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #6ea058;
+            font-weight: 500;
+        }
+
+        .step-number {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background: #6ea058;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 16px; /* Prevent zoom on iOS */
+            background: white;
+            color: #111827;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #6ea058;
+            box-shadow: 0 0 0 3px rgba(110, 160, 88, 0.1);
+        }
+
+        .form-button {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: #6ea058;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .form-button:hover {
+            background: #5a8a4a;
+        }
+
+        .form-button:active {
+            transform: scale(0.98);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            width: 100%;
+        }
+
+        .button-group .form-button {
+            flex: 1;
+        }
+
+        /* Mobile-specific styles */
+        @media (max-width: 767px) {
+            .mobile-form-viewport {
+                height: 100vh;
+                height: 100svh;
+                height: calc(var(--vh, 1vh) * 100);
+            }
+
+            .mobile-form-content {
+                padding: 0.5rem;
+            }
+
+            .mobile-form-container {
+                padding: 0.5rem;
+            }
+
+            .card-base {
+                padding: 1rem;
+                border-radius: 0.75rem;
+            }
+
+            .form-input {
+                font-size: 16px; /* Prevent zoom on iOS */
+                padding: 1rem;
+            }
+
+            .form-button {
+                font-size: 16px;
+                padding: 1rem;
+                min-height: 44px; /* Minimum touch target */
+            }
+        }
+
+        /* Test indicators */
+        .viewport-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            z-index: 1000;
+        }
+
+        .scroll-indicator {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <!-- Viewport indicators for testing -->
+    <div class="viewport-indicator" id="viewportInfo">
+        <div>Viewport: <span id="viewportSize"></span></div>
+        <div>Container: <span id="containerSize"></span></div>
+    </div>
+    
+    <div class="scroll-indicator" id="scrollInfo">
+        <div>Scroll: <span id="scrollStatus"></span></div>
+        <div>Overflow: <span id="overflowStatus"></span></div>
+    </div>
+
+    <div class="mobile-form-viewport">
+        <div class="mobile-form-content">
+            <!-- Progress Steps -->
+            <div class="mobile-progress-steps">
+                <div class="progress-step">
+                    <div class="step-number">1</div>
+                    <span>Schedule</span>
+                </div>
+                <div class="progress-step">
+                    <div class="step-number">2</div>
+                    <span>Group Booking</span>
+                </div>
+                <div class="progress-step">
+                    <div class="step-number">3</div>
+                    <span>Personal Info</span>
+                </div>
+                <div class="progress-step">
+                    <div class="step-number">4</div>
+                    <span>Payment</span>
+                </div>
+            </div>
+
+            <!-- Group Booking Form -->
+            <div class="mobile-form-scrollable">
+                <div class="mobile-form-container">
+                    <div class="card-base">
+                        <h2 style="text-align: center; color: #6ea058; margin-bottom: 1rem; font-size: 1.5rem;">
+                            Group Booking
+                        </h2>
+                        <p style="text-align: center; color: #6b7280; margin-bottom: 1.5rem;">
+                            Is this a group booking? Each person will need their own information.
+                        </p>
+
+                        <div class="button-group">
+                            <button class="form-button" onclick="selectGroupBooking(true)">
+                                Yes
+                            </button>
+                            <button class="form-button" onclick="selectGroupBooking(false)">
+                                No
+                            </button>
+                        </div>
+
+                        <!-- Group Member Form (shown when Yes is selected) -->
+                        <div id="groupMemberForm" style="display: none; margin-top: 1.5rem;">
+                            <h3 style="color: #374151; margin-bottom: 1rem;">Group Member Information</h3>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="firstName">First Name *</label>
+                                <input type="text" id="firstName" class="form-input" placeholder="Enter first name" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="lastName">Last Name *</label>
+                                <input type="text" id="lastName" class="form-input" placeholder="Enter last name" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="email">Email *</label>
+                                <input type="email" id="email" class="form-input" placeholder="Enter email address" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="phone">Phone *</label>
+                                <input type="tel" id="phone" class="form-input" placeholder="Enter phone number" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="birthDate">Birth Date *</label>
+                                <input type="date" id="birthDate" class="form-input" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="question">Your Question *</label>
+                                <textarea id="question" class="form-input" placeholder="What would you like to explore in your reading?" rows="3" required></textarea>
+                            </div>
+
+                            <button class="form-button" onclick="submitGroupMember()">
+                                Add Group Member
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set custom viewport height for mobile
+        function setVH() {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        }
+
+        // Update viewport info
+        function updateViewportInfo() {
+            const viewport = document.querySelector('.mobile-form-viewport');
+            const container = document.querySelector('.mobile-form-container');
+            
+            document.getElementById('viewportSize').textContent = 
+                `${window.innerWidth}x${window.innerHeight}`;
+            
+            if (container) {
+                const rect = container.getBoundingClientRect();
+                document.getElementById('containerSize').textContent = 
+                    `${Math.round(rect.width)}x${Math.round(rect.height)}`;
+            }
+
+            // Check for scrolling
+            const content = document.querySelector('.mobile-form-content');
+            const isScrollable = content && content.scrollHeight > content.clientHeight;
+            document.getElementById('scrollStatus').textContent = isScrollable ? 'Yes' : 'No';
+            
+            // Check for overflow
+            const hasOverflow = viewport && (viewport.scrollHeight > viewport.clientHeight || viewport.scrollWidth > viewport.clientWidth);
+            document.getElementById('overflowStatus').textContent = hasOverflow ? 'Yes' : 'No';
+        }
+
+        // Group booking functions
+        function selectGroupBooking(isGroup) {
+            const form = document.getElementById('groupMemberForm');
+            if (isGroup) {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
+            updateViewportInfo();
+        }
+
+        function submitGroupMember() {
+            alert('Group member added! (This is a test)');
+            updateViewportInfo();
+        }
+
+        // Initialize
+        setVH();
+        updateViewportInfo();
+
+        // Update on resize and orientation change
+        window.addEventListener('resize', () => {
+            setVH();
+            updateViewportInfo();
+        });
+
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                setVH();
+                updateViewportInfo();
+            }, 100);
+        });
+
+        // Update info periodically
+        setInterval(updateViewportInfo, 1000);
+    </script>
+</body>
+</html>

@@ -170,11 +170,11 @@ export function EmailManagement() {
             <p><strong>What's Next?</strong></p>
             <ul>
                 <li>José will review your birth chart information</li>
-                <li>You'll receive a scheduling email within 24-48 hours</li>
+                <li>You&apos;ll receive a scheduling email within 24-48 hours</li>
                 <li>Your personalized reading will be conducted via video call</li>
             </ul>
 
-            <p>If you have any questions, please don't hesitate to contact us at {{adminEmail}}.</p>
+            <p>If you have any questions, please don&apos;t hesitate to contact us at {{adminEmail}}.</p>
         </div>
         <div class="footer">
             <p>© 2024 MatMax Yoga Studio<br>

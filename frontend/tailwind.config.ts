@@ -263,6 +263,43 @@ const config: Config = {
           '4': 'var(--chart-4)',
           '5': 'var(--chart-5)',
         },
+        // MatMax brand colors
+        'matmax-purple': {
+          50: 'var(--matmax-purple-50)',
+          100: 'var(--matmax-purple-100)',
+          200: 'var(--matmax-purple-200)',
+          300: 'var(--matmax-purple-300)',
+          400: 'var(--matmax-purple-400)',
+          500: 'var(--matmax-purple-500)',
+          600: 'var(--matmax-purple-600)',
+          700: 'var(--matmax-purple-700)',
+          800: 'var(--matmax-purple-800)',
+          900: 'var(--matmax-purple-900)',
+        },
+        'matmax-teal': {
+          50: 'var(--matmax-teal-50)',
+          100: 'var(--matmax-teal-100)',
+          200: 'var(--matmax-teal-200)',
+          300: 'var(--matmax-teal-300)',
+          400: 'var(--matmax-teal-400)',
+          500: 'var(--matmax-teal-500)',
+          600: 'var(--matmax-teal-600)',
+          700: 'var(--matmax-teal-700)',
+          800: 'var(--matmax-teal-800)',
+          900: 'var(--matmax-teal-900)',
+        },
+        'matmax-orange': {
+          50: 'var(--matmax-orange-50)',
+          100: 'var(--matmax-orange-100)',
+          200: 'var(--matmax-orange-200)',
+          300: 'var(--matmax-orange-300)',
+          400: 'var(--matmax-orange-400)',
+          500: 'var(--matmax-orange-500)',
+          600: 'var(--matmax-orange-600)',
+          700: 'var(--matmax-orange-700)',
+          800: 'var(--matmax-orange-800)',
+          900: 'var(--matmax-orange-900)',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -272,6 +309,65 @@ const config: Config = {
       fontFamily: {
         heading: 'var(--font-heading)',
         body: 'var(--font-body)',
+      },
+      // Enhanced mobile viewport handling
+      height: {
+        'screen-mobile': '100svh',
+        'screen-mobile-fallback': '100vh',
+      },
+      minHeight: {
+        'screen-mobile': '100svh',
+        'screen-mobile-fallback': '100vh',
+      },
+      maxHeight: {
+        'screen-mobile': '100svh',
+        'screen-mobile-fallback': '100vh',
+      },
+      // Mobile-specific spacing
+      spacing: {
+        'mobile-safe': 'env(safe-area-inset-top)',
+        'mobile-safe-bottom': 'env(safe-area-inset-bottom)',
+        'mobile-safe-left': 'env(safe-area-inset-left)',
+        'mobile-safe-right': 'env(safe-area-inset-right)',
+      },
+      // Enhanced mobile breakpoints
+      screens: {
+        'xs': '475px',
+        'sm': '640px',
+        'md': '768px',
+        'lg': '1024px',
+        'xl': '1280px',
+        '2xl': '1536px',
+        // Mobile-specific breakpoints
+        'mobile-sm': '320px',
+        'mobile-md': '375px',
+        'mobile-lg': '414px',
+        'mobile-xl': '480px',
+        // Touch device detection
+        'touch': { 'raw': '(hover: none) and (pointer: coarse)' },
+        'no-touch': { 'raw': '(hover: hover) and (pointer: fine)' },
+      },
+      // Mobile-optimized animations
+      animation: {
+        'mobile-fade-in': 'mobileFadeIn 0.3s ease-out',
+        'mobile-slide-up': 'mobileSlideUp 0.3s ease-out',
+        'mobile-bounce': 'mobileBounce 0.6s ease-out',
+      },
+      keyframes: {
+        mobileFadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        mobileSlideUp: {
+          '0%': { transform: 'translateY(20px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        mobileBounce: {
+          '0%, 20%, 53%, 80%, 100%': { transform: 'translate3d(0,0,0)' },
+          '40%, 43%': { transform: 'translate3d(0, -8px, 0)' },
+          '70%': { transform: 'translate3d(0, -4px, 0)' },
+          '90%': { transform: 'translate3d(0, -2px, 0)' },
+        },
       },
     },
   },

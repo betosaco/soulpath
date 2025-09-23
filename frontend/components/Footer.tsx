@@ -70,7 +70,7 @@ export function Footer() {
               <Link href="/schedule" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
                 {footer.schedule || 'Schedule'}
               </Link>
-              <Link href="/account/book" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <Link href="/schedule" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
                 {footer.bookSession || 'Book Session'}
               </Link>
             </nav>

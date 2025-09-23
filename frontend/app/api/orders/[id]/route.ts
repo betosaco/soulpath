@@ -90,8 +90,11 @@ export async function GET(
 
     // Format booking details - collect from all userPackages
     const bookingDetails = order.items
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .flatMap((item: any) => item.userPackages || [])
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .flatMap((userPackage: any) => userPackage.bookings || [])
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .map((booking: any) => ({
         id: booking.id,
         selectedDate: booking.scheduleSlot?.startTime ? new Date(booking.scheduleSlot.startTime).toLocaleDateString() : undefined,

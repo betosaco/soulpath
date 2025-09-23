@@ -13,7 +13,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { AppLayout } from '@/components/AppLayout';
+import { AppShell } from '@/components/AppShell';
 
 interface OrderSummary {
   id: string;
@@ -96,20 +96,20 @@ export default function OrdersPage() {
 
   if (loading) {
     return (
-      <AppLayout>
+      <AppShell>
         <div className="min-h-screen bg-white flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-gray-600">Loading your orders...</p>
           </div>
         </div>
-      </AppLayout>
+      </AppShell>
     );
   }
 
   if (error) {
     return (
-      <AppLayout>
+      <AppShell>
         <div className="min-h-screen bg-white flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Orders</h1>
@@ -122,12 +122,12 @@ export default function OrdersPage() {
             </Button>
           </div>
         </div>
-      </AppLayout>
+      </AppShell>
     );
   }
 
   return (
-    <AppLayout>
+    <AppShell>
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="container mx-auto px-4 max-w-6xl">
           {/* Header */}
@@ -292,6 +292,6 @@ export default function OrdersPage() {
           {/* Pagination could be added here for large order lists */}
         </div>
       </div>
-    </AppLayout>
+    </AppShell>
   );
 }

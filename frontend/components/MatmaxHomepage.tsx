@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { AppLayout } from './AppLayout';
+import { AppShell } from './AppShell';
 import { useTranslations, useLanguage } from '@/hooks/useTranslations';
 
 export function MatmaxHomepage() {
@@ -25,9 +25,9 @@ export function MatmaxHomepage() {
   }, []);
 
   return (
-    <AppLayout className="min-h-screen bg-white mobile-container mobile-scrollable">
+    <AppShell className="min-h-screen bg-white mobile-container mobile-scrollable">
       {/* Hero Section */}
-      <section id="home" className="relative h-screen flex items-center justify-center overflow-hidden mobile-content mobile-scrollable" style={{ height: '100vh', height: '100svh' }}>
+      <section id="home" className="relative h-screen flex items-center justify-center overflow-hidden mobile-content mobile-scrollable" style={{ height: '100svh' }}>
         {/* Video Background with Image Fallback */}
         <div className="absolute inset-0">
           {/* Video Background - Desktop Only */}
@@ -138,7 +138,7 @@ export function MatmaxHomepage() {
           </div>
         </div>
       </section>
-    </AppLayout>
+    </AppShell>
   );
 }
 

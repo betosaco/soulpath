@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 export async function POST() {
@@ -11,7 +11,7 @@ export async function POST() {
         SELECT 1 FROM information_schema.tables
         WHERE table_name = 'telegram_users'
       )
-    ` as any[];
+    ` as Array<{ exists: boolean }>;
 
     if (tableExists[0].exists) {
       console.log('✅ Telegram users table already exists');
@@ -19,7 +19,7 @@ export async function POST() {
       // Check if user's Chat ID is stored
       const telegramUsers = await prisma.$queryRaw`
         SELECT * FROM telegram_users WHERE telegram_chat_id = '6894679353'
-      ` as any[];
+      ` as Array<{ telegram_chat_id: string; telegram_username?: string }>;
 
       return NextResponse.json({
         success: true,
@@ -118,7 +118,7 @@ export async function GET() {
         SELECT 1 FROM information_schema.tables
         WHERE table_name = 'telegram_users'
       )
-    ` as any[];
+    ` as Array<{ exists: boolean }>;
 
     let userRecord = null;
     if (tableExists[0].exists) {
@@ -127,7 +127,7 @@ export async function GET() {
         SELECT id, user_id, telegram_chat_id, telegram_username, is_active, created_at
         FROM telegram_users
         WHERE telegram_chat_id = '6894679353'
-      ` as any[];
+      ` as Array<{ id: number; user_id: string; telegram_chat_id: string; telegram_username?: string; is_active: boolean; created_at: Date }>;
       userRecord = telegramUsers[0] || null;
     }
 

@@ -162,12 +162,14 @@ export async function safeFetch<T = unknown>(
       console.error('❌ Fetch error:', {
         url,
         attempt: attempt + 1,
-        error: lastError.message
+        error: lastError?.message || 'Unknown error',
+        errorType: lastError?.constructor?.name || 'Unknown',
+        fullError: lastError
       });
       
       return {
         success: false,
-        error: lastError.message,
+        error: lastError?.message || 'Unknown error',
         status: 0,
         statusText: 'Network Error',
       };

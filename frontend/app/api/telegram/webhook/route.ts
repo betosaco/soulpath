@@ -422,7 +422,7 @@ async function registerTelegramUser(telegramData: {
   }
 }
 
-async function handleRegistrationCommand(chatId: string, userInfo: any): Promise<void> {
+async function handleRegistrationCommand(chatId: string, userInfo: { id: number; first_name?: string; last_name?: string; username?: string }): Promise<void> {
   try {
     const welcomeMessage = `
 🤖 <b>Welcome to SoulPath Telegram Bot!</b>

@@ -145,7 +145,6 @@ export async function GET(request: NextRequest) {
           telegramLastName: telegramUser.telegramLastName,
           isActive: telegramUser.isActive,
           lastInteraction: telegramUser.lastInteraction,
-          notificationPreferences: telegramUser.notificationPreferences
         }
       });
     } else {

@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { useProfileImage } from '@/hooks/useProfileImage';
 import { useTranslations } from '@/hooks/useTranslations';
 import { AdminDashboard } from '@/components/AdminDashboard';
-import { AppLayout } from '@/components/AppLayout';
+import { AppShell } from '@/components/AppShell';
 import { themeClasses } from '@/lib/theme/theme-utils';
 
 
@@ -122,12 +122,12 @@ export default function MainPageClient({
   }
 
   return (
-    <AppLayout 
+    <AppShell 
       className={`min-h-screen ${themeClasses.background.primary} ${themeClasses.text.primary}`}
       showFooter={false}
     >
       <ConstellationBackground />
       <HeroSection t={translations} />
-    </AppLayout>
+    </AppShell>
   );
 }

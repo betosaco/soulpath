@@ -1,12 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useTranslations, useLanguage } from '@/hooks/useTranslations';
-import { AppLayout } from '@/components/AppLayout';
+import { AppShell } from '@/components/AppShell';
 
 export default function PrivacyPage() {
-  const { language } = useLanguage();
-  const { t } = useTranslations(undefined, language);
   const [activeTab, setActiveTab] = useState<'es' | 'en'>('es');
 
   const privacyContent = {
@@ -305,7 +302,7 @@ export default function PrivacyPage() {
   const currentContent = privacyContent[activeTab];
 
   return (
-    <AppLayout>
+    <AppShell>
       <div className="min-h-screen bg-gray-50 py-12 mobile-container mobile-scrollable">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Language Toggle */}
@@ -369,6 +366,6 @@ export default function PrivacyPage() {
           </div>
         </div>
       </div>
-    </AppLayout>
+    </AppShell>
   );
 }

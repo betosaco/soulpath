@@ -187,7 +187,7 @@ export default function ClientAuthModal({ isOpen, onClose, onSuccess }: ClientAu
 
         <div className="mt-6 text-center">
           <p className="text-gray-400">
-            {isLogin ? "Don't have an account? " : "Already have an account? "}
+            {isLogin ? "Don&apos;t have an account? " : "Already have an account? "}
             <Button
               variant="ghost"
               size="sm"

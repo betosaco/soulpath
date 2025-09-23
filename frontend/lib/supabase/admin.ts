@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 export function createAdminClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -12,7 +12,7 @@ export function createAdminClient() {
         auth: { getUser: () => Promise.resolve({ data: { user: null }, error: null }) },
         from: () => ({ select: () => ({ data: [], error: null }) }),
         storage: { from: () => ({ upload: () => Promise.resolve({ data: null, error: null }) }) }
-      } as any;
+      } as unknown as SupabaseClient;
     }
   }
   
@@ -44,7 +44,7 @@ export function createPublicClient() {
         auth: { getUser: () => Promise.resolve({ data: { user: null }, error: null }) },
         from: () => ({ select: () => ({ data: [], error: null }) }),
         storage: { from: () => ({ upload: () => Promise.resolve({ data: null, error: null }) }) }
-      } as any;
+      } as unknown as SupabaseClient;
     }
   }
   

@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { PackageIcon, CalendarIcon, ShoppingCart, Clock as ClockIcon } from 'lucide-react';
 
 
-import { PackagePurchaseFlow } from '@/components/PackagePurchaseFlow';
+import { MasterBookingFlow } from '@/components/MasterBookingFlow';
+import { AppShell } from '@/components/AppShell';
 
 interface Package {
   id: number;
@@ -70,23 +71,29 @@ export default function PackagesPage() {
 
   if (showPurchaseFlow) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="mb-6">
-          <Button
-            variant="outline"
-            onClick={() => setShowPurchaseFlow(false)}
-            className="mb-4 border-[#2a2a4a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white"
-          >
-            ← Back to Packages
-          </Button>
+      <AppShell>
+        <div className="container mx-auto p-6">
+          <div className="mb-6">
+            <Button
+              variant="outline"
+              onClick={() => setShowPurchaseFlow(false)}
+              className="mb-4 border-[#2a2a4a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white"
+            >
+              ← Back to Packages
+            </Button>
+          </div>
+          <MasterBookingFlow onCheckoutComplete={(orderData) => {
+            console.log('Package purchase completed:', orderData);
+            setShowPurchaseFlow(false);
+          }} />
         </div>
-        <PackagePurchaseFlow />
-      </div>
+      </AppShell>
     );
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <AppShell>
+      <div className="container mx-auto p-6 space-y-6">
       <div className="text-center">
         <h1 className="text-3xl font-bold text-white">Available Packages</h1>
         <p className="text-gray-400 mt-2">Choose the perfect package for your spiritual journey</p>
@@ -205,6 +212,7 @@ export default function PackagesPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+      </div>
+    </AppShell>
   );
 }

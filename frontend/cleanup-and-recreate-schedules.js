@@ -88,7 +88,6 @@ async function cleanupAndRecreateSchedules() {
     
     // Now create schedule slots for the current week (Sept 15-22, 2025)
     const weekStart = new Date('2025-09-15');
-    const weekEnd = new Date('2025-09-22');
     
     const scheduleSlots = [];
     

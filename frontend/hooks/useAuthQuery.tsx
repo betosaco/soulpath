@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { useAuth as useAuthStore } from '@/store/appStore';
 import { safeApiCall } from '@/lib/api-utils';
 import { queryKeys } from '@/lib/query-client';
@@ -95,12 +96,15 @@ export function useAuthQuery() {
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
     retry: 1, // Only retry once for auth
-    onSuccess: (user) => {
-      setUser(user);
+  });
+
+  // Handle query results
+  useEffect(() => {
+    if (userQuery.data) {
+      setUser(userQuery.data);
       setLoading(false);
-    },
-    onError: (error) => {
-      console.error('🔐 Token verification error:', error);
+    } else if (userQuery.error) {
+      console.error('🔐 Token verification error:', userQuery.error);
       // Clear invalid token
       if (typeof window !== 'undefined') {
         localStorage.removeItem('auth_token');
@@ -108,12 +112,12 @@ export function useAuthQuery() {
       }
       setUser(null);
       setLoading(false);
-    },
-  });
+    }
+  }, [userQuery.data, userQuery.error, setUser, setLoading]);
   
   // Login mutation
   const loginMutation = useMutation({
-    mutationFn: loginAPI,
+    mutationFn: ({ email, password }: { email: string; password: string }) => loginAPI(email, password),
     onSuccess: (user) => {
       // Store token in localStorage and cookie
       if (typeof window !== 'undefined') {
@@ -167,7 +171,8 @@ export function useAuthQuery() {
   const user = userQuery.data;
   const isLoading = userQuery.isLoading || loginMutation.isPending;
   const isAuthenticated = !!user;
-  const isAdmin = user?.role === 'ADMIN';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const isAdmin = (user as any)?.role === 'ADMIN';
   
   // Login function
   const signIn = async (email: string, password: string) => {

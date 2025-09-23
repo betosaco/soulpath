@@ -1,13 +1,15 @@
 'use client';
 
 import React from 'react';
-import { AppLayout } from '@/components/AppLayout';
-import { EnhancedPackagesFlow } from '@/components/EnhancedPackagesFlow';
+import { AppShell } from '@/components/AppShell';
+import { MasterBookingFlow } from '@/components/MasterBookingFlow';
 
 export default function EnhancedPackagesPage() {
   return (
-    <AppLayout>
-      <EnhancedPackagesFlow />
-    </AppLayout>
+    <AppShell>
+      <MasterBookingFlow onCheckoutComplete={(orderData) => {
+        console.log('Package purchase completed:', orderData);
+      }} />
+    </AppShell>
   );
 }

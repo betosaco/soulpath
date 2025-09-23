@@ -114,10 +114,6 @@ export function usePackages(currency: string = 'PEN') {
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
-    onError: (error) => {
-      console.error('❌ Error fetching packages:', error);
-      toast.error(`Error loading packages: ${error.message}`);
-    },
   });
 }
 
@@ -143,10 +139,6 @@ export function usePackage(packageId: number, currency: string = 'PEN') {
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     retry: 3,
-    onError: (error) => {
-      console.error('❌ Error fetching package:', error);
-      toast.error(`Error loading package: ${error.message}`);
-    },
   });
 }
 
@@ -165,10 +157,6 @@ export function usePopularPackages(currency: string = 'PEN') {
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     retry: 3,
-    onError: (error) => {
-      console.error('❌ Error fetching popular packages:', error);
-      toast.error(`Error loading popular packages: ${error.message}`);
-    },
   });
 }
 
@@ -187,10 +175,6 @@ export function useFeaturedPackages(currency: string = 'PEN') {
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     retry: 3,
-    onError: (error) => {
-      console.error('❌ Error fetching featured packages:', error);
-      toast.error(`Error loading featured packages: ${error.message}`);
-    },
   });
 }
 
@@ -240,7 +224,7 @@ export function usePackagePurchase() {
       
       return response.json();
     },
-    onSuccess: (data, variables) => {
+    onSuccess: () => {
       // Invalidate and refetch packages to update availability
       queryClient.invalidateQueries({ queryKey: queryKeys.packages.all });
       

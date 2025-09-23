@@ -68,7 +68,7 @@ export class BrevoEmailService {
 
   async sendEmailWithBCC(emailData: EmailDataWithBCC): Promise<boolean> {
     try {
-      const payload: any = {
+      const payload: Record<string, unknown> = {
         sender: {
           name: this.config.senderName,
           email: this.config.senderEmail

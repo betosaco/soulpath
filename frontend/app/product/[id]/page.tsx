@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import { ChevronLeftIcon, ChevronRightIcon, ShoppingCartIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/outline';
-import { AppLayout } from '@/components/AppLayout';
-import { useCart } from '@/lib/cart-context';
+import { AppShell } from '@/components/AppShell';
+import { useCart } from '@/store/appStore';
 import { Button } from '@/components/ui/button';
 import { ColorSwatch } from '@/components/ColorSwatch';
 
@@ -32,7 +32,7 @@ interface Product {
 export default function ProductPage() {
   const params = useParams();
   const productId = params?.id as string;
-  const { addToCart, getTotalItems, setIsCartOpen } = useCart();
+  const { addItem: addToCart, getTotalItems, openCart: setIsCartOpen } = useCart();
   
   console.log('🛒 ProductPage rendered, params:', params, 'productId:', productId);
   
@@ -86,14 +86,14 @@ export default function ProductPage() {
   // Safety check for params - moved after hooks
   if (!params || !productId) {
     return (
-      <AppLayout className="min-h-screen bg-white">
+      <AppShell className="min-h-screen bg-white">
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-400 mx-auto mb-4"></div>
             <p className="text-gray-600 text-lg">Loading product...</p>
           </div>
         </div>
-      </AppLayout>
+      </AppShell>
     );
   }
 
@@ -159,32 +159,32 @@ export default function ProductPage() {
 
   if (loading) {
     return (
-      <AppLayout className="min-h-screen bg-white">
+      <AppShell className="min-h-screen bg-white">
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-400 mx-auto mb-4"></div>
             <p className="text-gray-600 text-lg">Loading product...</p>
           </div>
         </div>
-      </AppLayout>
+      </AppShell>
     );
   }
 
   if (!product) {
     return (
-      <AppLayout className="min-h-screen bg-white">
+      <AppShell className="min-h-screen bg-white">
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h1>
             <p className="text-gray-600">The product you&apos;re looking for doesn&apos;t exist.</p>
           </div>
         </div>
-      </AppLayout>
+      </AppShell>
     );
   }
 
   return (
-    <AppLayout className="min-h-screen bg-white mobile-container mobile-scrollable">
+    <AppShell className="min-h-screen bg-white mobile-container mobile-scrollable">
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mobile-content mobile-scrollable">
@@ -422,6 +422,6 @@ export default function ProductPage() {
           </div>
         </div>
       </div>
-    </AppLayout>
+    </AppShell>
   );
 }

@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
+import { requireAuth } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
     // Get user session
-    const session = await getServerSession(authOptions);
+    const user = await requireAuth(request);
 
-    if (!session?.user?.id) {
+    if (!user?.id) {
       return NextResponse.json(
         { success: false, error: 'Authentication required' },
         { status: 401 }
@@ -26,13 +25,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('🔗 Linking Telegram account for user:', session.user.id, 'Chat ID:', telegramChatId);
+    console.log('🔗 Linking Telegram account for user:', user.id, 'Chat ID:', telegramChatId);
 
     // Check if Telegram chat ID is already linked to another user
     const existingLink = await prisma.telegramUser.findFirst({
       where: {
         telegramChatId: telegramChatId.toString(),
-        userId: { not: session.user.id }
+        userId: { not: user.id }
       }
     });
 
@@ -45,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     // Link or update Telegram account
     const telegramUser = await prisma.telegramUser.upsert({
-      where: { userId: session.user.id },
+      where: { id: user.id },
       update: {
         telegramChatId: telegramChatId.toString(),
         isActive: true,
@@ -53,11 +52,11 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date()
       },
       create: {
-        userId: session.user.id,
+        userId: user.id,
         telegramChatId: telegramChatId.toString(),
-        telegramUsername: session.user.name || undefined,
-        telegramFirstName: session.user.name?.split(' ')[0] || undefined,
-        telegramLastName: session.user.name?.split(' ').slice(1).join(' ') || undefined,
+        telegramUsername: user.email || undefined,
+        telegramFirstName: user.email?.split('@')[0] || undefined,
+        telegramLastName: undefined,
         isActive: true,
         lastInteraction: new Date()
       }
@@ -69,11 +68,11 @@ export async function POST(request: NextRequest) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: session.user.id,
+          userId: user.id,
           telegramChatId: telegramChatId.toString(),
-          telegramUsername: session.user.name || undefined,
-          telegramFirstName: session.user.name?.split(' ')[0] || undefined,
-          telegramLastName: session.user.name?.split(' ').slice(1).join(' ') || undefined
+          telegramUsername: user.email || undefined,
+          telegramFirstName: user.email?.split('@')[0] || undefined,
+          telegramLastName: undefined
         })
       });
 
@@ -107,9 +106,9 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     // Get user session
-    const session = await getServerSession(authOptions);
+    const user = await requireAuth(request);
 
-    if (!session?.user?.id) {
+    if (!user?.id) {
       return NextResponse.json(
         { success: false, error: 'Authentication required' },
         { status: 401 }
@@ -118,7 +117,7 @@ export async function GET(request: NextRequest) {
 
     // Get current Telegram link status
     const telegramUser = await prisma.telegramUser.findUnique({
-      where: { userId: session.user.id },
+      where: { id: user.id },
       select: {
         id: true,
         telegramChatId: true,
@@ -149,9 +148,9 @@ export async function GET(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     // Get user session
-    const session = await getServerSession(authOptions);
+    const user = await requireAuth(request);
 
-    if (!session?.user?.id) {
+    if (!user?.id) {
       return NextResponse.json(
         { success: false, error: 'Authentication required' },
         { status: 401 }
@@ -160,7 +159,7 @@ export async function DELETE(request: NextRequest) {
 
     // Unlink Telegram account
     await prisma.telegramUser.updateMany({
-      where: { userId: session.user.id },
+      where: { id: user.id },
       data: {
         isActive: false,
         updatedAt: new Date()

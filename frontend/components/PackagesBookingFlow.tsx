@@ -28,7 +28,7 @@ import { EnhancedSchedule } from './EnhancedSchedule';
 import { usePackages, PackagePrice } from '@/hooks/usePackages';
 import { useLanguage, useTranslations } from '@/hooks/useTranslations';
 import { toast } from 'sonner';
-import { useCart } from '@/lib/cart-context';
+import { useCart } from '@/store/appStore';
 
 interface Teacher {
   id: number;
@@ -87,7 +87,7 @@ export function PackagesBookingFlow() {
   const { packages, loading: packagesLoading, error: packagesError } = usePackages('PEN');
   const { language } = useLanguage();
   const { t } = useTranslations(undefined, language);
-  const { addToCart, cartItems, setIsCartOpen } = useCart();
+  const { addItem: addToCart, items: cartItems, openCart: setIsCartOpen } = useCart();
   const [currentStep, setCurrentStep] = useState(0);
 
   // Icon diagnostic - remove after testing

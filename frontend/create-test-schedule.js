@@ -8,7 +8,7 @@ async function createTestSchedule() {
 
     // First, create some basic data if it doesn't exist
     console.log('📅 Creating session durations...');
-    const sessionDuration = await prisma.sessionDuration.upsert({
+    await prisma.sessionDuration.upsert({
       where: { id: 1 },
       update: {},
       create: {
@@ -59,7 +59,7 @@ async function createTestSchedule() {
     });
 
     console.log('📅 Creating schedule templates...');
-    const scheduleTemplate = await prisma.scheduleTemplate.upsert({
+    await prisma.scheduleTemplate.upsert({
       where: { id: 1 },
       update: {},
       create: {

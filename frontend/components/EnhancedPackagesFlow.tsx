@@ -28,7 +28,7 @@ interface PackageInstance extends PackagePrice {
 }
 import { useLanguage, useTranslations } from '@/hooks/useTranslations';
 import { toast } from 'sonner';
-import { useCart } from '@/store/appStore';
+import { useCart, useCartUI } from '@/store/appStore';
 
 interface Teacher {
   id: number;
@@ -86,12 +86,13 @@ interface BookingStep {
 
 export function EnhancedPackagesFlow() {
   const { data: packages, isLoading: packagesLoading, error: packagesError } = usePackages('PEN');
+  const typedPackages = packages as PackagePrice[] | undefined;
   
   const { language } = useLanguage();
   const { t } = useTranslations(undefined, language);
   const { addItem, items: cartItems, removeItem, updateQuantity } = useCart();
   const { openCart } = useCartUI();
-  // Get packages from cart
+  // Get typedPackages from cart
   const cartPackages = cartItems.filter(item => item.type === 'package');
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -104,7 +105,7 @@ export function EnhancedPackagesFlow() {
 
   // Set initial step based on cart contents (only once on mount)
   React.useEffect(() => {
-    // Always start at package selection step (step 0) to allow adding more packages
+    // Always start at package selection step (step 0) to allow adding more typedPackages
     setCurrentStep(0);
   }, []); // Empty dependency array - only run once on mount
 
@@ -142,14 +143,14 @@ export function EnhancedPackagesFlow() {
   const steps: BookingStep[] = React.useMemo(() => {
     const baseSteps = [
       { 
-        id: 'packages', 
+        id: 'typedPackages', 
         title: getTranslation('bookingFlow.selectPackages', 'Select Packages'), 
-        description: getTranslation('bookingFlow.selectPackagesDesc', 'Add packages to your cart'), 
+        description: getTranslation('bookingFlow.selectPackagesDesc', 'Add typedPackages to your cart'), 
         completed: false 
       }
     ];
 
-    // Always show schedule step if there are packages in cart
+    // Always show schedule step if there are typedPackages in cart
     if (cartPackages.length > 0) {
       baseSteps.push({
         id: 'schedule', 
@@ -159,7 +160,7 @@ export function EnhancedPackagesFlow() {
       });
     }
 
-    // Only add package selection step if there are multiple packages
+    // Only add package selection step if there are multiple typedPackages
     if (cartPackages.length > 1) {
       baseSteps.push({
         id: 'package-selection', 
@@ -175,7 +176,7 @@ export function EnhancedPackagesFlow() {
 
   const handleAddPackage = (pkg: PackagePrice) => {
     // Always create new package item with unique ID (no merging)
-    // This allows multiple packages of the same type to be treated separately
+    // This allows multiple typedPackages of the same type to be treated separately
     const uniqueId = `${pkg.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
     addItem({
@@ -194,18 +195,18 @@ export function EnhancedPackagesFlow() {
     
     toast.success(`${pkg.packageDefinition.name} added to cart`);
     
-    // All packages should go to schedule page for class selection
+    // All typedPackages should go to schedule page for class selection
     // Set up session storage for adding bookings to this package
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('isAddingMoreBookings', 'true');
-      // Check if there are already other packages in cart
+      // Check if there are already other typedPackages in cart
       const existingPackages = cartItems.filter(item => item.type === 'package');
-      console.log('🔍 Adding new package - existing packages:', existingPackages.length);
+      console.log('🔍 Adding new package - existing typedPackages:', existingPackages.length);
       console.log('🔍 New package ID:', uniqueId);
       
       if (existingPackages.length > 0) {
-        // Multiple packages - don't set specific package ID, let schedule page show modal
-        console.log('✅ Multiple packages detected - removing addingToPackageId');
+        // Multiple typedPackages - don't set specific package ID, let schedule page show modal
+        console.log('✅ Multiple typedPackages detected - removing addingToPackageId');
         sessionStorage.removeItem('addingToPackageId');
       } else {
         // First package - set specific package ID
@@ -248,7 +249,7 @@ export function EnhancedPackagesFlow() {
     
     // If only one package quantity, auto-select it for booking and go to checkout
     if (totalPackageQuantity === 1) {
-      const packageData = packages.find(pkg => pkg.id.toString() === cartPackages[0].id);
+      const packageData = typedPackages?.find(pkg => pkg.id.toString() === cartPackages[0].id);
       if (packageData) {
         // Create package instance with instanceId for tracking
         const packageInstance: PackageInstance = {
@@ -278,7 +279,7 @@ export function EnhancedPackagesFlow() {
   const handlePackageSelectionForBooking = (instanceId: string) => {
     // Extract package ID from instance ID (format: "packageId-index")
     const packageId = instanceId.split('-')[0];
-    const packageData = packages.find(pkg => pkg.id.toString() === packageId);
+    const packageData = typedPackages?.find(pkg => pkg.id.toString() === packageId);
     if (packageData) {
       // Create package instance with instanceId for tracking
       const packageInstance = {
@@ -373,20 +374,20 @@ export function EnhancedPackagesFlow() {
           {/* Step 1: Package Selection */}
           {currentStep === 0 && (
             <motion.div
-              key="packages"
+              key="typedPackages"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               className="max-w-6xl mx-auto mobile-step-content"
             >
-              {/* Mobile: Show packages at top, then header */}
+              {/* Mobile: Show typedPackages at top, then header */}
               <div className="block sm:hidden">
                 {/* Packages will be shown here first on mobile */}
               </div>
 
               <div className="text-center mb-8 hidden sm:block">
                 <h2 className="text-3xl font-bold text-primary mb-4">Select Your Packages</h2>
-                <p className="text-xl text-muted">Add multiple packages to your cart</p>
+                <p className="text-xl text-muted">Add multiple typedPackages to your cart</p>
               </div>
 
               {/* Mobile Header */}
@@ -418,21 +419,21 @@ export function EnhancedPackagesFlow() {
               )}
 
 
-              {/* Mobile: Show packages first, then loading/error states */}
+              {/* Mobile: Show typedPackages first, then loading/error states */}
               <div className="block sm:hidden">
                 {packagesLoading ? (
                   <div className="text-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-3"></div>
-                    <p className="text-gray-600">Loading packages...</p>
+                    <p className="text-gray-600">Loading typedPackages...</p>
                   </div>
                 ) : packagesError ? (
                   <div className="text-center py-8">
                     <AlertCircle className="w-6 h-6 mx-auto mb-3 text-red-500" />
-                    <p className="text-red-600 text-sm mb-4">Error loading packages: {packagesError}</p>
+                    <p className="text-red-600 text-sm mb-4">Error loading packages: {packagesError?.message}</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 gap-4 mobile-grid-responsive">
-                    {packages.map((pkg) => {
+                    {typedPackages?.map((pkg) => {
                       const cartItem = cartPackages.find(item => item.id === pkg.id.toString());
                       const isInCart = !!cartItem;
                       
@@ -521,21 +522,21 @@ export function EnhancedPackagesFlow() {
                 )}
               </div>
 
-              {/* Desktop: Show loading/error states first, then packages */}
+              {/* Desktop: Show loading/error states first, then typedPackages */}
               <div className="hidden sm:block">
                 {packagesLoading ? (
                   <div className="text-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                    <p className="text-gray-600 text-lg">Loading packages...</p>
+                    <p className="text-gray-600 text-lg">Loading typedPackages...</p>
                   </div>
                 ) : packagesError ? (
                   <div className="text-center py-12">
                     <AlertCircle className="w-8 h-8 mx-auto mb-4 text-red-500" />
-                    <p className="text-red-600 text-lg mb-4">Error loading packages: {packagesError}</p>
+                    <p className="text-red-600 text-lg mb-4">Error loading packages: {packagesError?.message}</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {packages.map((pkg) => {
+                  {typedPackages?.map((pkg) => {
                     const cartItem = cartPackages.find(item => item.id === pkg.id.toString());
                     const isInCart = !!cartItem;
                     
@@ -671,7 +672,7 @@ export function EnhancedPackagesFlow() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {cartPackages.map((cartItem) => {
-                  const packageData = packages.find(pkg => pkg.id.toString() === cartItem.id);
+                  const packageData = typedPackages?.find(pkg => pkg.id.toString() === cartItem.id);
                   if (!packageData) return null;
 
                   // Create individual package instances for selection

@@ -1,21 +1,36 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ShoppingCart, X } from 'lucide-react';
-import { useCart } from '@/lib/cart-context';
+import { useCart, useCartUI } from '@/store/appStore';
 
 interface MobileCartToggleProps {
   className?: string;
 }
 
 export function MobileCartToggle({ className = '' }: MobileCartToggleProps) {
-  const { getTotalItems, isCartOpen, setIsCartOpen } = useCart();
-  const totalItems = getTotalItems();
+  const { getTotalItems } = useCart();
+  const { isCartOpen, toggleCart } = useCartUI();
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [totalItems, setTotalItems] = useState(0);
+
+  // Handle hydration safely
+  useEffect(() => {
+    setIsHydrated(true);
+    setTotalItems(getTotalItems());
+  }, [getTotalItems]);
+
+  // Update total items when cart changes
+  useEffect(() => {
+    if (isHydrated) {
+      setTotalItems(getTotalItems());
+    }
+  }, [getTotalItems, isHydrated]);
 
   return (
     <motion.button 
-      onClick={() => setIsCartOpen(!isCartOpen)}
+      onClick={() => toggleCart()}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       className={`flex items-center justify-center rounded-lg header-button-menu touch-manipulation focus-visible px-4 py-2 min-h-[44px] min-w-[44px] relative overflow-hidden ${className}`}
@@ -35,8 +50,8 @@ export function MobileCartToggle({ className = '' }: MobileCartToggleProps) {
         </motion.div>
       </div>
 
-      {/* Item count badge */}
-      {totalItems > 0 && (
+      {/* Item count badge - only show after hydration */}
+      {isHydrated && totalItems > 0 && (
         <span className="absolute -top-1 -right-1 bg-[#6ea058] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
           {totalItems > 99 ? '99+' : totalItems}
         </span>

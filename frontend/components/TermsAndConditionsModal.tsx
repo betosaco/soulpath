@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useTranslations, useLanguage } from '@/hooks/useTranslations';
 
 interface TermsAndConditionsModalProps {
   isOpen: boolean;
@@ -21,8 +20,6 @@ export function TermsAndConditionsModal({
   onDecline,
   allowClose = true
 }: TermsAndConditionsModalProps) {
-  const { language } = useLanguage();
-  const { t } = useTranslations(undefined, language);
   const [activeTab, setActiveTab] = useState<'es' | 'en'>('es');
 
   const termsContent = {

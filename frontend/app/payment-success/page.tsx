@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { MessageCircle, CheckCircle, XCircle, Calendar, User, CreditCard, Package } from 'lucide-react';
-import { AppLayout } from '@/components/AppLayout';
+import { AppShell } from '@/components/AppShell';
 
 interface PaymentResult {
   orderStatus: string;
@@ -106,21 +106,21 @@ export default function PaymentSuccessPage() {
 
   if (isLoading) {
     return (
-      <AppLayout>
+      <AppShell>
         <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
           <div className="text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 dark:border-green-400"></div>
             <p className="mt-3 text-gray-600 dark:text-gray-300">Cargando resultado del pago...</p>
           </div>
         </div>
-      </AppLayout>
+      </AppShell>
     );
   }
 
   const isSuccess = paymentResult?.orderStatus === 'PAID';
 
   return (
-    <AppLayout>
+    <AppShell>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-2xl overflow-hidden border dark:border-gray-700">
@@ -367,6 +367,6 @@ export default function PaymentSuccessPage() {
           </div>
         </div>
       </div>
-    </AppLayout>
+    </AppShell>
   );
 }

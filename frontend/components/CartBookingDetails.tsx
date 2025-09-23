@@ -21,7 +21,6 @@ interface CartBookingDetailsProps {
   onAddMore?: () => void;
   showActions?: boolean;
   packageSessions?: number;
-  packageId?: string;
 }
 
 export function CartBookingDetails({ 
@@ -32,7 +31,6 @@ export function CartBookingDetails({
   onAddMore,
   showActions = false,
   packageSessions = 0,
-  packageId: _packageId
 }: CartBookingDetailsProps) {
   // Handle both single booking and array of bookings
   const bookings = Array.isArray(bookingDetails) ? bookingDetails : [bookingDetails];

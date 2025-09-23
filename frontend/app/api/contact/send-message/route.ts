@@ -11,7 +11,6 @@ const contactFormSchema = z.object({
   language: z.enum(['en', 'es']).default('en')
 });
 
-type ContactFormData = z.infer<typeof contactFormSchema>;
 
 export async function POST(request: NextRequest) {
   try {

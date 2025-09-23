@@ -25,23 +25,23 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { closeCart } = useCartUI();
 
-  // Function to check if a route is active
-  const isActiveRoute = (route: string) => {
+  // Function to check if a route is active - memoized to prevent re-renders
+  const isActiveRoute = React.useCallback((route: string) => {
     if (route === '/') {
       return pathname === '/';
     }
     return pathname.startsWith(route);
-  };
+  }, [pathname]);
 
   // Function to handle menu item clicks - closes both mobile menu and cart
-  const handleMenuItemClick = () => {
+  const handleMenuItemClick = React.useCallback(() => {
     setIsMenuOpen(false);
     closeCart();
-  };
+  }, [closeCart]);
   
 
-  // Helper function to safely access nested translation properties
-  const getTranslation = (path: string, fallback: string = ''): string => {
+  // Helper function to safely access nested translation properties - memoized to prevent re-renders
+  const getTranslation = React.useCallback((path: string, fallback: string = ''): string => {
     const keys = path.split('.');
     let current: Record<string, unknown> = (t && typeof t === 'object') ? t as Record<string, unknown> : {};
 
@@ -54,7 +54,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
     }
 
     return typeof current === 'string' ? current : fallback;
-  };
+  }, [t]);
 
 
   // Handle touch gestures for closing menu
