@@ -2,18 +2,18 @@
 
 /**
  * ========================================================================================
- * MASTER BOOKING FLOW COMPONENT - ORGANIZED BY SCENARIOS AND LOGIC FLOWS
+ * MASTER BOOKING FLOW COMPONENT
  * ========================================================================================
  *
- * This component implements the Master Booking Process with multiple entry points and flows.
- * The flow can be initiated from different starting points and follows different paths based
- * on user actions and system state.
+ * This component manages the complete booking flow with multiple entry points and scenarios.
+ * It handles package selection, schedule booking, customer information, and checkout.
  *
- * FLOW SCENARIOS OVERVIEW:
- * ==========. . ==============
+ * ========================================================================================
+ * BOOKING SCENARIOS & RULES
+ * ========================================================================================
  *
  * SCENARIO A: SCHEDULE-FIRST FLOW (from /schedule page)
- * ---------------------------------------------------
+ * ─────────────────────────────────────────────────────
  * 1. User clicks "Book Now" from homepage/schedule page
  * 2. User selects 1 time slot from schedule
  * 3. User selects a package for that slot
@@ -21,14 +21,15 @@
  * 5. After checkout, user can "Book More" to add sessions
  *
  * SCENARIO B: PACKAGE-FIRST FLOW (from /packages page)
- * ---------------------------------------------------
+ * ────────────────────────────────────────────────────
  * 1. User selects package(s) first
  * 2. User clicks "Book Now" from cart
- * 3. User goes to schedule page to select time  
- vb * 5. Goes to customer info → checkout
- * 
+ * 3. User goes to schedule page to select time slots
+ * 4. User can book multiple slots across packages
+ * 5. Goes to customer info → checkout
+ *
  * SCENARIO C: ADD MORE BOOKINGS FLOW (from cart "Book Now")
- * -------------------------------------------------------
+ * ─────────────────────────────────────────────────────────
  * 1. User has packages in cart with some sessions already booked
  * 2. User clicks "Book Now" from cart
  * 3. Schedule page reloads with previously booked slots LOCKED
@@ -36,29 +37,54 @@
  * 5. After booking, cart opens to show progress
  *
  * SCENARIO D: MULTIPLE PACKAGES FLOW
- * ----------------------------------
+ * ──────────────────────────────────
  * 1. User has multiple packages in cart
  * 2. When booking slots, system shows package selection modal
  * 3. User chooses which package to assign the slot to
  * 4. System prevents duplicate slots within same package
  *
- * STATE MANAGEMENT FLOWS:
- * =======================
+ * ========================================================================================
+ * SLOT BOOKING RULES
+ * ========================================================================================
+ *
+ * SINGLE PACKAGE RULES:
+ * ────────────────────
+ * • Slots previously booked by the same package are LOCKED
+ * • User cannot book the same slot twice for the same package
+ * • Visual feedback: "Previously Booked" button (disabled)
+ *
+ * MULTIPLE PACKAGES RULES:
+ * ───────────────────────
+ * • Different packages CAN book the same time slot
+ * • Each package can only book each slot once
+ * • Visual feedback: Blue notice "📦 Previously booked by: [Package Name]"
+ * • "Book Session" button remains available for other packages
+ *
+ * VALIDATION RULES:
+ * ────────────────
+ * • Package session limits must be respected
+ * • No duplicate slots within the same package
+ * • All required customer information must be provided
+ * • Shipping address required only for physical products
+ *
+ * ========================================================================================
+ * STATE MANAGEMENT
+ * ========================================================================================
  *
  * FLOW STATE DETECTION:
- * - sessionStorage flags: isAddingMoreBookings, addingToPackageId, bookingFlowType
- * - initialStep prop: 0=packages, 1=schedule
- * - Cart state: packages with bookingDetails
+ * • sessionStorage flags: isAddingMoreBookings, addingToPackageId, bookingFlowType
+ * • initialStep prop: 0=packages, 1=schedule, 2=customer info
+ * • Cart state: packages with bookingDetails
  *
  * LOCKED TIME SLOTS:
- * - Automatically calculated from cart bookingDetails
- * - Prevents duplicate booking of same slot by same package
- * - Visual feedback: orange background + lock icon
+ * • Automatically calculated from cart bookingDetails
+ * • Prevents duplicate booking of same slot by same package
+ * • Visual feedback: orange background + lock icon (single package only)
  *
- * VALIDATION FLOWS:
- * - Per-step validation before allowing navigation
- * - Package limits, duplicate slots, required fields
- * - Enhanced email/name/address validation
+ * PACKAGE NOTICES:
+ * • Shows which package already booked a slot (multiple packages only)
+ * • Appears above "Book Session" button
+ * • Allows cross-package booking with clear information
  */
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -154,6 +180,7 @@ interface MasterBookingFlowProps {
 // =============================================================================
 
 export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirectCheckout = false }: MasterBookingFlowProps) {
+  
   // =============================================================================
   // HOOKS AND EXTERNAL STATE
   // =============================================================================
@@ -162,7 +189,7 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
   const { data: packages, isLoading: packagesLoading } = usePackages('PEN');
   
   // =============================================================================
-  // STATE MANAGEMENT - ORGANIZED BY FLOW SCENARIOS
+  // STEP MANAGEMENT & FLOW DETECTION
   // =============================================================================
 
   // SCENARIO A & B: BASIC FLOW STATE
@@ -842,6 +869,31 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
   };
 
   // =============================================================================
+  // SLOT BOOKING RULES & VALIDATION
+  // =============================================================================
+
+  /**
+   * SLOT BOOKING RULES IMPLEMENTATION:
+   * 
+   * SINGLE PACKAGE RULES:
+   * • Slots previously booked by the same package are LOCKED
+   * • User cannot book the same slot twice for the same package
+   * • Visual feedback: "Previously Booked" button (disabled)
+   * 
+   * MULTIPLE PACKAGES RULES:
+   * • Different packages CAN book the same time slot
+   * • Each package can only book each slot once
+   * • Visual feedback: Blue notice "📦 Previously booked by: [Package Name]"
+   * • "Book Session" button remains available for other packages
+   * 
+   * VALIDATION RULES:
+   * • Package session limits must be respected
+   * • No duplicate slots within the same package
+   * • All required customer information must be provided
+   * • Shipping address required only for physical products
+   */
+
+  // =============================================================================
   // PACKAGE MANAGEMENT HELPERS
   // =============================================================================
 
@@ -914,13 +966,17 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
 
 
   // =============================================================================
-  // LOCKED TIME SLOTS MANAGEMENT (SCENARIO C)
+  // LOCKED TIME SLOTS MANAGEMENT
   // =============================================================================
 
   /**
    * LOCKED SLOTS VALIDATION
    * ------------------------
    * Functions to prevent duplicate bookings within the same package.
+   * 
+   * IMPORTANT: These functions work with the EnhancedSchedule component to:
+   * • Single Package: Lock slots that are already booked by the same package
+   * • Multiple Packages: Allow cross-package booking with package notices
    */
   const isTimeSlotLocked = (date: string, time: string, packageId?: string) => {
     return lockedTimeSlots.some(slot =>
@@ -1134,6 +1190,13 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
    * ----------------------
    * Renders the appropriate UI for each step based on current scenario.
    * Different content is shown depending on flow type and step.
+   * 
+   * RENDERING LOGIC:
+   * • Step 0 (packages): Package selection with cart integration
+   * • Step 1 (schedule): EnhancedSchedule with conditional locking rules
+   * • Step 2 (customer): Customer information form
+   * • Step 3 (shipping): Shipping address (if required)
+   * • Step 4 (payment): Stripe payment integration
    */
   const renderStepContent = () => {
     const currentStepData = steps[currentStep];
@@ -2092,6 +2155,10 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
       nextStep();
     }
   };
+
+  // =============================================================================
+  // MAIN COMPONENT RENDER
+  // =============================================================================
 
   return (
     <div className="max-w-4xl mx-auto">
