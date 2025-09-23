@@ -1685,8 +1685,21 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
                     }
                   }}
                   showFilters={true}
-                  existingBookings={packageItems.flatMap((item: any) => item.bookingDetails || [])}
+                  existingBookings={packageItems.flatMap((item: any) => 
+                    (item.bookingDetails || []).map((booking: any) => ({
+                      selectedDate: booking.selectedDate,
+                      selectedTime: booking.selectedTime,
+                      teacher: booking.teacher,
+                      dayOfWeek: booking.dayOfWeek,
+                      serviceType: booking.serviceType,
+                      venue: booking.venue,
+                      scheduleSlotId: booking.scheduleSlotId,
+                      packageName: item.name,
+                      packageId: item.id
+                    }))
+                  )}
                   lockedTimeSlots={lockedTimeSlots}
+                  hasMultiplePackages={cartItems.filter(item => item.type === 'package').length > 1}
                 />
               </div>
             )}
