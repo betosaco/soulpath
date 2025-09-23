@@ -1,5 +1,14 @@
 'use client';
 
+/**
+ * @deprecated This component is deprecated. Use MasterBookingFlow instead.
+ * 
+ * The PackagePurchaseFlow component has been consolidated into MasterBookingFlow.tsx
+ * which provides a unified booking and checkout experience.
+ * 
+ * Migration: Replace usage with MasterBookingFlow component
+ */
+
 import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

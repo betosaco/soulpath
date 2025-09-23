@@ -1,9 +1,7 @@
 'use client';
 
 import React from 'react';
-import { CentralizedHeader } from './CentralizedHeader';
-import { Footer } from './Footer';
-import { CartSidebar } from './CartSidebar';
+import { AppShell } from './AppShell';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -13,6 +11,15 @@ interface AppLayoutProps {
   className?: string;
 }
 
+/**
+ * AppLayout - Legacy wrapper component for backward compatibility
+ * 
+ * This component now simply delegates to the new AppShell component.
+ * It maintains the same interface for existing pages while centralizing
+ * the core layout logic in AppShell.
+ * 
+ * @deprecated Consider using AppShell directly for new components
+ */
 export function AppLayout({ 
   children, 
   user = null, 
@@ -20,20 +27,14 @@ export function AppLayout({
   showFooter = true,
   className = "min-h-screen bg-white"
 }: AppLayoutProps) {
-
   return (
-    <div className={`${className} mobile-container mobile-scrollable`}>
-      <CentralizedHeader 
-        user={user} 
-        isAdmin={isAdmin}
-      />
-      
-      <main className="pt-20 mobile-content mobile-scrollable">
-        {children}
-      </main>
-      
-      {showFooter && <Footer />}
-      <CartSidebar />
-    </div>
+    <AppShell 
+      user={user}
+      isAdmin={isAdmin}
+      showFooter={showFooter}
+      className={className}
+    >
+      {children}
+    </AppShell>
   );
 }

@@ -1,5 +1,14 @@
 'use client';
 
+/**
+ * @deprecated This component is deprecated. Use MasterBookingFlow instead.
+ * 
+ * The PackagesBookingFlow component has been consolidated into MasterBookingFlow.tsx
+ * which provides a unified booking and checkout experience.
+ * 
+ * Migration: Replace usage with MasterBookingFlow component
+ */
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {

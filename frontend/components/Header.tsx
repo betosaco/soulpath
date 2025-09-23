@@ -1,5 +1,15 @@
 'use client';
 
+/**
+ * @deprecated This component is deprecated. Use CentralizedHeader instead.
+ * 
+ * The Header component has been consolidated into CentralizedHeader.tsx
+ * which provides all the same functionality with better organization
+ * and mobile-first responsive design.
+ * 
+ * Migration: Replace imports of Header with CentralizedHeader
+ */
+
 import React, { useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';

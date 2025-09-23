@@ -10,7 +10,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useTranslations, useLanguage } from '@/hooks/useTranslations';
 import { CartIcon } from './CartIcon';
 import { MobileCartToggle } from './MobileCartToggle';
-import { useCart } from '@/lib/cart-context';
+import { useCartUI } from '@/store/appStore';
 
 interface CentralizedHeaderProps {
   user?: { email: string } | null;
@@ -23,7 +23,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
   const router = useRouter();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { setIsCartOpen } = useCart();
+  const { closeCart } = useCartUI();
 
   // Function to check if a route is active
   const isActiveRoute = (route: string) => {
@@ -36,7 +36,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
   // Function to handle menu item clicks - closes both mobile menu and cart
   const handleMenuItemClick = () => {
     setIsMenuOpen(false);
-    setIsCartOpen(false);
+    closeCart();
   };
   
 

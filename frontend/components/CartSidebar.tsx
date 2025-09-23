@@ -3,7 +3,7 @@
 import React from 'react';
 import { XMarkIcon, PlusIcon, MinusIcon, TrashIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
-import { useCart } from '@/lib/cart-context';
+import { useCart, useCartUI } from '@/store/appStore';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CartBookingDetails } from './CartBookingDetails';
@@ -11,17 +11,20 @@ import { toast } from 'sonner';
 
 export function CartSidebar() {
   const {
-    cartItems,
-    addToCart,
+    items: cartItems,
+    addItem,
     updateQuantity,
-    removeFromCart,
+    removeItem,
     removeBookingDetails,
     removeBookingFromPackage,
     clearCart,
-    getTotalPrice,
-    isCartOpen,
-    setIsCartOpen
+    getTotalPrice
   } = useCart();
+  
+  const {
+    isCartOpen,
+    closeCart
+  } = useCartUI();
 
   const totalPrice = getTotalPrice();
   
@@ -45,7 +48,7 @@ export function CartSidebar() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="fixed inset-0 bg-black bg-opacity-50 z-50"
-            onClick={() => setIsCartOpen(false)}
+            onClick={() => closeCart()}
           />
           
           {/* Sidebar */}
@@ -80,7 +83,7 @@ export function CartSidebar() {
               )}
             </div>
             <button
-              onClick={() => setIsCartOpen(false)}
+              onClick={() => closeCart()}
               className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
             >
               <XMarkIcon className="h-5 w-5" />
@@ -200,7 +203,7 @@ export function CartSidebar() {
                             <PlusIcon className="h-4 w-4" />
                           </button>
                           <button
-                            onClick={() => removeFromCart(item.id)}
+                            onClick={() => removeItem(item.id)}
                             className="p-1 text-red-400 hover:text-red-600 transition-colors ml-2"
                           >
                             <TrashIcon className="h-4 w-4" />
@@ -319,7 +322,7 @@ export function CartSidebar() {
                             sessionStorage.setItem('addingToPackageId', packageItems[0].id);
                             console.log('🔍 Single package - setting addingToPackageId:', packageItems[0].id);
                           }
-                          setIsCartOpen(false);
+                          closeCart();
                         } else {
                           // Not on schedule page - set up session storage and navigate
                           console.log('🔍 Not on schedule page - setting up navigation to /schedule');
@@ -337,7 +340,7 @@ export function CartSidebar() {
                           }
                           // Navigate to schedule page
                           console.log('🔍 Closing cart and navigating to /schedule');
-                          setIsCartOpen(false);
+                          closeCart();
                           
                           // Use multiple navigation methods to ensure it works
                           try {
@@ -391,7 +394,7 @@ export function CartSidebar() {
                       sessionStorage.removeItem('selectedPackageForBooking');
                     }
                     // Close sidecart when proceeding to checkout
-                    setIsCartOpen(false);
+                    closeCart();
                   }}
                 >
                   Proceed to Checkout

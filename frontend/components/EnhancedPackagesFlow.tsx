@@ -20,7 +20,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { EnhancedSchedule } from './EnhancedSchedule';
-import { usePackages, PackagePrice } from '@/hooks/usePackages';
+import { usePackages, PackagePrice } from '@/hooks/usePackagesQuery';
 
 interface PackageInstance extends PackagePrice {
   instanceId: string;
@@ -28,7 +28,7 @@ interface PackageInstance extends PackagePrice {
 }
 import { useLanguage, useTranslations } from '@/hooks/useTranslations';
 import { toast } from 'sonner';
-import { useCart } from '@/lib/cart-context';
+import { useCart } from '@/store/appStore';
 
 interface Teacher {
   id: number;
@@ -85,11 +85,12 @@ interface BookingStep {
 }
 
 export function EnhancedPackagesFlow() {
-  const { packages, loading: packagesLoading, error: packagesError } = usePackages('PEN');
+  const { data: packages, isLoading: packagesLoading, error: packagesError } = usePackages('PEN');
   
   const { language } = useLanguage();
   const { t } = useTranslations(undefined, language);
-  const { addToCart, cartItems, removeFromCart, updateQuantity, setIsCartOpen } = useCart();
+  const { addItem, items: cartItems, removeItem, updateQuantity } = useCart();
+  const { openCart } = useCartUI();
   // Get packages from cart
   const cartPackages = cartItems.filter(item => item.type === 'package');
 
@@ -177,7 +178,7 @@ export function EnhancedPackagesFlow() {
     // This allows multiple packages of the same type to be treated separately
     const uniqueId = `${pkg.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
-    addToCart({
+    addItem({
       id: uniqueId,
       name: pkg.packageDefinition.name,
       price: Number(pkg.price),
@@ -213,14 +214,12 @@ export function EnhancedPackagesFlow() {
       }
       localStorage.setItem('isCartOpen', 'true');
     }
-    if (setIsCartOpen) {
-      setIsCartOpen(true);
-    }
+    openCart();
     window.location.href = '/schedule';
   };
 
   const handleRemovePackage = (packageId: string) => {
-    removeFromCart(packageId);
+    removeItem(packageId);
     toast.success('Package removed from cart');
   };
 
@@ -266,9 +265,7 @@ export function EnhancedPackagesFlow() {
         if (typeof window !== 'undefined') {
           localStorage.setItem('isCartOpen', 'true');
         }
-        if (setIsCartOpen) {
-          setIsCartOpen(true);
-        }
+        openCart();
         window.location.href = '/checkout';
         return;
       }
@@ -317,9 +314,7 @@ export function EnhancedPackagesFlow() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('isCartOpen', 'true');
     }
-    if (setIsCartOpen) {
-      setIsCartOpen(true);
-    }
+    openCart();
     window.location.href = '/checkout';
   };
 

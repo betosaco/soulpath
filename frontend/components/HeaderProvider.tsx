@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useLanguage } from '@/hooks/useTranslations';
-import { Header } from './Header';
+import { CentralizedHeader } from './CentralizedHeader';
 
 interface HeaderContextType {
   isMenuOpen: boolean;
@@ -97,13 +97,7 @@ export function HeaderProvider({
 
   return (
     <HeaderContext.Provider value={contextValue}>
-      <Header
-        language={language}
-        setLanguage={setLanguage}
-        scrollToSection={scrollToSection}
-        t={{} as Record<string, string | Record<string, string>>}
-        isMenuOpen={isMenuOpen}
-        setIsMenuOpen={setIsMenuOpen}
+      <CentralizedHeader
         user={user}
         isAdmin={isAdmin}
       />
