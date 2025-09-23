@@ -1501,8 +1501,11 @@ export function ScheduleBookingFlow({
                               onClick={() => {
                                 if (addToCart) {
                                   // Create package with schedule information using formData.selectedSchedule
+                                  // Always create new package item with unique ID (no merging)
+                                  // This allows multiple packages of the same type to be treated separately
+                                  const uniqueId = `${pkg.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
                                   const packageData = {
-                                    id: pkg.id.toString(),
+                                    id: uniqueId,
                                     name: pkg.packageDefinition.name,
                                     price: pkg.price,
                                     image: '/images/products/yoga-journal-1.jpg',
