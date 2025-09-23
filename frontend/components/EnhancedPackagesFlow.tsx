@@ -384,9 +384,20 @@ export function EnhancedPackagesFlow() {
               exit={{ opacity: 0, x: -20 }}
               className="max-w-6xl mx-auto mobile-step-content"
             >
-              <div className="text-center mb-8">
+              {/* Mobile: Show packages at top, then header */}
+              <div className="block sm:hidden">
+                {/* Packages will be shown here first on mobile */}
+              </div>
+
+              <div className="text-center mb-8 hidden sm:block">
                 <h2 className="text-3xl font-bold text-primary mb-4">Select Your Packages</h2>
                 <p className="text-xl text-muted">Add multiple packages to your cart</p>
+              </div>
+
+              {/* Mobile Header */}
+              <div className="text-center mb-6 sm:hidden">
+                <h2 className="text-2xl font-bold text-primary mb-2">Select Your Package</h2>
+                <p className="text-lg text-muted">Choose the package that best fits your needs</p>
               </div>
 
               {/* Cart Summary */}
@@ -412,18 +423,123 @@ export function EnhancedPackagesFlow() {
               )}
 
 
-              {packagesLoading ? (
-                <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                  <p className="text-gray-600 text-lg">Loading packages...</p>
-                </div>
-              ) : packagesError ? (
-                <div className="text-center py-12">
-                  <AlertCircle className="w-8 h-8 mx-auto mb-4 text-red-500" />
-                  <p className="text-red-600 text-lg mb-4">Error loading packages: {packagesError}</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mobile-grid-responsive">
+              {/* Mobile: Show packages first, then loading/error states */}
+              <div className="block sm:hidden">
+                {packagesLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-3"></div>
+                    <p className="text-gray-600">Loading packages...</p>
+                  </div>
+                ) : packagesError ? (
+                  <div className="text-center py-8">
+                    <AlertCircle className="w-6 h-6 mx-auto mb-3 text-red-500" />
+                    <p className="text-red-600 text-sm mb-4">Error loading packages: {packagesError}</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-4 mobile-grid-responsive">
+                    {packages.map((pkg) => {
+                      const cartItem = cartPackages.find(item => item.id === pkg.id.toString());
+                      const isInCart = !!cartItem;
+                      
+                      return (
+                        <Card key={pkg.id} className="card-base card-hover hover-scale">
+                          <CardHeader className="text-center">
+                            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                              <Package className="w-8 h-8 text-white" />
+                            </div>
+                            <CardTitle className="text-2xl text-primary">
+                              {pkg.packageDefinition.name}
+                            </CardTitle>
+                            <div className="text-3xl font-bold text-black">
+                              {pkg.currency.symbol}{pkg.price}
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <p className="text-muted mb-4 text-center">
+                              {pkg.packageDefinition.description}
+                            </p>
+                            <div className="space-y-3 mb-6">
+                              <div className="flex items-center text-sm">
+                                <Users className="w-4 h-4 mr-2 text-primary" />
+                                <span className="text-muted">{pkg.packageDefinition.sessionsCount} Sessions</span>
+                              </div>
+                              <div className="flex items-center text-sm">
+                                <Clock className="w-4 h-4 mr-2 text-primary" />
+                                <span className="text-muted">{pkg.packageDefinition.sessionDuration.duration_minutes === 60 ? '1 hour' : `${pkg.packageDefinition.sessionDuration.duration_minutes} minutes`} each</span>
+                              </div>
+                              <div className="flex items-center text-sm">
+                                <Calendar className="w-4 h-4 mr-2 text-primary" />
+                                <span className="text-muted">Valid for 30 days</span>
+                              </div>
+                              <div className="flex items-center text-sm">
+                                <Star className="w-4 h-4 mr-2 text-primary" />
+                                <span className="text-muted">Personalized guidance</span>
+                              </div>
+                            </div>
+                            
+                            {isInCart ? (
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-center space-x-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleRemovePackage(pkg.id.toString())}
+                                    className="h-8 w-8 p-0"
+                                  >
+                                    <Minus className="w-3 h-3" />
+                                  </Button>
+                                  <span className="text-sm font-medium min-w-[2rem] text-center">
+                                    {cartItem.quantity}
+                                  </span>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleUpdateQuantity(pkg.id.toString(), (cartItem.quantity || 1) + 1)}
+                                    className="h-8 w-8 p-0"
+                                  >
+                                    <Plus className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleRemovePackage(pkg.id.toString())}
+                                  className="w-full text-xs"
+                                >
+                                  Remove from Cart
+                                </Button>
+                              </div>
+                            ) : (
+                              <Button
+                                onClick={() => handleAddPackage(pkg)}
+                                className="w-full bg-[#6ea058] hover:bg-[#5a8a47] text-white"
+                              >
+                                <Plus className="w-4 h-4 mr-2" />
+                                Add to Cart
+                              </Button>
+                            )}
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Desktop: Show loading/error states first, then packages */}
+              <div className="hidden sm:block">
+                {packagesLoading ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="text-gray-600 text-lg">Loading packages...</p>
+                  </div>
+                ) : packagesError ? (
+                  <div className="text-center py-12">
+                    <AlertCircle className="w-8 h-8 mx-auto mb-4 text-red-500" />
+                    <p className="text-red-600 text-lg mb-4">Error loading packages: {packagesError}</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {packages.map((pkg) => {
                     const cartItem = cartPackages.find(item => item.id === pkg.id.toString());
                     const isInCart = !!cartItem;
@@ -507,6 +623,7 @@ export function EnhancedPackagesFlow() {
                   })}
                 </div>
               )}
+              </div>
             </motion.div>
           )}
 

@@ -27,6 +27,8 @@ import { useLanguage, useTranslations } from '@/hooks/useTranslations';
 import { toast } from 'sonner';
 import { validateEmailWithMessage } from '@/lib/email-validation';
 import { AppLayout } from '@/components/AppLayout';
+import { CentralizedHeader } from '@/components/CentralizedHeader';
+import { CartSidebar } from '@/components/CartSidebar';
 import { countries } from '@/lib/countries';
 import { CartBookingDetails } from '@/components/CartBookingDetails';
 import { useCart, CartItem } from '@/lib/cart-context';
@@ -34,12 +36,6 @@ import { EnhancedSchedule } from './EnhancedSchedule';
 import { TermsAndConditionsModal } from './TermsAndConditionsModal';
 import { PrivacyPolicyModal } from './PrivacyPolicyModal';
 
-interface BookingStep {
-  id: string;
-  title: string;
-  description: string;
-  completed: boolean;
-}
 
 interface Teacher {
   id: number;
@@ -106,7 +102,7 @@ function UnifiedCheckoutFlowContent({
     return <div>Loading...</div>;
   }
   
-  const { cartItems, requiresAddress, clearCart, addToCart, updateQuantity, removeFromCart } = cartContext;
+  const { cartItems, requiresAddress, clearCart, addToCart, updateQuantity, removeFromCart, setIsCartOpen } = cartContext;
   const [currentStep, setCurrentStep] = useState(0);
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [countrySearchTerm, setCountrySearchTerm] = useState('');
@@ -440,75 +436,6 @@ function UnifiedCheckoutFlowContent({
     return typeof value === 'string' ? value : fallback;
   }, [t]);
 
-  const steps: BookingStep[] = React.useMemo(() => {
-    const baseSteps = [];
-    
-    // Check if there are packages in the cart
-    const hasPackages = cartItems.some(item => item.type === 'package');
-    const packageCount = cartItems.filter(item => item.type === 'package').length;
-    
-    // If there are packages and no schedule data yet, add schedule selection step
-    if (hasPackages && !scheduleData) {
-      baseSteps.push({ 
-        id: 'schedule', 
-        title: getTranslation('bookingFlow.selectSchedule', 'Select Schedule'), 
-        description: getTranslation('bookingFlow.selectScheduleDesc', 'Choose your preferred date and time'), 
-        completed: false 
-      });
-    }
-    
-    // If there are multiple packages and no package selected yet, add package selection step
-    if (packageCount > 1 && !selectedPackageForBooking) {
-      baseSteps.push({ 
-        id: 'package-selection', 
-        title: getTranslation('bookingFlow.selectPackageForBooking', 'Choose Package for Booking'), 
-        description: getTranslation('bookingFlow.selectPackageForBookingDesc', 'Select which package to use for this booking'), 
-        completed: false 
-      });
-    }
-    
-    // If there are multiple packages OR a single package with quantity > 1, add group booking step
-    const totalPackageQuantity = cartItems
-      .filter(item => item.type === 'package')
-      .reduce((sum, item) => sum + (item.quantity || 1), 0);
-    
-    if (packageCount > 1 || totalPackageQuantity > 1) {
-      baseSteps.push({ 
-        id: 'group-booking', 
-        title: 'Group Booking', 
-        description: 'Is this a group booking? Each person will need their own information', 
-        completed: false 
-      });
-    }
-    
-    // Always add personal information step
-    baseSteps.push({ 
-      id: 'personal', 
-      title: getTranslation('bookingFlow.personalInfo', 'Personal Information'), 
-      description: getTranslation('bookingFlow.personalInfoDesc', 'Provide your contact details'), 
-      completed: false 
-    });
-    
-    // Add address step if required
-    if (requiresAddress()) {
-      baseSteps.push({ 
-        id: 'address', 
-        title: 'Shipping Address', 
-        description: 'Enter your delivery information', 
-        completed: false 
-      });
-    }
-    
-    // Always add order summary step
-    baseSteps.push({ 
-      id: 'summary', 
-      title: 'Order Summary', 
-      description: 'Review your order and complete payment', 
-      completed: false 
-    });
-    
-    return baseSteps;
-  }, [getTranslation, requiresAddress, cartItems, scheduleData, selectedPackageForBooking]);
 
   // Close dropdown when clicking outside and prevent page scroll
   useEffect(() => {
@@ -560,6 +487,14 @@ function UnifiedCheckoutFlowContent({
         serviceType: slot.serviceType,
         venue: slot.venue
       }));
+    }
+    
+    // Open the cart when schedule is selected
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('isCartOpen', 'true');
+    }
+    if (setIsCartOpen) {
+      setIsCartOpen(true);
     }
     
     // If user is editing schedule from order summary, go straight back to order summary
@@ -931,14 +866,18 @@ function UnifiedCheckoutFlowContent({
   // Show loading state while cart is being loaded
   if (isCartLoading) {
     return (
-      <AppLayout className="min-h-screen bg-white">
-        <div className="min-h-screen flex items-center justify-center bg-white">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading checkout...</p>
+      <div className="min-h-screen bg-white">
+        <CentralizedHeader user={null} isAdmin={false} />
+        <main className="pt-20 mobile-content mobile-scrollable">
+          <div className="min-h-screen flex items-center justify-center bg-white">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading checkout...</p>
+            </div>
           </div>
-        </div>
-      </AppLayout>
+        </main>
+        <CartSidebar />
+      </div>
     );
   }
 
@@ -947,80 +886,56 @@ function UnifiedCheckoutFlowContent({
   const hasScheduleData = typeof window !== 'undefined' && sessionStorage.getItem('selectedSchedule');
   if (cartItems.length === 0 && !isRedirecting && !hasScheduleData) {
     return (
-      <AppLayout className="min-h-screen bg-white">
-        <div className="min-h-screen flex items-center justify-center bg-white">
-          <div className="text-center">
-            <ShoppingCart className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Your cart is empty</h1>
-            <p className="text-gray-600 mb-4">Add some items to your cart to proceed with checkout.</p>
-            <Button
-              onClick={() => window.location.href = '/products'}
-              className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors"
-            >
-              Continue Shopping
-            </Button>
+      <div className="min-h-screen bg-white">
+        <CentralizedHeader user={null} isAdmin={false} />
+        <main className="pt-20 mobile-content mobile-scrollable">
+          <div className="min-h-screen flex items-center justify-center bg-white">
+            <div className="text-center">
+              <ShoppingCart className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">Your cart is empty</h1>
+              <p className="text-gray-600 mb-4">Add some items to your cart to proceed with checkout.</p>
+              <Button
+                onClick={() => window.location.href = '/products'}
+                className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors"
+              >
+                Continue Shopping
+              </Button>
+            </div>
           </div>
-        </div>
-      </AppLayout>
+        </main>
+        <CartSidebar />
+      </div>
     );
   }
 
   // Show loading state when redirecting after order completion
   if (isRedirecting) {
-  return (
-      <AppLayout className="min-h-screen bg-white">
-        <div className="min-h-screen flex items-center justify-center bg-white">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Processing your order...</h1>
-            <p className="text-gray-600">Please wait while we redirect you to your order confirmation.</p>
+    return (
+      <div className="min-h-screen bg-white">
+        <CentralizedHeader user={null} isAdmin={false} />
+        <main className="pt-20 mobile-content mobile-scrollable">
+          <div className="min-h-screen flex items-center justify-center bg-white">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">Processing your order...</h1>
+              <p className="text-gray-600">Please wait while we redirect you to your order confirmation.</p>
+            </div>
           </div>
-        </div>
-      </AppLayout>
+        </main>
+        <CartSidebar />
+      </div>
     );
   }
 
   return (
-    <AppLayout className="min-h-screen bg-white mobile-container mobile-scrollable">
-      {/* Progress Steps */}
-      <div className="bg-gray-50 py-6 mobile-content mobile-scrollable">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-center">
-            <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-4 overflow-x-auto max-w-full">
-              {steps.map((step, index) => (
-                <div key={step.id} className="flex items-center flex-shrink-0">
-                  <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 ${
-                    currentStep >= index 
-                      ? 'bg-primary border-primary text-white' 
-                      : 'border-gray-400 text-gray-400'
-                  }`}>
-                    {currentStep > index ? (
-                      <CheckCircle className="w-4 h-4 sm:w-6 sm:h-6" />
-                    ) : (
-                      <span className="font-semibold text-xs sm:text-sm">{index + 1}</span>
-                    )}
-                  </div>
-                  <div className="ml-2 sm:ml-3 hidden sm:block">
-                    <p className={`font-semibold text-sm ${
-                      currentStep >= index ? 'text-primary' : 'text-gray-400'
-                    }`}>
-                      {step.title}
-                    </p>
-                    <p className="text-xs text-gray-500">{step.description}</p>
-                  </div>
-                  {index < steps.length - 1 && (
-                    <ArrowRight className="w-3 h-3 sm:w-5 sm:h-5 text-gray-400 mx-1 sm:mx-2 md:mx-4" />
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Step Content */}
-      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8 mobile-step-container mobile-content mobile-scrollable">
-        <AnimatePresence mode="wait">
+    <div className="mobile-form-viewport bg-white">
+      <CentralizedHeader user={null} isAdmin={false} />
+      <main className="pt-20 mobile-content mobile-scrollable">
+        <div className="mobile-form-content">
+          <div className="w-full max-w-4xl mx-auto">
+            {/* Step Content */}
+            <div className="mobile-form-scrollable w-full">
+            <AnimatePresence mode="wait">
           {/* Step 1: Schedule Selection (only if packages in cart, no schedule data, and not direct checkout, OR when editing schedule) */}
           {(() => {
             const shouldShowSchedule = currentStep === 0 && cartItems.some(item => item.type === 'package') && (isEditingSchedule || !scheduleData) && !isDirectCheckout;
@@ -1155,7 +1070,7 @@ function UnifiedCheckoutFlowContent({
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="max-w-2xl mx-auto mobile-step-content mobile-form-container"
+              className="w-full max-w-2xl mx-auto mobile-form-container"
             >
               <Card className="card-base">
                 <CardHeader>
@@ -2571,8 +2486,11 @@ function UnifiedCheckoutFlowContent({
               </div>
             </motion.div>
           )}
-        </AnimatePresence>
-      </div>
+            </AnimatePresence>
+          </div>
+          </div>
+        </div>
+      </main>
 
       {/* Conflict Resolution Modal */}
       {showConflictResolution && (
@@ -2775,7 +2693,8 @@ function UnifiedCheckoutFlowContent({
         }}
         allowClose={true}
       />
-    </AppLayout>
+      <CartSidebar />
+    </div>
   );
 }
 

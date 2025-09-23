@@ -1648,6 +1648,78 @@ section {
   overflow: hidden;
 }
 
+/* Mobile form container that fits within viewport without scrolling - Mobile only */
+@media (max-width: 767px) {
+  .mobile-form-viewport {
+    height: 100vh;
+    height: 100svh;
+    height: calc(var(--vh, 1vh) * 100);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .mobile-form-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+/* Desktop styles for mobile-form-viewport */
+@media (min-width: 768px) {
+  .mobile-form-viewport {
+    min-height: 100vh;
+    display: block;
+    position: relative;
+  }
+
+  .mobile-form-content {
+    display: block;
+    padding: 2rem;
+  }
+}
+
+.mobile-form-scrollable {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Additional mobile viewport utilities */
+.mobile-no-scroll {
+  overflow: hidden !important;
+  height: 100vh !important;
+  height: 100svh !important;
+  height: calc(var(--vh, 1vh) * 100) !important;
+}
+
+.mobile-fit-content {
+  max-height: 100vh !important;
+  max-height: 100svh !important;
+  max-height: calc(var(--vh, 1vh) * 100) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.mobile-center-content {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 100vh !important;
+  min-height: 100svh !important;
+  min-height: calc(var(--vh, 1vh) * 100) !important;
+}
+
 .safe-padding {
   padding-left: max(1rem, env(safe-area-inset-left));
   padding-right: max(1rem, env(safe-area-inset-right));
@@ -1826,6 +1898,16 @@ html, body {
     width: 100vw !important;
     height: 100vh !important;
     overflow: hidden !important;
+  }
+
+  /* Ensure mobile form viewport works on tablets too - but not desktop */
+  @media (max-width: 1024px) {
+    .mobile-form-viewport {
+      height: 100vh !important;
+      height: 100svh !important;
+      height: calc(var(--vh, 1vh) * 100) !important;
+      overflow: hidden !important;
+    }
   }
   
   /* Hero section mobile optimization */
@@ -2722,37 +2804,55 @@ html, body {
     align-items: center !important;
   }
   
-  /* Mobile checkout form centering */
+  /* Mobile checkout form centering - Updated for viewport fit - Mobile only */
   .mobile-step-container {
+    height: 100vh !important;
+    height: 100svh !important;
+    height: calc(var(--vh, 1vh) * 100) !important;
+    overflow: hidden !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    justify-content: flex-start !important;
-    min-height: 100vh;
-    min-height: 100svh;
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+    justify-content: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
   
   .mobile-step-content {
     width: 100% !important;
     max-width: 100% !important;
-    margin: 0 auto !important;
+    height: 100% !important;
+    margin: 0 !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
+    justify-content: center !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 1rem !important;
   }
   
   .mobile-form-container {
     width: 100% !important;
     max-width: 100% !important;
-    padding: 0 1rem !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 0 !important;
+    flex: 1 !important;
   }
   
   .mobile-form-container .card-base {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
+    max-height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
   }
 
   /* Mobile-specific animations */

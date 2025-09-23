@@ -376,16 +376,8 @@ export function EnhancedSchedule({
   // Debug logging
   console.log('🔍 EnhancedSchedule render - loading:', loading, 'slots:', slots?.length || 0, 'error:', error);
 
-  // Ensure component hydrates properly
-  const [isHydrated, setIsHydrated] = useState(false);
-  
-  useEffect(() => {
-    console.log('🔄 Component hydrated, setting isHydrated to true');
-    setIsHydrated(true);
-  }, []);
-
-  // Show loading state only if not hydrated or actually loading
-  if (!isHydrated || loading) {
+  // Show loading state only if actually loading
+  if (loading) {
     return (
       <div className={`enhanced-schedule ${className} bg-white`}>
         <div className="flex items-center justify-center py-12">

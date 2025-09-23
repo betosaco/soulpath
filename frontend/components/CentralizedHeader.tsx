@@ -9,6 +9,7 @@ import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
 import { useTranslations, useLanguage } from '@/hooks/useTranslations';
 import { CartIcon } from './CartIcon';
+import { MobileCartToggle } from './MobileCartToggle';
 import { useCart } from '@/lib/cart-context';
 
 interface CentralizedHeaderProps {
@@ -217,6 +218,11 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
             >
               ES
             </button>
+          </div>
+
+          {/* Mobile Cart Toggle Button */}
+          <div className="flex sm:hidden items-center space-x-2">
+            <MobileCartToggle />
           </div>
 
           {/* Mobile Menu Button */}

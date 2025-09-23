@@ -6,13 +6,22 @@ import { ScheduleBookingFlow } from '@/components/ScheduleBookingFlow';
 
 export default function SchedulePage() {
   const [currentStartDate, setCurrentStartDate] = useState<Date>(() => {
-    // Initialize with September 22, 2025 (Monday) - local time
-    return new Date(2025, 8, 22, 0, 0, 0, 0); // September 22, 2025 at midnight local time
+    // Initialize with current week's Monday
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Sunday = 0, so go back 6 days to get Monday
+    const monday = new Date(today);
+    monday.setDate(today.getDate() + mondayOffset);
+    monday.setHours(0, 0, 0, 0);
+    return monday;
   });
 
   const [currentEndDate, setCurrentEndDate] = useState<Date>(() => {
-    // Initialize with September 28, 2025 (Sunday) - local time
-    return new Date(2025, 8, 28, 23, 59, 59, 999); // September 28, 2025 at 11:59:59 PM local time
+    // Initialize with current week's Sunday
+    const sunday = new Date(currentStartDate);
+    sunday.setDate(currentStartDate.getDate() + 6);
+    sunday.setHours(23, 59, 59, 999);
+    return sunday;
   });
 
   const [totalSlots, setTotalSlots] = useState(0);
@@ -49,7 +58,7 @@ export default function SchedulePage() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Schedule Content - Week from September 22 to 28 */}
           <ScheduleBookingFlow

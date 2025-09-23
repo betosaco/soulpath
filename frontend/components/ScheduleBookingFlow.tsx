@@ -12,6 +12,10 @@ import {
   CheckCircle,
   AlertCircle,
   Users,
+  Star,
+  Plus,
+  Minus,
+  X,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -82,12 +86,6 @@ interface BookingFormData {
   notes: string;
 }
 
-interface BookingStep {
-  id: string;
-  title: string;
-  description: string;
-  completed: boolean;
-}
 
 interface ScheduleBookingFlowProps {
   startDate?: Date;
@@ -251,9 +249,9 @@ const handleDuplicateScheduleConflict = (conflictingBookings: any[], setIsGroupB
 };
 
 
-export function ScheduleBookingFlow({ 
-  startDate, 
-  endDate, 
+export function ScheduleBookingFlow({
+  startDate,
+  endDate,
   onSlotsChange,
   onStepChange
 }: ScheduleBookingFlowProps = {}) {
@@ -586,12 +584,6 @@ export function ScheduleBookingFlow({
     return typeof current === 'string' ? current : fallback;
   }, [t]);
 
-  const steps: BookingStep[] = React.useMemo(() => [
-    { id: 'schedule', title: getTranslation('bookingFlow.selectSchedule', 'Select Schedule'), description: getTranslation('bookingFlow.selectScheduleDesc', 'Choose your preferred date and time'), completed: false },
-    { id: 'groupBooking', title: 'Booking Type', description: 'Choose between group or individual booking', completed: false },
-    { id: 'package', title: getTranslation('bookingFlow.selectPackage', 'Select Package'), description: getTranslation('bookingFlow.selectPackageDesc', 'Choose the package that best fits your needs'), completed: false },
-    { id: 'customer', title: 'Customer Information', description: 'Provide your contact and billing details', completed: false }
-  ], [getTranslation]);
 
 
   const handleScheduleSelect = (slot: ScheduleSlot) => {
@@ -1275,47 +1267,10 @@ export function ScheduleBookingFlow({
 
 
 
-
   return (
     <div className="min-h-screen bg-white">
-      {/* Progress Steps */}
-      <div className="bg-gray-50 py-6">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-center">
-            <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-4 overflow-x-auto max-w-full">
-              {steps.map((step, index) => (
-                <div key={step.id} className="flex items-center flex-shrink-0">
-                  <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 ${
-                    currentStep >= index 
-                      ? 'bg-primary border-primary text-white' 
-                      : 'border-gray-400 text-gray-400'
-                  }`}>
-                    {currentStep > index ? (
-                      <CheckCircle className="w-4 h-4 sm:w-6 sm:h-6" />
-                    ) : (
-                      <span className="font-semibold text-xs sm:text-sm">{index + 1}</span>
-                    )}
-                  </div>
-                  <div className="ml-2 sm:ml-3 hidden sm:block">
-                    <p className={`font-semibold text-sm ${
-                      currentStep >= index ? 'text-primary' : 'text-gray-400'
-                    }`}>
-                      {step.title}
-                    </p>
-                    <p className="text-xs text-gray-500">{step.description}</p>
-                  </div>
-                  {index < steps.length - 1 && (
-                    <ArrowRight className="w-3 h-3 sm:w-5 sm:h-5 text-gray-400 mx-1 sm:mx-2 md:mx-4" />
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Step Content */}
-      <div className="container mx-auto px-4 py-8 mobile-step-container">
+      <div className="container mx-auto px-4 pb-8 mobile-step-container">
         <AnimatePresence mode="wait">
           {/* Step 1: Schedule Selection */}
           {currentStep === 0 && (
@@ -1364,13 +1319,6 @@ export function ScheduleBookingFlow({
                   <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                     <p className="text-sm text-blue-800">
                       You're editing the schedule for your package. Select a new time slot to update your booking.
-                    </p>
-                  </div>
-                )}
-                {editingPackageId && !isEditingSchedule && (
-                  <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <p className="text-sm text-green-800">
-                      You're adding more classes to your package. Select additional time slots to book more sessions.
                     </p>
                   </div>
                 )}
@@ -1588,7 +1536,7 @@ export function ScheduleBookingFlow({
           {/* Step 3: Package Selection */}
           {currentStep === 2 && (
             <motion.div
-              key="package"
+              key="packageSelection"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
@@ -1601,7 +1549,7 @@ export function ScheduleBookingFlow({
 
               {packagesLoading ? (
                 <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-400 mx-auto mb-4"></div>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
                   <p className="text-gray-600 text-lg">Loading packages...</p>
                 </div>
               ) : packagesError ? (
@@ -1610,413 +1558,167 @@ export function ScheduleBookingFlow({
                   <p className="text-red-600 text-lg mb-4">Error loading packages: {packagesError}</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mobile-grid-responsive">
-                  {packages.map((pkg) => (
-                    <Card key={pkg.id} className="card-base card-hover hover-scale">
-                      <CardHeader className="text-center">
-                        <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                          <Package className="w-8 h-8 text-white" />
-                        </div>
-                        <CardTitle className="text-2xl text-primary">
-                          {pkg.packageDefinition.name}
-                        </CardTitle>
-                        <div className="text-3xl font-bold text-black">
-                          {pkg.currency.symbol}{pkg.price}
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-muted mb-6 text-center">
-                          {pkg.packageDefinition.description}
-                        </p>
-                        <div className="space-y-3 mb-6">
-                          <div className="flex items-center text-sm">
-                            <Users className="w-4 h-4 mr-2 text-primary" />
-                            <span className="text-muted">{pkg.packageDefinition.sessionsCount} Sessions</span>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {packages.map((pkg) => {
+                    const isInCart = cartContext?.cartItems?.some(item => item.id === pkg.id.toString());
+                    const cartItem = cartContext?.cartItems?.find(item => item.id === pkg.id.toString());
+
+                    return (
+                      <Card key={pkg.id} className="card-base card-hover hover-scale">
+                        <CardHeader className="text-center">
+                          <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Package className="w-8 h-8 text-white" />
                           </div>
-                          <div className="flex items-center text-sm">
-                            <Clock className="w-4 h-4 mr-2 text-primary" />
-                            <span className="text-muted">{pkg.packageDefinition.sessionDuration.duration_minutes === 60 ? '1 hour' : `${pkg.packageDefinition.sessionDuration.duration_minutes} minutes`} each</span>
+                          <CardTitle className="text-2xl text-primary">
+                            {pkg.packageDefinition.name}
+                          </CardTitle>
+                          <div className="text-3xl font-bold text-black">
+                            {pkg.currency.symbol}{pkg.price}
                           </div>
-                          <div className="flex items-center text-sm">
-                            <Calendar className="w-4 h-4 mr-2 text-primary" />
-                            <span className="text-muted">Valid for 30 days</span>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-muted mb-4 text-center">
+                            {pkg.packageDefinition.description}
+                          </p>
+                          <div className="space-y-3 mb-6">
+                            <div className="flex items-center text-sm">
+                              <Users className="w-4 h-4 mr-2 text-primary" />
+                              <span className="text-muted">{pkg.packageDefinition.sessionsCount} Sessions</span>
+                            </div>
+                            <div className="flex items-center text-sm">
+                              <Clock className="w-4 h-4 mr-2 text-primary" />
+                              <span className="text-muted">{pkg.packageDefinition.sessionDuration.duration_minutes === 60 ? '1 hour' : `${pkg.packageDefinition.sessionDuration.duration_minutes} minutes`} each</span>
+                            </div>
+                            <div className="flex items-center text-sm">
+                              <Calendar className="w-4 h-4 mr-2 text-primary" />
+                              <span className="text-muted">Valid for 30 days</span>
+                            </div>
+                            <div className="flex items-center text-sm">
+                              <Star className="w-4 h-4 mr-2 text-primary" />
+                              <span className="text-muted">Personalized guidance</span>
+                            </div>
                           </div>
-                          <div className="flex items-center text-sm">
-                            <User className="w-4 h-4 mr-2 text-primary" />
-                            <span className="text-muted">Personalized guidance</span>
-                          </div>
-                        </div>
-                        <Button
-                          onClick={() => handlePackageSelect(pkg)}
-                          className="w-full bg-[#6ea058] hover:bg-[#5a8a47] text-white"
-                        >
-                          {getTranslation('bookingFlow.selectPackage', 'Select Package')}
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
+                          {isInCart ? (
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-center space-x-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => cartContext?.updateQuantity?.(pkg.id.toString(), cartItem.quantity - 1)}
+                                >
+                                  <Minus className="w-4 h-4" />
+                                </Button>
+                                <span className="font-semibold">{cartItem.quantity}</span>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => cartContext?.updateQuantity?.(pkg.id.toString(), cartItem.quantity + 1)}
+                                >
+                                  <Plus className="w-4 h-4" />
+                                </Button>
+                              </div>
+                              <Button
+                                onClick={() => cartContext?.removeFromCart?.(pkg.id.toString())}
+                                variant="destructive"
+                                className="w-full"
+                              >
+                                <X className="w-4 h-4 mr-2" />
+                                Remove from Cart
+                              </Button>
+                            </div>
+                          ) : (
+                            <Button
+                              onClick={() => {
+                                if (addToCart) {
+                                  // Create package with schedule information using formData.selectedSchedule
+                                  const packageData = {
+                                    id: pkg.id.toString(),
+                                    name: pkg.packageDefinition.name,
+                                    price: pkg.price,
+                                    image: '/images/products/yoga-journal-1.jpg',
+                                    sku: `PKG-${pkg.id}`,
+                                    currency: pkg.currency?.code || 'PEN',
+                                    type: 'package',
+                                    sessions: pkg.packageDefinition.sessionsCount,
+                                    duration: pkg.packageDefinition.sessionDuration?.duration_minutes,
+                                    packageType: pkg.packageDefinition.packageType,
+                                    maxGroupSize: pkg.packageDefinition.maxGroupSize,
+                                    bookingDetails: formData.selectedSchedule ? [{
+                                      selectedDate: formData.selectedSchedule.date,
+                                      selectedTime: formData.selectedSchedule.time,
+                                      teacher: formData.selectedSchedule.teacher?.name,
+                                      dayOfWeek: formData.selectedSchedule.dayOfWeek,
+                                      serviceType: formData.selectedSchedule.serviceType?.name,
+                                      venue: formData.selectedSchedule.venue?.name,
+                                      scheduleSlotId: formData.selectedSchedule.id
+                                    }] : undefined
+                                  };
+
+                                  addToCart(packageData);
+                                  
+                                  // Show success message
+                                  toast.success(`${pkg.packageDefinition.name} added to cart${formData.selectedSchedule ? ' with selected schedule' : ''}`);
+                                  
+                                  // Open cart to show both schedule and package
+                                  if (setIsCartOpen) {
+                                    setIsCartOpen(true);
+                                  }
+                                  
+                                  // Go back to schedule page (Step 0) so user can add more packages
+                                  setCurrentStep(0);
+                                  onStepChange?.(0);
+                                }
+                              }}
+                              className="w-full bg-[#6ea058] hover:bg-[#5a8a47] text-white"
+                            >
+                              <Plus className="w-4 h-4 mr-2" />
+                              Add to Cart
+                            </Button>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
               )}
 
-              <div className="flex justify-center mt-8">
-                <button
-                  onClick={() => {
-                    setCurrentStep(0);
-                    onStepChange?.(0);
-                  }}
-                  className="px-8 py-4 text-lg font-medium text-[#6ea058] border-2 border-[#6ea058] rounded-lg hover:bg-[#6ea058] hover:text-white transition-all duration-200 flex items-center"
-                >
-                  <ArrowLeft className="w-5 h-5 mr-2 text-[#6ea058]" />
-                  {getTranslation('bookingFlow.backToSchedule', 'Back to Schedule')}
-                </button>
-              </div>
-            </motion.div>
-          )}
+              {/* Continue to Checkout button */}
+              {cartContext?.cartItems && cartContext.cartItems.length > 0 && (
+                <div className="mt-8 flex justify-center">
+                  <Button
+                    onClick={() => {
+                      // Store customer information in sessionStorage for checkout
+                      if (typeof window !== 'undefined') {
+                        sessionStorage.setItem('customerInfo', JSON.stringify({
+                          clientName: formData.clientName,
+                          clientEmail: formData.clientEmail,
+                          clientPhone: formData.clientPhone,
+                          countryCode: formData.countryCode,
+                          billingDocumentType: formData.billingDocumentType,
+                          dni: formData.dni,
+                          ruc: formData.ruc,
+                          companyName: formData.companyName,
+                          notes: formData.notes
+                        }));
+                      }
 
-          {/* Step 4: Customer Information */}
-          {currentStep === 3 && (
-            <motion.div
-              key="customer"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="max-w-2xl mx-auto mobile-step-content mobile-form-container"
-            >
-              <Card className="card-base">
-                <CardHeader>
-                  <CardTitle 
-                    className="text-2xl text-primary text-center"
-                    style={{ fontFamily: 'var(--font-heading)' }}
+                      // Redirect to checkout page
+                      if (typeof window !== 'undefined') {
+                        window.location.href = '/checkout';
+                      }
+                    }}
+                    className="flex items-center gap-2 h-12 text-lg bg-primary hover:bg-primary/90"
                   >
-                    Personal Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mobile-input-group">
-                    <div>
-                      <Label htmlFor="clientName" className="text-black text-lg font-medium mb-2 block">Full Name *</Label>
-                      <Input
-                        id="clientName"
-                        type="text"
-                        value={formData.clientName}
-                        onChange={(e) => setFormData(prev => ({ ...prev, clientName: e.target.value }))}
-                        className="h-14 px-4 text-lg border-2 border-gray-300 text-black placeholder-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg transition-all duration-200"
-                        placeholder="Enter your full name"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="clientEmail" className="text-black text-lg font-medium mb-2 block">Email Address *</Label>
-                      <Input
-                        id="clientEmail"
-                        type="email"
-                        value={formData.clientEmail}
-                        onChange={(e) => setFormData(prev => ({ ...prev, clientEmail: e.target.value }))}
-                        className="h-14 px-4 text-lg border-2 border-gray-300 text-black placeholder-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg transition-all duration-200"
-                        placeholder="your.email@example.com"
-                        required
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <Label htmlFor="clientPhone" className="text-black text-lg font-medium mb-2 block">Phone Number *</Label>
-                      <div className="flex gap-2 mobile-input-group">
-                        {/* Country Code Dropdown */}
-                        <div className="relative country-dropdown mobile-country-dropdown">
-                          <button
-                            type="button"
-                            onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
-                            className="h-14 w-36 px-3 flex items-center space-x-2 border-2 border-gray-300 bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent mobile-touch-target rounded-lg transition-all duration-200 hover:scale-105 active:scale-95"
-                          >
-                            <span className="text-lg">{selectedCountry.flag}</span>
-                            <span className="text-sm text-gray-700 font-medium">{selectedCountry.code}</span>
-                            <svg className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isCountryDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                          </button>
-                          
-                          {/* Country Dropdown Menu */}
-                          {isCountryDropdownOpen && (
-                            <>
-                              <div 
-                                className="fixed inset-0 bg-black bg-opacity-20 z-40 animate-[fadeIn_0.2s_ease-out_forwards]"
-                                onClick={() => {
-                                  setIsCountryDropdownOpen(false);
-                                  setCountrySearchTerm('');
-                                }}
-                              />
-                              
-                              <div className="fixed top-0 right-0 h-full w-96 bg-white shadow-2xl z-50 transform translate-x-full animate-[slideInRight_0.3s_cubic-bezier(0.25,0.46,0.45,0.94)_forwards] flex flex-col">
-                                <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
-                                  <h3 className="text-lg font-semibold text-gray-900">Select Country</h3>
-                                  <button
-                                    onClick={() => {
-                                      setIsCountryDropdownOpen(false);
-                                      setCountrySearchTerm('');
-                                    }}
-                                    className="p-2 hover:bg-gray-200 rounded-full transition-colors duration-150"
-                                  >
-                                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                  </button>
-                                </div>
-                                
-                                <div className="p-4 border-b border-gray-200 flex-shrink-0">
-                                  <div className="relative">
-                                    <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                    <input
-                                      type="text"
-                                      placeholder="Search countries..."
-                                      value={countrySearchTerm}
-                                      onChange={(e) => setCountrySearchTerm(e.target.value)}
-                                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-                                      autoFocus
-                                    />
-                                  </div>
-                                </div>
-                                
-                                <div className="flex-1 overflow-y-auto overscroll-contain country-menu-scroll">
-                                  {countries
-                                    .filter(country => 
-                                      country.name.toLowerCase().includes(countrySearchTerm.toLowerCase()) ||
-                                      country.code.includes(countrySearchTerm)
-                                    )
-                                    .map((country, index) => (
-                                      <button
-                                        key={`${country.code}-${country.country}`}
-                                        type="button"
-                                        onClick={() => {
-                                          setFormData(prev => ({ ...prev, countryCode: country.code }));
-                                          setIsCountryDropdownOpen(false);
-                                          setCountrySearchTerm('');
-                                        }}
-                                        className={`w-full px-4 py-4 text-left hover:bg-gray-50 flex items-center space-x-4 transition-all duration-200 border-b border-gray-100 hover:translate-x-1 hover:shadow-sm animate-[slideInFromRight_0.3s_ease-out_forwards] ${
-                                          selectedCountry.code === country.code ? 'bg-primary/10 text-primary border-primary/20' : 'text-gray-700'
-                                        }`}
-                                        style={{ animationDelay: `${index * 0.05}s` }}
-                                      >
-                                        <span className="text-2xl">{country.flag}</span>
-                                        <div className="flex-1">
-                                          <div className="text-base font-medium">{country.name}</div>
-                                          <div className="text-sm text-gray-500">{country.code}</div>
-                                        </div>
-                                        {selectedCountry.code === country.code && (
-                                          <svg className="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                          </svg>
-                                        )}
-                                      </button>
-                                    ))}
-                                </div>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                        
-                        {/* Phone Number Input */}
-                        <Input
-                          id="clientPhone"
-                          type="tel"
-                          value={formData.clientPhone}
-                          onChange={(e) => setFormData(prev => ({ ...prev, clientPhone: e.target.value }))}
-                          className="flex-1 h-14 px-4 text-lg border-2 border-gray-300 text-black placeholder-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg transition-all duration-200"
-                          placeholder="999 999 999"
-                          required
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between pt-4">
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setCurrentStep(1);
-                        onStepChange?.(1);
-                      }}
-                      className="flex items-center gap-2 h-12 text-lg"
-                    >
-                      <ArrowLeft className="w-4 h-4" />
-                      Back to Packages
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        // Validate required fields
-                        if (!formData.clientName || !formData.clientEmail || !formData.clientPhone) {
-                          toast.error('Please fill in all required fields');
-                          return;
-                        }
-
-                        // Validate email
-                        const emailError = validateEmailWithMessage(formData.clientEmail);
-                        if (emailError) {
-                          toast.error(emailError);
-                          return;
-                        }
-
-                        // Store customer information in sessionStorage for checkout
-                        if (typeof window !== 'undefined') {
-                          sessionStorage.setItem('customerInfo', JSON.stringify({
-                            clientName: formData.clientName,
-                            clientEmail: formData.clientEmail,
-                            clientPhone: formData.clientPhone,
-                            countryCode: formData.countryCode,
-                            billingDocumentType: formData.billingDocumentType,
-                            dni: formData.dni,
-                            ruc: formData.ruc,
-                            companyName: formData.companyName,
-                            notes: formData.notes
-                          }));
-                        }
-
-                        // Redirect to checkout page
-                        if (typeof window !== 'undefined') {
-                          window.location.href = '/checkout';
-                        }
-                      }}
-                      className="flex items-center gap-2 h-12 text-lg bg-primary hover:bg-primary/90"
-                    >
-                      Continue to Checkout
-                      <ArrowRight className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                    Continue to Checkout
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
             </motion.div>
           )}
-
 
         </AnimatePresence>
       </div>
-
-      {/* Package Selection Modal */}
-      {showPackageSelection && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Select Package for Booking
-              </h3>
-              <p className="text-sm text-gray-600 mb-6">
-                {selectedScheduleForPackage ? 
-                  `Which package would you like to add this class (${selectedScheduleForPackage.date} at ${selectedScheduleForPackage.time}) to?` :
-                  'Select a schedule slot first, then choose which package to use for booking.'
-                }
-              </p>
-              
-              
-              
-              <div className="space-y-3">
-                {(() => {
-                  // Show all packages - individual capacity validation happens on selection
-                  const allPackages = cartContext?.cartItems
-                    .filter(item => item.type === 'package') || [];
-                  
-                  if (allPackages.length === 0) {
-                    return (
-                      <div className="text-center py-8">
-                        <p className="text-gray-500">No packages available for booking.</p>
-                      </div>
-                    );
-                  }
-                  
-                  return allPackages.map((packageItem) => {
-                    const currentBookings = Array.isArray(packageItem.bookingDetails) ? packageItem.bookingDetails : [];
-                    
-                    // Check if package has capacity - use sessions for multi-session packages, quantity for regular packages
-                    const packageCapacity = packageItem.sessions || packageItem.quantity || 1;
-                    const hasCapacity = currentBookings.length < packageCapacity;
-                    
-                    // Check if this package already has this specific schedule booked
-                    const hasThisScheduleBooked = selectedScheduleForPackage ? 
-                      currentBookings.some(booking => 
-                        booking.selectedDate === selectedScheduleForPackage.date && 
-                        booking.selectedTime === selectedScheduleForPackage.time
-                      ) : false;
-                    
-                    // Allow selection if package has capacity, schedule is selected, and doesn't already have this schedule
-                    const canBookThisSlot = hasCapacity && selectedScheduleForPackage !== null && !hasThisScheduleBooked;
-                    
-                    console.log(`🔍 Modal - Package ${packageItem.name}:`, {
-                      id: packageItem.id,
-                      sessions: packageItem.sessions,
-                      quantity: packageItem.quantity,
-                      capacity: packageCapacity,
-                      currentBookings: currentBookings.length,
-                      hasCapacity,
-                      canBookThisSlot,
-                      selectedSchedule: selectedScheduleForPackage ? `${selectedScheduleForPackage.date} ${selectedScheduleForPackage.time}` : 'None selected'
-                    });
-                    
-                    return (
-                    <button
-                      key={packageItem.id}
-                      onClick={() => handlePackageSelectionForBooking(packageItem.id)}
-                      className={`w-full p-4 border rounded-lg transition-colors text-left ${
-                        canBookThisSlot 
-                          ? 'border-green-200 bg-green-50 hover:border-primary hover:bg-primary/5' 
-                          : 'border-gray-300 bg-gray-50 hover:bg-gray-100 cursor-not-allowed opacity-75'
-                      }`}
-                      disabled={!canBookThisSlot}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-medium text-gray-900">{packageItem.name}</h4>
-                          <p className="text-sm text-gray-600">
-                            {packageItem.sessions || packageItem.quantity || 1} sessions • {packageItem.duration} min each
-                          </p>
-                            <p className="text-xs text-gray-500 mt-1">
-                            {packageItem.bookingDetails?.length || 0} / {packageCapacity} classes booked
-                            {!selectedScheduleForPackage ? (
-                              <span className="text-yellow-600 font-medium"> • Select a schedule first</span>
-                            ) : hasThisScheduleBooked ? (
-                              <span className="text-orange-600 font-medium"> • Already has this schedule</span>
-                            ) : canBookThisSlot ? (
-                              <span className="text-green-600 font-medium"> • Available</span>
-                            ) : (
-                              <span className="text-red-500 font-medium"> • Full</span>
-                            )}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold text-primary">
-                            {new Intl.NumberFormat('en-US', {
-                              style: 'currency',
-                              currency: packageItem.currency
-                            }).format(packageItem.price)}
-                          </p>
-                        </div>
-                      </div>
-                    </button>
-                    );
-                  });
-                })()}
-              </div>
-              
-              <div className="flex gap-3 mt-6">
-                <button
-                  onClick={() => {
-                    console.log('🔍 Cancel button clicked - closing modal and resetting state');
-                    setShowPackageSelection(false);
-                    setSelectedScheduleForPackage(null);
-                    
-                    // Add a small delay to ensure state is properly reset
-                    setTimeout(() => {
-                      console.log('🔍 Modal cancel state reset completed');
-                    }, 100);
-                  }}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
-
