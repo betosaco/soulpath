@@ -33,6 +33,7 @@ import { Label } from '@/components/ui/label';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { toast } from 'sonner';
 import { useBookingFlow } from '../hooks/useBookingFlow';
+import { useAppStore } from '@/store/appStore';
 
 /**
  * CUSTOMER FORM DATA INTERFACE
@@ -79,16 +80,22 @@ export function CustomerInfoStep({ initialData, onDataSaved }: CustomerInfoStepP
   const { goToNextStep } = useBookingFlow();
 
   /**
+   * CUSTOMER DATA STATE
+   * -------------------
+   * Access to stored customer data from previous steps
+   */
+  const { customerData, setCustomerData } = useAppStore();
+
+  /**
    * FORM STATE MANAGEMENT
    * ---------------------
-   * Local state for form data - in a real app, this might be persisted
-   * in a store or sent to an API
+   * Local state for form data - prioritizes stored data, then initial data, then defaults
    */
   const [formData, setFormData] = React.useState<CustomerFormData>({
-    name: initialData?.name || '',
-    email: initialData?.email || '',
-    phone: initialData?.phone || '',
-    countryCode: initialData?.countryCode || '+51'
+    name: customerData?.name || initialData?.name || '',
+    email: customerData?.email || initialData?.email || '',
+    phone: customerData?.phone || initialData?.phone || '',
+    countryCode: customerData?.countryCode || initialData?.countryCode || '+51'
   });
 
   /**
@@ -207,7 +214,10 @@ export function CustomerInfoStep({ initialData, onDataSaved }: CustomerInfoStepP
       return;
     }
 
-    // Save data (in a real app, this might save to a store or API)
+    // Save data to store for persistence across steps
+    setCustomerData(formData);
+    
+    // Call optional callback
     onDataSaved?.(formData);
 
     console.log('✅ Customer information validated and saved:', formData);

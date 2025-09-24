@@ -93,6 +93,21 @@ interface CartState {
   requiresAddress: () => boolean;
 }
 
+// Customer Data Interface
+interface CustomerData {
+  name: string;
+  email: string;
+  phone: string;
+  countryCode: string;
+}
+
+// Customer State Interface
+interface CustomerState {
+  customerData: CustomerData | null;
+  setCustomerData: (data: CustomerData) => void;
+  clearCustomerData: () => void;
+}
+
 // Auth State Interface
 interface AuthState {
   user: {
@@ -113,7 +128,7 @@ interface AuthState {
 }
 
 // Combined Store Interface
-interface AppStore extends UiState, CartState, AuthState {}
+interface AppStore extends UiState, CartState, CustomerState, AuthState {}
 
 /**
  * Central App Store using Zustand
@@ -285,6 +300,15 @@ export const useAppStore = create<AppStore>()(
         return get().items.some(item => item.type === 'product');
       },
       
+      // Customer State
+      customerData: null,
+      setCustomerData: (data) => set((state) => {
+        state.customerData = data;
+      }),
+      clearCustomerData: () => set((state) => {
+        state.customerData = null;
+      }),
+      
       // Auth State
       user: null,
       isLoading: true,
@@ -311,9 +335,10 @@ export const useAppStore = create<AppStore>()(
     {
       name: 'app-store',
       storage: createJSONStorage(() => localStorage),
-      // Only persist cart and user preferences, not UI state
+      // Only persist cart, customer data, and user preferences, not UI state
       partialize: (state) => ({
         items: state.items,
+        customerData: state.customerData,
         theme: state.theme,
         language: state.language,
         user: state.user,
