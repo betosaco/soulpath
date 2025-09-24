@@ -39,7 +39,7 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CountryInput } from '@/components/ui/CountryInput';
 import { toast } from 'sonner';
 import { useBookingFlow } from '../hooks/useBookingFlow';
 import { useCart } from '@/store/appStore';
@@ -222,12 +222,6 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
    *
    * @param value - The selected country value
    */
-  const handleCountryChange = (value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      country: value
-    }));
-  };
 
   /**
    * HANDLE FORM SUBMISSION
@@ -298,38 +292,6 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
     );
   };
 
-  /**
-   * RENDER COUNTRY SELECT
-   * ---------------------
-   * Renders the country selection dropdown
-   *
-   * @returns Country select JSX
-   */
-  const renderCountrySelect = () => {
-    const hasError = !!errors.country;
-    const errorMessage = errors.country;
-
-    return (
-      <div className="unified-form-group">
-        <Label htmlFor="country" className="unified-form-label">
-          Country *
-        </Label>
-        <Select value={formData.country} onValueChange={handleCountryChange}>
-          <SelectTrigger className={`unified-form-input ${hasError ? 'border-red-500 focus:border-red-500' : ''}`}>
-            <SelectValue placeholder="Select a country" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="PE">Peru</SelectItem>
-            <SelectItem value="US">United States</SelectItem>
-            <SelectItem value="CA">Canada</SelectItem>
-          </SelectContent>
-        </Select>
-        {hasError && (
-          <p className="text-red-600 text-sm mt-1">{errorMessage}</p>
-        )}
-      </div>
-    );
-  };
 
   // ============================================================================
   // MAIN RENDER
@@ -405,8 +367,16 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
           placeholder: 'Enter your postal code (optional)'
         })}
 
-        {/* Country Select */}
-        {renderCountrySelect()}
+        {/* Country Field */}
+        <CountryInput
+          label="Country"
+          required={true}
+          value={formData.country}
+          onChange={(countryCode) => setFormData(prev => ({ ...prev, country: countryCode }))}
+          placeholder="Select your country"
+          error={errors.country}
+          defaultCountryCode="PE"
+        />
       </div>
 
       {/* Form Actions */}
