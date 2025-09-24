@@ -603,6 +603,7 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
         }))}
         lockedTimeSlots={lockedTimeSlots}
         hasMultiplePackages={isMultiPackage || isAddMore}
+        maxBookingsPerSlot={isMultiPackage || isAddMore ? 999 : 1}
         selectedSlot={selectedSlot}
       />
 
