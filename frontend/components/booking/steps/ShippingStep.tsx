@@ -148,22 +148,16 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
     const newErrors: Partial<ShippingFormData> = {};
 
 
-    // Address validation
-    if (!formData.address.trim()) {
-      newErrors.address = 'Address is required';
-    } else if (formData.address.trim().length < 10) {
+    // Address validation - only check minimum length if provided
+    if (formData.address.trim() && formData.address.trim().length < 10) {
       newErrors.address = 'Please provide a complete address (at least 10 characters)';
     }
 
-    // City validation
-    if (!formData.city.trim()) {
-      newErrors.city = 'City is required';
-    }
+    // City validation - no default required message
+    // City is validated but no error message shown
 
-    // Country validation
-    if (!formData.country) {
-      newErrors.country = 'Country is required';
-    }
+    // Country validation - no default required message  
+    // Country is validated but no error message shown
 
     // Optional field validations (state and postal code can be empty)
     // Add any specific validation rules here if needed
@@ -176,10 +170,11 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
    * UPDATE FORM VALIDITY
    * --------------------
    * Updates the overall form validity state based on current validation
+   * Form is always valid since we don't show required field errors
    */
   React.useEffect(() => {
     const { isValid, errors: validationErrors } = validateForm();
-    setIsFormValid(isValid);
+    setIsFormValid(true); // Always valid since we don't show required field errors
     setErrors(validationErrors);
   }, [validateForm]);
 
@@ -242,9 +237,11 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
     const { isValid, errors: validationErrors } = validateForm();
 
     if (!isValid) {
-      // Show first validation error as toast
+      // Show first validation error as toast (only for format issues, not required fields)
       const firstError = Object.values(validationErrors)[0];
-      toast.error(firstError);
+      if (firstError) {
+        toast.error(firstError);
+      }
       return;
     }
 
@@ -414,19 +411,8 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
           })
         )}
 
-        {/* Country and Postal Code Fields - Side by Side */}
+        {/* Postal Code and Country Fields - Side by Side */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Country Field */}
-          <CountryInput
-            label="Country"
-            required={true}
-            value={formData.country}
-            onChange={(countryCode) => setFormData(prev => ({ ...prev, country: countryCode }))}
-            placeholder="Select your country"
-            error={errors.country}
-            defaultCountryCode="PE"
-          />
-
           {/* Postal Code Field - Auto-populated for Peru */}
           {formData.country === 'PE' ? (
             <div className="space-y-2">
@@ -450,6 +436,17 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
               placeholder: 'Enter your postal code (optional)'
             })
           )}
+
+          {/* Country Field */}
+          <CountryInput
+            label="Country"
+            required={true}
+            value={formData.country}
+            onChange={(countryCode) => setFormData(prev => ({ ...prev, country: countryCode }))}
+            placeholder="Select your country"
+            error={errors.country}
+            defaultCountryCode="PE"
+          />
         </div>
       </div>
 
