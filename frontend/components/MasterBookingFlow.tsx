@@ -863,10 +863,18 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
       scenario: isAddingMoreBookings ? 'C (Add More)' : 'A (Schedule-first)'
     });
 
-    // VALIDATION: Check if slot is already locked
-    if (isTimeSlotLocked(slot.date, slot.time)) {
-      toast.error('This time slot is already booked. Please select a different time slot.');
-      return;
+    // VALIDATION: For multiple packages, only check if current package has booked this slot
+    // For single package or schedule-first flow, check if any package has booked it
+    if (isAddingMoreBookings) {
+      // SCENARIO C: Add more bookings - only prevent if the specific package has booked this slot
+      // This allows different packages to book the same time slot
+      console.log('🔍 SCENARIO C: Checking package-specific slot availability');
+    } else {
+      // SCENARIO A: Schedule-first - check if any package has booked this slot
+      if (isTimeSlotLocked(slot.date, slot.time)) {
+        toast.error('This time slot is already booked. Please select a different time slot.');
+        return;
+      }
     }
 
     // SCENARIO C: Add more bookings mode
@@ -1136,11 +1144,9 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
       return;
     }
 
-    // VALIDATION: Check if slot is already locked
-    if (isTimeSlotLocked(slot.date, slot.time)) {
-      toast.error('This time slot is already booked. Please select a different time slot.');
-      return;
-    }
+    // REMOVED: Global slot locking validation
+    // REASON: Different packages should be able to book the same time slot
+    // The package-specific validation below handles duplicate prevention within the same package
 
     const newSchedule = {
       selectedDate: slot.date,
