@@ -2,64 +2,37 @@
 
 /**
  * ========================================================================================
- * MASTER BOOKING FLOW COMPONENT - ORGANIZED BY SCENARIOS AND LOGIC FLOWS
+ * MASTER BOOKING FLOW COMPONENT
  * ========================================================================================
- *
- * This component implements the Master Booking Process with multiple entry points and flows.
- * The flow can be initiated from different starting points and follows different paths based
- * on user actions and system state.
- *
- * FLOW SCENARIOS OVERVIEW:
- * ========================
- *
- * SCENARIO A: SCHEDULE-FIRST FLOW (from /schedule page)
- * ---------------------------------------------------
- * 1. User clicks "Book Now" from homepage/schedule page
- * 2. User selects 1 time slot from schedule
- * 3. User selects a package for that slot
- * 4. Goes to customer info → checkout
- * 5. After checkout, user can "Book More" to add sessions
- *
- * SCENARIO B: PACKAGE-FIRST FLOW (from /packages page)
- * ---------------------------------------------------
- * 1. User selects package(s) first
- * 2. User clicks "Book Now" from cart
- * 3. User goes to schedule page to select time slots
- * 4. User can book multiple slots across packages
- * 5. Goes to customer info → checkout
- *
- * SCENARIO C: ADD MORE BOOKINGS FLOW (from cart "Book Now")
- * -------------------------------------------------------
- * 1. User has packages in cart with some sessions already booked
- * 2. User clicks "Book Now" from cart
- * 3. Schedule page reloads with previously booked slots LOCKED
- * 4. User can only book remaining slots for existing packages
- * 5. After booking, cart opens to show progress
- *
- * SCENARIO D: MULTIPLE PACKAGES FLOW
- * ----------------------------------
- * 1. User has multiple packages in cart
- * 2. When booking slots, system shows package selection modal
- * 3. User chooses which package to assign the slot to
- * 4. System prevents duplicate slots within same package
- *
- * STATE MANAGEMENT FLOWS:
- * =======================
- *
- * FLOW STATE DETECTION:
- * - sessionStorage flags: isAddingMoreBookings, addingToPackageId, bookingFlowType
- * - initialStep prop: 0=packages, 1=schedule
- * - Cart state: packages with bookingDetails
- *
- * LOCKED TIME SLOTS:
- * - Automatically calculated from cart bookingDetails
- * - Prevents duplicate booking of same slot by same package
- * - Visual feedback: orange background + lock icon
- *
- * VALIDATION FLOWS:
- * - Per-step validation before allowing navigation
- * - Package limits, duplicate slots, required fields
- * - Enhanced email/name/address validation
+ * 
+ * OVERVIEW:
+ * ---------
+ * Central component managing the complete booking process with multiple entry points
+ * and flow scenarios. Handles package selection, schedule booking, customer info,
+ * and checkout integration.
+ * 
+ * ARCHITECTURE:
+ * -------------
+ * 1. STATE MANAGEMENT: Centralized state for all booking scenarios
+ * 2. FLOW DETECTION: Automatic detection of booking flow type
+ * 3. VALIDATION RULES: Comprehensive validation for each step
+ * 4. UI RENDERING: Dynamic content based on current step and flow
+ * 5. INTEGRATION: Cart, packages, schedule, and payment integration
+ * 
+ * BOOKING SCENARIOS:
+ * -----------------
+ * A) Schedule-First: User selects slot → package → checkout
+ * B) Package-First: User selects package → slots → checkout  
+ * C) Add More: User adds sessions to existing packages
+ * D) Multiple Packages: User manages multiple packages with modal selection
+ * 
+ * VALIDATION RULES:
+ * ----------------
+ * - Package session limits must be respected
+ * - No duplicate slots within same package
+ * - Cross-package booking allowed for different packages
+ * - Required customer information validation
+ * - Shipping address for physical products only
  */
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -112,6 +85,11 @@ interface CartItem {
   }>;
 }
 
+/**
+ * BOOKING STEP INTERFACE
+ * ----------------------
+ * Represents a step in the booking flow process
+ */
 interface BookingStep {
   id: string;
   title: string;
@@ -120,6 +98,11 @@ interface BookingStep {
   icon: any;
 }
 
+/**
+ * CUSTOMER FORM DATA INTERFACE
+ * ----------------------------
+ * Customer information collected during booking
+ */
 interface CustomerFormData {
   name: string;
   email: string;
@@ -128,6 +111,11 @@ interface CustomerFormData {
   birthPlace: string;
 }
 
+/**
+ * SHIPPING FORM DATA INTERFACE
+ * ----------------------------
+ * Shipping address information for physical products
+ */
 interface ShippingFormData {
   firstName: string;
   lastName: string;
@@ -138,6 +126,11 @@ interface ShippingFormData {
   country: string;
 }
 
+/**
+ * COMPONENT PROPS INTERFACE
+ * -------------------------
+ * Props passed to the MasterBookingFlow component
+ */
 interface MasterBookingFlowProps {
   onCheckoutComplete?: (orderData: {
     orderId: string;
@@ -155,19 +148,49 @@ interface MasterBookingFlowProps {
 // =============================================================================
 
 export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirectCheckout = false }: MasterBookingFlowProps) {
+  
   // =============================================================================
-  // HOOKS AND EXTERNAL STATE
+  // EXTERNAL HOOKS AND STATE
   // =============================================================================
-  const { items: cartItems, addItem: addToCart, removeItem: removeFromCart, updateQuantity, getTotalPrice, requiresAddress, addBookingToPackage } = useCart();
+  
+  /**
+   * CART MANAGEMENT
+   * ---------------
+   * Access to cart state and operations
+   */
+  const { 
+    items: cartItems, 
+    addItem: addToCart, 
+    removeItem: removeFromCart, 
+    updateQuantity, 
+    getTotalPrice, 
+    requiresAddress, 
+    addBookingToPackage 
+  } = useCart();
+  
+  /**
+   * CART UI MANAGEMENT
+   * ------------------
+   * Access to cart UI operations
+   */
   const { openCart } = useCartUI();
+  
+  /**
+   * PACKAGES DATA
+   * -------------
+   * Access to available packages
+   */
   const { data: packages, isLoading: packagesLoading } = usePackages('PEN');
   
   // =============================================================================
-  // STATE MANAGEMENT - ORGANIZED BY FLOW SCENARIOS
+  // INTERNAL STATE MANAGEMENT
   // =============================================================================
-
-  // SCENARIO A & B: BASIC FLOW STATE
-  // Initialize with prop-based logic to avoid hydration mismatch
+  
+  /**
+   * STEP NAVIGATION STATE
+   * ---------------------
+   * Manages current step in the booking flow
+   */
   const [currentStep, setCurrentStep] = useState(() => {
     // FLOW DETECTION LOGIC:
     // - Check isDirectCheckout prop (when coming from cart with all sessions booked)
@@ -188,12 +211,19 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
     return initialStep;
   });
 
-  // PAYMENT AND ORDER STATE
+  /**
+   * PAYMENT AND ORDER STATE
+   * -----------------------
+   * Manages payment processing and order completion
+   */
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [orderData, setOrderData] = useState<{ orderNumber: string; total: number; items: Array<{ name: string; quantity: number; price: number }> } | null>(null);
   
-  // SCENARIO A: SCHEDULE-FIRST FLOW STATE
-  // - Used when user selects schedule first, then chooses package
+  /**
+   * SCHEDULE-FIRST FLOW STATE (SCENARIO A)
+   * --------------------------------------
+   * Used when user selects schedule first, then chooses package
+   */
   const [, setFlowType] = useState<'schedule-first' | 'package-first' | null>(null);
   const [selectedSchedules, setSelectedSchedules] = useState<Array<{
     selectedDate: string;
@@ -205,13 +235,19 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
     scheduleSlotId: number;
   }>>([]);
 
-  // SCENARIO C: ADD MORE BOOKINGS FLOW STATE
-  // - Activated when user clicks "Book Now" from cart with existing bookings
+  /**
+   * ADD MORE BOOKINGS FLOW STATE (SCENARIO C)
+   * -----------------------------------------
+   * Activated when user clicks "Book Now" from cart with existing bookings
+   */
   const [isAddingMoreBookings, setIsAddingMoreBookings] = useState(false);
   const [addingToPackageId, setAddingToPackageId] = useState<string | null>(null);
 
-  // SCENARIO D: MULTIPLE PACKAGES FLOW STATE
-  // - Shows modal when user has multiple packages and needs to choose which one for a booking
+  /**
+   * MULTIPLE PACKAGES FLOW STATE (SCENARIO D)
+   * -----------------------------------------
+   * Shows modal when user has multiple packages and needs to choose which one for a booking
+   */
   const [showPackageSelectionModal, setShowPackageSelectionModal] = useState(false);
 
   // Prevent body scroll when modal is open
