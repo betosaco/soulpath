@@ -10,16 +10,14 @@
  *
  * RESPONSIBILITIES:
  * - Collect and validate customer details
- * - Provide form fields for name, email, phone, birth date, and birth place
+ * - Provide form fields for name, email, and phone
  * - Handle form validation with enhanced rules
  * - Persist data for use in checkout
  *
  * VALIDATION RULES:
  * - Name: Required, non-empty
  * - Email: Required, valid email format
- * - Phone: Optional
- * - Birth Date: Required, must be in the past, user must be 13+ years old
- * - Birth Place: Required, non-empty
+ * - Phone: Optional, valid format if provided
  *
  * INTEGRATIONS:
  * - useBookingFlow hook for navigation
@@ -46,8 +44,6 @@ interface CustomerFormData {
   email: string;
   phone: string;
   countryCode: string;
-  birthDate: string;
-  birthPlace: string;
 }
 
 /**
@@ -92,9 +88,7 @@ export function CustomerInfoStep({ initialData, onDataSaved }: CustomerInfoStepP
     name: initialData?.name || '',
     email: initialData?.email || '',
     phone: initialData?.phone || '',
-    countryCode: initialData?.countryCode || '+51',
-    birthDate: initialData?.birthDate || '',
-    birthPlace: initialData?.birthPlace || ''
+    countryCode: initialData?.countryCode || '+51'
   });
 
   /**
@@ -146,37 +140,6 @@ export function CustomerInfoStep({ initialData, onDataSaved }: CustomerInfoStepP
       if (!phoneRegex.test(formData.phone)) {
         newErrors.phone = 'Please enter a valid phone number';
       }
-    }
-
-    // Birth date validation
-    if (!formData.birthDate) {
-      newErrors.birthDate = 'Birth date is required';
-    } else {
-      const birthDate = new Date(formData.birthDate);
-      const today = new Date();
-
-      if (birthDate >= today) {
-        newErrors.birthDate = 'Birth date must be in the past';
-      } else {
-        // Age validation - must be at least 13 years old
-        const age = today.getFullYear() - birthDate.getFullYear();
-        const monthDiff = today.getMonth() - birthDate.getMonth();
-
-        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-          if (age - 1 < 13) {
-            newErrors.birthDate = 'You must be at least 13 years old to make a purchase';
-          }
-        } else {
-          if (age < 13) {
-            newErrors.birthDate = 'You must be at least 13 years old to make a purchase';
-          }
-        }
-      }
-    }
-
-    // Birth place validation
-    if (!formData.birthPlace.trim()) {
-      newErrors.birthPlace = 'Birth place is required';
     }
 
     const isValid = Object.keys(newErrors).length === 0;
@@ -312,7 +275,20 @@ export function CustomerInfoStep({ initialData, onDataSaved }: CustomerInfoStepP
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="max-w-md mx-auto space-y-6">
+        {/* Phone Field */}
+        <div className="unified-form-group">
+          <PhoneInput
+            label="Phone Number"
+            required={false}
+            value={formData.phone}
+            onChange={handlePhoneChange}
+            placeholder="Enter your phone number"
+            defaultCountryCode={formData.countryCode}
+            error={errors.phone}
+          />
+        </div>
+
         {/* Name Field */}
         {renderFormField({
           name: 'name',
@@ -329,36 +305,6 @@ export function CustomerInfoStep({ initialData, onDataSaved }: CustomerInfoStepP
           type: 'email',
           required: true,
           placeholder: 'Enter your email address'
-        })}
-
-        {/* Phone Field */}
-        <div className="unified-form-group">
-          <PhoneInput
-            label="Phone Number"
-            required={false}
-            value={formData.phone}
-            onChange={handlePhoneChange}
-            placeholder="Enter your phone number"
-            defaultCountryCode={formData.countryCode}
-            error={errors.phone}
-          />
-        </div>
-
-        {/* Birth Date Field */}
-        {renderFormField({
-          name: 'birthDate',
-          label: 'Birth Date',
-          type: 'date',
-          required: true
-        })}
-
-        {/* Birth Place Field */}
-        {renderFormField({
-          name: 'birthPlace',
-          label: 'Birth Place',
-          type: 'text',
-          required: true,
-          placeholder: 'Enter your birth place'
         })}
       </div>
 
