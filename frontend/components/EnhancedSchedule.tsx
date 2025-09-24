@@ -82,6 +82,15 @@ interface EnhancedScheduleProps {
   reloadTrigger?: number; // Triggers a reload when this value changes
   showFilters?: boolean; // Whether to show the header and filters
   hasMultiplePackages?: boolean; // Whether there are multiple packages in cart
+  cartPackages?: Array<{
+    id: string;
+    name: string;
+    sessions: number;
+    bookingDetails?: Array<{
+      selectedDate?: string;
+      selectedTime?: string;
+    }>;
+  }>; // All packages in the cart for checking if all have booked a slot
 }
 
 export function EnhancedSchedule({
@@ -96,7 +105,8 @@ export function EnhancedSchedule({
   reloadTrigger,
   showFilters = true,
   hasMultiplePackages = false,
-  selectedSlot = null
+  selectedSlot = null,
+  cartPackages = []
 }: EnhancedScheduleProps) {
   console.log('🔍 EnhancedSchedule render - startDate:', startDate, 'endDate:', endDate);
   console.log('🔍 EnhancedSchedule - lockedTimeSlots:', lockedTimeSlots);
@@ -172,6 +182,19 @@ export function EnhancedSchedule({
         booking.selectedTime === slot.time
       );
     }
+  };
+
+  // Check if all packages in cart have booked this slot
+  const isSlotBookedByAllPackages = (slot: ScheduleSlot) => {
+    if (!hasMultiplePackages || cartPackages.length === 0) return false;
+    
+    // Check if all packages in cart have booked this specific slot
+    return cartPackages.every(pkg => {
+      return pkg.bookingDetails?.some(booking => 
+        booking.selectedDate === slot.date && 
+        booking.selectedTime === slot.time
+      ) || false;
+    });
   };
 
   // Check if a slot is locked for a specific package
@@ -645,7 +668,7 @@ export function EnhancedSchedule({
                         key={slot.id}
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className={`schedule-slot card-base card-hover hover-scale ${!slot.isAvailable ? 'schedule-slot--unavailable' : ''} ${isSlotBooked(slot) ? 'schedule-slot--booked opacity-75' : ''} ${!hasMultiplePackages && isSlotLocked(slot) ? 'schedule-slot--locked opacity-75' : ''} ${isSlotSelected(slot) ? 'schedule-slot--selected ring-2 ring-green-500 ring-opacity-75' : ''}`}
+                        className={`schedule-slot card-base card-hover hover-scale ${!slot.isAvailable ? 'schedule-slot--unavailable' : ''} ${isSlotBooked(slot) ? 'schedule-slot--booked opacity-75' : ''} ${!hasMultiplePackages && isSlotLocked(slot) ? 'schedule-slot--locked opacity-75' : ''} ${isSlotBookedByAllPackages(slot) ? 'schedule-slot--fully-booked opacity-75' : ''} ${isSlotSelected(slot) ? 'schedule-slot--selected ring-2 ring-green-500 ring-opacity-75' : ''}`}
                       >
                         <div className="schedule-slot__header">
                           <div className="flex items-center gap-2 mb-2">
@@ -720,9 +743,17 @@ export function EnhancedSchedule({
 
                         <div className="schedule-slot__actions">
                           {slot.isAvailable ? (
-                            // Single package: show locked button if slot is locked
-                            // For multiple packages, don't show locked button - package-specific validation happens later
-                            !hasMultiplePackages && isSlotLocked(slot) ? (
+                            // Check if all packages have booked this slot first
+                            isSlotBookedByAllPackages(slot) ? (
+                              <button
+                                disabled
+                                className="w-full px-4 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed flex items-center justify-center gap-2"
+                                title="All packages have already booked this time slot"
+                              >
+                                <Lock className="h-4 w-4" />
+                                Booked by All Packages
+                              </button>
+                            ) : !hasMultiplePackages && isSlotLocked(slot) ? (
                               <button
                                 disabled
                                 className="w-full px-4 py-2 bg-orange-100 text-orange-700 rounded-lg cursor-not-allowed flex items-center justify-center gap-2 opacity-75"

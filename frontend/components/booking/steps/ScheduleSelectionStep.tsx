@@ -609,6 +609,14 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
         hasMultiplePackages={isMultiPackage || isAddMore}
         maxBookingsPerSlot={isMultiPackage || isAddMore ? 999 : 1}
         selectedSlot={selectedSlot}
+        cartPackages={cartItems
+          .filter(item => item.type === 'package')
+          .map(pkg => ({
+            id: pkg.id,
+            name: pkg.name,
+            sessions: pkg.sessions || 1,
+            bookingDetails: pkg.bookingDetails
+          }))}
       />
 
       {/* Navigation hints - Only show when relevant */}
