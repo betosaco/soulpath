@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { cache, cacheKeys, cacheTTL } from '@/lib/redis';
 
 const prisma = new PrismaClient();
 
@@ -15,6 +16,21 @@ export async function GET(request: NextRequest) {
     const sortOrder = searchParams.get('sortOrder') || 'desc';
 
     console.log('🛒 Query params:', { page, limit, search, category, sortBy, sortOrder });
+
+    // Generate cache key
+    const cacheKey = cacheKeys.products(page, limit, search, category, sortBy, sortOrder);
+    
+    // Try to get from cache first
+    const cachedData = await cache.get(cacheKey);
+    if (cachedData) {
+      console.log('✅ Returning cached products data');
+      return NextResponse.json({
+        success: true,
+        data: cachedData.data,
+        pagination: cachedData.pagination,
+        cached: true
+      });
+    }
 
     const skip = (page - 1) * limit;
 
@@ -83,8 +99,7 @@ export async function GET(request: NextRequest) {
 
     console.log('🛒 Found products:', products.length, 'Total:', total);
 
-    return NextResponse.json({
-      success: true,
+    const responseData = {
       data: products,
       pagination: {
         page,
@@ -92,6 +107,14 @@ export async function GET(request: NextRequest) {
         total,
         pages: Math.ceil(total / limit)
       }
+    };
+
+    // Cache the result
+    await cache.set(cacheKey, responseData, cacheTTL.products);
+
+    return NextResponse.json({
+      success: true,
+      ...responseData
     });
   } catch (error) {
     console.error('Error fetching products:', error);

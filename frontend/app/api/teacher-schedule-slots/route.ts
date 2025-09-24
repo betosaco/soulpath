@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { cache, cacheKeys, cacheTTL } from '@/lib/redis';
 
 export async function GET(request: NextRequest) {
   const prisma = new PrismaClient();
@@ -15,6 +16,20 @@ export async function GET(request: NextRequest) {
     const venueId = searchParams.get('venueId');
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
+
+    // Generate cache key
+    const cacheKey = cacheKeys.schedule(startDate || undefined, endDate || undefined, available === 'true');
+    
+    // Try to get from cache first
+    const cachedData = await cache.get(cacheKey);
+    if (cachedData) {
+      console.log('✅ Returning cached schedule data');
+      return NextResponse.json({
+        success: true,
+        slots: cachedData,
+        cached: true
+      });
+    }
 
     // Build where clause
     const whereClause: Record<string, unknown> = {};
@@ -206,6 +221,9 @@ export async function GET(request: NextRequest) {
         isAvailable: slots[0].isAvailable
       });
     }
+
+    // Cache the result
+    await cache.set(cacheKey, transformedSlots, cacheTTL.schedule);
 
     return NextResponse.json({
       success: true,
