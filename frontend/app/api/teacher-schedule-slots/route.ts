@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma, withConnection } from '@/lib/prisma';
+import { PrismaClient } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
+  const prisma = new PrismaClient();
+  
   try {
     console.log('🔍 GET /api/teacher-schedule-slots - Fetching teacher schedule slots...');
 
@@ -81,9 +83,17 @@ export async function GET(request: NextRequest) {
     
     console.log('🔍 Where clause:', JSON.stringify(whereClause, null, 2));
 
-    // Fetch schedule slots from database with connection management
-    const slots = await withConnection(async () => {
-      return await prisma.teacherScheduleSlot.findMany({
+    // Fetch schedule slots from database with retry mechanism
+    let slots: any[] = [];
+    let retryCount = 0;
+    const maxRetries = 3;
+    
+    while (retryCount < maxRetries) {
+      try {
+        // Ensure connection before each attempt
+        await prisma.$connect();
+        
+        slots = await prisma.teacherScheduleSlot.findMany({
       where: whereClause,
       include: {
         teacherSchedule: {
@@ -125,7 +135,22 @@ export async function GET(request: NextRequest) {
         { startTime: 'asc' }
       ]
     });
-    });
+        
+        // If we get here, the query was successful
+        break;
+        
+      } catch (error) {
+        retryCount++;
+        console.error(`❌ Database query failed (attempt ${retryCount}/${maxRetries}):`, error);
+        
+        if (retryCount >= maxRetries) {
+          throw error;
+        }
+        
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+      }
+    }
 
     // Transform the data to match the expected format - display EST times (UTC-5)
     const transformedSlots = slots.map(slot => {
@@ -214,6 +239,8 @@ export async function GET(request: NextRequest) {
       error: 'Failed to fetch teacher schedule slots',
       message: 'An error occurred while fetching teacher schedule slots'
     }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }
 

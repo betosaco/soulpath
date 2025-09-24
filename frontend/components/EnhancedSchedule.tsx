@@ -60,7 +60,7 @@ interface ScheduleSlot {
 }
 
 interface EnhancedScheduleProps {
-  onBookSlot?: (slot: ScheduleSlot) => void;
+  onBookSlot?: (slot: ScheduleSlot, event?: React.MouseEvent) => void;
   showBookingButton?: boolean;
   className?: string;
   startDate?: Date;
@@ -131,7 +131,7 @@ export function EnhancedSchedule({
   };
 
   // Enhanced slot click handler that clears conflicts
-  const handleSlotClickWithConflictClear = (slot: ScheduleSlot) => {
+  const handleSlotClickWithConflictClear = (slot: ScheduleSlot, event?: React.MouseEvent) => {
     // If there's only one package, prevent clicking on locked slots
     if (!hasMultiplePackages && isSlotLocked(slot)) {
       console.log('🚫 Slot is locked for single package, cannot be selected:', slot);
@@ -146,7 +146,7 @@ export function EnhancedSchedule({
     // Use the onBookSlot prop if provided, otherwise use default behavior
     if (onBookSlot) {
       console.log('🎯 Calling onBookSlot prop with slot:', slot);
-      onBookSlot(slot);
+      onBookSlot(slot, event);
     } else {
       console.log('🎯 Using default handleBookSlot with slot:', slot);
       handleBookSlot(slot);
@@ -720,7 +720,7 @@ export function EnhancedSchedule({
                               </button>
                             ) : (
                               <button
-                                onClick={() => handleSlotClick(slot)}
+                                onClick={(event) => handleSlotClick(slot, event)}
                                 className="w-full bg-[#6ea058] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#5a8a47] focus:ring-2 focus:ring-[#6ea058] focus:outline-none transition-colors flex items-center justify-center gap-2"
                                 disabled={slot.bookedCount >= slot.capacity}
                               >

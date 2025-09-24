@@ -97,7 +97,7 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
    * -------------
    * Control cart sidebar visibility
    */
-  const { openCart } = useCartUI();
+  const { openCart, closeCart } = useCartUI();
 
   // ============================================================================
   // LOCAL STATE MANAGEMENT
@@ -110,6 +110,7 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
    */
   const [showPackageModal, setShowPackageModal] = React.useState(false);
   const [pendingScheduleData, setPendingScheduleData] = React.useState<ScheduleData | null>(null);
+  const [modalPosition, setModalPosition] = React.useState<{ x: number; y: number } | undefined>(undefined);
 
   /**
    * SELECTED SLOT STATE
@@ -173,38 +174,41 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
    * Prevents users from booking the same time slot multiple times
    * Combines cart bookings and existing user bookings from database
    */
+  // Only lock slots that are booked by the user (from userBookings)
   const lockedTimeSlots = React.useMemo(() => {
-    // Combine bookings from cart and existing user bookings
-    const allBookings: Array<{
+    return userBookings.map(booking => ({
+      selectedDate: booking.selectedDate,
+      selectedTime: booking.selectedTime,
+      packageId: booking.packageId
+    }));
+  }, [userBookings]);
+
+  // Show which packages have booked each slot (for visual indication)
+  const packageBookings = React.useMemo(() => {
+    const bookings: Array<{
       selectedDate: string;
       selectedTime: string;
-      packageId?: string;
+      packageId: string;
+      packageName: string;
+      packageColor: string;
     }> = [];
 
-    // Add cart bookings
     cartItems
       .filter(item => item.type === 'package' && item.bookingDetails)
       .forEach(item => {
         (item.bookingDetails || []).forEach(booking => {
-          allBookings.push({
+          bookings.push({
             selectedDate: booking.selectedDate || '',
             selectedTime: booking.selectedTime || '',
-            packageId: item.id
+            packageId: item.id,
+            packageName: item.name,
+            packageColor: `hsl(${(item.id.charCodeAt(0) * 137.5) % 360}, 70%, 50%)`
           });
         });
       });
 
-    // Add existing user bookings to prevent duplicate time slots
-    userBookings.forEach(booking => {
-      allBookings.push({
-        selectedDate: booking.selectedDate,
-        selectedTime: booking.selectedTime,
-        packageId: booking.packageId
-      });
-    });
-
-    return allBookings;
-  }, [cartItems, userBookings]);
+    return bookings;
+  }, [cartItems]);
 
   // ============================================================================
   // EVENT HANDLERS
@@ -217,7 +221,7 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
    *
    * @param slot - The selected schedule slot data
    */
-  const handleScheduleSelection = (slot: any) => {
+  const handleScheduleSelection = (slot: any, event?: React.MouseEvent) => {
     console.log('📅 SCHEDULE SELECTION:', {
       slot: `${slot.date} ${slot.time}`,
       scenario,
@@ -256,11 +260,6 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
       return;
     }
 
-    // BOOKING COMPLETED - OPEN CART
-    setTimeout(() => {
-      openCart();
-    }, 300);
-
     // SCENARIO-SPECIFIC HANDLING
     if (isScheduleFirst) {
       // Schedule-First: Store selection and go to package selection
@@ -293,6 +292,11 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
         console.log('✅ Single package available - direct assignment');
         addBookingToPackage(availablePackages[0].id, scheduleData);
 
+        // Open cart after booking
+        setTimeout(() => {
+          openCart();
+        }, 300);
+
         // Check if package is now at capacity
         const remaining = getPackageRemainingSessions(availablePackages[0].id);
         if (remaining <= 0) {
@@ -305,7 +309,13 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
       } else {
         // Multiple packages available - show modal
         console.log('📦 Multiple packages available - showing selection modal');
+        closeCart(); // Close cart when modal opens
         setPendingScheduleData(scheduleData);
+        // Capture click position for modal placement
+        const clickX = event ? event.clientX : 100;
+        const clickY = event ? event.clientY : 100;
+        console.log('🎯 Capturing click position:', { clickX, clickY, hasEvent: !!event });
+        setModalPosition({ x: clickX, y: clickY });
         setShowPackageModal(true);
       }
     }
@@ -333,6 +343,11 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
       addBookingToPackage(availablePackages[0].id, scheduleData);
       console.log('✅ Auto-assigned to single available package');
 
+      // Open cart after booking
+      setTimeout(() => {
+        openCart();
+      }, 300);
+
       // Check if package is now at capacity
       const remaining = getPackageRemainingSessions(availablePackages[0].id);
       if (remaining <= 0) {
@@ -345,7 +360,13 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
     } else {
       // Multiple packages available - show modal
       console.log('📦 Multiple packages available - showing selection modal');
+      closeCart(); // Close cart when modal opens
       setPendingScheduleData(scheduleData);
+      // Capture click position for modal placement
+      const clickX = event ? event.clientX : 100;
+      const clickY = event ? event.clientY : 100;
+      console.log('🎯 Capturing click position (add-more):', { clickX, clickY, hasEvent: !!event });
+      setModalPosition({ x: clickX, y: clickY });
       setShowPackageModal(true);
     }
   };
@@ -360,9 +381,26 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
    * @returns True if slot is locked
    */
   const isTimeSlotLocked = (date: string, time: string): boolean => {
-    return lockedTimeSlots.some(slot =>
-      slot.selectedDate === date && slot.selectedTime === time
+    // Only lock slots that are booked by the current user (from userBookings)
+    // Allow multiple packages to book the same time slot
+    return userBookings.some(booking =>
+      booking.selectedDate === date && booking.selectedTime === time
     );
+  };
+
+  const getPackagesThatBookedSlot = (date: string, time: string) => {
+    return cartItems
+      .filter(item => item.type === 'package' && item.bookingDetails)
+      .filter(item => 
+        (item.bookingDetails || []).some(booking =>
+          booking.selectedDate === date && booking.selectedTime === time
+        )
+      )
+      .map(item => ({
+        id: item.id,
+        name: item.name,
+        color: `hsl(${(item.id.charCodeAt(0) * 137.5) % 360}, 70%, 50%)` // Generate color based on ID
+      }));
   };
 
   /**
@@ -383,8 +421,9 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
         const remaining = getPackageRemainingSessions(item.id);
         if (remaining <= 0) return false;
 
-        // For add-more scenario, respect locked slots
-        if (isAddMore && isTimeSlotLocked(date, time)) {
+        // Allow multiple packages to book the same time slot
+        // Only prevent if the user has already booked this slot (from userBookings)
+        if (isTimeSlotLocked(date, time)) {
           return false;
         }
 
@@ -447,10 +486,13 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
    * HANDLE MODAL CLOSE
    * ------------------
    * Handles when the package selection modal is closed
+   * This is called when user cancels the modal (not when package is selected)
    */
   const handleModalClose = () => {
     setShowPackageModal(false);
     setPendingScheduleData(null);
+    setModalPosition(undefined);
+    // Cart remains closed when modal is cancelled
   };
 
   // ============================================================================
@@ -510,6 +552,9 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
               const packageItems = getCartPackageItems();
               const remaining = getSinglePackageRemainingSessions();
               const packageName = packageItems.length === 1 ? packageItems[0].name : 'your packages';
+              if (packageItems.length > 1) {
+                return `You can book ${remaining} more session${remaining !== 1 ? 's' : ''} across your ${packageItems.length} packages. Each package can book the same time slot.`;
+              }
               return `You can book ${remaining} more session${remaining !== 1 ? 's' : ''} for ${packageName}`;
             }
             return 'Choose your preferred date and time';
@@ -521,7 +566,12 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
       <EnhancedSchedule
         onBookSlot={handleScheduleSelection}
         showFilters={true}
-        existingBookings={lockedTimeSlots}
+        existingBookings={packageBookings.map(booking => ({
+          selectedDate: booking.selectedDate,
+          selectedTime: booking.selectedTime,
+          packageName: booking.packageName,
+          packageId: booking.packageId
+        }))}
         lockedTimeSlots={lockedTimeSlots}
         hasMultiplePackages={isMultiPackage || isAddMore}
         selectedSlot={selectedSlot}
@@ -543,7 +593,7 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
 
         {isAddMore && (
           <p className="text-sm text-gray-600">
-            Add more sessions to your existing packages. Cart will open after each booking.
+            Add more sessions to your existing packages. Each package can book the same time slot. Cart will open after each booking.
           </p>
         )}
 
@@ -558,6 +608,7 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
       <PackageSelectionModal
         isOpen={showPackageModal}
         onClose={handleModalClose}
+        position={modalPosition}
         scheduleData={pendingScheduleData!}
         availablePackages={pendingScheduleData ? getAvailablePackagesForSlot(
           pendingScheduleData.selectedDate,
@@ -574,3 +625,4 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
     </div>
   );
 }
+

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { z } from 'zod';
-import { prisma } from '@/lib/prisma';
+import { PrismaClient } from '@prisma/client';
 // import { replacePlaceholders } from '@/lib/communication/placeholders';
 import { sendBookingConfirmationEmail } from '@/lib/send-booking-confirmation-email';
 
@@ -23,6 +23,8 @@ const querySchema = z.object({
 });
 
 export async function GET(request: NextRequest) {
+  const prisma = new PrismaClient();
+  
   try {
     console.log('🔍 GET /api/client/bookings - Starting request...');
     
@@ -73,6 +75,13 @@ export async function GET(request: NextRequest) {
       where.status = 'completed';
     }
 
+    // Ensure database connection
+    try {
+      await prisma.$connect();
+    } catch (error) {
+      console.log('Database already connected or connection failed:', error);
+    }
+    
     // Get bookings with enhanced relationships
     const [bookings, totalCount] = await Promise.all([
       prisma.booking.findMany({
@@ -175,6 +184,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const prisma = new PrismaClient();
+  
   try {
     console.log('🔍 POST /api/client/bookings - Starting request...');
     
@@ -203,6 +214,13 @@ export async function POST(request: NextRequest) {
     }
 
     const { scheduleSlotId, userPackageId, sessionType, notes, otpCode, phoneNumber } = validation.data;
+
+    // Ensure database connection
+    try {
+      await prisma.$connect();
+    } catch (error) {
+      console.log('Database already connected or connection failed:', error);
+    }
 
     // Verify the user owns the package and it's active
     const userPackage = await prisma.userPackage.findFirst({

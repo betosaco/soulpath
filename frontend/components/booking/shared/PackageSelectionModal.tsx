@@ -23,6 +23,7 @@
 'use client';
 
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { X, Package, Calendar, Clock } from 'lucide-react';
 
@@ -36,6 +37,11 @@ interface PackageSelectionModalProps {
   isOpen: boolean;
   /** Callback to close the modal */
   onClose: () => void;
+  /** Position coordinates for the modal */
+  position?: {
+    x: number;
+    y: number;
+  };
   /** The selected schedule data */
   scheduleData: {
     selectedDate: string;
@@ -77,6 +83,7 @@ interface PackageSelectionModalProps {
 export function PackageSelectionModal({
   isOpen,
   onClose,
+  position,
   scheduleData,
   availablePackages,
   onPackageSelected,
@@ -84,6 +91,31 @@ export function PackageSelectionModal({
 }: PackageSelectionModalProps) {
   // Don't render if not open
   if (!isOpen) return null;
+
+  // Calculate safe position coordinates
+  const getSafePosition = () => {
+    if (!position || typeof window === 'undefined') {
+      return null;
+    }
+    
+    const maxX = window.innerWidth - 420; // 400px modal width + 20px margin
+    const maxY = window.innerHeight - 320; // 300px modal height + 20px margin
+    
+    return {
+      x: Math.min(Math.max(position.x, 20), maxX),
+      y: Math.min(Math.max(position.y, 20), maxY)
+    };
+  };
+
+  const safePosition = getSafePosition();
+  
+  // Debug logging
+  console.log('🎯 Modal position debug:', {
+    originalPosition: position,
+    safePosition: safePosition,
+    hasWindow: typeof window !== 'undefined',
+    windowSize: typeof window !== 'undefined' ? { width: window.innerWidth, height: window.innerHeight } : null
+  });
 
   /**
    * HANDLE PACKAGE SELECTION
@@ -163,12 +195,13 @@ export function PackageSelectionModal({
     );
   };
 
-  return (
+  // Use portal to render modal at document body level
+  const modalContent = (
     <>
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
-        {/* Modal */}
-        <div className="bg-white rounded-lg shadow-2xl max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto">
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-[999999] flex items-start justify-center p-4 pt-20" style={{ zIndex: 999999 }}>
+        {/* Modal positioned at top of page with maximum z-index */}
+        <div className="bg-white rounded-lg shadow-2xl max-w-lg w-full max-h-[80vh] overflow-y-auto relative z-[999999]" style={{ zIndex: 999999 }}>
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200">
             <div>
@@ -229,4 +262,11 @@ export function PackageSelectionModal({
       </div>
     </>
   );
+
+  // Render modal using portal to document body
+  if (typeof window !== 'undefined') {
+    return createPortal(modalContent, document.body);
+  }
+  
+  return null;
 }
