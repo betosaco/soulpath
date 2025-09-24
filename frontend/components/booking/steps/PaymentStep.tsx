@@ -39,7 +39,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { useBookingFlow } from '../hooks/useBookingFlow';
 import { useCart } from '@/store/appStore';
-import { StripeInlineForm } from '../../stripe/StripeInlineForm';
+import { TermsAndConditionsModal } from '../../TermsAndConditionsModal';
+import { CreditCard, Clock, User, MapPin, Calendar, CheckCircle, AlertCircle } from 'lucide-react';
 
 /**
  * PAYMENT STEP PROPS
@@ -86,7 +87,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
    * ------------------
    * Access to flow navigation functions
    */
-  const { goToNextStep } = useBookingFlow();
+  const { goToNextStep, hasPhysicalProducts } = useBookingFlow();
 
   /**
    * CART STATE
@@ -102,6 +103,8 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
    */
   const [paymentStatus, setPaymentStatus] = React.useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [orderData, setOrderData] = React.useState<OrderData | null>(null);
+  const [showTermsModal, setShowTermsModal] = React.useState(false);
+  const [termsAccepted, setTermsAccepted] = React.useState(false);
 
   // ============================================================================
   // BUSINESS LOGIC - ORDER VALIDATION
@@ -218,6 +221,53 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
     toast.error('Payment failed. Please try again.');
   };
 
+  /**
+   * HANDLE PAY LATER
+   * ----------------
+   * Processes pay later option
+   */
+  const handlePayLater = () => {
+    if (!termsAccepted) {
+      setShowTermsModal(true);
+      return;
+    }
+
+    console.log('💳 Pay Later selected');
+    setPaymentStatus('processing');
+
+    // Create order data for confirmation
+    const orderInfo: OrderData = {
+      orderNumber: `ORD-${Date.now()}`,
+      total: getTotalPrice(),
+      items: cartItems.map(item => ({
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price
+      }))
+    };
+
+    setOrderData(orderInfo);
+
+    // Show success message
+    toast.success('Order confirmed! You will be contacted for payment.');
+
+    // Navigate to confirmation after a brief delay
+    setTimeout(() => {
+      goToNextStep();
+    }, 2000);
+  };
+
+  /**
+   * HANDLE TERMS ACCEPTANCE
+   * -----------------------
+   * Processes terms and conditions acceptance
+   */
+  const handleTermsAccept = () => {
+    setTermsAccepted(true);
+    setShowTermsModal(false);
+    toast.success('Terms and conditions accepted');
+  };
+
 
   // ============================================================================
   // RENDER HELPERS
@@ -226,26 +276,92 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
   /**
    * RENDER ORDER SUMMARY
    * --------------------
-   * Displays the order summary with all items and total
+   * Displays the complete order summary with customer info, packages, and bookings
    */
   const renderOrderSummary = () => (
     <Card className="unified-card">
       <CardHeader>
-        <CardTitle className="unified-card__title">Order Summary</CardTitle>
+        <CardTitle className="unified-card__title">Complete Order Summary</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
-          {cartItems.map((item, index) => (
-            <div key={`${item.id}-${index}`} className="flex items-center justify-between">
-              <span>{item.name} x {item.quantity}</span>
-              <span>S/ {(item.price * item.quantity).toFixed(2)}</span>
+        <div className="space-y-6">
+          {/* Customer Information */}
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+              <User className="w-5 h-5 mr-2" />
+              Customer Information
+            </h4>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p className="text-sm text-gray-600">
+                Customer details will be collected in the previous step
+              </p>
             </div>
-          ))}
+          </div>
 
-          <div className="border-t pt-2 mt-4">
-            <div className="flex justify-between font-bold">
-              <span>Total:</span>
-              <span>S/ {getTotalPrice().toFixed(2)}</span>
+          {/* Shipping Information (if applicable) */}
+          {hasPhysicalProducts && (
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                <MapPin className="w-5 h-5 mr-2" />
+                Shipping Address
+              </h4>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <p className="text-sm text-gray-600">
+                  Shipping address will be collected in the previous step
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Packages and Bookings */}
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+              <Calendar className="w-5 h-5 mr-2" />
+              Packages & Bookings
+            </h4>
+            <div className="space-y-4">
+              {cartItems.map((item, index) => (
+                <div key={`${item.id}-${index}`} className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h5 className="font-medium text-gray-900">{item.name}</h5>
+                    <span className="font-semibold text-green-600">
+                      {item.currency} {(item.price * item.quantity).toFixed(2)}
+                    </span>
+                  </div>
+                  
+                  {item.type === 'package' && item.bookingDetails && item.bookingDetails.length > 0 && (
+                    <div className="mt-3">
+                      <p className="text-sm text-gray-600 mb-2">
+                        Booked Sessions ({item.bookingDetails.length}):
+                      </p>
+                      <div className="space-y-1">
+                        {item.bookingDetails.map((booking, bookingIndex) => (
+                          <div key={bookingIndex} className="text-sm bg-blue-50 p-2 rounded">
+                            <div className="flex items-center justify-between">
+                              <span className="text-blue-800">
+                                {booking.selectedDate} at {booking.selectedTime}
+                              </span>
+                              <span className="text-blue-600 text-xs">
+                                {booking.teacher || 'TBD'}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Total */}
+          <div className="border-t pt-4">
+            <div className="flex justify-between items-center">
+              <span className="text-lg font-semibold text-gray-900">Total:</span>
+              <span className="text-xl font-bold text-green-600">
+                {cartItems.length > 0 && cartItems[0].currency} {getTotalPrice().toFixed(2)}
+              </span>
             </div>
           </div>
         </div>
@@ -303,7 +419,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
           Payment
         </h2>
         <p className="text-gray-600">
-          Complete your purchase securely
+          Review your order and complete your purchase
         </p>
       </div>
 
@@ -313,18 +429,95 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
       {/* Main Payment Interface */}
       {paymentStatus !== 'success' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Payment Form */}
+          {/* Payment Options */}
           <div>
             {validation.isValid ? (
-              <StripeInlineForm
-                amount={totalPrice * 100} // Convert to cents
-                currency="PEN"
-                description="Wellness Package Purchase"
-                onSuccess={handlePaymentSuccess}
-                onError={handlePaymentError}
-              />
+              <Card className="unified-card">
+                <CardHeader>
+                  <CardTitle className="unified-card__title">Payment Options</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* Disabled Payment Forms */}
+                    <div className="space-y-3">
+                      <div className="p-4 bg-gray-100 border border-gray-300 rounded-lg opacity-60">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <CreditCard className="w-6 h-6 text-gray-500" />
+                          <h4 className="font-medium text-gray-700">Credit/Debit Card</h4>
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          Payment forms are temporarily disabled
+                        </p>
+                      </div>
+
+                      <div className="p-4 bg-gray-100 border border-gray-300 rounded-lg opacity-60">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <CreditCard className="w-6 h-6 text-gray-500" />
+                          <h4 className="font-medium text-gray-700">Bank Transfer</h4>
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          Bank transfer option is temporarily disabled
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Pay Later Option */}
+                    <div className="border-t pt-4">
+                      <div className="flex items-center space-x-3 mb-4">
+                        <Clock className="w-6 h-6 text-orange-500" />
+                        <h4 className="font-medium text-gray-900">Pay Later</h4>
+                      </div>
+                      
+                      <p className="text-sm text-gray-600 mb-4">
+                        Complete your order now and pay later. We will contact you to arrange payment.
+                      </p>
+
+                      {/* Terms Acceptance */}
+                      <div className="mb-4">
+                        <label className="flex items-start space-x-3">
+                          <input
+                            type="checkbox"
+                            checked={termsAccepted}
+                            onChange={(e) => setTermsAccepted(e.target.checked)}
+                            className="mt-1 w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                          />
+                          <span className="text-sm text-gray-700">
+                            I agree to the{' '}
+                            <button
+                              onClick={() => setShowTermsModal(true)}
+                              className="text-blue-600 hover:text-blue-800 underline"
+                            >
+                              Terms and Conditions
+                            </button>
+                          </span>
+                        </label>
+                      </div>
+
+                      <button
+                        onClick={handlePayLater}
+                        disabled={!termsAccepted}
+                        className={`w-full py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2 ${
+                          termsAccepted
+                            ? 'bg-orange-600 text-white hover:bg-orange-700'
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        }`}
+                      >
+                        <Clock className="w-5 h-5" />
+                        <span>Pay Later</span>
+                      </button>
+
+                      {!termsAccepted && (
+                        <p className="text-xs text-gray-500 mt-2 text-center">
+                          Please accept the Terms and Conditions to proceed
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             ) : (
               <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-center">
+                <AlertCircle className="w-8 h-8 text-red-500 mx-auto mb-2" />
                 <p className="text-red-800 font-medium">
                   ⚠️ Cannot proceed with payment
                 </p>
@@ -355,37 +548,28 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
       {paymentStatus === 'success' && orderData && (
         <div className="text-center">
           <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+            <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-green-800 mb-2">
-              🎉 Payment Successful!
+              🎉 Order Confirmed!
             </h3>
             <p className="text-green-700 mb-4">
-              Your order has been processed successfully.
+              Your order has been confirmed. We will contact you to arrange payment.
             </p>
             <div className="text-sm text-green-600">
               <p>Order #{orderData.orderNumber}</p>
-              <p>Total: S/ {orderData.total.toFixed(2)}</p>
+              <p>Total: {cartItems.length > 0 && cartItems[0].currency} {orderData.total.toFixed(2)}</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Debug Information (remove in production) */}
-      {process.env.NODE_ENV === 'development' && (
-        <details className="mt-8 p-4 bg-gray-50 rounded-lg">
-          <summary className="cursor-pointer font-medium text-gray-700">
-            Debug Information
-          </summary>
-          <pre className="mt-2 text-xs text-gray-600 overflow-auto">
-            {JSON.stringify({
-              paymentStatus,
-              totalPrice,
-              cartItemsCount: cartItems.length,
-              validation,
-              orderData
-            }, null, 2)}
-          </pre>
-        </details>
-      )}
+      {/* Terms and Conditions Modal */}
+      <TermsAndConditionsModal
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        onAccept={handleTermsAccept}
+        language="en"
+      />
     </div>
   );
 }
