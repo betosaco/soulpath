@@ -148,17 +148,42 @@ export function PackageSelectionModal({
     const total = pkg.sessions || 1;
     const progressPercentage = (booked / total) * 100;
 
+    // Check if this package has already booked this specific slot
+    const hasBookedThisSlot = pkg.bookingDetails?.some((booking: any) =>
+      booking.selectedDate === scheduleData.selectedDate &&
+      booking.selectedTime === scheduleData.selectedTime
+    ) || false;
+
+    // Check if package can be selected (has remaining sessions and hasn't booked this slot)
+    const canSelect = remaining > 0 && !hasBookedThisSlot;
+
     return (
       <button
         key={pkg.id}
-        onClick={() => handlePackageSelect(pkg.id, pkg.originalId)}
-        className="w-full p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition-all duration-200 text-left group"
-        title={`Select ${pkg.name} for this booking`}
+        onClick={() => canSelect ? handlePackageSelect(pkg.id, pkg.originalId) : null}
+        disabled={!canSelect}
+        className={`w-full p-4 border rounded-lg transition-all duration-200 text-left group ${
+          canSelect 
+            ? 'border-gray-200 hover:border-green-500 hover:bg-green-50' 
+            : 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-60'
+        }`}
+        title={canSelect ? `Select ${pkg.name} for this booking` : 
+               hasBookedThisSlot ? `${pkg.name} has already booked this time slot` :
+               `${pkg.name} has no remaining sessions`}
       >
         <div className="flex justify-between items-start">
           <div className="flex-1">
-            <h4 className="font-semibold text-gray-900 group-hover:text-green-800 mb-2">
+            <h4 className={`font-semibold mb-2 ${
+              canSelect 
+                ? 'text-gray-900 group-hover:text-green-800' 
+                : 'text-gray-500'
+            }`}>
               {pkg.name}
+              {hasBookedThisSlot && (
+                <span className="ml-2 text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded">
+                  Already Booked
+                </span>
+              )}
             </h4>
 
             <div className="space-y-2 text-sm text-gray-600">
@@ -188,11 +213,15 @@ export function PackageSelectionModal({
           </div>
 
           <div className="text-right ml-4">
-            <div className="text-green-600 font-bold text-lg">
+            <div className={`font-bold text-lg ${
+              canSelect ? 'text-green-600' : 'text-gray-400'
+            }`}>
               {remaining}
             </div>
-            <div className="text-xs text-gray-500">
-              available
+            <div className={`text-xs ${
+              canSelect ? 'text-gray-500' : 'text-gray-400'
+            }`}>
+              {hasBookedThisSlot ? 'booked this slot' : 'available'}
             </div>
           </div>
         </div>
