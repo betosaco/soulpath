@@ -40,6 +40,7 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CountryInput } from '@/components/ui/CountryInput';
+import { PeruAddressInput } from '@/components/ui/PeruAddressInput';
 import { toast } from 'sonner';
 import { useBookingFlow } from '../hooks/useBookingFlow';
 import { useCart } from '@/store/appStore';
@@ -55,6 +56,10 @@ interface ShippingFormData {
   state: string;
   postalCode: string;
   country: string;
+  // Peru-specific fields
+  peruDepartment?: string;
+  peruProvince?: string;
+  peruDistrict?: string;
 }
 
 /**
@@ -106,7 +111,10 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
     city: initialData?.city || '',
     state: initialData?.state || '',
     postalCode: initialData?.postalCode || '',
-    country: initialData?.country || 'PE' // Default to Peru
+    country: initialData?.country || 'PE', // Default to Peru
+    peruDepartment: initialData?.peruDepartment || 'LIM',
+    peruProvince: initialData?.peruProvince || 'LMA',
+    peruDistrict: initialData?.peruDistrict || 'MIR'
   });
 
   /**
@@ -378,6 +386,38 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
           defaultCountryCode="PE"
         />
       </div>
+
+      {/* Peru Address Fields - Only show when Peru is selected */}
+      {formData.country === 'PE' && (
+        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <h3 className="text-lg font-semibold text-blue-900 mb-4">
+            Peru Address Details
+          </h3>
+          <PeruAddressInput
+            value={{
+              department: formData.peruDepartment || 'LIM',
+              province: formData.peruProvince || 'LMA',
+              district: formData.peruDistrict || 'MIR',
+              postalCode: formData.postalCode || '15074'
+            }}
+            onChange={(peruAddress) => {
+              setFormData(prev => ({
+                ...prev,
+                peruDepartment: peruAddress.department,
+                peruProvince: peruAddress.province,
+                peruDistrict: peruAddress.district,
+                postalCode: peruAddress.postalCode
+              }));
+            }}
+            errors={{
+              department: errors.peruDepartment,
+              province: errors.peruProvince,
+              district: errors.peruDistrict,
+              postalCode: errors.postalCode
+            }}
+          />
+        </div>
+      )}
 
       {/* Form Actions */}
       <div className="flex justify-end pt-4">
