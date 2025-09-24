@@ -40,7 +40,7 @@ import { toast } from 'sonner';
 import { useBookingFlow } from '../hooks/useBookingFlow';
 import { useCart } from '@/store/appStore';
 import { TermsAndConditionsModal } from '../../TermsAndConditionsModal';
-import { CreditCard, Clock, User, MapPin, Calendar, CheckCircle, AlertCircle } from 'lucide-react';
+import { CreditCard, Clock, User, MapPin, Calendar, CheckCircle, AlertCircle, Mail, Phone } from 'lucide-react';
 
 /**
  * PAYMENT STEP PROPS
@@ -292,9 +292,23 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
               Customer Information
             </h4>
             <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600">
-                Customer details will be collected in the previous step
-              </p>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center space-x-2">
+                  <User className="w-4 h-4 text-gray-500" />
+                  <span className="text-gray-600">Name:</span>
+                  <span className="font-medium text-gray-900">[Customer Name]</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Mail className="w-4 h-4 text-gray-500" />
+                  <span className="text-gray-600">Email:</span>
+                  <span className="font-medium text-gray-900">[customer@email.com]</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Phone className="w-4 h-4 text-gray-500" />
+                  <span className="text-gray-600">Phone:</span>
+                  <span className="font-medium text-gray-900">[+51 999 999 999]</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -331,19 +345,82 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                   
                   {item.type === 'package' && item.bookingDetails && item.bookingDetails.length > 0 && (
                     <div className="mt-3">
-                      <p className="text-sm text-gray-600 mb-2">
+                      <p className="text-sm text-gray-600 mb-3">
                         Booked Sessions ({item.bookingDetails.length}):
                       </p>
-                      <div className="space-y-1">
+                      <div className="space-y-2">
                         {item.bookingDetails.map((booking, bookingIndex) => (
-                          <div key={bookingIndex} className="text-sm bg-blue-50 p-2 rounded">
-                            <div className="flex items-center justify-between">
-                              <span className="text-blue-800">
-                                {booking.selectedDate} at {booking.selectedTime}
-                              </span>
-                              <span className="text-blue-600 text-xs">
-                                {booking.teacher || 'TBD'}
-                              </span>
+                          <div key={bookingIndex} className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                            {/* Compact Session Header */}
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center space-x-2">
+                                <Calendar className="w-4 h-4 text-blue-600" />
+                                <span className="text-sm font-semibold text-blue-900">
+                                  Session {bookingIndex + 1}
+                                </span>
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <CheckCircle className="w-3 h-3 text-green-500" />
+                                <span className="text-xs text-green-600 font-medium">Ready</span>
+                              </div>
+                            </div>
+
+                            {/* Compact Session Details - Two Column Layout */}
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              {/* Date & Time */}
+                              <div className="flex items-center space-x-1">
+                                <Clock className="w-3 h-3 text-gray-500" />
+                                <span className="text-gray-600">Date:</span>
+                                <span className="font-medium text-gray-900">{booking.selectedDate}</span>
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <Clock className="w-3 h-3 text-gray-500" />
+                                <span className="text-gray-600">Time:</span>
+                                <span className="font-medium text-gray-900">{booking.selectedTime}</span>
+                              </div>
+
+                              {/* Teacher & Service */}
+                              {booking.teacher && (
+                                <div className="flex items-center space-x-1">
+                                  <User className="w-3 h-3 text-gray-500" />
+                                  <span className="text-gray-600">Teacher:</span>
+                                  <span className="font-medium text-gray-900 truncate">{booking.teacher}</span>
+                                </div>
+                              )}
+                              {booking.serviceType && (
+                                <div className="flex items-center space-x-1">
+                                  <Calendar className="w-3 h-3 text-gray-500" />
+                                  <span className="text-gray-600">Service:</span>
+                                  <span className="font-medium text-gray-900 truncate">{booking.serviceType}</span>
+                                </div>
+                              )}
+
+                              {/* Day & Venue */}
+                              {booking.dayOfWeek && (
+                                <div className="flex items-center space-x-1">
+                                  <Clock className="w-3 h-3 text-gray-500" />
+                                  <span className="text-gray-600">Day:</span>
+                                  <span className="font-medium text-gray-900">{booking.dayOfWeek}</span>
+                                </div>
+                              )}
+                              {booking.venue && (
+                                <div className="flex items-center space-x-1">
+                                  <MapPin className="w-3 h-3 text-gray-500" />
+                                  <span className="text-gray-600">Location:</span>
+                                  <span className="font-medium text-gray-900 truncate">{booking.venue}</span>
+                                </div>
+                              )}
+
+                              {/* Slot ID (if available) */}
+                              {booking.scheduleSlotId && (
+                                <div className="flex items-center space-x-1 col-span-2">
+                                  <div className="w-3 h-3 bg-gray-300 rounded-full flex items-center justify-center">
+                                    <span className="text-xs text-gray-600">#</span>
+                                  </div>
+                                  <span className="text-gray-600">Slot ID:</span>
+                                  <span className="font-mono text-xs text-gray-700">{booking.scheduleSlotId}</span>
+                                </div>
+                              )}
                             </div>
                           </div>
                         ))}
@@ -355,13 +432,32 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
             </div>
           </div>
 
-          {/* Total */}
+          {/* Price Breakdown */}
           <div className="border-t pt-4">
-            <div className="flex justify-between items-center">
-              <span className="text-lg font-semibold text-gray-900">Total:</span>
-              <span className="text-xl font-bold text-green-600">
-                {cartItems.length > 0 && cartItems[0].currency} {getTotalPrice().toFixed(2)}
-              </span>
+            <div className="space-y-2 text-sm">
+              {/* Subtotal */}
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Subtotal:</span>
+                <span className="font-medium text-gray-900">
+                  {cartItems.length > 0 && cartItems[0].currency} {(getTotalPrice() / 1.18).toFixed(2)}
+                </span>
+              </div>
+              
+              {/* IGV (18%) */}
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">IGV (18%):</span>
+                <span className="font-medium text-gray-900">
+                  {cartItems.length > 0 && cartItems[0].currency} {(getTotalPrice() - (getTotalPrice() / 1.18)).toFixed(2)}
+                </span>
+              </div>
+              
+              {/* Total */}
+              <div className="flex justify-between items-center pt-2 border-t">
+                <span className="text-lg font-semibold text-gray-900">Total:</span>
+                <span className="text-xl font-bold text-green-600">
+                  {cartItems.length > 0 && cartItems[0].currency} {getTotalPrice().toFixed(2)}
+                </span>
+              </div>
             </div>
           </div>
         </div>

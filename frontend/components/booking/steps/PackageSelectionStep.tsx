@@ -154,10 +154,10 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
       const placeholderSchedule: ScheduleData = {
         selectedDate: urlParams.slotDate, // Use actual date from slot
         selectedTime: urlParams.slotTime, // Use actual time from slot
-        teacher: `Teacher ${(slotId % 5) + 1}`, // Keep placeholder teacher for now
+        teacher: urlParams.teacherName || `Teacher ${(slotId % 5) + 1}`, // Use real teacher name from URL
         dayOfWeek: scheduleDate.toLocaleDateString('en-US', { weekday: 'long' }),
-        serviceType: 'Yoga Class', // Keep placeholder service type
-        venue: `Studio ${(slotId % 3) + 1}`, // Keep placeholder venue
+        serviceType: urlParams.serviceType || 'Yoga Class', // Use real service type from URL
+        venue: urlParams.venueName || `Studio ${(slotId % 3) + 1}`, // Use real venue name from URL
         scheduleSlotId: slotId
       };
 
@@ -167,7 +167,7 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
       // Clear schedules if not in schedule-first scenario or missing slot data
       setPreSelectedSchedules([]);
     }
-  }, [isScheduleFirst, urlParams.slotId, urlParams.slotDate, urlParams.slotTime, urlParams.readyForSchedule]);
+  }, [isScheduleFirst, urlParams.slotId, urlParams.slotDate, urlParams.slotTime, urlParams.teacherName, urlParams.serviceType, urlParams.venueName, urlParams.readyForSchedule]);
 
   // ============================================================================
   // BUSINESS LOGIC - PACKAGE MANAGEMENT

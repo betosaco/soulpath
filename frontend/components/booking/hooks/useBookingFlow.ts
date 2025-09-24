@@ -298,6 +298,9 @@ export function useBookingFlow(): UseBookingFlowReturn {
     readyForSchedule: searchParams.get('readyForSchedule') === 'true',
     slotDate: searchParams.get('slotDate') || undefined,
     slotTime: searchParams.get('slotTime') || undefined,
+    teacherName: searchParams.get('teacherName') || undefined,
+    serviceType: searchParams.get('serviceType') || undefined,
+    venueName: searchParams.get('venueName') || undefined,
   }), [searchParams]);
 
   // Check if cart contains physical products (requires shipping)

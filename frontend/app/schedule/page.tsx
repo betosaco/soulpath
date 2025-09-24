@@ -7,11 +7,14 @@ import { EnhancedSchedule } from '@/components/EnhancedSchedule';
 export default function SchedulePage() {
   const handleScheduleSelected = (slot: any) => {
     // Navigate to booking flow when a slot is selected
-    // Pass slot details to avoid date calculation issues
+    // Pass slot details including teacher and service information
     const params = new URLSearchParams({
       slotId: slot.id.toString(),
       slotDate: slot.date,
       slotTime: slot.time,
+      teacherName: slot.teacher?.name || '',
+      serviceType: slot.serviceType?.name || '',
+      venueName: slot.venue?.name || '',
       readyForSchedule: 'true'
     });
     window.location.href = `/booking/packages?${params.toString()}`;

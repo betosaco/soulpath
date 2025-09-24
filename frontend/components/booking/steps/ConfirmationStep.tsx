@@ -215,21 +215,77 @@ export function ConfirmationStep({
 
                 <div className="space-y-2">
                   {item.bookingDetails?.map((booking, bookingIndex) => (
-                    <div key={bookingIndex} className="flex items-center justify-between p-2 bg-blue-50 rounded">
-                      <div className="flex items-center space-x-3">
-                        <Calendar className="w-4 h-4 text-blue-600" />
-                        <div>
-                          <p className="font-medium text-gray-900">
-                            {booking.selectedDate}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            {booking.selectedTime} - {booking.serviceType}
-                          </p>
+                    <div key={bookingIndex} className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      {/* Compact Session Header */}
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center space-x-2">
+                          <Calendar className="w-4 h-4 text-blue-600" />
+                          <span className="text-sm font-semibold text-blue-900">
+                            Session {bookingIndex + 1}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <CheckCircle className="w-3 h-3 text-green-500" />
+                          <span className="text-xs text-green-600 font-medium">Confirmed</span>
                         </div>
                       </div>
-                      <div className="text-right text-sm text-gray-600">
-                        <p>{booking.teacher}</p>
-                        <p>{booking.venue}</p>
+
+                      {/* Compact Session Details - Two Column Layout */}
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        {/* Date & Time */}
+                        <div className="flex items-center space-x-1">
+                          <Clock className="w-3 h-3 text-gray-500" />
+                          <span className="text-gray-600">Date:</span>
+                          <span className="font-medium text-gray-900">{booking.selectedDate}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Clock className="w-3 h-3 text-gray-500" />
+                          <span className="text-gray-600">Time:</span>
+                          <span className="font-medium text-gray-900">{booking.selectedTime}</span>
+                        </div>
+
+                        {/* Teacher & Service */}
+                        {booking.teacher && (
+                          <div className="flex items-center space-x-1">
+                            <User className="w-3 h-3 text-gray-500" />
+                            <span className="text-gray-600">Teacher:</span>
+                            <span className="font-medium text-gray-900 truncate">{booking.teacher}</span>
+                          </div>
+                        )}
+                        {booking.serviceType && (
+                          <div className="flex items-center space-x-1">
+                            <Calendar className="w-3 h-3 text-gray-500" />
+                            <span className="text-gray-600">Service:</span>
+                            <span className="font-medium text-gray-900 truncate">{booking.serviceType}</span>
+                          </div>
+                        )}
+
+                        {/* Day & Venue */}
+                        {booking.dayOfWeek && (
+                          <div className="flex items-center space-x-1">
+                            <Clock className="w-3 h-3 text-gray-500" />
+                            <span className="text-gray-600">Day:</span>
+                            <span className="font-medium text-gray-900">{booking.dayOfWeek}</span>
+                          </div>
+                        )}
+                        {booking.venue && (
+                          <div className="flex items-center space-x-1">
+                            <MapPin className="w-3 h-3 text-gray-500" />
+                            <span className="text-gray-600">Location:</span>
+                            <span className="font-medium text-gray-900 truncate">{booking.venue}</span>
+                          </div>
+                        )}
+
+                        {/* Slot ID (if available) */}
+                        {booking.scheduleSlotId && (
+                          <div className="flex items-center space-x-1 col-span-2">
+                            <div className="w-3 h-3 bg-gray-300 rounded-full flex items-center justify-center">
+                              <span className="text-xs text-gray-600">#</span>
+                            </div>
+                            <span className="text-gray-600">Slot ID:</span>
+                            <span className="font-mono text-xs text-gray-700">{booking.scheduleSlotId}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}

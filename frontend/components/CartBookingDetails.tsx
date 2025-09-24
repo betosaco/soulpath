@@ -124,7 +124,7 @@ export function CartBookingDetails({
                 </div>
               </div>
 
-              {/* Teacher and Venue */}
+              {/* Complete Session Details */}
               <div className="space-y-2">
                 {booking.teacher && (
                   <div className="flex items-center gap-3 text-sm">
@@ -136,6 +136,16 @@ export function CartBookingDetails({
                   </div>
                 )}
                 
+                {booking.dayOfWeek && (
+                  <div className="flex items-center gap-3 text-sm">
+                    <div className="flex items-center gap-2 text-gray-500">
+                      <Clock className="w-3.5 h-3.5 text-gray-400" />
+                      <span className="font-medium">Day:</span>
+                    </div>
+                    <span className="text-gray-700">{booking.dayOfWeek}</span>
+                  </div>
+                )}
+                
                 {booking.venue && (
                   <div className="flex items-center gap-3 text-sm">
                     <div className="flex items-center gap-2 text-gray-500">
@@ -143,6 +153,18 @@ export function CartBookingDetails({
                       <span className="font-medium">Location:</span>
                     </div>
                     <span className="text-gray-700">{booking.venue}</span>
+                  </div>
+                )}
+
+                {booking.scheduleSlotId && (
+                  <div className="flex items-center gap-3 text-sm">
+                    <div className="flex items-center gap-2 text-gray-500">
+                      <div className="w-3.5 h-3.5 bg-gray-300 rounded-full flex items-center justify-center">
+                        <span className="text-xs text-gray-600">#</span>
+                      </div>
+                      <span className="font-medium">Slot ID:</span>
+                    </div>
+                    <span className="text-gray-700 font-mono text-xs">{booking.scheduleSlotId}</span>
                   </div>
                 )}
               </div>
