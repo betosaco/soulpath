@@ -292,6 +292,41 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
+          {/* Price Details */}
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+              <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
+              Price Details
+            </h4>
+            <div className="bg-white border border-gray-200 rounded-lg p-4">
+              <div className="space-y-2 text-sm">
+                {/* Subtotal */}
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Subtotal:</span>
+                  <span className="font-medium text-gray-900">
+                    {cartItems.length > 0 && cartItems[0].currency} {(getTotalPrice() / 1.18).toFixed(2)}
+                  </span>
+                </div>
+                
+                {/* IGV (18%) */}
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">IGV (18%):</span>
+                  <span className="font-medium text-gray-900">
+                    {cartItems.length > 0 && cartItems[0].currency} {(getTotalPrice() - (getTotalPrice() / 1.18)).toFixed(2)}
+                  </span>
+                </div>
+                
+                {/* Total */}
+                <div className="flex justify-between items-center pt-2 border-t border-gray-300">
+                  <span className="text-lg font-semibold text-gray-900">Total:</span>
+                  <span className="text-xl font-bold text-green-600">
+                    {cartItems.length > 0 && cartItems[0].currency} {getTotalPrice().toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Shipping Information (if applicable) */}
           {hasPhysicalProducts && (
             <div>
