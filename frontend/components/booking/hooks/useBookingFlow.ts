@@ -24,6 +24,7 @@
 
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
+import { useCart } from '@/store/appStore';
 
 /**
  * BOOKING SCENARIO TYPES
@@ -182,6 +183,9 @@ interface UseBookingFlowReturn {
   isAddMore: boolean;
   isMultiPackage: boolean;
   isDirectCheckout: boolean;
+  
+  // Cart state
+  hasPhysicalProducts: boolean;
 }
 
 /**
@@ -280,6 +284,7 @@ export function useBookingFlow(): UseBookingFlowReturn {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const { items: cartItems } = useCart();
 
   // Parse current URL state
   const scenario = useMemo(() => determineScenario(searchParams), [searchParams]);
@@ -294,6 +299,11 @@ export function useBookingFlow(): UseBookingFlowReturn {
     slotDate: searchParams.get('slotDate') || undefined,
     slotTime: searchParams.get('slotTime') || undefined,
   }), [searchParams]);
+
+  // Check if cart contains physical products (requires shipping)
+  const hasPhysicalProducts = useMemo(() => {
+    return cartItems.some(item => item.type === 'product');
+  }, [cartItems]);
 
   // Scenario booleans for convenience
   const isScheduleFirst = scenario === 'schedule-first';
@@ -362,8 +372,14 @@ export function useBookingFlow(): UseBookingFlowReturn {
     const config = FLOW_CONFIG[currentStep];
     if (!config.next) return;
 
+    // Determine the actual next step (skip shipping if no physical products)
+    let actualNextStep = config.next;
+    if (config.next === 'shipping' && !hasPhysicalProducts) {
+      actualNextStep = 'payment';
+    }
+
     // Build URL for next step
-    const nextUrl = new URL(config.url, window.location.origin);
+    const nextUrl = new URL(FLOW_CONFIG[actualNextStep].url, window.location.origin);
 
     // Preserve existing search parameters
     searchParams.forEach((value, key) => {
@@ -393,7 +409,7 @@ export function useBookingFlow(): UseBookingFlowReturn {
       'multi-package': 'schedule',
       'customer-info': 'schedule',
       'shipping': 'customer-info',
-      'payment': 'shipping'
+      'payment': hasPhysicalProducts ? 'shipping' : 'customer-info'
     };
 
     const prevStep = reverseMap[currentStep];
@@ -449,6 +465,9 @@ export function useBookingFlow(): UseBookingFlowReturn {
     isPackageFirst,
     isAddMore,
     isMultiPackage,
-    isDirectCheckout
+    isDirectCheckout,
+    
+    // Cart state
+    hasPhysicalProducts
   };
 }

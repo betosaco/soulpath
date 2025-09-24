@@ -98,8 +98,16 @@ export function GroupCustomerInfoStep() {
   const handleSubmit = () => {
     console.log('👥 Group customer info submitted:', customerInfos);
     // TODO: Save customer info to store/API
+    
+    // Check if cart contains physical products (requires shipping)
+    const hasPhysicalProducts = cartItems.some(item => item.type === 'product');
+    
     // Navigate to next step (shipping or payment)
-    router.push('/booking/shipping');
+    if (hasPhysicalProducts) {
+      router.push('/booking/shipping');
+    } else {
+      router.push('/booking/payment');
+    }
   };
 
   return (

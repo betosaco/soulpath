@@ -32,7 +32,7 @@ export function GroupBookingSelectionStep() {
 
   const handleIndividualBooking = () => {
     console.log('👤 User selected Individual Booking');
-    // Navigate to single user form
+    // Navigate directly to single user form
     router.push('/booking/customer-info?isDirectCheckout=true');
   };
 
