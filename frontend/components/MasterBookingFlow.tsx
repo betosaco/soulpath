@@ -25,6 +25,7 @@
  * B) Package-First: User selects package → slots → checkout  
  * C) Add More: User adds sessions to existing packages
  * D) Multiple Packages: User manages multiple packages with modal selection
+ * E) Enhanced Flow: User with packages in cart navigates to schedule page → goes to schedule step
  * 
  * VALIDATION RULES:
  * ----------------
@@ -202,6 +203,7 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
     // FLOW DETECTION LOGIC:
     // - Check isDirectCheckout prop (when coming from cart with all sessions booked)
     // - Check for "add more bookings" scenario (packages in cart + sessionStorage flags)
+    // - Enhanced flow: If packages in cart + schedule page, go to schedule step
     // - Fall back to initialStep prop (0=packages, 1=schedule)
 
     console.log('🔍 FLOW DETECTION - Initial render:', {
@@ -219,10 +221,18 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
     if (typeof window !== 'undefined') {
       const isAddingMore = sessionStorage.getItem('isAddingMoreBookings') === 'true';
       const hasPackagesInCart = cartItems && cartItems.some(item => item.type === 'package');
+      const packageCount = cartItems ? cartItems.filter(item => item.type === 'package').length : 0;
       
       if (isAddingMore && hasPackagesInCart) {
         console.log('🔍 SCENARIO C: Add more bookings detected - routing to schedule step');
         return 1; // SCENARIO C: Go to schedule step for adding more bookings
+      }
+      
+      // ENHANCED FLOW DETECTION: If user has packages in cart and is on schedule page, go to schedule step
+      if (hasPackagesInCart && initialStep === 1) {
+        console.log('🔍 ENHANCED FLOW: Packages in cart + schedule page - routing to schedule step');
+        console.log('🔍 Package count:', packageCount, 'Initial step:', initialStep);
+        return 1; // Go to schedule step when packages are in cart and user is on schedule page
       }
     }
 
@@ -1310,7 +1320,7 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
                   Your Selected Schedules
                 </h3>
                 <p className="text-blue-700 mb-3">
-                  You've selected {selectedSchedules.length} time slot(s). Now choose a package that matches your needs.
+                  You&apos;ve selected {selectedSchedules.length} time slot(s). Now choose a package that matches your needs.
                 </p>
                 <div className="space-y-2">
                   {selectedSchedules.map((schedule, index) => (
