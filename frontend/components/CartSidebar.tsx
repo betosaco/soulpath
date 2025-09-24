@@ -5,7 +5,6 @@ import { XMarkIcon, PlusIcon, MinusIcon, TrashIcon, CalendarDaysIcon, CheckCircl
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCart, useCartUI } from '@/store/appStore';
-import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CartBookingDetails } from './CartBookingDetails';
 // import { toast } from 'sonner';
@@ -308,14 +307,14 @@ export function CartSidebar() {
                 {/* Book a Class Now / Proceed to Checkout button */}
                 {hasPackages && (
                   <button
-                    disabled={allSessionsBooked}
                     onClick={(e) => {
                       console.log('🎯 Book Now button clicked!');
 
                       // Check if all sessions are already booked
                       if (allSessionsBooked) {
-                        toast.error('All available sessions have been booked. Please proceed to checkout.');
-                        console.log('🚫 Book Now blocked - all sessions already booked');
+                        console.log('🚫 All sessions booked - automatically proceeding to checkout');
+                        closeCart();
+                        router.push('/booking/customer-info?isDirectCheckout=true');
                         return;
                       }
 
@@ -367,7 +366,7 @@ export function CartSidebar() {
                     }}
                     className={`w-full py-3 px-4 rounded-lg font-medium transition-colors text-center flex items-center justify-center gap-2 ${
                       allSessionsBooked
-                        ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                        ? 'bg-green-600 text-white hover:bg-green-700'
                         : 'bg-orange-600 text-white hover:bg-orange-700'
                     }`}
                   >
@@ -376,7 +375,7 @@ export function CartSidebar() {
                     ) : (
                       <CalendarDaysIcon className="h-5 w-5" />
                     )}
-                    {allSessionsBooked ? 'All Sessions Booked' : 'Book a Class Now'}
+                    {allSessionsBooked ? 'Proceed to Checkout' : 'Book a Class Now'}
                     {packageCount > 1 && !allSessionsBooked && (
                       <span className="text-xs bg-orange-500 px-2 py-1 rounded-full">
                         {packageCount} packages
@@ -385,37 +384,40 @@ export function CartSidebar() {
                   </button>
                 )}
 
-                <button
-                  className="w-full bg-[#6ea058] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#5a8a4a] transition-colors text-center"
-                  onClick={() => {
-                    // Check if we're already on the checkout page
-                    const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
-                    const isOnCheckoutPage = currentPath === '/checkout';
+                {/* Only show separate Proceed to Checkout button when not all sessions are booked */}
+                {!allSessionsBooked && (
+                  <button
+                    className="w-full bg-[#6ea058] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#5a8a4a] transition-colors text-center"
+                    onClick={() => {
+                      // Check if we're already on the checkout page
+                      const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+                      const isOnCheckoutPage = currentPath === '/checkout';
 
-                    if (isOnCheckoutPage) {
-                      // Check if user is already in the customer info step (checkout step)
-                      const currentStepId = typeof window !== 'undefined' ? sessionStorage.getItem('currentStepId') : '';
-                      const isInCustomerInfoStep = currentStepId === 'customer';
+                      if (isOnCheckoutPage) {
+                        // Check if user is already in the customer info step (checkout step)
+                        const currentStepId = typeof window !== 'undefined' ? sessionStorage.getItem('currentStepId') : '';
+                        const isInCustomerInfoStep = currentStepId === 'customer';
 
-                      if (isInCustomerInfoStep) {
-                        // User is already in customer info step, just close the cart
-                        console.log('📍 Already in customer info step - just closing cart');
-                        closeCart();
+                        if (isInCustomerInfoStep) {
+                          // User is already in customer info step, just close the cart
+                          console.log('📍 Already in customer info step - just closing cart');
+                          closeCart();
+                        } else {
+                          // Already on checkout page but not in customer step, just close the cart
+                          console.log('📍 Already on checkout page - just closing cart');
+                          closeCart();
+                        }
                       } else {
-                        // Already on checkout page but not in customer step, just close the cart
-                        console.log('📍 Already on checkout page - just closing cart');
+                        // Navigate to new booking flow customer-info step with direct checkout
+                        console.log('📍 Navigating to customer-info step with isDirectCheckout=true');
                         closeCart();
+                        window.location.href = '/booking/customer-info?isDirectCheckout=true';
                       }
-                    } else {
-                      // Navigate to new booking flow customer-info step with direct checkout
-                      console.log('📍 Navigating to customer-info step with isDirectCheckout=true');
-                      closeCart();
-                      window.location.href = '/booking/customer-info?isDirectCheckout=true';
-                    }
-                  }}
-                >
-                  Proceed to Checkout
-                </button>
+                    }}
+                  >
+                    Proceed to Checkout
+                  </button>
+                )}
                 
                 <button
                   onClick={clearCart}
