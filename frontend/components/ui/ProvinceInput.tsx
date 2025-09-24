@@ -40,21 +40,21 @@ interface Province {
  * Provinces in Peru
  */
 const provinces: Province[] = [
-  { code: 'LMA', name: 'Lima Metropolitana', flag: '🏛️' },
-  { code: 'CAL', name: 'Callao', flag: '🚢' },
-  { code: 'ARE', name: 'Arequipa', flag: '🌋' },
-  { code: 'CUS', name: 'Cusco', flag: '🏔️' },
-  { code: 'LAM', name: 'Lambayeque', flag: '🏺' },
-  { code: 'PIU', name: 'Piura', flag: '🌴' },
-  { code: 'TAC', name: 'Tacna', flag: '🏜️' },
-  { code: 'ICA', name: 'Ica', flag: '🏜️' },
-  { code: 'TRU', name: 'La Libertad', flag: '🏛️' },
-  { code: 'JUN', name: 'Junín', flag: '⛰️' },
-  { code: 'LOR', name: 'Loreto', flag: '🌿' },
-  { code: 'ANC', name: 'Ancash', flag: '🐟' },
-  { code: 'UCA', name: 'Ucayali', flag: '🌳' },
-  { code: 'CAJ', name: 'Cajamarca', flag: '⛰️' },
-  { code: 'AYA', name: 'Ayacucho', flag: '🏛️' }
+  { code: 'LMA', name: 'Lima Metropolitana', flag: '' },
+  { code: 'CAL', name: 'Callao', flag: '' },
+  { code: 'ARE', name: 'Arequipa', flag: '' },
+  { code: 'CUS', name: 'Cusco', flag: '' },
+  { code: 'LAM', name: 'Lambayeque', flag: '' },
+  { code: 'PIU', name: 'Piura', flag: '' },
+  { code: 'TAC', name: 'Tacna', flag: '' },
+  { code: 'ICA', name: 'Ica', flag: '' },
+  { code: 'TRU', name: 'La Libertad', flag: '' },
+  { code: 'JUN', name: 'Junín', flag: '' },
+  { code: 'LOR', name: 'Loreto', flag: '' },
+  { code: 'ANC', name: 'Ancash', flag: '' },
+  { code: 'UCA', name: 'Ucayali', flag: '' },
+  { code: 'CAJ', name: 'Cajamarca', flag: '' },
+  { code: 'AYA', name: 'Ayacucho', flag: '' }
 ];
 
 /**
@@ -214,12 +214,9 @@ export function ProvinceInput({
           }`}
         >
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center">
               {selectedProvince && (
-                <>
-                  <span className="text-xl">{selectedProvince.flag}</span>
-                  <span className="font-medium">{selectedProvince.name}</span>
-                </>
+                <span className="font-medium">{selectedProvince.name}</span>
               )}
             </div>
             <svg
@@ -290,8 +287,7 @@ export function ProvinceInput({
                       selectedProvince?.code === province.code ? 'bg-blue-50 border-blue-200' : ''
                     }`}
                   >
-                    <div className="flex items-center space-x-3">
-                      <span className="text-xl">{province.flag}</span>
+                    <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <div className="font-medium text-gray-900">{province.name}</div>
                         <div className="text-sm text-gray-500">{province.code}</div>

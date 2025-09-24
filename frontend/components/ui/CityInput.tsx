@@ -40,21 +40,21 @@ interface City {
  * Major cities in Peru
  */
 const cities: City[] = [
-  { code: 'Lima', name: 'Lima', flag: '🏛️' },
-  { code: 'Callao', name: 'Callao', flag: '🚢' },
-  { code: 'Arequipa', name: 'Arequipa', flag: '🌋' },
-  { code: 'Cusco', name: 'Cusco', flag: '🏔️' },
-  { code: 'Chiclayo', name: 'Chiclayo', flag: '🏺' },
-  { code: 'Piura', name: 'Piura', flag: '🌴' },
-  { code: 'Tacna', name: 'Tacna', flag: '🏜️' },
-  { code: 'Ica', name: 'Ica', flag: '🏜️' },
-  { code: 'Trujillo', name: 'Trujillo', flag: '🏛️' },
-  { code: 'Huancayo', name: 'Huancayo', flag: '⛰️' },
-  { code: 'Iquitos', name: 'Iquitos', flag: '🌿' },
-  { code: 'Chimbote', name: 'Chimbote', flag: '🐟' },
-  { code: 'Pucallpa', name: 'Pucallpa', flag: '🌳' },
-  { code: 'Cajamarca', name: 'Cajamarca', flag: '⛰️' },
-  { code: 'Ayacucho', name: 'Ayacucho', flag: '🏛️' }
+  { code: 'Lima', name: 'Lima', flag: '' },
+  { code: 'Callao', name: 'Callao', flag: '' },
+  { code: 'Arequipa', name: 'Arequipa', flag: '' },
+  { code: 'Cusco', name: 'Cusco', flag: '' },
+  { code: 'Chiclayo', name: 'Chiclayo', flag: '' },
+  { code: 'Piura', name: 'Piura', flag: '' },
+  { code: 'Tacna', name: 'Tacna', flag: '' },
+  { code: 'Ica', name: 'Ica', flag: '' },
+  { code: 'Trujillo', name: 'Trujillo', flag: '' },
+  { code: 'Huancayo', name: 'Huancayo', flag: '' },
+  { code: 'Iquitos', name: 'Iquitos', flag: '' },
+  { code: 'Chimbote', name: 'Chimbote', flag: '' },
+  { code: 'Pucallpa', name: 'Pucallpa', flag: '' },
+  { code: 'Cajamarca', name: 'Cajamarca', flag: '' },
+  { code: 'Ayacucho', name: 'Ayacucho', flag: '' }
 ];
 
 /**
@@ -214,12 +214,9 @@ export function CityInput({
           }`}
         >
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center">
               {selectedCity && (
-                <>
-                  <span className="text-xl">{selectedCity.flag}</span>
-                  <span className="font-medium">{selectedCity.name}</span>
-                </>
+                <span className="font-medium">{selectedCity.name}</span>
               )}
             </div>
             <svg
@@ -290,8 +287,7 @@ export function CityInput({
                       selectedCity?.code === city.code ? 'bg-blue-50 border-blue-200' : ''
                     }`}
                   >
-                    <div className="flex items-center space-x-3">
-                      <span className="text-xl">{city.flag}</span>
+                    <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <div className="font-medium text-gray-900">{city.name}</div>
                         <div className="text-sm text-gray-500">{city.code}</div>

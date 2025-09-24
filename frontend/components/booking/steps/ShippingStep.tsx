@@ -414,49 +414,52 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
           })
         )}
 
-        {/* Postal Code Field - Auto-populated for Peru */}
-        {formData.country === 'PE' ? (
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">
-              Postal Code
-            </Label>
-            <Input
-              type="text"
-              value={formData.postalCode || '15074'}
-              onChange={(e) => setFormData(prev => ({ ...prev, postalCode: e.target.value }))}
-              placeholder="Postal code"
-              className="w-full"
-            />
-          </div>
-        ) : (
-          renderFormField({
-            name: 'postalCode',
-            label: 'Postal Code',
-            type: 'text',
-            required: false,
-            placeholder: 'Enter your postal code (optional)'
-          })
-        )}
+        {/* Country and Postal Code Fields - Side by Side */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Country Field */}
+          <CountryInput
+            label="Country"
+            required={true}
+            value={formData.country}
+            onChange={(countryCode) => setFormData(prev => ({ ...prev, country: countryCode }))}
+            placeholder="Select your country"
+            error={errors.country}
+            defaultCountryCode="PE"
+          />
 
-        {/* Country Field */}
-        <CountryInput
-          label="Country"
-          required={true}
-          value={formData.country}
-          onChange={(countryCode) => setFormData(prev => ({ ...prev, country: countryCode }))}
-          placeholder="Select your country"
-          error={errors.country}
-          defaultCountryCode="PE"
-        />
+          {/* Postal Code Field - Auto-populated for Peru */}
+          {formData.country === 'PE' ? (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-700">
+                Postal Code
+              </Label>
+              <Input
+                type="text"
+                value={formData.postalCode || '15074'}
+                onChange={(e) => setFormData(prev => ({ ...prev, postalCode: e.target.value }))}
+                placeholder="Postal code"
+                className="w-full"
+              />
+            </div>
+          ) : (
+            renderFormField({
+              name: 'postalCode',
+              label: 'Postal Code',
+              type: 'text',
+              required: false,
+              placeholder: 'Enter your postal code (optional)'
+            })
+          )}
+        </div>
       </div>
 
 
       {/* Form Actions */}
-      <div className="flex justify-end pt-4">
+      <div className="pt-4">
         <button
           onClick={handleSubmit}
           disabled={!isFormValid}
-          className={`px-6 py-2 rounded-md font-medium transition-all duration-200 ${
+          className={`w-full px-6 py-3 rounded-md font-medium transition-all duration-200 ${
             isFormValid
               ? 'bg-green-600 hover:bg-green-700 text-white shadow-md'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'

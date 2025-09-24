@@ -41,26 +41,26 @@ interface District {
  * Major districts in Peru (focusing on Lima area)
  */
 const districts: District[] = [
-  { code: 'MIR', name: 'Miraflores', flag: '🏛️', postalCode: '15074' },
-  { code: 'SAN', name: 'San Isidro', flag: '🏢', postalCode: '15036' },
-  { code: 'SUR', name: 'Surco', flag: '🌳', postalCode: '15023' },
-  { code: 'LAP', name: 'La Molina', flag: '🌾', postalCode: '15026' },
-  { code: 'PUE', name: 'Pueblo Libre', flag: '🏛️', postalCode: '15084' },
-  { code: 'JES', name: 'Jesús María', flag: '⛪', postalCode: '15072' },
-  { code: 'LIN', name: 'Lince', flag: '🏘️', postalCode: '15073' },
-  { code: 'MAG', name: 'Magdalena', flag: '🌊', postalCode: '15076' },
-  { code: 'BRE', name: 'Breña', flag: '🏘️', postalCode: '15082' },
-  { code: 'CHI', name: 'Chorrillos', flag: '🏖️', postalCode: '15063' },
-  { code: 'LUR', name: 'Lurín', flag: '🏜️', postalCode: '15080' },
-  { code: 'PUN', name: 'Punta Negra', flag: '🏖️', postalCode: '15065' },
-  { code: 'PUC', name: 'Pucusana', flag: '🐟', postalCode: '15066' },
-  { code: 'SAN_MAR', name: 'San Martín de Porres', flag: '🏘️', postalCode: '15081' },
-  { code: 'SAN_MIG', name: 'San Miguel', flag: '🏘️', postalCode: '15088' },
-  { code: 'SANTA_AN', name: 'Santa Anita', flag: '🏘️', postalCode: '15089' },
-  { code: 'SANTIAGO', name: 'Santiago de Surco', flag: '🌳', postalCode: '15023' },
-  { code: 'VILLA_EL', name: 'Villa El Salvador', flag: '🏘️', postalCode: '15095' },
-  { code: 'VILLA_MAR', name: 'Villa María del Triunfo', flag: '🏘️', postalCode: '15096' },
-  { code: 'CER', name: 'Cerro de Pasco', flag: '⛰️', postalCode: '15001' }
+  { code: 'MIR', name: 'Miraflores', flag: '', postalCode: '15074' },
+  { code: 'SAN', name: 'San Isidro', flag: '', postalCode: '15036' },
+  { code: 'SUR', name: 'Surco', flag: '', postalCode: '15023' },
+  { code: 'LAP', name: 'La Molina', flag: '', postalCode: '15026' },
+  { code: 'PUE', name: 'Pueblo Libre', flag: '', postalCode: '15084' },
+  { code: 'JES', name: 'Jesús María', flag: '', postalCode: '15072' },
+  { code: 'LIN', name: 'Lince', flag: '', postalCode: '15073' },
+  { code: 'MAG', name: 'Magdalena', flag: '', postalCode: '15076' },
+  { code: 'BRE', name: 'Breña', flag: '', postalCode: '15082' },
+  { code: 'CHI', name: 'Chorrillos', flag: '', postalCode: '15063' },
+  { code: 'LUR', name: 'Lurín', flag: '', postalCode: '15080' },
+  { code: 'PUN', name: 'Punta Negra', flag: '', postalCode: '15065' },
+  { code: 'PUC', name: 'Pucusana', flag: '', postalCode: '15066' },
+  { code: 'SAN_MAR', name: 'San Martín de Porres', flag: '', postalCode: '15081' },
+  { code: 'SAN_MIG', name: 'San Miguel', flag: '', postalCode: '15088' },
+  { code: 'SANTA_AN', name: 'Santa Anita', flag: '', postalCode: '15089' },
+  { code: 'SANTIAGO', name: 'Santiago de Surco', flag: '', postalCode: '15023' },
+  { code: 'VILLA_EL', name: 'Villa El Salvador', flag: '', postalCode: '15095' },
+  { code: 'VILLA_MAR', name: 'Villa María del Triunfo', flag: '', postalCode: '15096' },
+  { code: 'CER', name: 'Cerro de Pasco', flag: '', postalCode: '15001' }
 ];
 
 /**
@@ -220,12 +220,9 @@ export function DistrictInput({
           }`}
         >
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center">
               {selectedDistrict && (
-                <>
-                  <span className="text-xl">{selectedDistrict.flag}</span>
-                  <span className="font-medium">{selectedDistrict.name}</span>
-                </>
+                <span className="font-medium">{selectedDistrict.name}</span>
               )}
             </div>
             <svg
@@ -296,8 +293,7 @@ export function DistrictInput({
                       selectedDistrict?.code === district.code ? 'bg-blue-50 border-blue-200' : ''
                     }`}
                   >
-                    <div className="flex items-center space-x-3">
-                      <span className="text-xl">{district.flag}</span>
+                    <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <div className="font-medium text-gray-900">{district.name}</div>
                         <div className="text-sm text-gray-500">
