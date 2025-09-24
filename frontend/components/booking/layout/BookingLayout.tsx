@@ -35,7 +35,6 @@ import {
   Truck,
   CreditCard,
   CheckCircle,
-  ArrowLeft,
   ArrowRight
 } from 'lucide-react';
 import { useBookingFlow } from '../hooks/useBookingFlow';
@@ -150,9 +149,7 @@ export function BookingLayout({
   const {
     currentStep,
     canGoNext,
-    canGoPrevious,
     goToNextStep,
-    goToPreviousStep,
     isMultiPackage,
     isDirectCheckout
   } = useBookingFlow();
@@ -221,15 +218,6 @@ export function BookingLayout({
   // ============================================================================
   // EVENT HANDLERS
   // ============================================================================
-
-  /**
-   * HANDLE PREVIOUS STEP
-   * --------------------
-   * Navigate to the previous step in the flow
-   */
-  const handlePreviousStep = () => {
-    goToPreviousStep();
-  };
 
   /**
    * HANDLE NEXT STEP
@@ -312,19 +300,7 @@ export function BookingLayout({
     const isLastStep = currentStepIndex === steps.length - 1;
 
     return (
-      <div className="flex justify-between items-center">
-        {/* Previous Button */}
-        <Button
-          onClick={handlePreviousStep}
-          disabled={!canGoPrevious}
-          variant="outline"
-          className="flex items-center transition-all duration-200"
-          title={!canGoPrevious ? "You're at the first step" : "Go back to previous step"}
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Previous
-        </Button>
-
+      <div className="flex justify-center items-center">
         {/* Step Indicator */}
         {renderStepIndicator()}
 
@@ -333,14 +309,14 @@ export function BookingLayout({
           <Button
             onClick={handleNextStep}
             disabled={!canGoNext}
-            className="flex items-center transition-all duration-200"
+            className="flex items-center transition-all duration-200 ml-4"
             title={!canGoNext ? "Please complete the current step before continuing" : "Continue to next step"}
           >
             Next
             <ArrowRight className="w-4 h-4 mr-2" />
           </Button>
         ) : (
-          <div className="text-center">
+          <div className="text-center ml-4">
             <p className="text-green-600 font-semibold">Order Complete!</p>
           </div>
         )}

@@ -646,7 +646,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
             {/* Price Breakdown */}
             <Card className="unified-card">
               <CardContent>
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="bg-white border border-gray-200 rounded-lg p-4">
                   <div className="space-y-2 text-sm">
                     {/* Subtotal */}
                     <div className="flex justify-between items-center">
@@ -665,7 +665,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                     </div>
                     
                     {/* Total */}
-                    <div className="flex justify-between items-center pt-2 border-t border-green-300">
+                    <div className="flex justify-between items-center pt-2 border-t border-gray-300">
                       <span className="text-lg font-semibold text-gray-900">Total:</span>
                       <span className="text-xl font-bold text-green-600">
                         {cartItems.length > 0 && cartItems[0].currency} {getTotalPrice().toFixed(2)}

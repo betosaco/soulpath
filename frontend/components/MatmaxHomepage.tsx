@@ -111,7 +111,7 @@ export function MatmaxHomepage() {
           </div>
           
           <h1 
-            className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold mb-4 sm:mb-6 leading-tight px-2"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold mb-4 sm:mb-6 leading-tight px-2 text-white"
             style={{ fontFamily: 'var(--font-heading)' }}
           >
             {typeof translations?.hero === 'object' && translations.hero?.title || 'Find Your Flow, Transform Your Body & Mind'}
