@@ -638,18 +638,13 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                 </p>
               </div>
             )}
+            </div>
           </div>
 
           {/* Column 2: Price and Order Summary */}
           <div className="space-y-6">
             {/* Price Breakdown */}
             <Card className="unified-card">
-              <CardHeader>
-                <CardTitle className="unified-card__title flex items-center">
-                  <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
-                  Price Breakdown
-                </CardTitle>
-              </CardHeader>
               <CardContent>
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                   <div className="space-y-2 text-sm">
