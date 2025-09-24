@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "test:cross-package-booking": "node test-cross-package-booking.js",
+    "fix:cross-package-booking": "node test-cross-package-booking.js --fix",
+    "test:booking-logic": "node test-cross-package-booking.js --verbose",
+    "validate:booking-system": "node test-cross-package-booking.js --validate-all"
+  }
+}
