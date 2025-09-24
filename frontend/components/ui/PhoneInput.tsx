@@ -224,10 +224,10 @@ export function PhoneInput({
             </svg>
           </button>
 
-          {/* Dropdown Menu */}
+          {/* Right Sidebar Menu */}
           {isCountryDropdownOpen && (
             <>
-              {/* Backdrop */}
+              {/* Minimal Backdrop - No Page Movement */}
               <div 
                 className="fixed inset-0 bg-black bg-opacity-20 z-40 animate-[fadeIn_0.2s_ease-out_forwards]"
                 onClick={() => {
@@ -236,65 +236,73 @@ export function PhoneInput({
                 }}
               />
               
-              {/* Dropdown Content */}
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl z-50 max-h-60 overflow-hidden">
+              {/* Side Menu - Smooth Slide */}
+              <div className="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-out animate-[slideInFromRight_0.3s_ease-out_forwards]">
                 {/* Header */}
-                <div className="p-3 border-b border-gray-200 bg-gray-50">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-semibold text-gray-900">Select Country</h3>
-                    <button
-                      onClick={() => {
-                        setIsCountryDropdownOpen(false);
-                        setCountrySearchTerm('');
-                      }}
-                      className="p-1 hover:bg-gray-200 rounded-full transition-colors duration-150"
-                    >
-                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
+                <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+                  <h3 className="text-lg font-semibold text-gray-900">Select Country</h3>
+                  <button
+                    onClick={() => {
+                      setIsCountryDropdownOpen(false);
+                      setCountrySearchTerm('');
+                    }}
+                    className="p-2 hover:bg-gray-200 rounded-full transition-colors duration-150"
+                  >
+                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Search Form */}
+                <div className="p-4 border-b border-gray-200 bg-white">
+                  <div className="relative">
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      placeholder="Search countries..."
+                      value={countrySearchTerm}
+                      onChange={(e) => setCountrySearchTerm(e.target.value)}
+                      className="w-full px-4 py-3 pl-10 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
+                    <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
                   </div>
-                  
-                  {/* Search Input */}
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    placeholder="Search countries..."
-                    value={countrySearchTerm}
-                    onChange={(e) => setCountrySearchTerm(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
                 </div>
 
                 {/* Countries List */}
-                <div className="max-h-48 overflow-y-auto mobile-scroll">
+                <div className="flex-1 overflow-y-auto mobile-scroll">
                   {filteredCountries.length > 0 ? (
                     filteredCountries.map((country, index) => (
                       <button
                         key={`${country.code}-${country.country}`}
                         type="button"
                         onClick={() => handleCountrySelect(country)}
-                        className={`w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center space-x-3 transition-all duration-200 border-b border-gray-100 last:border-b-0 ${
+                        className={`w-full px-4 py-4 text-left hover:bg-gray-50 flex items-center space-x-4 transition-all duration-200 border-b border-gray-100 hover:translate-x-1 hover:shadow-sm animate-[slideInFromRight_0.3s_ease-out_forwards] ${
                           selectedCountry.code === country.code 
                             ? 'bg-primary/10 text-primary border-primary/20' 
                             : 'text-gray-700'
                         }`}
                         style={{ animationDelay: `${index * 0.05}s` }}
                       >
-                        <span className="text-lg">{country.flag}</span>
+                        <span className="text-2xl">{country.flag}</span>
                         <div className="flex-1">
-                          <div className="text-sm font-medium">{country.name}</div>
-                          <div className="text-xs text-gray-500">{country.code}</div>
+                          <div className="text-base font-medium">{country.name}</div>
+                          <div className="text-sm text-gray-500">{country.code}</div>
                         </div>
                         {selectedCountry.code === country.code && (
-                          <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                          <svg className="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                           </svg>
                         )}
                       </button>
                     ))
                   ) : (
-                    <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                    <div className="px-4 py-8 text-sm text-gray-500 text-center">
+                      <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
                       No countries found
                     </div>
                   )}
