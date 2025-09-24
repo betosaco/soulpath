@@ -283,7 +283,7 @@ export function DistrictInput({
               </div>
 
               {/* Districts List */}
-              <div className="overflow-y-auto h-full pb-8">
+              <div className="overflow-y-auto h-full pb-16">
                 {filteredDistricts.map((district) => (
                   <button
                     key={`${district.code}-${district.name}`}
