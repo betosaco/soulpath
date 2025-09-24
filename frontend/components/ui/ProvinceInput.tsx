@@ -240,7 +240,7 @@ export function ProvinceInput({
               exit={{ x: '100%', opacity: 0 }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               className="fixed right-0 w-80 bg-white shadow-2xl border-l border-gray-200 z-50 overflow-hidden"
-              style={{ top: '80px', bottom: 0 }}
+              style={{ top: '80px', bottom: '80px' }}
             >
               {/* Dropdown Header */}
               <div className="p-4 border-b border-gray-200 bg-gray-50">
