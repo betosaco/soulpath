@@ -897,8 +897,14 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
   };
 
   // =============================================================================
-  // PACKAGE MANAGEMENT HELPERS
+  // BUSINESS LOGIC - PACKAGE MANAGEMENT
   // =============================================================================
+  
+  /**
+   * PACKAGE SESSION CALCULATIONS
+   * -----------------------------
+   * Functions to calculate remaining sessions and validate package limits
+   */
 
   /**
    * PACKAGE CAPACITY CALCULATIONS
@@ -969,8 +975,15 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
 
 
   // =============================================================================
-  // LOCKED TIME SLOTS MANAGEMENT (SCENARIO C)
+  // BUSINESS LOGIC - SLOT VALIDATION AND LOCKING
   // =============================================================================
+  
+  /**
+   * SLOT LOCKING MECHANISM (SCENARIO C)
+   * -----------------------------------
+   * Prevents duplicate bookings within the same package
+   * Functions to validate and manage locked time slots
+   */
 
   /**
    * LOCKED SLOTS VALIDATION
@@ -1028,6 +1041,15 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
    * -------------------------------------
    * Handles additional schedule bookings when user is in "add more bookings" mode.
    * Routes to cart after booking for user to continue or checkout.
+   */
+  // =============================================================================
+  // EVENT HANDLERS - BOOKING ACTIONS
+  // =============================================================================
+  
+  /**
+   * ADD MORE BOOKINGS HANDLER (SCENARIO C)
+   * --------------------------------------
+   * Handles slot selection when adding more sessions to existing packages
    */
   const handleAddMoreBookings = (slot: any) => {
     console.log('🎯 ADD MORE BOOKINGS:', {
@@ -1131,8 +1153,8 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
   };
 
   /**
-   * SCENARIO D: PACKAGE SELECTION FROM MODAL
-   * ----------------------------------------
+   * PACKAGE SELECTION HANDLER (SCENARIO D)
+   * --------------------------------------
    * Handles package selection when multiple packages are available for a booking.
    * Closes modal and routes to cart after selection.
    */
@@ -1187,14 +1209,21 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
   };
 
   // =============================================================================
-  // STEP RENDERING AND VALIDATION
+  // UI RENDERING LOGIC
   // =============================================================================
-
+  
   /**
    * STEP CONTENT RENDERING
    * ----------------------
    * Renders the appropriate UI for each step based on current scenario.
    * Different content is shown depending on flow type and step.
+   * 
+   * RENDERING LOGIC:
+   * - Step 0 (packages): Package selection with cart integration
+   * - Step 1 (schedule): EnhancedSchedule with conditional locking rules
+   * - Step 2 (customer): Customer information form
+   * - Step 3 (shipping): Shipping address (if required)
+   * - Step 4 (payment): Stripe payment integration
    */
   const renderStepContent = () => {
     const currentStepData = steps[currentStep];
@@ -2151,6 +2180,10 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
     }
   };
 
+  // =============================================================================
+  // MAIN COMPONENT RENDER
+  // =============================================================================
+  
   return (
     <div className="max-w-4xl mx-auto">
       {/* Progress Steps */}
