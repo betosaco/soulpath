@@ -41,7 +41,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Download, Mail, Phone, Calendar, Package, Truck, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useCart } from '@/store/appStore';
+import { useCart, useAppStore } from '@/store/appStore';
 
 /**
  * CONFIRMATION STEP PROPS
@@ -103,6 +103,13 @@ export function ConfirmationStep({
    * Access to cart items for detailed booking information
    */
   const { items: cartItems } = useCart();
+
+  /**
+   * CUSTOMER DATA STATE
+   * -------------------
+   * Access to stored customer data from previous steps
+   */
+  const { customerData: storeCustomerData } = useAppStore();
 
   // ============================================================================
   // EVENT HANDLERS
@@ -310,7 +317,9 @@ export function ConfirmationStep({
    * Shows customer details for confirmation
    */
   const renderCustomerInfo = () => {
-    if (!customerData) return null;
+    // Use store customer data if available, otherwise fall back to props
+    const displayCustomerData = storeCustomerData || customerData;
+    if (!displayCustomerData) return null;
 
     return (
       <Card className="unified-card">
@@ -322,9 +331,11 @@ export function ConfirmationStep({
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            <p><strong>Name:</strong> {customerData.name}</p>
-            <p><strong>Email:</strong> {customerData.email}</p>
-            {customerData.phone && <p><strong>Phone:</strong> {customerData.phone}</p>}
+            <p><strong>Name:</strong> {displayCustomerData.name}</p>
+            <p><strong>Email:</strong> {displayCustomerData.email}</p>
+            {displayCustomerData.phone && (
+              <p><strong>Phone:</strong> {displayCustomerData.countryCode ? `${displayCustomerData.countryCode} ${displayCustomerData.phone}` : displayCustomerData.phone}</p>
+            )}
           </div>
         </CardContent>
       </Card>

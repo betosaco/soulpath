@@ -38,7 +38,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { useBookingFlow } from '../hooks/useBookingFlow';
-import { useCart } from '@/store/appStore';
+import { useCart, useAppStore } from '@/store/appStore';
 import { TermsAndConditionsModal } from '../../TermsAndConditionsModal';
 import { CreditCard, Clock, User, MapPin, Calendar, CheckCircle, AlertCircle, Mail, Phone } from 'lucide-react';
 
@@ -95,6 +95,13 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
    * Access to cart items, pricing, and order operations
    */
   const { items: cartItems, getTotalPrice } = useCart();
+
+  /**
+   * CUSTOMER DATA STATE
+   * -------------------
+   * Access to stored customer data from previous steps
+   */
+  const { customerData } = useAppStore();
 
   /**
    * PAYMENT STATE
@@ -285,6 +292,39 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
+          {/* Price Breakdown */}
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+              <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
+              Price Breakdown
+            </h4>
+            <div className="space-y-2 text-sm">
+              {/* Subtotal */}
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Subtotal:</span>
+                <span className="font-medium text-gray-900">
+                  {cartItems.length > 0 && cartItems[0].currency} {(getTotalPrice() / 1.18).toFixed(2)}
+                </span>
+              </div>
+              
+              {/* IGV (18%) */}
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">IGV (18%):</span>
+                <span className="font-medium text-gray-900">
+                  {cartItems.length > 0 && cartItems[0].currency} {(getTotalPrice() - (getTotalPrice() / 1.18)).toFixed(2)}
+                </span>
+              </div>
+              
+              {/* Total */}
+              <div className="flex justify-between items-center pt-2 border-t border-green-300">
+                <span className="text-lg font-semibold text-gray-900">Total:</span>
+                <span className="text-xl font-bold text-green-600">
+                  {cartItems.length > 0 && cartItems[0].currency} {getTotalPrice().toFixed(2)}
+                </span>
+              </div>
+            </div>
+          </div>
+
           {/* Customer Information */}
           <div>
             <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
@@ -296,17 +336,23 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                 <div className="flex items-center space-x-2">
                   <User className="w-4 h-4 text-gray-500" />
                   <span className="text-gray-600">Name:</span>
-                  <span className="font-medium text-gray-900">[Customer Name]</span>
+                  <span className="font-medium text-gray-900">
+                    {customerData?.name || 'Not provided'}
+                  </span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Mail className="w-4 h-4 text-gray-500" />
                   <span className="text-gray-600">Email:</span>
-                  <span className="font-medium text-gray-900">[customer@email.com]</span>
+                  <span className="font-medium text-gray-900">
+                    {customerData?.email || 'Not provided'}
+                  </span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Phone className="w-4 h-4 text-gray-500" />
                   <span className="text-gray-600">Phone:</span>
-                  <span className="font-medium text-gray-900">[+51 999 999 999]</span>
+                  <span className="font-medium text-gray-900">
+                    {customerData?.phone ? `${customerData.countryCode} ${customerData.phone}` : 'Not provided'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -432,34 +478,6 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
             </div>
           </div>
 
-          {/* Price Breakdown */}
-          <div className="border-t pt-4">
-            <div className="space-y-2 text-sm">
-              {/* Subtotal */}
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Subtotal:</span>
-                <span className="font-medium text-gray-900">
-                  {cartItems.length > 0 && cartItems[0].currency} {(getTotalPrice() / 1.18).toFixed(2)}
-                </span>
-              </div>
-              
-              {/* IGV (18%) */}
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">IGV (18%):</span>
-                <span className="font-medium text-gray-900">
-                  {cartItems.length > 0 && cartItems[0].currency} {(getTotalPrice() - (getTotalPrice() / 1.18)).toFixed(2)}
-                </span>
-              </div>
-              
-              {/* Total */}
-              <div className="flex justify-between items-center pt-2 border-t">
-                <span className="text-lg font-semibold text-gray-900">Total:</span>
-                <span className="text-xl font-bold text-green-600">
-                  {cartItems.length > 0 && cartItems[0].currency} {getTotalPrice().toFixed(2)}
-                </span>
-              </div>
-            </div>
-          </div>
         </div>
       </CardContent>
     </Card>
