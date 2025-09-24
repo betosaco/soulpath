@@ -28,7 +28,6 @@
 
 import { AppShell } from '@/components/AppShell';
 import { ShippingStep } from '@/components/booking/steps/ShippingStep';
-import { BookingLayout } from '@/components/booking/layout/BookingLayout';
 
 /**
  * BOOKING SHIPPING PAGE COMPONENT
@@ -40,9 +39,9 @@ import { BookingLayout } from '@/components/booking/layout/BookingLayout';
 export default function ShippingPage() {
   return (
     <AppShell>
-      <BookingLayout>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <ShippingStep />
-      </BookingLayout>
+      </div>
     </AppShell>
   );
 }
