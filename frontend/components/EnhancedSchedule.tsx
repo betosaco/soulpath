@@ -751,7 +751,7 @@ export function EnhancedSchedule({
                                 title="All packages have already booked this time slot"
                               >
                                 <Lock className="h-4 w-4" />
-                                Booked by All Packages
+                                Already Booked
                               </button>
                             ) : !hasMultiplePackages && isSlotLocked(slot) ? (
                               <button
