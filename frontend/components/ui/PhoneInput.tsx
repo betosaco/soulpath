@@ -271,7 +271,7 @@ export function PhoneInput({
                   {filteredCountries.length > 0 ? (
                     filteredCountries.map((country, index) => (
                       <button
-                        key={country.code}
+                        key={`${country.code}-${country.country}`}
                         type="button"
                         onClick={() => handleCountrySelect(country)}
                         className={`w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center space-x-3 transition-all duration-200 border-b border-gray-100 last:border-b-0 ${
