@@ -349,14 +349,29 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
    * @param scheduleData - Processed schedule data
    */
   const handleAddMoreBookingWithCart = (slot: any, scheduleData: any) => {
-    const availablePackages = getAvailablePackagesForSlot(slot.date, slot.time);
+    // Check if there are multiple packages in cart
+    const allPackages = cartItems.filter(item => item.type === 'package');
+    
+    if (allPackages.length > 1) {
+      // Multiple packages in cart - always show modal for package selection
+      console.log('📦 Multiple packages in cart - showing selection modal');
+      closeCart(); // Close cart when modal opens
+      setPendingScheduleData(scheduleData);
+      // Capture click position for modal placement
+      const clickX = event ? (event as unknown as React.MouseEvent).clientX : 100;
+      const clickY = event ? (event as unknown as React.MouseEvent).clientY : 100;
+      console.log('🎯 Capturing click position (add-more):', { clickX, clickY, hasEvent: !!event });
+      setModalPosition({ x: clickX, y: clickY });
+      setShowPackageModal(true);
+    } else {
+      // Single package in cart - direct assignment
+      const availablePackages = getAvailablePackagesForSlot(slot.date, slot.time);
+      
+      if (availablePackages.length === 0) {
+        console.warn('🚫 No packages available for this slot');
+        return;
+      }
 
-    if (availablePackages.length === 0) {
-      console.warn('🚫 No packages available for this slot');
-      return;
-    }
-
-    if (availablePackages.length === 1) {
       // Direct assignment to single available package
       addBookingToPackage(availablePackages[0].id, scheduleData);
       console.log('✅ Auto-assigned to single available package');
@@ -375,17 +390,6 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
         console.log('📦 Package has remaining sessions - staying on schedule page');
         // Stay on page, cart remains open
       }
-    } else {
-      // Multiple packages available - show modal
-      console.log('📦 Multiple packages available - showing selection modal');
-      closeCart(); // Close cart when modal opens
-      setPendingScheduleData(scheduleData);
-      // Capture click position for modal placement
-      const clickX = event ? (event as unknown as React.MouseEvent).clientX : 100;
-      const clickY = event ? (event as unknown as React.MouseEvent).clientY : 100;
-      console.log('🎯 Capturing click position (add-more):', { clickX, clickY, hasEvent: !!event });
-      setModalPosition({ x: clickX, y: clickY });
-      setShowPackageModal(true);
     }
   };
 
@@ -635,24 +639,25 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
       </div>
 
       {/* Package Selection Modal */}
-      <PackageSelectionModal
-        isOpen={showPackageModal}
-        onClose={handleModalClose}
-        position={modalPosition}
-        scheduleData={pendingScheduleData!}
-        availablePackages={pendingScheduleData ? getAvailablePackagesForSlot(
-          pendingScheduleData.selectedDate,
-          pendingScheduleData.selectedTime
-        ).map((pkg, index) => ({
-          id: `${pkg.id}-${index}`, // Ensure unique keys by combining ID with index
-          originalId: pkg.id, // Keep original ID for business logic
-          name: pkg.name,
-          sessions: pkg.sessions || 1,
-          bookingDetails: pkg.bookingDetails
-        })) : []}
-        onPackageSelected={handlePackageSelectionFromModal}
-        getPackageRemainingSessions={getPackageRemainingSessions}
-      />
+      {showPackageModal && pendingScheduleData && (
+        <PackageSelectionModal
+          isOpen={showPackageModal}
+          onClose={handleModalClose}
+          position={modalPosition}
+          scheduleData={pendingScheduleData}
+          availablePackages={cartItems
+            .filter(item => item.type === 'package')
+            .map((pkg, index) => ({
+              id: `${pkg.id}-${index}`, // Ensure unique keys by combining ID with index
+              originalId: pkg.id, // Keep original ID for business logic
+              name: pkg.name,
+              sessions: pkg.sessions || 1,
+              bookingDetails: pkg.bookingDetails
+            }))}
+          onPackageSelected={handlePackageSelectionFromModal}
+          getPackageRemainingSessions={getPackageRemainingSessions}
+        />
+      )}
     </div>
   );
 }
