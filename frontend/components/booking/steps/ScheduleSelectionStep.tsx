@@ -232,14 +232,9 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
     // Set selected slot for visual feedback
     setSelectedSlot(slot);
 
-    // VALIDATION: Check for locked slots
-    // Note: We allow different packages to book the same time slot
-    // The isTimeSlotLocked check is for existing confirmed bookings (userBookings)
+    // VALIDATION: Allow different packages to book the same time slot
     // Package-specific validation happens in getAvailablePackagesForSlot
-    if (isTimeSlotLocked(slot.date, slot.time)) {
-      console.warn('🚫 Time slot already booked by user - preventing duplicate booking');
-      return;
-    }
+    // We only prevent the same package instance from booking the same slot twice
 
     // Prepare schedule data
     const scheduleData: ScheduleData = {
