@@ -308,7 +308,7 @@ export function CustomerInfoStep({ initialData, onDataSaved }: CustomerInfoStepP
         })}
 
         {/* Continue Button */}
-        <div className="pt-4">
+        <div className="pt-4 pb-16">
           <button
             onClick={handleSubmit}
             disabled={!isFormValid}
@@ -323,17 +323,6 @@ export function CustomerInfoStep({ initialData, onDataSaved }: CustomerInfoStepP
         </div>
       </div>
 
-      {/* Debug Information (remove in production) */}
-      {process.env.NODE_ENV === 'development' && (
-        <details className="mt-8 p-4 bg-gray-50 rounded-lg">
-          <summary className="cursor-pointer font-medium text-gray-700">
-            Debug Information
-          </summary>
-          <pre className="mt-2 text-xs text-gray-600 overflow-auto">
-            {JSON.stringify({ formData, errors, isFormValid }, null, 2)}
-          </pre>
-        </details>
-      )}
     </div>
   );
 }
