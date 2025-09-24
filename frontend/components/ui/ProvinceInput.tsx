@@ -277,7 +277,7 @@ export function ProvinceInput({
               </div>
 
               {/* Provinces List */}
-              <div className="overflow-y-auto h-full pb-4">
+              <div className="overflow-y-auto h-full pb-8">
                 {filteredProvinces.map((province) => (
                   <button
                     key={`${province.code}-${province.name}`}

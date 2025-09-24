@@ -277,7 +277,7 @@ export function CityInput({
               </div>
 
               {/* Cities List */}
-              <div className="overflow-y-auto h-full pb-4">
+              <div className="overflow-y-auto h-full pb-8">
                 {filteredCities.map((city) => (
                   <button
                     key={`${city.code}-${city.name}`}

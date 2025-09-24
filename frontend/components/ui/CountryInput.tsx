@@ -254,7 +254,7 @@ export function CountryInput({
               </div>
 
               {/* Countries List */}
-              <div className="overflow-y-auto h-full pb-4">
+              <div className="overflow-y-auto h-full pb-8">
                 {filteredCountries.map((country) => (
                   <button
                     key={`${country.country}-${country.name}`}
