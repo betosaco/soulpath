@@ -306,21 +306,21 @@ export function CustomerInfoStep({ initialData, onDataSaved }: CustomerInfoStepP
           required: true,
           placeholder: 'Enter your email address'
         })}
-      </div>
 
-      {/* Form Actions */}
-      <div className="flex justify-end pt-4">
-        <button
-          onClick={handleSubmit}
-          disabled={!isFormValid}
-          className={`px-6 py-2 rounded-md font-medium transition-all duration-200 ${
-            isFormValid
-              ? 'bg-green-600 hover:bg-green-700 text-white shadow-md'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          }`}
-        >
-          Continue to Next Step
-        </button>
+        {/* Continue Button */}
+        <div className="pt-4">
+          <button
+            onClick={handleSubmit}
+            disabled={!isFormValid}
+            className={`w-full px-6 py-3 rounded-md font-medium transition-all duration-200 ${
+              isFormValid
+                ? 'bg-green-600 hover:bg-green-700 text-white shadow-md'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
+          >
+            Continue to Next Step
+          </button>
+        </div>
       </div>
 
       {/* Debug Information (remove in production) */}
