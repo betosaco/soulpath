@@ -292,40 +292,6 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          {/* Price Breakdown */}
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-              <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
-              Price Breakdown
-            </h4>
-            <div className="space-y-2 text-sm">
-              {/* Subtotal */}
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Subtotal:</span>
-                <span className="font-medium text-gray-900">
-                  {cartItems.length > 0 && cartItems[0].currency} {(getTotalPrice() / 1.18).toFixed(2)}
-                </span>
-              </div>
-              
-              {/* IGV (18%) */}
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">IGV (18%):</span>
-                <span className="font-medium text-gray-900">
-                  {cartItems.length > 0 && cartItems[0].currency} {(getTotalPrice() - (getTotalPrice() / 1.18)).toFixed(2)}
-                </span>
-              </div>
-              
-              {/* Total */}
-              <div className="flex justify-between items-center pt-2 border-t border-green-300">
-                <span className="text-lg font-semibold text-gray-900">Total:</span>
-                <span className="text-xl font-bold text-green-600">
-                  {cartItems.length > 0 && cartItems[0].currency} {getTotalPrice().toFixed(2)}
-                </span>
-              </div>
-            </div>
-          </div>
-
-
           {/* Shipping Information (if applicable) */}
           {hasPhysicalProducts && (
             <div>
@@ -510,61 +476,62 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
 
       {/* Main Payment Interface */}
       {paymentStatus !== 'success' && (
-        <div className="space-y-8">
-          {/* Customer Information Section */}
-          {customerData && (
-            <Card className="unified-card">
-              <CardHeader>
-                <CardTitle className="unified-card__title flex items-center">
-                  <User className="w-5 h-5 mr-2" />
-                  Customer Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div className="flex items-center space-x-2">
-                      <User className="w-4 h-4 text-gray-500" />
-                      <span className="text-gray-600">Name:</span>
-                      <span className="font-medium text-gray-900">
-                        {customerData.name}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Mail className="w-4 h-4 text-gray-500" />
-                      <span className="text-gray-600">Email:</span>
-                      <span className="font-medium text-gray-900">
-                        {customerData.email}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Phone className="w-4 h-4 text-gray-500" />
-                      <span className="text-gray-600">Phone:</span>
-                      <span className="font-medium text-gray-900">
-                        {customerData.phone ? `${customerData.countryCode} ${customerData.phone}` : 'Not provided'}
-                      </span>
-                    </div>
-                    {/* Address Information - when available */}
-                    {(customerData as any)?.address && (
-                      <div className="flex items-start space-x-2 md:col-span-2">
-                        <MapPin className="w-4 h-4 text-gray-500 mt-0.5" />
-                        <div className="flex-1">
-                          <span className="text-gray-600">Address:</span>
-                          <div className="font-medium text-gray-900">
-                            {(customerData as any).address}
-                            {(customerData as any)?.city && `, ${(customerData as any).city}`}
-                            {(customerData as any)?.country && `, ${(customerData as any).country}`}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Column 1: User Info and Payment Options */}
+          <div className="space-y-6">
+            {/* Customer Information Section */}
+            {customerData && (
+              <Card className="unified-card">
+                <CardHeader>
+                  <CardTitle className="unified-card__title flex items-center">
+                    <User className="w-5 h-5 mr-2" />
+                    Customer Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div className="flex items-center space-x-2">
+                        <User className="w-4 h-4 text-gray-500" />
+                        <span className="text-gray-600">Name:</span>
+                        <span className="font-medium text-gray-900">
+                          {customerData.name}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Mail className="w-4 h-4 text-gray-500" />
+                        <span className="text-gray-600">Email:</span>
+                        <span className="font-medium text-gray-900">
+                          {customerData.email}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Phone className="w-4 h-4 text-gray-500" />
+                        <span className="text-gray-600">Phone:</span>
+                        <span className="font-medium text-gray-900">
+                          {customerData.phone ? `${customerData.countryCode} ${customerData.phone}` : 'Not provided'}
+                        </span>
+                      </div>
+                      {/* Address Information - when available */}
+                      {(customerData as any)?.address && (
+                        <div className="flex items-start space-x-2 md:col-span-2">
+                          <MapPin className="w-4 h-4 text-gray-500 mt-0.5" />
+                          <div className="flex-1">
+                            <span className="text-gray-600">Address:</span>
+                            <div className="font-medium text-gray-900">
+                              {(customerData as any).address}
+                              {(customerData as any)?.city && `, ${(customerData as any).city}`}
+                              {(customerData as any)?.country && `, ${(customerData as any).country}`}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                </CardContent>
+              </Card>
+            )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Payment Options */}
             <div>
             {validation.isValid ? (
@@ -672,6 +639,47 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
               </div>
             )}
           </div>
+
+          {/* Column 2: Price and Order Summary */}
+          <div className="space-y-6">
+            {/* Price Breakdown */}
+            <Card className="unified-card">
+              <CardHeader>
+                <CardTitle className="unified-card__title flex items-center">
+                  <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
+                  Price Breakdown
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="space-y-2 text-sm">
+                    {/* Subtotal */}
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Subtotal:</span>
+                      <span className="font-medium text-gray-900">
+                        {cartItems.length > 0 && cartItems[0].currency} {(getTotalPrice() / 1.18).toFixed(2)}
+                      </span>
+                    </div>
+                    
+                    {/* IGV (18%) */}
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">IGV (18%):</span>
+                      <span className="font-medium text-gray-900">
+                        {cartItems.length > 0 && cartItems[0].currency} {(getTotalPrice() - (getTotalPrice() / 1.18)).toFixed(2)}
+                      </span>
+                    </div>
+                    
+                    {/* Total */}
+                    <div className="flex justify-between items-center pt-2 border-t border-green-300">
+                      <span className="text-lg font-semibold text-gray-900">Total:</span>
+                      <span className="text-xl font-bold text-green-600">
+                        {cartItems.length > 0 && cartItems[0].currency} {getTotalPrice().toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Order Summary */}
             <div>
