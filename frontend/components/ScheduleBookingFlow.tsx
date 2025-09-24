@@ -1592,6 +1592,109 @@ export function ScheduleBookingFlow({
 
         </AnimatePresence>
       </div>
+
+      {/* Package Selection Modal */}
+      {showPackageSelection && selectedScheduleForPackage && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Select Package for Booking</h3>
+              <div className="text-sm text-gray-500">
+                {selectedScheduleForPackage.date} at {selectedScheduleForPackage.time}
+              </div>
+            </div>
+            
+            <div className="space-y-3 mb-6">
+              {cartItems
+                .filter(item => item.type === 'package')
+                .map((pkg) => {
+                  const scheduled = pkg.bookingDetails?.length || 0;
+                  const total = pkg.sessions || 1;
+                  const isAtMax = scheduled >= total;
+                  
+                  return (
+                    <button
+                      key={pkg.id}
+                      onClick={() => {
+                        if (isAtMax) {
+                          toast.error('This package has reached its maximum number of sessions. Please select a different package.');
+                          return;
+                        }
+                        
+                        // Check for duplicate booking
+                        const hasAlreadyBookedThisSlot = pkg.bookingDetails?.some(booking => 
+                          booking.selectedDate === selectedScheduleForPackage.date && 
+                          booking.selectedTime === selectedScheduleForPackage.time
+                        );
+                        
+                        if (hasAlreadyBookedThisSlot) {
+                          toast.error('This package has already booked this time slot. Please select a different package.');
+                          return;
+                        }
+                        
+                        // Add booking to package
+                        const newBookingDetails = {
+                          selectedDate: selectedScheduleForPackage.date,
+                          selectedTime: selectedScheduleForPackage.time,
+                          teacher: selectedScheduleForPackage.teacher?.name || 'TBA',
+                          serviceType: selectedScheduleForPackage.serviceType?.name || 'Class',
+                          venue: selectedScheduleForPackage.venue?.name || 'Studio',
+                          dayOfWeek: selectedScheduleForPackage.dayOfWeek,
+                          scheduleSlotId: selectedScheduleForPackage.id
+                        };
+                        
+                        cartContext.addBookingToPackage(pkg.id, newBookingDetails);
+                        setIsCartOpen();
+                        toast.success(`Added session to ${pkg.name}`);
+                        
+                        // Close modal
+                        setShowPackageSelection(false);
+                        setSelectedScheduleForPackage(null);
+                      }}
+                      disabled={isAtMax}
+                      className={`w-full p-4 border rounded-lg text-left transition-all duration-200 ${
+                        isAtMax 
+                          ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed' 
+                          : 'border-gray-200 hover:border-green-500 hover:bg-green-50 group'
+                      }`}
+                      title={isAtMax ? 'Package has reached maximum sessions' : `Select ${pkg.name} for this booking`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div className="flex-1">
+                          <h4 className={`font-medium ${isAtMax ? 'text-gray-400' : 'text-gray-900 group-hover:text-green-800'}`}>
+                            {pkg.name}
+                          </h4>
+                          <p className="text-sm text-gray-600">
+                            {scheduled}/{total} sessions booked
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          {isAtMax ? (
+                            <span className="text-xs text-red-600 font-medium">Max Reached</span>
+                          ) : (
+                            <span className="text-xs text-green-600 font-medium">Available</span>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+            </div>
+            
+            <div className="flex justify-end space-x-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowPackageSelection(false);
+                  setSelectedScheduleForPackage(null);
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
