@@ -101,6 +101,7 @@ export function EnhancedSchedule({
   console.log('🔍 EnhancedSchedule render - startDate:', startDate, 'endDate:', endDate);
   console.log('🔍 EnhancedSchedule - lockedTimeSlots:', lockedTimeSlots);
   console.log('🔍 EnhancedSchedule - existingBookings:', existingBookings);
+  console.log('🔍 EnhancedSchedule - hasMultiplePackages:', hasMultiplePackages);
   // Handle slot booking - redirect to account booking page
   const handleBookSlot = (slot: ScheduleSlot) => {
     try {
@@ -139,6 +140,9 @@ export function EnhancedSchedule({
       return;
     }
     
+    // For multiple packages, always allow slot selection (package-specific validation happens later)
+    console.log('✅ Slot selection allowed - hasMultiplePackages:', hasMultiplePackages);
+    
     // Clear conflicting schedule from sessionStorage when user selects a new slot
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem('conflictingSchedule');
@@ -176,17 +180,21 @@ export function EnhancedSchedule({
     // For multiple packages, only lock if the specific package has booked the slot
     // For single package, lock if any package has booked the slot
     if (hasMultiplePackages && packageId) {
-      return lockedTimeSlots.some(lockedSlot =>
+      const isLocked = lockedTimeSlots.some(lockedSlot =>
         lockedSlot.selectedDate === slot.date &&
         lockedSlot.selectedTime === slot.time &&
         lockedSlot.packageId === packageId
       );
+      console.log('🔒 isSlotLocked (multiple packages, specific package):', { slot: `${slot.date} ${slot.time}`, packageId, isLocked });
+      return isLocked;
     } else {
       // Single package mode or no specific package - lock if any package has booked it
-      return lockedTimeSlots.some(lockedSlot =>
+      const isLocked = lockedTimeSlots.some(lockedSlot =>
         lockedSlot.selectedDate === slot.date &&
         lockedSlot.selectedTime === slot.time
       );
+      console.log('🔒 isSlotLocked (single package or no packageId):', { slot: `${slot.date} ${slot.time}`, hasMultiplePackages, packageId, isLocked, lockedTimeSlots });
+      return isLocked;
     }
   };
 
