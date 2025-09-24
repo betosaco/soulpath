@@ -38,7 +38,7 @@ export function ColorSwatch({ colors, selectedColor, onColorChange, productName 
             variant="ghost"
             className={`relative p-0 border-2 rounded-lg overflow-hidden transition-all ${
               selectedColor === color.value
-                ? 'border-primary ring-2 ring-primary ring-offset-2'
+                ? 'border-primary ring-2 ring-primary ring-offset-2 !bg-white'
                 : 'border-gray-200 hover:border-gray-300'
             } ${!color.available ? 'opacity-50 cursor-not-allowed' : ''}`}
             disabled={!color.available}

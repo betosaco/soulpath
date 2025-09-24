@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import { ChevronLeftIcon, ChevronRightIcon, ShoppingCartIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/outline';
 import { AppShell } from '@/components/AppShell';
-import { useCart } from '@/store/appStore';
+import { useCart, useCartUI } from '@/store/appStore';
 import { Button } from '@/components/ui/button';
 import { ColorSwatch } from '@/components/ColorSwatch';
 
@@ -32,7 +32,8 @@ interface Product {
 export default function ProductPage() {
   const params = useParams();
   const productId = params?.id as string;
-  const { addItem: addToCart, getTotalItems, openCart: setIsCartOpen } = useCart();
+  const { addItem: addToCart, getTotalItems } = useCart();
+  const { openCart } = useCartUI();
   
   console.log('🛒 ProductPage rendered, params:', params, 'productId:', productId);
   
@@ -185,14 +186,13 @@ export default function ProductPage() {
 
   return (
     <AppShell className="min-h-screen bg-white mobile-container mobile-scrollable">
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mobile-content mobile-scrollable">
+      <div className="pt-24 pb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Product Images */}
           <div className="space-y-4">
             {/* Main Image */}
-            <div className="relative aspect-square bg-white rounded-lg overflow-hidden">
+            <div className="relative aspect-square bg-white rounded-lg overflow-hidden max-w-md mx-auto">
               <Image
                 src={product.images[currentImageIndex]}
                 alt={product.name}
@@ -225,23 +225,33 @@ export default function ProductPage() {
 
             {/* Thumbnail Images */}
             {product.images.length > 1 && (
-              <div className="grid grid-cols-3 gap-4">
+              <div className="flex flex-wrap gap-3 justify-center">
                 {product.images.map((image, index) => (
                   <Button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
                     variant="ghost"
-                    className={`aspect-square rounded-lg overflow-hidden border-2 p-0 ${
-                      currentImageIndex === index ? 'border-primary ring-2 ring-primary ring-offset-2' : 'border-gray-200 hover:border-gray-300'
+                    className={`relative p-0 border-2 rounded-lg overflow-hidden transition-all ${
+                      currentImageIndex === index
+                        ? 'border-primary ring-2 ring-primary ring-offset-2 !bg-white'
+                        : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <Image
-                      src={image}
-                      alt={`${product.name} ${index + 1}`}
-                      width={200}
-                      height={200}
-                      className="object-cover w-full h-full"
-                    />
+                    <div className="w-16 h-16 relative">
+                      <Image
+                        src={image}
+                        alt={`${product.name} ${index + 1}`}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    
+                    {/* Selected indicator */}
+                    {currentImageIndex === index && (
+                      <div className="absolute top-1 right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
+                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                      </div>
+                    )}
                   </Button>
                 ))}
               </div>
@@ -320,22 +330,6 @@ export default function ProductPage() {
               )}
             </div>
 
-            {/* Tags */}
-            {product.tags && product.tags.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Tags</h3>
-                <div className="flex flex-wrap gap-2">
-                  {product.tags.map((tag, index) => (
-                    <span
-                      key={index}
-                      className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {/* Quantity and Add to Cart */}
             <div className="space-y-4">
@@ -387,7 +381,7 @@ export default function ProductPage() {
                   </span>
                 </Button>
                 <Button
-                  onClick={() => setIsCartOpen(true)}
+                  onClick={() => openCart()}
                   variant="outline"
                 >
                   View Cart ({getTotalItems()})
@@ -420,6 +414,7 @@ export default function ProductPage() {
               </span>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </AppShell>
