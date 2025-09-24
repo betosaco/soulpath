@@ -175,6 +175,8 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
    * Combines cart bookings and existing user bookings from database
    */
   // Lock slots that are booked by the user (from userBookings) AND current cart bookings
+  // For multiple packages, only include user bookings (database bookings) in lockedTimeSlots
+  // Cart bookings are handled separately for package-specific validation
   const lockedTimeSlots = React.useMemo(() => {
     const userBookingsSlots = userBookings.map(booking => ({
       selectedDate: booking.selectedDate,
@@ -182,18 +184,24 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
       packageId: booking.packageId || 'unknown'
     }));
 
-    const cartBookingsSlots = cartItems
-      .filter(item => item.type === 'package' && item.bookingDetails)
-      .flatMap(item => 
-        (item.bookingDetails || []).map(booking => ({
-          selectedDate: booking.selectedDate!,
-          selectedTime: booking.selectedTime!,
-          packageId: item.id
-        }))
-      );
-
-    return [...userBookingsSlots, ...cartBookingsSlots];
-  }, [userBookings, cartItems]);
+    // For multiple packages, don't include cart bookings in lockedTimeSlots
+    // This allows cross-package booking while still preventing duplicate user bookings
+    if (isMultiPackage || isAddMore) {
+      return userBookingsSlots;
+    } else {
+      // Single package mode - include cart bookings to prevent duplicates
+      const cartBookingsSlots = cartItems
+        .filter(item => item.type === 'package' && item.bookingDetails)
+        .flatMap(item => 
+          (item.bookingDetails || []).map(booking => ({
+            selectedDate: booking.selectedDate!,
+            selectedTime: booking.selectedTime!,
+            packageId: item.id
+          }))
+        );
+      return [...userBookingsSlots, ...cartBookingsSlots];
+    }
+  }, [userBookings, cartItems, isMultiPackage, isAddMore]);
 
   // Show which packages have booked each slot (for visual indication)
   const packageBookings = React.useMemo(() => {
