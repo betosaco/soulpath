@@ -37,25 +37,52 @@ interface City {
 /**
  * CITY DATA
  * ---------
- * Major cities in Peru
+ * Cities organized by province
  */
-const cities: City[] = [
-  { code: 'Lima', name: 'Lima', flag: '' },
-  { code: 'Callao', name: 'Callao', flag: '' },
-  { code: 'Arequipa', name: 'Arequipa', flag: '' },
-  { code: 'Cusco', name: 'Cusco', flag: '' },
-  { code: 'Chiclayo', name: 'Chiclayo', flag: '' },
-  { code: 'Piura', name: 'Piura', flag: '' },
-  { code: 'Tacna', name: 'Tacna', flag: '' },
-  { code: 'Ica', name: 'Ica', flag: '' },
-  { code: 'Trujillo', name: 'Trujillo', flag: '' },
-  { code: 'Huancayo', name: 'Huancayo', flag: '' },
-  { code: 'Iquitos', name: 'Iquitos', flag: '' },
-  { code: 'Chimbote', name: 'Chimbote', flag: '' },
-  { code: 'Pucallpa', name: 'Pucallpa', flag: '' },
-  { code: 'Cajamarca', name: 'Cajamarca', flag: '' },
-  { code: 'Ayacucho', name: 'Ayacucho', flag: '' }
-];
+const citiesByProvince: Record<string, City[]> = {
+  'LMA': [ // Lima Metropolitana
+    { code: 'Lima', name: 'Lima', flag: '' },
+    { code: 'Miraflores', name: 'Miraflores', flag: '' },
+    { code: 'San_Isidro', name: 'San Isidro', flag: '' },
+    { code: 'Surco', name: 'Surco', flag: '' },
+    { code: 'La_Molina', name: 'La Molina', flag: '' },
+    { code: 'Pueblo_Libre', name: 'Pueblo Libre', flag: '' },
+    { code: 'Jesus_Maria', name: 'Jesús María', flag: '' },
+    { code: 'Lince', name: 'Lince', flag: '' },
+    { code: 'Magdalena', name: 'Magdalena', flag: '' },
+    { code: 'Breña', name: 'Breña', flag: '' },
+    { code: 'Chorrillos', name: 'Chorrillos', flag: '' },
+    { code: 'Lurin', name: 'Lurín', flag: '' },
+    { code: 'Punta_Negra', name: 'Punta Negra', flag: '' },
+    { code: 'Pucusana', name: 'Pucusana', flag: '' }
+  ],
+  'CAL': [ // Callao
+    { code: 'Callao', name: 'Callao', flag: '' },
+    { code: 'Bellavista', name: 'Bellavista', flag: '' },
+    { code: 'Carmen_de_la_Legua', name: 'Carmen de la Legua', flag: '' },
+    { code: 'La_Perla', name: 'La Perla', flag: '' },
+    { code: 'La_Punta', name: 'La Punta', flag: '' },
+    { code: 'Ventanilla', name: 'Ventanilla', flag: '' }
+  ],
+  'ARE': [ // Arequipa
+    { code: 'Arequipa', name: 'Arequipa', flag: '' },
+    { code: 'Cayma', name: 'Cayma', flag: '' },
+    { code: 'Cerro_Colorado', name: 'Cerro Colorado', flag: '' },
+    { code: 'Characato', name: 'Characato', flag: '' },
+    { code: 'Chiguata', name: 'Chiguata', flag: '' },
+    { code: 'Jacobo_Hunter', name: 'Jacobo Hunter', flag: '' }
+  ],
+  'CUS': [ // Cusco
+    { code: 'Cusco', name: 'Cusco', flag: '' },
+    { code: 'Santiago', name: 'Santiago', flag: '' },
+    { code: 'Wanchaq', name: 'Wanchaq', flag: '' },
+    { code: 'San_Sebastian', name: 'San Sebastián', flag: '' },
+    { code: 'San_Jerónimo', name: 'San Jerónimo', flag: '' }
+  ]
+};
+
+// Get all cities for backward compatibility
+const cities: City[] = Object.values(citiesByProvince).flat();
 
 /**
  * CITY INPUT PROPS
@@ -79,6 +106,8 @@ interface CityInputProps {
   error?: string;
   /** Default city code */
   defaultCityCode?: string;
+  /** Province code to filter cities */
+  provinceCode?: string;
 }
 
 /**
@@ -97,7 +126,8 @@ export function CityInput({
   placeholder = 'Select city',
   disabled = false,
   error,
-  defaultCityCode = 'Lima'
+  defaultCityCode = 'Lima',
+  provinceCode
 }: CityInputProps) {
   // ============================================================================
   // STATE MANAGEMENT
@@ -113,16 +143,29 @@ export function CityInput({
   // ============================================================================
 
   /**
+   * GET AVAILABLE CITIES
+   * --------------------
+   * Get cities based on selected province
+   */
+  const getAvailableCities = () => {
+    if (provinceCode && citiesByProvince[provinceCode]) {
+      return citiesByProvince[provinceCode];
+    }
+    return cities;
+  };
+
+  /**
    * INITIALIZE SELECTED CITY
    * ------------------------
    * Set the initial selected city based on value or default
    */
   useEffect(() => {
-    const city = cities.find(c => c.code === value) || 
-                 cities.find(c => c.code === defaultCityCode) ||
-                 cities[0];
+    const availableCities = getAvailableCities();
+    const city = availableCities.find(c => c.code === value) || 
+                 availableCities.find(c => c.code === defaultCityCode) ||
+                 availableCities[0];
     setSelectedCity(city);
-  }, [value, defaultCityCode]);
+  }, [value, defaultCityCode, provinceCode]);
 
   /**
    * HANDLE CLICK OUTSIDE
@@ -177,9 +220,9 @@ export function CityInput({
   /**
    * FILTERED CITIES
    * ---------------
-   * Cities filtered by search term
+   * Cities filtered by search term and province
    */
-  const filteredCities = cities.filter(city =>
+  const filteredCities = getAvailableCities().filter(city =>
     city.name.toLowerCase().includes(citySearchTerm.toLowerCase()) ||
     city.code.toLowerCase().includes(citySearchTerm.toLowerCase())
   );

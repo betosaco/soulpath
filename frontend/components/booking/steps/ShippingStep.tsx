@@ -359,6 +359,7 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
             placeholder="Select city"
             error={errors.city}
             defaultCityCode=""
+            provinceCode={formData.peruProvince}
           />
         ) : (
           renderFormField({
@@ -399,6 +400,7 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
             placeholder="Select district"
             error={errors.peruDistrict}
             defaultDistrictCode="MIR"
+            cityCode={formData.city}
           />
         )}
 

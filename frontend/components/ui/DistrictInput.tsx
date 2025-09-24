@@ -38,30 +38,50 @@ interface District {
 /**
  * DISTRICT DATA
  * -------------
- * Major districts in Peru (focusing on Lima area)
+ * Districts organized by city
  */
-const districts: District[] = [
-  { code: 'MIR', name: 'Miraflores', flag: '', postalCode: '15074' },
-  { code: 'SAN', name: 'San Isidro', flag: '', postalCode: '15036' },
-  { code: 'SUR', name: 'Surco', flag: '', postalCode: '15023' },
-  { code: 'LAP', name: 'La Molina', flag: '', postalCode: '15026' },
-  { code: 'PUE', name: 'Pueblo Libre', flag: '', postalCode: '15084' },
-  { code: 'JES', name: 'Jesús María', flag: '', postalCode: '15072' },
-  { code: 'LIN', name: 'Lince', flag: '', postalCode: '15073' },
-  { code: 'MAG', name: 'Magdalena', flag: '', postalCode: '15076' },
-  { code: 'BRE', name: 'Breña', flag: '', postalCode: '15082' },
-  { code: 'CHI', name: 'Chorrillos', flag: '', postalCode: '15063' },
-  { code: 'LUR', name: 'Lurín', flag: '', postalCode: '15080' },
-  { code: 'PUN', name: 'Punta Negra', flag: '', postalCode: '15065' },
-  { code: 'PUC', name: 'Pucusana', flag: '', postalCode: '15066' },
-  { code: 'SAN_MAR', name: 'San Martín de Porres', flag: '', postalCode: '15081' },
-  { code: 'SAN_MIG', name: 'San Miguel', flag: '', postalCode: '15088' },
-  { code: 'SANTA_AN', name: 'Santa Anita', flag: '', postalCode: '15089' },
-  { code: 'SANTIAGO', name: 'Santiago de Surco', flag: '', postalCode: '15023' },
-  { code: 'VILLA_EL', name: 'Villa El Salvador', flag: '', postalCode: '15095' },
-  { code: 'VILLA_MAR', name: 'Villa María del Triunfo', flag: '', postalCode: '15096' },
-  { code: 'CER', name: 'Cerro de Pasco', flag: '', postalCode: '15001' }
-];
+const districtsByCity: Record<string, District[]> = {
+  'Lima': [
+    { code: 'Lima_Centro', name: 'Lima Centro', flag: '', postalCode: '15001' },
+    { code: 'Rimac', name: 'Rímac', flag: '', postalCode: '15025' },
+    { code: 'Breña', name: 'Breña', flag: '', postalCode: '15082' },
+    { code: 'La_Victoria', name: 'La Victoria', flag: '', postalCode: '15013' },
+    { code: 'Lince', name: 'Lince', flag: '', postalCode: '15073' },
+    { code: 'Jesus_Maria', name: 'Jesús María', flag: '', postalCode: '15072' },
+    { code: 'Pueblo_Libre', name: 'Pueblo Libre', flag: '', postalCode: '15084' },
+    { code: 'Magdalena', name: 'Magdalena', flag: '', postalCode: '15076' }
+  ],
+  'Miraflores': [
+    { code: 'MIR', name: 'Miraflores', flag: '', postalCode: '15074' }
+  ],
+  'San_Isidro': [
+    { code: 'SAN', name: 'San Isidro', flag: '', postalCode: '15036' }
+  ],
+  'Surco': [
+    { code: 'SUR', name: 'Surco', flag: '', postalCode: '15023' },
+    { code: 'SANTIAGO', name: 'Santiago de Surco', flag: '', postalCode: '15023' }
+  ],
+  'La_Molina': [
+    { code: 'LAP', name: 'La Molina', flag: '', postalCode: '15026' }
+  ],
+  'Chorrillos': [
+    { code: 'CHI', name: 'Chorrillos', flag: '', postalCode: '15063' },
+    { code: 'LUR', name: 'Lurín', flag: '', postalCode: '15080' },
+    { code: 'PUN', name: 'Punta Negra', flag: '', postalCode: '15065' },
+    { code: 'PUC', name: 'Pucusana', flag: '', postalCode: '15066' }
+  ],
+  'Callao': [
+    { code: 'Callao_Centro', name: 'Callao Centro', flag: '', postalCode: '07001' },
+    { code: 'Bellavista', name: 'Bellavista', flag: '', postalCode: '07002' },
+    { code: 'Carmen_de_la_Legua', name: 'Carmen de la Legua', flag: '', postalCode: '07003' },
+    { code: 'La_Perla', name: 'La Perla', flag: '', postalCode: '07004' },
+    { code: 'La_Punta', name: 'La Punta', flag: '', postalCode: '07005' },
+    { code: 'Ventanilla', name: 'Ventanilla', flag: '', postalCode: '07006' }
+  ]
+};
+
+// Get all districts for backward compatibility
+const districts: District[] = Object.values(districtsByCity).flat();
 
 /**
  * DISTRICT INPUT PROPS
@@ -85,6 +105,8 @@ interface DistrictInputProps {
   error?: string;
   /** Default district code */
   defaultDistrictCode?: string;
+  /** City code to filter districts */
+  cityCode?: string;
 }
 
 /**
@@ -103,7 +125,8 @@ export function DistrictInput({
   placeholder = 'Select district',
   disabled = false,
   error,
-  defaultDistrictCode = 'MIR'
+  defaultDistrictCode = 'MIR',
+  cityCode
 }: DistrictInputProps) {
   // ============================================================================
   // STATE MANAGEMENT
@@ -119,16 +142,29 @@ export function DistrictInput({
   // ============================================================================
 
   /**
+   * GET AVAILABLE DISTRICTS
+   * -----------------------
+   * Get districts based on selected city
+   */
+  const getAvailableDistricts = () => {
+    if (cityCode && districtsByCity[cityCode]) {
+      return districtsByCity[cityCode];
+    }
+    return districts;
+  };
+
+  /**
    * INITIALIZE SELECTED DISTRICT
    * ----------------------------
    * Set the initial selected district based on value or default
    */
   useEffect(() => {
-    const district = districts.find(d => d.code === value) || 
-                     districts.find(d => d.code === defaultDistrictCode) ||
-                     districts[0];
+    const availableDistricts = getAvailableDistricts();
+    const district = availableDistricts.find(d => d.code === value) || 
+                     availableDistricts.find(d => d.code === defaultDistrictCode) ||
+                     availableDistricts[0];
     setSelectedDistrict(district);
-  }, [value, defaultDistrictCode]);
+  }, [value, defaultDistrictCode, cityCode]);
 
   /**
    * HANDLE CLICK OUTSIDE
@@ -183,9 +219,9 @@ export function DistrictInput({
   /**
    * FILTERED DISTRICTS
    * ------------------
-   * Districts filtered by search term
+   * Districts filtered by search term and city
    */
-  const filteredDistricts = districts.filter(district =>
+  const filteredDistricts = getAvailableDistricts().filter(district =>
     district.name.toLowerCase().includes(districtSearchTerm.toLowerCase()) ||
     district.code.toLowerCase().includes(districtSearchTerm.toLowerCase())
   );
