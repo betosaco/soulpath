@@ -113,7 +113,7 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
     city: initialData?.city || '',
     state: initialData?.state || '',
     postalCode: initialData?.postalCode || '',
-    country: initialData?.country || '', // Start empty, user must select
+    country: initialData?.country || 'PE', // Default to Peru
     peruDepartment: initialData?.peruDepartment || 'LIM',
     peruProvince: initialData?.peruProvince || 'LMA',
     peruDistrict: initialData?.peruDistrict || 'MIR'
@@ -150,8 +150,12 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
 
     // Check if all required fields have values (but don't show error messages)
     const hasAddress = formData.address.trim().length > 0;
-    const hasCity = formData.city.trim().length > 0;
     const hasCountry = formData.country.length > 0;
+    
+    // For Peru, check Peru-specific fields; for other countries, check main city field
+    const hasCity = formData.country === 'PE' 
+      ? formData.peruProvince.length > 0 && formData.peruDistrict.length > 0
+      : formData.city.trim().length > 0;
 
     // Address validation - only check minimum length if provided
     if (formData.address.trim() && formData.address.trim().length < 10) {
@@ -443,7 +447,7 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
             onChange={(countryCode) => setFormData(prev => ({ ...prev, country: countryCode }))}
             placeholder="Select your country"
             error={errors.country}
-            defaultCountryCode=""
+            defaultCountryCode="PE"
           />
         </div>
       </div>
