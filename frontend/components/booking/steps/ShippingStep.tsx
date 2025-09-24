@@ -113,7 +113,7 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
     city: initialData?.city || '',
     state: initialData?.state || '',
     postalCode: initialData?.postalCode || '',
-    country: initialData?.country || 'PE', // Default to Peru
+    country: initialData?.country || '', // Start empty, user must select
     peruDepartment: initialData?.peruDepartment || 'LIM',
     peruProvince: initialData?.peruProvince || 'LMA',
     peruDistrict: initialData?.peruDistrict || 'MIR'
@@ -350,11 +350,11 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
           <CityInput
             label="City"
             required={true}
-            value={formData.city || 'Lima'}
+            value={formData.city || ''}
             onChange={(cityCode) => setFormData(prev => ({ ...prev, city: cityCode }))}
             placeholder="Select city"
             error={errors.city}
-            defaultCityCode="Lima"
+            defaultCityCode=""
           />
         ) : (
           renderFormField({
@@ -443,7 +443,7 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
             onChange={(countryCode) => setFormData(prev => ({ ...prev, country: countryCode }))}
             placeholder="Select your country"
             error={errors.country}
-            defaultCountryCode="PE"
+            defaultCountryCode=""
           />
         </div>
       </div>
