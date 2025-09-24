@@ -223,6 +223,7 @@ export function CustomerInfoStep({ initialData, onDataSaved }: CustomerInfoStepP
     console.log('✅ Customer information validated and saved:', formData);
 
     // Navigate to next step
+    console.log('🔄 Attempting to navigate to next step...');
     goToNextStep();
   };
 

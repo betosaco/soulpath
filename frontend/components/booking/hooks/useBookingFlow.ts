@@ -339,14 +339,22 @@ export function useBookingFlow(): UseBookingFlowReturn {
    */
   const canGoNext = useMemo(() => {
     const config = FLOW_CONFIG[currentStep];
-    if (!config.next) return false;
+    if (!config.next) {
+      console.log('❌ canGoNext: No next step for', currentStep);
+      return false;
+    }
 
     // Skip validation for non-required steps
-    if (!config.requiresValidation) return true;
+    if (!config.requiresValidation) {
+      console.log('✅ canGoNext: No validation required for', currentStep);
+      return true;
+    }
 
     // Scenario-specific validation
-    return validateStepTransition(currentStep, config.next);
-  }, [currentStep, validateStepTransition]);
+    const isValid = validateStepTransition(currentStep, config.next);
+    console.log('🔍 canGoNext validation:', { currentStep, nextStep: config.next, isValid, scenario });
+    return isValid;
+  }, [currentStep, validateStepTransition, scenario]);
 
   /**
    * CHECK IF CAN GO TO PREVIOUS STEP
@@ -370,16 +378,27 @@ export function useBookingFlow(): UseBookingFlowReturn {
    * Advances to the next step in the booking flow
    */
   const goToNextStep = useCallback(() => {
-    if (!canGoNext) return;
+    console.log('🚀 goToNextStep called:', { currentStep, canGoNext, hasPhysicalProducts });
+    
+    if (!canGoNext) {
+      console.log('❌ Cannot go to next step - canGoNext is false');
+      return;
+    }
 
     const config = FLOW_CONFIG[currentStep];
-    if (!config.next) return;
+    if (!config.next) {
+      console.log('❌ No next step configured for:', currentStep);
+      return;
+    }
 
     // Determine the actual next step (skip shipping if no physical products)
     let actualNextStep = config.next;
     if (config.next === 'shipping' && !hasPhysicalProducts) {
       actualNextStep = 'payment';
+      console.log('🔄 Skipping shipping step, going directly to payment');
     }
+
+    console.log('📍 Navigating from', currentStep, 'to', actualNextStep);
 
     // Build URL for next step
     const nextUrl = new URL(FLOW_CONFIG[actualNextStep].url, window.location.origin);

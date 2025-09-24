@@ -290,7 +290,12 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
    * Navigates back to customer info page for editing
    */
   const handleEditCustomerInfo = () => {
-    router.push('/booking/customer-info');
+    // Get current URL parameters to preserve the flow state
+    const currentParams = new URLSearchParams(window.location.search);
+    
+    // Navigate to customer info with preserved parameters
+    const customerInfoUrl = `/booking/customer-info?${currentParams.toString()}`;
+    router.push(customerInfoUrl);
   };
 
 
