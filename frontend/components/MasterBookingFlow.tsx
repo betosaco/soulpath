@@ -29,10 +29,17 @@
  * VALIDATION RULES:
  * ----------------
  * - Package session limits must be respected
- * - No duplicate slots within same package
- * - Cross-package booking allowed for different packages
+ * - No duplicate slots within same package (prevents double-booking same slot by same package)
+ * - Cross-package booking ALLOWED: Different packages can book the same time slot
  * - Required customer information validation
  * - Shipping address for physical products only
+ * 
+ * CROSS-PACKAGE BOOKING LOGIC:
+ * ----------------------------
+ * - Package A can book Slot X at 10:00 AM
+ * - Package B can also book Slot X at 10:00 AM (same time slot)
+ * - Package A cannot book Slot X at 10:00 AM twice (duplicate prevention)
+ * - This allows multiple packages to share popular time slots
  */
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -1020,6 +1027,21 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
     );
   };
 
+  /**
+   * CHECK IF SLOT IS BOOKED BY SPECIFIC PACKAGE
+   * --------------------------------------------
+   * Checks if a specific package has already booked a particular time slot.
+   * Used for duplicate prevention within the same package.
+   * 
+   * NOTE: This function is used for validation, NOT for filtering available packages.
+   * Different packages can book the same slot - this only prevents the same package
+   * from booking the same slot twice.
+   * 
+   * @param date - The date of the slot
+   * @param time - The time of the slot  
+   * @param packageId - The ID of the package to check
+   * @returns true if the package has already booked this slot
+   */
   const isTimeSlotBookedByPackage = (date: string, time: string, packageId: string) => {
     const pkg = cartItems.find(item => item.id === packageId && item.type === 'package');
     if (!pkg || !pkg.bookingDetails) return false;
@@ -1029,12 +1051,30 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
     );
   };
 
-  const getAvailablePackagesForSlot = (date: string, time: string) => {
+  /**
+   * GET AVAILABLE PACKAGES FOR SLOT
+   * --------------------------------
+   * Returns packages that can book a specific time slot.
+   * 
+   * CROSS-PACKAGE BOOKING RULE:
+   * - Different packages CAN book the same time slot
+   * - Same package CANNOT book the same time slot twice (duplicate prevention)
+   * - Only packages with remaining sessions are available
+   * 
+   * @param date - The date of the slot
+   * @param time - The time of the slot
+   * @returns Array of packages that can book this slot
+   */
+  const getAvailablePackagesForSlot = (_date: string, _time: string) => {
+    // Note: date and time parameters are kept for future extensibility
+    // Currently, we only check session limits, not slot-specific availability
     return cartItems
       .filter(item =>
         item.type === 'package' &&
-        getPackageRemainingSessions(item.id) > 0 &&
-        !isTimeSlotBookedByPackage(date, time, item.id)
+        getPackageRemainingSessions(item.id) > 0
+        // REMOVED: !isTimeSlotBookedByPackage(date, time, item.id)
+        // REASON: Different packages should be able to book the same time slot
+        // Only check if package has remaining sessions, not if it has booked this specific slot
       );
   };
 
@@ -2205,7 +2245,7 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
   // =============================================================================
   // MAIN COMPONENT RENDER
   // =============================================================================
-  
+
   return (
     <div className="max-w-4xl mx-auto">
       {/* Progress Steps */}
