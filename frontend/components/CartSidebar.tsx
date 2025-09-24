@@ -314,7 +314,13 @@ export function CartSidebar() {
                       if (allSessionsBooked) {
                         console.log('🚫 All sessions booked - automatically proceeding to checkout');
                         closeCart();
-                        router.push('/booking/customer-info?isDirectCheckout=true');
+                        
+                        // If multiple packages, go to group selection first
+                        if (packageCount > 1) {
+                          router.push('/booking/group-selection');
+                        } else {
+                          router.push('/booking/customer-info?isDirectCheckout=true');
+                        }
                         return;
                       }
 
@@ -411,7 +417,13 @@ export function CartSidebar() {
                         // Navigate to new booking flow customer-info step with direct checkout
                         console.log('📍 Navigating to customer-info step with isDirectCheckout=true');
                         closeCart();
-                        window.location.href = '/booking/customer-info?isDirectCheckout=true';
+                        
+                        // If multiple packages, go to group selection first
+                        if (packageCount > 1) {
+                          window.location.href = '/booking/group-selection';
+                        } else {
+                          window.location.href = '/booking/customer-info?isDirectCheckout=true';
+                        }
                       }
                     }}
                   >
