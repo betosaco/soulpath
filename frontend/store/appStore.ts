@@ -99,6 +99,10 @@ interface CustomerData {
   email: string;
   phone: string;
   countryCode: string;
+  // Optional address fields for shipping
+  address?: string;
+  city?: string;
+  country?: string;
 }
 
 // Customer State Interface
