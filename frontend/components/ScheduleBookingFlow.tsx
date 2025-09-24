@@ -1613,7 +1613,7 @@ export function ScheduleBookingFlow({
 
       {/* Package Selection Modal */}
       {showPackageSelection && selectedScheduleForPackage && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50" style={{ top: 0, left: 0, right: 0, bottom: 0, paddingTop: '10vh' }}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-[9999]" style={{ top: 0, left: 0, right: 0, bottom: 0, paddingTop: '10vh' }}>
           <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Select Package for Booking</h3>
