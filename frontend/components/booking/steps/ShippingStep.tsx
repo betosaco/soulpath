@@ -284,7 +284,7 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
     return (
       <div className={`unified-form-group ${fullWidth ? 'md:col-span-2' : ''}`}>
         <Label htmlFor={name} className="unified-form-label">
-          {label} {required && '*'}
+          {label}
         </Label>
         <Input
           id={name}

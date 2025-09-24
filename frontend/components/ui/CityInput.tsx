@@ -194,7 +194,6 @@ export function CityInput({
       {label && (
         <Label className="text-sm font-medium text-gray-700">
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
         </Label>
       )}
 
