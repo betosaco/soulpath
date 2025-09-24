@@ -19,13 +19,14 @@
  * - Integrate with cart state to determine if shipping is required
  *
  * VALIDATION RULES:
- * - First Name: Required, minimum 2 characters
- * - Last Name: Required, minimum 2 characters
  * - Address: Required, minimum 10 characters
  * - City: Required
  * - State: Optional
  * - Postal Code: Optional
  * - Country: Required (defaults to Peru)
+ * 
+ * NOTE: First Name and Last Name are not collected here as they are
+ * already collected in the customer information step.
  *
  * INTEGRATIONS:
  * - useCart hook to check if shipping is required
@@ -49,8 +50,6 @@ import { useCart } from '@/store/appStore';
  * Defines the structure of shipping address information collected
  */
 interface ShippingFormData {
-  firstName: string;
-  lastName: string;
   address: string;
   city: string;
   state: string;
@@ -103,8 +102,6 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
    * Local state for shipping form data
    */
   const [formData, setFormData] = React.useState<ShippingFormData>({
-    firstName: initialData?.firstName || '',
-    lastName: initialData?.lastName || '',
     address: initialData?.address || '',
     city: initialData?.city || '',
     state: initialData?.state || '',
@@ -140,19 +137,6 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
   const validateForm = React.useCallback((): { isValid: boolean; errors: Partial<ShippingFormData> } => {
     const newErrors: Partial<ShippingFormData> = {};
 
-    // First name validation
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
-    } else if (formData.firstName.trim().length < 2) {
-      newErrors.firstName = 'First name must be at least 2 characters long';
-    }
-
-    // Last name validation
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
-    } else if (formData.lastName.trim().length < 2) {
-      newErrors.lastName = 'Last name must be at least 2 characters long';
-    }
 
     // Address validation
     if (!formData.address.trim()) {
@@ -378,28 +362,11 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
           Shipping Address
         </h2>
         <p className="text-gray-600">
-          Provide shipping details for your physical products
+          Provide shipping address details for your physical products
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* First Name Field */}
-        {renderFormField({
-          name: 'firstName',
-          label: 'First Name',
-          type: 'text',
-          required: true,
-          placeholder: 'Enter your first name'
-        })}
-
-        {/* Last Name Field */}
-        {renderFormField({
-          name: 'lastName',
-          label: 'Last Name',
-          type: 'text',
-          required: true,
-          placeholder: 'Enter your last name'
-        })}
 
         {/* Address Field */}
         {renderFormField({
