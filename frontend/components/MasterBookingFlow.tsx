@@ -1574,7 +1574,8 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
                   onBookSlot={handleScheduleSelection}
                   showFilters={true}
                   existingBookings={selectedSchedules}
-                    lockedTimeSlots={lockedTimeSlots}
+                  lockedTimeSlots={lockedTimeSlots}
+                  hasMultiplePackages={false}
                 />
                 )}
               </div>
@@ -1669,6 +1670,7 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
                     })))
                   }
                   lockedTimeSlots={lockedTimeSlots}
+                  hasMultiplePackages={cartItems.filter(item => item.type === 'package').length > 1}
                 />
               )}
 
@@ -1789,6 +1791,7 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
                   showFilters={true}
                   existingBookings={packageItems.flatMap((item: any) => item.bookingDetails || [])}
                   lockedTimeSlots={lockedTimeSlots}
+                  hasMultiplePackages={packageItems.length > 1}
                 />
               </div>
             )}
