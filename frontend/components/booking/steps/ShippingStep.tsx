@@ -148,21 +148,19 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
     const newErrors: Partial<ShippingFormData> = {};
 
 
+    // Check if all required fields have values (but don't show error messages)
+    const hasAddress = formData.address.trim().length > 0;
+    const hasCity = formData.city.trim().length > 0;
+    const hasCountry = formData.country.length > 0;
+
     // Address validation - only check minimum length if provided
     if (formData.address.trim() && formData.address.trim().length < 10) {
       newErrors.address = 'Please provide a complete address (at least 10 characters)';
     }
 
-    // City validation - no default required message
-    // City is validated but no error message shown
-
-    // Country validation - no default required message  
-    // Country is validated but no error message shown
-
-    // Optional field validations (state and postal code can be empty)
-    // Add any specific validation rules here if needed
-
-    const isValid = Object.keys(newErrors).length === 0;
+    // Form is valid only if all required fields have values and no format errors
+    const isValid = hasAddress && hasCity && hasCountry && Object.keys(newErrors).length === 0;
+    
     return { isValid, errors: newErrors };
   }, [formData]);
 
@@ -170,11 +168,11 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
    * UPDATE FORM VALIDITY
    * --------------------
    * Updates the overall form validity state based on current validation
-   * Form is always valid since we don't show required field errors
+   * Form is valid only when all required fields have values
    */
   React.useEffect(() => {
     const { isValid, errors: validationErrors } = validateForm();
-    setIsFormValid(true); // Always valid since we don't show required field errors
+    setIsFormValid(isValid);
     setErrors(validationErrors);
   }, [validateForm]);
 
