@@ -5,7 +5,7 @@ const testData = {
   customerName: "Test User",
   customerEmail: "alberto@matmax.world",
   customerPhone: "+51 981281297",
-  orderNumber: "DEBUG-001",
+  orderNumber: "DEBUG-001", // Test data - server generates real order numbers
   orderId: "debug-order-123",
   orderDate: "2025-01-09",
   orderStatus: "confirmed",
@@ -30,7 +30,7 @@ const testData = {
   taxAmount: 9.15,
   shippingAmount: 0,
   totalAmount: 60,
-  currency: "PEN",
+  currency: "S/.",
   scheduleDetails: [
     {
       selectedDate: "2025-01-15",

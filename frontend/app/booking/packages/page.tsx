@@ -23,7 +23,7 @@
 
 import { AppShell } from '@/components/AppShell';
 import { PackageSelectionStep } from '@/components/booking/steps/PackageSelectionStep';
-import { BookingLayout } from '@/components/booking/layout/BookingLayout';
+// import { BookingLayout } from '@/components/booking/layout/BookingLayout'; // Unused import
 
 /**
  * BOOKING PACKAGES PAGE COMPONENT

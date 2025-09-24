@@ -20,7 +20,7 @@ async function fixLocalPackageOrder() {
       where: { isActive: true },
       include: {
         packagePrices: {
-          where: { currencyId: 1 }, // PEN currency
+          where: { currencyId: 1 }, // S/. currency
           select: { price: true }
         }
       },
@@ -57,7 +57,7 @@ async function fixLocalPackageOrder() {
       await prisma.packagePrice.create({
         data: {
           packageDefinitionId: testUsPackage.id,
-          currencyId: 1, // PEN
+          currencyId: 1, // S/.
           price: 1.00,
           pricingMode: 'promotional',
           isActive: true

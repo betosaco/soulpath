@@ -5,7 +5,7 @@ const testGroupBookingData = {
   customerName: "Jose Garfias",
   customerEmail: "alberto@matmax.world",
   customerPhone: "981281297",
-  orderNumber: "ORD-TEST-001",
+  orderNumber: "ORD-TEST-001", // Test data - server generates real order numbers
   orderId: "test-order-123",
   orderDate: "2025-01-09",
   orderStatus: "confirmed",
@@ -42,7 +42,7 @@ const testGroupBookingData = {
   tax_amount: 19.15,
   shipping_amount: 0,
   total_amount: 120,
-  currency: "PEN",
+  currency: "S/.",
   notes: "Test group booking order",
   shipping_address: null,
   scheduleDetails: {

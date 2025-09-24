@@ -118,7 +118,7 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
    * -------------
    * Access to available packages
    */
-  const { data: packages, isLoading: packagesLoading } = usePackages('PEN');
+  const { data: packages, isLoading: packagesLoading } = usePackages('S/.');
 
   // ============================================================================
   // BUSINESS LOGIC - SCHEDULE-FIRST SCENARIO
@@ -154,10 +154,10 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
       const placeholderSchedule: ScheduleData = {
         selectedDate: urlParams.slotDate, // Use actual date from slot
         selectedTime: urlParams.slotTime, // Use actual time from slot
-        teacher: urlParams.teacherName || `Teacher ${(slotId % 5) + 1}`, // Use real teacher name from URL
+        teacher: (urlParams as any).teacherName || `Teacher ${(slotId % 5) + 1}`, // Use real teacher name from URL
         dayOfWeek: scheduleDate.toLocaleDateString('en-US', { weekday: 'long' }),
-        serviceType: urlParams.serviceType || 'Yoga Class', // Use real service type from URL
-        venue: urlParams.venueName || `Studio ${(slotId % 3) + 1}`, // Use real venue name from URL
+        serviceType: (urlParams as any).serviceType || 'Yoga Class', // Use real service type from URL
+        venue: (urlParams as any).venueName || `Studio ${(slotId % 3) + 1}`, // Use real venue name from URL
         scheduleSlotId: slotId
       };
 
@@ -167,7 +167,7 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
       // Clear schedules if not in schedule-first scenario or missing slot data
       setPreSelectedSchedules([]);
     }
-  }, [isScheduleFirst, urlParams.slotId, urlParams.slotDate, urlParams.slotTime, urlParams.teacherName, urlParams.serviceType, urlParams.venueName, urlParams.readyForSchedule]);
+  }, [isScheduleFirst, urlParams.slotId, urlParams.slotDate, urlParams.slotTime, (urlParams as any).teacherName, (urlParams as any).serviceType, (urlParams as any).venueName, urlParams.readyForSchedule]);
 
   // ============================================================================
   // BUSINESS LOGIC - PACKAGE MANAGEMENT
@@ -234,7 +234,7 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
       name: pkg.packageDefinition.name,
       price: pkg.price,
       image: '/placeholder-package.jpg',
-      currency: 'PEN',
+      currency: 'S/.',
       type: 'package' as const,
       sessions: pkg.packageDefinition.sessionsCount || 1,
       duration: pkg.packageDefinition.sessionDuration?.duration_minutes || 60,
@@ -527,14 +527,6 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
 
   return (
     <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Select Packages & Products
-        </h2>
-        <p className="text-gray-600">
-          Add items to your cart
-        </p>
-      </div>
 
       {/* Show pre-selected schedules for schedule-first flow */}
       {renderPreSelectedSchedules()}

@@ -1,0 +1,680 @@
+{
+  "departments": [
+    {
+      "code": "LIM",
+      "name": "Lima",
+      "provinces": [
+        {
+          "code": "LMA",
+          "name": "Lima Metropolitana",
+          "districts": [
+            {
+              "code": "LIM_CEN",
+              "name": "Lima Centro",
+              "postalCode": "15001"
+            },
+            {
+              "code": "RIM",
+              "name": "Rímac",
+              "postalCode": "15025"
+            },
+            {
+              "code": "BRE",
+              "name": "Breña",
+              "postalCode": "15082"
+            },
+            {
+              "code": "VIC",
+              "name": "La Victoria",
+              "postalCode": "15013"
+            },
+            {
+              "code": "LIN",
+              "name": "Lince",
+              "postalCode": "15073"
+            },
+            {
+              "code": "JES",
+              "name": "Jesús María",
+              "postalCode": "15072"
+            },
+            {
+              "code": "PUE",
+              "name": "Pueblo Libre",
+              "postalCode": "15084"
+            },
+            {
+              "code": "MAG",
+              "name": "Magdalena",
+              "postalCode": "15076"
+            },
+            {
+              "code": "MIR",
+              "name": "Miraflores",
+              "postalCode": "15074"
+            },
+            {
+              "code": "SIS",
+              "name": "San Isidro",
+              "postalCode": "15036"
+            },
+            {
+              "code": "SUR",
+              "name": "Surco",
+              "postalCode": "15023"
+            },
+            {
+              "code": "MOL",
+              "name": "La Molina",
+              "postalCode": "15026"
+            },
+            {
+              "code": "CHO",
+              "name": "Chorrillos",
+              "postalCode": "15063"
+            },
+            {
+              "code": "LUR",
+              "name": "Lurín",
+              "postalCode": "15080"
+            },
+            {
+              "code": "PUN",
+              "name": "Punta Negra",
+              "postalCode": "15065"
+            },
+            {
+              "code": "PUC",
+              "name": "Pucusana",
+              "postalCode": "15066"
+            },
+            {
+              "code": "SMP",
+              "name": "San Martín de Porres",
+              "postalCode": "15081"
+            },
+            {
+              "code": "SMI",
+              "name": "San Miguel",
+              "postalCode": "15088"
+            },
+            {
+              "code": "SAN",
+              "name": "Santa Anita",
+              "postalCode": "15089"
+            },
+            {
+              "code": "SDS",
+              "name": "Santiago de Surco",
+              "postalCode": "15023"
+            },
+            {
+              "code": "VES",
+              "name": "Villa El Salvador",
+              "postalCode": "15095"
+            },
+            {
+              "code": "VMT",
+              "name": "Villa María del Triunfo",
+              "postalCode": "15096"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "CAL",
+      "name": "Callao",
+      "provinces": [
+        {
+          "code": "CAL",
+          "name": "Callao",
+          "districts": [
+            {
+              "code": "CAL_CEN",
+              "name": "Callao Centro",
+              "postalCode": "07001"
+            },
+            {
+              "code": "BEL",
+              "name": "Bellavista",
+              "postalCode": "07002"
+            },
+            {
+              "code": "CAR",
+              "name": "Carmen de la Legua",
+              "postalCode": "07003"
+            },
+            {
+              "code": "PER",
+              "name": "La Perla",
+              "postalCode": "07004"
+            },
+            {
+              "code": "PUN",
+              "name": "La Punta",
+              "postalCode": "07005"
+            },
+            {
+              "code": "VEN",
+              "name": "Ventanilla",
+              "postalCode": "07006"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "ARE",
+      "name": "Arequipa",
+      "provinces": [
+        {
+          "code": "ARE",
+          "name": "Arequipa",
+          "districts": [
+            {
+              "code": "ARE_CEN",
+              "name": "Arequipa Centro",
+              "postalCode": "04001"
+            },
+            {
+              "code": "CAY",
+              "name": "Cayma",
+              "postalCode": "04002"
+            },
+            {
+              "code": "CER",
+              "name": "Cerro Colorado",
+              "postalCode": "04003"
+            },
+            {
+              "code": "CHA",
+              "name": "Characato",
+              "postalCode": "04004"
+            },
+            {
+              "code": "CHI",
+              "name": "Chiguata",
+              "postalCode": "04005"
+            },
+            {
+              "code": "JAC",
+              "name": "Jacobo Hunter",
+              "postalCode": "04006"
+            },
+            {
+              "code": "JOY",
+              "name": "La Joya",
+              "postalCode": "04007"
+            },
+            {
+              "code": "MAR",
+              "name": "Mariano Melgar",
+              "postalCode": "04008"
+            },
+            {
+              "code": "MIR",
+              "name": "Miraflores",
+              "postalCode": "04009"
+            },
+            {
+              "code": "MOL",
+              "name": "Mollebaya",
+              "postalCode": "04010"
+            },
+            {
+              "code": "PAU",
+              "name": "Paucarpata",
+              "postalCode": "04011"
+            },
+            {
+              "code": "POC",
+              "name": "Pocsi",
+              "postalCode": "04012"
+            },
+            {
+              "code": "POL",
+              "name": "Polobaya",
+              "postalCode": "04013"
+            },
+            {
+              "code": "QUE",
+              "name": "Quequeña",
+              "postalCode": "04014"
+            },
+            {
+              "code": "SAB",
+              "name": "Sabandía",
+              "postalCode": "04015"
+            },
+            {
+              "code": "SAC",
+              "name": "Sachaca",
+              "postalCode": "04016"
+            },
+            {
+              "code": "SIG",
+              "name": "San Juan de Siguas",
+              "postalCode": "04017"
+            },
+            {
+              "code": "TAR",
+              "name": "San Juan de Tarucani",
+              "postalCode": "04018"
+            },
+            {
+              "code": "SIS",
+              "name": "Santa Isabel de Siguas",
+              "postalCode": "04019"
+            },
+            {
+              "code": "SRS",
+              "name": "Santa Rita de Siguas",
+              "postalCode": "04020"
+            },
+            {
+              "code": "SOC",
+              "name": "Socabaya",
+              "postalCode": "04021"
+            },
+            {
+              "code": "TIA",
+              "name": "Tiabaya",
+              "postalCode": "04022"
+            },
+            {
+              "code": "UCH",
+              "name": "Uchumayo",
+              "postalCode": "04023"
+            },
+            {
+              "code": "VIT",
+              "name": "Vitor",
+              "postalCode": "04024"
+            },
+            {
+              "code": "YAN",
+              "name": "Yanahuara",
+              "postalCode": "04025"
+            },
+            {
+              "code": "YAR",
+              "name": "Yarabamba",
+              "postalCode": "04026"
+            },
+            {
+              "code": "YUR",
+              "name": "Yura",
+              "postalCode": "04027"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "CUS",
+      "name": "Cusco",
+      "provinces": [
+        {
+          "code": "CUS",
+          "name": "Cusco",
+          "districts": [
+            {
+              "code": "CUS_CEN",
+              "name": "Cusco Centro",
+              "postalCode": "08001"
+            },
+            {
+              "code": "CCO",
+              "name": "Ccorca",
+              "postalCode": "08002"
+            },
+            {
+              "code": "POR",
+              "name": "Poroy",
+              "postalCode": "08003"
+            },
+            {
+              "code": "SJE",
+              "name": "San Jerónimo",
+              "postalCode": "08004"
+            },
+            {
+              "code": "SSE",
+              "name": "San Sebastián",
+              "postalCode": "08005"
+            },
+            {
+              "code": "SAG",
+              "name": "Santiago",
+              "postalCode": "08006"
+            },
+            {
+              "code": "SAY",
+              "name": "Saylla",
+              "postalCode": "08007"
+            },
+            {
+              "code": "WAN",
+              "name": "Wanchaq",
+              "postalCode": "08008"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "LAM",
+      "name": "Lambayeque",
+      "provinces": [
+        {
+          "code": "CHI",
+          "name": "Chiclayo",
+          "districts": [
+            {
+              "code": "CHI_CEN",
+              "name": "Chiclayo Centro",
+              "postalCode": "14001"
+            },
+            {
+              "code": "CAY",
+              "name": "Cayaltí",
+              "postalCode": "14002"
+            },
+            {
+              "code": "CHO",
+              "name": "Chongoyape",
+              "postalCode": "14003"
+            },
+            {
+              "code": "ETE",
+              "name": "Eten",
+              "postalCode": "14004"
+            },
+            {
+              "code": "ETP",
+              "name": "Eten Puerto",
+              "postalCode": "14005"
+            },
+            {
+              "code": "JLO",
+              "name": "José Leonardo Ortiz",
+              "postalCode": "14006"
+            },
+            {
+              "code": "VIC",
+              "name": "La Victoria",
+              "postalCode": "14007"
+            },
+            {
+              "code": "LAG",
+              "name": "Lagunas",
+              "postalCode": "14008"
+            },
+            {
+              "code": "MON",
+              "name": "Monsefú",
+              "postalCode": "14009"
+            },
+            {
+              "code": "NAR",
+              "name": "Nueva Arica",
+              "postalCode": "14010"
+            },
+            {
+              "code": "OYO",
+              "name": "Oyotún",
+              "postalCode": "14011"
+            },
+            {
+              "code": "PIC",
+              "name": "Picsi",
+              "postalCode": "14012"
+            },
+            {
+              "code": "PIM",
+              "name": "Pimentel",
+              "postalCode": "14013"
+            },
+            {
+              "code": "POM",
+              "name": "Pomalca",
+              "postalCode": "14014"
+            },
+            {
+              "code": "PUC",
+              "name": "Pucalá",
+              "postalCode": "14015"
+            },
+            {
+              "code": "REQ",
+              "name": "Reque",
+              "postalCode": "14016"
+            },
+            {
+              "code": "SRO",
+              "name": "Santa Rosa",
+              "postalCode": "14017"
+            },
+            {
+              "code": "SAN",
+              "name": "Saña",
+              "postalCode": "14018"
+            },
+            {
+              "code": "PAT",
+              "name": "Patapo",
+              "postalCode": "14020"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "PIU",
+      "name": "Piura",
+      "provinces": [
+        {
+          "code": "PIU",
+          "name": "Piura",
+          "districts": [
+            {
+              "code": "PIU_CEN",
+              "name": "Piura Centro",
+              "postalCode": "20001"
+            },
+            {
+              "code": "CAS",
+              "name": "Castilla",
+              "postalCode": "20002"
+            },
+            {
+              "code": "CAT",
+              "name": "Catacaos",
+              "postalCode": "20003"
+            },
+            {
+              "code": "CUR",
+              "name": "Cura Mori",
+              "postalCode": "20004"
+            },
+            {
+              "code": "TAL",
+              "name": "El Tallán",
+              "postalCode": "20005"
+            },
+            {
+              "code": "ARE",
+              "name": "La Arena",
+              "postalCode": "20006"
+            },
+            {
+              "code": "UNI",
+              "name": "La Unión",
+              "postalCode": "20007"
+            },
+            {
+              "code": "LOM",
+              "name": "Las Lomas",
+              "postalCode": "20008"
+            },
+            {
+              "code": "TAM",
+              "name": "Tambo Grande",
+              "postalCode": "20009"
+            },
+            {
+              "code": "VEO",
+              "name": "Veintiséis de Octubre",
+              "postalCode": "20010"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "TAC",
+      "name": "Tacna",
+      "provinces": [
+        {
+          "code": "TAC",
+          "name": "Tacna",
+          "districts": [
+            {
+              "code": "TAC_CEN",
+              "name": "Tacna Centro",
+              "postalCode": "23001"
+            },
+            {
+              "code": "ALT",
+              "name": "Alto de la Alianza",
+              "postalCode": "23002"
+            },
+            {
+              "code": "CAL",
+              "name": "Calana",
+              "postalCode": "23003"
+            },
+            {
+              "code": "CIU",
+              "name": "Ciudad Nueva",
+              "postalCode": "23004"
+            },
+            {
+              "code": "INC",
+              "name": "Inclán",
+              "postalCode": "23005"
+            },
+            {
+              "code": "PAC",
+              "name": "Pachía",
+              "postalCode": "23006"
+            },
+            {
+              "code": "PAL",
+              "name": "Palca",
+              "postalCode": "23007"
+            },
+            {
+              "code": "POC",
+              "name": "Pocollay",
+              "postalCode": "23008"
+            },
+            {
+              "code": "SAM",
+              "name": "Sama",
+              "postalCode": "23009"
+            },
+            {
+              "code": "CGA",
+              "name": "Coronel Gregorio Albarracín",
+              "postalCode": "23010"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "ICA",
+      "name": "Ica",
+      "provinces": [
+        {
+          "code": "ICA",
+          "name": "Ica",
+          "districts": [
+            {
+              "code": "ICA_CEN",
+              "name": "Ica Centro",
+              "postalCode": "11001"
+            },
+            {
+              "code": "TIN",
+              "name": "La Tinguiña",
+              "postalCode": "11002"
+            },
+            {
+              "code": "AQU",
+              "name": "Los Aquijes",
+              "postalCode": "11003"
+            },
+            {
+              "code": "OCU",
+              "name": "Ocucaje",
+              "postalCode": "11004"
+            },
+            {
+              "code": "PAC",
+              "name": "Pachacútec",
+              "postalCode": "11005"
+            },
+            {
+              "code": "PAR",
+              "name": "Parcona",
+              "postalCode": "11006"
+            },
+            {
+              "code": "PUE",
+              "name": "Pueblo Nuevo",
+              "postalCode": "11007"
+            },
+            {
+              "code": "SAL",
+              "name": "Salas",
+              "postalCode": "11008"
+            },
+            {
+              "code": "SJM",
+              "name": "San José de los Molinos",
+              "postalCode": "11009"
+            },
+            {
+              "code": "SJB",
+              "name": "San Juan Bautista",
+              "postalCode": "11010"
+            },
+            {
+              "code": "SAG",
+              "name": "Santiago",
+              "postalCode": "11011"
+            },
+            {
+              "code": "SUB",
+              "name": "Subtanjalla",
+              "postalCode": "11012"
+            },
+            {
+              "code": "TAT",
+              "name": "Tate",
+              "postalCode": "11013"
+            },
+            {
+              "code": "YAU",
+              "name": "Yauca del Rosario",
+              "postalCode": "11014"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

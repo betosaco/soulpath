@@ -429,7 +429,7 @@ export default function PaymentMethodsPage() {
                 id="providerConfig"
                 value={providerConfig}
                 onChange={(e) => setProviderConfig(e.target.value)}
-                placeholder='{"merchantId":"...","username":"...","password":"...","publicKey":"...","currency":"PEN","environment":"sandbox","supportedCountries":["PE"],"returnUrl":"/payment/success","cancelUrl":"/payment/cancel"}'
+                placeholder='{"merchantId":"...","username":"...","password":"...","publicKey":"...","currency":"S/.","environment":"sandbox","supportedCountries":["PE"],"returnUrl":"/payment/success","cancelUrl":"/payment/cancel"}'
                 className={`bg-[${colors.semantic.surface.primary}] border-[${colors.border[500]}] text-[${colors.text.primary}] placeholder:text-[${colors.text.tertiary}]`}
                 rows={6}
               />
@@ -586,7 +586,7 @@ export default function PaymentMethodsPage() {
                 id="edit-providerConfig"
                 value={providerConfig}
                 onChange={(e) => setProviderConfig(e.target.value)}
-                placeholder='{"merchantId":"...","username":"...","password":"...","publicKey":"...","currency":"PEN","environment":"sandbox","supportedCountries":["PE"],"returnUrl":"/payment/success","cancelUrl":"/payment/cancel"}'
+                placeholder='{"merchantId":"...","username":"...","password":"...","publicKey":"...","currency":"S/.","environment":"sandbox","supportedCountries":["PE"],"returnUrl":"/payment/success","cancelUrl":"/payment/cancel"}'
                 className={`bg-[${colors.semantic.surface.primary}] border-[${colors.border[500]}] text-[${colors.text.primary}] placeholder:text-[${colors.text.tertiary}]`}
                 rows={6}
               />

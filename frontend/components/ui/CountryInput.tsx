@@ -25,7 +25,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Input } from '@/components/ui/input';
+// import { Input } from '@/components/ui/input'; // Unused import
 import { Label } from '@/components/ui/label';
 import { countries, Country } from '@/lib/countries';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -67,7 +67,7 @@ export function CountryInput({
   required = false,
   value,
   onChange,
-  placeholder = 'Select country',
+  _placeholder = 'Select country',
   disabled = false,
   error,
   defaultCountryCode = 'PE'
@@ -178,7 +178,7 @@ export function CountryInput({
           type="button"
           onClick={handleDropdownToggle}
           disabled={disabled}
-          className={`w-full px-4 py-3 border rounded-lg text-left transition-all duration-200 ${
+          className={`w-full px-4 py-3 border rounded-lg text-left transition-all duration-200 h-12 ${
             error
               ? 'border-red-300 bg-red-50 text-red-900'
               : disabled
@@ -254,7 +254,7 @@ export function CountryInput({
               </div>
 
               {/* Countries List */}
-              <div className="overflow-y-auto h-full pb-16">
+              <div className="overflow-y-auto h-96 pb-16">
                 {filteredCountries.map((country) => (
                   <button
                     key={`${country.country}-${country.name}`}

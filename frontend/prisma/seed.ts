@@ -564,7 +564,7 @@ async function main() {
 
   // 10. Create package prices (PEN)
   console.log('💲 Creating MATPASS package prices in PEN...');
-  const penCurrency = await prisma.currency.findUnique({ where: { code: 'PEN' } });
+  const penCurrency = await prisma.currency.findUnique({ where: { code: 'S/.' } });
   const penCurrencyId = penCurrency?.id ?? 5;
   const packagePrices = await Promise.all([
     prisma.packagePrice.upsert({
@@ -1009,7 +1009,7 @@ async function main() {
       create: {
         userId: clients[0].id,
         totalAmount: 50.00,
-        currencyCode: 'PEN',
+        currencyCode: 'S/.',
         paymentMethod: 'stripe',
         paymentStatus: 'COMPLETED',
         notes: 'Test purchase for John Doe - 01 MATPASS',
@@ -1023,7 +1023,7 @@ async function main() {
       create: {
         userId: clients[1].id,
         totalAmount: 210.00,
-        currencyCode: 'PEN',
+        currencyCode: 'S/.',
         paymentMethod: 'cash',
         paymentStatus: 'COMPLETED',
         notes: 'Test purchase for Maria Garcia - 04 MATPASS',
@@ -1051,7 +1051,7 @@ async function main() {
         paymentStatus: 'COMPLETED',
         subtotal: 60.00,
         total: 60.00,
-        currency: 'PEN',
+        currency: 'S/.',
         notes: 'Test order for John Doe - 01 MATPASS'
       }
     }),
@@ -1069,7 +1069,7 @@ async function main() {
         paymentStatus: 'COMPLETED',
         subtotal: 190.00,
         total: 190.00,
-        currency: 'PEN',
+        currency: 'S/.',
         notes: 'Test order for Maria Garcia - 04 MATPASS'
       }
     })
@@ -1179,7 +1179,7 @@ async function main() {
         userId: clients[0].id,
         purchaseId: 1,
         amount: 50.00,
-        currency: 'PEN',
+        currency: 'S/.',
         paymentMethod: 'stripe',
         status: 'COMPLETED',
         paymentStatus: 'COMPLETED'
@@ -1193,7 +1193,7 @@ async function main() {
         userId: clients[1].id,
         purchaseId: 2,
         amount: 210.00,
-        currency: 'PEN',
+        currency: 'S/.',
         paymentMethod: 'cash',
         status: 'COMPLETED',
         paymentStatus: 'COMPLETED'
@@ -1382,7 +1382,7 @@ async function main() {
         benefits: ['Improved flexibility', 'Better posture', 'Stress relief', 'Mind-body connection'],
         difficulty: 'ALL_LEVELS',
         price: 50.00,
-        currencyId: 5, // PEN
+        currencyId: 5, // S/.
         isActive: true,
         displayOrder: 1,
         featured: true,
@@ -1406,7 +1406,7 @@ async function main() {
         benefits: ['Improved strength', 'Better flexibility', 'Cardiovascular fitness', 'Mental focus'],
         difficulty: 'INTERMEDIATE',
         price: 50.00,
-        currencyId: 5, // PEN
+        currencyId: 5, // S/.
         isActive: true,
         displayOrder: 2,
         featured: true,

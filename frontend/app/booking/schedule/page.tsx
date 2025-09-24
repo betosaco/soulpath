@@ -25,7 +25,7 @@
 
 import { AppShell } from '@/components/AppShell';
 import { ScheduleSelectionStep } from '@/components/booking/steps/ScheduleSelectionStep';
-import { BookingLayout } from '@/components/booking/layout/BookingLayout';
+// import { BookingLayout } from '@/components/booking/layout/BookingLayout'; // Unused import
 
 /**
  * BOOKING SCHEDULE PAGE COMPONENT

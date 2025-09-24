@@ -43,9 +43,12 @@ import { CountryInput } from '@/components/ui/CountryInput';
 import { CityInput } from '@/components/ui/CityInput';
 import { ProvinceInput } from '@/components/ui/ProvinceInput';
 import { DistrictInput } from '@/components/ui/DistrictInput';
+import { DepartmentInput } from '@/components/ui/DepartmentInput';
+import { PostalCodeInput } from '@/components/ui/PostalCodeInput';
 import { toast } from 'sonner';
 import { useBookingFlow } from '../hooks/useBookingFlow';
-import { useCart } from '@/store/appStore';
+import { useCart, useShipping } from '@/store/appStore';
+import { getDefaultPeruValues } from '@/lib/peru-shipping-data';
 
 /**
  * SHIPPING FORM DATA INTERFACE
@@ -94,30 +97,42 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
    * ------------------
    * Access to flow navigation functions
    */
-  const { goToNextStep } = useBookingFlow();
+  const { goToNextStep, currentStep, canGoNext } = useBookingFlow();
+  
 
   /**
    * CART STATE
    * ----------
    * Check if shipping is required for current cart
    */
-  const { requiresAddress } = useCart();
+  const { items: cartItems } = useCart();
+
+  /**
+   * SHIPPING STATE
+   * --------------
+   * Access to global shipping data storage
+   */
+  const { shippingData, setShippingData } = useShipping();
 
   /**
    * FORM STATE MANAGEMENT
    * ---------------------
    * Local state for shipping form data
    */
+  // Get default Peru values
+  const defaultValues = getDefaultPeruValues();
+  
   const [formData, setFormData] = React.useState<ShippingFormData>({
-    address: initialData?.address || '',
-    city: initialData?.city || '',
-    state: initialData?.state || '',
-    postalCode: initialData?.postalCode || '',
-    country: initialData?.country || 'PE', // Default to Peru
-    peruDepartment: initialData?.peruDepartment || 'LIM',
-    peruProvince: initialData?.peruProvince || 'LMA',
-    peruDistrict: initialData?.peruDistrict || 'MIR'
+    address: initialData?.address || shippingData?.address || '', // No default address
+    city: initialData?.city || shippingData?.city || 'Lima Metropolitana',
+    state: initialData?.state || shippingData?.state || '',
+    postalCode: initialData?.postalCode || shippingData?.postalCode || defaultValues.postalCode,
+    country: initialData?.country || shippingData?.country || 'PE', // Default to Peru
+    peruDepartment: initialData?.peruDepartment || shippingData?.peruDepartment || defaultValues.department,
+    peruProvince: initialData?.peruProvince || shippingData?.peruProvince || defaultValues.province,
+    peruDistrict: initialData?.peruDistrict || shippingData?.peruDistrict || defaultValues.district
   });
+
 
   /**
    * VALIDATION STATE
@@ -133,6 +148,7 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
    */
   const [isFormValid, setIsFormValid] = React.useState(false);
 
+
   // ============================================================================
   // VALIDATION LOGIC
   // ============================================================================
@@ -147,14 +163,13 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
   const validateForm = React.useCallback((): { isValid: boolean; errors: Partial<ShippingFormData> } => {
     const newErrors: Partial<ShippingFormData> = {};
 
-
     // Check if all required fields have values (but don't show error messages)
     const hasAddress = formData.address.trim().length > 0;
     const hasCountry = formData.country.length > 0;
     
     // For Peru, check Peru-specific fields; for other countries, check main city field
     const hasCity = formData.country === 'PE' 
-      ? formData.peruProvince.length > 0 && formData.peruDistrict.length > 0
+      ? formData.peruDepartment && formData.peruDepartment.length > 0 && formData.peruProvince && formData.peruProvince.length > 0 && formData.peruDistrict && formData.peruDistrict.length > 0
       : formData.city.trim().length > 0;
 
     // Address validation - only check minimum length if provided
@@ -165,7 +180,8 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
     // Form is valid only if all required fields have values and no format errors
     const isValid = hasAddress && hasCity && hasCountry && Object.keys(newErrors).length === 0;
     
-    return { isValid, errors: newErrors };
+    
+    return { isValid: !!isValid, errors: newErrors };
   }, [formData]);
 
   /**
@@ -188,12 +204,16 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
    * CHECK IF SHIPPING IS REQUIRED
    * -----------------------------
    * Determines if this step should be shown based on cart contents
+   * Use client-side only to prevent hydration mismatch
    */
-  const isShippingRequired = requiresAddress();
+  const [isShippingRequired, setIsShippingRequired] = React.useState<boolean | null>(null);
 
-  // If shipping is not required, auto-advance to next step
+  // Check shipping requirement on client side only
   React.useEffect(() => {
-    if (!isShippingRequired) {
+    const required = cartItems.some(item => item.type === 'product');
+    setIsShippingRequired(required);
+
+    if (!required) {
       console.log('🚚 Shipping not required, auto-advancing to next step');
       // In a real implementation, you might want to delay this slightly
       // or show a message that shipping is being skipped
@@ -201,7 +221,7 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
         goToNextStep();
       }, 100);
     }
-  }, [isShippingRequired, goToNextStep]);
+  }, [cartItems, goToNextStep]);
 
   // ============================================================================
   // EVENT HANDLERS
@@ -247,7 +267,8 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
       return;
     }
 
-    // Save data (in a real app, this might save to a store or API)
+    // Save data to global store
+    setShippingData(formData);
     onDataSaved?.(formData);
 
     console.log('✅ Shipping information validated and saved:', formData);
@@ -306,6 +327,23 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
   // MAIN RENDER
   // ============================================================================
 
+  // Show loading state while determining if shipping is required
+  if (isShippingRequired === null) {
+    return (
+      <div className="max-w-2xl mx-auto h-full space-y-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Shipping Address
+          </h2>
+          <div className="mt-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+            <p className="text-sm text-gray-500 mt-2">Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Auto-skip if shipping is not required
   if (!isShippingRequired) {
     return (
@@ -349,16 +387,62 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
           fullWidth: true
         })}
 
+        {/* Department Field - Only for Peru (First Field) */}
+        {formData.country === 'PE' && (
+          <DepartmentInput
+            label="Department"
+            required={true}
+            value={formData.peruDepartment || defaultValues.department}
+            onChange={(departmentCode) => setFormData(prev => ({ 
+              ...prev, 
+              peruDepartment: departmentCode,
+              peruProvince: '', // Clear province when department changes
+              city: '', // Clear city when department changes
+              peruDistrict: '', // Clear district when department changes
+              postalCode: '' // Clear postal code when department changes
+            }))}
+            placeholder="Select department"
+            error={errors.peruDepartment}
+            defaultDepartmentCode={defaultValues.department}
+          />
+        )}
+
+        {/* Province Field - Only for Peru (Second Field) */}
+        {formData.country === 'PE' && (
+          <ProvinceInput
+            label="Province"
+            required={true}
+            value={formData.peruProvince || defaultValues.province}
+            onChange={(provinceCode) => setFormData(prev => ({ 
+              ...prev, 
+              peruProvince: provinceCode,
+              city: '', // Clear city when province changes
+              peruDistrict: '', // Clear district when province changes
+              postalCode: '' // Clear postal code when province changes
+            }))}
+            placeholder="Select province"
+            error={errors.peruProvince}
+            defaultProvinceCode={defaultValues.province}
+            departmentCode={formData.peruDepartment}
+          />
+        )}
+
         {/* City Field - Changes based on country */}
         {formData.country === 'PE' ? (
           <CityInput
             label="City"
             required={true}
-            value={formData.city || ''}
-            onChange={(cityCode) => setFormData(prev => ({ ...prev, city: cityCode }))}
+            value={formData.city || 'Lima Metropolitana'}
+            onChange={(cityCode) => setFormData(prev => ({ 
+              ...prev, 
+              city: cityCode,
+              peruDistrict: '', // Clear district when city changes
+              postalCode: '' // Clear postal code when city changes
+            }))}
             placeholder="Select city"
             error={errors.city}
-            defaultCityCode=""
+            defaultCityCode={defaultValues.city}
+            departmentCode={formData.peruDepartment}
             provinceCode={formData.peruProvince}
           />
         ) : (
@@ -371,36 +455,24 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
           })
         )}
 
-        {/* Province Field - Only for Peru */}
-        {formData.country === 'PE' && (
-          <ProvinceInput
-            label="Province"
-            required={true}
-            value={formData.peruProvince || 'LMA'}
-            onChange={(provinceCode) => setFormData(prev => ({ ...prev, peruProvince: provinceCode }))}
-            placeholder="Select province"
-            error={errors.peruProvince}
-            defaultProvinceCode="LMA"
-          />
-        )}
-
         {/* District Field - Only for Peru */}
         {formData.country === 'PE' && (
           <DistrictInput
             label="District"
             required={true}
-            value={formData.peruDistrict || 'MIR'}
+            value={formData.peruDistrict || defaultValues.district}
             onChange={(districtCode, postalCode) => {
               setFormData(prev => ({ 
                 ...prev, 
                 peruDistrict: districtCode,
-                postalCode: postalCode || prev.postalCode
+                postalCode: postalCode || '' // Clear postal code when district changes
               }));
             }}
             placeholder="Select district"
             error={errors.peruDistrict}
-            defaultDistrictCode="MIR"
-            cityCode={formData.city}
+            defaultDistrictCode={defaultValues.district}
+            departmentCode={formData.peruDepartment}
+            provinceCode={formData.peruProvince}
           />
         )}
 
@@ -415,43 +487,49 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
           })
         )}
 
-        {/* Postal Code and Country Fields - Side by Side */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Postal Code Field - Auto-populated for Peru */}
-          {formData.country === 'PE' ? (
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">
-                Postal Code
-              </Label>
-              <Input
-                type="text"
-                value={formData.postalCode || '15074'}
-                onChange={(e) => setFormData(prev => ({ ...prev, postalCode: e.target.value }))}
-                placeholder="Postal code"
-                className="w-full"
-              />
-            </div>
-          ) : (
-            renderFormField({
-              name: 'postalCode',
-              label: 'Postal Code',
-              type: 'text',
-              required: false,
-              placeholder: 'Enter your postal code (optional)'
-            })
-          )}
-
-          {/* Country Field */}
-          <CountryInput
-            label="Country"
+        {/* Postal Code Field - Left Column */}
+        {formData.country === 'PE' ? (
+          <PostalCodeInput
+            label="Postal Code"
             required={true}
-            value={formData.country}
-            onChange={(countryCode) => setFormData(prev => ({ ...prev, country: countryCode }))}
-            placeholder="Select your country"
-            error={errors.country}
-            defaultCountryCode="PE"
+            value={formData.postalCode || defaultValues.postalCode}
+            onChange={(postalCode) => setFormData(prev => ({ ...prev, postalCode }))}
+            placeholder="Select postal code"
+            error={errors.postalCode}
+            defaultPostalCode={defaultValues.postalCode}
+            departmentCode={formData.peruDepartment}
+            provinceCode={formData.peruProvince}
+            districtCode={formData.peruDistrict}
           />
-        </div>
+        ) : (
+          renderFormField({
+            name: 'postalCode',
+            label: 'Postal Code',
+            type: 'text',
+            required: false,
+            placeholder: 'Enter your postal code (optional)'
+          })
+        )}
+
+        {/* Country Field - Right Column */}
+        <CountryInput
+          label="Country"
+          required={true}
+          value={formData.country}
+          onChange={(countryCode) => setFormData(prev => ({ 
+            ...prev, 
+            country: countryCode,
+            // Clear Peru-specific fields when country changes
+            peruDepartment: countryCode === 'PE' ? prev.peruDepartment : '',
+            peruProvince: countryCode === 'PE' ? prev.peruProvince : '',
+            city: countryCode === 'PE' ? prev.city : '',
+            peruDistrict: countryCode === 'PE' ? prev.peruDistrict : '',
+            postalCode: countryCode === 'PE' ? prev.postalCode : ''
+          }))}
+          placeholder="Select your country"
+          error={errors.country}
+          defaultCountryCode="PE"
+        />
       </div>
 
 

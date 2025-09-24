@@ -22,6 +22,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Label } from '@/components/ui/label';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getProvincesByDepartment } from '@/lib/peru-shipping-data';
 
 /**
  * PROVINCE DATA INTERFACE
@@ -37,25 +38,8 @@ interface Province {
 /**
  * PROVINCE DATA
  * -------------
- * Provinces in Peru
+ * Provinces loaded from MTC database
  */
-const provinces: Province[] = [
-  { code: 'LMA', name: 'Lima Metropolitana', flag: '' },
-  { code: 'CAL', name: 'Callao', flag: '' },
-  { code: 'ARE', name: 'Arequipa', flag: '' },
-  { code: 'CUS', name: 'Cusco', flag: '' },
-  { code: 'LAM', name: 'Lambayeque', flag: '' },
-  { code: 'PIU', name: 'Piura', flag: '' },
-  { code: 'TAC', name: 'Tacna', flag: '' },
-  { code: 'ICA', name: 'Ica', flag: '' },
-  { code: 'TRU', name: 'La Libertad', flag: '' },
-  { code: 'JUN', name: 'Junín', flag: '' },
-  { code: 'LOR', name: 'Loreto', flag: '' },
-  { code: 'ANC', name: 'Ancash', flag: '' },
-  { code: 'UCA', name: 'Ucayali', flag: '' },
-  { code: 'CAJ', name: 'Cajamarca', flag: '' },
-  { code: 'AYA', name: 'Ayacucho', flag: '' }
-];
 
 /**
  * PROVINCE INPUT PROPS
@@ -79,6 +63,8 @@ interface ProvinceInputProps {
   error?: string;
   /** Default province code */
   defaultProvinceCode?: string;
+  /** Department code to filter provinces */
+  departmentCode?: string;
 }
 
 /**
@@ -91,13 +77,14 @@ interface ProvinceInputProps {
  */
 export function ProvinceInput({
   label,
-  required = false,
+  _required = false,
   value,
   onChange,
   placeholder = 'Select province',
   disabled = false,
   error,
-  defaultProvinceCode = 'LMA'
+  defaultProvinceCode = 'LMA',
+  departmentCode
 }: ProvinceInputProps) {
   // ============================================================================
   // STATE MANAGEMENT
@@ -113,16 +100,30 @@ export function ProvinceInput({
   // ============================================================================
 
   /**
+   * GET AVAILABLE PROVINCES
+   * -----------------------
+   * Get provinces based on selected department
+   */
+  const getAvailableProvinces = () => {
+    if (departmentCode) {
+      const mtcProvinces = getProvincesByDepartment(departmentCode);
+      return mtcProvinces.map(p => ({ code: p.code, name: p.name, flag: '' }));
+    }
+    return [];
+  };
+
+  /**
    * INITIALIZE SELECTED PROVINCE
    * ----------------------------
    * Set the initial selected province based on value or default
    */
   useEffect(() => {
-    const province = provinces.find(p => p.code === value) || 
-                     provinces.find(p => p.code === defaultProvinceCode) ||
-                     provinces[0];
+    const availableProvinces = getAvailableProvinces();
+    const province = availableProvinces.find(p => p.code === value) || 
+                     availableProvinces.find(p => p.code === defaultProvinceCode) ||
+                     availableProvinces[0];
     setSelectedProvince(province);
-  }, [value, defaultProvinceCode]);
+  }, [value, defaultProvinceCode, departmentCode]);
 
   /**
    * HANDLE CLICK OUTSIDE
@@ -179,7 +180,8 @@ export function ProvinceInput({
    * ------------------
    * Provinces filtered by search term
    */
-  const filteredProvinces = provinces.filter(province =>
+  const availableProvinces = getAvailableProvinces();
+  const filteredProvinces = availableProvinces.filter(province =>
     province.name.toLowerCase().includes(provinceSearchTerm.toLowerCase()) ||
     province.code.toLowerCase().includes(provinceSearchTerm.toLowerCase())
   );
@@ -204,7 +206,7 @@ export function ProvinceInput({
           type="button"
           onClick={handleDropdownToggle}
           disabled={disabled}
-          className={`w-full px-4 py-3 border rounded-lg text-left transition-all duration-200 ${
+          className={`w-full px-4 py-3 border rounded-lg text-left transition-all duration-200 h-12 ${
             error
               ? 'border-red-300 bg-red-50 text-red-900'
               : disabled
@@ -214,9 +216,9 @@ export function ProvinceInput({
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              {selectedProvince && (
-                <span className="font-medium">{selectedProvince.name}</span>
-              )}
+              <span className={selectedProvince ? 'font-medium text-gray-900' : 'text-gray-500'}>
+                {selectedProvince ? selectedProvince.name : placeholder}
+              </span>
             </div>
             <svg
               className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${
@@ -277,7 +279,7 @@ export function ProvinceInput({
               </div>
 
               {/* Provinces List */}
-              <div className="overflow-y-auto h-full pb-16">
+              <div className="overflow-y-auto h-96 pb-16">
                 {filteredProvinces.map((province) => (
                   <button
                     key={`${province.code}-${province.name}`}

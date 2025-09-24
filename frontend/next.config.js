@@ -29,7 +29,7 @@ const nextConfig = {
   },
   // Note: swcMinify is deprecated in Next.js 15+, minification is handled by webpack config
   // Disable CSS optimization completely
-  webpack: (config, { dev, isServer }) => {
+  webpack: (config, { dev: _dev, isServer }) => {
     // Configure webpack to handle module resolution
     config.resolve.alias = {
       ...config.resolve.alias,

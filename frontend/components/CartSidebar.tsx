@@ -27,7 +27,10 @@ export function CartSidebar() {
   } = useCartUI();
 
   const totalPrice = getTotalPrice();
-  
+
+  // Check if cart has products (not packages)
+  const hasProducts = cartItems.some(item => item.type === 'product');
+
   // Check if there are packages in the cart
   const packageItems = cartItems.filter(item => item.type === 'package');
   const hasPackages = packageItems.length > 0;
@@ -144,7 +147,7 @@ export function CartSidebar() {
                           {item.name}
                         </h3>
                         <p className="text-sm text-gray-500">
-                          {item.currency === 'PEN' ? 'S/ ' : item.currency + ' '}{item.price.toFixed(2)}
+                          {item.currency === 'S/.' ? 'S/ ' : item.currency + ' '}{item.price.toFixed(2)}
                         </p>
                         {item.type === 'package' && (
                           <div className="text-xs text-gray-500 mt-1 space-y-1">
@@ -228,7 +231,7 @@ export function CartSidebar() {
                         </div>
                       </div>
                       <div className="text-sm font-medium text-gray-900">
-                        {item.currency === 'PEN' ? 'S/ ' : item.currency + ' '}{(item.price * item.quantity).toFixed(2)}
+                        {item.currency === 'S/.' ? 'S/ ' : item.currency + ' '}{(item.price * item.quantity).toFixed(2)}
                       </div>
                     </div>
                     
@@ -299,7 +302,7 @@ export function CartSidebar() {
               <div className="flex justify-between items-center">
                 <span className="text-lg font-semibold text-gray-900">Total:</span>
                 <span className="text-lg font-bold text-[#6ea058]">
-                  {cartItems.length > 0 && cartItems[0].currency === 'PEN' ? 'S/ ' : cartItems.length > 0 ? cartItems[0].currency + ' ' : ''}{totalPrice.toFixed(2)}
+                  {cartItems.length > 0 && cartItems[0].currency === 'S/.' ? 'S/ ' : cartItems.length > 0 ? cartItems[0].currency + ' ' : ''}{totalPrice.toFixed(2)}
                 </span>
               </div>
               
@@ -430,7 +433,22 @@ export function CartSidebar() {
                     Proceed to Checkout
                   </button>
                 )}
-                
+
+                {/* Checkout button for products only */}
+                {hasProducts && !hasPackages && (
+                  <button
+                    className="w-full bg-[#6ea058] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#5a8a4a] transition-colors text-center"
+                    onClick={() => {
+                      console.log('🛒 Product checkout clicked');
+                      closeCart();
+                      // Navigate to customer info step for products (which will include shipping if needed)
+                      router.push('/booking/customer-info?hasProducts=true');
+                    }}
+                  >
+                    Proceed to Checkout
+                  </button>
+                )}
+
                 <button
                   onClick={clearCart}
                   className="w-full text-gray-500 py-2 px-4 rounded-lg font-medium hover:text-red-600 transition-colors"

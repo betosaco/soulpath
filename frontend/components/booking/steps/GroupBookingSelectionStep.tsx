@@ -45,7 +45,7 @@ export function GroupBookingSelectionStep() {
         </h1>
         <p className="text-lg text-gray-600">
           You have {packageCount} package{packageCount > 1 ? 's' : ''} in your cart. 
-          How would you like to proceed?
+          Choose how to assign these packages to users.
         </p>
       </div>
 
@@ -54,7 +54,7 @@ export function GroupBookingSelectionStep() {
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Packages:</h3>
         <div className="space-y-3">
           {packageItems.map((pkg, index) => (
-            <div key={pkg.id} className="flex items-center justify-between bg-white p-4 rounded-lg border">
+            <div key={`package-${index}`} className="flex items-center justify-between bg-white p-4 rounded-lg border">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
                   <span className="text-green-600 font-semibold">{index + 1}</span>
@@ -92,7 +92,7 @@ export function GroupBookingSelectionStep() {
             </h3>
           </div>
           <p className="text-gray-600 mb-4">
-            Each package will be assigned to a different person. You'll provide contact information for each participant.
+            Each package will be assigned to a different person. You&apos;ll provide contact information for each participant.
           </p>
           <div className="flex items-center text-green-600 font-medium">
             <CheckCircle className="w-5 h-5 mr-2" />
@@ -114,7 +114,7 @@ export function GroupBookingSelectionStep() {
             </h3>
           </div>
           <p className="text-gray-600 mb-4">
-            All packages will be assigned to you. You'll provide your contact information once.
+            All packages will be assigned to you. You&apos;ll provide your contact information once.
           </p>
           <div className="flex items-center text-blue-600 font-medium">
             <CheckCircle className="w-5 h-5 mr-2" />
@@ -123,12 +123,6 @@ export function GroupBookingSelectionStep() {
         </button>
       </div>
 
-      {/* Help Text */}
-      <div className="mt-8 text-center">
-        <p className="text-sm text-gray-500">
-          You can change this selection later if needed. The booking process will adapt based on your choice.
-        </p>
-      </div>
     </div>
   );
 }

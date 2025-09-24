@@ -28,6 +28,11 @@ export function MobileCartToggle({ className = '' }: MobileCartToggleProps) {
     }
   }, [getTotalItems, isHydrated]);
 
+  // Don't render if cart is empty (after hydration)
+  if (isHydrated && totalItems === 0) {
+    return null;
+  }
+
   return (
     <motion.button 
       onClick={() => toggleCart()}

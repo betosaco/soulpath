@@ -305,11 +305,6 @@ function StripeFormInner({
         setShowTermsModal(false);
         processPayment();
       }}
-      onDecline={() => {
-        setShowTermsModal(false);
-        setError('You must accept the terms and conditions to proceed with your payment.');
-      }}
-      allowClose={true}
     />
   </>
   );

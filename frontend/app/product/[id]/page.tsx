@@ -132,7 +132,7 @@ export default function ProductPage() {
           price: product.price,
           image: product.images[currentImageIndex] || product.images[0] || '/images/products/yoga-journal-1.jpg',
           sku: product.sku,
-          currency: 'PEN',
+          currency: 'S/.',
           type: 'product',
           stock: product.stock,
           weight: product.weight?.toString(),

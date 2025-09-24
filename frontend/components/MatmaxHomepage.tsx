@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { AppShell } from './AppShell';
+import { CentralizedHeader } from './CentralizedHeader';
 import { useTranslations, useLanguage } from '@/hooks/useTranslations';
 
 export function MatmaxHomepage() {
@@ -25,65 +25,66 @@ export function MatmaxHomepage() {
   }, []);
 
   return (
-    <AppShell className="min-h-screen bg-white mobile-container mobile-scrollable">
-      {/* Hero Section */}
-      <section id="home" className="relative h-screen flex items-center justify-center overflow-hidden mobile-content mobile-scrollable" style={{ height: '100svh' }}>
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <CentralizedHeader />
+      
+      {/* Hero Section - Full Width, Outside AppShell Container */}
+      <section id="home" className="relative h-screen flex items-center justify-center overflow-hidden w-full" style={{ height: '100svh' }}>
         {/* Video Background with Image Fallback */}
         <div className="absolute inset-0">
-          {/* Video Background - Desktop Only */}
-          {!isMobile && (
-            <video
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              className="absolute inset-0 w-full h-full object-cover"
-              poster="/matmaxstudio.png"
-              aria-label="Background video of yoga studio"
-              style={{
-                minHeight: '100%',
-                minWidth: '100%',
-                width: 'auto',
-                height: 'auto',
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-              }}
-              webkit-playsinline="true"
-              x5-video-player-type="h5"
-              x5-video-player-fullscreen="true"
-              onError={(e) => {
-                // Fallback to image if video fails to load
-                const target = e.target as HTMLVideoElement;
+          {/* Video Background - All Devices */}
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            className="absolute inset-0 w-full h-full object-cover"
+            poster="/matmaxstudio.png"
+            aria-label="Background video of yoga studio"
+            style={{
+              minHeight: '100%',
+              minWidth: '100%',
+              width: 'auto',
+              height: 'auto',
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+            }}
+            webkit-playsinline="true"
+            x5-video-player-type="h5"
+            x5-video-player-fullscreen="true"
+            onError={(e) => {
+              // Fallback to image if video fails to load
+              const target = e.target as HTMLVideoElement;
+              target.style.display = 'none';
+              const fallbackDiv = target.nextElementSibling as HTMLElement;
+              if (fallbackDiv) {
+                fallbackDiv.style.display = 'block';
+              }
+            }}
+            onLoadStart={(e) => {
+              // Ensure video starts playing when loaded
+              const target = e.target as HTMLVideoElement;
+              target.play().catch(() => {
+                // If autoplay fails, show fallback image
                 target.style.display = 'none';
                 const fallbackDiv = target.nextElementSibling as HTMLElement;
                 if (fallbackDiv) {
                   fallbackDiv.style.display = 'block';
                 }
-              }}
-              onLoadStart={(e) => {
-                // Ensure video starts playing when loaded
-                const target = e.target as HTMLVideoElement;
-                target.play().catch(() => {
-                  // If autoplay fails, show fallback image
-                  target.style.display = 'none';
-                  const fallbackDiv = target.nextElementSibling as HTMLElement;
-                  if (fallbackDiv) {
-                    fallbackDiv.style.display = 'block';
-                  }
-                });
-              }}
-            >
-              <source src="/hero-video.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-          )}
+              });
+            }}
+          >
+            <source src="/hero-video.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
           
-          {/* Image Background - Mobile or Fallback */}
+          {/* Image Background - Fallback Only */}
           <div 
-            className={`absolute inset-0 bg-cover bg-center bg-no-repeat ${isMobile ? 'block' : 'hidden'}`}
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat hidden"
             style={{
               backgroundImage: 'url("/matmaxstudio.png")',
               minHeight: '100%',
@@ -138,7 +139,7 @@ export function MatmaxHomepage() {
           </div>
         </div>
       </section>
-    </AppShell>
+    </div>
   );
 }
 

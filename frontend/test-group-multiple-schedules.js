@@ -32,7 +32,7 @@ const testData = {
     }
   ],
   totalAmount: 120,
-  currency: "PEN",
+  currency: "S/.",
   isGroupBooking: true,
   groupMembers: [
     {

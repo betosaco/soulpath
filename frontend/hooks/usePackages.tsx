@@ -54,7 +54,7 @@ export interface UsePackagesReturn {
   lastLoaded: Date | null;
 }
 
-export function usePackages(currency: string = 'PEN'): UsePackagesReturn {
+export function usePackages(currency: string = 'S/.'): UsePackagesReturn {
   const { user } = useAuth();
   const [packages, setPackages] = useState<PackagePrice[]>([]);
   const [loading, setLoading] = useState(false);
@@ -151,7 +151,7 @@ export function usePackagesWithCurrency() {
 }
 
 // Hook for fetching a single package by ID
-export function usePackage(packageId: number, currency: string = 'PEN') {
+export function usePackage(packageId: number, currency: string = 'S/.') {
   const { packages, loading, error, refetch } = usePackages(currency);
   
   const packageData = packages.find(pkg => pkg.id === packageId);
@@ -165,7 +165,7 @@ export function usePackage(packageId: number, currency: string = 'PEN') {
 }
 
 // Hook for fetching popular packages only
-export function usePopularPackages(currency: string = 'PEN') {
+export function usePopularPackages(currency: string = 'S/.') {
   const { packages, loading, error, refetch } = usePackages(currency);
   
   const popularPackages = packages.filter(pkg => pkg.packageDefinition.isPopular);

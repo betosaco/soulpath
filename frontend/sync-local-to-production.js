@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { PrismaClient } from '@prisma/client';
-import fs from 'fs';
+import _fs from 'fs';
 
 // Create two Prisma clients - one for local, one for production
 const localPrisma = new PrismaClient({
@@ -47,7 +47,7 @@ async function syncProducts() {
           price: product.price,
           comparePrice: product.comparePrice,
           costPrice: product.costPrice,
-          currency: product.currency || 'PEN',
+          currency: product.currency || 'S/.',
           stock: product.stock,
           minStock: product.minStock,
           maxStock: product.maxStock,

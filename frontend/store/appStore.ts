@@ -105,11 +105,48 @@ interface CustomerData {
   country?: string;
 }
 
+// Shipping Data Interface
+interface ShippingData {
+  address: string;
+  city: string;
+  state?: string;
+  postalCode: string;
+  country: string;
+  peruDepartment?: string;
+  peruProvince?: string;
+  peruDistrict?: string;
+}
+
+// Order Data Interface
+interface OrderData {
+  orderNumber: string;
+  total: number;
+  items: Array<{
+    name: string;
+    quantity: number;
+    price: number;
+  }>;
+}
+
 // Customer State Interface
 interface CustomerState {
   customerData: CustomerData | null;
   setCustomerData: (data: CustomerData) => void;
   clearCustomerData: () => void;
+}
+
+// Order State Interface
+interface OrderState {
+  orderData: OrderData | null;
+  setOrderData: (data: OrderData) => void;
+  clearOrderData: () => void;
+}
+
+// Shipping State Interface
+interface ShippingState {
+  shippingData: ShippingData | null;
+  setShippingData: (data: ShippingData) => void;
+  clearShippingData: () => void;
 }
 
 // Auth State Interface
@@ -132,7 +169,7 @@ interface AuthState {
 }
 
 // Combined Store Interface
-interface AppStore extends UiState, CartState, CustomerState, AuthState {}
+interface AppStore extends UiState, CartState, CustomerState, ShippingState, OrderState, AuthState {}
 
 /**
  * Central App Store using Zustand
@@ -311,6 +348,24 @@ export const useAppStore = create<AppStore>()(
       }),
       clearCustomerData: () => set((state) => {
         state.customerData = null;
+      }),
+
+      // Shipping State
+      shippingData: null,
+      setShippingData: (data) => set((state) => {
+        state.shippingData = data;
+      }),
+      clearShippingData: () => set((state) => {
+        state.shippingData = null;
+      }),
+      
+      // Order State
+      orderData: null,
+      setOrderData: (data) => set((state) => {
+        state.orderData = data;
+      }),
+      clearOrderData: () => set((state) => {
+        state.orderData = null;
       }),
       
       // Auth State
@@ -495,5 +550,41 @@ export const useUI = () => {
     setTheme,
     language,
     setLanguage,
+  };
+};
+
+// Individual shipping selectors
+export const useShippingData = () => useAppStore((state) => state.shippingData);
+export const useShippingSetData = () => useAppStore((state) => state.setShippingData);
+export const useShippingClearData = () => useAppStore((state) => state.clearShippingData);
+
+// Combined shipping hook
+export const useShipping = () => {
+  const shippingData = useShippingData();
+  const setShippingData = useShippingSetData();
+  const clearShippingData = useShippingClearData();
+  
+  return {
+    shippingData,
+    setShippingData,
+    clearShippingData,
+  };
+};
+
+// Individual order selectors
+export const useOrderData = () => useAppStore((state) => state.orderData);
+export const useOrderSetData = () => useAppStore((state) => state.setOrderData);
+export const useOrderClearData = () => useAppStore((state) => state.clearOrderData);
+
+// Combined order hook
+export const useOrder = () => {
+  const orderData = useOrderData();
+  const setOrderData = useOrderSetData();
+  const clearOrderData = useOrderClearData();
+  
+  return {
+    orderData,
+    setOrderData,
+    clearOrderData,
   };
 };

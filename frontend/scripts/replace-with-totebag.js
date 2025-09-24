@@ -30,7 +30,7 @@ async function replaceWithToteBag() {
         shortDescription: 'Premium cotton tote bag "Path to You" made in Peru',
         sku: 'TOTEBAG-PATH-TO-YOU-001',
         price: 129.00,
-        currency: 'PEN',
+        currency: 'S/.',
         stock: 50,
         minStock: 10,
         maxStock: 100,

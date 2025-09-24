@@ -166,8 +166,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate order number
-    const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    // Generate unique order number
+    const generateOrderNumber = async (): Promise<string> => {
+      let orderNumber: string;
+      let isUnique = false;
+      let attempts = 0;
+      const maxAttempts = 5;
+
+      while (!isUnique && attempts < maxAttempts) {
+        const timestamp = Date.now();
+        const randomPart = Math.random().toString(36).substr(2, 9).toUpperCase();
+        orderNumber = `ORD-${timestamp}-${randomPart}`;
+        
+        // Check if order number already exists
+        const existingOrder = await prisma.order.findUnique({
+          where: { orderNumber }
+        });
+        
+        if (!existingOrder) {
+          isUnique = true;
+        } else {
+          attempts++;
+          console.log(`Order number ${orderNumber} already exists, generating new one...`);
+        }
+      }
+
+      if (!isUnique) {
+        throw new Error('Failed to generate unique order number after multiple attempts');
+      }
+
+      return orderNumber!;
+    };
+
+    const orderNumber = await generateOrderNumber();
 
     // Start transaction
     console.log('Starting database transaction...');

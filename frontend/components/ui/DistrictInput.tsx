@@ -22,6 +22,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Label } from '@/components/ui/label';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getDistrictsByProvince } from '@/lib/peru-shipping-data';
+import { VirtualizedList } from '@/components/ui/VirtualizedList';
 
 /**
  * DISTRICT DATA INTERFACE
@@ -31,57 +33,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface District {
   code: string;
   name: string;
+  postalCodes: string[];
   flag: string;
-  postalCode?: string;
 }
 
 /**
  * DISTRICT DATA
  * -------------
- * Districts organized by city
+ * Districts are now loaded dynamically from the geographic data file
  */
-const districtsByCity: Record<string, District[]> = {
-  'Lima': [
-    { code: 'Lima_Centro', name: 'Lima Centro', flag: '', postalCode: '15001' },
-    { code: 'Rimac', name: 'Rímac', flag: '', postalCode: '15025' },
-    { code: 'Breña', name: 'Breña', flag: '', postalCode: '15082' },
-    { code: 'La_Victoria', name: 'La Victoria', flag: '', postalCode: '15013' },
-    { code: 'Lince', name: 'Lince', flag: '', postalCode: '15073' },
-    { code: 'Jesus_Maria', name: 'Jesús María', flag: '', postalCode: '15072' },
-    { code: 'Pueblo_Libre', name: 'Pueblo Libre', flag: '', postalCode: '15084' },
-    { code: 'Magdalena', name: 'Magdalena', flag: '', postalCode: '15076' }
-  ],
-  'Miraflores': [
-    { code: 'MIR', name: 'Miraflores', flag: '', postalCode: '15074' }
-  ],
-  'San_Isidro': [
-    { code: 'SAN', name: 'San Isidro', flag: '', postalCode: '15036' }
-  ],
-  'Surco': [
-    { code: 'SUR', name: 'Surco', flag: '', postalCode: '15023' },
-    { code: 'SANTIAGO', name: 'Santiago de Surco', flag: '', postalCode: '15023' }
-  ],
-  'La_Molina': [
-    { code: 'LAP', name: 'La Molina', flag: '', postalCode: '15026' }
-  ],
-  'Chorrillos': [
-    { code: 'CHI', name: 'Chorrillos', flag: '', postalCode: '15063' },
-    { code: 'LUR', name: 'Lurín', flag: '', postalCode: '15080' },
-    { code: 'PUN', name: 'Punta Negra', flag: '', postalCode: '15065' },
-    { code: 'PUC', name: 'Pucusana', flag: '', postalCode: '15066' }
-  ],
-  'Callao': [
-    { code: 'Callao_Centro', name: 'Callao Centro', flag: '', postalCode: '07001' },
-    { code: 'Bellavista', name: 'Bellavista', flag: '', postalCode: '07002' },
-    { code: 'Carmen_de_la_Legua', name: 'Carmen de la Legua', flag: '', postalCode: '07003' },
-    { code: 'La_Perla', name: 'La Perla', flag: '', postalCode: '07004' },
-    { code: 'La_Punta', name: 'La Punta', flag: '', postalCode: '07005' },
-    { code: 'Ventanilla', name: 'Ventanilla', flag: '', postalCode: '07006' }
-  ]
-};
-
-// Get all districts for backward compatibility
-const districts: District[] = Object.values(districtsByCity).flat();
 
 /**
  * DISTRICT INPUT PROPS
@@ -105,8 +65,10 @@ interface DistrictInputProps {
   error?: string;
   /** Default district code */
   defaultDistrictCode?: string;
-  /** City code to filter districts */
-  cityCode?: string;
+  /** Department code to filter districts */
+  departmentCode?: string;
+  /** Province code to filter districts */
+  provinceCode?: string;
 }
 
 /**
@@ -119,14 +81,15 @@ interface DistrictInputProps {
  */
 export function DistrictInput({
   label,
-  required = false,
+  _required = false,
   value,
   onChange,
   placeholder = 'Select district',
   disabled = false,
   error,
   defaultDistrictCode = 'MIR',
-  cityCode
+  departmentCode,
+  provinceCode,
 }: DistrictInputProps) {
   // ============================================================================
   // STATE MANAGEMENT
@@ -144,13 +107,19 @@ export function DistrictInput({
   /**
    * GET AVAILABLE DISTRICTS
    * -----------------------
-   * Get districts based on selected city
+   * Get districts based on selected department and province
    */
   const getAvailableDistricts = () => {
-    if (cityCode && districtsByCity[cityCode]) {
-      return districtsByCity[cityCode];
+    if (provinceCode) {
+      const mtcDistricts = getDistrictsByProvince(provinceCode);
+      return mtcDistricts.map(d => ({
+        code: d.code,
+        name: d.name,
+        postalCodes: d.postalCodes,
+        flag: ''
+      }));
     }
-    return districts;
+    return [];
   };
 
   /**
@@ -164,7 +133,7 @@ export function DistrictInput({
                      availableDistricts.find(d => d.code === defaultDistrictCode) ||
                      availableDistricts[0];
     setSelectedDistrict(district);
-  }, [value, defaultDistrictCode, cityCode]);
+  }, [value, defaultDistrictCode, departmentCode, provinceCode]);
 
   /**
    * HANDLE CLICK OUTSIDE
@@ -194,7 +163,9 @@ export function DistrictInput({
    */
   const handleDistrictSelect = (district: District) => {
     setSelectedDistrict(district);
-    onChange(district.code, district.postalCode);
+    // Use the primary postal code (first one in the array)
+    const primaryPostalCode = district.postalCodes && district.postalCodes.length > 0 ? district.postalCodes[0] : '';
+    onChange(district.code, primaryPostalCode);
     setIsDistrictDropdownOpen(false);
     setDistrictSearchTerm('');
   };
@@ -217,14 +188,27 @@ export function DistrictInput({
   // ============================================================================
 
   /**
-   * FILTERED DISTRICTS
-   * ------------------
-   * Districts filtered by search term and city
+   * AVAILABLE DISTRICTS
+   * -------------------
+   * Get all available districts for the selected department and province
    */
-  const filteredDistricts = getAvailableDistricts().filter(district =>
-    district.name.toLowerCase().includes(districtSearchTerm.toLowerCase()) ||
-    district.code.toLowerCase().includes(districtSearchTerm.toLowerCase())
-  );
+  const [isLoading, setIsLoading] = useState(false);
+  const [availableDistricts, setAvailableDistricts] = useState<District[]>([]);
+
+  // Load districts with loading state
+  useEffect(() => {
+    if (departmentCode && provinceCode) {
+      setIsLoading(true);
+      // Simulate async loading for better UX
+      setTimeout(() => {
+        const districts = getAvailableDistricts();
+        setAvailableDistricts(districts);
+        setIsLoading(false);
+      }, 100);
+    } else {
+      setAvailableDistricts([]);
+    }
+  }, [departmentCode, provinceCode]);
 
   // ============================================================================
   // RENDER
@@ -246,7 +230,7 @@ export function DistrictInput({
           type="button"
           onClick={handleDropdownToggle}
           disabled={disabled}
-          className={`w-full px-4 py-3 border rounded-lg text-left transition-all duration-200 ${
+          className={`w-full px-4 py-3 border rounded-lg text-left transition-all duration-200 h-12 ${
             error
               ? 'border-red-300 bg-red-50 text-red-900'
               : disabled
@@ -256,8 +240,12 @@ export function DistrictInput({
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              {selectedDistrict && (
-                <span className="font-medium">{selectedDistrict.name}</span>
+              {selectedDistrict ? (
+                <div className="flex flex-col">
+                  <span className="font-medium">{selectedDistrict.name}</span>
+                </div>
+              ) : (
+                <span className="text-gray-500">{placeholder}</span>
               )}
             </div>
             <svg
@@ -318,32 +306,57 @@ export function DistrictInput({
                 </div>
               </div>
 
-              {/* Districts List */}
-              <div className="overflow-y-auto h-full pb-16">
-                {filteredDistricts.map((district) => (
-                  <button
-                    key={`${district.code}-${district.name}`}
-                    onClick={() => handleDistrictSelect(district)}
-                    className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 ${
-                      selectedDistrict?.code === district.code ? 'bg-blue-50 border-blue-200' : ''
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="font-medium text-gray-900">{district.name}</div>
-                        <div className="text-sm text-gray-500">
-                          {district.code} {district.postalCode && `• ${district.postalCode}`}
+              {/* Districts List - Virtualized for Performance */}
+              {isLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <span className="ml-2 text-gray-600">Loading districts...</span>
+                </div>
+              ) : availableDistricts.length > 0 ? (
+                <VirtualizedList
+                  items={availableDistricts}
+                  itemHeight={60}
+                  containerHeight={600}
+                  searchTerm={districtSearchTerm}
+                  searchFields={['name', 'code']}
+                  className="pb-16"
+                  renderItem={(district, index) => (
+                    <button
+                      key={`${district.code}-${district.name}-${index}`}
+                      onClick={() => handleDistrictSelect(district)}
+                      className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 ${
+                        selectedDistrict?.code === district.code ? 'bg-blue-50 border-blue-200' : ''
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900">{district.name}</div>
+                          <div className="text-sm text-gray-500">
+                            {district.code} {district.postalCode && `• ${district.postalCode}`}
+                            {district.allPostalCodes && district.allPostalCodes.length > 1 && (
+                              <span className="ml-2 text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                                +{district.allPostalCodes.length - 1} more codes
+                              </span>
+                            )}
+                          </div>
                         </div>
+                        {selectedDistrict?.code === district.code && (
+                          <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        )}
                       </div>
-                      {selectedDistrict?.code === district.code && (
-                        <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
+                    </button>
+                  )}
+                />
+              ) : (
+                <div className="px-4 py-3 text-gray-500 text-center">
+                  {!departmentCode || !provinceCode 
+                    ? 'Select department and province first' 
+                    : 'No districts found'
+                  }
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

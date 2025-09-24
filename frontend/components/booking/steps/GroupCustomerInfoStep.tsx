@@ -3,16 +3,17 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/store/appStore';
-import { ArrowLeft, ArrowRight, User, Mail, Phone, MapPin } from 'lucide-react';
+import { ArrowLeft, User } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { PhoneInput } from '@/components/ui/PhoneInput';
+import { toast } from 'sonner';
 
 interface CustomerInfo {
-  firstName: string;
-  lastName: string;
+  name: string;
   email: string;
   phone: string;
-  address?: string;
-  city?: string;
-  country?: string;
+  countryCode: string;
 }
 
 /**
@@ -33,21 +34,21 @@ export function GroupCustomerInfoStep() {
     const initialInfos: Record<string, CustomerInfo> = {};
     packageItems.forEach(pkg => {
       initialInfos[pkg.id] = {
-        firstName: '',
-        lastName: '',
+        name: '',
         email: '',
         phone: '',
-        address: '',
-        city: '',
-        country: ''
+        countryCode: 'PE'
       };
     });
     return initialInfos;
   });
 
   const [currentPackageIndex, setCurrentPackageIndex] = useState(0);
-  const currentPackage = packageItems[currentPackageIndex];
-  const currentCustomerInfo = customerInfos[currentPackage.id];
+  const [showPackageModal, setShowPackageModal] = useState(false);
+  
+  // Add null checks and fallbacks for SSR safety
+  const currentPackage = packageItems[currentPackageIndex] || null;
+  const currentCustomerInfo = currentPackage ? customerInfos[currentPackage.id] : null;
 
   const updateCustomerInfo = (packageId: string, field: keyof CustomerInfo, value: string) => {
     setCustomerInfos(prev => ({
@@ -59,31 +60,53 @@ export function GroupCustomerInfoStep() {
     }));
   };
 
+  const handlePackageSelection = (selectedPackageId: string) => {
+    // Find the index of the selected package
+    const selectedIndex = packageItems.findIndex(pkg => pkg.id === selectedPackageId);
+    if (selectedIndex !== -1) {
+      // Switch to the selected package
+      setCurrentPackageIndex(selectedIndex);
+    }
+    setShowPackageModal(false);
+  };
+
+  const handleSidebarPackageClick = (packageIndex: number) => {
+    setCurrentPackageIndex(packageIndex);
+  };
+
+  // Ensure currentPackageIndex is valid when packageItems changes
+  React.useEffect(() => {
+    if (packageItems.length > 0 && currentPackageIndex >= packageItems.length) {
+      setCurrentPackageIndex(0);
+    }
+  }, [packageItems.length, currentPackageIndex]);
+
+  // Early return if no packages or current package is not available
+  if (packageItems.length === 0 || !currentPackage || !currentCustomerInfo) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center py-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">No Packages Found</h2>
+          <p className="text-gray-600">Please add packages to your cart before proceeding.</p>
+        </div>
+      </div>
+    );
+  }
+
   const isCurrentFormValid = () => {
     const info = currentCustomerInfo;
-    return info.firstName.trim() !== '' && 
-           info.lastName.trim() !== '' && 
+    return info.name.trim() !== '' && 
            info.email.trim() !== '' && 
-           info.phone.trim() !== '';
+           /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(info.email);
   };
 
-  const isAllFormsValid = () => {
+  const _isAllFormsValid = () => {
     return packageItems.every(pkg => {
       const info = customerInfos[pkg.id];
-      return info.firstName.trim() !== '' && 
-             info.lastName.trim() !== '' && 
+      return info.name.trim() !== '' && 
              info.email.trim() !== '' && 
-             info.phone.trim() !== '';
+             /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(info.email);
     });
-  };
-
-  const handleNext = () => {
-    if (currentPackageIndex < packageItems.length - 1) {
-      setCurrentPackageIndex(prev => prev + 1);
-    } else {
-      // All forms completed, proceed to next step
-      handleSubmit();
-    }
   };
 
   const handlePrevious = () => {
@@ -95,216 +118,345 @@ export function GroupCustomerInfoStep() {
     }
   };
 
+  // Helper function to find the next unassigned package
+  const findNextUnassignedPackage = () => {
+    return packageItems.findIndex(pkg => {
+      const customerInfo = customerInfos[pkg.id];
+      return !customerInfo.name || !customerInfo.email;
+    });
+  };
+
   const handleSubmit = () => {
     console.log('👥 Group customer info submitted:', customerInfos);
     // TODO: Save customer info to store/API
     
-    // Check if cart contains physical products (requires shipping)
-    const hasPhysicalProducts = cartItems.some(item => item.type === 'product');
+    // Find the next unassigned package
+    const nextUnassignedIndex = findNextUnassignedPackage();
     
-    // Navigate to next step (shipping or payment)
-    if (hasPhysicalProducts) {
-      router.push('/booking/shipping');
+    if (nextUnassignedIndex !== -1) {
+      // Navigate to the next unassigned package
+      setCurrentPackageIndex(nextUnassignedIndex);
     } else {
-      router.push('/booking/payment');
+      // All packages are assigned, proceed to checkout
+      const hasPhysicalProducts = cartItems.some(item => item.type === 'product');
+      
+      if (hasPhysicalProducts) {
+        router.push('/booking/shipping');
+      } else {
+        router.push('/booking/payment');
+      }
     }
   };
 
+  // Check if all forms are completed
+  const allFormsCompleted = _isAllFormsValid();
+
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-4xl mx-auto">
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">
-          Customer Information
+          Group Booking
         </h1>
         <p className="text-lg text-gray-600">
-          Package {currentPackageIndex + 1} of {packageItems.length}: {currentPackage.name}
+          {allFormsCompleted ? 'Final Assignment Summary' : 'Enter details for each person'}
         </p>
       </div>
 
-      {/* Progress Indicator */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-2">
-          {packageItems.map((pkg, index) => (
-            <div key={pkg.id} className="flex items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                index < currentPackageIndex 
-                  ? 'bg-green-500 text-white' 
-                  : index === currentPackageIndex 
-                    ? 'bg-blue-500 text-white' 
-                    : 'bg-gray-200 text-gray-600'
-              }`}>
-                {index < currentPackageIndex ? '✓' : index + 1}
-              </div>
-              {index < packageItems.length - 1 && (
-                <div className={`w-12 h-1 mx-2 ${
-                  index < currentPackageIndex ? 'bg-green-500' : 'bg-gray-200'
-                }`} />
-              )}
+      {/* Show Final Assignment Summary when all forms are completed */}
+      {allFormsCompleted ? (
+        <div className="bg-white rounded-lg border p-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
+            Package Assignments Complete
+          </h2>
+          <p className="text-center text-gray-600 mb-6">
+            All packages have been assigned. Review the assignments below.
+          </p>
+          <div className="space-y-4">
+            {packageItems.map((pkg, index) => {
+              const customerInfo = customerInfos[pkg.id];
+              return (
+                <div key={`final-${index}`} className="flex items-center justify-between bg-gray-50 p-4 rounded-lg cursor-default">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                      <span className="text-green-600 font-semibold text-lg">✓</span>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{pkg.name}</h3>
+                      <p className="text-sm text-gray-600">
+                        {pkg.currency} {pkg.price?.toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium text-gray-900">{customerInfo.name}</p>
+                    <p className="text-sm text-gray-600">{customerInfo.email}</p>
+                    <p className="text-sm text-gray-600">{customerInfo.phone}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        /* Main Content - Forms */
+        <div className="grid lg:grid-cols-3 gap-8">
+        {/* Left Side - Package List */}
+        <div className="lg:col-span-1">
+          <div className="bg-white rounded-lg border p-6 sticky top-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Packages</h3>
+            <div className="space-y-3">
+              {packageItems.map((pkg, index) => {
+                const customerInfo = customerInfos[pkg.id];
+                const isCompleted = customerInfo.name && customerInfo.email;
+                const isCurrent = index === currentPackageIndex;
+                
+                return (
+                  <div 
+                    key={`sidebar-${index}`} 
+                    className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                      isCurrent 
+                        ? 'border-blue-500 bg-blue-50' 
+                        : isCompleted 
+                          ? 'border-green-500 bg-green-50' 
+                          : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    onClick={() => {
+                      // Don't allow navigation if all forms are completed
+                      if (!allFormsCompleted) {
+                        handleSidebarPackageClick(index);
+                      }
+                    }}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <h4 className="font-medium text-gray-900 text-sm">{pkg.name}</h4>
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${
+                        isCompleted 
+                          ? 'bg-green-500 text-white' 
+                          : isCurrent 
+                            ? 'bg-blue-500 text-white' 
+                            : 'bg-gray-300 text-gray-600'
+                      }`}>
+                        {isCompleted ? '✓' : '○'}
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600">
+                      {isCompleted 
+                        ? `${customerInfo.name}`
+                        : isCurrent 
+                          ? 'Filling out...'
+                          : 'Not assigned'
+                      }
+                    </p>
+                  </div>
+                );
+              })}
             </div>
-          ))}
-        </div>
-        <div className="flex justify-between text-sm text-gray-600">
-          {packageItems.map((pkg, index) => (
-            <span key={pkg.id} className="text-center max-w-20 truncate">
-              {pkg.name}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Current Package Info */}
-      <div className="bg-blue-50 rounded-lg p-4 mb-6">
-        <div className="flex items-center space-x-3">
-          <User className="w-6 h-6 text-blue-600" />
-          <div>
-            <h3 className="font-semibold text-blue-900">{currentPackage.name}</h3>
-            <p className="text-sm text-blue-700">
-              {currentPackage.bookingDetails?.length || 0} sessions booked • {currentPackage.currency} {currentPackage.price?.toFixed(2)}
-            </p>
           </div>
         </div>
-      </div>
 
-      {/* Customer Information Form */}
-      <div className="bg-white rounded-lg border p-6 mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Contact Information for {currentPackage.name}
-        </h3>
-        
-        <div className="grid md:grid-cols-2 gap-4">
-          {/* First Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              First Name *
-            </label>
-            <input
-              type="text"
-              value={currentCustomerInfo.firstName}
-              onChange={(e) => updateCustomerInfo(currentPackage.id, 'firstName', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter first name"
-            />
-          </div>
+        {/* Right Side - Form */}
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-lg border p-6">
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                {currentPackage.name}
+              </h2>
+              <p className="text-gray-600">
+                Enter contact information for the person who will use this package
+              </p>
+            </div>
 
-          {/* Last Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Last Name *
-            </label>
-            <input
-              type="text"
-              value={currentCustomerInfo.lastName}
-              onChange={(e) => updateCustomerInfo(currentPackage.id, 'lastName', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter last name"
-            />
-          </div>
+            {/* Customer Information Form */}
+            <div className="space-y-6">
+              {/* Phone Field */}
+              <div className="unified-form-group">
+                <PhoneInput
+                  label="Phone Number"
+                  required={false}
+                  value={currentCustomerInfo.phone}
+                  onChange={(phone, countryCode) => {
+                    updateCustomerInfo(currentPackage.id, 'phone', phone);
+                    updateCustomerInfo(currentPackage.id, 'countryCode', countryCode);
+                  }}
+                  placeholder="Enter phone number"
+                  defaultCountryCode={currentCustomerInfo.countryCode}
+                />
+              </div>
 
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address *
-            </label>
-            <input
-              type="email"
-              value={currentCustomerInfo.email}
-              onChange={(e) => updateCustomerInfo(currentPackage.id, 'email', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter email address"
-            />
-          </div>
+              {/* Name Field */}
+              <div className="unified-form-group">
+                <Label htmlFor="name" className="unified-form-label">
+                  Full Name *
+                </Label>
+                <Input
+                  id="name"
+                  type="text"
+                  value={currentCustomerInfo.name}
+                  onChange={(e) => updateCustomerInfo(currentPackage.id, 'name', e.target.value)}
+                  className="unified-form-input"
+                  required={true}
+                  placeholder="Enter full name"
+                />
+              </div>
 
-          {/* Phone */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Phone Number *
-            </label>
-            <input
-              type="tel"
-              value={currentCustomerInfo.phone}
-              onChange={(e) => updateCustomerInfo(currentPackage.id, 'phone', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter phone number"
-            />
-          </div>
+              {/* Email Field */}
+              <div className="unified-form-group">
+                <Label htmlFor="email" className="unified-form-label">
+                  Email *
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={currentCustomerInfo.email}
+                  onChange={(e) => updateCustomerInfo(currentPackage.id, 'email', e.target.value)}
+                  className="unified-form-input"
+                  required={true}
+                  placeholder="Enter email address"
+                />
+              </div>
 
-          {/* Address */}
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Address (Optional)
-            </label>
-            <input
-              type="text"
-              value={currentCustomerInfo.address || ''}
-              onChange={(e) => updateCustomerInfo(currentPackage.id, 'address', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter address"
-            />
-          </div>
+              {/* Package Selection Field */}
+              <div className="unified-form-group">
+                <Label className="unified-form-label">
+                  Select Package *
+                </Label>
+                
+                {/* Desktop: Dropdown */}
+                <div className="hidden md:block">
+                  <select
+                    value={currentPackage.id}
+                    onChange={(e) => handlePackageSelection(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  >
+                    {packageItems.map((pkg, index) => {
+                      const customerInfo = customerInfos[pkg.id];
+                      const isCompleted = customerInfo.name && customerInfo.email;
+                      
+                      return (
+                        <option 
+                          key={`option-${index}`} 
+                          value={pkg.id}
+                        >
+                          {pkg.name} - {pkg.currency} {pkg.price?.toFixed(2)}
+                          {isCompleted ? ` (${customerInfo.name})` : ' (Not assigned)'}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
 
-          {/* City */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              City (Optional)
-            </label>
-            <input
-              type="text"
-              value={currentCustomerInfo.city || ''}
-              onChange={(e) => updateCustomerInfo(currentPackage.id, 'city', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter city"
-            />
-          </div>
-
-          {/* Country */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Country (Optional)
-            </label>
-            <input
-              type="text"
-              value={currentCustomerInfo.country || ''}
-              onChange={(e) => updateCustomerInfo(currentPackage.id, 'country', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter country"
-            />
+                {/* Mobile: Button that opens modal */}
+                <button
+                  type="button"
+                  onClick={() => setShowPackageModal(true)}
+                  className="md:hidden w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left bg-white hover:bg-gray-50 transition-colors"
+                >
+                  <span className="text-gray-900">
+                    {currentPackage.name} - {currentPackage.currency} {currentPackage.price?.toFixed(2)}
+                  </span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Navigation Buttons */}
-      <div className="flex justify-between">
+      )}
+
+      {/* Navigation */}
+      <div className="flex justify-between pt-8 pb-8">
         <button
           onClick={handlePrevious}
           className="flex items-center space-x-2 px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span>{currentPackageIndex === 0 ? 'Back to Selection' : 'Previous'}</span>
+          <span>{currentPackageIndex === 0 ? 'Back to Selection' : 'Previous Package'}</span>
         </button>
 
-        <button
-          onClick={handleNext}
-          disabled={!isCurrentFormValid()}
-          className={`flex items-center space-x-2 px-6 py-3 rounded-lg text-white transition-colors ${
-            isCurrentFormValid()
-              ? 'bg-blue-600 hover:bg-blue-700'
-              : 'bg-gray-400 cursor-not-allowed'
-          }`}
-        >
-          <span>
-            {currentPackageIndex === packageItems.length - 1 ? 'Complete' : 'Next Package'}
-          </span>
-          <ArrowRight className="w-5 h-5" />
-        </button>
+        {!allFormsCompleted && (
+          <button
+            onClick={handleSubmit}
+            className="px-6 py-3 rounded-md font-medium transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+          >
+            {findNextUnassignedPackage() !== -1 ? 'NEXT' : 'CONTINUE TO CHECKOUT'}
+          </button>
+        )}
+
+        {allFormsCompleted && (
+          <button
+            onClick={handleSubmit}
+            className="px-6 py-3 rounded-md font-medium transition-all duration-200 bg-green-600 hover:bg-green-700 text-white shadow-md"
+          >
+            CONTINUE TO CHECKOUT
+          </button>
+        )}
       </div>
 
-      {/* Summary */}
-      <div className="mt-6 text-center text-sm text-gray-600">
-        <p>
-          {packageItems.length - currentPackageIndex - 1} package{packageItems.length - currentPackageIndex - 1 !== 1 ? 's' : ''} remaining
-        </p>
-      </div>
+      {/* Package Selection Modal - Mobile Only */}
+      {showPackageModal && (
+        <div className="md:hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Select Package</h3>
+                <button
+                  onClick={() => setShowPackageModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <p className="text-gray-600 mb-4">
+                Select which package to edit:
+              </p>
+              
+              <div className="space-y-3">
+                {packageItems.map((pkg, index) => {
+                  const isCurrent = index === currentPackageIndex;
+                  const customerInfo = customerInfos[pkg.id];
+                  const isCompleted = customerInfo.name && customerInfo.email;
+                  
+                  return (
+                    <button
+                      key={`modal-${index}`}
+                      onClick={() => handlePackageSelection(pkg.id)}
+                      className={`w-full p-4 rounded-lg border text-left transition-all ${
+                        isCurrent
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium text-gray-900">{pkg.name}</h4>
+                          <p className="text-sm text-gray-600">
+                            {pkg.currency} {pkg.price?.toFixed(2)}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {isCompleted ? `Assigned to: ${customerInfo.name}` : 'Not assigned yet'}
+                          </p>
+                        </div>
+                        {isCurrent && (
+                          <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

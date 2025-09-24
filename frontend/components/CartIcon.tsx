@@ -27,6 +27,11 @@ export function CartIcon({ className = '' }: CartIconProps) {
     }
   }, [getTotalItems, isHydrated]);
 
+  // Don't render if cart is empty (after hydration)
+  if (isHydrated && totalItems === 0) {
+    return null;
+  }
+
   return (
     <button
       onClick={() => openCart()}

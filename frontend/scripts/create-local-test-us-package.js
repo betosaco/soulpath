@@ -15,13 +15,13 @@ async function createLocalTestUsPackage() {
   console.log('=================================\n');
 
   try {
-    // Get PEN currency
+    // Get S/. currency
     const penCurrency = await prisma.currency.findUnique({ 
-      where: { code: 'PEN' } 
+      where: { code: 'S/.' } 
     });
     
     if (!penCurrency) {
-      throw new Error('PEN currency not found');
+      throw new Error('S/. currency not found');
     }
 
     // Get 60-minute session duration

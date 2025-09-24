@@ -10,32 +10,73 @@ import { QueryClient } from '@tanstack/react-query';
  * - Error handling and retry logic
  * - DevTools integration for debugging
  */
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      // Cache data for 5 minutes by default
-      staleTime: 5 * 60 * 1000,
-      // Keep data in cache for 10 minutes
-      gcTime: 10 * 60 * 1000,
-      // Retry failed requests up to 3 times
-      retry: 3,
-      // Retry with exponential backoff
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-      // Refetch on window focus for fresh data
-      refetchOnWindowFocus: true,
-      // Refetch on reconnect
-      refetchOnReconnect: true,
-      // Don't refetch on mount if data is fresh
-      refetchOnMount: true,
-    },
-    mutations: {
-      // Retry mutations once on failure
-      retry: 1,
-      // Retry delay for mutations
-      retryDelay: 1000,
-    },
-  },
-});
+
+// Create a singleton query client to prevent multiple instances
+let queryClientInstance: QueryClient | undefined;
+
+export const queryClient = (() => {
+  if (typeof window === 'undefined') {
+    // Server-side: always create a new instance
+    return new QueryClient({
+      defaultOptions: {
+        queries: {
+          // Cache data for 5 minutes by default
+          staleTime: 5 * 60 * 1000,
+          // Keep data in cache for 10 minutes
+          gcTime: 10 * 60 * 1000,
+          // Retry failed requests up to 3 times
+          retry: 3,
+          // Retry with exponential backoff
+          retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+          // Refetch on window focus for fresh data
+          refetchOnWindowFocus: true,
+          // Refetch on reconnect
+          refetchOnReconnect: true,
+          // Don't refetch on mount if data is fresh
+          refetchOnMount: true,
+        },
+        mutations: {
+          // Retry mutations once on failure
+          retry: 1,
+          // Retry delay for mutations
+          retryDelay: 1000,
+        },
+      },
+    });
+  }
+
+  // Client-side: use singleton pattern
+  if (!queryClientInstance) {
+    queryClientInstance = new QueryClient({
+      defaultOptions: {
+        queries: {
+          // Cache data for 5 minutes by default
+          staleTime: 5 * 60 * 1000,
+          // Keep data in cache for 10 minutes
+          gcTime: 10 * 60 * 1000,
+          // Retry failed requests up to 3 times
+          retry: 3,
+          // Retry with exponential backoff
+          retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+          // Refetch on window focus for fresh data
+          refetchOnWindowFocus: true,
+          // Refetch on reconnect
+          refetchOnReconnect: true,
+          // Don't refetch on mount if data is fresh
+          refetchOnMount: true,
+        },
+        mutations: {
+          // Retry mutations once on failure
+          retry: 1,
+          // Retry delay for mutations
+          retryDelay: 1000,
+        },
+      },
+    });
+  }
+
+  return queryClientInstance;
+})();
 
 // Query key factory for consistent key generation
 export const queryKeys = {

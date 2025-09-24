@@ -44,7 +44,7 @@ async function createTestOrder() {
       }
     ],
     totalAmount: 150.00,
-    currency: 'PEN',
+    currency: 'S/.',
     notes: 'Test order created by automated script to verify Telegram notifications',
     scheduleDetails: [
       {
@@ -136,7 +136,7 @@ async function main() {
       await new Promise(resolve => setTimeout(resolve, 3000));
     }
 
-    const orderResult = await createTestOrder();
+    const _orderResult = await createTestOrder();
     await checkDatabaseState();
 
     console.log('\n🎯 Test Summary:');

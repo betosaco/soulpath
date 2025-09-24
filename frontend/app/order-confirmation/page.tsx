@@ -114,11 +114,11 @@ export default function OrderConfirmationPage() {
     }
   };
 
-  const formatCurrency = (amount: number, currency: string = 'PEN') => {
+  const formatCurrency = (amount: number, currency: string = 'S/.') => {
     const currencyCode = currency.toUpperCase();
 
     // Special handling for Peruvian Soles - display as S/.
-    if (currencyCode === 'PEN') {
+    if (currencyCode === 'S/.') {
       return `S/. ${amount.toFixed(2)}`;
     }
 

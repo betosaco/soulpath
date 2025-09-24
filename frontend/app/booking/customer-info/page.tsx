@@ -26,7 +26,7 @@
 
 import { AppShell } from '@/components/AppShell';
 import { CustomerInfoStep } from '@/components/booking/steps/CustomerInfoStep';
-import { BookingLayout } from '@/components/booking/layout/BookingLayout';
+// import { BookingLayout } from '@/components/booking/layout/BookingLayout'; // Unused import
 
 /**
  * BOOKING CUSTOMER INFO PAGE COMPONENT

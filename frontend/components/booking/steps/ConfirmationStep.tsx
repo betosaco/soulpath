@@ -39,9 +39,9 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Download, Mail, Phone, Calendar, Package, Truck, User } from 'lucide-react';
+import { CheckCircle, Download, Mail, Phone, Calendar, Package, Truck, User, Clock, MapPin } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useCart, useAppStore } from '@/store/appStore';
+import { useCart, useAppStore, useOrder, useShipping } from '@/store/appStore';
 
 /**
  * CONFIRMATION STEP PROPS
@@ -82,9 +82,9 @@ interface ConfirmationStepProps {
  * @returns React component
  */
 export function ConfirmationStep({
-  orderData,
-  customerData,
-  shippingData
+  orderData: propOrderData,
+  customerData: propCustomerData,
+  shippingData: propShippingData
 }: ConfirmationStepProps) {
   // ============================================================================
   // HOOKS AND STATE MANAGEMENT
@@ -96,6 +96,20 @@ export function ConfirmationStep({
    * Access to Next.js router for navigation
    */
   const router = useRouter();
+
+  /**
+   * GLOBAL STORE DATA
+   * -----------------
+   * Access to global state data
+   */
+  const { orderData: globalOrderData } = useOrder();
+  const { customerData: globalCustomerData } = useAppStore();
+  const { shippingData: globalShippingData } = useShipping();
+
+  // Use props if provided, otherwise fall back to global store
+  const orderData = propOrderData || globalOrderData;
+  const customerData = propCustomerData || globalCustomerData;
+  const shippingData = propShippingData || globalShippingData;
 
   /**
    * CART STATE
@@ -334,7 +348,7 @@ export function ConfirmationStep({
             <p><strong>Name:</strong> {displayCustomerData.name}</p>
             <p><strong>Email:</strong> {displayCustomerData.email}</p>
             {displayCustomerData.phone && (
-              <p><strong>Phone:</strong> {displayCustomerData.countryCode ? `${displayCustomerData.countryCode} ${displayCustomerData.phone}` : displayCustomerData.phone}</p>
+              <p><strong>Phone:</strong> {displayCustomerData.phone}</p>
             )}
           </div>
         </CardContent>
@@ -462,6 +476,11 @@ export function ConfirmationStep({
         <p className="text-gray-600 text-lg">
           Thank you for your purchase. Your booking is confirmed.
         </p>
+        {orderData?.orderNumber && (
+          <p className="text-lg font-semibold text-gray-800 mt-2">
+            Order Number: {orderData.orderNumber}
+          </p>
+        )}
       </div>
 
       {/* Order Summary */}

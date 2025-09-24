@@ -52,6 +52,8 @@ interface BookingLayoutProps {
   className?: string;
   /** Whether to show the step indicator in the center */
   showStepIndicator?: boolean;
+  /** Whether to hide the navigation buttons */
+  hideNavigation?: boolean;
 }
 
 /**
@@ -75,7 +77,7 @@ interface BookingStepConfig {
 const STEP_CONFIGS: Record<string, BookingStepConfig> = {
   packages: {
     id: 'packages',
-    title: 'Select Packages & Products',
+    title: '',
     description: 'Add items to your cart',
     icon: ShoppingCart,
     alwaysVisible: true
@@ -135,7 +137,8 @@ const STEP_CONFIGS: Record<string, BookingStepConfig> = {
 export function BookingLayout({
   children,
   className = '',
-  showStepIndicator = true
+  showStepIndicator = true,
+  hideNavigation = false
 }: BookingLayoutProps) {
   // ============================================================================
   // HOOKS AND STATE
@@ -171,7 +174,10 @@ export function BookingLayout({
    * -----------------
    * Dynamically builds the steps array based on current scenario and cart contents
    */
-  const steps = React.useMemo(() => {
+  const [steps, setSteps] = React.useState<BookingStepConfig[]>([]);
+
+  // Build steps on client-side only to prevent hydration mismatch
+  React.useEffect(() => {
     const stepList: BookingStepConfig[] = [];
 
     // For direct checkout, skip packages and schedule steps
@@ -198,7 +204,7 @@ export function BookingLayout({
     stepList.push(STEP_CONFIGS.payment);
     stepList.push(STEP_CONFIGS.confirmation);
 
-    return stepList;
+    setSteps(stepList);
   }, [isMultiPackage, requiresAddress, isDirectCheckout]);
 
   /**
@@ -207,6 +213,8 @@ export function BookingLayout({
    * Determines which steps are completed based on current progress
    */
   const completedSteps = React.useMemo(() => {
+    if (steps.length === 0) return [];
+    
     const currentStepIndex = steps.findIndex(step => step.id === currentStep);
 
     return steps.map((step, index) => ({
@@ -237,9 +245,12 @@ export function BookingLayout({
    * -----------------------
    * Renders the visual progress stepper showing completed and current steps
    */
-  const renderProgressStepper = () => (
-    <div className="flex items-center justify-center space-x-2 sm:space-x-4 mb-8">
-      {completedSteps.map((step, index) => (
+  const renderProgressStepper = () => {
+    if (completedSteps.length === 0) return null;
+    
+    return (
+      <div className="flex items-center justify-center space-x-2 sm:space-x-4 mb-8">
+        {completedSteps.map((step, index) => (
         <div key={step.id} className="flex items-center">
           {/* Step Circle */}
           <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 transition-all duration-200 ${
@@ -264,8 +275,9 @@ export function BookingLayout({
           )}
         </div>
       ))}
-    </div>
-  );
+      </div>
+    );
+  };
 
   /**
    * RENDER STEP INDICATOR
@@ -273,21 +285,8 @@ export function BookingLayout({
    * Shows current step information in the center of navigation
    */
   const renderStepIndicator = () => {
-    if (!showStepIndicator) return null;
-
-    const currentStepIndex = completedSteps.findIndex(step => step.id === currentStep);
-    const currentStepData = completedSteps[currentStepIndex];
-
-    return (
-      <div className="text-center">
-        <p className="text-sm text-gray-600">
-          Step {currentStepIndex + 1} of {steps.length}
-        </p>
-        <p className="text-xs text-gray-500">
-          {currentStepData?.title || 'Unknown Step'}
-        </p>
-      </div>
-    );
+    // Step indicator removed as requested
+    return null;
   };
 
   /**
@@ -296,32 +295,13 @@ export function BookingLayout({
    * Renders Previous/Next buttons with appropriate states
    */
   const renderNavigationButtons = () => {
-    const currentStepIndex = completedSteps.findIndex(step => step.id === currentStep);
-    const isLastStep = currentStepIndex === steps.length - 1;
+    // Hide navigation if hideNavigation prop is true
+    if (hideNavigation) {
+      return null;
+    }
 
-    return (
-      <div className="flex justify-center items-center">
-        {/* Step Indicator */}
-        {renderStepIndicator()}
-
-        {/* Next/Complete Button */}
-        {!isLastStep ? (
-          <Button
-            onClick={handleNextStep}
-            disabled={!canGoNext}
-            className="flex items-center transition-all duration-200 ml-4"
-            title={!canGoNext ? "Please complete the current step before continuing" : "Continue to next step"}
-          >
-            Next
-            <ArrowRight className="w-4 h-4 mr-2" />
-          </Button>
-        ) : (
-          <div className="text-center ml-4">
-            <p className="text-green-600 font-semibold">Order Complete!</p>
-          </div>
-        )}
-      </div>
-    );
+    // Next button removed as requested
+    return null;
   };
 
   // ============================================================================

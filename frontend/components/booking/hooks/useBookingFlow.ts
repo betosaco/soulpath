@@ -36,7 +36,8 @@ export type BookingScenario =
   | 'package-first'       // User starts by selecting a package
   | 'add-more'           // User adds sessions to existing packages
   | 'multi-package'      // User manages multiple packages
-  | 'direct-checkout';   // Cart is ready, skip to checkout
+  | 'direct-checkout'    // Cart is ready, skip to checkout
+  | 'product-checkout';  // User has products in cart, needs checkout with potential shipping
 
 /**
  * BOOKING STEP TYPES
@@ -147,6 +148,23 @@ const SCENARIO_HANDLERS = {
       }
       return false;
     }
+  },
+  'product-checkout': {
+    initialStep: 'customer-info' as BookingStep,
+    validateTransition: (from: BookingStep, to: BookingStep) => {
+      // For product checkout, allow transitions from customer-info onwards
+      // Include shipping step since products may require physical delivery
+      if (from === 'customer-info' && ['shipping', 'payment'].includes(to)) {
+        return true;
+      }
+      if (from === 'shipping' && to === 'payment') {
+        return true;
+      }
+      if (from === 'payment' && to === 'confirmation') {
+        return true;
+      }
+      return false;
+    }
   }
 };
 
@@ -202,6 +220,11 @@ function determineScenario(searchParams: URLSearchParams): BookingScenario | nul
     return 'direct-checkout';
   }
 
+  // Product checkout scenario
+  if (searchParams.get('hasProducts') === 'true') {
+    return 'product-checkout';
+  }
+
   // Multi-package scenario
   if (searchParams.get('multiPackage') === 'true') {
     return 'multi-package';
@@ -222,6 +245,12 @@ function determineScenario(searchParams: URLSearchParams): BookingScenario | nul
     return 'package-first';
   }
 
+  // Fallback: If we have any booking-related parameters, assume product-checkout
+  // This handles cases where we're on shipping page but don't have explicit scenario markers
+  if (searchParams.has('slotId') || searchParams.has('packageId') || searchParams.has('flowType')) {
+    return 'product-checkout';
+  }
+
   return null;
 }
 
@@ -235,12 +264,7 @@ function determineScenario(searchParams: URLSearchParams): BookingScenario | nul
  * @returns The current booking step
  */
 function determineCurrentStep(pathname: string, scenario: BookingScenario | null): BookingStep {
-  // Direct checkout scenario always starts at customer-info
-  if (scenario === 'direct-checkout') {
-    return 'customer-info';
-  }
-
-  // Extract step from pathname
+  // Extract step from pathname first
   const pathSegments = pathname.split('/');
   const lastSegment = pathSegments[pathSegments.length - 1];
 
@@ -264,7 +288,7 @@ function determineCurrentStep(pathname: string, scenario: BookingScenario | null
     return step;
   }
 
-  // Default to scenario's initial step
+  // Default to scenario's initial step if no valid step found in URL
   if (scenario && SCENARIO_HANDLERS[scenario]) {
     return SCENARIO_HANDLERS[scenario].initialStep;
   }
@@ -325,7 +349,19 @@ export function useBookingFlow(): UseBookingFlowReturn {
    * @returns Whether the transition is valid
    */
   const validateStepTransition = useCallback((from: BookingStep, to: BookingStep): boolean => {
-    if (!scenario) return false;
+    if (!scenario) {
+      // Fallback: Allow basic transitions for common steps
+      if (from === 'shipping' && to === 'payment') {
+        return true;
+      }
+      if (from === 'customer-info' && to === 'shipping') {
+        return true;
+      }
+      if (from === 'customer-info' && to === 'payment') {
+        return true;
+      }
+      return false;
+    }
 
     // Use scenario-specific validation
     const handler = SCENARIO_HANDLERS[scenario];
@@ -340,19 +376,16 @@ export function useBookingFlow(): UseBookingFlowReturn {
   const canGoNext = useMemo(() => {
     const config = FLOW_CONFIG[currentStep];
     if (!config.next) {
-      console.log('❌ canGoNext: No next step for', currentStep);
       return false;
     }
 
     // Skip validation for non-required steps
     if (!config.requiresValidation) {
-      console.log('✅ canGoNext: No validation required for', currentStep);
       return true;
     }
 
     // Scenario-specific validation
     const isValid = validateStepTransition(currentStep, config.next);
-    console.log('🔍 canGoNext validation:', { currentStep, nextStep: config.next, isValid, scenario });
     return isValid;
   }, [currentStep, validateStepTransition, scenario]);
 
@@ -391,9 +424,9 @@ export function useBookingFlow(): UseBookingFlowReturn {
       return;
     }
 
-    // Determine the actual next step (skip shipping if no physical products)
+    // Determine the actual next step (skip shipping if no physical products, except for product-checkout)
     let actualNextStep = config.next;
-    if (config.next === 'shipping' && !hasPhysicalProducts) {
+    if (config.next === 'shipping' && !hasPhysicalProducts && scenario !== 'product-checkout') {
       actualNextStep = 'payment';
       console.log('🔄 Skipping shipping step, going directly to payment');
     }

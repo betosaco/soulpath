@@ -85,7 +85,7 @@ export default function PaymentSuccessPage() {
     const amount = paymentResult?.amount ? (paymentResult.amount / 100).toFixed(2) : 'N/A';
     const currency = typeof paymentResult?.currency === 'string' 
       ? paymentResult.currency 
-      : paymentResult?.currency?.symbol || paymentResult?.currency?.code || 'PEN';
+      : paymentResult?.currency?.symbol || paymentResult?.currency?.code || 'S/.';
     
     const message = `¡Hola! Acabo de completar mi pago exitosamente.
 
@@ -157,7 +157,7 @@ export default function PaymentSuccessPage() {
                       <dd className="text-lg text-gray-900 dark:text-white font-bold">
                         {typeof paymentResult?.currency === 'string' 
                           ? paymentResult.currency 
-                          : paymentResult?.currency?.symbol || paymentResult?.currency?.code || 'PEN'
+                          : paymentResult?.currency?.symbol || paymentResult?.currency?.code || 'S/.'
                         } {(paymentResult?.amount / 100).toFixed(2)}
                       </dd>
                     </div>
@@ -218,7 +218,7 @@ export default function PaymentSuccessPage() {
                         <dd className="text-sm text-gray-900 dark:text-gray-100 font-medium">
                           {typeof paymentResult.packageData.currency === 'string' 
                             ? paymentResult.packageData.currency 
-                            : paymentResult.packageData.currency?.symbol || paymentResult.packageData.currency?.code || 'PEN'
+                            : paymentResult.packageData.currency?.symbol || paymentResult.packageData.currency?.code || 'S/.'
                           } {paymentResult.packageData.price.toFixed(2)}
                         </dd>
                       </div>

@@ -511,6 +511,7 @@
   font-family: inherit;
   transition: all var(--unified-transition-normal);
   width: 100%;
+  height: 3rem; /* Fixed height for consistency */
   box-sizing: border-box;
   appearance: none;
   -webkit-appearance: none;

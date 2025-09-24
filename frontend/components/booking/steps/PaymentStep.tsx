@@ -40,7 +40,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useBookingFlow } from '../hooks/useBookingFlow';
-import { useCart, useAppStore } from '@/store/appStore';
+import { useCart, useAppStore, useShipping, useOrder } from '@/store/appStore';
 import { TermsAndConditionsModal } from '../../TermsAndConditionsModal';
 import { CreditCard, Clock, User, MapPin, Calendar, CheckCircle, AlertCircle, Mail, Phone, Edit } from 'lucide-react';
 
@@ -113,12 +113,19 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
   const { customerData } = useAppStore();
 
   /**
+   * SHIPPING DATA STATE
+   * -------------------
+   * Access to stored shipping data from previous steps
+   */
+  const { shippingData } = useShipping();
+
+  /**
    * PAYMENT STATE
    * -------------
    * Tracks payment processing status
    */
   const [paymentStatus, setPaymentStatus] = React.useState<'idle' | 'processing' | 'success' | 'error'>('idle');
-  const [orderData, setOrderData] = React.useState<OrderData | null>(null);
+  const { orderData, setOrderData } = useOrder();
   const [showTermsModal, setShowTermsModal] = React.useState(false);
   const [termsAccepted, setTermsAccepted] = React.useState(false);
 
@@ -145,32 +152,24 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
       return { isValid: false, error: 'Invalid total price' };
     }
 
-    // For packages, ensure they have at least one scheduled session
+    // Check for duplicate time slots within packages (if any bookings exist)
     const packageItems = cartItems.filter(item => item.type === 'package');
     if (packageItems.length > 0) {
-      const packagesWithoutBookings = packageItems.filter(pkg =>
-        !pkg.bookingDetails || pkg.bookingDetails.length === 0
-      );
-
-      if (packagesWithoutBookings.length > 0) {
-        return {
-          isValid: false,
-          error: 'All packages must have at least one scheduled session before checkout'
-        };
-      }
-
-      // Check for duplicate time slots within packages
       const allBookings = packageItems.flatMap(pkg => pkg.bookingDetails || []);
-      const timeSlots = allBookings.map(booking =>
-        `${booking.selectedDate}-${booking.selectedTime}`
-      );
-      const uniqueTimeSlots = new Set(timeSlots);
+      
+      // Only check for duplicates if there are actual bookings
+      if (allBookings.length > 0) {
+        const timeSlots = allBookings.map(booking =>
+          `${booking.selectedDate}-${booking.selectedTime}`
+        );
+        const uniqueTimeSlots = new Set(timeSlots);
 
-      if (timeSlots.length !== uniqueTimeSlots.size) {
-        return {
-          isValid: false,
-          error: 'Duplicate time slots detected. Please remove duplicates before checkout.'
-        };
+        if (timeSlots.length !== uniqueTimeSlots.size) {
+          return {
+            isValid: false,
+            error: 'Duplicate time slots detected. Please remove duplicates before checkout.'
+          };
+        }
       }
     }
 
@@ -188,34 +187,92 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
    *
    * @param paymentIntentId - Stripe payment intent ID
    */
-  const handlePaymentSuccess = (paymentIntentId: string) => {
+  const _handlePaymentSuccess = async (paymentIntentId: string) => {
     console.log('💳 Payment successful:', paymentIntentId);
 
     setPaymentStatus('success');
 
-    // Create order data for confirmation
-    const orderInfo: OrderData = {
-      orderNumber: `ORD-${Date.now()}`,
-      total: getTotalPrice(),
-      items: cartItems.map(item => ({
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price
-      }))
-    };
+    try {
+      // Create order in the database
+      const orderResponse = await fetch('/api/orders/create-unified', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customerInfo: customerData || {
+            name: 'Customer',
+            email: 'customer@example.com',
+            phone: '+51999999999',
+            countryCode: 'PE',
+            language: 'en'
+          },
+          shippingAddress: shippingData ? {
+            address: shippingData.address,
+            city: shippingData.city,
+            state: shippingData.state || '',
+            zipCode: shippingData.postalCode,
+            country: shippingData.country
+          } : null,
+          items: cartItems,
+          paymentMethod: 'stripe',
+          paymentIntentId: paymentIntentId
+        })
+      });
 
-    setOrderData(orderInfo);
+      if (!orderResponse.ok) {
+        throw new Error('Failed to create order');
+      }
 
-    // Call success callback
-    onPaymentSuccess?.(paymentIntentId, orderInfo);
+      const orderResult = await orderResponse.json();
+      console.log('✅ Order created:', orderResult);
 
-    // Show success message
-    toast.success('Payment successful! Processing your order...');
+      // Create order data for confirmation with real order number
+      const orderInfo: OrderData = {
+        orderNumber: orderResult.orderNumber,
+        total: getTotalPrice(),
+        items: cartItems.map(item => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price
+        }))
+      };
 
-    // Navigate to confirmation after a brief delay
-    setTimeout(() => {
-      goToNextStep();
-    }, 2000);
+      setOrderData(orderInfo);
+
+      // Call success callback
+      onPaymentSuccess?.(paymentIntentId, orderInfo);
+
+      // Show success message
+      toast.success('Payment successful! Processing your order...');
+
+      // Navigate to confirmation after a brief delay
+      setTimeout(() => {
+        goToNextStep();
+      }, 2000);
+
+    } catch (error) {
+      console.error('❌ Error creating order:', error);
+      toast.error('Payment successful but failed to create order. Please contact support.');
+      
+      // Still set order data with pending status
+      const orderInfo: OrderData = {
+        orderNumber: 'PENDING',
+        total: getTotalPrice(),
+        items: cartItems.map(item => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price
+        }))
+      };
+
+      setOrderData(orderInfo);
+      
+      // Navigate to confirmation anyway
+      setTimeout(() => {
+        goToNextStep();
+      }, 2000);
+    }
   };
 
   /**
@@ -225,7 +282,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
    *
    * @param error - Payment error details
    */
-  const handlePaymentError = (error: any) => {
+  const _handlePaymentError = (error: any) => {
     console.error('❌ Payment failed:', error);
 
     setPaymentStatus('error');
@@ -242,7 +299,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
    * ----------------
    * Processes pay later option
    */
-  const handlePayLater = () => {
+  const handlePayLater = async () => {
     if (!termsAccepted) {
       setShowTermsModal(true);
       return;
@@ -251,26 +308,83 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
     console.log('💳 Pay Later selected');
     setPaymentStatus('processing');
 
-    // Create order data for confirmation
-    const orderInfo: OrderData = {
-      orderNumber: `ORD-${Date.now()}`,
-      total: getTotalPrice(),
-      items: cartItems.map(item => ({
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price
-      }))
-    };
+    try {
+      // Create order in the database
+      const orderResponse = await fetch('/api/orders/create-unified', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customerInfo: customerData || {
+            name: 'Customer',
+            email: 'customer@example.com',
+            phone: '+51999999999',
+            countryCode: 'PE',
+            language: 'en'
+          },
+          shippingAddress: shippingData ? {
+            address: shippingData.address,
+            city: shippingData.city,
+            state: shippingData.state || '',
+            zipCode: shippingData.postalCode,
+            country: shippingData.country
+          } : null,
+          items: cartItems,
+          paymentMethod: 'pay_later'
+        })
+      });
 
-    setOrderData(orderInfo);
+      if (!orderResponse.ok) {
+        throw new Error('Failed to create order');
+      }
 
-    // Show success message
-    toast.success('Order confirmed! You will be contacted for payment.');
+      const orderResult = await orderResponse.json();
+      console.log('✅ Order created:', orderResult);
 
-    // Navigate to confirmation after a brief delay
-    setTimeout(() => {
-      goToNextStep();
-    }, 2000);
+      // Create order data for confirmation with real order number
+      const orderInfo: OrderData = {
+        orderNumber: orderResult.orderNumber,
+        total: getTotalPrice(),
+        items: cartItems.map(item => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price
+        }))
+      };
+
+      setOrderData(orderInfo);
+
+      // Show success message
+      toast.success('Order confirmed! You will be contacted for payment.');
+
+      // Navigate to confirmation after a brief delay
+      setTimeout(() => {
+        goToNextStep();
+      }, 2000);
+
+    } catch (error) {
+      console.error('❌ Error creating order:', error);
+      toast.error('Failed to create order. Please contact support.');
+      
+      // Still set order data with pending status
+      const orderInfo: OrderData = {
+        orderNumber: 'PENDING',
+        total: getTotalPrice(),
+        items: cartItems.map(item => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price
+        }))
+      };
+
+      setOrderData(orderInfo);
+      
+      // Navigate to confirmation anyway
+      setTimeout(() => {
+        goToNextStep();
+      }, 2000);
+    }
   };
 
   /**
@@ -327,7 +441,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Subtotal:</span>
                   <span className="font-medium text-gray-900">
-                    {cartItems.length > 0 && cartItems[0].currency} {(getTotalPrice() / 1.18).toFixed(2)}
+                    {isClient && cartItems.length > 0 && cartItems[0].currency} {isClient ? (getTotalPrice() / 1.18).toFixed(2) : '0.00'}
                   </span>
                 </div>
                 
@@ -335,7 +449,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">IGV (18%):</span>
                   <span className="font-medium text-gray-900">
-                    {cartItems.length > 0 && cartItems[0].currency} {(getTotalPrice() - (getTotalPrice() / 1.18)).toFixed(2)}
+                    {isClient && cartItems.length > 0 && cartItems[0].currency} {isClient ? (getTotalPrice() - (getTotalPrice() / 1.18)).toFixed(2) : '0.00'}
                   </span>
                 </div>
                 
@@ -343,27 +457,13 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                 <div className="flex justify-between items-center pt-2 border-t border-gray-300">
                   <span className="text-lg font-semibold text-gray-900">Total:</span>
                   <span className="text-xl font-bold text-green-600">
-                    {cartItems.length > 0 && cartItems[0].currency} {getTotalPrice().toFixed(2)}
+                    {isClient && cartItems.length > 0 && cartItems[0].currency} {isClient ? getTotalPrice().toFixed(2) : '0.00'}
                   </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Shipping Information (if applicable) */}
-          {hasPhysicalProducts && (
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-                <MapPin className="w-5 h-5 mr-2" />
-                Shipping Address
-              </h4>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-600">
-                  Shipping address will be collected in the previous step
-                </p>
-              </div>
-            </div>
-          )}
 
           {/* Packages and Bookings */}
           <div>
@@ -372,12 +472,12 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
               Packages & Bookings
             </h4>
             <div className="space-y-4">
-              {cartItems.map((item, index) => (
+              {isClient && cartItems.map((item, index) => (
                 <div key={`${item.id}-${index}`} className="border rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
                     <h5 className="font-medium text-gray-900">{item.name}</h5>
                     <span className="font-semibold text-green-600">
-                      {item.currency} {(item.price * item.quantity).toFixed(2)}
+                      {isClient && item.currency} {isClient ? (item.price * item.quantity).toFixed(2) : '0.00'}
                     </span>
                   </div>
                   
@@ -515,8 +615,15 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
   // MAIN RENDER
   // ============================================================================
 
-  const totalPrice = getTotalPrice();
+  const _totalPrice = getTotalPrice();
   const validation = validateOrder();
+  
+  // Client-side only state to prevent hydration mismatch
+  const [isClient, setIsClient] = React.useState(false);
+  
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   return (
     <div className="space-y-6 pb-20">
@@ -581,16 +688,16 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                           {customerData.phone ? `${customerData.countryCode} ${customerData.phone}` : 'Not provided'}
                         </span>
                       </div>
-                      {/* Address Information - when available */}
-                      {(customerData as any)?.address && (
+                      {/* Shipping Address Information - when available */}
+                      {shippingData && (
                         <div className="flex items-start space-x-2 md:col-span-2">
                           <MapPin className="w-4 h-4 text-gray-500 mt-0.5" />
                           <div className="flex-1">
-                            <span className="text-gray-600">Address:</span>
+                            <span className="text-gray-600">Shipping Address:</span>
                             <div className="font-medium text-gray-900">
-                              {(customerData as any).address}
-                              {(customerData as any)?.city && `, ${(customerData as any).city}`}
-                              {(customerData as any)?.country && `, ${(customerData as any).country}`}
+                              {shippingData.address}
+                              {shippingData.city && `, ${shippingData.city}`}
+                              {shippingData.country && `, ${shippingData.country}`}
                             </div>
                           </div>
                         </div>

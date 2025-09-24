@@ -45,7 +45,7 @@ export default function BookPage() {
         name: 'Single Session',
         price: 50, // Default price, should be fetched from API
         image: '/placeholder-session.jpg',
-        currency: 'PEN',
+        currency: 'S/.',
         type: 'package',
         sessions: 1,
         duration: 60,

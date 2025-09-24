@@ -49,7 +49,7 @@ export default function ProductsPage() {
         price: product.price,
         image: product.images[0] || '/images/products/placeholder-product.jpg',
         sku: product.sku,
-        currency: product.currency || 'PEN',
+        currency: product.currency || 'S/.',
         type: 'product',
         stock: product.stock,
         weight: product.weight,
@@ -129,7 +129,7 @@ export default function ProductsPage() {
 
   return (
     <AppLayout>
-      <div className="py-8">
+      <div className="pt-24 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">Our Products</h1>

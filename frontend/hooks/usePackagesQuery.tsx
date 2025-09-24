@@ -102,7 +102,7 @@ async function fetchPackagesAPI(currency: string, accessToken?: string): Promise
  * - Loading states management
  * - Optimistic updates support
  */
-export function usePackages(currency: string = 'PEN') {
+export function usePackages(currency: string = 'S/.') {
   const { user } = useAuth();
   
   return useQuery({
@@ -120,7 +120,7 @@ export function usePackages(currency: string = 'PEN') {
 /**
  * usePackage - Hook for fetching a single package by ID
  */
-export function usePackage(packageId: number, currency: string = 'PEN') {
+export function usePackage(packageId: number, currency: string = 'S/.') {
   const { user } = useAuth();
   
   return useQuery({
@@ -145,7 +145,7 @@ export function usePackage(packageId: number, currency: string = 'PEN') {
 /**
  * usePopularPackages - Hook for fetching popular packages only
  */
-export function usePopularPackages(currency: string = 'PEN') {
+export function usePopularPackages(currency: string = 'S/.') {
   const { user } = useAuth();
   
   return useQuery({
@@ -163,7 +163,7 @@ export function usePopularPackages(currency: string = 'PEN') {
 /**
  * useFeaturedPackages - Hook for fetching featured packages only
  */
-export function useFeaturedPackages(currency: string = 'PEN') {
+export function useFeaturedPackages(currency: string = 'S/.') {
   const { user } = useAuth();
   
   return useQuery({
@@ -182,7 +182,7 @@ export function useFeaturedPackages(currency: string = 'PEN') {
  * usePackagesWithCurrency - Hook for fetching packages with currency selection
  */
 export function usePackagesWithCurrency() {
-  const [selectedCurrency, setSelectedCurrency] = React.useState('PEN');
+  const [selectedCurrency, setSelectedCurrency] = React.useState('S/.');
   const packagesQuery = usePackages(selectedCurrency);
 
   const changeCurrency = React.useCallback((currency: string) => {

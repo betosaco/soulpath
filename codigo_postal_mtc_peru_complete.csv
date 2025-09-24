@@ -1,0 +1,117 @@
+CODIGO POSTAL,CAPITALES,DISTRITOS,PROVINCIA,DEPARTAMENTO
+15001,Lima Centro,Lima Centro,Lima Metropolitana,Lima
+15025,Rímac,Rímac,Lima Metropolitana,Lima
+15082,Breña,Breña,Lima Metropolitana,Lima
+15013,La Victoria,La Victoria,Lima Metropolitana,Lima
+15073,Lince,Lince,Lima Metropolitana,Lima
+15072,Jesús María,Jesús María,Lima Metropolitana,Lima
+15084,Pueblo Libre,Pueblo Libre,Lima Metropolitana,Lima
+15076,Magdalena,Magdalena,Lima Metropolitana,Lima
+15074,Miraflores,Miraflores,Lima Metropolitana,Lima
+15036,San Isidro,San Isidro,Lima Metropolitana,Lima
+15023,Surco,Surco,Lima Metropolitana,Lima
+15026,La Molina,La Molina,Lima Metropolitana,Lima
+15063,Chorrillos,Chorrillos,Lima Metropolitana,Lima
+15080,Lurín,Lurín,Lima Metropolitana,Lima
+15065,Punta Negra,Punta Negra,Lima Metropolitana,Lima
+15066,Pucusana,Pucusana,Lima Metropolitana,Lima
+15081,San Martín de Porres,San Martín de Porres,Lima Metropolitana,Lima
+15088,San Miguel,San Miguel,Lima Metropolitana,Lima
+15089,Santa Anita,Santa Anita,Lima Metropolitana,Lima
+15023,Santiago de Surco,Santiago de Surco,Lima Metropolitana,Lima
+15095,Villa El Salvador,Villa El Salvador,Lima Metropolitana,Lima
+15096,Villa María del Triunfo,Villa María del Triunfo,Lima Metropolitana,Lima
+07001,Callao Centro,Callao Centro,Callao,Callao
+07002,Bellavista,Bellavista,Callao,Callao
+07003,Carmen de la Legua,Carmen de la Legua,Callao,Callao
+07004,La Perla,La Perla,Callao,Callao
+07005,La Punta,La Punta,Callao,Callao
+07006,Ventanilla,Ventanilla,Callao,Callao
+04001,Arequipa Centro,Arequipa Centro,Arequipa,Arequipa
+04002,Cayma,Cayma,Arequipa,Arequipa
+04003,Cerro Colorado,Cerro Colorado,Arequipa,Arequipa
+04004,Characato,Characato,Arequipa,Arequipa
+04005,Chiguata,Chiguata,Arequipa,Arequipa
+04006,Jacobo Hunter,Jacobo Hunter,Arequipa,Arequipa
+04007,La Joya,La Joya,Arequipa,Arequipa
+04008,Mariano Melgar,Mariano Melgar,Arequipa,Arequipa
+04009,Miraflores,Miraflores,Arequipa,Arequipa
+04010,Mollebaya,Mollebaya,Arequipa,Arequipa
+04011,Paucarpata,Paucarpata,Arequipa,Arequipa
+04012,Pocsi,Pocsi,Arequipa,Arequipa
+04013,Polobaya,Polobaya,Arequipa,Arequipa
+04014,Quequeña,Quequeña,Arequipa,Arequipa
+04015,Sabandía,Sabandía,Arequipa,Arequipa
+04016,Sachaca,Sachaca,Arequipa,Arequipa
+04017,San Juan de Siguas,San Juan de Siguas,Arequipa,Arequipa
+04018,San Juan de Tarucani,San Juan de Tarucani,Arequipa,Arequipa
+04019,Santa Isabel de Siguas,Santa Isabel de Siguas,Arequipa,Arequipa
+04020,Santa Rita de Siguas,Santa Rita de Siguas,Arequipa,Arequipa
+04021,Socabaya,Socabaya,Arequipa,Arequipa
+04022,Tiabaya,Tiabaya,Arequipa,Arequipa
+04023,Uchumayo,Uchumayo,Arequipa,Arequipa
+04024,Vitor,Vitor,Arequipa,Arequipa
+04025,Yanahuara,Yanahuara,Arequipa,Arequipa
+04026,Yarabamba,Yarabamba,Arequipa,Arequipa
+04027,Yura,Yura,Arequipa,Arequipa
+08001,Cusco Centro,Cusco Centro,Cusco,Cusco
+08002,Ccorca,Ccorca,Cusco,Cusco
+08003,Poroy,Poroy,Cusco,Cusco
+08004,San Jerónimo,San Jerónimo,Cusco,Cusco
+08005,San Sebastián,San Sebastián,Cusco,Cusco
+08006,Santiago,Santiago,Cusco,Cusco
+08007,Saylla,Saylla,Cusco,Cusco
+08008,Wanchaq,Wanchaq,Cusco,Cusco
+14001,Chiclayo Centro,Chiclayo Centro,Chiclayo,Lambayeque
+14002,Cayaltí,Cayaltí,Chiclayo,Lambayeque
+14003,Chongoyape,Chongoyape,Chiclayo,Lambayeque
+14004,Eten,Eten,Chiclayo,Lambayeque
+14005,Eten Puerto,Eten Puerto,Chiclayo,Lambayeque
+14006,José Leonardo Ortiz,José Leonardo Ortiz,Chiclayo,Lambayeque
+14007,La Victoria,La Victoria,Chiclayo,Lambayeque
+14008,Lagunas,Lagunas,Chiclayo,Lambayeque
+14009,Monsefú,Monsefú,Chiclayo,Lambayeque
+14010,Nueva Arica,Nueva Arica,Chiclayo,Lambayeque
+14011,Oyotún,Oyotún,Chiclayo,Lambayeque
+14012,Picsi,Picsi,Chiclayo,Lambayeque
+14013,Pimentel,Pimentel,Chiclayo,Lambayeque
+14014,Pomalca,Pomalca,Chiclayo,Lambayeque
+14015,Pucalá,Pucalá,Chiclayo,Lambayeque
+14016,Reque,Reque,Chiclayo,Lambayeque
+14017,Santa Rosa,Santa Rosa,Chiclayo,Lambayeque
+14018,Saña,Saña,Chiclayo,Lambayeque
+14020,Patapo,Patapo,Chiclayo,Lambayeque
+20001,Piura Centro,Piura Centro,Piura,Piura
+20002,Castilla,Castilla,Piura,Piura
+20003,Catacaos,Catacaos,Piura,Piura
+20004,Cura Mori,Cura Mori,Piura,Piura
+20005,El Tallán,El Tallán,Piura,Piura
+20006,La Arena,La Arena,Piura,Piura
+20007,La Unión,La Unión,Piura,Piura
+20008,Las Lomas,Las Lomas,Piura,Piura
+20009,Tambo Grande,Tambo Grande,Piura,Piura
+20010,Veintiséis de Octubre,Veintiséis de Octubre,Piura,Piura
+23001,Tacna Centro,Tacna Centro,Tacna,Tacna
+23002,Alto de la Alianza,Alto de la Alianza,Tacna,Tacna
+23003,Calana,Calana,Tacna,Tacna
+23004,Ciudad Nueva,Ciudad Nueva,Tacna,Tacna
+23005,Inclán,Inclán,Tacna,Tacna
+23006,Pachía,Pachía,Tacna,Tacna
+23007,Palca,Palca,Tacna,Tacna
+23008,Pocollay,Pocollay,Tacna,Tacna
+23009,Sama,Sama,Tacna,Tacna
+23010,Coronel Gregorio Albarracín,Coronel Gregorio Albarracín,Tacna,Tacna
+11001,Ica Centro,Ica Centro,Ica,Ica
+11002,La Tinguiña,La Tinguiña,Ica,Ica
+11003,Los Aquijes,Los Aquijes,Ica,Ica
+11004,Ocucaje,Ocucaje,Ica,Ica
+11005,Pachacútec,Pachacútec,Ica,Ica
+11006,Parcona,Parcona,Ica,Ica
+11007,Pueblo Nuevo,Pueblo Nuevo,Ica,Ica
+11008,Salas,Salas,Ica,Ica
+11009,San José de los Molinos,San José de los Molinos,Ica,Ica
+11010,San Juan Bautista,San Juan Bautista,Ica,Ica
+11011,Santiago,Santiago,Ica,Ica
+11012,Subtanjalla,Subtanjalla,Ica,Ica
+11013,Tate,Tate,Ica,Ica
+11014,Yauca del Rosario,Yauca del Rosario,Ica,Ica

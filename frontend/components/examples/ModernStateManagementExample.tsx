@@ -21,7 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
  */
 export function ModernStateManagementExample() {
   // TanStack Query hooks for server state
-  const { data: packages, isLoading: packagesLoading, error: packagesError } = usePackages('PEN');
+  const { data: packages, isLoading: packagesLoading, error: packagesError } = usePackages('S/.');
   const { user, isLoading: authLoading, isAuthenticated, signIn, signOut } = useAuthQuery();
   
   // Zustand hooks for client state
@@ -37,7 +37,7 @@ export function ModernStateManagementExample() {
       name: pkg.packageDefinition.name,
       price: pkg.price,
       image: '/placeholder-package.jpg',
-      currency: pkg.currency?.code || 'PEN',
+      currency: pkg.currency?.code || 'S/.',
       type: 'package',
       sessions: pkg.packageDefinition.sessionsCount || 1,
       duration: pkg.packageDefinition.sessionDuration?.duration_minutes || 60,
@@ -219,7 +219,7 @@ export function ModernStateManagementExample() {
                 <CardContent>
                   <div className="space-y-2">
                     <p>Items: {getTotalItems()}</p>
-                    <p>Total: PEN {getTotalPrice().toFixed(2)}</p>
+                    <p>Total: S/. {getTotalPrice().toFixed(2)}</p>
                     <Button 
                       onClick={toggleCart}
                       variant={isCartOpen ? "outline" : "default"}

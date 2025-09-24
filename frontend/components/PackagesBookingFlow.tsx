@@ -28,7 +28,7 @@ import { EnhancedSchedule } from './EnhancedSchedule';
 import { usePackages, PackagePrice } from '@/hooks/usePackages';
 import { useLanguage, useTranslations } from '@/hooks/useTranslations';
 import { toast } from 'sonner';
-import { useCart } from '@/store/appStore';
+import { useCart, useCartUI } from '@/store/appStore';
 
 interface Teacher {
   id: number;
@@ -84,10 +84,11 @@ interface BookingStep {
 }
 
 export function PackagesBookingFlow() {
-  const { packages, loading: packagesLoading, error: packagesError } = usePackages('PEN');
+  const { packages, loading: packagesLoading, error: packagesError } = usePackages('S/.');
   const { language } = useLanguage();
   const { t } = useTranslations(undefined, language);
-  const { addItem: addToCart, items: cartItems, openCart: setIsCartOpen } = useCart();
+  const { addItem: addToCart, items: cartItems } = useCart();
+  const { openCart } = useCartUI();
   const [currentStep, setCurrentStep] = useState(0);
 
   // Icon diagnostic - remove after testing
@@ -154,7 +155,7 @@ export function PackagesBookingFlow() {
       price: pkg.price,
       image: '/images/products/yoga-journal-1.jpg', // Default package image
       sku: `PKG-${pkg.id}`,
-      currency: pkg.currency?.code || 'PEN',
+      currency: pkg.currency?.code || 'S/.',
       type: 'package',
       sessions: pkg.packageDefinition.sessionsCount,
       duration: pkg.packageDefinition.sessionDuration?.duration_minutes,
@@ -179,8 +180,8 @@ export function PackagesBookingFlow() {
       }
       localStorage.setItem('isCartOpen', 'true');
     }
-    if (setIsCartOpen) {
-      setIsCartOpen(true);
+    if (openCart) {
+      openCart();
     }
     window.location.href = '/schedule';
   };
@@ -208,8 +209,8 @@ export function PackagesBookingFlow() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('isCartOpen', 'true');
     }
-    if (setIsCartOpen) {
-      setIsCartOpen(true);
+    if (openCart) {
+      openCart();
     }
     window.location.href = '/checkout';
   };

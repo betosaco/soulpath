@@ -1,0 +1,7089 @@
+{
+  "Amazonas": {
+    "Chachapoyas": {
+      "Chachapoyas": [
+        "01000",
+        "01001"
+      ],
+      "Huancas": [
+        "01000"
+      ],
+      "Granada": [
+        "01200"
+      ],
+      "Quinjalca": [
+        "01210"
+      ],
+      "Chiliquin": [
+        "01220"
+      ],
+      "Asunción": [
+        "01230"
+      ],
+      "Olleros": [
+        "01280"
+      ],
+      "Sonche": [
+        "01300"
+      ],
+      "Soloco": [
+        "01305"
+      ],
+      "San Francisco de Daguas": [
+        "01310"
+      ],
+      "Cheto": [
+        "01315"
+      ],
+      "Molinopampa": [
+        "01320"
+      ],
+      "Levanto": [
+        "01400"
+      ],
+      "San Isidro de Maino": [
+        "01405"
+      ],
+      "Magdalena": [
+        "01410"
+      ],
+      "La Jalca": [
+        "01440",
+        "01441"
+      ],
+      "Mariscal Castilla": [
+        "01455"
+      ],
+      "Montevideo": [
+        "01460"
+      ],
+      "Leimebamba": [
+        "01465"
+      ],
+      "Chuquibamba": [
+        "01470"
+      ],
+      "Balsas": [
+        "01475"
+      ]
+    },
+    "Bongara": {
+      "Valera": [
+        "01100"
+      ],
+      "Churuja": [
+        "01110"
+      ],
+      "San Carlos": [
+        "01120"
+      ],
+      "Jazan": [
+        "01130",
+        "01131"
+      ],
+      "Cuispes": [
+        "01140"
+      ],
+      "Florida": [
+        "01150",
+        "01151"
+      ],
+      "Yambrasbamba": [
+        "01160",
+        "01161"
+      ],
+      "Recta": [
+        "01240"
+      ],
+      "Jumbilla": [
+        "01250"
+      ],
+      "Chisquilla": [
+        "01260"
+      ],
+      "Corosha": [
+        "01270"
+      ],
+      "Shipasbamba": [
+        "01600"
+      ]
+    },
+    "Rodriguez de Mendoza": {
+      "Vista Alegre": [
+        "01325"
+      ],
+      "Mariscal Benavides": [
+        "01330"
+      ],
+      "San Nicolas": [
+        "01335"
+      ],
+      "Omia": [
+        "01340",
+        "01341"
+      ],
+      "Longar": [
+        "01345"
+      ],
+      "Cochamal": [
+        "01350"
+      ],
+      "Huambo": [
+        "01355"
+      ],
+      "Santa Rosa": [
+        "01360"
+      ],
+      "Totora": [
+        "01365"
+      ],
+      "Limabamba": [
+        "01370"
+      ],
+      "Milpuc": [
+        "01375"
+      ],
+      "Chirimoto": [
+        "01380"
+      ]
+    },
+    "Luya": {
+      "Tingo": [
+        "01415"
+      ],
+      "Colcamar": [
+        "01420"
+      ],
+      "Longuita": [
+        "01425"
+      ],
+      "María": [
+        "01430"
+      ],
+      "San Juan de Lopecancha": [
+        "01435"
+      ],
+      "Santo Tomas": [
+        "01445"
+      ],
+      "San Francisco del Yeso": [
+        "01450"
+      ],
+      "Cocabamba": [
+        "01480"
+      ],
+      "Pisuquia": [
+        "01485",
+        "01486"
+      ],
+      "Lonya Chico": [
+        "01500"
+      ],
+      "Inguilpata": [
+        "01505"
+      ],
+      "Luya": [
+        "01510"
+      ],
+      "Lamud": [
+        "01515"
+      ],
+      "San Cristobal": [
+        "01520"
+      ],
+      "San Jerónimo": [
+        "01525"
+      ],
+      "Conila": [
+        "01530"
+      ],
+      "Ocumal": [
+        "01535"
+      ],
+      "Providencia": [
+        "01540"
+      ],
+      "Ocalli": [
+        "01545"
+      ],
+      "Camporredondo": [
+        "01550",
+        "01551"
+      ],
+      "Trita": [
+        "01570"
+      ],
+      "Luya Viejo": [
+        "01575"
+      ],
+      "Santa Catalina": [
+        "01580"
+      ]
+    },
+    "Utcubamba": {
+      "Lonya Grande": [
+        "01555",
+        "01556"
+      ],
+      "Yamón": [
+        "01560"
+      ],
+      "Cumba": [
+        "01565",
+        "01566"
+      ],
+      "Jamalca": [
+        "01610",
+        "01611"
+      ],
+      "Bagua Grande": [
+        "01620",
+        "01621"
+      ],
+      "El Milagro": [
+        "01630",
+        "01631"
+      ],
+      "Cajaruro": [
+        "01700",
+        "01701"
+      ]
+    },
+    "Bagua": {
+      "Copallin": [
+        "01710",
+        "01711"
+      ],
+      "Bagua": [
+        "01720",
+        "01721"
+      ],
+      "El Parco": [
+        "01730"
+      ],
+      "La Peca": [
+        "01740",
+        "01741"
+      ],
+      "Aramango": [
+        "01800",
+        "01801"
+      ],
+      "Imaza": [
+        "01810",
+        "01811"
+      ]
+    },
+    "Condorcanqui": {
+      "El Cenepa": [
+        "01820",
+        "01821"
+      ],
+      "Nieva": [
+        "01830",
+        "01831"
+      ],
+      "Río Santiago": [
+        "01840",
+        "01841"
+      ]
+    }
+  },
+  "Ancash": {
+    "Huaraz": {
+      "Huaraz": [
+        "02000",
+        "02001",
+        "02002"
+      ],
+      "Independencia": [
+        "02000",
+        "02002"
+      ],
+      "Jangas": [
+        "02100"
+      ],
+      "Tarica": [
+        "02119",
+        "02120"
+      ],
+      "Olleros": [
+        "02400"
+      ],
+      "Pira": [
+        "02600"
+      ],
+      "La Libertad": [
+        "02603"
+      ],
+      "Pampas": [
+        "02605"
+      ],
+      "Huanchay": [
+        "02607"
+      ],
+      "Pariacoto": [
+        "02685"
+      ],
+      "Cochabamba": [
+        "02690"
+      ],
+      "Colcabamba": [
+        "02695"
+      ]
+    },
+    "Carhuaz": {
+      "Yungar": [
+        "02103"
+      ],
+      "Anta": [
+        "02105"
+      ],
+      "Marcara": [
+        "02109",
+        "02110"
+      ],
+      "Pariahuanca": [
+        "02113"
+      ],
+      "San Miguel de Aco": [
+        "02115"
+      ],
+      "Acopampa": [
+        "02123"
+      ],
+      "Carhuaz": [
+        "02125",
+        "02127"
+      ],
+      "Amashca": [
+        "02130"
+      ],
+      "Shilla": [
+        "02133"
+      ],
+      "Tinco": [
+        "02135"
+      ],
+      "Ataquero": [
+        "02139"
+      ]
+    },
+    "Yungay": {
+      "Shupluy": [
+        "02140"
+      ],
+      "Cascapara": [
+        "02145"
+      ],
+      "Mancos": [
+        "02148",
+        "02150"
+      ],
+      "Ranrahirca": [
+        "02152"
+      ],
+      "Matacoto": [
+        "02155"
+      ],
+      "Yungay": [
+        "02158",
+        "02160"
+      ],
+      "Yanama": [
+        "02162",
+        "02163"
+      ],
+      "Quillo": [
+        "02675",
+        "02676"
+      ]
+    },
+    "Huaylas": {
+      "Caraz": [
+        "02165",
+        "02167"
+      ],
+      "Pueblo Libre": [
+        "02170",
+        "02171"
+      ],
+      "Santa Cruz": [
+        "02174"
+      ],
+      "Huata": [
+        "02175"
+      ],
+      "Pamparomas": [
+        "02180",
+        "02181"
+      ],
+      "Mato": [
+        "02184"
+      ],
+      "Huaylas": [
+        "02185"
+      ],
+      "Santo Toribio": [
+        "02190"
+      ],
+      "Huallanca": [
+        "02193"
+      ],
+      "Yuracmarca": [
+        "02195"
+      ]
+    },
+    "Corongo": {
+      "La Pampa": [
+        "02200"
+      ],
+      "Yupan": [
+        "02203"
+      ],
+      "Bambas": [
+        "02205"
+      ],
+      "Yanac": [
+        "02209"
+      ],
+      "Cusca": [
+        "02210"
+      ],
+      "Aco": [
+        "02215"
+      ],
+      "Corongo": [
+        "02218"
+      ]
+    },
+    "Sihuas": {
+      "Sihuas": [
+        "02220",
+        "02222"
+      ],
+      "Cashapampa": [
+        "02225"
+      ],
+      "Ragash": [
+        "02228"
+      ],
+      "Huayllabamba": [
+        "02230"
+      ],
+      "Quiches": [
+        "02234"
+      ],
+      "Acobamba": [
+        "02235"
+      ],
+      "Chingalpo": [
+        "02240"
+      ],
+      "Sicsibamba": [
+        "02243"
+      ],
+      "Alfonso Ugarte": [
+        "02245"
+      ],
+      "San Juan": [
+        "02249",
+        "02251"
+      ]
+    },
+    "Pomabamba": {
+      "Parobamba": [
+        "02250",
+        "02254"
+      ],
+      "Quinuabamba": [
+        "02258"
+      ],
+      "Pomabamba": [
+        "02260",
+        "02262"
+      ],
+      "Huayllan": [
+        "02295"
+      ]
+    },
+    "Mariscal Luzuriaga": {
+      "Casca": [
+        "02264"
+      ],
+      "Piscobamba": [
+        "02265"
+      ],
+      "Fidel Olivas Escudero": [
+        "02270"
+      ],
+      "Musga": [
+        "02273"
+      ],
+      "Llama": [
+        "02275"
+      ],
+      "Eleazar Guzman Barrón": [
+        "02279"
+      ],
+      "Llumpa": [
+        "02289",
+        "02291"
+      ],
+      "Lucma": [
+        "02290"
+      ]
+    },
+    "Carlos Fermín Fitzcarrald": {
+      "Yauya": [
+        "02280",
+        "02283"
+      ],
+      "San Nicolas": [
+        "02285"
+      ],
+      "San Luis": [
+        "02310",
+        "02311"
+      ]
+    },
+    "Huari": {
+      "Huantar": [
+        "02300"
+      ],
+      "Huari": [
+        "02303",
+        "02304"
+      ],
+      "Cajay": [
+        "02305"
+      ],
+      "Huachis": [
+        "02320"
+      ],
+      "Masin": [
+        "02324"
+      ],
+      "Rahuapampa": [
+        "02325"
+      ],
+      "Ponto": [
+        "02330"
+      ],
+      "San Pedro de Chama": [
+        "02333"
+      ],
+      "Huacachi": [
+        "02355"
+      ],
+      "Anra": [
+        "02358"
+      ],
+      "Uco": [
+        "02370"
+      ],
+      "Paucas": [
+        "02375"
+      ],
+      "Huacchis": [
+        "02380"
+      ],
+      "Rapayan": [
+        "02385"
+      ],
+      "San Marcos": [
+        "02390",
+        "02391"
+      ],
+      "Chavín de Huantar": [
+        "02395",
+        "02396"
+      ]
+    },
+    "Asunción": {
+      "Acochaca": [
+        "02314"
+      ],
+      "Chacas": [
+        "02315",
+        "02318"
+      ]
+    },
+    "Antonio Raymondi": {
+      "San Juan de Rontoy": [
+        "02335"
+      ],
+      "Aczo": [
+        "02340"
+      ],
+      "Chingas": [
+        "02342"
+      ],
+      "Llamellin": [
+        "02345"
+      ],
+      "Chaccho": [
+        "02348"
+      ],
+      "Mirgas": [
+        "02350",
+        "02352"
+      ]
+    },
+    "Recuay": {
+      "Recuay": [
+        "02403",
+        "02405"
+      ],
+      "Ticapampa": [
+        "02407"
+      ],
+      "Catac": [
+        "02410"
+      ],
+      "Pampas Chico": [
+        "02483"
+      ],
+      "Marca": [
+        "02490"
+      ],
+      "Huayllapampa": [
+        "02495"
+      ],
+      "Cotaparaco": [
+        "02633"
+      ],
+      "Tapacocha": [
+        "02635"
+      ],
+      "Pararín": [
+        "02640"
+      ],
+      "Llacllin": [
+        "02645"
+      ]
+    },
+    "Bolognesi": {
+      "Chiquian": [
+        "02413"
+      ],
+      "Huasta": [
+        "02415"
+      ],
+      "Aquía": [
+        "02420"
+      ],
+      "Huallanca": [
+        "02422",
+        "02425"
+      ],
+      "Pacllon": [
+        "02426"
+      ],
+      "Ticllos": [
+        "02430"
+      ],
+      "San Miguel de Corpanqui": [
+        "02432"
+      ],
+      "Abelardo Pardo Lezameta": [
+        "02435"
+      ],
+      "La Primavera": [
+        "02440"
+      ],
+      "Mangas": [
+        "02441"
+      ],
+      "Canis": [
+        "02445"
+      ],
+      "Cajacay": [
+        "02485"
+      ],
+      "Antonio Raymondi": [
+        "02489"
+      ],
+      "Colquioc": [
+        "02500"
+      ],
+      "Huayllacayan": [
+        "02510"
+      ]
+    },
+    "Ocros": {
+      "Cajamarquilla": [
+        "02447"
+      ],
+      "San Cristobal de Rajan": [
+        "02450"
+      ],
+      "Llipa": [
+        "02455"
+      ],
+      "Ocros": [
+        "02460"
+      ],
+      "Santiago de Chilcas": [
+        "02465"
+      ],
+      "Acas": [
+        "02470"
+      ],
+      "Cochas": [
+        "02475"
+      ],
+      "Carhuapampa": [
+        "02480"
+      ],
+      "San Pedro": [
+        "02520"
+      ],
+      "Congas": [
+        "02530"
+      ]
+    },
+    "Aija": {
+      "Aija": [
+        "02610"
+      ],
+      "La Merced": [
+        "02613"
+      ],
+      "Succha": [
+        "02616"
+      ],
+      "Coris": [
+        "02621"
+      ],
+      "Huacllan": [
+        "02625"
+      ]
+    },
+    "Huarmey": {
+      "Huayán": [
+        "02618"
+      ],
+      "Malvas": [
+        "02627"
+      ],
+      "Cochapeti": [
+        "02630"
+      ],
+      "Huarmey": [
+        "02650",
+        "02651"
+      ],
+      "Culebras": [
+        "02655"
+      ]
+    },
+    "Casma": {
+      "Casma": [
+        "02660",
+        "02661"
+      ],
+      "Comandante Noel": [
+        "02665"
+      ],
+      "Buena Vista Alta": [
+        "02670"
+      ],
+      "Yautan": [
+        "02680",
+        "02681"
+      ]
+    },
+    "Santa": {
+      "Samanco": [
+        "02700"
+      ],
+      "Nuevo Chimbote": [
+        "02710",
+        "02711",
+        "02712"
+      ],
+      "Nepeña": [
+        "02720",
+        "02721"
+      ],
+      "Moro": [
+        "02730",
+        "02731"
+      ],
+      "Caceres del Perú": [
+        "02740",
+        "02741"
+      ],
+      "Chimbote": [
+        "02800",
+        "02801",
+        "02802",
+        "02803",
+        "02804"
+      ],
+      "Coishco": [
+        "02810",
+        "02811"
+      ],
+      "Santa": [
+        "02815",
+        "02816"
+      ],
+      "Macate": [
+        "02820"
+      ]
+    },
+    "Pallasca": {
+      "Santa Rosa": [
+        "02825"
+      ],
+      "Bolognesi": [
+        "02830"
+      ],
+      "Pallasca": [
+        "02835"
+      ],
+      "Llapo": [
+        "02840"
+      ],
+      "Tauca": [
+        "02845"
+      ],
+      "Cabana": [
+        "02850"
+      ],
+      "Huandoval": [
+        "02855"
+      ],
+      "Huacaschuque": [
+        "02860"
+      ],
+      "Pampas": [
+        "02865",
+        "02866"
+      ],
+      "Lacabamba": [
+        "02870"
+      ],
+      "Conchucos": [
+        "02875",
+        "02876"
+      ]
+    }
+  },
+  "Apurimac": {
+    "Abancay": {
+      "Abancay": [
+        "03000",
+        "03001"
+      ],
+      "Tamburco": [
+        "03000",
+        "03001"
+      ],
+      "Curahuasi": [
+        "03100",
+        "03101"
+      ],
+      "San Pedro de Cachora": [
+        "03110"
+      ],
+      "Huanipaca": [
+        "03120"
+      ],
+      "Lambrama": [
+        "03300",
+        "03301"
+      ],
+      "Circa": [
+        "03305"
+      ],
+      "Pichirhua": [
+        "03400"
+      ],
+      "Chacoche": [
+        "03405"
+      ]
+    },
+    "Grau": {
+      "Gamarra": [
+        "03200"
+      ],
+      "Huayllati": [
+        "03210"
+      ],
+      "Progreso": [
+        "03280"
+      ],
+      "Curasco": [
+        "03290"
+      ],
+      "Chuquibambilla": [
+        "03310",
+        "03311"
+      ],
+      "Curpahuasi": [
+        "03315"
+      ],
+      "Vilcabamba": [
+        "03320"
+      ],
+      "Micaela Bastidas": [
+        "03325"
+      ],
+      "San Antonio": [
+        "03330"
+      ],
+      "Mamara": [
+        "03335"
+      ],
+      "Santa Rosa": [
+        "03345"
+      ],
+      "Pataypampa": [
+        "03350"
+      ],
+      "Turpay": [
+        "03355"
+      ],
+      "Virundo": [
+        "03360"
+      ]
+    },
+    "Cotabambas": {
+      "Coyllurqui": [
+        "03220",
+        "03221"
+      ],
+      "Cotabambas": [
+        "03230"
+      ],
+      "Tambobamba": [
+        "03240",
+        "03241"
+      ],
+      "Mara": [
+        "03250",
+        "03251"
+      ],
+      "Challhuahuacho": [
+        "03260",
+        "03261"
+      ],
+      "Haquira": [
+        "03270",
+        "03271"
+      ]
+    },
+    "Antabamba": {
+      "Oropesa": [
+        "03340"
+      ],
+      "El Oro": [
+        "03450"
+      ],
+      "Pachaconas": [
+        "03455"
+      ],
+      "Sabaino": [
+        "03460"
+      ],
+      "Antabamba": [
+        "03465"
+      ],
+      "Huaquirca": [
+        "03470"
+      ],
+      "Juan Espinoza Medrano": [
+        "03475"
+      ]
+    },
+    "Aymaraes": {
+      "Tintay": [
+        "03410"
+      ],
+      "Lucre": [
+        "03415"
+      ],
+      "San Juan de Chacña": [
+        "03420"
+      ],
+      "Chapimarca": [
+        "03425"
+      ],
+      "Justo Apu Sahuaraura": [
+        "03430"
+      ],
+      "Tapairihua": [
+        "03435"
+      ],
+      "Yanaca": [
+        "03440"
+      ],
+      "Pocohuanca": [
+        "03445"
+      ],
+      "Colcabamba": [
+        "03500"
+      ],
+      "Toraya": [
+        "03510"
+      ],
+      "Capaya": [
+        "03520"
+      ],
+      "Huayllo": [
+        "03530"
+      ],
+      "Soraya": [
+        "03540"
+      ],
+      "Sañayca": [
+        "03550"
+      ],
+      "Chalhuanca": [
+        "03560"
+      ],
+      "Caraybamba": [
+        "03570"
+      ],
+      "Cotaruse": [
+        "03580"
+      ]
+    },
+    "Andahuaylas": {
+      "Pampachiri": [
+        "03600"
+      ],
+      "Pomacocha": [
+        "03610"
+      ],
+      "Tumay Huaraca": [
+        "03620"
+      ],
+      "Huayana": [
+        "03630"
+      ],
+      "San Miguel de Chaccrampa": [
+        "03640"
+      ],
+      "Chiara": [
+        "03650"
+      ],
+      "San Antonio de Cachi": [
+        "03660"
+      ],
+      "Huancaray": [
+        "03670"
+      ],
+      "Turpo": [
+        "03680"
+      ],
+      "Andahuaylas": [
+        "03700",
+        "03701"
+      ],
+      "San Jerónimo": [
+        "03700",
+        "03701"
+      ],
+      "Talavera": [
+        "03700",
+        "03701"
+      ],
+      "Pacucha": [
+        "03730",
+        "03731"
+      ],
+      "Andarapa": [
+        "03740",
+        "03741"
+      ],
+      "Kaquiabamba": [
+        "03750"
+      ],
+      "Kishuara": [
+        "03760",
+        "03761"
+      ],
+      "Pacobamba": [
+        "03770"
+      ],
+      "Huancarama": [
+        "03780",
+        "03781"
+      ],
+      "Santa María de Chicmo": [
+        "03800",
+        "03801"
+      ]
+    },
+    "Chincheros": {
+      "Uranmarca": [
+        "03810"
+      ],
+      "Cocharcas": [
+        "03820"
+      ],
+      "Ranracancha": [
+        "03830"
+      ],
+      "Anco Huallo": [
+        "03840",
+        "03841"
+      ],
+      "Chincheros": [
+        "03850",
+        "03851"
+      ],
+      "Ocobamba": [
+        "03860",
+        "03861"
+      ],
+      "Ongoy": [
+        "03870",
+        "03871"
+      ],
+      "Huaccana": [
+        "03880",
+        "03881"
+      ]
+    }
+  },
+  "Arequipa": {
+    "Arequipa": {
+      "Cayma": [
+        "04000",
+        "04013",
+        "04014",
+        "04017",
+        "04018"
+      ],
+      "Cerro Colorado": [
+        "04000",
+        "04013",
+        "04014",
+        "04016",
+        "04017"
+      ],
+      "Characato": [
+        "04000",
+        "04012"
+      ],
+      "Sabandía": [
+        "04000",
+        "04012"
+      ],
+      "Socabaya": [
+        "04000",
+        "04009",
+        "04011",
+        "04012",
+        "04013"
+      ],
+      "Tiabaya": [
+        "04000",
+        "04013"
+      ],
+      "Yura": [
+        "04000",
+        "04016",
+        "04076"
+      ],
+      "Alto Selva Alegre": [
+        "04001",
+        "04003",
+        "04004"
+      ],
+      "Arequipa": [
+        "04001",
+        "04002",
+        "04011",
+        "04013",
+        "04017"
+      ],
+      "Miraflores": [
+        "04001",
+        "04004"
+      ],
+      "José Luis Bustamante y Rivero": [
+        "04002",
+        "04008",
+        "04009",
+        "04011",
+        "04012"
+      ],
+      "Mariano Melgar": [
+        "04002",
+        "04006"
+      ],
+      "Paucarpata": [
+        "04002",
+        "04007",
+        "04008",
+        "04009"
+      ],
+      "Jacobo Hunter": [
+        "04011",
+        "04012"
+      ],
+      "Sachaca": [
+        "04013"
+      ],
+      "Yanahuara": [
+        "04013",
+        "04014",
+        "04017"
+      ],
+      "Vitor": [
+        "04100"
+      ],
+      "Santa Rita de Siguas": [
+        "04102"
+      ],
+      "San Juan de Siguas": [
+        "04105"
+      ],
+      "Santa Isabel de Siguas": [
+        "04108"
+      ],
+      "Chiguata": [
+        "04200"
+      ],
+      "San Juan de Tarucani": [
+        "04210"
+      ],
+      "Mollebaya": [
+        "04300"
+      ],
+      "Pocsi": [
+        "04310"
+      ],
+      "Polobaya": [
+        "04320"
+      ],
+      "Yarabamba": [
+        "04330"
+      ],
+      "Quequeña": [
+        "04340"
+      ],
+      "Uchumayo": [
+        "04400",
+        "04401"
+      ],
+      "La Joya": [
+        "04405",
+        "04406"
+      ]
+    },
+    "Caylloma": {
+      "Majes": [
+        "04110",
+        "04112"
+      ],
+      "Lluta": [
+        "04115"
+      ],
+      "Huanca": [
+        "04118"
+      ],
+      "Huambo": [
+        "04120"
+      ],
+      "Cabanaconde": [
+        "04124"
+      ],
+      "Tapay": [
+        "04125"
+      ],
+      "Maca": [
+        "04130"
+      ],
+      "Achoma": [
+        "04135"
+      ],
+      "Yanque": [
+        "04140"
+      ],
+      "Chivay": [
+        "04145",
+        "04146"
+      ],
+      "Coporaque": [
+        "04150"
+      ],
+      "Ichupampa": [
+        "04155"
+      ],
+      "Lari": [
+        "04160"
+      ],
+      "Madrigal": [
+        "04165"
+      ],
+      "Tuti": [
+        "04170"
+      ],
+      "Sibayo": [
+        "04175"
+      ],
+      "Callalli": [
+        "04180"
+      ],
+      "Tisco": [
+        "04185"
+      ],
+      "Caylloma": [
+        "04190"
+      ],
+      "San Antonio de Chuca": [
+        "04220"
+      ]
+    },
+    "Condesuyos": {
+      "Cayarani": [
+        "04195"
+      ],
+      "Iray": [
+        "04700"
+      ],
+      "Chuquibamba": [
+        "04710"
+      ],
+      "Andaray": [
+        "04720"
+      ],
+      "Yanaquihua": [
+        "04730"
+      ],
+      "Río Grande": [
+        "04770"
+      ],
+      "Salamanca": [
+        "04800"
+      ],
+      "Chichas": [
+        "04805"
+      ]
+    },
+    "Islay": {
+      "Islay": [
+        "04410"
+      ],
+      "Mollendo": [
+        "04415",
+        "04416"
+      ],
+      "Mejía": [
+        "04420"
+      ],
+      "Dean Valdivia": [
+        "04425",
+        "04426"
+      ],
+      "Cocachacra": [
+        "04430",
+        "04431"
+      ],
+      "Punta de Bombón": [
+        "04435",
+        "04436"
+      ]
+    },
+    "Camana": {
+      "Quilca": [
+        "04440"
+      ],
+      "Samuel Pastor": [
+        "04445",
+        "04446"
+      ],
+      "Camaná": [
+        "04450",
+        "04451"
+      ],
+      "Nicolas de Pierola": [
+        "04455",
+        "04456"
+      ],
+      "José María Quimper": [
+        "04460"
+      ],
+      "Mariscal Cáceres": [
+        "04465",
+        "04466"
+      ],
+      "Ocoña": [
+        "04470"
+      ],
+      "Mariano Nicolas Valcarcel": [
+        "04760"
+      ]
+    },
+    "Caraveli": {
+      "Atico": [
+        "04475"
+      ],
+      "Chala": [
+        "04500",
+        "04501"
+      ],
+      "Huanuhuanu": [
+        "04510"
+      ],
+      "Atiquipa": [
+        "04520"
+      ],
+      "Yauca": [
+        "04530"
+      ],
+      "Jaqui": [
+        "04540"
+      ],
+      "Acarí": [
+        "04550"
+      ],
+      "Bella Unión": [
+        "04560"
+      ],
+      "Lomas": [
+        "04570"
+      ],
+      "Chaparra": [
+        "04580"
+      ],
+      "Quicacha": [
+        "04590"
+      ],
+      "Caravelí": [
+        "04740"
+      ],
+      "Cahuacho": [
+        "04750"
+      ]
+    },
+    "Castilla": {
+      "Uraca": [
+        "04600",
+        "04601"
+      ],
+      "Aplao": [
+        "04605",
+        "04606"
+      ],
+      "Huancarqui": [
+        "04610"
+      ],
+      "Tipan": [
+        "04615"
+      ],
+      "Pampacolca": [
+        "04620"
+      ],
+      "Viraco": [
+        "04625"
+      ],
+      "Machaguay": [
+        "04630"
+      ],
+      "Uñon": [
+        "04635"
+      ],
+      "Andagua": [
+        "04640"
+      ],
+      "Ayo": [
+        "04645"
+      ],
+      "Chilcaymarca": [
+        "04650"
+      ],
+      "Orcopampa": [
+        "04655",
+        "04656"
+      ],
+      "Chachas": [
+        "04660"
+      ],
+      "Choco": [
+        "04665"
+      ]
+    },
+    "La Unión": {
+      "Cotahuasi": [
+        "04810"
+      ],
+      "Pampamarca": [
+        "04815"
+      ],
+      "Huaynacotas": [
+        "04820"
+      ],
+      "Tomepampa": [
+        "04825"
+      ],
+      "Alca": [
+        "04830"
+      ],
+      "Puyca": [
+        "04835"
+      ],
+      "Toro": [
+        "04840"
+      ],
+      "Quechualla": [
+        "04845"
+      ],
+      "Charcana": [
+        "04850"
+      ],
+      "Sayla": [
+        "04855"
+      ],
+      "Tauría": [
+        "04860"
+      ]
+    }
+  },
+  "Ayacucho": {
+    "Huamanga": {
+      "Ayacucho": [
+        "05000",
+        "05001",
+        "05002",
+        "05003"
+      ],
+      "Carmen Alto": [
+        "05000",
+        "05002"
+      ],
+      "Jesús Nazareno": [
+        "05000",
+        "05001"
+      ],
+      "San Juan Bautista": [
+        "05000",
+        "05001",
+        "05002"
+      ],
+      "Pacaycasa": [
+        "05100"
+      ],
+      "Quinua": [
+        "05160",
+        "05161"
+      ],
+      "Acos Vinchos": [
+        "05180",
+        "05181"
+      ],
+      "Tambillo": [
+        "05300",
+        "05301"
+      ],
+      "Acocro": [
+        "05305",
+        "05306"
+      ],
+      "Ocros": [
+        "05310",
+        "05311"
+      ],
+      "Chiara": [
+        "05315",
+        "05316"
+      ],
+      "Santiago de Pischa": [
+        "05800"
+      ],
+      "San José de Ticllas": [
+        "05805"
+      ],
+      "Socos": [
+        "05810",
+        "05811"
+      ],
+      "Vinchos": [
+        "05815",
+        "05816"
+      ]
+    },
+    "Huanta": {
+      "Iguain": [
+        "05110"
+      ],
+      "Huanta": [
+        "05120",
+        "05121"
+      ],
+      "Luricocha": [
+        "05130",
+        "05131"
+      ],
+      "Santillana": [
+        "05140",
+        "05141"
+      ],
+      "Ayahuanco": [
+        "05150",
+        "05151"
+      ],
+      "Huamanguilla": [
+        "05170",
+        "05171"
+      ],
+      "Silvia": [
+        "05220",
+        "05221"
+      ],
+      "Llochegua": [
+        "05230",
+        "05231"
+      ]
+    },
+    "La Mar": {
+      "Tambo": [
+        "05200",
+        "05201"
+      ],
+      "Ayna": [
+        "05210",
+        "05211"
+      ],
+      "Santa Rosa": [
+        "05240",
+        "05241"
+      ],
+      "San Miguel": [
+        "05250",
+        "05251"
+      ],
+      "Anco": [
+        "05260",
+        "05261"
+      ],
+      "Chungui": [
+        "05270",
+        "05271"
+      ],
+      "Chilcas": [
+        "05280"
+      ],
+      "Luis Carranza": [
+        "05290"
+      ]
+    },
+    "Vilcas Huamán": {
+      "Vischongo": [
+        "05320"
+      ],
+      "Vilcas Huamán": [
+        "05325",
+        "05326"
+      ],
+      "Concepción": [
+        "05330"
+      ],
+      "Saurama": [
+        "05335"
+      ],
+      "Carhuanca": [
+        "05340"
+      ],
+      "Huambalpa": [
+        "05385"
+      ],
+      "Accomarca": [
+        "05390"
+      ],
+      "Independencia": [
+        "05395"
+      ]
+    },
+    "Sucre": {
+      "Belén": [
+        "05345"
+      ],
+      "Chalcos": [
+        "05350"
+      ],
+      "Chilcayoc": [
+        "05355"
+      ],
+      "San Salvador de Quije": [
+        "05360"
+      ],
+      "Paico": [
+        "05365"
+      ],
+      "Santiago de Paucaray": [
+        "05370"
+      ],
+      "Soras": [
+        "05375"
+      ],
+      "San Pedro de Larcay": [
+        "05380"
+      ],
+      "Querobamba": [
+        "05450"
+      ],
+      "Morcolla": [
+        "05455"
+      ],
+      "Huacaña": [
+        "05460"
+      ]
+    },
+    "Cangallo": {
+      "Cangallo": [
+        "05400",
+        "05401"
+      ],
+      "Paras": [
+        "05820",
+        "05821"
+      ],
+      "Totos": [
+        "05830"
+      ],
+      "Chuschi": [
+        "05835",
+        "05836"
+      ],
+      "María Parado de Bellido": [
+        "05840"
+      ],
+      "Los Morochucos": [
+        "05845",
+        "05846"
+      ]
+    },
+    "Víctor Fajardo": {
+      "Alcamenca": [
+        "05405"
+      ],
+      "Huancaraylla": [
+        "05410"
+      ],
+      "Huancapi": [
+        "05415"
+      ],
+      "Cayara": [
+        "05420"
+      ],
+      "Colca": [
+        "05425"
+      ],
+      "Huaya": [
+        "05430"
+      ],
+      "Canaria": [
+        "05435"
+      ],
+      "Apongo": [
+        "05440"
+      ],
+      "Asquipata": [
+        "05445"
+      ],
+      "Vilcanchos": [
+        "05825"
+      ],
+      "Sarhua": [
+        "05850"
+      ],
+      "Huamanquiquia": [
+        "05855"
+      ]
+    },
+    "Lucanas": {
+      "Santa Ana de Huaycahuacho": [
+        "05465"
+      ],
+      "Aucará": [
+        "05470"
+      ],
+      "Cabana": [
+        "05475"
+      ],
+      "Carmen Salcedo": [
+        "05480"
+      ],
+      "Chipao": [
+        "05485"
+      ],
+      "Puquio": [
+        "05500",
+        "05501"
+      ],
+      "San Pedro": [
+        "05510"
+      ],
+      "San Juan": [
+        "05520"
+      ],
+      "Lucanas": [
+        "05530"
+      ],
+      "Leoncio Prado": [
+        "05540"
+      ],
+      "San Cristobal": [
+        "05550"
+      ],
+      "Saisa": [
+        "05560"
+      ],
+      "Santa Lucía": [
+        "05570"
+      ],
+      "Chaviña": [
+        "05600"
+      ],
+      "Sancos": [
+        "05605",
+        "05606"
+      ],
+      "Laramate": [
+        "05740"
+      ],
+      "Llauta": [
+        "05750"
+      ],
+      "Huac Huas": [
+        "05760"
+      ],
+      "Ocoña": [
+        "05770"
+      ],
+      "San Pedro de Palco": [
+        "05780"
+      ],
+      "Otaca": [
+        "05790"
+      ]
+    },
+    "Parinacochas": {
+      "Coracora": [
+        "05610",
+        "05611"
+      ],
+      "Chumpi": [
+        "05615"
+      ],
+      "Pullo": [
+        "05620"
+      ],
+      "Puyusca": [
+        "05625"
+      ],
+      "San Francisco de Ravacayco": [
+        "05680"
+      ],
+      "Pacapausa": [
+        "05685"
+      ],
+      "Upahuacho": [
+        "05690"
+      ],
+      "Coronel Castañeda": [
+        "05695"
+      ]
+    },
+    "Paucar del Sara Sara": {
+      "Sara Sara": [
+        "05630"
+      ],
+      "Pararca": [
+        "05635"
+      ],
+      "Pausa": [
+        "05640"
+      ],
+      "Lampa": [
+        "05645"
+      ],
+      "Marcabamba": [
+        "05650"
+      ],
+      "Colpa": [
+        "05655"
+      ],
+      "Oyolo": [
+        "05660"
+      ],
+      "San José de Ushua": [
+        "05665"
+      ],
+      "Corculla": [
+        "05670"
+      ],
+      "San Javier de Alpabamba": [
+        "05675"
+      ]
+    },
+    "Hunca Sancos": {
+      "Carapo": [
+        "05700"
+      ],
+      "Sancos": [
+        "05710"
+      ],
+      "Santiago de Lucanamarca": [
+        "05720"
+      ],
+      "Sacsamarca": [
+        "05730"
+      ]
+    }
+  },
+  "Cajamarca": {
+    "Cajamarca": {
+      "Cajamarca": [
+        "06000",
+        "06001",
+        "06002",
+        "06003"
+      ],
+      "Los Baños del Inca": [
+        "06000",
+        "06001",
+        "06004"
+      ],
+      "Encañada": [
+        "06200",
+        "06201"
+      ],
+      "Llacanora": [
+        "06300"
+      ],
+      "Namora": [
+        "06305",
+        "06306"
+      ],
+      "Matara": [
+        "06310"
+      ],
+      "Jesús": [
+        "06370",
+        "06371"
+      ],
+      "San Juan": [
+        "06400"
+      ],
+      "Asunción": [
+        "06403",
+        "06405"
+      ],
+      "Cospan": [
+        "06407",
+        "06410"
+      ],
+      "Magdalena": [
+        "06411",
+        "06412"
+      ],
+      "Chetilla": [
+        "06415"
+      ]
+    },
+    "Hualgayoc": {
+      "Hualgayoc": [
+        "06100",
+        "06101"
+      ],
+      "Bambamarca": [
+        "06115",
+        "06116"
+      ],
+      "Chugur": [
+        "06625"
+      ]
+    },
+    "Chota": {
+      "Chota": [
+        "06120",
+        "06121"
+      ],
+      "Conchán": [
+        "06125",
+        "06126"
+      ],
+      "Chiguirip": [
+        "06130"
+      ],
+      "Tacabamba": [
+        "06135",
+        "06136"
+      ],
+      "Anguía": [
+        "06140"
+      ],
+      "Chalamarca": [
+        "06145",
+        "06146"
+      ],
+      "Paccha": [
+        "06150",
+        "06151"
+      ],
+      "Chadín": [
+        "06155"
+      ],
+      "Choropampa": [
+        "06160"
+      ],
+      "Chimban": [
+        "06165"
+      ],
+      "Pion": [
+        "06170"
+      ],
+      "Lajas": [
+        "06600",
+        "06601"
+      ],
+      "Cochabamba": [
+        "06650",
+        "06651"
+      ],
+      "Huambos": [
+        "06653",
+        "06655"
+      ],
+      "Llama": [
+        "06665",
+        "06666"
+      ],
+      "San Juan de Licupis": [
+        "06670"
+      ],
+      "Miracosta": [
+        "06675"
+      ],
+      "Tocmoche": [
+        "06680"
+      ],
+      "Querocoto": [
+        "06683",
+        "06685"
+      ]
+    },
+    "Cutervo": {
+      "La Ramada": [
+        "06175"
+      ],
+      "San Luis de Lucma": [
+        "06180"
+      ],
+      "Querocotillo": [
+        "06690",
+        "06691"
+      ],
+      "Cutervo": [
+        "06700",
+        "06701"
+      ],
+      "Santo Domingo de la Capilla": [
+        "06705",
+        "06706"
+      ],
+      "Callayuc": [
+        "06710",
+        "06711"
+      ],
+      "Santa Cruz": [
+        "06715"
+      ],
+      "Socota": [
+        "06750",
+        "06751"
+      ],
+      "San Andres de Cutervo": [
+        "06755",
+        "06756"
+      ],
+      "Santo Tomas": [
+        "06760",
+        "06761"
+      ],
+      "Pimpingos": [
+        "06765",
+        "06766"
+      ],
+      "San Juan de Cutervo": [
+        "06770"
+      ],
+      "Cujillo": [
+        "06775"
+      ],
+      "Toribio Casanova": [
+        "06780"
+      ],
+      "Choros": [
+        "06785"
+      ]
+    },
+    "Celendín": {
+      "Sucre": [
+        "06205",
+        "06206"
+      ],
+      "Oxamarca": [
+        "06210",
+        "06211"
+      ],
+      "José Galvez": [
+        "06215"
+      ],
+      "Jorge Chávez": [
+        "06220"
+      ],
+      "Celendin": [
+        "06225",
+        "06226"
+      ],
+      "Utco": [
+        "06230"
+      ],
+      "Sorochuco": [
+        "06235",
+        "06236"
+      ],
+      "Huasmin": [
+        "06240",
+        "06241"
+      ],
+      "La Libertad de Pallán": [
+        "06245",
+        "06246"
+      ],
+      "Miguel Iglesias": [
+        "06250"
+      ],
+      "Chumuch": [
+        "06255"
+      ],
+      "Cortegana": [
+        "06260",
+        "06261"
+      ]
+    },
+    "San Marcos": {
+      "Gregorio Pita": [
+        "06315",
+        "06316"
+      ],
+      "Pedro Galvez": [
+        "06320",
+        "06321"
+      ],
+      "Ichocán": [
+        "06325"
+      ],
+      "Chancay": [
+        "06330"
+      ],
+      "Eduardo Villanueva": [
+        "06335"
+      ],
+      "José Manuel Quiroz": [
+        "06360"
+      ],
+      "José Sabogal": [
+        "06365",
+        "06366"
+      ]
+    },
+    "Cajabamba": {
+      "Cachachi": [
+        "06340",
+        "06341"
+      ],
+      "Condebamba": [
+        "06345",
+        "06346"
+      ],
+      "Cajabamba": [
+        "06350",
+        "06351"
+      ],
+      "Sitacocha": [
+        "06355",
+        "06356"
+      ]
+    },
+    "Contumaza": {
+      "Chilete": [
+        "06420"
+      ],
+      "Contumazá": [
+        "06421",
+        "06422"
+      ],
+      "Santa Cruz de Toled": [
+        "06425"
+      ],
+      "Tantarica": [
+        "06430"
+      ],
+      "Guzmango": [
+        "06431"
+      ],
+      "San Benito": [
+        "06435"
+      ],
+      "Yonan": [
+        "06437",
+        "06440"
+      ],
+      "Cupisnique": [
+        "06441"
+      ]
+    },
+    "San Pablo": {
+      "San Bernardino": [
+        "06445"
+      ],
+      "San Luis": [
+        "06450"
+      ],
+      "San Pablo": [
+        "06451",
+        "06452"
+      ],
+      "Tumbaden": [
+        "06490"
+      ]
+    },
+    "San Miguel": {
+      "San Miguel": [
+        "06455",
+        "06456"
+      ],
+      "Calquis": [
+        "06460"
+      ],
+      "El Prado": [
+        "06465"
+      ],
+      "Unión Agua Blanca": [
+        "06470"
+      ],
+      "San Gregorio": [
+        "06475"
+      ],
+      "Llapa": [
+        "06480",
+        "06481"
+      ],
+      "San Silvestre de Cochan": [
+        "06485"
+      ],
+      "Catilluc": [
+        "06495"
+      ],
+      "La Florida": [
+        "06500"
+      ],
+      "Niepos": [
+        "06510"
+      ],
+      "Bolivar": [
+        "06520"
+      ],
+      "Nanchoc": [
+        "06530"
+      ],
+      "Tongod": [
+        "06630"
+      ]
+    },
+    "Santa Cruz": {
+      "Uticyacu": [
+        "06605"
+      ],
+      "Chancaybaños": [
+        "06610"
+      ],
+      "La Esperanza": [
+        "06611"
+      ],
+      "Andabamba": [
+        "06615"
+      ],
+      "Yauyucan": [
+        "06620"
+      ],
+      "Ninabamba": [
+        "06621"
+      ],
+      "Santa Cruz": [
+        "06633",
+        "06635"
+      ],
+      "Saucepampa": [
+        "06640"
+      ],
+      "Pulan": [
+        "06641"
+      ],
+      "Catache": [
+        "06644",
+        "06645"
+      ],
+      "Sexi": [
+        "06660"
+      ]
+    },
+    "Jaen": {
+      "Colasay": [
+        "06720",
+        "06721"
+      ],
+      "Pucará": [
+        "06725",
+        "06726"
+      ],
+      "Pomahuaca": [
+        "06730",
+        "06731"
+      ],
+      "San Felipe": [
+        "06735",
+        "06736"
+      ],
+      "Sallique": [
+        "06740",
+        "06741"
+      ],
+      "Chontali": [
+        "06745",
+        "06746"
+      ],
+      "Jaen": [
+        "06800",
+        "06801"
+      ],
+      "Las Pirias": [
+        "06805"
+      ],
+      "Huabal": [
+        "06810",
+        "06811"
+      ],
+      "Bellavista": [
+        "06815",
+        "06816"
+      ],
+      "Santa Rosa": [
+        "06820",
+        "06821"
+      ],
+      "San José del Alto": [
+        "06830",
+        "06831"
+      ]
+    },
+    "San Ignacio": {
+      "La Coipa": [
+        "06825",
+        "06826"
+      ],
+      "Tabaconas": [
+        "06835",
+        "06836"
+      ],
+      "Chirinos": [
+        "06840",
+        "06841"
+      ],
+      "San Ignacio": [
+        "06845",
+        "06846"
+      ],
+      "Namballe": [
+        "06850",
+        "06851"
+      ],
+      "San José de Lourdes": [
+        "06855",
+        "06856"
+      ],
+      "Huarango": [
+        "06860",
+        "06861"
+      ]
+    }
+  },
+  "Callao": {
+    "Callao": {
+      "Bellavista": [
+        "07001",
+        "07006",
+        "07011",
+        "07016",
+        "07021"
+      ],
+      "Callao": [
+        "07001",
+        "07006",
+        "07021",
+        "07026",
+        "07031",
+        "07036",
+        "07041",
+        "07046"
+      ],
+      "Carmen de la Legua Reynoso": [
+        "07006"
+      ],
+      "La Perla": [
+        "07011",
+        "07016"
+      ],
+      "La Punta": [
+        "07021"
+      ],
+      "Ventanilla": [
+        "07046",
+        "07051",
+        "07056",
+        "07061",
+        "07066",
+        "07071",
+        "07076"
+      ]
+    }
+  },
+  "Cuzco": {
+    "Cuzco": {
+      "Ccorca": [
+        "08000",
+        "08051"
+      ],
+      "Cusco": [
+        "08000",
+        "08001",
+        "08002",
+        "08003"
+      ],
+      "San Jerónimo": [
+        "08000",
+        "08006"
+      ],
+      "San Sebastian": [
+        "08000",
+        "08004",
+        "08006"
+      ],
+      "Santiago": [
+        "08000",
+        "08001",
+        "08006",
+        "08007"
+      ],
+      "Wanchaq": [
+        "08002",
+        "08003",
+        "08004",
+        "08006",
+        "08007"
+      ],
+      "Saylla": [
+        "08200"
+      ],
+      "Poroy": [
+        "08600"
+      ]
+    },
+    "Calca": {
+      "Taray": [
+        "08100"
+      ],
+      "Pisac": [
+        "08105",
+        "08106"
+      ],
+      "Coya": [
+        "08110"
+      ],
+      "Lamay": [
+        "08115",
+        "08116"
+      ],
+      "Calca": [
+        "08120",
+        "08121"
+      ],
+      "Lares": [
+        "08125",
+        "08126"
+      ],
+      "San Salvador": [
+        "08150",
+        "08151"
+      ],
+      "Yanatile": [
+        "08770",
+        "08771"
+      ]
+    },
+    "Paucartambo": {
+      "Colquepata": [
+        "08130",
+        "08131"
+      ],
+      "Paucartambo": [
+        "08135",
+        "08136"
+      ],
+      "Challabamba": [
+        "08140",
+        "08141"
+      ],
+      "Kosñipata": [
+        "08145"
+      ],
+      "Caicay": [
+        "08155"
+      ],
+      "Huancarani": [
+        "08160",
+        "08161"
+      ]
+    },
+    "Quispicanchi": {
+      "Ccatca": [
+        "08165",
+        "08166"
+      ],
+      "Ocongate": [
+        "08170",
+        "08171"
+      ],
+      "Ccarhuayo": [
+        "08175"
+      ],
+      "Marcapata": [
+        "08180"
+      ],
+      "Camanti": [
+        "08185"
+      ],
+      "Oropesa": [
+        "08204",
+        "08205"
+      ],
+      "Lucre": [
+        "08207"
+      ],
+      "Andahuaylillas": [
+        "08210"
+      ],
+      "Huaro": [
+        "08215"
+      ],
+      "Urcos": [
+        "08219",
+        "08220"
+      ],
+      "Quiquijana": [
+        "08222",
+        "08223"
+      ],
+      "Cusipata": [
+        "08225"
+      ]
+    },
+    "Canchis": {
+      "Checacupe": [
+        "08230"
+      ],
+      "Pitumarca": [
+        "08234",
+        "08235"
+      ],
+      "Combapata": [
+        "08238",
+        "08240"
+      ],
+      "Tinta": [
+        "08242",
+        "08243"
+      ],
+      "San Pedro": [
+        "08245"
+      ],
+      "San Pablo": [
+        "08250"
+      ],
+      "Sicuani": [
+        "08254",
+        "08255"
+      ],
+      "Marangani": [
+        "08257",
+        "08258"
+      ]
+    },
+    "Canas": {
+      "Pampamarca": [
+        "08260"
+      ],
+      "Yanaoca": [
+        "08264",
+        "08265"
+      ],
+      "Kunturkannki": [
+        "08267",
+        "08268"
+      ],
+      "Langui": [
+        "08270"
+      ],
+      "Layo": [
+        "08274",
+        "08275"
+      ],
+      "Checca": [
+        "08277",
+        "08278"
+      ],
+      "Quehue": [
+        "08280"
+      ],
+      "Tupac Amaru": [
+        "08285"
+      ]
+    },
+    "Acomayo": {
+      "Mosoc Llacta": [
+        "08290"
+      ],
+      "Acopia": [
+        "08295"
+      ],
+      "Rondocan": [
+        "08525"
+      ],
+      "Acos": [
+        "08545"
+      ],
+      "Acomayo": [
+        "08550",
+        "08551"
+      ],
+      "Sangarara": [
+        "08555"
+      ],
+      "Pomacanchi": [
+        "08560",
+        "08561"
+      ]
+    },
+    "Espinar": {
+      "Espinar": [
+        "08300",
+        "08301"
+      ],
+      "Pichigua": [
+        "08310"
+      ],
+      "Pallpata": [
+        "08320",
+        "08321"
+      ],
+      "Alto Pichigua": [
+        "08330"
+      ],
+      "Ocoruro": [
+        "08340"
+      ],
+      "Condoroma": [
+        "08350"
+      ],
+      "Suyckutambo": [
+        "08360"
+      ],
+      "Coporaque": [
+        "08370",
+        "08371"
+      ]
+    },
+    "Chumbivilcas": {
+      "Quiñota": [
+        "08400"
+      ],
+      "Llusco": [
+        "08410",
+        "08411"
+      ],
+      "Santo Tomas": [
+        "08420",
+        "08421"
+      ],
+      "Velille": [
+        "08430",
+        "08431"
+      ],
+      "Colquemarca": [
+        "08440",
+        "08441"
+      ],
+      "Capacmarca": [
+        "08450"
+      ],
+      "Chamaca": [
+        "08460",
+        "08461"
+      ],
+      "Livitaca": [
+        "08470",
+        "08471"
+      ]
+    },
+    "Paruro": {
+      "Huanoquite": [
+        "08500",
+        "08501"
+      ],
+      "Ccapi": [
+        "08505"
+      ],
+      "Yaurisque": [
+        "08510"
+      ],
+      "Paccaritambo": [
+        "08515"
+      ],
+      "Paruro": [
+        "08520"
+      ],
+      "Colcha": [
+        "08530"
+      ],
+      "Accha": [
+        "08535"
+      ],
+      "Pillpinto": [
+        "08540"
+      ],
+      "Omacha": [
+        "08565",
+        "08566"
+      ]
+    },
+    "Anta": {
+      "Cachimayo": [
+        "08605"
+      ],
+      "Pucyura": [
+        "08610"
+      ],
+      "Anta": [
+        "08615",
+        "08616"
+      ],
+      "Chinchaypujio": [
+        "08620"
+      ],
+      "Huarocondo": [
+        "08625",
+        "08626"
+      ],
+      "Zurite": [
+        "08630"
+      ],
+      "Ancahuasi": [
+        "08635",
+        "08636"
+      ],
+      "Limatambo": [
+        "08640",
+        "08641"
+      ],
+      "Mollepata": [
+        "08645"
+      ]
+    },
+    "Urubamba": {
+      "Chinchero": [
+        "08650",
+        "08651"
+      ],
+      "Maras": [
+        "08655",
+        "08656"
+      ],
+      "Urubamba": [
+        "08660",
+        "08661"
+      ],
+      "Yucay": [
+        "08665"
+      ],
+      "Huayllabamba": [
+        "08670"
+      ],
+      "Ollantaytambo": [
+        "08675",
+        "08676"
+      ],
+      "Machupicchu": [
+        "08680",
+        "08681"
+      ]
+    },
+    "La Convención": {
+      "Huayopata": [
+        "08700",
+        "08701"
+      ],
+      "Santa Teresa": [
+        "08710",
+        "08711"
+      ],
+      "Vilcabamba": [
+        "08720",
+        "08721"
+      ],
+      "Maranura": [
+        "08730",
+        "08731"
+      ],
+      "Santa Ana": [
+        "08740",
+        "08741"
+      ],
+      "Echarate": [
+        "08750",
+        "08751"
+      ],
+      "Quellouno": [
+        "08760",
+        "08761"
+      ],
+      "Ocobamba": [
+        "08780",
+        "08781"
+      ],
+      "Kimbiri": [
+        "08800",
+        "08801"
+      ],
+      "Pichari": [
+        "08850",
+        "08851"
+      ]
+    }
+  },
+  "Huancavelica": {
+    "Huancavelica": {
+      "Ascensión": [
+        "09000",
+        "09001"
+      ],
+      "Huancavelíca": [
+        "09000",
+        "09001"
+      ],
+      "Acoria": [
+        "09100",
+        "09101"
+      ],
+      "Palca": [
+        "09105"
+      ],
+      "Huando": [
+        "09110",
+        "09111"
+      ],
+      "Izcuchaca": [
+        "09115"
+      ],
+      "Mariscal Cáceres": [
+        "09120"
+      ],
+      "Yauli": [
+        "09300",
+        "09301"
+      ],
+      "Huachocolpa": [
+        "09510"
+      ],
+      "Acobambilla": [
+        "09800"
+      ],
+      "Manta": [
+        "09810"
+      ],
+      "Vilca": [
+        "09820"
+      ],
+      "Moya": [
+        "09830"
+      ],
+      "Huayllahuara": [
+        "09840"
+      ],
+      "Pilchaca": [
+        "09850"
+      ],
+      "Cuenca": [
+        "09860"
+      ],
+      "Conayca": [
+        "09870"
+      ],
+      "Laría": [
+        "09880"
+      ],
+      "Nuevo Occoro": [
+        "09890"
+      ]
+    },
+    "Tayacaja": {
+      "Acostambo": [
+        "09125"
+      ],
+      "Ñahuimpuquio": [
+        "09130"
+      ],
+      "Pazos": [
+        "09135",
+        "09136"
+      ],
+      "Huaribamba": [
+        "09140",
+        "09141"
+      ],
+      "Acraquia": [
+        "09145",
+        "09146"
+      ],
+      "Ahuaycha": [
+        "09150",
+        "09151"
+      ],
+      "Pampas": [
+        "09155",
+        "09156"
+      ],
+      "Daniel Hernandez": [
+        "09160",
+        "09161"
+      ],
+      "Salcabamba": [
+        "09200",
+        "09201"
+      ],
+      "Quishuar": [
+        "09210"
+      ],
+      "Salcahuasi": [
+        "09220"
+      ],
+      "San Marcos de Rocchac": [
+        "09230"
+      ],
+      "Surcubamba": [
+        "09240",
+        "09241"
+      ],
+      "Huachocolpa": [
+        "09250"
+      ],
+      "Tintay Puncu": [
+        "09260",
+        "09261"
+      ],
+      "Colcabamba": [
+        "09320",
+        "09321"
+      ]
+    },
+    "Acobamba": {
+      "Paucara": [
+        "09305",
+        "09306"
+      ],
+      "Andabamba": [
+        "09310"
+      ],
+      "Rosario": [
+        "09370",
+        "09371"
+      ],
+      "Anta": [
+        "09375",
+        "09376"
+      ],
+      "Acobamba": [
+        "09380",
+        "09381"
+      ],
+      "Pomacocha": [
+        "09385"
+      ],
+      "Caja": [
+        "09390"
+      ],
+      "Marcas": [
+        "09395"
+      ]
+    },
+    "Churcampa": {
+      "Anco": [
+        "09315",
+        "09316"
+      ],
+      "Chinchihuasi": [
+        "09325"
+      ],
+      "Paucarbamba": [
+        "09330",
+        "09331"
+      ],
+      "Pachamarca": [
+        "09335"
+      ],
+      "San Pedro de Coris": [
+        "09340"
+      ],
+      "Churcampa": [
+        "09345",
+        "09346"
+      ],
+      "Locroja": [
+        "09350"
+      ],
+      "La Merced": [
+        "09355"
+      ],
+      "San Miguel de Mayocc": [
+        "09360"
+      ],
+      "El Carmen": [
+        "09365"
+      ]
+    },
+    "Angaraes": {
+      "Ccochaccasa": [
+        "09400"
+      ],
+      "Lircay": [
+        "09405",
+        "09406"
+      ],
+      "Anchonga": [
+        "09415",
+        "09416"
+      ],
+      "Huayllay Grande": [
+        "09420"
+      ],
+      "Callanmarca": [
+        "09425"
+      ],
+      "Huanca Huanca": [
+        "09430"
+      ],
+      "Congalla": [
+        "09435"
+      ],
+      "Secclla": [
+        "09440"
+      ],
+      "Julcamarca": [
+        "09445"
+      ],
+      "Chincho": [
+        "09450"
+      ],
+      "San Antonio de Antaparco": [
+        "09455"
+      ],
+      "Santo Tomas de Pata": [
+        "09460"
+      ]
+    },
+    "Castrovirreyna": {
+      "Santa Ana": [
+        "09500"
+      ],
+      "Arma": [
+        "09700"
+      ],
+      "Huachos": [
+        "09705"
+      ],
+      "Capillas": [
+        "09710"
+      ],
+      "Mollepampa": [
+        "09715"
+      ],
+      "Cocas": [
+        "09720"
+      ],
+      "Castrovirreyna": [
+        "09725"
+      ],
+      "Ticrapo": [
+        "09730"
+      ],
+      "Aurahua": [
+        "09735"
+      ],
+      "Chupamarca": [
+        "09740"
+      ],
+      "Tantara": [
+        "09745"
+      ],
+      "Huamatambo": [
+        "09750"
+      ],
+      "San Juan": [
+        "09755"
+      ]
+    },
+    "Huaytara": {
+      "Pilpichaca": [
+        "09520"
+      ],
+      "Huaytará": [
+        "09600"
+      ],
+      "Ayaví": [
+        "09605"
+      ],
+      "Tambo": [
+        "09610"
+      ],
+      "Santo Domingo de Capillas": [
+        "09615"
+      ],
+      "San Francisco de Sangayaico": [
+        "09620"
+      ],
+      "Santiago de Chocorvos": [
+        "09625"
+      ],
+      "San isidro": [
+        "09630"
+      ],
+      "Cordova": [
+        "09635"
+      ],
+      "Laramarca": [
+        "09640"
+      ],
+      "Querco": [
+        "09645"
+      ],
+      "Ocoyo": [
+        "09650"
+      ],
+      "Santiago de Quirahuara": [
+        "09655"
+      ],
+      "Huayacundo Arma": [
+        "09660"
+      ],
+      "Quito Arma": [
+        "09665"
+      ],
+      "San Antonio de Cusicancha": [
+        "09670"
+      ]
+    }
+  },
+  "Huanuco": {
+    "Huanuco": {
+      "Amarilis": [
+        "10000",
+        "10002",
+        "10003"
+      ],
+      "Huanuco": [
+        "10000",
+        "10001",
+        "10003"
+      ],
+      "Pillco Marca": [
+        "10000",
+        "10003"
+      ],
+      "San Francisco de Cayran": [
+        "10000",
+        "10031"
+      ],
+      "Santa María del Valle": [
+        "10100",
+        "10101"
+      ],
+      "Chinchao": [
+        "10110",
+        "10111"
+      ],
+      "Churubamba": [
+        "10180",
+        "10181"
+      ],
+      "Yurumayo": [
+        "10500"
+      ],
+      "San Pedro de Chaulan": [
+        "10510",
+        "10511"
+      ],
+      "Margos": [
+        "10520",
+        "10521"
+      ],
+      "Quisqui": [
+        "10700",
+        "10701"
+      ]
+    },
+    "Leoncio Prado": {
+      "Mariano Damaso Beraún": [
+        "10120",
+        "10121"
+      ],
+      "Rupa Rupa": [
+        "10130",
+        "10131"
+      ],
+      "Luyando": [
+        "10140",
+        "10141"
+      ],
+      "Daniel Alomias Robles": [
+        "10150",
+        "10151"
+      ],
+      "Hermilio Valdizán": [
+        "10160"
+      ],
+      "José Crespo y Castillo": [
+        "10170",
+        "10171"
+      ]
+    },
+    "Pachitea": {
+      "Umari": [
+        "10200",
+        "10201"
+      ],
+      "Molino": [
+        "10210",
+        "10211"
+      ],
+      "Panao": [
+        "10220",
+        "10221"
+      ],
+      "Chaglla": [
+        "10230",
+        "10231"
+      ]
+    },
+    "Puerto Inca": {
+      "Codo del Pozuzo": [
+        "10240",
+        "10241"
+      ],
+      "Yuyapichis": [
+        "10250",
+        "10251"
+      ],
+      "Puerto Inca": [
+        "10260",
+        "10261"
+      ],
+      "Tournavista": [
+        "10300",
+        "10301"
+      ],
+      "Honoría": [
+        "10350",
+        "10351"
+      ]
+    },
+    "Ambo": {
+      "Conchamarca": [
+        "10400",
+        "10401"
+      ],
+      "Tomay Kichwa": [
+        "10410"
+      ],
+      "Ambo": [
+        "10420",
+        "10421"
+      ],
+      "San Rafael": [
+        "10430",
+        "10431"
+      ],
+      "Huacar": [
+        "10440",
+        "10441"
+      ],
+      "San Francisco": [
+        "10450"
+      ],
+      "Cayna": [
+        "10460"
+      ],
+      "Colpas": [
+        "10470"
+      ]
+    },
+    "Lauricocha": {
+      "Jesús": [
+        "10530",
+        "10531"
+      ],
+      "San Miguel de Cauri": [
+        "10540",
+        "10541"
+      ],
+      "Jivia": [
+        "10550"
+      ],
+      "San Francisco de Asís": [
+        "10560"
+      ],
+      "Rondos": [
+        "10626",
+        "10630"
+      ],
+      "Baños": [
+        "10631",
+        "10640"
+      ],
+      "Queropalca": [
+        "10650"
+      ]
+    },
+    "Yarowilca": {
+      "Choras": [
+        "10570"
+      ],
+      "Chacabamba": [
+        "10580"
+      ],
+      "Cahuac": [
+        "10590"
+      ],
+      "Jacas Chico": [
+        "10705"
+      ],
+      "Chavinillo": [
+        "10710",
+        "10711"
+      ],
+      "Obas": [
+        "10720",
+        "10721"
+      ],
+      "Aparicio Pomares": [
+        "10730",
+        "10731"
+      ],
+      "Pampamarca": [
+        "10750"
+      ]
+    },
+    "Dos de Mayo": {
+      "Pachas": [
+        "10600",
+        "10601"
+      ],
+      "Shunqui": [
+        "10605"
+      ],
+      "Ripan": [
+        "10610",
+        "10611"
+      ],
+      "Sillapata": [
+        "10615"
+      ],
+      "La Unión": [
+        "10620",
+        "10621"
+      ],
+      "Chuquis": [
+        "10740",
+        "10741"
+      ],
+      "Yanas": [
+        "10745"
+      ],
+      "Quivilla": [
+        "10755"
+      ],
+      "Marias": [
+        "10760",
+        "10761"
+      ]
+    },
+    "Huamalies": {
+      "Llata": [
+        "10641",
+        "10660"
+      ],
+      "Puños": [
+        "10670"
+      ],
+      "Miraflores": [
+        "10680"
+      ],
+      "Punchao": [
+        "10685"
+      ],
+      "Singa": [
+        "10690"
+      ],
+      "Jacas Grande": [
+        "10770",
+        "10771"
+      ],
+      "Chavín de Pariarca": [
+        "10775"
+      ],
+      "Tantamayo": [
+        "10780"
+      ],
+      "Monzón": [
+        "10800",
+        "10801"
+      ],
+      "Jircan": [
+        "10810"
+      ],
+      "Arancay": [
+        "10820"
+      ]
+    },
+    "Huacaybamba": {
+      "Cochabamba": [
+        "10830"
+      ],
+      "Huacaybamba": [
+        "10840",
+        "10841"
+      ],
+      "Pinra": [
+        "10850",
+        "10851"
+      ],
+      "Canchabamba": [
+        "10860"
+      ]
+    },
+    "Marañon": {
+      "San Buenaventura": [
+        "10870"
+      ],
+      "Huacrachuco": [
+        "10880",
+        "10881"
+      ],
+      "Cholón": [
+        "10890",
+        "10891"
+      ]
+    }
+  },
+  "Ica": {
+    "Ica": {
+      "Ica": [
+        "11000",
+        "11001",
+        "11002",
+        "11004"
+      ],
+      "La Tinguiña": [
+        "11000",
+        "11002",
+        "11003"
+      ],
+      "Los Aquijes": [
+        "11000",
+        "11061"
+      ],
+      "Parcona": [
+        "11000",
+        "11001",
+        "11003"
+      ],
+      "San Juan Bautista": [
+        "11000",
+        "11002"
+      ],
+      "Subtanjalla": [
+        "11000",
+        "11004"
+      ],
+      "San José de los Molinos": [
+        "11100",
+        "11101"
+      ],
+      "Pueblo Nuevo": [
+        "11200"
+      ],
+      "Tate": [
+        "11210"
+      ],
+      "Pachacutec": [
+        "11220",
+        "11221"
+      ],
+      "Santiago": [
+        "11230",
+        "11231"
+      ],
+      "Ocucaje": [
+        "11240"
+      ],
+      "Yauca del Rosario": [
+        "11260"
+      ],
+      "Salas": [
+        "11500",
+        "11501"
+      ]
+    },
+    "Palpa": {
+      "Santa Cruz": [
+        "11300"
+      ],
+      "Tibillo": [
+        "11310"
+      ],
+      "Río Grande": [
+        "11320"
+      ],
+      "Palpa": [
+        "11330",
+        "11331"
+      ],
+      "Llipata": [
+        "11360"
+      ]
+    },
+    "Nazca": {
+      "Changuillo": [
+        "11340"
+      ],
+      "El Ingenio": [
+        "11350"
+      ],
+      "Nazca": [
+        "11400",
+        "11401"
+      ],
+      "Vista Alegre": [
+        "11400",
+        "11401"
+      ],
+      "Marcona": [
+        "11420",
+        "11421"
+      ]
+    },
+    "Pisco": {
+      "Paracas": [
+        "11550"
+      ],
+      "San Andres": [
+        "11600",
+        "11601"
+      ],
+      "Pisco": [
+        "11600",
+        "11601"
+      ],
+      "Tupac Amaru Inca": [
+        "11620",
+        "11621"
+      ],
+      "San Clemente": [
+        "11630",
+        "11631"
+      ],
+      "Independencia": [
+        "11640",
+        "11641"
+      ],
+      "Humay": [
+        "11650",
+        "11651"
+      ],
+      "Huancano": [
+        "11660"
+      ]
+    },
+    "Chincha": {
+      "Grocio Prado": [
+        "11700",
+        "11703"
+      ],
+      "Sunampe": [
+        "11700",
+        "11702"
+      ],
+      "Chincha Alta": [
+        "11701",
+        "11702",
+        "11703"
+      ],
+      "Pueblo Nuevo": [
+        "11701",
+        "11703"
+      ],
+      "El Carmen": [
+        "11740",
+        "11741"
+      ],
+      "Chincha Baja": [
+        "11750",
+        "11751"
+      ],
+      "Tambo de Mora": [
+        "11760"
+      ],
+      "Alto Larán": [
+        "11770",
+        "11771"
+      ],
+      "Chavín": [
+        "11780"
+      ],
+      "San Pedro de Huacarpana": [
+        "11800"
+      ],
+      "San Juan de Yanac": [
+        "11850"
+      ]
+    }
+  },
+  "Junín": {
+    "Huancayo": {
+      "Huancayo": [
+        "12000",
+        "12001",
+        "12002",
+        "12003",
+        "12004"
+      ],
+      "Huancan": [
+        "12000",
+        "12051"
+      ],
+      "Chilca": [
+        "12000",
+        "12001",
+        "12002",
+        "12003",
+        "12051"
+      ],
+      "El Tambo": [
+        "12000",
+        "12004",
+        "12006",
+        "12007"
+      ],
+      "Pilcomayo": [
+        "12006"
+      ],
+      "San Agustín": [
+        "12100",
+        "12101"
+      ],
+      "Hualhuas": [
+        "12105"
+      ],
+      "Saño": [
+        "12110"
+      ],
+      "San Jerónimo de Tunán": [
+        "12115",
+        "12116"
+      ],
+      "Quilcas": [
+        "12120"
+      ],
+      "Quichuay": [
+        "12205"
+      ],
+      "Ingenio": [
+        "12210"
+      ],
+      "San Domingo de Acobamba": [
+        "12240",
+        "12241"
+      ],
+      "Pariahuanca": [
+        "12245",
+        "12246"
+      ],
+      "Sapallanca": [
+        "12400",
+        "12401"
+      ],
+      "Pucará": [
+        "12404",
+        "12405"
+      ],
+      "Huayucachi": [
+        "12408",
+        "12410"
+      ],
+      "Viques": [
+        "12415"
+      ],
+      "Huacrapuquio": [
+        "12419"
+      ],
+      "Cullhuas": [
+        "12420"
+      ],
+      "Chupuro": [
+        "12435"
+      ],
+      "Colca": [
+        "12436"
+      ],
+      "Chacapampa": [
+        "12440"
+      ],
+      "Carhuacallanga": [
+        "12442"
+      ],
+      "Huasicancha": [
+        "12445"
+      ],
+      "Chongos Alto": [
+        "12450"
+      ],
+      "Chicche": [
+        "12451"
+      ],
+      "Sicaya": [
+        "12500",
+        "12501"
+      ]
+    },
+    "Concepción": {
+      "Concepción": [
+        "12125",
+        "12126"
+      ],
+      "Nueve de Julio": [
+        "12130"
+      ],
+      "Matahuasi": [
+        "12135",
+        "12136"
+      ],
+      "Santa Rosa de Ocopa": [
+        "12200"
+      ],
+      "Heroinas Toledo": [
+        "12215"
+      ],
+      "Comas": [
+        "12220",
+        "12221"
+      ],
+      "Cochas": [
+        "12225"
+      ],
+      "Mariscal Castilla": [
+        "12230"
+      ],
+      "Andamarca": [
+        "12235",
+        "12236"
+      ],
+      "Manzanares": [
+        "12485"
+      ],
+      "Chambará": [
+        "12490"
+      ],
+      "San José de Quero": [
+        "12495",
+        "12496"
+      ],
+      "Orcotuna": [
+        "12504"
+      ],
+      "Mito": [
+        "12505"
+      ],
+      "Aco": [
+        "12510"
+      ]
+    },
+    "Jauja": {
+      "Apata": [
+        "12140"
+      ],
+      "San Lorenzo": [
+        "12145"
+      ],
+      "El Mantaro": [
+        "12150"
+      ],
+      "Huamalí": [
+        "12155"
+      ],
+      "Ataura": [
+        "12160"
+      ],
+      "Masma": [
+        "12165"
+      ],
+      "Masma Chicche": [
+        "12170"
+      ],
+      "Julcán": [
+        "12175"
+      ],
+      "Molinos": [
+        "12180"
+      ],
+      "Sincos": [
+        "12513"
+      ],
+      "Leonor Ordoñez": [
+        "12515"
+      ],
+      "Muqui": [
+        "12520"
+      ],
+      "Muquiyauyo": [
+        "12525"
+      ],
+      "Huaripampa": [
+        "12530"
+      ],
+      "Parco": [
+        "12540"
+      ],
+      "Llocllapampa": [
+        "12545"
+      ],
+      "Curicaca": [
+        "12550"
+      ],
+      "Canchayllo": [
+        "12555"
+      ],
+      "Paccha": [
+        "12585"
+      ],
+      "Sausa": [
+        "12600",
+        "12601"
+      ],
+      "Yauyos": [
+        "12600",
+        "12601"
+      ],
+      "Jauja": [
+        "12601"
+      ],
+      "Huertas": [
+        "12615"
+      ],
+      "Acolla": [
+        "12620",
+        "12621"
+      ],
+      "Marco": [
+        "12625"
+      ],
+      "Janjaillo": [
+        "12630"
+      ],
+      "Pomacancha": [
+        "12635"
+      ],
+      "Tunan Marca": [
+        "12640"
+      ],
+      "Pancan": [
+        "12800"
+      ],
+      "San Pedro de Chunán": [
+        "12805"
+      ],
+      "Paca": [
+        "12810"
+      ],
+      "Yauli": [
+        "12815"
+      ],
+      "RIicran": [
+        "12820"
+      ],
+      "Monobamba": [
+        "12850"
+      ]
+    },
+    "Satipo": {
+      "Pampa Hermosa": [
+        "12250",
+        "12251"
+      ],
+      "Coviriali": [
+        "12255",
+        "12256"
+      ],
+      "Satipo": [
+        "12260",
+        "12261"
+      ],
+      "Mazamari": [
+        "12300",
+        "12301"
+      ],
+      "Llaylla": [
+        "12310",
+        "12311"
+      ],
+      "Pangoa": [
+        "12320",
+        "12321"
+      ],
+      "Río Tambo": [
+        "12330",
+        "12331"
+      ],
+      "Río Negro": [
+        "12875",
+        "12876"
+      ]
+    },
+    "Chupaca": {
+      "Huamancaca Chico": [
+        "12425"
+      ],
+      "Tres de Diciembre": [
+        "12428"
+      ],
+      "Chongos Bajo": [
+        "12430"
+      ],
+      "Chupaca": [
+        "12455",
+        "12456"
+      ],
+      "San Juan de Yscos": [
+        "12460"
+      ],
+      "Ahuac": [
+        "12465",
+        "12466"
+      ],
+      "Yanacancha": [
+        "12470"
+      ],
+      "San Juan de Jarpa": [
+        "12475"
+      ],
+      "Huachac": [
+        "12480"
+      ]
+    },
+    "Yauli": {
+      "Paccha": [
+        "12535"
+      ],
+      "Chacapalpa": [
+        "12560"
+      ],
+      "Huay Huay": [
+        "12565"
+      ],
+      "Suitucancha": [
+        "12570"
+      ],
+      "La Oroya": [
+        "12575",
+        "12576"
+      ],
+      "Santa Rosa de Sacco": [
+        "12575",
+        "12576"
+      ],
+      "Yauli": [
+        "12590",
+        "12591"
+      ],
+      "Morococha": [
+        "12595",
+        "12596"
+      ],
+      "Santa Barbara de Carhuacayan": [
+        "12770"
+      ],
+      "Marcapomacocha": [
+        "12780"
+      ]
+    },
+    "Tarma": {
+      "Huaricolca": [
+        "12645"
+      ],
+      "Tarma": [
+        "12650",
+        "12651"
+      ],
+      "La Unión": [
+        "12655"
+      ],
+      "Acobamba": [
+        "12700",
+        "12701"
+      ],
+      "Palcamayo": [
+        "12710",
+        "12711"
+      ],
+      "San Pedro de Cajas": [
+        "12720",
+        "12721"
+      ],
+      "Tapo": [
+        "12825",
+        "12826"
+      ],
+      "Palca": [
+        "12830",
+        "12831"
+      ],
+      "Huasahuasi": [
+        "12835",
+        "12836"
+      ]
+    },
+    "Junín": {
+      "Junín": [
+        "12730",
+        "12731"
+      ],
+      "Carhuamayo": [
+        "12740",
+        "12741"
+      ],
+      "Ulcumayo": [
+        "12750",
+        "12751"
+      ],
+      "Ondores": [
+        "12760"
+      ]
+    },
+    "Chanchamayo": {
+      "San Ramón": [
+        "12840",
+        "12841"
+      ],
+      "Vitoc": [
+        "12845"
+      ],
+      "Chanchamayo": [
+        "12855",
+        "12856"
+      ],
+      "San Luis de Shuaro": [
+        "12860",
+        "12861"
+      ],
+      "Pichanaqui": [
+        "12865",
+        "12866"
+      ],
+      "Perené": [
+        "12865",
+        "12867"
+      ]
+    }
+  },
+  "La Libertad": {
+    "Trujillo": {
+      "Huanchaco": [
+        "13000",
+        "13011",
+        "13014"
+      ],
+      "Trujillo": [
+        "13001",
+        "13006",
+        "13007",
+        "13008",
+        "13011"
+      ],
+      "El Porvenir": [
+        "13002",
+        "13003",
+        "13004"
+      ],
+      "Florencia de Mora": [
+        "13002",
+        "13003"
+      ],
+      "La Esperanza": [
+        "13002",
+        "13012",
+        "13013",
+        "13014"
+      ],
+      "Víctor Larco Herrera": [
+        "13008",
+        "13009"
+      ],
+      "Laredo": [
+        "13100",
+        "13101"
+      ],
+      "Simbal": [
+        "13105"
+      ],
+      "Poroto": [
+        "13125"
+      ],
+      "Moche": [
+        "13600",
+        "13601"
+      ],
+      "Salaverry": [
+        "13610",
+        "13611"
+      ]
+    },
+    "Otuzco": {
+      "Sinsicap": [
+        "13110",
+        "13111"
+      ],
+      "Paranday": [
+        "13115"
+      ],
+      "La Cuesta": [
+        "13120"
+      ],
+      "Salpo": [
+        "13130",
+        "13131"
+      ],
+      "Agallpampa": [
+        "13135",
+        "13136"
+      ],
+      "Mache": [
+        "13175"
+      ],
+      "Otuzco": [
+        "13200",
+        "13201"
+      ],
+      "Charat": [
+        "13210"
+      ],
+      "Usquil": [
+        "13220",
+        "13221"
+      ],
+      "Huaranchal": [
+        "13230",
+        "13231"
+      ]
+    },
+    "Santiago de Chucho": {
+      "Quiruvilca": [
+        "13140",
+        "13141"
+      ],
+      "Santiago de Chuco": [
+        "13145",
+        "13146"
+      ],
+      "Santa Cruz de Chuca": [
+        "13150"
+      ],
+      "Cachicadan": [
+        "13155",
+        "13156"
+      ],
+      "Angasmarca": [
+        "13160",
+        "13161"
+      ],
+      "Mollebamba": [
+        "13165"
+      ],
+      "Mollepata": [
+        "13170"
+      ],
+      "Sitabamba": [
+        "13380"
+      ]
+    },
+    "Julcan": {
+      "Julcán": [
+        "13180",
+        "13181"
+      ],
+      "Calamarca": [
+        "13185",
+        "13186"
+      ],
+      "Huaso": [
+        "13190",
+        "13191"
+      ],
+      "Carabamba": [
+        "13195",
+        "13196"
+      ]
+    },
+    "Gran Chimu": {
+      "Lucma": [
+        "13240",
+        "13241"
+      ],
+      "Sayapullo": [
+        "13250",
+        "13251"
+      ],
+      "Marmot": [
+        "13260"
+      ],
+      "Cascas": [
+        "13780",
+        "13781"
+      ]
+    },
+    "Sanchez Carrión": {
+      "Huamachuco": [
+        "13300",
+        "13301"
+      ],
+      "Sanagorán": [
+        "13310",
+        "13311"
+      ],
+      "Marcabal": [
+        "13320",
+        "13321"
+      ],
+      "Chugay": [
+        "13330",
+        "13331"
+      ],
+      "Cochorco": [
+        "13340",
+        "13341"
+      ],
+      "Sartimbamba": [
+        "13350",
+        "13351"
+      ],
+      "Curgos": [
+        "13360",
+        "13361"
+      ],
+      "Sarín": [
+        "13370",
+        "13371"
+      ]
+    },
+    "Bolivar": {
+      "Bambamarca": [
+        "13400"
+      ],
+      "Condormarca": [
+        "13410"
+      ],
+      "Bolivar": [
+        "13420"
+      ],
+      "Ucuncha": [
+        "13430"
+      ],
+      "Longotea": [
+        "13440"
+      ],
+      "Uchumarca": [
+        "13450"
+      ]
+    },
+    "Pataz": {
+      "Pataz": [
+        "13500",
+        "13501"
+      ],
+      "Pías": [
+        "13505"
+      ],
+      "Parcoy": [
+        "13510",
+        "13511"
+      ],
+      "Buldibuyo": [
+        "13515"
+      ],
+      "Huaylillas": [
+        "13520"
+      ],
+      "Tayabamba": [
+        "13525",
+        "13526"
+      ],
+      "Huancaspata": [
+        "13530",
+        "13531"
+      ],
+      "Santiago de Challas": [
+        "13535"
+      ],
+      "Urpay": [
+        "13540"
+      ],
+      "Taurija": [
+        "13545"
+      ],
+      "Chillia": [
+        "13550",
+        "13551"
+      ],
+      "Huayo": [
+        "13555"
+      ],
+      "Ongón": [
+        "13560"
+      ]
+    },
+    "Viru": {
+      "Virú": [
+        "13620",
+        "13621"
+      ],
+      "Chao": [
+        "13630",
+        "13631"
+      ],
+      "Guadalupito": [
+        "13640",
+        "13641"
+      ]
+    },
+    "Ascope": {
+      "Chicama": [
+        "13700",
+        "13701"
+      ],
+      "Chocope": [
+        "13710",
+        "13711"
+      ],
+      "Paijan": [
+        "13720",
+        "13721"
+      ],
+      "Razuri": [
+        "13730",
+        "13731"
+      ],
+      "Santiago de Cao": [
+        "13740",
+        "13741"
+      ],
+      "Magdalena de Cao": [
+        "13750"
+      ],
+      "Casa Grande": [
+        "13760",
+        "13761"
+      ],
+      "Ascope": [
+        "13770",
+        "13771"
+      ]
+    },
+    "Pacasmayo": {
+      "San Pedro de Lloc": [
+        "13800",
+        "13801"
+      ],
+      "Pacasmayo": [
+        "13810",
+        "13811"
+      ],
+      "Jequetepeque": [
+        "13820"
+      ],
+      "San José": [
+        "13830",
+        "13831"
+      ],
+      "Guadalupe": [
+        "13840",
+        "13841"
+      ]
+    },
+    "Chepen": {
+      "Pueblo Nuevo": [
+        "13850",
+        "13851"
+      ],
+      "Pacanga": [
+        "13860",
+        "13861"
+      ],
+      "Chepén": [
+        "13870",
+        "13871"
+      ]
+    }
+  },
+  "Lambayeque": {
+    "Chiclayo, Lambayeque": {
+      "Pimentel": [
+        "14000"
+      ],
+      "José Leonardo Ortíz": [
+        "14000",
+        "14013"
+      ],
+      "La Victoria": [
+        "14000"
+      ],
+      "Lambayeque": [
+        "14000",
+        "14013"
+      ],
+      "Pomalca": [
+        "14000"
+      ],
+      "San José": [
+        "14000"
+      ]
+    },
+    "Chiclayo": {
+      "Chiclayo": [
+        "14001",
+        "14002",
+        "14004",
+        "14006",
+        "14008",
+        "14009",
+        "14011",
+        "14012"
+      ],
+      "José Leonardo Ortíz": [
+        "14002",
+        "14003",
+        "14004"
+      ],
+      "Pomalca": [
+        "14006"
+      ],
+      "La Victoria": [
+        "14007",
+        "14008"
+      ],
+      "Pimentel": [
+        "14012"
+      ],
+      "Picsi": [
+        "14300",
+        "14301"
+      ],
+      "Tumán": [
+        "14600",
+        "14601"
+      ],
+      "Patapo": [
+        "14610",
+        "14611"
+      ],
+      "Chongoyape": [
+        "14620",
+        "14621"
+      ],
+      "Pucalá": [
+        "14630",
+        "14631"
+      ],
+      "Lagunas": [
+        "14700",
+        "14701"
+      ],
+      "Saña": [
+        "14710",
+        "14711"
+      ],
+      "Cayalti": [
+        "14720",
+        "14721"
+      ],
+      "Nueva Arica": [
+        "14730"
+      ],
+      "Oyotun": [
+        "14740",
+        "14741"
+      ],
+      "Reque": [
+        "14800",
+        "14801"
+      ],
+      "Etén Puerto": [
+        "14810"
+      ],
+      "Etén": [
+        "14820",
+        "14821"
+      ],
+      "Monsefú": [
+        "14830",
+        "14831"
+      ],
+      "Santa Rosa": [
+        "14840",
+        "14841"
+      ]
+    },
+    "Lambayeque": {
+      "San José": [
+        "14051"
+      ],
+      "Mochumi": [
+        "14110",
+        "14111"
+      ],
+      "Tucumé": [
+        "14120",
+        "14121"
+      ],
+      "Illimo": [
+        "14130",
+        "14131"
+      ],
+      "Pacora": [
+        "14140",
+        "14141"
+      ],
+      "Jayanca": [
+        "14150",
+        "14151"
+      ],
+      "Morrope": [
+        "14160",
+        "14161"
+      ],
+      "Motupe": [
+        "14200",
+        "14201"
+      ],
+      "Olmos": [
+        "14210",
+        "14211"
+      ],
+      "Chochope": [
+        "14220"
+      ],
+      "Salas": [
+        "14230",
+        "14231"
+      ]
+    },
+    "Ferreñafe": {
+      "Pueblo Nuevo": [
+        "14310",
+        "14311"
+      ],
+      "Ferreñafe": [
+        "14310",
+        "14311"
+      ],
+      "Manuel Antonio Mesones Muro": [
+        "14330"
+      ],
+      "Pitipo": [
+        "14340",
+        "14341"
+      ],
+      "Incahuasi": [
+        "14400",
+        "14401"
+      ],
+      "Cañaris": [
+        "14500",
+        "14501"
+      ]
+    }
+  },
+  "Lima": {
+    "Lima": {
+      "Lima": [
+        "15001",
+        "15003",
+        "15004",
+        "15006",
+        "15018",
+        "15019",
+        "15046",
+        "15072",
+        "15079",
+        "15081",
+        "15082",
+        "15083",
+        "15088"
+      ],
+      "El Agustino": [
+        "15003",
+        "15004",
+        "15006",
+        "15007",
+        "15008",
+        "15009",
+        "15011",
+        "15018",
+        "15022"
+      ],
+      "Ate": [
+        "15004",
+        "15011",
+        "15012",
+        "15019",
+        "15022",
+        "15023",
+        "15026",
+        "15476",
+        "15479",
+        "15483",
+        "15487",
+        "15491",
+        "15494",
+        "15498"
+      ],
+      "San Luis": [
+        "15004",
+        "15019",
+        "15021",
+        "15022"
+      ],
+      "Santa Anita": [
+        "15007",
+        "15008",
+        "15009",
+        "15011",
+        "15498"
+      ],
+      "La Molina": [
+        "15012",
+        "15023",
+        "15024",
+        "15026"
+      ],
+      "La Victoria": [
+        "15018",
+        "15019",
+        "15033",
+        "15034"
+      ],
+      "San Borja": [
+        "15021",
+        "15034",
+        "15036",
+        "15037"
+      ],
+      "Santiago de Surco": [
+        "15023",
+        "15024",
+        "15037",
+        "15038",
+        "15039",
+        "15047",
+        "15048",
+        "15049",
+        "15054",
+        "15056",
+        "15063",
+        "15064",
+        "15803"
+      ],
+      "San Isidro": [
+        "15036",
+        "15046",
+        "15047",
+        "15072",
+        "15073",
+        "15074",
+        "15076"
+      ],
+      "Surquillo": [
+        "15036",
+        "15037",
+        "15038",
+        "15047",
+        "15048"
+      ],
+      "Jesús María": [
+        "15046",
+        "15072",
+        "15073",
+        "15076",
+        "15083",
+        "15084"
+      ],
+      "Lince": [
+        "15046",
+        "15072",
+        "15073",
+        "15076"
+      ],
+      "Miraflores": [
+        "15046",
+        "15047",
+        "15048",
+        "15073",
+        "15074",
+        "15076"
+      ],
+      "Barranco": [
+        "15047",
+        "15049",
+        "15063"
+      ],
+      "Chorrillos": [
+        "15054",
+        "15056",
+        "15057",
+        "15058",
+        "15063",
+        "15064",
+        "15066",
+        "15067"
+      ],
+      "San Juan de Miraflores": [
+        "15056",
+        "15058",
+        "15801",
+        "15803",
+        "15804",
+        "15806",
+        "15809",
+        "15824",
+        "15828",
+        "15829",
+        "15842"
+      ],
+      "Magdalena del Mar": [
+        "15076",
+        "15086"
+      ],
+      "Breña": [
+        "15082",
+        "15083"
+      ],
+      "Magdalena Vieja": [
+        "15083",
+        "15084",
+        "15086",
+        "15088"
+      ],
+      "San Miguel": [
+        "15084",
+        "15086",
+        "15087",
+        "15088"
+      ],
+      "Rimac": [
+        "15093",
+        "15094",
+        "15096",
+        "15333"
+      ],
+      "San Martin de Porres": [
+        "15101",
+        "15102",
+        "15103",
+        "15106",
+        "15107",
+        "15108",
+        "15109",
+        "15112",
+        "15113"
+      ],
+      "Los Olivos": [
+        "15113",
+        "15301",
+        "15302",
+        "15304",
+        "15306",
+        "15307",
+        "15311",
+        "15314"
+      ],
+      "Puente Piedra": [
+        "15113",
+        "15116",
+        "15117",
+        "15118",
+        "15121",
+        "15122"
+      ],
+      "Carabayllo": [
+        "15121",
+        "15122",
+        "15313",
+        "15316",
+        "15318",
+        "15319",
+        "15320",
+        "15321",
+        "15324"
+      ],
+      "Ancón": [
+        "15123"
+      ],
+      "Santa Rosa": [
+        "15123"
+      ],
+      "Independencia": [
+        "15311",
+        "15328",
+        "15331",
+        "15332",
+        "15333"
+      ],
+      "Comas": [
+        "15311",
+        "15312",
+        "15313",
+        "15314",
+        "15316",
+        "15324",
+        "15326",
+        "15327",
+        "15328",
+        "15332"
+      ],
+      "San Juan de Lurigancho": [
+        "15401",
+        "15404",
+        "15408",
+        "15412",
+        "15416",
+        "15419",
+        "15423",
+        "15427",
+        "15431",
+        "15434",
+        "15438",
+        "15442",
+        "15446",
+        "15449",
+        "15453",
+        "15457"
+      ],
+      "Lurigancho": [
+        "15457",
+        "15461",
+        "15464",
+        "15468",
+        "15472"
+      ],
+      "Chaclacayo": [
+        "15472",
+        "15476"
+      ],
+      "Pachacamac": [
+        "15593",
+        "15594",
+        "15823"
+      ],
+      "Cieneguilla": [
+        "15593",
+        "15594"
+      ],
+      "Villa Maria del Triunfo": [
+        "15803",
+        "15804",
+        "15809",
+        "15811",
+        "15812",
+        "15816",
+        "15817",
+        "15818",
+        "15822",
+        "15824",
+        "15828"
+      ],
+      "Villa el Salvador": [
+        "15816",
+        "15828",
+        "15829",
+        "15831",
+        "15834",
+        "15836",
+        "15837",
+        "15841",
+        "15842"
+      ],
+      "Lurín": [
+        "15822",
+        "15823",
+        "15841",
+        "15842",
+        "15846"
+      ],
+      "Punta Hermosa": [
+        "15845",
+        "15846"
+      ],
+      "Punta Negra": [
+        "15850",
+        "15851"
+      ],
+      "San Bartolo": [
+        "15855",
+        "15856"
+      ],
+      "Santa Maria del Mar": [
+        "15861"
+      ],
+      "Pucusana": [
+        "15865",
+        "15866"
+      ]
+    },
+    "Huaral": {
+      "Aucallama": [
+        "15125",
+        "15126"
+      ],
+      "Chancay": [
+        "15130",
+        "15131"
+      ],
+      "Huaral": [
+        "15200",
+        "15201",
+        "15202"
+      ],
+      "Atavillos Bajo": [
+        "15205"
+      ],
+      "Sumbilca": [
+        "15210"
+      ],
+      "San Miguel de Acos": [
+        "15215"
+      ],
+      "Lampian": [
+        "15220"
+      ],
+      "Veintisiete de Noviembre": [
+        "15221"
+      ],
+      "Atavillos Alto": [
+        "15225"
+      ],
+      "Pacaraos": [
+        "15230"
+      ],
+      "Santa Cruz de Andamarca": [
+        "15235"
+      ],
+      "Ihuari": [
+        "15245"
+      ]
+    },
+    "Huaura": {
+      "Santa María": [
+        "15135",
+        "15137",
+        "15138"
+      ],
+      "Huacho": [
+        "15135",
+        "15136",
+        "15137",
+        "15138"
+      ],
+      "Huaura": [
+        "15135",
+        "15138"
+      ],
+      "Hualmay": [
+        "15137",
+        "15138"
+      ],
+      "Caleta de Carquín": [
+        "15138"
+      ],
+      "Vegueta": [
+        "15157",
+        "15160"
+      ],
+      "Ambar": [
+        "15182"
+      ],
+      "Sayán": [
+        "15237",
+        "15240"
+      ],
+      "Leoncio Prado": [
+        "15246"
+      ],
+      "Paccho": [
+        "15255"
+      ],
+      "Checras": [
+        "15280"
+      ],
+      "Santa Leonor": [
+        "15285"
+      ]
+    },
+    "Barranca": {
+      "Supe Puerto": [
+        "15161",
+        "15162"
+      ],
+      "Supe": [
+        "15161",
+        "15162"
+      ],
+      "Barranca": [
+        "15169",
+        "15170"
+      ],
+      "Pativilca": [
+        "15174",
+        "15175"
+      ],
+      "Paramonga": [
+        "15178",
+        "15180"
+      ]
+    },
+    "Cajatambo": {
+      "Manas": [
+        "15185"
+      ],
+      "Gorgor": [
+        "15190"
+      ],
+      "Huancapón": [
+        "15191"
+      ],
+      "Cajatambo": [
+        "15195"
+      ],
+      "Copa": [
+        "15197"
+      ]
+    },
+    "Oyón": {
+      "Cochamarca": [
+        "15250"
+      ],
+      "Navan": [
+        "15260"
+      ],
+      "Caujul": [
+        "15265"
+      ],
+      "Andajes": [
+        "15266"
+      ],
+      "Pachangara": [
+        "15270"
+      ],
+      "Oyón": [
+        "15274",
+        "15275"
+      ]
+    },
+    "Canta": {
+      "Santa Rosa de Quives": [
+        "15335",
+        "15336"
+      ],
+      "Arahuay": [
+        "15340"
+      ],
+      "Lachaqui": [
+        "15345"
+      ],
+      "San Buenaventura": [
+        "15350"
+      ],
+      "Huamantanga": [
+        "15355"
+      ],
+      "Canta": [
+        "15360"
+      ],
+      "Huaros": [
+        "15365"
+      ]
+    },
+    "Huarochiri": {
+      "Santa Eulalia": [
+        "15500",
+        "15501"
+      ],
+      "Callahuanca": [
+        "15505"
+      ],
+      "San Antonio": [
+        "15510"
+      ],
+      "San Pedro de Casta": [
+        "15515"
+      ],
+      "Huachupampa": [
+        "15516"
+      ],
+      "San Juan de Irís": [
+        "15520"
+      ],
+      "Carampoma": [
+        "15525"
+      ],
+      "Laraos": [
+        "15530"
+      ],
+      "Huanza": [
+        "15535"
+      ],
+      "Ricardo Palma": [
+        "15536",
+        "15537"
+      ],
+      "San Mateo de Otao": [
+        "15540"
+      ],
+      "Santa Cruz de Cocachacra": [
+        "15545"
+      ],
+      "San Bartolomé": [
+        "15550"
+      ],
+      "Surco": [
+        "15555"
+      ],
+      "Matucana": [
+        "15556"
+      ],
+      "San Mateo": [
+        "15560",
+        "15561"
+      ],
+      "Chicla": [
+        "15564",
+        "15565"
+      ],
+      "Santiago de Tuna": [
+        "15570"
+      ],
+      "San Andres de Tupicocha": [
+        "15571"
+      ],
+      "San Damian": [
+        "15575"
+      ],
+      "Lahuaytambo": [
+        "15577"
+      ],
+      "Langa": [
+        "15580"
+      ],
+      "Cuenca": [
+        "15585"
+      ],
+      "Antioquía": [
+        "15586"
+      ],
+      "Santo Domingo de los Olleros": [
+        "15590"
+      ],
+      "Sangallaya": [
+        "15625"
+      ],
+      "Mariatana": [
+        "15630"
+      ],
+      "Huarochiri": [
+        "15635"
+      ],
+      "San Lorenzo de Quinti": [
+        "15640"
+      ],
+      "San Pedro de Huancayre": [
+        "15641"
+      ],
+      "Santiago de Anchucaya": [
+        "15645"
+      ],
+      "San Juan de Tantaranche": [
+        "15650"
+      ]
+    },
+    "Cañete": {
+      "San Antonio": [
+        "15600"
+      ],
+      "Santa Cruz de Flores": [
+        "15605"
+      ],
+      "Mala": [
+        "15608",
+        "15610"
+      ],
+      "Calango": [
+        "15615"
+      ],
+      "Coayllo": [
+        "15685"
+      ],
+      "Asia": [
+        "15689",
+        "15690"
+      ],
+      "Imperial": [
+        "15700",
+        "15701"
+      ],
+      "San Vicente de Cañete": [
+        "15700",
+        "15701"
+      ],
+      "Quilmana": [
+        "15712",
+        "15715"
+      ],
+      "Cerro Azul": [
+        "15716",
+        "15717"
+      ],
+      "San Luis": [
+        "15719",
+        "15720"
+      ],
+      "Nuevo Imperial": [
+        "15723",
+        "15725"
+      ],
+      "Lunahuana": [
+        "15727"
+      ],
+      "Pacarán": [
+        "15730"
+      ],
+      "Zuñiga": [
+        "15735"
+      ],
+      "Chilca": [
+        "15870",
+        "15871"
+      ]
+    },
+    "Yauyos": {
+      "Quinocay": [
+        "15620"
+      ],
+      "Cochas": [
+        "15621"
+      ],
+      "San Joaquin": [
+        "15655"
+      ],
+      "Tanta": [
+        "15660"
+      ],
+      "Huañec": [
+        "15661"
+      ],
+      "Quinches": [
+        "15665"
+      ],
+      "Huampara": [
+        "15670"
+      ],
+      "Ayavirí": [
+        "15675"
+      ],
+      "San Pedro de Pilas": [
+        "15680"
+      ],
+      "Omas": [
+        "15681"
+      ],
+      "Chocos": [
+        "15736"
+      ],
+      "Azangaro": [
+        "15740"
+      ],
+      "Madean": [
+        "15742"
+      ],
+      "Viñac": [
+        "15745"
+      ],
+      "Huangascar": [
+        "15748"
+      ],
+      "Cacra": [
+        "15750"
+      ],
+      "Hongos": [
+        "15753"
+      ],
+      "Lincha": [
+        "15755"
+      ],
+      "Catahuasi": [
+        "15760"
+      ],
+      "Tupe": [
+        "15761"
+      ],
+      "Putinza": [
+        "15763"
+      ],
+      "Ayauca": [
+        "15765"
+      ],
+      "Tauripampa": [
+        "15768"
+      ],
+      "Colonia": [
+        "15770"
+      ],
+      "Yauyos": [
+        "15775"
+      ],
+      "Huantán": [
+        "15780"
+      ],
+      "Carania": [
+        "15781"
+      ],
+      "Laraos": [
+        "15785"
+      ],
+      "Alis": [
+        "15786"
+      ],
+      "Tomás": [
+        "15790"
+      ],
+      "Miraflores": [
+        "15792"
+      ],
+      "Vitis": [
+        "15795"
+      ],
+      "Huancaya": [
+        "15796"
+      ]
+    }
+  },
+  "Loreto": {
+    "Maynas": {
+      "Punchana": [
+        "16000",
+        "16003",
+        "16004"
+      ],
+      "San Juan Bautista": [
+        "16000",
+        "16007",
+        "16008"
+      ],
+      "Belén": [
+        "16000",
+        "16001",
+        "16006",
+        "16008"
+      ],
+      "Iquitos": [
+        "16000",
+        "16001",
+        "16002",
+        "16003",
+        "16004",
+        "16006",
+        "16007"
+      ],
+      "Mazán": [
+        "16100",
+        "16101"
+      ],
+      "Putumayo": [
+        "16110",
+        "16111"
+      ],
+      "Napo": [
+        "16120",
+        "16121"
+      ],
+      "Torres Causana": [
+        "16130"
+      ],
+      "Teniente Manuel Clavero": [
+        "16140"
+      ],
+      "Indiana": [
+        "16200",
+        "16201"
+      ],
+      "Las Amazonas": [
+        "16210",
+        "16211"
+      ],
+      "Fernado Lores": [
+        "16310",
+        "16311"
+      ],
+      "Alto Nanay": [
+        "16800"
+      ]
+    },
+    "Mariscal Ramón Castilla": {
+      "Pebas": [
+        "16220",
+        "16221"
+      ],
+      "San Pablo": [
+        "16230",
+        "16231"
+      ],
+      "Ramón Castilla": [
+        "16240",
+        "16241"
+      ],
+      "Yavarí": [
+        "16250",
+        "16251"
+      ]
+    },
+    "Loreto": {
+      "Nauta": [
+        "16300",
+        "16301"
+      ],
+      "Urarinas": [
+        "16560",
+        "16561"
+      ],
+      "Parinari": [
+        "16570",
+        "16571"
+      ],
+      "Tigre": [
+        "16810",
+        "16811"
+      ],
+      "Trompeteros": [
+        "16820",
+        "16821"
+      ]
+    },
+    "Requena": {
+      "Saquena": [
+        "16320"
+      ],
+      "Jenaro Herrera": [
+        "16330",
+        "16331"
+      ],
+      "Requena": [
+        "16340",
+        "16341"
+      ],
+      "Yaquerana": [
+        "16350"
+      ],
+      "Soplin": [
+        "16360"
+      ],
+      "Tapiche": [
+        "16370"
+      ],
+      "Alto Tapiche": [
+        "16380"
+      ],
+      "Capelo": [
+        "16400"
+      ],
+      "Puinahua": [
+        "16410",
+        "16411"
+      ],
+      "Emilio San Martín": [
+        "16420",
+        "16421"
+      ],
+      "Maquia": [
+        "16430",
+        "16431"
+      ]
+    },
+    "Ucayali": {
+      "Sarayacu": [
+        "16440",
+        "16441"
+      ],
+      "Vargas Guerra": [
+        "16450",
+        "16451"
+      ],
+      "Inahuaya": [
+        "16460"
+      ],
+      "Pampa Hermosa": [
+        "16470",
+        "16471"
+      ],
+      "Contamaná": [
+        "16480",
+        "16481"
+      ],
+      "Padre Marquez": [
+        "16490",
+        "16491"
+      ]
+    },
+    "Alto Amazonas": {
+      "Yurimaguas": [
+        "16500",
+        "16501"
+      ],
+      "Balsapuerto": [
+        "16510",
+        "16511"
+      ],
+      "Jeberos": [
+        "16520"
+      ],
+      "Teniente Cesar López Rojas": [
+        "16530",
+        "16531"
+      ],
+      "Santa Cruz": [
+        "16540"
+      ],
+      "Lagunas": [
+        "16550",
+        "16551"
+      ]
+    },
+    "Datem del Marañón": {
+      "Barranca": [
+        "16600",
+        "16601"
+      ],
+      "Cahuapanas": [
+        "16610",
+        "16611"
+      ],
+      "Manseriche": [
+        "16620",
+        "16621"
+      ],
+      "Morona": [
+        "16630",
+        "16631"
+      ],
+      "Pastaza": [
+        "16700",
+        "16701"
+      ],
+      "Andoas": [
+        "16750",
+        "16751"
+      ]
+    }
+  },
+  "Madre de Dios": {
+    "Tambopata": {
+      "Tambopata": [
+        "17000",
+        "17001"
+      ],
+      "Las Piedras": [
+        "17100",
+        "17101"
+      ],
+      "Laberinto": [
+        "17400"
+      ],
+      "Inambari": [
+        "17500",
+        "17501"
+      ]
+    },
+    "Tahuamanu": {
+      "Tahuamanú": [
+        "17200"
+      ],
+      "Iberia": [
+        "17250",
+        "17251"
+      ],
+      "Iñapari": [
+        "17300"
+      ]
+    },
+    "Manu": {
+      "Huepetuhe": [
+        "17550",
+        "17551"
+      ],
+      "Madre de Dios": [
+        "17600",
+        "17601"
+      ],
+      "Manú": [
+        "17700"
+      ],
+      "Fitzcarrald": [
+        "17800"
+      ]
+    }
+  },
+  "Moquegua": {
+    "Mariscal Nieto": {
+      "Moquegua": [
+        "18000",
+        "18001"
+      ],
+      "Samegua": [
+        "18000",
+        "18001"
+      ],
+      "Torata": [
+        "18100",
+        "18101"
+      ],
+      "Curumas": [
+        "18400"
+      ],
+      "Cuchumbaya": [
+        "18410"
+      ],
+      "San Cristobal": [
+        "18420"
+      ]
+    },
+    "General Sanchez Cerro": {
+      "Omate": [
+        "18200"
+      ],
+      "Coalaque": [
+        "18210"
+      ],
+      "Puquina": [
+        "18220"
+      ],
+      "La Capilla": [
+        "18230"
+      ],
+      "Quinistaquillas": [
+        "18300"
+      ],
+      "Matalaque": [
+        "18310"
+      ],
+      "Ubinas": [
+        "18320"
+      ],
+      "Chojata": [
+        "18500"
+      ],
+      "Lloque": [
+        "18510"
+      ],
+      "Yunga": [
+        "18520"
+      ],
+      "Ichuña": [
+        "18530"
+      ]
+    },
+    "Ilo": {
+      "Ilo": [
+        "18600",
+        "18601"
+      ],
+      "Pacocha": [
+        "18610",
+        "18611"
+      ],
+      "El Algarrobal": [
+        "18620"
+      ]
+    }
+  },
+  "Pasco": {
+    "Pasco": {
+      "Yanacancha": [
+        "19000",
+        "19001"
+      ],
+      "Chaupimarca": [
+        "19000",
+        "19001"
+      ],
+      "Simón Bolivar": [
+        "19000",
+        "19001",
+        "19031"
+      ],
+      "San Francisco de Asís de Yarusyacán": [
+        "19100",
+        "19101"
+      ],
+      "Pallanchacra": [
+        "19110"
+      ],
+      "Huariaca": [
+        "19120",
+        "19121"
+      ],
+      "Ticlacayan": [
+        "19130",
+        "19131"
+      ],
+      "Paucartambo": [
+        "19200",
+        "19201"
+      ],
+      "Huachón": [
+        "19220"
+      ],
+      "Tinyahuarco": [
+        "19400",
+        "19401"
+      ],
+      "Vicco": [
+        "19410"
+      ],
+      "Ninacaca": [
+        "19420"
+      ],
+      "Huayllay": [
+        "19500",
+        "19501"
+      ]
+    },
+    "Oxapampa": {
+      "Chontabamba": [
+        "19210"
+      ],
+      "Oxapampa": [
+        "19230",
+        "19231"
+      ],
+      "Huancabamba": [
+        "19240",
+        "19241"
+      ],
+      "Pozuzo": [
+        "19250",
+        "19251"
+      ],
+      "Villa Rica": [
+        "19300",
+        "19301"
+      ],
+      "Puerto Bermudez": [
+        "19310",
+        "19311"
+      ],
+      "Palcazú": [
+        "19320",
+        "19321"
+      ]
+    },
+    "Daniel Alcides Carrión": {
+      "Yanahuanca": [
+        "19600",
+        "19601"
+      ],
+      "San Pedro de Pillao": [
+        "19650"
+      ],
+      "Santa Ana de Tusi": [
+        "19700",
+        "19701"
+      ],
+      "Goyllarisquizga": [
+        "19710"
+      ],
+      "Chacayán": [
+        "19720"
+      ],
+      "Vilcabamba": [
+        "19730"
+      ],
+      "Tapuc": [
+        "19740"
+      ],
+      "Paucar": [
+        "19750"
+      ]
+    }
+  },
+  "Piura": {
+    "Piura": {
+      "Piura": [
+        "20000",
+        "20001",
+        "20004",
+        "20007",
+        "20008",
+        "20009"
+      ],
+      "Catacaos": [
+        "20000",
+        "20004",
+        "20006"
+      ],
+      "Castilla": [
+        "20000",
+        "20002",
+        "20003"
+      ],
+      "Tambo Grande": [
+        "20200",
+        "20201"
+      ],
+      "Las Lomas": [
+        "20210",
+        "20211"
+      ],
+      "Cura Mori": [
+        "20600",
+        "20601"
+      ],
+      "La Arena": [
+        "20620",
+        "20621"
+      ],
+      "La Unión": [
+        "20620",
+        "20621"
+      ],
+      "El Tallan": [
+        "20630"
+      ]
+    },
+    "Sullana": {
+      "Sullana": [
+        "20100",
+        "20101",
+        "20102",
+        "20103"
+      ],
+      "Bellavista": [
+        "20101",
+        "20102"
+      ],
+      "Marcavelica": [
+        "20120",
+        "20121"
+      ],
+      "Salitral": [
+        "20130",
+        "20131"
+      ],
+      "Querecotillo": [
+        "20140",
+        "20141"
+      ],
+      "Lancones": [
+        "20150",
+        "20151"
+      ],
+      "Ignacio Escudero": [
+        "20760",
+        "20761"
+      ],
+      "Miguel Checa": [
+        "20770",
+        "20771"
+      ]
+    },
+    "Ayabaca": {
+      "Suyo": [
+        "20220",
+        "20221"
+      ],
+      "Sapillica": [
+        "20230",
+        "20231"
+      ],
+      "Frías": [
+        "20340",
+        "20341"
+      ],
+      "Paimas": [
+        "20500",
+        "20501"
+      ],
+      "Montero": [
+        "20510",
+        "20511"
+      ],
+      "Jilili": [
+        "20520"
+      ],
+      "Sicchez": [
+        "20530"
+      ],
+      "Ayabaca": [
+        "20540",
+        "20541"
+      ],
+      "Lagunas": [
+        "20550",
+        "20551"
+      ],
+      "Pacaipampa": [
+        "20560",
+        "20561"
+      ]
+    },
+    "Morropon": {
+      "Chulucanas": [
+        "20300",
+        "20301"
+      ],
+      "Morropón": [
+        "20310",
+        "20311"
+      ],
+      "Santa Catalina de Mossa": [
+        "20320"
+      ],
+      "Santo Domingo": [
+        "20330",
+        "20331"
+      ],
+      "Chalaco": [
+        "20350",
+        "20351"
+      ],
+      "Yamango": [
+        "20360",
+        "20361"
+      ],
+      "La Matanza": [
+        "20370",
+        "20371"
+      ],
+      "Buenos Aires": [
+        "20380",
+        "20381"
+      ],
+      "Salitral": [
+        "20400",
+        "20401"
+      ],
+      "San Juan de Bigote": [
+        "20410",
+        "20411"
+      ]
+    },
+    "Huancabamba": {
+      "Lalaquiz": [
+        "20420",
+        "20421"
+      ],
+      "Canchaque": [
+        "20430",
+        "20431"
+      ],
+      "Huancabamba": [
+        "20440",
+        "20441"
+      ],
+      "El Carmen de la Frontera": [
+        "20450",
+        "20451"
+      ],
+      "San Miguel de el Faique": [
+        "20460",
+        "20461"
+      ],
+      "Huarmaca": [
+        "20470",
+        "20471"
+      ],
+      "Sondor": [
+        "20480",
+        "20481"
+      ],
+      "Sondorillo": [
+        "20490",
+        "20491"
+      ]
+    },
+    "Sechura": {
+      "Vice": [
+        "20640",
+        "20641"
+      ],
+      "Bellavista de la Unión": [
+        "20650"
+      ],
+      "Rinconada Llicuar": [
+        "20660"
+      ],
+      "Bernal": [
+        "20670",
+        "20671"
+      ],
+      "Cristo Nos Valga": [
+        "20680"
+      ],
+      "Sechura": [
+        "20690",
+        "20691"
+      ]
+    },
+    "Paita": {
+      "Paita": [
+        "20700",
+        "20701"
+      ],
+      "Colán": [
+        "20710",
+        "20711"
+      ],
+      "Arenal": [
+        "20720"
+      ],
+      "Amotape": [
+        "20730"
+      ],
+      "Vichayal": [
+        "20740",
+        "20741"
+      ],
+      "Tamarindo": [
+        "20750"
+      ],
+      "La Huaca": [
+        "20780",
+        "20781"
+      ]
+    },
+    "Talara": {
+      "La Brea": [
+        "20800",
+        "20801"
+      ],
+      "Pariñas": [
+        "20810",
+        "20811"
+      ],
+      "Lobitos": [
+        "20820"
+      ],
+      "El Alto": [
+        "20830",
+        "20831"
+      ],
+      "Los Organos": [
+        "20840",
+        "20841"
+      ],
+      "Máncora": [
+        "20850",
+        "20851"
+      ]
+    }
+  },
+  "Puno": {
+    "Puno": {
+      "Puno": [
+        "21000",
+        "21001",
+        "21002"
+      ],
+      "Paucarcolla": [
+        "21110"
+      ],
+      "Atuncolla": [
+        "21113",
+        "21115"
+      ],
+      "Huata": [
+        "21116",
+        "21117"
+      ],
+      "Coata": [
+        "21119",
+        "21120"
+      ],
+      "Capachica": [
+        "21123",
+        "21125"
+      ],
+      "Amantani": [
+        "21127"
+      ],
+      "Acora": [
+        "21510",
+        "21511"
+      ],
+      "Platería": [
+        "21515",
+        "21516"
+      ],
+      "Chucuito": [
+        "21520",
+        "21521"
+      ],
+      "Pichacani": [
+        "21575",
+        "21576"
+      ],
+      "Mañozo": [
+        "21730",
+        "21731"
+      ],
+      "Vilque": [
+        "21740"
+      ],
+      "Tiquillaca": [
+        "21750"
+      ],
+      "San Antonio": [
+        "21760"
+      ]
+    },
+    "San Román": {
+      "Juliaca": [
+        "21100",
+        "21101",
+        "21102",
+        "21103",
+        "21104"
+      ],
+      "Caracoto": [
+        "21107",
+        "21108"
+      ],
+      "Cabana": [
+        "21700"
+      ],
+      "Cabanillas": [
+        "21720",
+        "21721"
+      ]
+    },
+    "Lampa": {
+      "Calapuja": [
+        "21130"
+      ],
+      "Nicasio": [
+        "21135"
+      ],
+      "Pucará": [
+        "21136",
+        "21137"
+      ],
+      "Cabanilla": [
+        "21710",
+        "21711"
+      ],
+      "Santa Lucía": [
+        "21770",
+        "21771"
+      ],
+      "Paratía": [
+        "21780",
+        "21781"
+      ],
+      "Lampa": [
+        "21800",
+        "21801"
+      ],
+      "Palca": [
+        "21805"
+      ],
+      "Vilavila": [
+        "21815"
+      ],
+      "Ocuviri": [
+        "21825"
+      ]
+    },
+    "Azangaro": {
+      "José Domingo Choquehuanca": [
+        "21139",
+        "21140"
+      ],
+      "Santiago de Pupuja": [
+        "21143",
+        "21145"
+      ],
+      "Tirapata": [
+        "21146"
+      ],
+      "Asillo": [
+        "21149",
+        "21150"
+      ],
+      "Azangaro": [
+        "21157",
+        "21160"
+      ],
+      "San José": [
+        "21162",
+        "21165"
+      ],
+      "San Juan de Salinas": [
+        "21166"
+      ],
+      "Arapa": [
+        "21169",
+        "21170"
+      ],
+      "Caminaca": [
+        "21175"
+      ],
+      "Achaya": [
+        "21180"
+      ],
+      "San Antón": [
+        "21200",
+        "21201"
+      ],
+      "Potoni": [
+        "21210",
+        "21211"
+      ],
+      "Saman": [
+        "21300",
+        "21301"
+      ],
+      "Chupa": [
+        "21320",
+        "21321"
+      ],
+      "Muñani": [
+        "21345",
+        "21346"
+      ]
+    },
+    "Melgar": {
+      "Orurillo": [
+        "21153",
+        "21155"
+      ],
+      "Antauta": [
+        "21205"
+      ],
+      "Llalli": [
+        "21835"
+      ],
+      "Cupi": [
+        "21845"
+      ],
+      "Umachiri": [
+        "21855"
+      ],
+      "Ayavarí": [
+        "21865",
+        "21866"
+      ],
+      "Macarí": [
+        "21875",
+        "21876"
+      ],
+      "Santa Rosa": [
+        "21885",
+        "21886"
+      ],
+      "Nuñoa": [
+        "21895",
+        "21896"
+      ]
+    },
+    "Carabaya": {
+      "Crucero": [
+        "21215",
+        "21216"
+      ],
+      "Usicayos": [
+        "21235",
+        "21236"
+      ],
+      "Ajoyani": [
+        "21240"
+      ],
+      "Coasa": [
+        "21245",
+        "21246"
+      ],
+      "Macusani": [
+        "21250",
+        "21251"
+      ],
+      "Ituata": [
+        "21255",
+        "21256"
+      ],
+      "Ayapata": [
+        "21260",
+        "21261"
+      ],
+      "Corani": [
+        "21265"
+      ],
+      "Ollachea": [
+        "21270"
+      ],
+      "San Gaban": [
+        "21275"
+      ]
+    },
+    "Sandia": {
+      "Patambuco": [
+        "21220"
+      ],
+      "Limbani": [
+        "21225"
+      ],
+      "Phara": [
+        "21230"
+      ],
+      "Cuyocuyo": [
+        "21360",
+        "21361"
+      ],
+      "Sandia": [
+        "21365",
+        "21366"
+      ],
+      "Alto Inambari": [
+        "21370",
+        "21371"
+      ],
+      "San Juan del Oro": [
+        "21375",
+        "21376"
+      ],
+      "San Pedro de Putína Punco": [
+        "21380",
+        "21381"
+      ],
+      "Yanahuaya": [
+        "21385"
+      ],
+      "Quiaca": [
+        "21390"
+      ]
+    },
+    "Huancane": {
+      "Taraco": [
+        "21305",
+        "21306"
+      ],
+      "Pusi": [
+        "21310",
+        "21311"
+      ],
+      "Huancané": [
+        "21315",
+        "21316"
+      ],
+      "Huatasani": [
+        "21325"
+      ],
+      "Inchupalla": [
+        "21330"
+      ],
+      "Vilque Chico": [
+        "21400",
+        "21401"
+      ],
+      "Cojata": [
+        "21410"
+      ],
+      "Rasaspata": [
+        "21420",
+        "21421"
+      ]
+    },
+    "San Antonio de Putina": {
+      "Pedro Vilca Apaza": [
+        "21335"
+      ],
+      "Putina": [
+        "21340",
+        "21341"
+      ],
+      "Quilcapuncu": [
+        "21350",
+        "21351"
+      ],
+      "Ananea": [
+        "21355",
+        "21356"
+      ],
+      "Sina": [
+        "21395"
+      ]
+    },
+    "Moho": {
+      "Moho": [
+        "21430",
+        "21431"
+      ],
+      "Huayrapata": [
+        "21440"
+      ],
+      "Conima": [
+        "21450"
+      ],
+      "Tilali": [
+        "21460"
+      ]
+    },
+    "El Collao": {
+      "Ilave": [
+        "21500",
+        "21501"
+      ],
+      "Pilcuyo": [
+        "21525",
+        "21526"
+      ],
+      "Capazo": [
+        "21650"
+      ],
+      "Santa Rosa": [
+        "21660",
+        "21661"
+      ],
+      "Conduriri": [
+        "21670"
+      ]
+    },
+    "Chucuito": {
+      "Juli": [
+        "21530",
+        "21531"
+      ],
+      "Pomata": [
+        "21535",
+        "21536"
+      ],
+      "Zepita": [
+        "21600",
+        "21601"
+      ],
+      "Desaguadero": [
+        "21610",
+        "21611"
+      ],
+      "Huacullani": [
+        "21620",
+        "21621"
+      ],
+      "Kelluyo": [
+        "21630",
+        "21631"
+      ],
+      "Pisacoma": [
+        "21640",
+        "21641"
+      ]
+    },
+    "Yunguyo": {
+      "Cuturapi": [
+        "21540"
+      ],
+      "Yunguyo": [
+        "21545",
+        "21546"
+      ],
+      "Ollaraya": [
+        "21550"
+      ],
+      "Unicachi": [
+        "21555"
+      ],
+      "Tinicachi": [
+        "21560"
+      ],
+      "Anapia": [
+        "21565"
+      ],
+      "Copani": [
+        "21570",
+        "21571"
+      ]
+    }
+  },
+  "San Martín": {
+    "Moyobamba": {
+      "Moyobamba": [
+        "22000",
+        "22001"
+      ],
+      "Yantalo": [
+        "22000",
+        "22051"
+      ],
+      "Jepelacio": [
+        "22100",
+        "22101"
+      ],
+      "Calzada": [
+        "22800"
+      ],
+      "Habana": [
+        "22805"
+      ],
+      "Soritor": [
+        "22810",
+        "22811"
+      ]
+    },
+    "Lamas": {
+      "Alonso de Alvarado": [
+        "22110",
+        "22111"
+      ],
+      "Tabalosos": [
+        "22120",
+        "22121"
+      ],
+      "Shanao": [
+        "22130"
+      ],
+      "Pinto Recodo": [
+        "22140",
+        "22141"
+      ],
+      "Lamas": [
+        "22150",
+        "22151"
+      ],
+      "Rumisapa": [
+        "22170"
+      ],
+      "Cuñumbuqui": [
+        "22180"
+      ],
+      "Zapatero": [
+        "22190"
+      ],
+      "San Roque de Cumbaza": [
+        "22220"
+      ],
+      "Caynarachi": [
+        "22235",
+        "22236"
+      ],
+      "Barranquita": [
+        "22240",
+        "22241"
+      ]
+    },
+    "San Martín": {
+      "Cacatachi": [
+        "22160"
+      ],
+      "La Banda de Shilcayo": [
+        "22200",
+        "22201",
+        "22202"
+      ],
+      "Morales": [
+        "22200",
+        "22201",
+        "22202"
+      ],
+      "Tarapoto": [
+        "22200",
+        "22201",
+        "22202"
+      ],
+      "San Antonio": [
+        "22215"
+      ],
+      "El Porvenir": [
+        "22245"
+      ],
+      "Papaplaya": [
+        "22250"
+      ],
+      "Chipurana": [
+        "22255"
+      ],
+      "Huimbayoc": [
+        "22260"
+      ],
+      "Shapaja": [
+        "22300"
+      ],
+      "Chazuta": [
+        "22310",
+        "22311"
+      ],
+      "Alberto Leveau": [
+        "22320"
+      ],
+      "Sauce": [
+        "22330",
+        "22331"
+      ],
+      "Juan Guerra": [
+        "22400"
+      ]
+    },
+    "PIcota": {
+      "Tres Unidos": [
+        "22340"
+      ],
+      "Pilluana": [
+        "22350"
+      ],
+      "Tingo de Ponasa": [
+        "22360"
+      ],
+      "Shamboyacu": [
+        "22370",
+        "22371"
+      ],
+      "Buenos Aires": [
+        "22410"
+      ],
+      "Pucacaca": [
+        "22420"
+      ],
+      "Picota": [
+        "22430",
+        "22431"
+      ],
+      "Caspisapa": [
+        "22440"
+      ],
+      "San Cristobal": [
+        "22450"
+      ],
+      "San Hilarión": [
+        "22460"
+      ]
+    },
+    "Bellavista": {
+      "San Rafael": [
+        "22470",
+        "22471"
+      ],
+      "Bajo Biavo": [
+        "22480",
+        "22481"
+      ],
+      "Alto Biavo": [
+        "22490",
+        "22491"
+      ],
+      "Huallaga": [
+        "22510"
+      ],
+      "San Pablo": [
+        "22730",
+        "22731"
+      ],
+      "Bellavista": [
+        "22740",
+        "22741"
+      ]
+    },
+    "Mariscal Cáceres": {
+      "Pajarillo": [
+        "22500",
+        "22501"
+      ],
+      "Canpanilla": [
+        "22520",
+        "22521"
+      ],
+      "Juanjui": [
+        "22600",
+        "22601"
+      ],
+      "Pachiza": [
+        "22610"
+      ],
+      "Huicungo": [
+        "22620",
+        "22621"
+      ]
+    },
+    "Tocache": {
+      "Polvora": [
+        "22530",
+        "22531"
+      ],
+      "Tocache": [
+        "22540",
+        "22541"
+      ],
+      "Nuevo Progreso": [
+        "22550",
+        "22551"
+      ],
+      "Uchiza": [
+        "22560",
+        "22561"
+      ],
+      "Shunte": [
+        "22570"
+      ]
+    },
+    "Huallaga": {
+      "Sacanche": [
+        "22630"
+      ],
+      "El Eslabón": [
+        "22640"
+      ],
+      "Piscoyacu": [
+        "22650"
+      ],
+      "Saposoa": [
+        "22660",
+        "22661"
+      ],
+      "Alto Saposoa": [
+        "22670"
+      ],
+      "TIingo de Saposoa": [
+        "22750"
+      ]
+    },
+    "El Dorado": {
+      "San José de Sisa": [
+        "22700",
+        "22701"
+      ],
+      "Agua Blanca": [
+        "22710"
+      ],
+      "Santa Rosa": [
+        "22720",
+        "22721"
+      ],
+      "Shatoja": [
+        "22760"
+      ],
+      "San Martín": [
+        "22770",
+        "22771"
+      ]
+    },
+    "Rioja": {
+      "Yorongos": [
+        "22820"
+      ],
+      "Rioja": [
+        "22825",
+        "22826"
+      ],
+      "Posic": [
+        "22835"
+      ],
+      "Elias SoplinVargas": [
+        "22840",
+        "22841"
+      ],
+      "Nueva Cajamarca": [
+        "22845",
+        "22846"
+      ],
+      "Yuracyacu": [
+        "22850"
+      ],
+      "San Fernando": [
+        "22855"
+      ],
+      "Awajun": [
+        "22860",
+        "22861"
+      ],
+      "Pardo Miguel": [
+        "22865",
+        "22866"
+      ]
+    }
+  },
+  "Tacna": {
+    "Tacna": {
+      "Pocollay": [
+        "23000",
+        "23001",
+        "23002",
+        "23003"
+      ],
+      "Ciudad Nueva": [
+        "23000",
+        "23002"
+      ],
+      "Alto de la Alianza": [
+        "23000",
+        "23001",
+        "23002",
+        "23006"
+      ],
+      "Coronel Gregorio Albarracin Lanchipa": [
+        "23000",
+        "23003",
+        "23004",
+        "23006"
+      ],
+      "Tacna": [
+        "23000",
+        "23001",
+        "23003",
+        "23004",
+        "23006"
+      ],
+      "Calana": [
+        "23000",
+        "23041"
+      ],
+      "Pachia": [
+        "23500"
+      ],
+      "Palca": [
+        "23550"
+      ],
+      "Inclan": [
+        "23600"
+      ],
+      "Sama": [
+        "23650"
+      ]
+    },
+    "Tarata": {
+      "Estique Pampa": [
+        "23100"
+      ],
+      "Estique": [
+        "23120"
+      ],
+      "Tarucachi": [
+        "23140"
+      ],
+      "Tarata": [
+        "23200"
+      ],
+      "Ticaco": [
+        "23220"
+      ],
+      "Heroes Albarracín": [
+        "23240"
+      ],
+      "Sitajara": [
+        "23300"
+      ],
+      "Susapaya": [
+        "23350"
+      ]
+    },
+    "Candarave": {
+      "Quilahuani": [
+        "23400"
+      ],
+      "Candarave": [
+        "23420"
+      ],
+      "Cairani": [
+        "23440"
+      ],
+      "Huanaura": [
+        "23460"
+      ],
+      "Curibaya": [
+        "23480"
+      ],
+      "Camilaca": [
+        "23850"
+      ]
+    },
+    "Jorge Basadre": {
+      "Ite": [
+        "23700"
+      ],
+      "Locumba": [
+        "23750"
+      ],
+      "Ilabaya": [
+        "23800"
+      ]
+    }
+  },
+  "Tumbes": {
+    "Tumbes": {
+      "Tumbes": [
+        "24000",
+        "24001",
+        "24002"
+      ],
+      "San Juan de la Virgen": [
+        "24300"
+      ],
+      "Pampas de Hospital": [
+        "24350",
+        "24351"
+      ],
+      "San Jacinto": [
+        "24400",
+        "24401"
+      ],
+      "Corrales": [
+        "24500",
+        "24501"
+      ],
+      "La Cruz": [
+        "24520",
+        "24521"
+      ]
+    },
+    "Zarumilla": {
+      "Aguas Verdes": [
+        "24100",
+        "24101"
+      ],
+      "Zarumilla": [
+        "24150",
+        "24151"
+      ],
+      "Papayal": [
+        "24200"
+      ],
+      "Matapalo": [
+        "24250"
+      ]
+    },
+    "Contralmirante Villar": {
+      "Casitas": [
+        "24450"
+      ],
+      "Zorritos": [
+        "24540",
+        "24541"
+      ],
+      "Canoas de Punta Sal": [
+        "24560"
+      ]
+    }
+  },
+  "Ucayali": {
+    "Coronel Portillo": {
+      "Yarinacocha": [
+        "25000",
+        "25003",
+        "25004",
+        "25006"
+      ],
+      "Manantay": [
+        "25000",
+        "25001",
+        "25002"
+      ],
+      "Callería": [
+        "25000",
+        "25001",
+        "25002",
+        "25003",
+        "25004",
+        "25006"
+      ],
+      "Masisea": [
+        "25100",
+        "25101"
+      ],
+      "Iparía": [
+        "25230",
+        "25231"
+      ],
+      "Campoverde": [
+        "25500",
+        "25501"
+      ],
+      "Nueva Requena": [
+        "25700",
+        "25701"
+      ]
+    },
+    "Atalaya": {
+      "Raymondi": [
+        "25200",
+        "25201"
+      ],
+      "Sepahua": [
+        "25210",
+        "25211"
+      ],
+      "Tahuania": [
+        "25220",
+        "25221"
+      ],
+      "Yurua": [
+        "25300"
+      ]
+    },
+    "Purus": {
+      "Purús": [
+        "25400"
+      ]
+    },
+    "Padre Abad": {
+      "Irazola": [
+        "25530",
+        "25531"
+      ],
+      "Padre Abad": [
+        "25550",
+        "25551"
+      ],
+      "Curimana": [
+        "25600",
+        "25601"
+      ]
+    }
+  }
+}

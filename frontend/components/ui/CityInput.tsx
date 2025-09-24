@@ -22,67 +22,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Label } from '@/components/ui/label';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getCitiesByProvince, City } from '@/lib/peru-shipping-data';
 
 /**
  * CITY DATA INTERFACE
  * -------------------
  * Structure for city data
  */
-interface City {
-  code: string;
-  name: string;
-  flag: string;
-}
-
 /**
  * CITY DATA
  * ---------
- * Cities organized by province
+ * Cities are now loaded dynamically from the shipping data file
  */
-const citiesByProvince: Record<string, City[]> = {
-  'LMA': [ // Lima Metropolitana
-    { code: 'Lima', name: 'Lima', flag: '' },
-    { code: 'Miraflores', name: 'Miraflores', flag: '' },
-    { code: 'San_Isidro', name: 'San Isidro', flag: '' },
-    { code: 'Surco', name: 'Surco', flag: '' },
-    { code: 'La_Molina', name: 'La Molina', flag: '' },
-    { code: 'Pueblo_Libre', name: 'Pueblo Libre', flag: '' },
-    { code: 'Jesus_Maria', name: 'Jesús María', flag: '' },
-    { code: 'Lince', name: 'Lince', flag: '' },
-    { code: 'Magdalena', name: 'Magdalena', flag: '' },
-    { code: 'Breña', name: 'Breña', flag: '' },
-    { code: 'Chorrillos', name: 'Chorrillos', flag: '' },
-    { code: 'Lurin', name: 'Lurín', flag: '' },
-    { code: 'Punta_Negra', name: 'Punta Negra', flag: '' },
-    { code: 'Pucusana', name: 'Pucusana', flag: '' }
-  ],
-  'CAL': [ // Callao
-    { code: 'Callao', name: 'Callao', flag: '' },
-    { code: 'Bellavista', name: 'Bellavista', flag: '' },
-    { code: 'Carmen_de_la_Legua', name: 'Carmen de la Legua', flag: '' },
-    { code: 'La_Perla', name: 'La Perla', flag: '' },
-    { code: 'La_Punta', name: 'La Punta', flag: '' },
-    { code: 'Ventanilla', name: 'Ventanilla', flag: '' }
-  ],
-  'ARE': [ // Arequipa
-    { code: 'Arequipa', name: 'Arequipa', flag: '' },
-    { code: 'Cayma', name: 'Cayma', flag: '' },
-    { code: 'Cerro_Colorado', name: 'Cerro Colorado', flag: '' },
-    { code: 'Characato', name: 'Characato', flag: '' },
-    { code: 'Chiguata', name: 'Chiguata', flag: '' },
-    { code: 'Jacobo_Hunter', name: 'Jacobo Hunter', flag: '' }
-  ],
-  'CUS': [ // Cusco
-    { code: 'Cusco', name: 'Cusco', flag: '' },
-    { code: 'Santiago', name: 'Santiago', flag: '' },
-    { code: 'Wanchaq', name: 'Wanchaq', flag: '' },
-    { code: 'San_Sebastian', name: 'San Sebastián', flag: '' },
-    { code: 'San_Jerónimo', name: 'San Jerónimo', flag: '' }
-  ]
-};
-
-// Get all cities for backward compatibility
-const cities: City[] = Object.values(citiesByProvince).flat();
 
 /**
  * CITY INPUT PROPS
@@ -106,6 +57,8 @@ interface CityInputProps {
   error?: string;
   /** Default city code */
   defaultCityCode?: string;
+  /** Department code to filter cities */
+  departmentCode?: string;
   /** Province code to filter cities */
   provinceCode?: string;
 }
@@ -120,13 +73,14 @@ interface CityInputProps {
  */
 export function CityInput({
   label,
-  required = false,
+  _required = false,
   value,
   onChange,
   placeholder = 'Select city',
   disabled = false,
   error,
   defaultCityCode = 'Lima',
+  _departmentCode,
   provinceCode
 }: CityInputProps) {
   // ============================================================================
@@ -145,13 +99,19 @@ export function CityInput({
   /**
    * GET AVAILABLE CITIES
    * --------------------
-   * Get cities based on selected province
+   * Get cities (capitals) based on selected department and province
    */
   const getAvailableCities = () => {
-    if (provinceCode && citiesByProvince[provinceCode]) {
-      return citiesByProvince[provinceCode];
+    if (provinceCode) {
+      const cities = getCitiesByProvince(provinceCode);
+      return cities.map(city => ({
+        code: city.code,
+        name: city.name,
+        postalCodes: city.postalCodes,
+        flag: ''
+      }));
     }
-    return cities;
+    return [];
   };
 
   /**
@@ -247,7 +207,7 @@ export function CityInput({
           type="button"
           onClick={handleDropdownToggle}
           disabled={disabled}
-          className={`w-full px-4 py-3 border rounded-lg text-left transition-all duration-200 ${
+          className={`w-full px-4 py-3 border rounded-lg text-left transition-all duration-200 h-12 ${
             error
               ? 'border-red-300 bg-red-50 text-red-900'
               : disabled
@@ -257,9 +217,9 @@ export function CityInput({
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              {selectedCity && (
-                <span className="font-medium">{selectedCity.name}</span>
-              )}
+              <span className={selectedCity ? 'font-medium text-gray-900' : 'text-gray-500'}>
+                {selectedCity ? selectedCity.name : placeholder}
+              </span>
             </div>
             <svg
               className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${
@@ -320,7 +280,7 @@ export function CityInput({
               </div>
 
               {/* Cities List */}
-              <div className="overflow-y-auto h-full pb-16">
+              <div className="overflow-y-auto h-96 pb-16">
                 {filteredCities.map((city) => (
                   <button
                     key={`${city.code}-${city.name}`}

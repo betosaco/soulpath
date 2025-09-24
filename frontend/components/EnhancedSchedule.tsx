@@ -437,9 +437,9 @@ export function EnhancedSchedule({
   // Get service type icon
   const getServiceIcon = (serviceName: string) => {
     const iconMap: { [key: string]: string } = {
-      'hatha yoga': '🧘‍♀️',
-      'vinyasa yoga': '🧘‍♂️',
-      'meditation': '🧘',
+      'hatha yoga': '',
+      'vinyasa yoga': '',
+      'meditation': '',
       'pilates': '🤸',
       'fitness': '💪',
       'dance': '💃',
@@ -460,7 +460,7 @@ export function EnhancedSchedule({
       'rehabilitation': '🦽'
     };
     const lowerName = serviceName.toLowerCase();
-    return iconMap[lowerName] || '🎯';
+    return iconMap[lowerName] || '';
   };
 
 

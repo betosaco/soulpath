@@ -22,7 +22,7 @@ const testData = {
     }
   ],
   totalAmount: 60,
-  currency: "PEN",
+  currency: "S/.",
   isGroupBooking: false,
   // Multiple scheduled sessions for individual booking
   scheduleDetails: [

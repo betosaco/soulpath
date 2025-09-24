@@ -28,7 +28,7 @@ import {
   getPeruProvinces, 
   getPeruDistricts, 
   getDefaultPeruAddress,
-  PeruDepartment,
+  _PeruDepartment,
   PeruProvince,
   PeruDistrict
 } from '@/lib/peru-addresses';

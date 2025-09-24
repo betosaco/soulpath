@@ -7,7 +7,7 @@
 
 import puppeteer from 'puppeteer';
 import fs from 'fs';
-import path from 'path';
+import _path from 'path';
 
 const LOCALHOST_URL = 'http://localhost:3000';
 const PRODUCTION_URL = 'https://frontend-eb96ocbiz-matmaxworlds-projects.vercel.app';

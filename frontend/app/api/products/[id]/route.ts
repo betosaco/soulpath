@@ -5,14 +5,15 @@ const prisma = new PrismaClient();
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    console.log('🛒 Public Product API called for ID:', params.id);
+    const { id } = await params;
+    console.log('🛒 Public Product API called for ID:', id);
     
     const product = await prisma.product.findUnique({
       where: { 
-        id: params.id,
+        id: id,
         status: 'ACTIVE' // Only show active products to public
       },
       select: {

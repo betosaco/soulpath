@@ -32,7 +32,7 @@ const testData = {
     }
   ],
   totalAmount: 540,
-  currency: "PEN",
+  currency: "S/.",
   isGroupBooking: false,
   // Multiple scheduled sessions for different packages
   scheduleDetails: [

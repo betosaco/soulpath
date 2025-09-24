@@ -271,7 +271,7 @@ export function ScheduleBookingFlow({
   onSlotsChange,
   onStepChange
 }: ScheduleBookingFlowProps = {}) {
-  const { packages, loading: packagesLoading, error: packagesError } = usePackages('PEN');
+  const { packages, loading: packagesLoading, error: packagesError } = usePackages('S/.');
   const cartContext = useCart();
   const { items: cartItems, addItem: addToCart, removeItem: removeFromCart, updateQuantity } = cartContext;
   const { openCart: setIsCartOpen } = useCartUI();
@@ -1528,7 +1528,7 @@ export function ScheduleBookingFlow({
                                     price: pkg.price,
                                     image: '/images/products/yoga-journal-1.jpg',
                                     sku: `PKG-${pkg.id}`,
-                                    currency: pkg.currency?.code || 'PEN',
+                                    currency: pkg.currency?.code || 'S/.',
                                     type: 'package',
                                     sessions: pkg.packageDefinition.sessionsCount,
                                     duration: pkg.packageDefinition.sessionDuration?.duration_minutes,

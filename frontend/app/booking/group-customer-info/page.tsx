@@ -5,7 +5,7 @@ import { GroupCustomerInfoStep } from '@/components/booking/steps/GroupCustomerI
 export default function GroupCustomerInfoPage() {
   return (
     <AppShell>
-      <BookingLayout showStepIndicator={false}>
+      <BookingLayout showStepIndicator={false} hideNavigation={true}>
         <GroupCustomerInfoStep />
       </BookingLayout>
     </AppShell>

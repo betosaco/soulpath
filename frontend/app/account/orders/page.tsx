@@ -58,7 +58,7 @@ export default function OrdersPage() {
     }
   };
 
-  const formatCurrency = (amount: number, currency: string = 'PEN') => {
+  const formatCurrency = (amount: number, currency: string = 'S/.') => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency,

@@ -85,7 +85,7 @@ interface BookingStep {
 }
 
 export function EnhancedPackagesFlow() {
-  const { data: packages, isLoading: packagesLoading, error: packagesError } = usePackages('PEN');
+  const { data: packages, isLoading: packagesLoading, error: packagesError } = usePackages('S/.');
   const typedPackages = packages as PackagePrice[] | undefined;
   
   const { language } = useLanguage();
@@ -185,7 +185,7 @@ export function EnhancedPackagesFlow() {
       price: Number(pkg.price),
       image: '/images/products/yoga-journal-1.jpg',
       sku: `PKG-${pkg.id}`,
-      currency: pkg.currency?.code || 'PEN',
+      currency: pkg.currency?.code || 'S/.',
       type: 'package',
       sessions: pkg.packageDefinition.sessionsCount,
       duration: pkg.packageDefinition.sessionDuration?.duration_minutes,
