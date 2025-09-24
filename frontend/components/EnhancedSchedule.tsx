@@ -156,10 +156,16 @@ export function EnhancedSchedule({
   
   // Check if a slot is already booked
   const isSlotBooked = (slot: ScheduleSlot) => {
-    return existingBookings.some(booking => 
-      booking.selectedDate === slot.date && 
-      booking.selectedTime === slot.time
-    );
+    // For multiple packages, a slot is only "booked" if it reaches max capacity
+    // For single package, a slot is "booked" if any booking exists
+    if (hasMultiplePackages) {
+      return getSlotBookingCount(slot) >= maxBookingsPerSlot;
+    } else {
+      return existingBookings.some(booking => 
+        booking.selectedDate === slot.date && 
+        booking.selectedTime === slot.time
+      );
+    }
   };
 
   // Check if a slot is locked for a specific package
@@ -179,6 +185,8 @@ export function EnhancedSchedule({
   };
 
   const canBookMore = (slot: ScheduleSlot) => {
+    // For multiple packages, allow cross-package booking (maxBookingsPerSlot is 999)
+    // For single package, this should be handled by the package selection logic
     const currentBookings = getSlotBookingCount(slot);
     return currentBookings < maxBookingsPerSlot;
   };
