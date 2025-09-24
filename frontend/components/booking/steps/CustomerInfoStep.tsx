@@ -32,6 +32,7 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 import { toast } from 'sonner';
 import { useBookingFlow } from '../hooks/useBookingFlow';
 
@@ -44,6 +45,7 @@ interface CustomerFormData {
   name: string;
   email: string;
   phone: string;
+  countryCode: string;
   birthDate: string;
   birthPlace: string;
 }
@@ -90,6 +92,7 @@ export function CustomerInfoStep({ initialData, onDataSaved }: CustomerInfoStepP
     name: initialData?.name || '',
     email: initialData?.email || '',
     phone: initialData?.phone || '',
+    countryCode: initialData?.countryCode || '+51',
     birthDate: initialData?.birthDate || '',
     birthPlace: initialData?.birthPlace || ''
   });
@@ -211,6 +214,22 @@ export function CustomerInfoStep({ initialData, onDataSaved }: CustomerInfoStepP
   };
 
   /**
+   * HANDLE PHONE CHANGE
+   * -------------------
+   * Updates phone number and country code
+   *
+   * @param phoneNumber - The phone number
+   * @param countryCode - The country code
+   */
+  const handlePhoneChange = (phoneNumber: string, countryCode: string) => {
+    setFormData(prev => ({
+      ...prev,
+      phone: phoneNumber,
+      countryCode: countryCode
+    }));
+  };
+
+  /**
    * HANDLE FORM SUBMISSION
    * ----------------------
    * Validates and processes the form data
@@ -313,13 +332,17 @@ export function CustomerInfoStep({ initialData, onDataSaved }: CustomerInfoStepP
         })}
 
         {/* Phone Field */}
-        {renderFormField({
-          name: 'phone',
-          label: 'Phone',
-          type: 'tel',
-          required: false,
-          placeholder: 'Enter your phone number'
-        })}
+        <div className="unified-form-group">
+          <PhoneInput
+            label="Phone Number"
+            required={false}
+            value={formData.phone}
+            onChange={handlePhoneChange}
+            placeholder="Enter your phone number"
+            defaultCountryCode={formData.countryCode}
+            error={errors.phone}
+          />
+        </div>
 
         {/* Birth Date Field */}
         {renderFormField({
