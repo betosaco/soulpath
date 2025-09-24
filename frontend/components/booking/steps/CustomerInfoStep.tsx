@@ -308,7 +308,7 @@ export function CustomerInfoStep({ initialData, onDataSaved }: CustomerInfoStepP
         })}
 
         {/* Continue Button */}
-        <div className="pt-4 pb-32">
+        <div className="pt-4 pb-8">
           <button
             onClick={handleSubmit}
             disabled={!isFormValid}
