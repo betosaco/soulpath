@@ -101,7 +101,6 @@ export function EnhancedSchedule({
   console.log('🔍 EnhancedSchedule render - startDate:', startDate, 'endDate:', endDate);
   console.log('🔍 EnhancedSchedule - lockedTimeSlots:', lockedTimeSlots);
   console.log('🔍 EnhancedSchedule - existingBookings:', existingBookings);
-  console.log('🔍 EnhancedSchedule - hasMultiplePackages:', hasMultiplePackages);
   // Handle slot booking - redirect to account booking page
   const handleBookSlot = (slot: ScheduleSlot) => {
     try {
@@ -179,22 +178,24 @@ export function EnhancedSchedule({
   const isSlotLocked = (slot: ScheduleSlot, packageId?: string) => {
     // For multiple packages, only lock if the specific package has booked the slot
     // For single package, lock if any package has booked the slot
-    if (hasMultiplePackages && packageId) {
-      const isLocked = lockedTimeSlots.some(lockedSlot =>
-        lockedSlot.selectedDate === slot.date &&
-        lockedSlot.selectedTime === slot.time &&
-        lockedSlot.packageId === packageId
-      );
-      console.log('🔒 isSlotLocked (multiple packages, specific package):', { slot: `${slot.date} ${slot.time}`, packageId, isLocked });
-      return isLocked;
+    if (hasMultiplePackages) {
+      if (packageId) {
+        // Multiple packages with specific package - check if that package has booked the slot
+        return lockedTimeSlots.some(lockedSlot =>
+          lockedSlot.selectedDate === slot.date &&
+          lockedSlot.selectedTime === slot.time &&
+          lockedSlot.packageId === packageId
+        );
+      } else {
+        // Multiple packages but no specific package - allow cross-package booking
+        return false;
+      }
     } else {
-      // Single package mode or no specific package - lock if any package has booked it
-      const isLocked = lockedTimeSlots.some(lockedSlot =>
+      // Single package mode - lock if any package has booked it
+      return lockedTimeSlots.some(lockedSlot =>
         lockedSlot.selectedDate === slot.date &&
         lockedSlot.selectedTime === slot.time
       );
-      console.log('🔒 isSlotLocked (single package or no packageId):', { slot: `${slot.date} ${slot.time}`, hasMultiplePackages, packageId, isLocked, lockedTimeSlots });
-      return isLocked;
     }
   };
 
@@ -720,6 +721,7 @@ export function EnhancedSchedule({
                         <div className="schedule-slot__actions">
                           {slot.isAvailable ? (
                             // Single package: show locked button if slot is locked
+                            // For multiple packages, don't show locked button - package-specific validation happens later
                             !hasMultiplePackages && isSlotLocked(slot) ? (
                               <button
                                 disabled
