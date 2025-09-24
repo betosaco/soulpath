@@ -1144,6 +1144,12 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
         isDuplicate: isTimeSlotBookedByPackage(schedule.selectedDate, schedule.selectedTime, packageId)
       });
 
+      // VALIDATION: Check if package has reached session limit
+      if (isPackageAtMaxSessions(packageId)) {
+        toast.error('This package has reached its maximum number of sessions. Please select a different package.');
+        return;
+      }
+
       // VALIDATION: Check for duplicate booking
       if (isTimeSlotBookedByPackage(schedule.selectedDate, schedule.selectedTime, packageId)) {
         toast.error('This package has already booked this time slot. Please select a different package.');
