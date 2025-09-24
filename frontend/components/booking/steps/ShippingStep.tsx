@@ -39,8 +39,10 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CountryInput } from '@/components/ui/CountryInput';
+import { CityInput } from '@/components/ui/CityInput';
+import { ProvinceInput } from '@/components/ui/ProvinceInput';
+import { DistrictInput } from '@/components/ui/DistrictInput';
 import { toast } from 'sonner';
 import { useBookingFlow } from '../hooks/useBookingFlow';
 import { useCart } from '@/store/appStore';
@@ -348,25 +350,17 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
           fullWidth: true
         })}
 
-        {/* City/Province Field - Changes based on country */}
+        {/* City Field - Changes based on country */}
         {formData.country === 'PE' ? (
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">
-              Province <span className="text-red-500">*</span>
-            </Label>
-            <Select
-              value={formData.peruProvince || 'LMA'}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, peruProvince: value }))}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select province" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="LMA">Lima Metropolitana</SelectItem>
-                <SelectItem value="CAL">Callao</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <CityInput
+            label="City"
+            required={true}
+            value={formData.city || 'Lima'}
+            onChange={(cityCode) => setFormData(prev => ({ ...prev, city: cityCode }))}
+            placeholder="Select city"
+            error={errors.city}
+            defaultCityCode="Lima"
+          />
         ) : (
           renderFormField({
             name: 'city',
@@ -377,43 +371,40 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
           })
         )}
 
-        {/* State/District Field - Changes based on country */}
-        {formData.country === 'PE' ? (
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">
-              District <span className="text-red-500">*</span>
-            </Label>
-            <Select
-              value={formData.peruDistrict || 'MIR'}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, peruDistrict: value }))}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select district" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="MIR">Miraflores</SelectItem>
-                <SelectItem value="SAN">San Isidro</SelectItem>
-                <SelectItem value="SUR">Surco</SelectItem>
-                <SelectItem value="LAP">La Molina</SelectItem>
-                <SelectItem value="PUE">Pueblo Libre</SelectItem>
-                <SelectItem value="JES">Jesús María</SelectItem>
-                <SelectItem value="LIN">Lince</SelectItem>
-                <SelectItem value="MAG">Magdalena</SelectItem>
-                <SelectItem value="BRE">Breña</SelectItem>
-                <SelectItem value="CHI">Chorrillos</SelectItem>
-                <SelectItem value="LUR">Lurín</SelectItem>
-                <SelectItem value="PUN">Punta Negra</SelectItem>
-                <SelectItem value="PUC">Pucusana</SelectItem>
-                <SelectItem value="SAN_MAR">San Martín de Porres</SelectItem>
-                <SelectItem value="SAN_MIG">San Miguel</SelectItem>
-                <SelectItem value="SANTA_AN">Santa Anita</SelectItem>
-                <SelectItem value="SANTIAGO">Santiago de Surco</SelectItem>
-                <SelectItem value="VILLA_EL">Villa El Salvador</SelectItem>
-                <SelectItem value="VILLA_MAR">Villa María del Triunfo</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        ) : (
+        {/* Province Field - Only for Peru */}
+        {formData.country === 'PE' && (
+          <ProvinceInput
+            label="Province"
+            required={true}
+            value={formData.peruProvince || 'LMA'}
+            onChange={(provinceCode) => setFormData(prev => ({ ...prev, peruProvince: provinceCode }))}
+            placeholder="Select province"
+            error={errors.peruProvince}
+            defaultProvinceCode="LMA"
+          />
+        )}
+
+        {/* District Field - Only for Peru */}
+        {formData.country === 'PE' && (
+          <DistrictInput
+            label="District"
+            required={true}
+            value={formData.peruDistrict || 'MIR'}
+            onChange={(districtCode, postalCode) => {
+              setFormData(prev => ({ 
+                ...prev, 
+                peruDistrict: districtCode,
+                postalCode: postalCode || prev.postalCode
+              }));
+            }}
+            placeholder="Select district"
+            error={errors.peruDistrict}
+            defaultDistrictCode="MIR"
+          />
+        )}
+
+        {/* State Field - Only for non-Peru countries */}
+        {formData.country !== 'PE' && (
           renderFormField({
             name: 'state',
             label: 'State',
