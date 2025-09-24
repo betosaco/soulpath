@@ -132,7 +132,8 @@ export function EnhancedSchedule({
 
   // Enhanced slot click handler that clears conflicts
   const handleSlotClickWithConflictClear = (slot: ScheduleSlot, event?: React.MouseEvent) => {
-    // If there's only one package, prevent clicking on locked slots
+    // For multiple packages, allow cross-package booking (different packages can book same slot)
+    // For single package, prevent clicking on locked slots
     if (!hasMultiplePackages && isSlotLocked(slot)) {
       console.log('🚫 Slot is locked for single package, cannot be selected:', slot);
       return;
@@ -172,11 +173,21 @@ export function EnhancedSchedule({
 
   // Check if a slot is locked for a specific package
   const isSlotLocked = (slot: ScheduleSlot, packageId?: string) => {
-    return lockedTimeSlots.some(lockedSlot =>
-      lockedSlot.selectedDate === slot.date &&
-      lockedSlot.selectedTime === slot.time &&
-      (!packageId || lockedSlot.packageId === packageId)
-    );
+    // For multiple packages, only lock if the specific package has booked the slot
+    // For single package, lock if any package has booked the slot
+    if (hasMultiplePackages && packageId) {
+      return lockedTimeSlots.some(lockedSlot =>
+        lockedSlot.selectedDate === slot.date &&
+        lockedSlot.selectedTime === slot.time &&
+        lockedSlot.packageId === packageId
+      );
+    } else {
+      // Single package mode or no specific package - lock if any package has booked it
+      return lockedTimeSlots.some(lockedSlot =>
+        lockedSlot.selectedDate === slot.date &&
+        lockedSlot.selectedTime === slot.time
+      );
+    }
   };
 
   // Check if a slot is currently selected

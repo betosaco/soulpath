@@ -174,14 +174,26 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
    * Prevents users from booking the same time slot multiple times
    * Combines cart bookings and existing user bookings from database
    */
-  // Only lock slots that are booked by the user (from userBookings)
+  // Lock slots that are booked by the user (from userBookings) AND current cart bookings
   const lockedTimeSlots = React.useMemo(() => {
-    return userBookings.map(booking => ({
+    const userBookingsSlots = userBookings.map(booking => ({
       selectedDate: booking.selectedDate,
       selectedTime: booking.selectedTime,
-      packageId: booking.packageId
+      packageId: booking.packageId || 'unknown'
     }));
-  }, [userBookings]);
+
+    const cartBookingsSlots = cartItems
+      .filter(item => item.type === 'package' && item.bookingDetails)
+      .flatMap(item => 
+        (item.bookingDetails || []).map(booking => ({
+          selectedDate: booking.selectedDate!,
+          selectedTime: booking.selectedTime!,
+          packageId: item.id
+        }))
+      );
+
+    return [...userBookingsSlots, ...cartBookingsSlots];
+  }, [userBookings, cartItems]);
 
   // Show which packages have booked each slot (for visual indication)
   const packageBookings = React.useMemo(() => {
@@ -310,8 +322,8 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
         closeCart(); // Close cart when modal opens
         setPendingScheduleData(scheduleData);
         // Capture click position for modal placement
-        const clickX = event ? event.clientX : 100;
-        const clickY = event ? event.clientY : 100;
+        const clickX = event ? (event as unknown as React.MouseEvent).clientX : 100;
+        const clickY = event ? (event as unknown as React.MouseEvent).clientY : 100;
         console.log('🎯 Capturing click position:', { clickX, clickY, hasEvent: !!event });
         setModalPosition({ x: clickX, y: clickY });
         setShowPackageModal(true);
@@ -361,8 +373,8 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
       closeCart(); // Close cart when modal opens
       setPendingScheduleData(scheduleData);
       // Capture click position for modal placement
-      const clickX = event ? event.clientX : 100;
-      const clickY = event ? event.clientY : 100;
+      const clickX = event ? (event as unknown as React.MouseEvent).clientX : 100;
+      const clickY = event ? (event as unknown as React.MouseEvent).clientY : 100;
       console.log('🎯 Capturing click position (add-more):', { clickX, clickY, hasEvent: !!event });
       setModalPosition({ x: clickX, y: clickY });
       setShowPackageModal(true);
@@ -378,7 +390,7 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
    * @param time - Slot time
    * @returns True if slot is locked
    */
-  const isTimeSlotLocked = (date: string, time: string): boolean => {
+  const isTimeSlotLocked = (_date: string, _time: string): boolean => {
     // Check if user has already booked this slot with any package
     // Note: This is a general check - package-specific validation happens elsewhere
     // For now, we'll allow multiple packages to book the same slot
@@ -411,20 +423,6 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
     );
   };
 
-  const getPackagesThatBookedSlot = (date: string, time: string) => {
-    return cartItems
-      .filter(item => item.type === 'package' && item.bookingDetails)
-      .filter(item => 
-        (item.bookingDetails || []).some(booking =>
-          booking.selectedDate === date && booking.selectedTime === time
-        )
-      )
-      .map(item => ({
-        id: item.id,
-        name: item.name,
-        color: `hsl(${(item.id.charCodeAt(0) * 137.5) % 360}, 70%, 50%)` // Generate color based on ID
-      }));
-  };
 
   /**
    * GET AVAILABLE PACKAGES FOR SLOT
