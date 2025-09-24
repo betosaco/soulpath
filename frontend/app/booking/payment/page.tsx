@@ -27,7 +27,6 @@
 
 import { AppShell } from '@/components/AppShell';
 import { PaymentStep } from '@/components/booking/steps/PaymentStep';
-import { BookingLayout } from '@/components/booking/layout/BookingLayout';
 
 /**
  * BOOKING PAYMENT PAGE COMPONENT
@@ -39,9 +38,9 @@ import { BookingLayout } from '@/components/booking/layout/BookingLayout';
 export default function PaymentPage() {
   return (
     <AppShell>
-      <BookingLayout showStepIndicator={false}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <PaymentStep />
-      </BookingLayout>
+      </div>
     </AppShell>
   );
 }
