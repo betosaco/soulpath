@@ -54,6 +54,7 @@ interface PackageSelectionModalProps {
   /** Available packages for booking */
   availablePackages: Array<{
     id: string;
+    originalId?: string; // Original package ID for business logic
     name: string;
     sessions: number;
     bookingDetails?: Array<{
@@ -122,10 +123,13 @@ export function PackageSelectionModal({
    * ------------------------
    * Handles when user selects a package for booking
    *
-   * @param packageId - The selected package ID
+   * @param packageId - The selected package ID (unique key)
+   * @param originalId - The original package ID for business logic
    */
-  const handlePackageSelect = (packageId: string) => {
-    onPackageSelected(packageId, scheduleData);
+  const handlePackageSelect = (packageId: string, originalId?: string) => {
+    // Use originalId if available, otherwise fall back to packageId
+    const actualPackageId = originalId || packageId;
+    onPackageSelected(actualPackageId, scheduleData);
     onClose();
   };
 
@@ -138,7 +142,8 @@ export function PackageSelectionModal({
    * @returns Package card JSX
    */
   const renderPackageCard = (pkg: any) => {
-    const remaining = getPackageRemainingSessions(pkg.id);
+    const actualPackageId = pkg.originalId || pkg.id;
+    const remaining = getPackageRemainingSessions(actualPackageId);
     const booked = pkg.bookingDetails?.length || 0;
     const total = pkg.sessions || 1;
     const progressPercentage = (booked / total) * 100;
@@ -146,7 +151,7 @@ export function PackageSelectionModal({
     return (
       <button
         key={pkg.id}
-        onClick={() => handlePackageSelect(pkg.id)}
+        onClick={() => handlePackageSelect(pkg.id, pkg.originalId)}
         className="w-full p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition-all duration-200 text-left group"
         title={`Select ${pkg.name} for this booking`}
       >

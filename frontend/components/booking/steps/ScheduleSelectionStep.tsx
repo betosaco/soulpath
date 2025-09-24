@@ -613,8 +613,9 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
         availablePackages={pendingScheduleData ? getAvailablePackagesForSlot(
           pendingScheduleData.selectedDate,
           pendingScheduleData.selectedTime
-        ).map(pkg => ({
-          id: pkg.id,
+        ).map((pkg, index) => ({
+          id: `${pkg.id}-${index}`, // Ensure unique keys by combining ID with index
+          originalId: pkg.id, // Keep original ID for business logic
           name: pkg.name,
           sessions: pkg.sessions || 1,
           bookingDetails: pkg.bookingDetails
