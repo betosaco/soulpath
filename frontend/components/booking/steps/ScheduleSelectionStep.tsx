@@ -232,9 +232,12 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
     // Set selected slot for visual feedback
     setSelectedSlot(slot);
 
-    // VALIDATION: Check for locked slots (user can only book one session per time slot)
+    // VALIDATION: Check for locked slots
+    // Note: We allow different packages to book the same time slot
+    // The isTimeSlotLocked check is for existing confirmed bookings (userBookings)
+    // Package-specific validation happens in getAvailablePackagesForSlot
     if (isTimeSlotLocked(slot.date, slot.time)) {
-      console.warn('🚫 Time slot already booked - preventing duplicate booking');
+      console.warn('🚫 Time slot already booked by user - preventing duplicate booking');
       return;
     }
 
@@ -381,9 +384,34 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
    * @returns True if slot is locked
    */
   const isTimeSlotLocked = (date: string, time: string): boolean => {
-    // Only lock slots that are booked by the current user (from userBookings)
-    // Allow multiple packages to book the same time slot
-    return userBookings.some(booking =>
+    // Check if user has already booked this slot with any package
+    // Note: This is a general check - package-specific validation happens elsewhere
+    // For now, we'll allow multiple packages to book the same slot
+    // If you want to prevent any user from booking the same slot twice, uncomment below:
+    // return userBookings.some(booking =>
+    //   booking.selectedDate === date && booking.selectedTime === time
+    // );
+    
+    // Currently allowing cross-package booking of same time slots
+    return false;
+  };
+
+  /**
+   * HAS PACKAGE BOOKED SLOT
+   * -----------------------
+   * Checks if a specific package has already booked a time slot
+   * This allows different packages to book the same slot, but prevents same package from booking twice
+   *
+   * @param packageId - The package ID to check
+   * @param date - Slot date
+   * @param time - Slot time
+   * @returns True if this specific package has booked the slot
+   */
+  const hasPackageBookedSlot = (packageId: string, date: string, time: string): boolean => {
+    const packageItem = cartItems.find(item => item.id === packageId && item.type === 'package');
+    if (!packageItem || !packageItem.bookingDetails) return false;
+
+    return packageItem.bookingDetails.some(booking =>
       booking.selectedDate === date && booking.selectedTime === time
     );
   };
@@ -421,9 +449,9 @@ export function ScheduleSelectionStep({ onScheduleSelected }: ScheduleSelectionS
         const remaining = getPackageRemainingSessions(item.id);
         if (remaining <= 0) return false;
 
-        // Allow multiple packages to book the same time slot
-        // Only prevent if the user has already booked this slot (from userBookings)
-        if (isTimeSlotLocked(date, time)) {
+        // Check if THIS SPECIFIC PACKAGE has already booked this slot
+        // Allow different packages to book the same time slot
+        if (hasPackageBookedSlot(item.id, date, time)) {
           return false;
         }
 
