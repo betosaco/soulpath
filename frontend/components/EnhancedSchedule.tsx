@@ -15,7 +15,7 @@ import {
   Lock
 } from 'lucide-react';
 import Image from 'next/image';
-import './EnhancedSchedule.css';
+// import './EnhancedSchedule.css'; // TODO: Re-enable CSS import after fixing SSR issues
 
 interface Teacher {
   id: number;
@@ -66,6 +66,7 @@ interface EnhancedScheduleProps {
   startDate?: Date;
   endDate?: Date;
   onSlotsChange?: (slots: ScheduleSlot[]) => void;
+  selectedSlot?: ScheduleSlot | null;
   existingBookings?: Array<{
     selectedDate: string;
     selectedTime: string;
@@ -94,7 +95,8 @@ export function EnhancedSchedule({
   maxBookingsPerSlot = 1,
   reloadTrigger,
   showFilters = true,
-  hasMultiplePackages = false
+  hasMultiplePackages = false,
+  selectedSlot = null
 }: EnhancedScheduleProps) {
   console.log('🔍 EnhancedSchedule render - startDate:', startDate, 'endDate:', endDate);
   console.log('🔍 EnhancedSchedule - lockedTimeSlots:', lockedTimeSlots);
@@ -170,11 +172,19 @@ export function EnhancedSchedule({
 
   // Check if a slot is locked for a specific package
   const isSlotLocked = (slot: ScheduleSlot, packageId?: string) => {
-    return lockedTimeSlots.some(lockedSlot => 
-      lockedSlot.selectedDate === slot.date && 
+    return lockedTimeSlots.some(lockedSlot =>
+      lockedSlot.selectedDate === slot.date &&
       lockedSlot.selectedTime === slot.time &&
       (!packageId || lockedSlot.packageId === packageId)
     );
+  };
+
+  // Check if a slot is currently selected
+  const isSlotSelected = (slot: ScheduleSlot) => {
+    return selectedSlot &&
+           selectedSlot.date === slot.date &&
+           selectedSlot.time === slot.time &&
+           selectedSlot.id === slot.id;
   };
 
 
@@ -615,7 +625,7 @@ export function EnhancedSchedule({
                         key={slot.id}
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className={`schedule-slot card-base card-hover hover-scale ${!slot.isAvailable ? 'schedule-slot--unavailable' : ''} ${isSlotBooked(slot) ? 'schedule-slot--booked opacity-75' : ''} ${!hasMultiplePackages && isSlotLocked(slot) ? 'schedule-slot--locked opacity-75' : ''}`}
+                        className={`schedule-slot card-base card-hover hover-scale ${!slot.isAvailable ? 'schedule-slot--unavailable' : ''} ${isSlotBooked(slot) ? 'schedule-slot--booked opacity-75' : ''} ${!hasMultiplePackages && isSlotLocked(slot) ? 'schedule-slot--locked opacity-75' : ''} ${isSlotSelected(slot) ? 'schedule-slot--selected ring-2 ring-green-500 ring-opacity-75' : ''}`}
                       >
                         <div className="schedule-slot__header">
                           <div className="flex items-center gap-2 mb-2">

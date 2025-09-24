@@ -3,14 +3,15 @@
 import React from 'react';
 import { XMarkIcon, PlusIcon, MinusIcon, TrashIcon, CalendarDaysIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useCart, useCartUI } from '@/store/appStore';
 import { toast } from 'sonner';
-import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CartBookingDetails } from './CartBookingDetails';
 // import { toast } from 'sonner';
 
 export function CartSidebar() {
+  const router = useRouter();
   const {
     items: cartItems,
     updateQuantity,
@@ -326,56 +327,40 @@ export function CartSidebar() {
                       if (typeof window !== 'undefined') {
                         sessionStorage.removeItem('isDirectCheckout');
                         
-                        // Check if user is already on schedule page
+                        // Check if user is already on schedule page or booking schedule page
                         const currentPath = window.location.pathname;
                         const isOnSchedulePage = currentPath === '/schedule';
+                        const isOnBookingSchedulePage = currentPath.startsWith('/booking/schedule');
                         
                         console.log('🔍 Book Now clicked - currentPath:', currentPath, 'isOnSchedulePage:', isOnSchedulePage);
                         console.log('🔍 Package items:', packageItems.length, packageItems.map(p => ({ id: p.id, name: p.name })));
                         
-                        if (isOnSchedulePage) {
-                          // Already on schedule page - set up session storage for modal and close sidecart
-                          if (packageItems.length > 1) {
-                            // Multiple packages - show modal for package selection
-                            sessionStorage.setItem('isAddingMoreBookings', 'true');
-                            sessionStorage.setItem('bookingFlowType', 'add-more-bookings');
-                            sessionStorage.removeItem('addingToPackageId');
-                            console.log('🔍 Multiple packages - will show modal for package selection');
-                          } else if (packageItems.length === 1) {
-                            // Single package - set specific package ID
-                            sessionStorage.setItem('isAddingMoreBookings', 'true');
-                            sessionStorage.setItem('bookingFlowType', 'add-more-bookings');
-                            sessionStorage.setItem('addingToPackageId', packageItems[0].id);
-                            console.log('🔍 Single package - setting addingToPackageId:', packageItems[0].id);
-                          }
+                        if (isOnSchedulePage || isOnBookingSchedulePage) {
+                          // Already on schedule page - just close cart and let user continue booking
+                          console.log('🔍 Already on schedule page - just closing cart');
                           closeCart();
                         } else {
-                          // Not on schedule page - set up session storage and navigate
-                          console.log('🔍 Not on schedule page - setting up navigation to /schedule');
-                          if (packageItems.length > 0) {
-                            sessionStorage.setItem('isAddingMoreBookings', 'true');
-                            sessionStorage.setItem('bookingFlowType', 'add-more-bookings');
-                            // Only set specific package ID if there's only one package
-                            if (packageItems.length === 1) {
-                              sessionStorage.setItem('addingToPackageId', packageItems[0].id);
-                              console.log('🔍 Single package - setting addingToPackageId:', packageItems[0].id);
-                            } else {
-                              // Multiple packages - don't set specific package ID, let schedule page show modal
-                              sessionStorage.removeItem('addingToPackageId');
-                              console.log('🔍 Multiple packages - removed addingToPackageId');
-                            }
-                          }
-                          // Navigate to schedule page
-                          console.log('🔍 Closing cart and navigating to /schedule');
+                          // Not on schedule page - navigate directly to new booking flow
+                          console.log('🔍 Not on schedule page - navigating to new booking flow');
+                          console.log('🔍 Closing cart - navigating to booking flow');
                           closeCart();
-                          
-                          // Navigate to unified booking flow
+
+                          // Navigate directly to booking schedule step for "Add More Bookings" scenario
+                          let bookingUrl = '/booking/schedule?flowType=add-more';
+                          if (packageItems.length === 1) {
+                            bookingUrl += `&packageId=${packageItems[0].id}`;
+                            console.log('🔍 Single package - navigating to:', bookingUrl);
+                          } else {
+                            console.log('🔍 Multiple packages - navigating to:', bookingUrl);
+                          }
+
                           try {
-                            console.log('🔍 Attempting navigation to /schedule...');
-                            window.location.href = '/schedule';
+                            console.log('🔍 Attempting navigation to booking flow...');
+                            router.push(bookingUrl);
                           } catch (error) {
                             console.error('🔍 Navigation error:', error);
-                            window.location.replace('/schedule');
+                            // Fallback to window.location if router fails
+                            window.location.href = bookingUrl;
                           }
                         }
                       }
@@ -422,10 +407,10 @@ export function CartSidebar() {
                         closeCart();
                       }
                     } else {
-                      // Navigate to checkout and close cart
-                      console.log('📍 Navigating to checkout page with directCheckout=true');
+                      // Navigate to new booking flow customer-info step with direct checkout
+                      console.log('📍 Navigating to customer-info step with isDirectCheckout=true');
                       closeCart();
-                      window.location.href = '/checkout?directCheckout=true';
+                      window.location.href = '/booking/customer-info?isDirectCheckout=true';
                     }
                   }}
                 >

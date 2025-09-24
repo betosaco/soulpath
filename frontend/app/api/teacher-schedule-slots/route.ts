@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma, withConnection } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
@@ -52,20 +52,16 @@ export async function GET(request: NextRequest) {
       dateEnd = new Date(endDate);
       dateEnd.setHours(23, 59, 59, 999); // Include the entire end date
     } else {
-      // Default to current week
+      // Default to next 14 days from now (current time)
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const startOfWeek = new Date(today);
-      const dayOfWeek = today.getDay();
-      const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Sunday = 0, so 6 days to Monday
-      startOfWeek.setDate(today.getDate() - daysToMonday);
 
-      dateStart = startOfWeek;
-      dateEnd = new Date(startOfWeek);
-      dateEnd.setDate(startOfWeek.getDate() + 7); // Show one week
-      
+      dateStart = new Date(now); // Start from current time, not beginning of day
+      dateEnd = new Date(today);
+      dateEnd.setDate(today.getDate() + 14); // Show next 14 days
+
       // Set timezone to UTC to match database
-      dateStart.setUTCHours(0, 0, 0, 0);
+      dateStart.setUTCHours(dateStart.getUTCHours(), dateStart.getUTCMinutes(), dateStart.getUTCSeconds(), dateStart.getUTCMilliseconds());
       dateEnd.setUTCHours(23, 59, 59, 999);
     }
 
@@ -85,8 +81,9 @@ export async function GET(request: NextRequest) {
     
     console.log('🔍 Where clause:', JSON.stringify(whereClause, null, 2));
 
-    // Fetch schedule slots from database
-    const slots = await prisma.teacherScheduleSlot.findMany({
+    // Fetch schedule slots from database with connection management
+    const slots = await withConnection(async () => {
+      return await prisma.teacherScheduleSlot.findMany({
       where: whereClause,
       include: {
         teacherSchedule: {
@@ -127,6 +124,7 @@ export async function GET(request: NextRequest) {
       orderBy: [
         { startTime: 'asc' }
       ]
+    });
     });
 
     // Transform the data to match the expected format - display EST times (UTC-5)

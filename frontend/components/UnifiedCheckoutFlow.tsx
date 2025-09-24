@@ -1,8 +1,10 @@
 'use client';
 
 import React from 'react';
-import { MasterBookingFlow } from './MasterBookingFlow';
+import { useRouter } from 'next/navigation';
 import { AppShell } from '@/components/AppShell';
+import { CustomerInfoStep } from './booking/steps/CustomerInfoStep';
+import { BookingLayout } from './booking/layout/BookingLayout';
 
 interface UnifiedCheckoutFlowProps {
   onCheckoutComplete?: (orderData: {
@@ -17,27 +19,45 @@ interface UnifiedCheckoutFlowProps {
 
 /**
  * UnifiedCheckoutFlow - Entry point for the unified booking and checkout experience
- * 
- * This component now serves as a wrapper around MasterBookingFlow, providing
- * the complete booking and checkout experience in a single, coherent flow.
- * 
+ *
+ * This component now serves as a wrapper around the new modular booking system,
+ * providing direct checkout when the cart is ready for payment.
+ *
  * Features:
- * - Unified package and product selection
- * - Integrated scheduling for packages
+ * - Direct checkout for ready-to-pay carts
  * - Customer information collection
  * - Conditional shipping address collection
  * - Payment processing
  * - Order confirmation
  */
 function UnifiedCheckoutFlowContent({
-  onCheckoutComplete,
+  onCheckoutComplete: _onCheckoutComplete,
   isDirectCheckout = false
 }: UnifiedCheckoutFlowProps) {
+  const router = useRouter();
+
+  // Handle redirect for non-direct checkout scenarios
+  React.useEffect(() => {
+    if (!isDirectCheckout) {
+      router.push('/packages/enhanced');
+    }
+  }, [isDirectCheckout, router]);
+
+  // Don't render anything if not direct checkout
+  if (!isDirectCheckout) {
+    return null;
+  }
+
+  const handleDataSaved = (_data: any) => {
+    // Navigate to shipping step
+    router.push('/booking/shipping?isDirectCheckout=true');
+  };
+
   return (
     <AppShell showFooter={false}>
-      <div className="min-h-screen bg-gray-50 py-8">
-        <MasterBookingFlow onCheckoutComplete={onCheckoutComplete} isDirectCheckout={isDirectCheckout} />
-      </div>
+      <BookingLayout>
+        <CustomerInfoStep onDataSaved={handleDataSaved} />
+      </BookingLayout>
     </AppShell>
   );
 }

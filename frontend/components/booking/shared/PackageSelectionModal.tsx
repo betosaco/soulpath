@@ -1,0 +1,232 @@
+/**
+ * ========================================================================================
+ * PACKAGE SELECTION MODAL COMPONENT
+ * ========================================================================================
+ *
+ * PURPOSE:
+ * --------
+ * Modal component that allows users to select which package should be used for booking
+ * when multiple packages are available for the same time slot.
+ *
+ * FEATURES:
+ * - Shows all packages that can book the selected time slot
+ * - Displays package details (name, sessions remaining, progress)
+ * - Allows cross-package booking (different packages can book same slot)
+ * - Prevents same package from booking duplicate slots
+ *
+ * BUSINESS RULES:
+ * - Cross-package booking ALLOWED: Different packages can book same time slot
+ * - Duplicate prevention: Same package cannot book same slot twice
+ * - Session limits: Only packages with remaining sessions are shown
+ */
+
+'use client';
+
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { X, Package, Calendar, Clock } from 'lucide-react';
+
+/**
+ * PACKAGE SELECTION MODAL PROPS
+ * -----------------------------
+ * Props for the PackageSelectionModal component
+ */
+interface PackageSelectionModalProps {
+  /** Whether the modal is open */
+  isOpen: boolean;
+  /** Callback to close the modal */
+  onClose: () => void;
+  /** The selected schedule data */
+  scheduleData: {
+    selectedDate: string;
+    selectedTime: string;
+    teacher: string;
+    serviceType: string;
+    venue: string;
+    scheduleSlotId: number;
+  };
+  /** Available packages for booking */
+  availablePackages: Array<{
+    id: string;
+    name: string;
+    sessions: number;
+    bookingDetails?: Array<{
+      selectedDate?: string;
+      selectedTime?: string;
+      teacher?: string;
+      dayOfWeek?: string;
+      serviceType?: string;
+      venue?: string;
+      scheduleSlotId?: number;
+    }>;
+  }>;
+  /** Callback when a package is selected */
+  onPackageSelected: (packageId: string, scheduleData: any) => void;
+  /** Function to get remaining sessions for a package */
+  getPackageRemainingSessions: (packageId: string) => number;
+}
+
+/**
+ * PACKAGE SELECTION MODAL COMPONENT
+ * ---------------------------------
+ * Modal for selecting which package to use for booking
+ *
+ * @param props - Component props
+ * @returns React component
+ */
+export function PackageSelectionModal({
+  isOpen,
+  onClose,
+  scheduleData,
+  availablePackages,
+  onPackageSelected,
+  getPackageRemainingSessions
+}: PackageSelectionModalProps) {
+  // Don't render if not open
+  if (!isOpen) return null;
+
+  /**
+   * HANDLE PACKAGE SELECTION
+   * ------------------------
+   * Handles when user selects a package for booking
+   *
+   * @param packageId - The selected package ID
+   */
+  const handlePackageSelect = (packageId: string) => {
+    onPackageSelected(packageId, scheduleData);
+    onClose();
+  };
+
+  /**
+   * RENDER PACKAGE CARD
+   * -------------------
+   * Renders an individual package option
+   *
+   * @param pkg - Package data
+   * @returns Package card JSX
+   */
+  const renderPackageCard = (pkg: any) => {
+    const remaining = getPackageRemainingSessions(pkg.id);
+    const booked = pkg.bookingDetails?.length || 0;
+    const total = pkg.sessions || 1;
+    const progressPercentage = (booked / total) * 100;
+
+    return (
+      <button
+        key={pkg.id}
+        onClick={() => handlePackageSelect(pkg.id)}
+        className="w-full p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition-all duration-200 text-left group"
+        title={`Select ${pkg.name} for this booking`}
+      >
+        <div className="flex justify-between items-start">
+          <div className="flex-1">
+            <h4 className="font-semibold text-gray-900 group-hover:text-green-800 mb-2">
+              {pkg.name}
+            </h4>
+
+            <div className="space-y-2 text-sm text-gray-600">
+              <div className="flex items-center space-x-2">
+                <Calendar className="w-4 h-4" />
+                <span>{booked} / {total} sessions booked</span>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Clock className="w-4 h-4" />
+                <span>{remaining} sessions remaining</span>
+              </div>
+            </div>
+
+            {/* Progress bar */}
+            <div className="mt-3">
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${progressPercentage}%` }}
+                ></div>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                {Math.round(progressPercentage)}% complete
+              </p>
+            </div>
+          </div>
+
+          <div className="text-right ml-4">
+            <div className="text-green-600 font-bold text-lg">
+              {remaining}
+            </div>
+            <div className="text-xs text-gray-500">
+              available
+            </div>
+          </div>
+        </div>
+      </button>
+    );
+  };
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
+        {/* Modal */}
+        <div className="bg-white rounded-lg shadow-2xl max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Select Package for Booking
+              </h3>
+              <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center space-x-2 text-blue-800">
+                  <Calendar className="w-4 h-4" />
+                  <span className="text-sm font-medium">
+                    {scheduleData.selectedDate} at {scheduleData.selectedTime}
+                  </span>
+                </div>
+                <div className="text-xs text-blue-600 mt-1">
+                  {scheduleData.serviceType} with {scheduleData.teacher}
+                </div>
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
+
+          {/* Content */}
+          <div className="p-6">
+            <p className="text-gray-600 mb-4">
+              You have multiple packages available. Which package would you like to use for this booking?
+            </p>
+
+            <div className="space-y-3">
+              {availablePackages.map(renderPackageCard)}
+
+              {availablePackages.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <p>No packages available for this time slot.</p>
+                  <p className="text-sm">All packages have either reached capacity or already booked this slot.</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="flex justify-end space-x-3 p-6 border-t border-gray-200">
+            <Button
+              variant="outline"
+              onClick={onClose}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}

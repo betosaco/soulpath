@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { PackageIcon, CalendarIcon, ShoppingCart, Clock as ClockIcon } from 'lucide-react';
 
 
-import { MasterBookingFlow } from '@/components/MasterBookingFlow';
 import { AppShell } from '@/components/AppShell';
 
 interface Package {
@@ -34,7 +33,6 @@ interface Package {
 export default function PackagesPage() {
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showPurchaseFlow, setShowPurchaseFlow] = useState(false);
 
   useEffect(() => {
     fetchPackages();
@@ -69,27 +67,11 @@ export default function PackagesPage() {
     );
   }
 
-  if (showPurchaseFlow) {
-    return (
-      <AppShell>
-        <div className="container mx-auto p-6">
-          <div className="mb-6">
-            <Button
-              variant="outline"
-              onClick={() => setShowPurchaseFlow(false)}
-              className="mb-4 border-[#2a2a4a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white"
-            >
-              ← Back to Packages
-            </Button>
-          </div>
-          <MasterBookingFlow onCheckoutComplete={(orderData) => {
-            console.log('Package purchase completed:', orderData);
-            setShowPurchaseFlow(false);
-          }} />
-        </div>
-      </AppShell>
-    );
-  }
+  // Handle navigation to booking flow when purchase is initiated
+  const handlePurchasePackage = (pkg: Package) => {
+    // Navigate to package selection step with the selected package
+    window.location.href = `/booking/packages?packageId=${pkg.id}`;
+  };
 
   return (
     <AppShell>
@@ -158,9 +140,9 @@ export default function PackagesPage() {
               )}
 
               <div className="pt-4">
-                <Button 
+                <Button
                   className="w-full bg-[#ffd700] text-black hover:bg-[#ffd700]/90"
-                  onClick={() => setShowPurchaseFlow(true)}
+                  onClick={() => handlePurchasePackage(pkg)}
                 >
                   <ShoppingCart className="w-4 h-4 mr-2" />
                   Purchase Package

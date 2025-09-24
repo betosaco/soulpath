@@ -1,4 +1,4 @@
-const { sendOrderConfirmationEmail } = require('./lib/send-order-confirmation-email.ts');
+import { sendOrderConfirmationEmail } from './lib/send-order-confirmation-email.ts';
 
 // Test data for group booking email
 const testGroupBookingData = {
