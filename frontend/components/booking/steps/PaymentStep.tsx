@@ -36,11 +36,13 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 import { useBookingFlow } from '../hooks/useBookingFlow';
 import { useCart, useAppStore } from '@/store/appStore';
 import { TermsAndConditionsModal } from '../../TermsAndConditionsModal';
-import { CreditCard, Clock, User, MapPin, Calendar, CheckCircle, AlertCircle, Mail, Phone } from 'lucide-react';
+import { CreditCard, Clock, User, MapPin, Calendar, CheckCircle, AlertCircle, Mail, Phone, Edit } from 'lucide-react';
 
 /**
  * PAYMENT STEP PROPS
@@ -81,6 +83,13 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
   // ============================================================================
   // HOOKS AND STATE MANAGEMENT
   // ============================================================================
+
+  /**
+   * ROUTER
+   * ------
+   * For navigation to customer info page
+   */
+  const router = useRouter();
 
   /**
    * BOOKING FLOW STATE
@@ -273,6 +282,15 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
     setTermsAccepted(true);
     setShowTermsModal(false);
     toast.success('Terms and conditions accepted');
+  };
+
+  /**
+   * HANDLE EDIT CUSTOMER INFO
+   * -------------------------
+   * Navigates back to customer info page for editing
+   */
+  const handleEditCustomerInfo = () => {
+    router.push('/booking/customer-info');
   };
 
 
@@ -518,10 +536,21 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
             {customerData && (
               <Card className="unified-card">
                 <CardHeader>
-                  <CardTitle className="unified-card__title flex items-center">
-                    <User className="w-5 h-5 mr-2" />
-                    Customer Information
-                  </CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="unified-card__title flex items-center">
+                      <User className="w-5 h-5 mr-2" />
+                      Customer Information
+                    </CardTitle>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleEditCustomerInfo}
+                      className="flex items-center space-x-1 text-blue-600 border-blue-200 hover:bg-blue-50"
+                    >
+                      <Edit className="w-4 h-4" />
+                      <span>Edit</span>
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="bg-gray-50 p-4 rounded-lg">
