@@ -676,41 +676,8 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
             </div>
           </div>
 
-          {/* Column 2: Price and Order Summary */}
+          {/* Column 2: Order Summary */}
           <div className="space-y-6">
-            {/* Price Breakdown */}
-            <Card className="unified-card">
-              <CardContent>
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                  <div className="space-y-2 text-sm">
-                    {/* Subtotal */}
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Subtotal:</span>
-                      <span className="font-medium text-gray-900">
-                        {cartItems.length > 0 && cartItems[0].currency} {(getTotalPrice() / 1.18).toFixed(2)}
-                      </span>
-                    </div>
-                    
-                    {/* IGV (18%) */}
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">IGV (18%):</span>
-                      <span className="font-medium text-gray-900">
-                        {cartItems.length > 0 && cartItems[0].currency} {(getTotalPrice() - (getTotalPrice() / 1.18)).toFixed(2)}
-                      </span>
-                    </div>
-                    
-                    {/* Total */}
-                    <div className="flex justify-between items-center pt-2 border-t border-gray-300">
-                      <span className="text-lg font-semibold text-gray-900">Total:</span>
-                      <span className="text-xl font-bold text-green-600">
-                        {cartItems.length > 0 && cartItems[0].currency} {getTotalPrice().toFixed(2)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Order Summary */}
             <div>
               {renderOrderSummary()}
