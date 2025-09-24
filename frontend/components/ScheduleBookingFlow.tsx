@@ -317,6 +317,24 @@ export function ScheduleBookingFlow({
     console.log('🔍 Modal state changed - showPackageSelection:', showPackageSelection, 'selectedScheduleForPackage:', selectedScheduleForPackage?.id);
   }, [showPackageSelection, selectedScheduleForPackage]);
 
+  // Prevent body scroll when modal is open
+  React.useEffect(() => {
+    if (showPackageSelection) {
+      // Prevent body scroll
+      document.body.style.overflow = 'hidden';
+      // Scroll to top of page
+      window.scrollTo(0, 0);
+    } else {
+      // Restore body scroll
+      document.body.style.overflow = 'unset';
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [showPackageSelection]);
+
   // Debug cart changes and force re-evaluation of package modal logic
   React.useEffect(() => {
     const packageItems = cartItems?.filter(item => item.type === 'package') || [];
@@ -1595,8 +1613,8 @@ export function ScheduleBookingFlow({
 
       {/* Package Selection Modal */}
       {showPackageSelection && selectedScheduleForPackage && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50" style={{ top: 0, left: 0, right: 0, bottom: 0, paddingTop: '10vh' }}>
+          <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Select Package for Booking</h3>
               <div className="text-sm text-gray-500">
