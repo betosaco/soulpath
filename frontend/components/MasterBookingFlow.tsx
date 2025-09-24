@@ -194,6 +194,7 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
   const [currentStep, setCurrentStep] = useState(() => {
     // FLOW DETECTION LOGIC:
     // - Check isDirectCheckout prop (when coming from cart with all sessions booked)
+    // - Check for "add more bookings" scenario (packages in cart + sessionStorage flags)
     // - Fall back to initialStep prop (0=packages, 1=schedule)
 
     console.log('🔍 FLOW DETECTION - Initial render:', {
@@ -205,6 +206,17 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
     if (isDirectCheckout) {
       console.log('🔍 SCENARIO D: Direct checkout - routing to customer info step');
       return 2; // SCENARIO D: Go directly to customer info step
+    }
+
+    // SCENARIO C: Add more bookings - check for packages in cart and sessionStorage flags
+    if (typeof window !== 'undefined') {
+      const isAddingMore = sessionStorage.getItem('isAddingMoreBookings') === 'true';
+      const hasPackagesInCart = cartItems && cartItems.some(item => item.type === 'package');
+      
+      if (isAddingMore && hasPackagesInCart) {
+        console.log('🔍 SCENARIO C: Add more bookings detected - routing to schedule step');
+        return 1; // SCENARIO C: Go to schedule step for adding more bookings
+      }
     }
 
     console.log('🔍 Using initialStep prop:', initialStep);
@@ -338,10 +350,10 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
   }, []); // Empty dependency array - only run once after hydration
 
   /**
-   * SCENARIO C: ADD MORE BOOKINGS DETECTION
-   * ------------------------------------------
+   * SCENARIO C: ADD MORE BOOKINGS DETECTION (MOUNT)
+   * ------------------------------------------------
    * Detects when user clicks "Book Now" from cart and activates add more bookings mode.
-   * This happens on component mount and when cart state changes.
+   * This runs on component mount to detect sessionStorage flags.
    */
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -362,24 +374,12 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
         setFlowType('package-first'); // Adding more is always package-first
         setCurrentStep(1); // Route to schedule step
 
-        // LOCKED SLOTS: Load from cart to prevent duplicate bookings
-        const existingLockedSlots = cartItems
-          .filter(item => item.type === 'package' && item.bookingDetails)
-          .flatMap(item =>
-            (item.bookingDetails || []).map(booking => ({
-              selectedDate: booking.selectedDate || '',
-              selectedTime: booking.selectedTime || '',
-              packageId: item.id
-            }))
-          );
-        setLockedTimeSlots(existingLockedSlots);
-
         // CLEANUP: Clear sessionStorage flags after activation
         sessionStorage.removeItem('isAddingMoreBookings');
         sessionStorage.removeItem('addingToPackageId');
         sessionStorage.removeItem('bookingFlowType');
         
-        console.log('🔒 Locked slots loaded for add more bookings:', existingLockedSlots.length);
+        console.log('✅ Add more bookings flow activated');
       }
       else if (detectedFlowType) {
         // SCENARIO A/B: Initial flow type detection
@@ -400,7 +400,29 @@ export function MasterBookingFlow({ onCheckoutComplete, initialStep = 0, isDirec
         }
       }
     }
-  }, [cartItems]); // Re-run when cart changes to update locked slots
+  }, []); // Run only on mount
+
+  /**
+   * SCENARIO C: LOCKED SLOTS UPDATE
+   * --------------------------------
+   * Updates locked slots when cart items change (for add more bookings mode).
+   */
+  useEffect(() => {
+    if (isAddingMoreBookings && cartItems) {
+      // LOCKED SLOTS: Load from cart to prevent duplicate bookings
+      const existingLockedSlots = cartItems
+        .filter(item => item.type === 'package' && item.bookingDetails)
+        .flatMap(item =>
+          (item.bookingDetails || []).map(booking => ({
+            selectedDate: booking.selectedDate || '',
+            selectedTime: booking.selectedTime || '',
+            packageId: item.id
+          }))
+        );
+      setLockedTimeSlots(existingLockedSlots);
+      console.log('🔒 Locked slots updated for add more bookings:', existingLockedSlots.length);
+    }
+  }, [cartItems, isAddingMoreBookings]); // Re-run when cart changes
 
   /**
    * SCENARIO C: REAL-TIME FLOW ACTIVATION
