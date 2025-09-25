@@ -1043,7 +1043,7 @@ async function main() {
       create: {
         orderNumber: `ORD-${Date.now()}-001`,
         customerId: clients[0].id,
-        customerName: clients[0].fullName,
+        customerName: clients[0].fullName || 'Unknown Customer',
         customerEmail: clients[0].email,
         customerPhone: clients[0].phone,
         billingDocumentType: 'boleta_simple',
@@ -1061,7 +1061,7 @@ async function main() {
       create: {
         orderNumber: `ORD-${Date.now()}-002`,
         customerId: clients[1].id,
-        customerName: clients[1].fullName,
+        customerName: clients[1].fullName || 'Unknown Customer',
         customerEmail: clients[1].email,
         customerPhone: clients[1].phone,
         billingDocumentType: 'boleta_simple',

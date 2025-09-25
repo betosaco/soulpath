@@ -129,6 +129,6 @@
             "analyze:css": "node scripts/simple-css-comparison.js",
             "test:rendering": "node scripts/test-rendering-differences.js",
             "postinstall": "prisma generate",
-            "build:vercel": "prisma generate && next build"
+            "build:vercel": "npx prisma generate && npm run build"
       }
 }
