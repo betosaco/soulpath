@@ -36,7 +36,9 @@ export function ModernStateManagementExample() {
       id: pkg.id.toString(),
       name: pkg.packageDefinition.name,
       price: pkg.price,
-      image: '/placeholder-package.jpg',
+      image: pkg.packageDefinition.name?.includes('MATPASS') 
+        ? '/matpass-logo.png' 
+        : '/placeholder-package.jpg',
       currency: pkg.currency?.code || 'S/.',
       type: 'package',
       sessions: pkg.packageDefinition.sessionsCount || 1,

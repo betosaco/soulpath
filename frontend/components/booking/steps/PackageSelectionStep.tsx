@@ -332,7 +332,9 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
       id: pkg.id.toString(),
       name: pkg.packageDefinition.name,
       price: pkg.price,
-      image: '/placeholder-package.jpg',
+      image: pkg.packageDefinition.name?.includes('MATPASS') 
+        ? '/matpass-logo.png' 
+        : '/placeholder-package.jpg',
       currency: 'S/.',
       type: 'package' as const,
       sessions: pkg.packageDefinition.sessionsCount || 1,
@@ -496,6 +498,13 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
    * Displays available packages for selection
    */
   const renderPackagesGrid = () => {
+    // Debug: Log all package names
+    console.log('🔍 All packages in PackageSelectionStep:', packages?.map(p => ({
+      id: p.id,
+      name: p.packageDefinition?.name,
+      type: p.packageDefinition?.packageType
+    })));
+    
     // Show loading state while packages are being fetched (initial load or refetch)
     if (packagesLoading) {
       return (

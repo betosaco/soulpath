@@ -314,23 +314,6 @@ export default function ProductPage() {
               <p className="text-gray-700 leading-relaxed">{product.description}</p>
             </div>
 
-            {/* Product Specifications */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {product.weight && (
-                <div>
-                  <h4 className="font-semibold text-gray-900">Weight</h4>
-                  <p className="text-gray-600">{product.weight} kg</p>
-                </div>
-              )}
-              {product.dimensions && (
-                <div>
-                  <h4 className="font-semibold text-gray-900">Dimensions</h4>
-                  <p className="text-gray-600">{product.dimensions}</p>
-                </div>
-              )}
-            </div>
-
-
             {/* Quantity and Add to Cart */}
             <div className="space-y-4">
               <div className="flex items-center space-x-4">
@@ -387,6 +370,22 @@ export default function ProductPage() {
                   View Cart ({getTotalItems()})
                 </Button>
               </div>
+            </div>
+
+            {/* Product Specifications */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {product.weight && (
+                <div>
+                  <h4 className="font-semibold text-gray-900">Weight</h4>
+                  <p className="text-gray-600">{product.weight} kg</p>
+                </div>
+              )}
+              {product.dimensions && (
+                <div>
+                  <h4 className="font-semibold text-gray-900">Dimensions</h4>
+                  <p className="text-gray-600">{product.dimensions}</p>
+                </div>
+              )}
             </div>
 
             {/* Stock Status */}

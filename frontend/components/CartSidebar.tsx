@@ -132,10 +132,14 @@ export function CartSidebar() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.2, delay: index * 0.05 }}
                   >
-                    <div className="flex items-center space-x-3 p-3 border border-green-300 rounded-lg bg-white">
+                    <div className="relative flex items-center space-x-3 p-3 border border-green-300 rounded-lg bg-white">
                       <div className="flex-shrink-0">
                         <Image
-                          src={item.image || '/images/products/yoga-journal-1.jpg'}
+                          src={
+                            item.name?.includes('MATPASS') 
+                              ? '/matpass-logo.png' 
+                              : (item.image || '/images/products/yoga-journal-1.jpg')
+                          }
                           alt={item.name}
                           width={60}
                           height={60}
