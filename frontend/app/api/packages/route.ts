@@ -1,44 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma, withConnection } from '@/lib/prisma';
-import { addCorsHeaders, handleCorsPreflight } from '@/lib/cors';
+import { PrismaClient } from '@prisma/client';
 import { cache, cacheKeys, cacheTTL } from '@/lib/redis';
 
-export async function OPTIONS() {
-  return handleCorsPreflight();
-}
+const prisma = new PrismaClient();
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const activeOnly = searchParams.get('active') !== 'false'; // Default to true
-  const currency = searchParams.get('currency') || 'PEN';
-  
   try {
-    console.log('🔍 GET /api/packages - Fetching active packages...');
+    const { searchParams } = new URL(request.url);
+    const activeOnly = searchParams.get('active') !== 'false'; // Default to true
+    const currency = searchParams.get('currency') || 'PEN';
 
-    // Generate cache key
-    const cacheKey = cacheKeys.packages(currency, activeOnly);
+    console.log('🔍 GET /api/packages - Fetching packages...');
+
+    // Create cache key
+    const cacheKey = `packages:${currency}:${activeOnly}`;
     
     // Try to get from cache first
-    const cachedData = await cache.get(cacheKey);
-    if (cachedData) {
-      console.log('✅ Returning cached packages data');
-      return addCorsHeaders(NextResponse.json({
-        success: true,
-        data: cachedData,
-        meta: {
-          currency,
-          total: Array.isArray(cachedData) ? cachedData.length : 0
-        },
-        cached: true
-      }));
+    try {
+      const cachedData = await cache.get(cacheKey);
+      if (cachedData) {
+        console.log('✅ Cache hit for packages:', cacheKey);
+        return NextResponse.json(cachedData);
+      }
+    } catch (error) {
+      console.warn('⚠️ Cache read error:', error);
     }
 
-    // Fetch packages with optimized query
-    const packages = await withConnection(async () => {
-      return await prisma.packageDefinition.findMany({
-      where: {
-        isActive: activeOnly ? true : undefined
-      },
+    console.log('❌ Cache miss for packages:', cacheKey);
+
+    // Try to fetch packages using Prisma with optimized query
+    const packages = await prisma.packageDefinition.findMany({
+      where: activeOnly ? { isActive: true } : {},
       select: {
         id: true,
         name: true,
@@ -46,124 +38,98 @@ export async function GET(request: NextRequest) {
         sessionsCount: true,
         packageType: true,
         maxGroupSize: true,
+        isActive: true,
         isPopular: true,
         featured: true,
         displayOrder: true,
+        createdAt: true,
+        updatedAt: true,
         packagePrices: {
           where: {
-            isActive: true,
-            currency: {
-              code: currency
-            }
+            isActive: true
           },
           select: {
-            id: true,
             price: true,
-            pricingMode: true,
-            isActive: true,
             currency: {
               select: {
-                id: true,
                 code: true,
-                name: true,
                 symbol: true
               }
             }
-          },
-          orderBy: {
-            price: 'asc'
           }
         },
         sessionDuration: {
           select: {
             id: true,
             name: true,
-            duration_minutes: true,
-            description: true
+            duration_minutes: true
           }
         }
       },
-      orderBy: [
-        { displayOrder: 'asc' },
-        { name: 'asc' }
-      ]
-    });
-    });
-
-    // Transform the data to match the expected PackagePrice format
-    const transformedPackages = packages.map(pkg => {
-      // Get the first active price for the specified currency
-      const price = pkg.packagePrices[0];
-      
-      if (!price) {
-        console.warn(`No price found for package ${pkg.name} in currency ${currency}`);
-        return null;
-      }
-
-      return {
-        id: price.id, // Use the price ID, not package ID
-        price: Number(price.price),
-        packageDefinition: {
-          id: pkg.id,
-          name: pkg.name,
-          description: pkg.description || '',
-          sessionsCount: pkg.sessionsCount,
-          isActive: true,
-          packageType: pkg.packageType,
-          maxGroupSize: pkg.maxGroupSize,
-          isPopular: pkg.isPopular,
-          featured: pkg.featured,
-          displayOrder: pkg.displayOrder,
-          sessionDuration: pkg.sessionDuration
-        },
-        currency: {
-          id: price.currency.id,
-          code: price.currency.code,
-          symbol: price.currency.symbol,
-          name: price.currency.name
-        },
-        pricingMode: price.pricingMode,
-        isActive: price.isActive
-      };
-    }).filter(Boolean); // Remove null entries
-
-    console.log(`✅ Found ${transformedPackages.length} active packages with pricing`);
-
-    // Cache the result
-    await cache.set(cacheKey, transformedPackages, cacheTTL.packages);
-
-    return addCorsHeaders(NextResponse.json({
-      success: true,
-      data: transformedPackages,
-      meta: {
-        currency,
-        total: transformedPackages.length
-      }
-    }));
-
-  } catch (error) {
-    console.error('❌ Error in GET /api/packages:', error);
-    console.error('❌ Error details:', {
-      message: error instanceof Error ? error.message : 'Unknown error',
-      name: error instanceof Error ? error.name : 'Unknown',
-      stack: error instanceof Error ? error.stack : 'No stack'
+      orderBy: { displayOrder: 'asc' }
     });
     
-    // Check if it's a database connection error
-    if (error instanceof Error && (
-      error.message.includes('denied access') ||
-      error.message.includes('User was denied access') ||
-      error.message.includes('P1010') ||
-      error.message.includes('PrismaClientInitializationError') ||
-      error.message.includes('Can\'t reach database server') ||
-      error.message.includes('not available during build phase')
-    )) {
-      console.log('🔄 Database unavailable, returning mock packages for development');
+    console.log('Database query result:', { packages });
+    console.log('Packages count:', packages?.length || 0);
+
+    if (!packages) {
+      console.error('Error fetching packages: No packages returned');
       
-      // Return mock packages for development when database is not available
-      const mockPackages = generateMockPackages(currency);
+      // If table doesn't exist or has issues, return mock data
+      console.log('🔄 Database unavailable, returning mock packages');
       
-      return addCorsHeaders(NextResponse.json({
+      const mockPackages = [
+        {
+          id: 1,
+          name: 'Yoga Starter Pack',
+          description: 'Perfect for beginners who want to start their yoga journey',
+          sessionsCount: 4,
+          packageType: 'individual',
+          maxGroupSize: 1,
+          isActive: true,
+          isPopular: false,
+          featured: false,
+          displayOrder: 1,
+          price: 150,
+          currency: currency,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: 2,
+          name: 'Yoga Pro Package',
+          description: 'Advanced package for experienced practitioners',
+          sessionsCount: 8,
+          packageType: 'individual',
+          maxGroupSize: 1,
+          isActive: true,
+          isPopular: true,
+          featured: true,
+          displayOrder: 2,
+          price: 280,
+          currency: currency,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: 3,
+          name: 'Group Yoga Sessions',
+          description: 'Perfect for friends and family to practice together',
+          sessionsCount: 6,
+          packageType: 'group',
+          maxGroupSize: 4,
+          isActive: true,
+          isPopular: false,
+          featured: false,
+          displayOrder: 3,
+          price: 200,
+          currency: currency,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      ];
+
+      return NextResponse.json({
         success: true,
         data: mockPackages,
         meta: {
@@ -171,145 +137,124 @@ export async function GET(request: NextRequest) {
           total: mockPackages.length
         },
         message: 'Using mock data - database unavailable'
-      }));
+      });
     }
-    
-    return addCorsHeaders(NextResponse.json({
+
+    // Transform packages to match expected format
+    const transformedPackages = packages.map(pkg => {
+      // Get the price for the requested currency
+      const packagePrice = pkg.packagePrices?.find(pp => 
+        pp.currency.code === currency
+      ) || pkg.packagePrices?.[0];
+      
+      return {
+        id: pkg.id,
+        price: packagePrice ? Number(packagePrice.price) : 0,
+        currency: packagePrice?.currency?.code || currency,
+        packageDefinition: {
+          id: pkg.id,
+          name: pkg.name,
+          description: pkg.description || '',
+          sessionsCount: pkg.sessionsCount || 1,
+          packageType: pkg.packageType || 'standard',
+          maxGroupSize: pkg.maxGroupSize || 1,
+          isActive: pkg.isActive,
+          isPopular: pkg.isPopular || false,
+          featured: pkg.featured || false,
+          displayOrder: pkg.displayOrder,
+          createdAt: pkg.createdAt,
+          updatedAt: pkg.updatedAt
+        }
+      };
+    });
+
+    console.log(`✅ Found ${transformedPackages.length} packages`);
+
+    const response = {
+      success: true,
+      data: transformedPackages,
+      meta: {
+        currency,
+        total: transformedPackages.length
+      }
+    };
+
+    // Cache the response
+    try {
+      await cache.set(cacheKey, response, cacheTTL.packages);
+      console.log('✅ Cached packages data for key:', cacheKey, 'TTL:', cacheTTL.packages);
+    } catch (error) {
+      console.warn('⚠️ Cache write error:', error);
+    }
+
+    return NextResponse.json(response);
+
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    return NextResponse.json({
       success: false,
-      error: 'Failed to fetch packages',
-      message: 'An error occurred while fetching packages',
+      error: 'Internal server error',
+      message: 'An unexpected error occurred',
       details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : 'Unknown error') : 'Internal server error'
-    }, { status: 500 }));
+    }, { status: 500 });
   }
 }
 
-// Generate mock packages for development
-function generateMockPackages(currency: string) {
-  const currencySymbol = currency === 'PEN' ? 'S/' : '$';
-  const currencyCode = currency;
-  
-  const mockPackages = [
-    {
-      id: 'mock_pkg_1',
-      price: currency === 'PEN' ? 15000 : 150, // 150 PEN or $150
-      packageDefinition: {
-        id: 'pkg_1',
-        name: 'Yoga Starter Pack',
-        description: 'Perfect for beginners who want to start their yoga journey with guided sessions and personalized attention.',
-        sessionsCount: 4,
-        isActive: true,
-        packageType: 'Individual',
-        maxGroupSize: 1,
-        isPopular: false,
-        featured: false,
-        displayOrder: 1,
-        sessionDuration: {
-          id: 'duration_1',
-          name: 'Standard Session',
-          duration_minutes: 60,
-          description: '60-minute yoga session'
-        }
-      },
-      currency: {
-        id: 'curr_1',
-        code: currencyCode,
-        symbol: currencySymbol,
-        name: currency === 'PEN' ? 'Peruvian Sol' : 'US Dollar'
-      },
-      pricingMode: 'FIXED',
-      isActive: true
-    },
-    {
-      id: 'mock_pkg_2',
-      price: currency === 'PEN' ? 28000 : 280, // 280 PEN or $280
-      packageDefinition: {
-        id: 'pkg_2',
-        name: 'Wellness Journey',
-        description: 'A comprehensive wellness package combining yoga, meditation, and mindfulness practices for holistic health.',
-        sessionsCount: 8,
-        isActive: true,
-        packageType: 'Individual',
-        maxGroupSize: 1,
-        isPopular: true,
-        featured: true,
-        displayOrder: 2,
-        sessionDuration: {
-          id: 'duration_2',
-          name: 'Extended Session',
-          duration_minutes: 75,
-          description: '75-minute comprehensive wellness session'
-        }
-      },
-      currency: {
-        id: 'curr_1',
-        code: currencyCode,
-        symbol: currencySymbol,
-        name: currency === 'PEN' ? 'Peruvian Sol' : 'US Dollar'
-      },
-      pricingMode: 'FIXED',
-      isActive: true
-    },
-    {
-      id: 'mock_pkg_3',
-      price: currency === 'PEN' ? 45000 : 450, // 450 PEN or $450
-      packageDefinition: {
-        id: 'pkg_3',
-        name: 'Premium Wellness',
-        description: 'Our most comprehensive package with unlimited sessions, personalized nutrition guidance, and 24/7 support.',
-        sessionsCount: 12,
-        isActive: true,
-        packageType: 'Individual',
-        maxGroupSize: 1,
-        isPopular: false,
-        featured: true,
-        displayOrder: 3,
-        sessionDuration: {
-          id: 'duration_3',
-          name: 'Premium Session',
-          duration_minutes: 90,
-          description: '90-minute premium wellness session'
-        }
-      },
-      currency: {
-        id: 'curr_1',
-        code: currencyCode,
-        symbol: currencySymbol,
-        name: currency === 'PEN' ? 'Peruvian Sol' : 'US Dollar'
-      },
-      pricingMode: 'FIXED',
-      isActive: true
-    },
-    {
-      id: 'mock_pkg_4',
-      price: currency === 'PEN' ? 20000 : 200, // 200 PEN or $200
-      packageDefinition: {
-        id: 'pkg_4',
-        name: 'Group Wellness',
-        description: 'Join our group sessions for a shared wellness experience with friends and like-minded individuals.',
-        sessionsCount: 6,
-        isActive: true,
-        packageType: 'Group',
-        maxGroupSize: 8,
-        isPopular: true,
-        featured: false,
-        displayOrder: 4,
-        sessionDuration: {
-          id: 'duration_4',
-          name: 'Group Session',
-          duration_minutes: 60,
-          description: '60-minute group wellness session'
-        }
-      },
-      currency: {
-        id: 'curr_1',
-        code: currencyCode,
-        symbol: currencySymbol,
-        name: currency === 'PEN' ? 'Peruvian Sol' : 'US Dollar'
-      },
-      pricingMode: 'FIXED',
-      isActive: true
-    }
-  ];
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
 
-  return mockPackages;
+    // Simple validation
+    if (!body.name) {
+      return NextResponse.json({
+        success: false,
+        error: 'Validation failed',
+        message: 'Package name is required'
+      }, { status: 400 });
+    }
+
+    // Try to insert into database
+    const { data, error } = await supabase
+      .from('package_definitions')
+      .insert({
+        name: body.name,
+        description: body.description,
+        sessions_count: body.sessionsCount || 1,
+        package_type: body.packageType || 'standard',
+        max_group_size: body.maxGroupSize || 1,
+        is_active: body.isActive !== false,
+        is_popular: body.isPopular || false,
+        featured: body.featured || false,
+        display_order: body.displayOrder || 0,
+        session_duration_id: body.sessionDurationId || 1,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating package:', error);
+      return NextResponse.json({
+        success: false,
+        error: 'Database error',
+        message: 'Failed to create package',
+        details: error.message
+      }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Package created successfully',
+      data
+    }, { status: 201 });
+
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    return NextResponse.json({
+      success: false,
+      error: 'Internal server error',
+      message: 'An unexpected error occurred'
+    }, { status: 500 });
+  }
 }

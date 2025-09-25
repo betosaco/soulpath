@@ -103,11 +103,15 @@ async function fetchPackagesAPI(currency: string, accessToken?: string): Promise
  * - Optimistic updates support
  */
 export function usePackages(currency: string = 'S/.') {
+  console.log('🚀 usePackagesQuery hook called with currency:', currency);
   const { user } = useAuth();
   
   return useQuery({
     queryKey: queryKeys.packages.list(currency),
-    queryFn: () => fetchPackagesAPI(currency, user?.access_token),
+    queryFn: () => {
+      console.log('🚀 TanStack Query calling fetchPackagesAPI with:', { currency, hasToken: !!user?.access_token });
+      return fetchPackagesAPI(currency, user?.access_token);
+    },
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
     retry: 3,

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { cache, cacheKeys, cacheTTL } from '@/lib/redis';
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,6 +18,24 @@ export async function GET(request: NextRequest) {
     }
 
     console.log('✅ Admin user authenticated:', user.email);
+
+    // Generate cache key for admin dashboard
+    const cacheKey = 'admin:dashboard:summary';
+    
+    // Try to get from cache first
+    try {
+      const cachedData = await cache.get(cacheKey);
+      if (cachedData) {
+        console.log('✅ Cache hit for admin dashboard summary');
+        return NextResponse.json({
+          success: true,
+          data: cachedData,
+          cached: true
+        });
+      }
+    } catch (error) {
+      console.warn('⚠️ Cache read error:', error);
+    }
 
     // Fetch all dashboard statistics in parallel
     const [

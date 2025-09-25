@@ -11,7 +11,7 @@ import { performance } from 'perf_hooks';
 async function testRedisConnection() {
   console.log('🔍 Testing Redis connection...\n');
 
-  const redisUrl = process.env.REDIS_URL || process.env.REDISCLOUD_URL;
+  const redisUrl = process.env.REDIS_URL || process.env.REDIS_REDIS_URL || process.env.REDISCLOUD_URL;
 
   if (!redisUrl) {
     console.log('⚠️  No Redis URL found in environment variables');
@@ -171,13 +171,13 @@ Options:
   --url URL     Override Redis URL
 
 Environment Variables:
-  REDIS_URL           Primary Redis connection URL
+  REDIS_REDIS_URL     Primary Redis connection URL
   REDISCLOUD_URL      Redis Cloud connection URL
 
 Examples:
   node scripts/test-redis.js
   node scripts/test-redis.js --url redis://localhost:6379
-  REDIS_URL=redis://localhost:6379 node scripts/test-redis.js
+  REDIS_REDIS_URL=redis://localhost:6379 node scripts/test-redis.js
 `);
   process.exit(0);
 }
@@ -186,7 +186,7 @@ Examples:
 if (args.includes('--url')) {
   const urlIndex = args.indexOf('--url');
   if (urlIndex + 1 < args.length) {
-    process.env.REDIS_URL = args[urlIndex + 1];
+    process.env.REDIS_REDIS_URL = args[urlIndex + 1];
   }
 }
 

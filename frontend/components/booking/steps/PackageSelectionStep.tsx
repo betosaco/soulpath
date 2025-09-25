@@ -28,7 +28,7 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -42,7 +42,7 @@ import {
 import { toast } from 'sonner';
 import { useBookingFlow } from '../hooks/useBookingFlow';
 import { useCart, useCartUI } from '@/store/appStore';
-import { usePackages } from '@/hooks/usePackagesQuery';
+import { usePackages } from '@/hooks/usePackages';
 
 /**
  * PACKAGE SELECTION STEP PROPS
@@ -87,7 +87,17 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
    * ------------------
    * Access to centralized flow management
    */
-  const bookingFlow = useBookingFlow();
+  let bookingFlow;
+  try {
+    bookingFlow = useBookingFlow();
+  } catch (error) {
+    console.warn('⚠️ PackageSelectionStep: useBookingFlow failed:', error);
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-600">Loading booking flow...</p>
+      </div>
+    );
+  }
   
   // Add safety check for bookingFlow
   if (!bookingFlow) {
@@ -110,7 +120,17 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
    * ---------------
    * Access to cart state and operations
    */
-  const cart = useCart();
+  let cart;
+  try {
+    cart = useCart();
+  } catch (error) {
+    console.warn('⚠️ PackageSelectionStep: useCart failed:', error);
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-600">Loading cart...</p>
+      </div>
+    );
+  }
   
   // Add safety check for cart
   if (!cart) {
@@ -135,7 +155,17 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
    * ------------------
    * Access to cart UI operations
    */
-  const cartUI = useCartUI();
+  let cartUI;
+  try {
+    cartUI = useCartUI();
+  } catch (error) {
+    console.warn('⚠️ PackageSelectionStep: useCartUI failed:', error);
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-600">Loading cart UI...</p>
+      </div>
+    );
+  }
   
   // Add safety check for cartUI
   if (!cartUI) {
@@ -154,19 +184,40 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
    * -------------
    * Access to available packages
    */
-  const packagesQuery = usePackages('S/.');
+  const { packages, loading: packagesLoading, error: packagesError } = usePackages('S/.');
   
-  // Add safety check for packagesQuery
-  if (!packagesQuery) {
-    console.warn('⚠️ PackageSelectionStep: usePackages returned undefined');
+  // Debug packages data
+  console.log('🔍 PackageSelectionStep - Packages state:', {
+    packages,
+    packagesLoading,
+    packagesError,
+    packagesLength: packages?.length,
+    packagesType: typeof packages,
+    packagesIsArray: Array.isArray(packages)
+  });
+
+  // Track if packages have been loaded at least once
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  
+  useEffect(() => {
+    if (packages && packages.length > 0 && !packagesLoading) {
+      setHasLoadedOnce(true);
+      // Show success animation for first load
+      if (!hasLoadedOnce) {
+        console.log('🎉 Packages loaded successfully!');
+      }
+    }
+  }, [packages, packagesLoading, hasLoadedOnce]);
+  
+  // Add safety check for packages
+  if (packagesError) {
+    console.warn('⚠️ PackageSelectionStep: Error loading packages:', packagesError);
     return (
       <div className="text-center py-8">
-        <p className="text-gray-600">Loading packages...</p>
+        <p className="text-red-600">Error loading packages: {packagesError}</p>
       </div>
     );
   }
-  
-  const { data: packages, isLoading: packagesLoading = false, isFetching: packagesFetching = false } = packagesQuery;
 
   // ============================================================================
   // BUSINESS LOGIC - SCHEDULE-FIRST SCENARIO
@@ -446,7 +497,7 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
    */
   const renderPackagesGrid = () => {
     // Show loading state while packages are being fetched (initial load or refetch)
-    if (packagesLoading || packagesFetching) {
+    if (packagesLoading) {
       return (
         <div className="space-y-6">
           {/* Loading Header */}
@@ -455,30 +506,33 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
             <p className="text-gray-600">Loading our yoga packages...</p>
           </div>
           
-          {/* Loading Spinner */}
-          <div className="flex justify-center py-12">
+          {/* Enhanced Loading Animation */}
+          <div className="flex justify-center py-8">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-200 border-t-green-600 mx-auto mb-4"></div>
-              <p className="text-green-600 font-medium">Loading packages...</p>
+              <div className="relative mb-4">
+                <div className="animate-spin rounded-full h-16 w-16 border-4 border-green-100 border-t-green-600 mx-auto"></div>
+                <div className="absolute inset-0 rounded-full h-16 w-16 border-4 border-transparent border-r-green-300 animate-spin" style={{animationDirection: 'reverse', animationDuration: '1.5s'}}></div>
+              </div>
+              <p className="text-green-600 font-medium text-lg animate-pulse">Loading packages...</p>
               <p className="text-sm text-gray-500 mt-1">Please wait while we fetch our available packages</p>
             </div>
           </div>
           
-          {/* Loading Skeleton Cards */}
+          {/* Enhanced Loading Skeleton Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="unified-card animate-pulse">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Card key={i} className="unified-card animate-pulse hover:shadow-md transition-all duration-300" style={{animationDelay: `${i * 100}ms`}}>
                 <CardHeader>
-                  <div className="h-6 bg-gray-200 rounded mb-2"></div>
-                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-6 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg mb-2 animate-pulse"></div>
+                  <div className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-3/4 animate-pulse"></div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <div className="h-8 bg-gray-200 rounded w-20"></div>
-                      <div className="h-4 bg-gray-200 rounded w-16"></div>
+                      <div className="h-8 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg w-20 animate-pulse"></div>
+                      <div className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-16 animate-pulse"></div>
                     </div>
-                    <div className="h-10 bg-gray-200 rounded"></div>
+                    <div className="h-10 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg animate-pulse"></div>
                   </div>
                 </CardContent>
               </Card>
@@ -489,7 +543,7 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
     }
 
     // Show empty state if no packages (only after loading is complete and we have data)
-    if (!packagesLoading && !packagesFetching && packages && Array.isArray(packages) && packages.length === 0) {
+    if (!packagesLoading && packages && Array.isArray(packages) && packages.length === 0) {
       return (
         <div className="text-center py-12">
           <div className="text-gray-400 mb-4">
@@ -502,17 +556,35 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
     }
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-500">
         {/* Packages Header */}
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Available Packages</h2>
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <h2 className="text-2xl font-bold text-gray-900">Available Packages</h2>
+            {packagesLoading && hasLoadedOnce && (
+              <div className="animate-spin rounded-full h-5 w-5 border-2 border-green-200 border-t-green-600"></div>
+            )}
+          </div>
           <p className="text-gray-600">Choose the perfect package for your yoga journey</p>
         </div>
         
-        {/* Packages Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {packages && Array.isArray(packages) && packages.map((pkg: any) => (
-            <Card key={pkg.id} className="unified-card hover:shadow-lg transition-shadow duration-200">
+        {/* Packages Grid with Smooth Animations */}
+        <div className="relative">
+          {packagesLoading && hasLoadedOnce && (
+            <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-10 rounded-lg flex items-center justify-center">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-green-200 border-t-green-600 mx-auto mb-2"></div>
+                <p className="text-sm text-gray-600">Refreshing packages...</p>
+              </div>
+            </div>
+          )}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {packages && Array.isArray(packages) && packages.map((pkg: any, index: number) => (
+            <Card 
+              key={pkg.id} 
+              className="unified-card hover:shadow-lg transition-all duration-300 transform hover:scale-105 animate-in fade-in-50 slide-in-from-bottom-4 hover:animate-pulse"
+              style={{animationDelay: `${index * 100}ms`}}
+            >
               <CardHeader>
                 <CardTitle className="unified-card__title">{pkg.packageDefinition.name}</CardTitle>
                 <p className="unified-card__subtitle">{pkg.packageDefinition.description}</p>
@@ -538,6 +610,7 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
               </CardContent>
             </Card>
           ))}
+          </div>
         </div>
       </div>
     );

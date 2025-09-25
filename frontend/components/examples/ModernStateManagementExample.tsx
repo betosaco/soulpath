@@ -3,7 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ShoppingCart, Package, User, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
-import { usePackages } from '@/hooks/usePackagesQuery';
+import { usePackages } from '@/hooks/usePackages';
 import { useAuthQuery } from '@/hooks/useAuthQuery';
 import { useCart, useCartUI, useUI } from '@/store/appStore';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
  */
 export function ModernStateManagementExample() {
   // TanStack Query hooks for server state
-  const { data: packages, isLoading: packagesLoading, error: packagesError } = usePackages('S/.');
+  const { packages, loading: packagesLoading, error: packagesError } = usePackages('S/.');
   const { user, isLoading: authLoading, isAuthenticated, signIn, signOut } = useAuthQuery();
   
   // Zustand hooks for client state

@@ -314,9 +314,34 @@ function determineCurrentStep(pathname: string, scenario: BookingScenario | null
  * @returns Object containing current flow state and navigation functions
  */
 export function useBookingFlow(): UseBookingFlowReturn {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
+  // Add try-catch wrapper for Next.js hooks to prevent webpack errors
+  let router, searchParams, pathname;
+  
+  try {
+    router = useRouter();
+    searchParams = useSearchParams();
+    pathname = usePathname();
+  } catch (error) {
+    console.warn('⚠️ useBookingFlow: Next.js router hooks failed to initialize:', error);
+    // Return a safe fallback state
+    return {
+      currentStep: 'packages',
+      scenario: null,
+      canGoNext: false,
+      canGoPrevious: false,
+      urlParams: {},
+      goToNextStep: () => console.warn('Router not available'),
+      goToPreviousStep: () => console.warn('Router not available'),
+      goToStep: () => console.warn('Router not available'),
+      isScheduleFirst: false,
+      isPackageFirst: false,
+      isAddMore: false,
+      isMultiPackage: false,
+      isDirectCheckout: false,
+      hasPhysicalProducts: false,
+    };
+  }
+
   const { items: cartItems } = useCart();
 
   // Add safety checks for Next.js hooks

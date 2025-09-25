@@ -20,7 +20,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { EnhancedSchedule } from './EnhancedSchedule';
-import { usePackages, PackagePrice } from '@/hooks/usePackagesQuery';
+import { usePackages, PackagePrice } from '@/hooks/usePackages';
 
 interface PackageInstance extends PackagePrice {
   instanceId: string;
@@ -85,7 +85,7 @@ interface BookingStep {
 }
 
 export function EnhancedPackagesFlow() {
-  const { data: packages, isLoading: packagesLoading, error: packagesError } = usePackages('S/.');
+  const { packages, loading: packagesLoading, error: packagesError } = usePackages('S/.');
   const typedPackages = packages as PackagePrice[] | undefined;
   
   const { language } = useLanguage();

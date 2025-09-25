@@ -2,9 +2,9 @@ import { Redis } from 'ioredis';
 
 // Redis client configuration for Vercel
 const redisConfig = {
-  // Use REDIS_URL if available (Upstash), otherwise use individual components
-  ...(process.env.REDIS_URL ? {
-    url: process.env.REDIS_URL,
+  // Use Vercel's REDIS_URL if available, otherwise fallback to REDIS_REDIS_URL, then individual components
+  ...(process.env.REDIS_URL || process.env.REDIS_REDIS_URL ? {
+    url: process.env.REDIS_URL || process.env.REDIS_REDIS_URL,
   } : {
     host: process.env.REDIS_HOST || 'localhost',
     port: parseInt(process.env.REDIS_PORT || '6379'),
@@ -38,6 +38,24 @@ const redisConfig = {
 };
 
 const redis = new Redis(redisConfig);
+
+// Handle Redis connection errors gracefully
+redis.on('error', (error) => {
+  console.warn('⚠️ Redis connection error (non-critical):', error.message);
+  // Don't throw the error, just log it as Redis is optional
+});
+
+redis.on('connect', () => {
+  console.log('✅ Redis connected successfully');
+});
+
+redis.on('ready', () => {
+  console.log('✅ Redis ready for operations');
+});
+
+redis.on('close', () => {
+  console.log('🔄 Redis connection closed');
+});
 
 // Cache key generators
 export const cacheKeys = {
@@ -94,7 +112,7 @@ export class CacheService {
       console.log(`❌ Cache miss for key: ${key}`);
       return null;
     } catch (error) {
-      console.error(`❌ Redis get error for key ${key}:`, error);
+      console.warn(`⚠️ Redis get error for key ${key} (falling back to no cache):`, error.message);
       return null;
     }
   }
@@ -109,7 +127,7 @@ export class CacheService {
       }
       console.log(`✅ Cached data for key: ${key}${ttl ? ` (TTL: ${ttl}s)` : ''}`);
     } catch (error) {
-      console.error(`❌ Redis set error for key ${key}:`, error);
+      console.warn(`⚠️ Redis set error for key ${key} (cache disabled):`, error.message);
     }
   }
 

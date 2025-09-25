@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
+import { cache, cacheKeys, cacheTTL } from '@/lib/redis';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const prisma = new PrismaClient();
 
 // Zod schema for schedule creation
 const scheduleCreateSchema = z.object({
@@ -24,35 +22,52 @@ export async function GET(request: NextRequest) {
     const dayOfWeek = searchParams.get('day_of_week');
     const available = searchParams.get('available');
 
-    let query = supabase
-      .from('schedule_templates')
-      .select('*')
-      .order('day_of_week', { ascending: true })
-      .order('start_time', { ascending: true });
+    // Generate cache key for schedules
+    const cacheKey = `schedules:${dayOfWeek || 'all'}:${available || 'all'}`;
+    
+    // Try to get from cache first
+    try {
+      const cachedData = await cache.get(cacheKey);
+      if (cachedData) {
+        console.log('✅ Cache hit for schedules:', cacheKey);
+        return NextResponse.json({
+          success: true,
+          data: cachedData,
+          cached: true
+        });
+      }
+    } catch (error) {
+      console.warn('⚠️ Cache read error:', error);
+    }
 
+    // Build where clause for Prisma
+    const where: any = {};
+    
     if (dayOfWeek) {
-      query = query.eq('day_of_week', dayOfWeek);
+      where.dayOfWeek = dayOfWeek;
     }
-
+    
     if (available !== null) {
-      query = query.eq('is_available', available === 'true');
+      where.isAvailable = available === 'true';
     }
 
-    const { data: schedules, error } = await query;
+    // Fetch schedules using Prisma
+    const schedules = await prisma.scheduleTemplate.findMany({
+      where,
+      orderBy: [
+        { dayOfWeek: 'asc' },
+        { startTime: 'asc' }
+      ]
+    });
 
-    if (error) {
-      console.error('Error fetching schedules:', error);
-      return NextResponse.json({
-        success: false,
-        error: 'Database error',
-        message: 'Failed to fetch schedules',
-        details: error.message,
-        toast: {
-          type: 'error',
-          title: 'Database Error',
-          description: 'Failed to fetch schedules. Please try again.'
-        }
-      }, { status: 500 });
+    console.log('✅ Found schedules:', schedules.length);
+
+    // Cache the response
+    try {
+      await cache.set(cacheKey, schedules, cacheTTL.schedules || 1800); // 30 minutes default
+      console.log('✅ Cached schedules data for key:', cacheKey, 'TTL:', cacheTTL.schedules || 1800);
+    } catch (error) {
+      console.warn('⚠️ Cache write error:', error);
     }
 
     return NextResponse.json({
@@ -99,12 +114,12 @@ export async function POST(request: NextRequest) {
     const scheduleData = validation.data;
 
     // Check if schedule already exists
-    const { data: existingSchedule } = await supabase
-      .from('schedule_templates')
-      .select('id')
-      .eq('day_of_week', scheduleData.day_of_week)
-      .eq('start_time', scheduleData.start_time)
-      .single();
+    const existingSchedule = await prisma.scheduleTemplate.findFirst({
+      where: {
+        dayOfWeek: scheduleData.day_of_week,
+        startTime: scheduleData.start_time
+      }
+    });
 
     if (existingSchedule) {
       return NextResponse.json({
@@ -119,35 +134,27 @@ export async function POST(request: NextRequest) {
       }, { status: 409 });
     }
 
-    // Insert schedule into database
-    const { data, error } = await supabase
-      .from('schedule_templates')
-      .insert({
-        day_of_week: scheduleData.day_of_week,
-        start_time: scheduleData.start_time,
-        end_time: scheduleData.end_time,
-        capacity: scheduleData.capacity,
-        is_available: scheduleData.is_available,
-        auto_available: scheduleData.auto_available,
-        session_duration_id: scheduleData.session_duration_id,
-        created_at: new Date().toISOString()
-      })
-      .select()
-      .single();
+    // Create new schedule using Prisma
+    const data = await prisma.scheduleTemplate.create({
+      data: {
+        dayOfWeek: scheduleData.day_of_week,
+        startTime: scheduleData.start_time,
+        endTime: scheduleData.end_time,
+        capacity: scheduleData.capacity || 10,
+        isAvailable: scheduleData.is_available,
+        autoAvailable: scheduleData.auto_available,
+        sessionDurationId: scheduleData.session_duration_id
+      }
+    });
 
-    if (error) {
-      console.error('Error creating schedule:', error);
-      return NextResponse.json({
-        success: false,
-        error: 'Database error',
-        message: 'Failed to create schedule',
-        details: error.message,
-        toast: {
-          type: 'error',
-          title: 'Schedule Creation Failed',
-          description: 'Failed to create schedule. Please try again.'
-        }
-      }, { status: 500 });
+    console.log('✅ Created schedule:', data.id);
+
+    // Invalidate schedules cache when new schedule is created
+    try {
+      await cache.del('schedules:*');
+      console.log('✅ Invalidated schedules cache after creating new schedule');
+    } catch (error) {
+      console.warn('⚠️ Cache invalidation error:', error);
     }
 
     return NextResponse.json({
@@ -157,7 +164,7 @@ export async function POST(request: NextRequest) {
       toast: {
         type: 'success',
         title: 'Success!',
-        description: `Schedule for ${data.day_of_week} at ${data.start_time} created successfully`
+        description: `Schedule for ${data.dayOfWeek} at ${data.startTime} created successfully`
       }
     }, { status: 201 });
 

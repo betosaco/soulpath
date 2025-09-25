@@ -5,14 +5,13 @@ import { useRouter } from 'next/navigation';
 import { AppShell } from '@/components/AppShell';
 import { PackageSelectionStep } from '@/components/booking/steps/PackageSelectionStep';
 import { BookingLayout } from '@/components/booking/layout/BookingLayout';
-import { usePackages } from '@/hooks/usePackagesQuery';
+import { usePackages } from '@/hooks/usePackages';
 
 export default function EnhancedPackagesPage() {
   const router = useRouter();
   
   // Check if packages are loading to show page-level loading state
-  const packagesQuery = usePackages('S/.');
-  const { isLoading: packagesLoading, isFetching: packagesFetching } = packagesQuery || {};
+  const { loading: packagesLoading } = usePackages('S/.');
 
   // This page serves as an entry point for package browsing
   // Users can browse packages and add multiple packages to cart
@@ -23,7 +22,7 @@ export default function EnhancedPackagesPage() {
   };
 
   // Show page-level loading state while packages are being fetched
-  if (packagesLoading || packagesFetching) {
+  if (packagesLoading) {
     return (
       <AppShell>
         <div className="min-h-screen bg-gray-50">

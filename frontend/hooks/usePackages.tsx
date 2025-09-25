@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from './useAuth';
+import { useAuth } from '@/store/appStore';
 import { toast } from 'sonner';
 import { safeGet } from '@/lib/safe-fetch';
 
@@ -55,7 +55,15 @@ export interface UsePackagesReturn {
 }
 
 export function usePackages(currency: string = 'S/.'): UsePackagesReturn {
-  const { user } = useAuth();
+  let user;
+  try {
+    const authData = useAuth();
+    user = authData.user;
+  } catch (error) {
+    console.warn('⚠️ usePackages: useAuth failed:', error);
+    user = null;
+  }
+  
   const [packages, setPackages] = useState<PackagePrice[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

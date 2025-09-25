@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { cache, cacheKeys, cacheTTL } from '@/lib/redis';
 
 const prisma = new PrismaClient();
 
@@ -16,6 +17,25 @@ export async function GET(request: NextRequest) {
     const sortOrder = searchParams.get('sortOrder') || 'desc';
 
     console.log('🛒 Query params:', { page, limit, search, category, status, sortBy, sortOrder });
+
+    // Generate cache key for admin products
+    const cacheKey = `admin:products:${page}:${limit}:${search}:${category}:${status}:${sortBy}:${sortOrder}`;
+    
+    // Try to get from cache first
+    try {
+      const cachedData = await cache.get(cacheKey);
+      if (cachedData) {
+        console.log('✅ Cache hit for admin products:', cacheKey);
+        return NextResponse.json({
+          success: true,
+          data: cachedData.data,
+          pagination: cachedData.pagination,
+          cached: true
+        });
+      }
+    } catch (error) {
+      console.warn('⚠️ Cache read error:', error);
+    }
 
     const skip = (page - 1) * limit;
 
@@ -70,7 +90,7 @@ export async function GET(request: NextRequest) {
 
     console.log('🛒 Found products:', products.length, 'Total:', total);
 
-    return NextResponse.json({
+    const response = {
       success: true,
       data: products,
       pagination: {
@@ -79,7 +99,17 @@ export async function GET(request: NextRequest) {
         total,
         pages: Math.ceil(total / limit)
       }
-    });
+    };
+
+    // Cache the response
+    try {
+      await cache.set(cacheKey, response, cacheTTL.products);
+      console.log('✅ Cached admin products data for key:', cacheKey, 'TTL:', cacheTTL.products);
+    } catch (error) {
+      console.warn('⚠️ Cache write error:', error);
+    }
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error('Error fetching products:', error);
     return NextResponse.json(
@@ -149,6 +179,14 @@ export async function POST(request: NextRequest) {
         slug: productSlug
       }
     });
+
+    // Invalidate products cache when new product is created
+    try {
+      await cache.del('admin:products:*');
+      console.log('✅ Invalidated admin products cache after creating new product');
+    } catch (error) {
+      console.warn('⚠️ Cache invalidation error:', error);
+    }
 
     return NextResponse.json({
       success: true,

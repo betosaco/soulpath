@@ -7,7 +7,7 @@ let redis: ReturnType<typeof createClient> | null = null;
 async function getRedisClient() {
   if (!redis) {
     redis = createClient({
-      url: process.env.REDIS_URL || process.env.REDISCLOUD_URL || 'redis://localhost:6379'
+      url: process.env.REDIS_URL || process.env.REDIS_REDIS_URL || process.env.REDISCLOUD_URL || 'redis://localhost:6379'
     });
 
     redis.on('error', (err) => {
