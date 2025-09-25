@@ -1,95 +1,29 @@
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  outputFileTracingRoot: path.resolve(__dirname),
   typescript: {
-    // !! WARN !!
-    // Dangerously allow production builds to successfully complete even if
-    // your project has type errors.
-    // !! WARN !!
     ignoreBuildErrors: true,
   },
   eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
   experimental: {
-    // Enable experimental features if needed
-    optimizeCss: false, // Disable CSS optimization to prevent purging issues
+    optimizeCss: false,
   },
-  // Enable CSS generation but prevent differences
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
-  // Note: swcMinify is deprecated in Next.js 15+, minification is handled by webpack config
-  // Disable CSS optimization completely
+  productionBrowserSourceMaps: false,
   webpack: (config, { dev, isServer }) => {
     // Configure webpack to handle module resolution
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@': path.resolve(__dirname),
+      '@': require('path').resolve(__dirname),
     };
-
-    // Configure CSS handling to prevent differences between localhost and production
-    if (!isServer) {
-      config.optimization = {
-        ...config.optimization,
-        minimize: false, // Disable minification to prevent differences
-        usedExports: false, // Disable tree shaking
-        sideEffects: false, // Disable side effects detection
-        splitChunks: {
-          ...config.optimization.splitChunks,
-          chunks: 'all',
-          minSize: 20000,
-          maxSize: 244000,
-          cacheGroups: {
-            ...config.optimization.splitChunks.cacheGroups,
-            default: {
-              minChunks: 1,
-              priority: -20,
-              reuseExistingChunk: true,
-            },
-            vendor: {
-              test: /[\\/]node_modules[\\/]/,
-              name: 'vendors',
-              priority: -10,
-              chunks: 'all',
-            },
-            styles: {
-              name: 'styles',
-              test: /\.(css|scss|sass)$/,
-              chunks: 'all',
-              enforce: true,
-            },
-          },
-        },
-      };
-
-      // Add performance hints to reduce preload warnings
-      config.performance = {
-        ...config.performance,
-        hints: false, // Disable performance hints that can cause preload warnings
-      };
-      
-      // Disable CSS optimization plugins that cause differences
-      config.plugins = config.plugins.filter(plugin => {
-        return !plugin.constructor.name.includes('CssMinimizer') && 
-               !plugin.constructor.name.includes('OptimizeCssAssets');
-      });
-    }
-
+    
+    // Disable source maps completely
+    config.devtool = false;
+    
     return config;
-  },
-  // Optimize bundle and prevent preload warnings
-  // Disable webpack bundle analyzer warnings
-  generateBuildId: async () => {
-    return 'build-' + Date.now();
   },
   // Content Security Policy and CORS configuration
   async headers() {
@@ -179,4 +113,3 @@ const nextConfig = {
 };
 
 export default nextConfig;
-
