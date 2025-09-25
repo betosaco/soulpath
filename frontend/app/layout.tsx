@@ -3,6 +3,7 @@ import { poppins, roboto } from './fonts';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/lib/theme/ThemeProvider';
+import { Providers } from '@/lib/providers';
 
 export const metadata: Metadata = {
   title: 'MatMax Yoga Studio',
@@ -55,9 +56,11 @@ export default function RootLayout({
         poppins.variable,
         roboto.variable
       )}>
-        <ThemeProvider initialTheme="light">
-          {children}
-        </ThemeProvider>
+        <Providers>
+          <ThemeProvider initialTheme="light">
+            {children}
+          </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );

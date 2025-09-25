@@ -905,7 +905,8 @@ export function ScheduleBookingFlow({
           teacher: slot.teacher,
           dayOfWeek: slot.dayOfWeek,
           serviceType: slot.serviceType,
-          venue: slot.venue
+          venue: slot.venue,
+          scheduleSlotId: slot.id
         }));
       }
       

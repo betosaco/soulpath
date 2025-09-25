@@ -45,6 +45,8 @@ interface DepartmentInputProps {
   label?: string;
   /** Whether the field is required */
   required?: boolean;
+  /** Internal required flag */
+  _required?: boolean;
   /** Current value of the input */
   value: string;
   /** Callback when value changes */

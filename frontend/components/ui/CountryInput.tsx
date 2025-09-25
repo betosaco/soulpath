@@ -40,12 +40,16 @@ interface CountryInputProps {
   label?: string;
   /** Whether the field is required */
   required?: boolean;
+  /** Internal required flag */
+  _required?: boolean;
   /** Current country code value (e.g., 'PE', 'US') */
   value: string;
   /** Callback when country changes */
   onChange: (countryCode: string) => void;
   /** Placeholder text for the country input */
   placeholder?: string;
+  /** Internal placeholder */
+  _placeholder?: string;
   /** Whether the input is disabled */
   disabled?: boolean;
   /** Error message to display */

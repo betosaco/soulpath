@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma, withConnection } from '@/lib/prisma';
 import { addCorsHeaders, handleCorsPreflight } from '@/lib/cors';
+import { cache, cacheKeys, cacheTTL } from '@/lib/redis';
 
 export async function OPTIONS() {
   return handleCorsPreflight();
@@ -14,7 +15,25 @@ export async function GET(request: NextRequest) {
   try {
     console.log('🔍 GET /api/packages - Fetching active packages...');
 
-    // Fetch packages with all pricing information
+    // Generate cache key
+    const cacheKey = cacheKeys.packages(currency, activeOnly);
+    
+    // Try to get from cache first
+    const cachedData = await cache.get(cacheKey);
+    if (cachedData) {
+      console.log('✅ Returning cached packages data');
+      return addCorsHeaders(NextResponse.json({
+        success: true,
+        data: cachedData,
+        meta: {
+          currency,
+          total: Array.isArray(cachedData) ? cachedData.length : 0
+        },
+        cached: true
+      }));
+    }
+
+    // Fetch packages with optimized query
     const packages = await withConnection(async () => {
       return await prisma.packageDefinition.findMany({
       where: {
@@ -109,6 +128,9 @@ export async function GET(request: NextRequest) {
     }).filter(Boolean); // Remove null entries
 
     console.log(`✅ Found ${transformedPackages.length} active packages with pricing`);
+
+    // Cache the result
+    await cache.set(cacheKey, transformedPackages, cacheTTL.packages);
 
     return addCorsHeaders(NextResponse.json({
       success: true,

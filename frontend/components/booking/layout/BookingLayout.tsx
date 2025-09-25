@@ -246,7 +246,7 @@ export function BookingLayout({
    * Renders the visual progress stepper showing completed and current steps
    */
   const renderProgressStepper = () => {
-    if (completedSteps.length === 0) return null;
+    if (!showStepIndicator || completedSteps.length === 0) return null;
     
     return (
       <div className="flex items-center justify-center space-x-2 sm:space-x-4 mb-8">
@@ -310,8 +310,8 @@ export function BookingLayout({
 
   return (
     <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${className}`}>
-      {/* Progress Stepper */}
-      {renderProgressStepper()}
+      {/* Progress Stepper - only show if showStepIndicator is true */}
+      {showStepIndicator && renderProgressStepper()}
 
       {/* Step Content */}
       <div className="mb-8">

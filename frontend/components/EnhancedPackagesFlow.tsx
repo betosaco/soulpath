@@ -240,7 +240,8 @@ export function EnhancedPackagesFlow() {
         teacher: slot.teacher,
         dayOfWeek: slot.dayOfWeek,
         serviceType: slot.serviceType,
-        venue: slot.venue
+        venue: slot.venue,
+        scheduleSlotId: slot.id
       }));
     }
     
@@ -302,7 +303,8 @@ export function EnhancedPackagesFlow() {
         teacher: formData.selectedSchedule.teacher,
         dayOfWeek: formData.selectedSchedule.dayOfWeek,
         serviceType: formData.selectedSchedule.serviceType,
-        venue: formData.selectedSchedule.venue
+        venue: formData.selectedSchedule.venue,
+        scheduleSlotId: formData.selectedSchedule.id
       }));
     }
     

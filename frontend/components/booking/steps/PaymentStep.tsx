@@ -103,7 +103,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
    * ----------
    * Access to cart items, pricing, and order operations
    */
-  const { items: cartItems, getTotalPrice } = useCart();
+  const { items: cartItems, getTotalPrice, clearCart } = useCart();
 
   /**
    * CUSTOMER DATA STATE
@@ -152,28 +152,89 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
       return { isValid: false, error: 'Invalid total price' };
     }
 
-    // Check for duplicate time slots within packages (if any bookings exist)
+    // Check for duplicate time slots within each package individually
     const packageItems = cartItems.filter(item => item.type === 'package');
     if (packageItems.length > 0) {
-      const allBookings = packageItems.flatMap(pkg => pkg.bookingDetails || []);
-      
-      // Only check for duplicates if there are actual bookings
-      if (allBookings.length > 0) {
-        const timeSlots = allBookings.map(booking =>
-          `${booking.selectedDate}-${booking.selectedTime}`
-        );
-        const uniqueTimeSlots = new Set(timeSlots);
+      for (const pkg of packageItems) {
+        const packageBookings = pkg.bookingDetails || [];
+        
+        // Only check for duplicates if this package has bookings
+        if (packageBookings.length > 0) {
+          const timeSlots = packageBookings.map(booking =>
+            `${booking.selectedDate}-${booking.selectedTime}`
+          );
+          const uniqueTimeSlots = new Set(timeSlots);
 
-        if (timeSlots.length !== uniqueTimeSlots.size) {
-          return {
-            isValid: false,
-            error: 'Duplicate time slots detected. Please remove duplicates before checkout.'
-          };
+          // Check for duplicates within this specific package
+          if (timeSlots.length !== uniqueTimeSlots.size) {
+            return {
+              isValid: false,
+              error: `Duplicate time slots detected in package "${pkg.name}". Please remove duplicates before checkout.`
+            };
+          }
         }
       }
     }
 
     return { isValid: true };
+  };
+
+  // ============================================================================
+  // HELPER FUNCTIONS
+  // ============================================================================
+
+  /**
+   * EXTRACT SCHEDULE DETAILS FROM CART ITEMS
+   * ----------------------------------------
+   * Converts bookingDetails from cart items to scheduleDetails format
+   * expected by the order creation API
+   */
+  const extractScheduleDetails = () => {
+    const scheduleDetails: any[] = [];
+    
+    console.log('🔍 Extracting schedule details from cart items:', cartItems);
+    console.log('🔍 Cart items structure:', cartItems.map(item => ({
+      id: item.id,
+      name: item.name,
+      type: item.type,
+      hasBookingDetails: !!item.bookingDetails,
+      bookingDetailsCount: item.bookingDetails?.length || 0,
+      bookingDetails: item.bookingDetails
+    })));
+    
+    cartItems.forEach(item => {
+      console.log('🔍 Processing cart item:', item.name, 'type:', item.type);
+      if (item.type === 'package' && item.bookingDetails && Array.isArray(item.bookingDetails)) {
+        console.log('🔍 Item has bookingDetails:', item.bookingDetails);
+        item.bookingDetails.forEach((booking, index) => {
+          console.log(`🔍 Processing booking ${index}:`, booking);
+          if (booking.scheduleSlotId) {
+            const scheduleDetail = {
+              selectedDate: booking.selectedDate,
+              selectedTime: booking.selectedTime,
+              teacher: booking.teacher,
+              serviceType: booking.serviceType,
+              venue: booking.venue,
+              dayOfWeek: booking.dayOfWeek,
+              scheduleSlotId: booking.scheduleSlotId
+            };
+            console.log('✅ Adding schedule detail:', scheduleDetail);
+            scheduleDetails.push(scheduleDetail);
+          } else {
+            console.log('❌ Booking missing scheduleSlotId:', booking);
+          }
+        });
+      } else {
+        console.log('❌ Item not a package or no bookingDetails:', {
+          isPackage: item.type === 'package',
+          hasBookingDetails: item.bookingDetails && Array.isArray(item.bookingDetails),
+          bookingDetails: item.bookingDetails
+        });
+      }
+    });
+    
+    console.log('📅 Final extracted schedule details:', scheduleDetails);
+    return scheduleDetails;
   };
 
   // ============================================================================
@@ -193,6 +254,26 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
     setPaymentStatus('success');
 
     try {
+      // Extract schedule details from cart items
+      const scheduleDetails = extractScheduleDetails();
+      
+      // Debug: Log cart items to verify they contain bookingDetails
+      console.log('🔍 Cart items being sent to API:', JSON.stringify(cartItems, null, 2));
+      console.log('🔍 Extracted schedule details:', scheduleDetails);
+      
+      // If no schedule details were extracted, log a warning
+      if (scheduleDetails.length === 0) {
+        console.warn('⚠️ No schedule details extracted from cart items!');
+        console.warn('⚠️ This means bookings will not be created in the database.');
+        console.warn('⚠️ Cart items structure:', cartItems.map(item => ({
+          id: item.id,
+          name: item.name,
+          type: item.type,
+          hasBookingDetails: !!item.bookingDetails,
+          bookingDetailsCount: item.bookingDetails?.length || 0
+        })));
+      }
+      
       // Create order in the database
       const orderResponse = await fetch('/api/orders/create-unified', {
         method: 'POST',
@@ -215,13 +296,43 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
             country: shippingData.country
           } : null,
           items: cartItems,
+          totalAmount: getTotalPrice(),
+          currency: 'S/.',
           paymentMethod: 'stripe',
-          paymentIntentId: paymentIntentId
+          paymentIntentId: paymentIntentId,
+          scheduleDetails: scheduleDetails.length > 0 ? scheduleDetails : undefined
         })
       });
 
       if (!orderResponse.ok) {
-        throw new Error('Failed to create order');
+        // Get more detailed error information
+        let errorMessage = 'Failed to create order';
+        try {
+          // Check if response has content before trying to parse JSON
+          const responseText = await orderResponse.text();
+          console.error('❌ Raw error response:', responseText);
+          
+          if (responseText && responseText.trim()) {
+            const errorData = JSON.parse(responseText);
+            errorMessage = errorData.error || errorData.message || errorMessage;
+            const errorDetails = errorData.details || errorData.errorType;
+            console.error('❌ Order creation error details:', errorData);
+            
+            // Provide more specific error message based on status code
+            if (orderResponse.status === 500) {
+              errorMessage = errorDetails ? 
+                `Server error: ${errorDetails}` : 
+                'Server error occurred while creating order. Please try again or contact support.';
+            }
+          } else {
+            console.error('❌ Empty error response body');
+            errorMessage = `Failed to create order (HTTP ${orderResponse.status}: ${orderResponse.statusText})`;
+          }
+        } catch (parseError) {
+          console.error('❌ Could not parse error response:', parseError);
+          errorMessage = `Failed to create order (HTTP ${orderResponse.status}: ${orderResponse.statusText})`;
+        }
+        throw new Error(errorMessage);
       }
 
       const orderResult = await orderResponse.json();
@@ -240,6 +351,10 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
 
       setOrderData(orderInfo);
 
+      // Clear cart immediately after successful payment
+      console.log('🧹 Clearing cart immediately after successful payment');
+      clearCart();
+
       // Call success callback
       onPaymentSuccess?.(paymentIntentId, orderInfo);
 
@@ -249,11 +364,12 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
       // Navigate to confirmation after a brief delay
       setTimeout(() => {
         goToNextStep();
-      }, 2000);
+      }, 1000);
 
     } catch (error) {
       console.error('❌ Error creating order:', error);
-      toast.error('Payment successful but failed to create order. Please contact support.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      toast.error(`Payment successful but failed to create order: ${errorMessage}. Please contact support.`);
       
       // Still set order data with pending status
       const orderInfo: OrderData = {
@@ -271,7 +387,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
       // Navigate to confirmation anyway
       setTimeout(() => {
         goToNextStep();
-      }, 2000);
+      }, 1000);
     }
   };
 
@@ -309,6 +425,26 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
     setPaymentStatus('processing');
 
     try {
+      // Extract schedule details from cart items
+      const scheduleDetails = extractScheduleDetails();
+      
+      // Debug: Log cart items to verify they contain bookingDetails
+      console.log('🔍 Cart items being sent to API:', JSON.stringify(cartItems, null, 2));
+      console.log('🔍 Extracted schedule details:', scheduleDetails);
+      
+      // If no schedule details were extracted, log a warning
+      if (scheduleDetails.length === 0) {
+        console.warn('⚠️ No schedule details extracted from cart items!');
+        console.warn('⚠️ This means bookings will not be created in the database.');
+        console.warn('⚠️ Cart items structure:', cartItems.map(item => ({
+          id: item.id,
+          name: item.name,
+          type: item.type,
+          hasBookingDetails: !!item.bookingDetails,
+          bookingDetailsCount: item.bookingDetails?.length || 0
+        })));
+      }
+      
       // Create order in the database
       const orderResponse = await fetch('/api/orders/create-unified', {
         method: 'POST',
@@ -331,12 +467,42 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
             country: shippingData.country
           } : null,
           items: cartItems,
-          paymentMethod: 'pay_later'
+          totalAmount: getTotalPrice(),
+          currency: 'S/.',
+          paymentMethod: 'pay_later',
+          scheduleDetails: scheduleDetails.length > 0 ? scheduleDetails : undefined
         })
       });
 
       if (!orderResponse.ok) {
-        throw new Error('Failed to create order');
+        // Get more detailed error information
+        let errorMessage = 'Failed to create order';
+        try {
+          // Check if response has content before trying to parse JSON
+          const responseText = await orderResponse.text();
+          console.error('❌ Raw error response:', responseText);
+          
+          if (responseText && responseText.trim()) {
+            const errorData = JSON.parse(responseText);
+            errorMessage = errorData.error || errorData.message || errorMessage;
+            const errorDetails = errorData.details || errorData.errorType;
+            console.error('❌ Order creation error details:', errorData);
+            
+            // Provide more specific error message based on status code
+            if (orderResponse.status === 500) {
+              errorMessage = errorDetails ? 
+                `Server error: ${errorDetails}` : 
+                'Server error occurred while creating order. Please try again or contact support.';
+            }
+          } else {
+            console.error('❌ Empty error response body');
+            errorMessage = `Failed to create order (HTTP ${orderResponse.status}: ${orderResponse.statusText})`;
+          }
+        } catch (parseError) {
+          console.error('❌ Could not parse error response:', parseError);
+          errorMessage = `Failed to create order (HTTP ${orderResponse.status}: ${orderResponse.statusText})`;
+        }
+        throw new Error(errorMessage);
       }
 
       const orderResult = await orderResponse.json();
@@ -355,17 +521,22 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
 
       setOrderData(orderInfo);
 
+      // Clear cart immediately after order confirmation
+      console.log('🧹 Clearing cart immediately after order confirmation');
+      clearCart();
+
       // Show success message
       toast.success('Order confirmed! You will be contacted for payment.');
 
-      // Navigate to confirmation after a brief delay
+      // Navigate to confirmation immediately for faster user experience
       setTimeout(() => {
         goToNextStep();
-      }, 2000);
+      }, 1000);
 
     } catch (error) {
       console.error('❌ Error creating order:', error);
-      toast.error('Failed to create order. Please contact support.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      toast.error(`Failed to create order: ${errorMessage}. Please contact support.`);
       
       // Still set order data with pending status
       const orderInfo: OrderData = {
@@ -383,7 +554,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
       // Navigate to confirmation anyway
       setTimeout(() => {
         goToNextStep();
-      }, 2000);
+      }, 1000);
     }
   };
 

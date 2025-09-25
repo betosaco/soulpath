@@ -202,7 +202,8 @@ export function PackagesBookingFlow() {
       selectedTime: slot.time,
       teacher: slot.teacher,
       dayOfWeek: slot.dayOfWeek,
-      serviceType: slot.serviceType
+      serviceType: slot.serviceType,
+      scheduleSlotId: slot.id
     }));
     
     // Keep sidecart open and redirect to unified checkout

@@ -1,5 +1,9 @@
 {
   "version": 2,
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/.next",
+  "installCommand": "cd frontend && npm install",
+  "devCommand": "cd frontend && npm run dev",
   "framework": "nextjs",
   "env": {
     "NODE_ENV": "production"
@@ -7,17 +11,6 @@
   "build": {
     "env": {
       "NODE_ENV": "production"
-    }
-  },
-  "functions": {
-    "app/api/**/*.ts": {
-      "maxDuration": 30
-    },
-    "app/api/orders/create-unified/route.ts": {
-      "maxDuration": 60
-    },
-    "app/api/telegram/webhook/route.ts": {
-      "maxDuration": 60
     }
   },
   "headers": [

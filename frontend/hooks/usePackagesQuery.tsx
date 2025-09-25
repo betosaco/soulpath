@@ -114,6 +114,9 @@ export function usePackages(currency: string = 'S/.') {
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
+    // Error handling is now done via error boundary or try-catch
+    // Don't provide placeholder data to avoid showing empty state during loading
+    // placeholderData: [],
   });
 }
 

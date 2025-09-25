@@ -1,116 +1,126 @@
-import { createClient } from 'redis';
 import { NextRequest, NextResponse } from 'next/server';
-import { RedisMonitor } from '@/lib/redis';
+import { cache } from '@/lib/redis';
 
 export async function GET(request: NextRequest) {
-  const startTime = Date.now();
-
   try {
-    // Initialize Redis client
-    const redis = createClient({
-      url: process.env.REDIS_URL || process.env.REDISCLOUD_URL || 'redis://localhost:6379'
-    });
+    console.log('🔍 Testing Redis connection...');
 
-    // Connect to Redis
-    await redis.connect();
+    // Test Redis connection
+    const isConnected = await cache.ping();
+    if (!isConnected) {
+      return NextResponse.json({
+        success: false,
+        error: 'Redis connection failed',
+        message: 'Unable to connect to Redis server'
+      }, { status: 500 });
+    }
 
-    // Test Redis operations
-    const testKey = 'test:item';
-    const testValue = JSON.stringify({
-      message: 'Hello from Redis!',
+    // Test cache operations
+    const testKey = 'redis-test-' + Date.now();
+    const testValue = { 
+      message: 'Hello from Redis!', 
       timestamp: new Date().toISOString(),
-      userAgent: request.headers.get('user-agent')
-    });
+      testId: Math.random().toString(36).substring(7)
+    };
 
-    // Set a value
-    await redis.setEx(testKey, 300, testValue); // Expires in 5 minutes
+    // Set test data
+    await cache.set(testKey, testValue, 60); // Cache for 1 minute
 
-    // Get the value
-    const result = await redis.get(testKey);
+    // Get test data
+    const retrievedValue = await cache.get(testKey);
 
-    // Set expiration time
-    const ttl = await redis.ttl(testKey);
+    // Get cache statistics
+    const stats = await cache.getStats();
 
-    // Clean up
-    await redis.disconnect();
-
-    // Record performance
-    RedisMonitor.recordOperation('redis_test', Date.now() - startTime);
+    // Clean up test data
+    await cache.del(testKey);
 
     return NextResponse.json({
       success: true,
-      data: {
-        stored: JSON.parse(result || '{}'),
-        ttl,
-        redisConnected: true,
-        performance: RedisMonitor.getStats()
+      message: 'Redis connection successful',
+      test: {
+        set: testValue,
+        retrieved: retrievedValue,
+        match: JSON.stringify(testValue) === JSON.stringify(retrievedValue)
+      },
+      stats: {
+        connected: isConnected,
+        memory: stats.memory,
+        keys: stats.keys
+      },
+      environment: {
+        hasRedisUrl: !!process.env.REDIS_URL,
+        hasRedisHost: !!process.env.REDIS_HOST,
+        hasRedisPassword: !!process.env.REDIS_PASSWORD,
+        nodeEnv: process.env.NODE_ENV
       }
-    }, { status: 200 });
+    });
 
   } catch (error) {
-    // Record failed operation
-    RedisMonitor.recordOperation('redis_test_error', Date.now() - startTime);
-
-    console.error('Redis test error:', error);
+    console.error('❌ Redis test error:', error);
+    
     return NextResponse.json({
       success: false,
-      error: 'Redis connection failed',
+      error: 'Redis test failed',
       message: error instanceof Error ? error.message : 'Unknown error',
-      fallbackCache: true
-    }, { status: 200 }); // Return 200 to show fallback works
+      environment: {
+        hasRedisUrl: !!process.env.REDIS_URL,
+        hasRedisHost: !!process.env.REDIS_HOST,
+        hasRedisPassword: !!process.env.REDIS_PASSWORD,
+        nodeEnv: process.env.NODE_ENV
+      }
+    }, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
-  const startTime = Date.now();
-
   try {
-    // Initialize Redis client
-    const redis = await createClient({
-      url: process.env.REDIS_URL || process.env.REDISCLOUD_URL || 'redis://localhost:6379'
-    }).connect();
+    const { action, key, value, ttl } = await request.json();
 
-    // Parse request body
-    const body = await request.json();
-    const { key, value, ttl = 300 } = body;
+    switch (action) {
+      case 'set':
+        await cache.set(key, value, ttl);
+        return NextResponse.json({
+          success: true,
+          message: `Set ${key} successfully`
+        });
 
-    if (!key || !value) {
-      return NextResponse.json({
-        success: false,
-        error: 'Missing key or value in request body'
-      }, { status: 400 });
+      case 'get':
+        const data = await cache.get(key);
+        return NextResponse.json({
+          success: true,
+          data,
+          found: data !== null
+        });
+
+      case 'delete':
+        await cache.del(key);
+        return NextResponse.json({
+          success: true,
+          message: `Deleted ${key} successfully`
+        });
+
+      case 'clear':
+        await cache.invalidatePattern('*');
+        return NextResponse.json({
+          success: true,
+          message: 'Cache cleared successfully'
+        });
+
+      default:
+        return NextResponse.json({
+          success: false,
+          error: 'Invalid action',
+          message: 'Supported actions: set, get, delete, clear'
+        }, { status: 400 });
     }
 
-    // Store in Redis
-    await redis.setEx(key, ttl, JSON.stringify(value));
-
-    // Get the stored value to verify
-    const storedValue = await redis.get(key);
-
-    // Clean up
-    await redis.disconnect();
-
-    // Record performance
-    RedisMonitor.recordOperation('redis_set', Date.now() - startTime);
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        key,
-        stored: JSON.parse(storedValue || '{}'),
-        ttl,
-        redisConnected: true
-      }
-    }, { status: 200 });
-
   } catch (error) {
-    // Record failed operation
-    RedisMonitor.recordOperation('redis_set_error', Date.now() - startTime);
-
-    console.error('Redis POST error:', error);
+    console.error('❌ Redis POST test error:', error);
+    
     return NextResponse.json({
       success: false,
-      error: 'Failed to store data in Redis',
+      error: 'Redis operation failed',
       message: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }

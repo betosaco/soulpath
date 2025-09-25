@@ -87,38 +87,86 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
    * ------------------
    * Access to centralized flow management
    */
+  const bookingFlow = useBookingFlow();
+  
+  // Add safety check for bookingFlow
+  if (!bookingFlow) {
+    console.warn('⚠️ PackageSelectionStep: useBookingFlow returned undefined');
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-600">Loading booking flow...</p>
+      </div>
+    );
+  }
+  
   const {
-    urlParams,
-    isScheduleFirst,
-    goToNextStep
-  } = useBookingFlow();
+    urlParams = {},
+    isScheduleFirst = false,
+    goToNextStep = () => console.warn('goToNextStep not available')
+  } = bookingFlow;
 
   /**
    * CART MANAGEMENT
    * ---------------
    * Access to cart state and operations
    */
+  const cart = useCart();
+  
+  // Add safety check for cart
+  if (!cart) {
+    console.warn('⚠️ PackageSelectionStep: useCart returned undefined');
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-600">Loading cart...</p>
+      </div>
+    );
+  }
+  
   const {
-    items: cartItems,
-    addItem: addToCart,
-    removeItem: removeFromCart,
-    updateQuantity,
-    getTotalPrice
-  } = useCart();
+    items: cartItems = [],
+    addItem: addToCart = () => console.warn('addToCart not available'),
+    removeItem: removeFromCart = () => console.warn('removeFromCart not available'),
+    updateQuantity = () => console.warn('updateQuantity not available'),
+    getTotalPrice = () => 0
+  } = cart;
 
   /**
    * CART UI MANAGEMENT
    * ------------------
    * Access to cart UI operations
    */
-  const { openCart } = useCartUI();
+  const cartUI = useCartUI();
+  
+  // Add safety check for cartUI
+  if (!cartUI) {
+    console.warn('⚠️ PackageSelectionStep: useCartUI returned undefined');
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-600">Loading cart UI...</p>
+      </div>
+    );
+  }
+  
+  const { openCart = () => console.warn('openCart not available') } = cartUI;
 
   /**
    * PACKAGES DATA
    * -------------
    * Access to available packages
    */
-  const { data: packages, isLoading: packagesLoading } = usePackages('S/.');
+  const packagesQuery = usePackages('S/.');
+  
+  // Add safety check for packagesQuery
+  if (!packagesQuery) {
+    console.warn('⚠️ PackageSelectionStep: usePackages returned undefined');
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-600">Loading packages...</p>
+      </div>
+    );
+  }
+  
+  const { data: packages, isLoading: packagesLoading = false, isFetching: packagesFetching = false } = packagesQuery;
 
   // ============================================================================
   // BUSINESS LOGIC - SCHEDULE-FIRST SCENARIO
@@ -282,12 +330,16 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
       // Navigate to customer info (skip schedule step)
       goToNextStep();
     } else {
-      // SCENARIO B: Package-first flow initiation
-      console.log('🎯 Package-first flow - routing to schedule selection');
-      toast.success(`${pkg.packageDefinition.name} added to cart. Now select your schedule.`);
+      // SCENARIO B: Package-first flow - just add to cart, no automatic redirect
+      console.log('🎯 Package added to cart - user can add more packages');
+      toast.success(`${pkg.packageDefinition.name} added to cart! You can add more packages or proceed to checkout.`);
 
-      // Navigate to schedule step
-      goToNextStep();
+      // Open cart to show the added package
+      setTimeout(() => {
+        openCart();
+      }, 500);
+
+      // No automatic navigation - let user decide what to do next
     }
   };
 
@@ -312,6 +364,8 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
    * REMOVE PRE-SELECTED SCHEDULE
    * ----------------------------
    * Removes a pre-selected schedule in schedule-first scenario
+   * Note: This function is kept for potential future use but remove button
+   * is no longer shown on the page - removal is handled in cart
    */
   const removePreSelectedSchedule = (index: number) => {
     setPreSelectedSchedules(prev => prev.filter((_, i) => i !== index));
@@ -325,33 +379,61 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
    * RENDER PRE-SELECTED SCHEDULES
    * -----------------------------
    * Shows selected schedules for schedule-first scenario
+   * Now displays below packages with improved styling and no remove button
    */
   const renderPreSelectedSchedules = () => {
     if (preSelectedSchedules.length === 0) return null;
 
     return (
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h3 className="text-lg font-semibold text-blue-800 mb-2">
-          Your Selected Schedule
-        </h3>
-        <p className="text-blue-700 mb-3">
-          You&apos;ve selected 1 time slot. Now choose a package that matches your needs.
-        </p>
-        <div className="space-y-2">
-          {preSelectedSchedules.map((schedule, index) => (
-            <div key={index} className="flex justify-between items-center bg-blue-100 p-2 rounded">
-              <span className="text-blue-800">
-                {schedule.selectedDate} at {schedule.selectedTime} - {schedule.serviceType}
-              </span>
-              <Button
-                size="sm"
-                variant="destructive"
-                onClick={() => removePreSelectedSchedule(index)}
-              >
-                Remove
-              </Button>
+      <div className="mt-8">
+        <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl p-6 shadow-sm">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center justify-center w-10 h-10 bg-green-100 rounded-full">
+              <Calendar className="h-5 w-5 text-green-600" />
             </div>
-          ))}
+            <div>
+              <h3 className="text-xl font-semibold text-gray-900">
+                Your Selected Schedule
+              </h3>
+              <p className="text-sm text-gray-600">
+                You've selected 1 time slot. Now choose a package that matches your needs.
+              </p>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+            {preSelectedSchedules.map((schedule, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">
+                      {new Date(schedule.selectedDate).toLocaleDateString('en-US', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {schedule.selectedTime} - {schedule.serviceType}
+                    </p>
+                    {schedule.teacher && (
+                      <p className="text-xs text-gray-500">
+                        with {schedule.teacher}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-medium text-green-600">Selected</p>
+                  <p className="text-xs text-gray-500">Ready to book</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -363,163 +445,104 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
    * Displays available packages for selection
    */
   const renderPackagesGrid = () => {
-    if (packagesLoading) {
+    // Show loading state while packages are being fetched (initial load or refetch)
+    if (packagesLoading || packagesFetching) {
       return (
-        <div className="flex justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+        <div className="space-y-6">
+          {/* Loading Header */}
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Available Packages</h2>
+            <p className="text-gray-600">Loading our yoga packages...</p>
+          </div>
+          
+          {/* Loading Spinner */}
+          <div className="flex justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-200 border-t-green-600 mx-auto mb-4"></div>
+              <p className="text-green-600 font-medium">Loading packages...</p>
+              <p className="text-sm text-gray-500 mt-1">Please wait while we fetch our available packages</p>
+            </div>
+          </div>
+          
+          {/* Loading Skeleton Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="unified-card animate-pulse">
+                <CardHeader>
+                  <div className="h-6 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="h-8 bg-gray-200 rounded w-20"></div>
+                      <div className="h-4 bg-gray-200 rounded w-16"></div>
+                    </div>
+                    <div className="h-10 bg-gray-200 rounded"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // Show empty state if no packages (only after loading is complete and we have data)
+    if (!packagesLoading && !packagesFetching && packages && Array.isArray(packages) && packages.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <div className="text-gray-400 mb-4">
+            <Package className="h-16 w-16 mx-auto" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">No Packages Available</h3>
+          <p className="text-gray-600">We're currently updating our package offerings. Please check back later.</p>
         </div>
       );
     }
 
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {packages?.map((pkg: any) => (
-          <Card key={pkg.id} className="unified-card">
-            <CardHeader>
-              <CardTitle className="unified-card__title">{pkg.packageDefinition.name}</CardTitle>
-              <p className="unified-card__subtitle">{pkg.packageDefinition.description}</p>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold text-green-600">
-                    S/ {pkg.price.toFixed(2)}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    {pkg.packageDefinition.sessionsCount || 1} sessions
-                  </span>
+      <div className="space-y-6">
+        {/* Packages Header */}
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Available Packages</h2>
+          <p className="text-gray-600">Choose the perfect package for your yoga journey</p>
+        </div>
+        
+        {/* Packages Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {packages && Array.isArray(packages) && packages.map((pkg: any) => (
+            <Card key={pkg.id} className="unified-card hover:shadow-lg transition-shadow duration-200">
+              <CardHeader>
+                <CardTitle className="unified-card__title">{pkg.packageDefinition.name}</CardTitle>
+                <p className="unified-card__subtitle">{pkg.packageDefinition.description}</p>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-2xl font-bold text-green-600">
+                      S/ {pkg.price.toFixed(2)}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {pkg.packageDefinition.sessionsCount || 1} sessions
+                    </span>
+                  </div>
+                  <Button
+                    onClick={() => handleAddPackage(pkg)}
+                    className="w-full btn-primary"
+                  >
+                    <Package className="w-4 h-4 mr-2" />
+                    Add to Cart
+                  </Button>
                 </div>
-                <Button
-                  onClick={() => handleAddPackage(pkg)}
-                  className="w-full btn-primary"
-                >
-                  <Package className="w-4 h-4 mr-2" />
-                  Add to Cart
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   };
 
-  /**
-   * RENDER CART SUMMARY
-   * -------------------
-   * Shows current cart contents and booking details
-   */
-  const renderCartSummary = () => {
-    if (cartItems.length === 0) return null;
-
-    return (
-      <Card className="unified-card">
-        <CardHeader>
-          <CardTitle className="unified-card__title">Cart Summary</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {cartItems.map((item: any, index: number) => (
-              <div key={`${item.id}-${index}`} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span>{item.name}</span>
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                    >
-                      <Minus className="w-3 h-3" />
-                    </Button>
-                    <span className="w-8 text-center">{item.quantity}</span>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                    >
-                      <Plus className="w-3 h-3" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => removeFromCart(item.id)}
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Show booking details for packages */}
-                {item.type === 'package' && item.bookingDetails && item.bookingDetails.length > 0 && (
-                  <div className="ml-4 p-2 bg-green-50 border border-green-200 rounded text-sm">
-                    <div className="text-green-800 font-semibold mb-1">Scheduled Sessions:</div>
-                    {item.bookingDetails.map((booking: any, bookingIndex: number) => (
-                      <div key={bookingIndex} className="text-green-700">
-                        {booking.selectedDate} at {booking.selectedTime} - {booking.serviceType}
-                      </div>
-                    ))}
-                    <div className="text-green-600 text-xs mt-1">
-                      {item.bookingDetails.length} / {item.sessions || 1} sessions scheduled
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-
-            <div className="flex justify-between font-bold border-t pt-2">
-              <span>Total:</span>
-              <span>S/ {getTotalPrice().toFixed(2)}</span>
-            </div>
-
-            {/* Book Now Button */}
-            {cartItems.some(item => item.type === 'package') && (() => {
-              const atMax = isAtMaxSessions();
-
-              return (
-                <div className="mt-4 pt-4 border-t">
-                  <Button
-                    onClick={handleBookNowClick}
-                    className={`w-full text-white ${
-                      atMax
-                        ? 'bg-gray-500 hover:bg-gray-500 cursor-not-allowed border border-gray-600'
-                        : 'bg-green-600 hover:bg-green-700'
-                    }`}
-                    disabled={atMax}
-                  >
-                    {atMax ? (
-                      <>
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        All Sessions Booked
-                      </>
-                    ) : (
-                      <>
-                        <Calendar className="w-4 h-4 mr-2" />
-                        Book Now
-                      </>
-                    )}
-                  </Button>
-                </div>
-              );
-            })()}
-
-            {isAtMaxSessions() && (
-              <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                <div className="flex items-center justify-center space-x-2">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <p className="text-green-800 font-medium text-center">
-                    All Sessions Booked - Ready to Checkout!
-                  </p>
-                </div>
-                <p className="text-green-600 text-sm text-center mt-1">
-                  You have successfully booked all available sessions for your packages.
-                </p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
 
   // ============================================================================
   // MAIN RENDER
@@ -527,15 +550,11 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
 
   return (
     <div className="space-y-6">
-
-      {/* Show pre-selected schedules for schedule-first flow */}
-      {renderPreSelectedSchedules()}
-
-      {/* Packages Grid */}
+      {/* Packages Grid - Show first for better flow */}
       {renderPackagesGrid()}
 
-      {/* Cart Summary */}
-      {renderCartSummary()}
+      {/* Show pre-selected schedules below packages for better integration */}
+      {renderPreSelectedSchedules()}
     </div>
   );
 }

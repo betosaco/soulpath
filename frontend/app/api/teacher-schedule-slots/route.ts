@@ -6,109 +6,42 @@ export async function GET(request: NextRequest) {
   const prisma = new PrismaClient();
   
   try {
-    console.log('🔍 GET /api/teacher-schedule-slots - Fetching teacher schedule slots...');
+    console.log('🚀 API called with URL:', request.url);
 
     // Parse query parameters
     const { searchParams } = new URL(request.url);
     const available = searchParams.get('available');
-    const teacherId = searchParams.get('teacherId');
-    const serviceTypeId = searchParams.get('serviceTypeId');
-    const venueId = searchParams.get('venueId');
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
 
-    // Generate cache key
-    const cacheKey = cacheKeys.schedule(startDate || undefined, endDate || undefined, available === 'true');
-    
-    // Try to get from cache first
-    const cachedData = await cache.get(cacheKey);
-    if (cachedData) {
-      console.log('✅ Returning cached schedule data');
-      return NextResponse.json({
-        success: true,
-        slots: cachedData,
-        cached: true
-      });
-    }
-
     // Build where clause
-    const whereClause: Record<string, unknown> = {};
+    const whereClause: any = {};
 
     if (available === 'true') {
       whereClause.isAvailable = true;
     }
 
-    if (teacherId) {
-      whereClause.teacherSchedule = {
-        ...(whereClause.teacherSchedule || {}),
-        teacherId: parseInt(teacherId)
-      };
-    }
-
-    if (serviceTypeId) {
-      whereClause.teacherSchedule = {
-        ...(whereClause.teacherSchedule || {}),
-        serviceTypeId: parseInt(serviceTypeId)
-      };
-    }
-
-    if (venueId) {
-      whereClause.teacherSchedule = {
-        ...(whereClause.teacherSchedule || {}),
-        venueId: parseInt(venueId)
-      };
-    }
-
     // Determine date range
-    let dateStart: Date;
-    let dateEnd: Date;
-
     if (startDate && endDate) {
-      // Use custom date range
-      dateStart = new Date(startDate);
-      dateEnd = new Date(endDate);
-      dateEnd.setHours(23, 59, 59, 999); // Include the entire end date
+      whereClause.startTime = {
+        gte: new Date(startDate + 'T00:00:00.000Z'),
+        lte: new Date(endDate + 'T23:59:59.999Z')
+      };
     } else {
-      // Default to next 14 days from now (current time)
+      // Default to next 14 days
       const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-      dateStart = new Date(now); // Start from current time, not beginning of day
-      dateEnd = new Date(today);
-      dateEnd.setDate(today.getDate() + 14); // Show next 14 days
-
-      // Set timezone to UTC to match database
-      dateStart.setUTCHours(dateStart.getUTCHours(), dateStart.getUTCMinutes(), dateStart.getUTCSeconds(), dateStart.getUTCMilliseconds());
-      dateEnd.setUTCHours(23, 59, 59, 999);
+      const futureDate = new Date(now);
+      futureDate.setDate(now.getDate() + 14);
+      whereClause.startTime = {
+        gte: now,
+        lte: futureDate
+      };
     }
 
-    whereClause.startTime = {
-      ...(whereClause.startTime || {}),
-      gte: dateStart,
-      lte: dateEnd
-    };
+    console.log('🔍 Querying with:', whereClause);
 
-    console.log('📅 Date range:', {
-      start: dateStart.toISOString().split('T')[0],
-      end: dateEnd.toISOString().split('T')[0],
-      custom: !!(startDate && endDate),
-      startTime: dateStart.toISOString(),
-      endTime: dateEnd.toISOString()
-    });
-    
-    console.log('🔍 Where clause:', JSON.stringify(whereClause, null, 2));
-
-    // Fetch schedule slots from database with retry mechanism
-    let slots: any[] = [];
-    let retryCount = 0;
-    const maxRetries = 3;
-    
-    while (retryCount < maxRetries) {
-      try {
-        // Ensure connection before each attempt
-        await prisma.$connect();
-        
-        slots = await prisma.teacherScheduleSlot.findMany({
+    // Query database
+    const slots = await prisma.teacherScheduleSlot.findMany({
       where: whereClause,
       include: {
         teacherSchedule: {
@@ -146,84 +79,44 @@ export async function GET(request: NextRequest) {
           }
         }
       },
-      orderBy: [
-        { startTime: 'asc' }
-      ]
+      orderBy: { startTime: 'asc' }
     });
-        
-        // If we get here, the query was successful
-        break;
-        
-      } catch (error) {
-        retryCount++;
-        console.error(`❌ Database query failed (attempt ${retryCount}/${maxRetries}):`, error);
-        
-        if (retryCount >= maxRetries) {
-          throw error;
-        }
-        
-        // Wait before retrying
-        await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
-      }
-    }
 
-    // Transform the data to match the expected format - display EST times (UTC-5)
+    console.log(`✅ Found ${slots.length} raw slots`);
+
+    // Transform the data
     const transformedSlots = slots.map(slot => {
-      // Convert UTC time to EST (subtract 5 hours since EST is UTC-5)
+      // Convert UTC time to Peru time (UTC-5)
       const startTime = new Date(slot.startTime);
-      const estTime = new Date(startTime.getTime() - (5 * 60 * 60 * 1000)); // Subtract 5 hours for EST
+      const peruTime = new Date(startTime.getTime() - (5 * 60 * 60 * 1000));
 
-      // Format date as YYYY-MM-DD
-      const date = estTime.toISOString().split('T')[0];
-
-      // Format time as HH:MM in 24-hour format
-      const hours = estTime.getUTCHours().toString().padStart(2, '0');
-      const minutes = estTime.getUTCMinutes().toString().padStart(2, '0');
+      // Format date and time
+      const date = peruTime.toISOString().split('T')[0];
+      const hours = peruTime.getUTCHours().toString().padStart(2, '0');
+      const minutes = peruTime.getUTCMinutes().toString().padStart(2, '0');
       const time = `${hours}:${minutes}`;
+      const dayOfWeek = peruTime.toLocaleDateString('en-US', { weekday: 'long' });
 
-      // Get the actual day of week from EST date
-      const actualDayOfWeek = estTime.toLocaleDateString('en-US', {
-        weekday: 'long',
-        timeZone: 'UTC'
-      });
-      
       return {
         id: slot.id,
         date,
         time,
-        isAvailable: slot.isAvailable && (slot.maxBookings === null || (slot.bookedCount || 0) < slot.maxBookings),
+        isAvailable: slot.isAvailable && (slot.bookedCount || 0) < (slot.maxBookings || 15),
         capacity: slot.maxBookings || 15,
         bookedCount: slot.bookedCount || 0,
-        duration: slot.teacherSchedule.serviceType?.duration || 60,
-        teacher: slot.teacherSchedule.teacher,
-        serviceType: slot.teacherSchedule.serviceType,
-        venue: slot.teacherSchedule.venue,
-        dayOfWeek: actualDayOfWeek,
-        dayOrder: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].indexOf(actualDayOfWeek)
+        duration: slot.teacherSchedule?.serviceType?.duration || 60,
+        teacher: slot.teacherSchedule?.teacher,
+        serviceType: slot.teacherSchedule?.serviceType,
+        venue: slot.teacherSchedule?.venue,
+        dayOfWeek,
+        dayOrder: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].indexOf(dayOfWeek)
       };
     });
 
-    // Sort by date (current day first), then by time
-    transformedSlots.sort((a, b) => {
-      // First sort by date
-      if (a.date !== b.date) {
-        return a.date.localeCompare(b.date);
-      }
-      // Then sort by time within the same date
-      return a.time.localeCompare(b.time);
-    });
-
-    console.log(`✅ Found ${slots.length} raw slots, ${transformedSlots.length} transformed slots`);
-    if (slots.length > 0) {
-      console.log('📅 First slot:', {
-        id: slots[0].id,
-        startTime: slots[0].startTime.toISOString(),
-        isAvailable: slots[0].isAvailable
-      });
+    console.log(`✅ Transformed ${transformedSlots.length} slots`);
+    if (transformedSlots.length > 0) {
+      console.log('📅 First transformed slot:', transformedSlots[0]);
     }
-
-    // Cache the result
-    await cache.set(cacheKey, transformedSlots, cacheTTL.schedule);
 
     return NextResponse.json({
       success: true,
@@ -231,31 +124,10 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('❌ Error in GET /api/teacher-schedule-slots:', error);
-    
-    // Check if it's a database connection error
-    if (error instanceof Error && (
-      error.message.includes('denied access') ||
-      error.message.includes('Can\'t reach database server') ||
-      error.message.includes('PrismaClientInitializationError') ||
-      error.message.includes('not available during build phase')
-    )) {
-      console.log('🔄 Database unavailable, returning mock data for development');
-      
-      // Return mock data for development when database is not available
-      const mockSlots = generateMockScheduleSlots();
-      
-      return NextResponse.json({
-        success: true,
-        slots: mockSlots,
-        message: 'Using mock data - database unavailable'
-      });
-    }
-    
+    console.error('❌ Error in API:', error);
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch teacher schedule slots',
-      message: 'An error occurred while fetching teacher schedule slots'
+      error: 'Failed to fetch schedule slots'
     }, { status: 500 });
   } finally {
     await prisma.$disconnect();

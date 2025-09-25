@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { MessageCircle, CheckCircle, XCircle, Calendar, User, CreditCard, Package } from 'lucide-react';
 import { AppShell } from '@/components/AppShell';
+import { useCart } from '@/store/appStore';
 
 interface PaymentResult {
   orderStatus: string;
@@ -52,6 +53,7 @@ interface PaymentResult {
 export default function PaymentSuccessPage() {
   const [paymentResult, setPaymentResult] = useState<PaymentResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { clearCart } = useCart();
 
   useEffect(() => {
     // Get payment result from sessionStorage
@@ -63,6 +65,7 @@ export default function PaymentSuccessPage() {
         
         // Email sending is handled by webhooks to prevent duplicates
         console.log('📧 Payment result data:', parsedResult);
+        console.log('🆔 Order ID:', parsedResult.orderId);
         console.log('ℹ️ Email sending is handled by webhooks to prevent duplicates');
         // Note: Email sending is disabled here to prevent duplicates
         // Email notifications are handled by payment webhooks
@@ -76,12 +79,18 @@ export default function PaymentSuccessPage() {
     setIsLoading(false);
   }, []);
 
+  // Clear cart when payment success page loads
+  useEffect(() => {
+    console.log('🧹 Clearing cart after payment success');
+    clearCart();
+  }, [clearCart]);
+
   // Email sending is now handled by webhooks to prevent duplicates
   // The triggerConfirmationEmail function has been removed
 
   const handleWhatsAppContact = () => {
     const phoneNumber = '51916172368'; // +51 916 172 368
-    const orderId = paymentResult?.orderId || 'N/A';
+    const orderId = paymentResult?.orderId || `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
     const amount = paymentResult?.amount ? (paymentResult.amount / 100).toFixed(2) : 'N/A';
     const currency = typeof paymentResult?.currency === 'string' 
       ? paymentResult.currency 
@@ -150,7 +159,9 @@ export default function PaymentSuccessPage() {
                   <dl className="space-y-4">
                     <div className="flex justify-between items-center">
                       <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">ID de Orden:</dt>
-                      <dd className="text-sm text-gray-900 dark:text-gray-100 font-mono bg-white dark:bg-gray-600 px-3 py-1 rounded border dark:border-gray-500">{paymentResult?.orderId}</dd>
+                      <dd className="text-sm text-gray-900 dark:text-gray-100 font-mono bg-white dark:bg-gray-600 px-3 py-1 rounded border dark:border-gray-500">
+                        {paymentResult?.orderId || `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`}
+                      </dd>
                     </div>
                     <div className="flex justify-between items-center">
                       <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Monto Total:</dt>
@@ -335,7 +346,9 @@ export default function PaymentSuccessPage() {
                   <dl className="space-y-4">
                     <div className="flex justify-between items-center">
                       <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">ID de Orden:</dt>
-                      <dd className="text-sm text-gray-900 dark:text-gray-100 font-mono bg-white dark:bg-gray-600 px-3 py-1 rounded border dark:border-gray-500">{paymentResult.orderId}</dd>
+                      <dd className="text-sm text-gray-900 dark:text-gray-100 font-mono bg-white dark:bg-gray-600 px-3 py-1 rounded border dark:border-gray-500">
+                        {paymentResult.orderId || `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`}
+                      </dd>
                     </div>
                     <div className="flex justify-between items-center">
                       <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Estado:</dt>

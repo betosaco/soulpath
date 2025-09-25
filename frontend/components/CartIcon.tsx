@@ -9,28 +9,19 @@ interface CartIconProps {
 }
 
 export function CartIcon({ className = '' }: CartIconProps) {
-  const { getTotalItems } = useCart();
+  const { getTotalItems, items } = useCart();
   const { openCart } = useCartUI();
   const [isHydrated, setIsHydrated] = useState(false);
-  const [totalItems, setTotalItems] = useState(0);
 
   // Handle hydration safely
   useEffect(() => {
     setIsHydrated(true);
-    setTotalItems(getTotalItems());
-  }, [getTotalItems]);
+  }, []);
 
-  // Update total items when cart changes
-  useEffect(() => {
-    if (isHydrated) {
-      setTotalItems(getTotalItems());
-    }
-  }, [getTotalItems, isHydrated]);
+  // Calculate total items directly from items array for better reactivity
+  const totalItems = isHydrated ? items.reduce((total, item) => total + item.quantity, 0) : 0;
 
-  // Don't render if cart is empty (after hydration)
-  if (isHydrated && totalItems === 0) {
-    return null;
-  }
+  // Always render cart icon - don't hide when empty
 
   return (
     <button

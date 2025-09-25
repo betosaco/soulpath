@@ -51,6 +51,8 @@ interface ProvinceInputProps {
   label?: string;
   /** Whether the field is required */
   required?: boolean;
+  /** Internal required flag */
+  _required?: boolean;
   /** Current province value */
   value: string;
   /** Callback when province changes */

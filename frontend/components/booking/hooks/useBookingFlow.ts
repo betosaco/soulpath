@@ -23,7 +23,7 @@
  */
 
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useEffect } from 'react';
 import { useCart } from '@/store/appStore';
 
 /**
@@ -106,6 +106,10 @@ const SCENARIO_HANDLERS = {
     initialStep: 'packages' as BookingStep,
     validateTransition: (_from: BookingStep, _to: BookingStep, params: URLSearchParams) => {
       if (_from === 'packages' && _to === 'schedule') {
+        return params.has('slotId');
+      }
+      // Allow transition from schedule to packages in schedule-first scenario
+      if (_from === 'schedule' && _to === 'packages') {
         return params.has('slotId');
       }
       return true;
@@ -235,8 +239,8 @@ function determineScenario(searchParams: URLSearchParams): BookingScenario | nul
     return 'add-more';
   }
 
-  // Schedule-first: has slotId but no packageId
-  if (searchParams.has('slotId') && !searchParams.has('packageId')) {
+  // Schedule-first: has slotId but no packageId, OR has readyForSchedule=true
+  if ((searchParams.has('slotId') && !searchParams.has('packageId')) || searchParams.get('readyForSchedule') === 'true') {
     return 'schedule-first';
   }
 
@@ -285,6 +289,11 @@ function determineCurrentStep(pathname: string, scenario: BookingScenario | null
 
   const step = stepMap[lastSegment];
   if (step) {
+    // SPECIAL CASE: If we're on schedule page but it's a schedule-first scenario,
+    // we should actually be on the packages page
+    if (step === 'schedule' && scenario === 'schedule-first') {
+      return 'packages';
+    }
     return step;
   }
 
@@ -310,6 +319,28 @@ export function useBookingFlow(): UseBookingFlowReturn {
   const pathname = usePathname();
   const { items: cartItems } = useCart();
 
+  // Add safety checks for Next.js hooks
+  if (!router || !searchParams || !pathname) {
+    console.warn('⚠️ useBookingFlow: Next.js router hooks not properly initialized');
+    // Return a safe fallback state
+    return {
+      currentStep: 'packages',
+      scenario: null,
+      canGoNext: false,
+      canGoPrevious: false,
+      urlParams: {},
+      goToNextStep: () => console.warn('Router not available'),
+      goToPreviousStep: () => console.warn('Router not available'),
+      goToStep: () => console.warn('Router not available'),
+      isScheduleFirst: false,
+      isPackageFirst: false,
+      isAddMore: false,
+      isMultiPackage: false,
+      isDirectCheckout: false,
+      hasPhysicalProducts: false,
+    };
+  }
+
   // Parse current URL state
   const scenario = useMemo(() => determineScenario(searchParams), [searchParams]);
   const currentStep = useMemo(() => determineCurrentStep(pathname, scenario), [pathname, scenario]);
@@ -326,6 +357,34 @@ export function useBookingFlow(): UseBookingFlowReturn {
     serviceType: searchParams.get('serviceType') || undefined,
     venueName: searchParams.get('venueName') || undefined,
   }), [searchParams]);
+
+  // Handle URL/Scenario mismatch - redirect to correct page
+  useEffect(() => {
+    if (!scenario || typeof window === 'undefined') return;
+
+    const expectedStep = SCENARIO_HANDLERS[scenario]?.initialStep;
+    const currentPathStep = pathname.split('/').pop();
+    
+    // If we're on schedule page but should be on packages for schedule-first scenario
+    if (scenario === 'schedule-first' && currentPathStep === 'schedule' && expectedStep === 'packages') {
+      console.log('🔄 Redirecting from /booking/schedule to /booking/packages for schedule-first scenario');
+      
+      // Add a small delay to ensure the component is fully mounted
+      const timeoutId = setTimeout(() => {
+        try {
+          const newUrl = new URL('/booking/packages', window.location.origin);
+          searchParams.forEach((value, key) => {
+            newUrl.searchParams.set(key, value);
+          });
+          router.replace(newUrl.pathname + newUrl.search);
+        } catch (error) {
+          console.error('Error during redirect:', error);
+        }
+      }, 100);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [scenario, pathname, searchParams, router]);
 
   // Check if cart contains physical products (requires shipping)
   const hasPhysicalProducts = useMemo(() => {
@@ -384,6 +443,12 @@ export function useBookingFlow(): UseBookingFlowReturn {
       return true;
     }
 
+    // SPECIAL HANDLING FOR SCHEDULE-FIRST SCENARIO
+    // Allow navigation from schedule to packages in schedule-first scenario
+    if (scenario === 'schedule-first' && currentStep === 'schedule') {
+      return true; // Always allow going to packages in schedule-first
+    }
+
     // Scenario-specific validation
     const isValid = validateStepTransition(currentStep, config.next);
     return isValid;
@@ -411,7 +476,7 @@ export function useBookingFlow(): UseBookingFlowReturn {
    * Advances to the next step in the booking flow
    */
   const goToNextStep = useCallback(() => {
-    console.log('🚀 goToNextStep called:', { currentStep, canGoNext, hasPhysicalProducts });
+    console.log('🚀 goToNextStep called:', { currentStep, canGoNext, hasPhysicalProducts, scenario });
     
     if (!canGoNext) {
       console.log('❌ Cannot go to next step - canGoNext is false');
@@ -424,9 +489,16 @@ export function useBookingFlow(): UseBookingFlowReturn {
       return;
     }
 
-    // Determine the actual next step (skip shipping if no physical products, except for product-checkout)
+    // SPECIAL HANDLING FOR SCHEDULE-FIRST SCENARIO
+    // In schedule-first, when on schedule page, go to packages instead of customer-info
     let actualNextStep = config.next;
-    if (config.next === 'shipping' && !hasPhysicalProducts && scenario !== 'product-checkout') {
+    if (scenario === 'schedule-first' && currentStep === 'schedule') {
+      actualNextStep = 'packages';
+      console.log('🎯 Schedule-first scenario: redirecting to packages page');
+    }
+
+    // Determine the actual next step (skip shipping if no physical products, except for product-checkout)
+    if (actualNextStep === 'shipping' && !hasPhysicalProducts && scenario !== 'product-checkout') {
       actualNextStep = 'payment';
       console.log('🔄 Skipping shipping step, going directly to payment');
     }
@@ -448,7 +520,7 @@ export function useBookingFlow(): UseBookingFlowReturn {
     }
 
     router.push(nextUrl.pathname + nextUrl.search);
-  }, [canGoNext, currentStep, searchParams, router]);
+  }, [canGoNext, currentStep, searchParams, router, scenario, hasPhysicalProducts]);
 
   /**
    * NAVIGATE TO PREVIOUS STEP

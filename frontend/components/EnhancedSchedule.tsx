@@ -368,18 +368,6 @@ export function EnhancedSchedule({
     }
   }, [startDate, endDate, fetchSlots]); // Include fetchSlots in dependencies
 
-  // Force fetch on mount as backup
-  useEffect(() => {
-    console.log('🔄 Force fetch useEffect triggered');
-    const timeoutId = setTimeout(() => {
-      console.log('🔄 Force fetch timeout triggered');
-      if (fetchSlots) {
-        fetchSlots();
-      }
-    }, 1000);
-    
-    return () => clearTimeout(timeoutId);
-  }, [fetchSlots]); // Include fetchSlots in dependencies
 
   // Reload slots when reloadTrigger changes
   useEffect(() => {
@@ -736,6 +724,21 @@ export function EnhancedSchedule({
                             <span>{slot.venue.name}</span>
                             {slot.venue.city && (
                               <span className="text-gray-400">• {slot.venue.city}</span>
+                            )}
+                          </div>
+
+                          {/* Available Spots Info */}
+                          <div className="flex items-center gap-2 text-sm mb-3">
+                            <div className="flex items-center gap-1">
+                              <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                              <span className="text-gray-600">
+                                {slot.capacity - slot.bookedCount} of {slot.capacity} spots available
+                              </span>
+                            </div>
+                            {slot.bookedCount > 0 && (
+                              <span className="text-xs text-gray-500">
+                                ({slot.bookedCount} booked)
+                              </span>
                             )}
                           </div>
 

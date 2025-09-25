@@ -130,8 +130,12 @@ export async function POST(request: NextRequest) {
       paymentMethod
     } = body;
 
-    // Generate order number
-    const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
+    // Generate unique order number
+    const timestamp = Date.now();
+    const processId = process.pid || Math.floor(Math.random() * 10000);
+    const randomPart = Math.random().toString(36).substr(2, 9).toUpperCase();
+    const microtime = process.hrtime.bigint().toString().slice(-6);
+    const orderNumber = `ORD-${timestamp}-${processId}-${microtime}-${randomPart}`;
 
     const order = await prisma.order.create({
       data: {

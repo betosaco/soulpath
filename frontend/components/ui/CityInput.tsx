@@ -45,6 +45,10 @@ interface CityInputProps {
   label?: string;
   /** Whether the field is required */
   required?: boolean;
+  /** Internal required flag */
+  _required?: boolean;
+  /** Internal department code */
+  _departmentCode?: string;
   /** Current city value */
   value: string;
   /** Callback when city changes */
@@ -73,7 +77,7 @@ interface CityInputProps {
  */
 export function CityInput({
   label,
-  _required = false,
+  _required = false as any,
   value,
   onChange,
   placeholder = 'Select city',

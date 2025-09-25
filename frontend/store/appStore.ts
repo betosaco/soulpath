@@ -253,11 +253,19 @@ export const useAppStore = create<AppStore>()(
       
       removeItem: (id: string) => set((state) => {
         state.items = state.items.filter(item => item.id !== id);
+        // Automatically close cart when it becomes empty
+        if (state.items.length === 0 && state.isCartOpen) {
+          state.isCartOpen = false;
+        }
       }),
       
       updateQuantity: (id: string, quantity: number) => set((state) => {
         if (quantity <= 0) {
           state.items = state.items.filter(item => item.id !== id);
+          // Automatically close cart when it becomes empty
+          if (state.items.length === 0 && state.isCartOpen) {
+            state.isCartOpen = false;
+          }
           return;
         }
         
@@ -268,7 +276,17 @@ export const useAppStore = create<AppStore>()(
       }),
       
       clearCart: () => set((state) => {
+        console.log('🧹 clearCart called - clearing all cart items');
+        console.log('🔍 Cart items before clearing:', state.items.map(item => ({
+          id: item.id,
+          name: item.name,
+          type: item.type,
+          hasBookingDetails: !!item.bookingDetails,
+          bookingDetailsCount: item.bookingDetails?.length || 0
+        })));
         state.items = [];
+        // Automatically close cart when it's cleared
+        state.isCartOpen = false;
       }),
       
       addBookingToPackage: (packageId: string, bookingDetails) => set((state) => {
@@ -302,6 +320,21 @@ export const useAppStore = create<AppStore>()(
             packageSessions,
             isAtMaxNow: (item.bookingDetails?.length || 0) >= packageSessions
           });
+          
+          // Debug: Log the entire cart state after adding booking
+          console.log('🔍 Cart state after adding booking:', {
+            totalItems: state.items.length,
+            items: state.items.map(item => ({
+              id: item.id,
+              name: item.name,
+              type: item.type,
+              hasBookingDetails: !!item.bookingDetails,
+              bookingDetailsCount: item.bookingDetails?.length || 0
+            }))
+          });
+        } else {
+          console.error('❌ Package not found in cart:', packageId);
+          console.log('🔍 Available cart items:', state.items.map(item => ({ id: item.id, name: item.name, type: item.type })));
         }
       }),
       

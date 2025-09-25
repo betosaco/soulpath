@@ -492,7 +492,7 @@ if (isTimeSlotBooked(slot)) {
 ### **State Management**
 - **Zustand**: Cart and UI state
 - **SessionStorage**: Booking flow persistence
-- **Supabase**: User authentication and data
+- **Supabasis e**: User authentication and data
 - **React Query**: API data caching
 
 ### **Styling**

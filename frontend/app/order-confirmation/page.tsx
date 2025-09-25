@@ -17,6 +17,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AppShell } from '@/components/AppShell';
+import { useCart } from '@/store/appStore';
 
 interface OrderItem {
   id: string;
@@ -86,6 +87,7 @@ export default function OrderConfirmationPage() {
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { clearCart } = useCart();
 
   useEffect(() => {
     if (orderId) {
@@ -95,6 +97,12 @@ export default function OrderConfirmationPage() {
       setLoading(false);
     }
   }, [orderId]);
+
+  // Clear cart when order confirmation page loads
+  useEffect(() => {
+    console.log('🧹 Clearing cart after order confirmation');
+    clearCart();
+  }, [clearCart]);
 
   const fetchOrderDetails = async (id: string) => {
     try {
@@ -194,6 +202,7 @@ export default function OrderConfirmationPage() {
 
   return (
     <AppShell>
+      {/* No step indicators - clean order confirmation page */}
       <div className="min-h-screen bg-white py-8">
         <div className="container mx-auto px-4 max-w-6xl">
           {/* Success Header */}
@@ -442,73 +451,6 @@ export default function OrderConfirmationPage() {
                 </CardContent>
               </Card>
 
-              {/* Next Steps */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>What&apos;s Next?</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-xs font-semibold text-primary">1</span>
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm">Email Confirmation</p>
-                        <p className="text-xs text-gray-600">
-                          {order.paymentStatus === 'PENDING' 
-                            ? 'You\'ll receive an email with your order details and payment instructions.'
-                            : 'You\'ll receive an email confirmation shortly with your order details.'
-                          }
-                        </p>
-                      </div>
-                    </div>
-                    {order.paymentStatus === 'PENDING' && (
-                      <div className="flex items-start gap-3">
-                        <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <span className="text-xs font-semibold text-orange-600">2</span>
-                        </div>
-                        <div>
-                          <p className="font-medium text-sm">Complete Payment</p>
-                          <p className="text-xs text-gray-600">
-                            Follow the payment instructions in your email to complete your order.
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                    <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-xs font-semibold text-primary">{order.paymentStatus === 'PENDING' ? '3' : '2'}</span>
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm">Package Activation</p>
-                        <p className="text-xs text-gray-600">
-                          Your yoga packages are now active in your account and ready to use.
-                        </p>
-                      </div>
-                    </div>
-                    {order.shippingAddress && (
-                      <div className="flex items-start gap-3">
-                        <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <span className="text-xs font-semibold text-primary">
-                            {(() => {
-                              let step = 2;
-                              if (order.paymentStatus === 'PENDING') step++;
-                              return step;
-                            })()}
-                          </span>
-                        </div>
-                        <div>
-                          <p className="font-medium text-sm">Shipping</p>
-                          <p className="text-xs text-gray-600">
-                            Your products will be shipped to the address provided.
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
 
               {/* Action Buttons */}
               <div className="space-y-3">

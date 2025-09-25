@@ -56,3 +56,4 @@ prisma/migrations/
 *.tmp
 *.temp
 rasa/.rasa/cache/
+.env*.local

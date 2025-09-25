@@ -10,28 +10,19 @@ interface MobileCartToggleProps {
 }
 
 export function MobileCartToggle({ className = '' }: MobileCartToggleProps) {
-  const { getTotalItems } = useCart();
+  const { getTotalItems, items } = useCart();
   const { isCartOpen, toggleCart } = useCartUI();
   const [isHydrated, setIsHydrated] = useState(false);
-  const [totalItems, setTotalItems] = useState(0);
 
   // Handle hydration safely
   useEffect(() => {
     setIsHydrated(true);
-    setTotalItems(getTotalItems());
-  }, [getTotalItems]);
+  }, []);
 
-  // Update total items when cart changes
-  useEffect(() => {
-    if (isHydrated) {
-      setTotalItems(getTotalItems());
-    }
-  }, [getTotalItems, isHydrated]);
+  // Calculate total items directly from items array for better reactivity
+  const totalItems = isHydrated ? items.reduce((total, item) => total + item.quantity, 0) : 0;
 
-  // Don't render if cart is empty (after hydration)
-  if (isHydrated && totalItems === 0) {
-    return null;
-  }
+  // Always render cart toggle - don't hide when empty
 
   return (
     <motion.button 

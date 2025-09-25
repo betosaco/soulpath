@@ -53,6 +53,8 @@ interface DistrictInputProps {
   label?: string;
   /** Whether the field is required */
   required?: boolean;
+  /** Internal required flag */
+  _required?: boolean;
   /** Current district value */
   value: string;
   /** Callback when district changes */

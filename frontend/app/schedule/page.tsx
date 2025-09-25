@@ -1,10 +1,25 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { AppShell } from '@/components/AppShell';
 import { EnhancedSchedule } from '@/components/EnhancedSchedule';
+import { useCart } from '@/store/appStore';
 
 export default function SchedulePage() {
+  const router = useRouter();
+  const { items: cartItems } = useCart();
+
+  // Monitor cart state and redirect to fresh start when cart becomes empty
+  useEffect(() => {
+    // Only redirect if we're on the schedule page and cart becomes empty
+    if (cartItems.length === 0) {
+      console.log('🔄 Cart is empty, reloading schedule page for fresh start');
+      // Use router.refresh() to reload the current page
+      router.refresh();
+    }
+  }, [cartItems.length, router]);
+
   const handleScheduleSelected = (slot: any) => {
     // Navigate to booking flow when a slot is selected
     // Pass slot details including teacher and service information
