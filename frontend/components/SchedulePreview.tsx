@@ -247,7 +247,7 @@ export function SchedulePreview({
                         alt={slot.teacher.name}
                         width={24}
                         height={24}
-                        className="rounded-full object-cover"
+                        className={`rounded-full object-cover ${slot.teacher.name === 'Lucia Meza' ? 'grayscale' : ''}`}
                       />
                     ) : (
                       <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">

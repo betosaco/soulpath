@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { CentralizedHeader } from './CentralizedHeader';
+import { CartSidebar } from './CartSidebar';
 import { useTranslations, useLanguage } from '@/hooks/useTranslations';
 
 export function MatmaxHomepage() {
@@ -28,6 +29,9 @@ export function MatmaxHomepage() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <CentralizedHeader />
+      
+      {/* Cart Sidebar */}
+      <CartSidebar />
       
       {/* Hero Section - Full Width, Outside AppShell Container */}
       <section id="home" className="relative h-screen flex items-center justify-center overflow-hidden w-full" style={{ height: '100svh' }}>

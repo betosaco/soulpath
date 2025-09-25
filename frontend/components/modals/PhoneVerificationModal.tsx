@@ -89,11 +89,21 @@ export function PhoneVerificationModal({
       return;
     }
 
-    // Validate phone number format
+    // Validate phone number format based on country
     const cleanNumber = phoneNumber.trim().replace(/\D/g, '');
-    if (cleanNumber.length < 7 || cleanNumber.length > 15) {
-      setError('Phone number must be between 7 and 15 digits');
-      return;
+    
+    // Peru mobile validation: must be 9 digits starting with 9
+    if (selectedCountry.code === '+51' || selectedCountry.code === 'PE') {
+      if (!/^9\d{8}$/.test(cleanNumber)) {
+        setError('Peru mobile numbers must be 9 digits starting with 9 (e.g., 912345678)');
+        return;
+      }
+    } else {
+      // General validation for other countries
+      if (cleanNumber.length < 7 || cleanNumber.length > 15) {
+        setError('Phone number must be between 7 and 15 digits');
+        return;
+      }
     }
 
     setIsLoading(true);

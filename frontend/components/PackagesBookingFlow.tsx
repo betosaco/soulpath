@@ -84,7 +84,7 @@ interface BookingStep {
 }
 
 export function PackagesBookingFlow() {
-  const { packages, loading: packagesLoading, error: packagesError } = usePackages('S/.');
+  const { packages, loading: packagesLoading, error: packagesError } = usePackages('PEN');
   const { language } = useLanguage();
   const { t } = useTranslations(undefined, language);
   const { addItem: addToCart, items: cartItems } = useCart();

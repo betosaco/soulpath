@@ -558,13 +558,23 @@ export function CustomerBookingFlow({ initialSlotData }: CustomerBookingFlowProp
               {packages.map((pkg) => (
                 <Card 
                   key={pkg.id} 
-                  className={`cursor-pointer transition-all mobile-touch-target mobile-tap-highlight ${
+                  className={`cursor-pointer transition-all mobile-touch-target mobile-tap-highlight relative ${
                     formData.selectedPackage?.id === pkg.id 
                       ? 'ring-2 ring-[#ffd700] bg-[#1a1a2e]' 
                       : 'bg-[#1a1a2e] border-[#16213e] hover:border-[#ffd700]/50'
                   }`}
                   onClick={() => handlePackageSelect(pkg)}
                 >
+                  {/* Matpass image in top-right corner */}
+                  <div className="absolute top-3 right-3 z-10">
+                    <Image
+                      src="/matpass-logo.png"
+                      alt="Matpass"
+                      width={36}
+                      height={36}
+                      className="rounded-full object-cover shadow-sm"
+                    />
+                  </div>
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-white">{pkg.name}</CardTitle>
@@ -577,7 +587,7 @@ export function CustomerBookingFlow({ initialSlotData }: CustomerBookingFlowProp
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-400">Sessions Remaining:</span>
-                        <span className="text-white font-medium">{pkg.sessionsRemaining}/{pkg.totalSessions}</span>
+                        <span className="text-lg font-semibold text-white">{pkg.sessionsRemaining}/{pkg.totalSessions}</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-400">Session Duration:</span>
@@ -899,7 +909,7 @@ export function CustomerBookingFlow({ initialSlotData }: CustomerBookingFlowProp
                       <div className="flex-1">
                         <p className="text-white font-medium">{formData.selectedPackage.name}</p>
                         <p className="text-sm text-gray-400">
-                          {formData.selectedPackage.sessionsRemaining} sessions remaining
+                          <span className="text-lg font-semibold">{formData.selectedPackage.sessionsRemaining} sessions remaining</span>
                         </p>
                       </div>
                     </div>

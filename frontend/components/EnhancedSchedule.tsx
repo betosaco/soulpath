@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, memo, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Calendar, 
@@ -12,7 +12,8 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle,
-  Lock
+  Lock,
+  AlertTriangle
 } from 'lucide-react';
 import Image from 'next/image';
 // import './EnhancedSchedule.css'; // TODO: Re-enable CSS import after fixing SSR issues
@@ -57,6 +58,16 @@ interface ScheduleSlot {
   venue: Venue;
   dayOfWeek: string;
   conflictReason?: string;
+  isLate?: boolean;
+  lateMinutes?: number;
+  lateMessage?: string;
+  lateNotifiedAt?: string;
+  teacherNotice?: {
+    type: 'cancelled' | 'substitution' | 'late';
+    message: string;
+  };
+  originalStartTime?: string;
+  originalEndTime?: string;
 }
 
 interface EnhancedScheduleProps {
@@ -93,7 +104,8 @@ interface EnhancedScheduleProps {
   }>; // All packages in the cart for checking if all have booked a slot
 }
 
-export function EnhancedSchedule({
+// ULTRA-OPTIMIZATION: Memoized EnhancedSchedule component
+export const EnhancedSchedule = memo(function EnhancedSchedule({
   onBookSlot,
   className = '',
   startDate,
@@ -381,34 +393,45 @@ export function EnhancedSchedule({
     }
   }, [reloadTrigger, startDate, endDate, fetchSlots]);
 
-  // Get unique teachers and services for filters
-  const teachers = [...new Set((slots || []).map(slot => slot.teacher.name))];
-  const services = [...new Set((slots || []).map(slot => slot.serviceType.name))];
+  // ULTRA-OPTIMIZATION: Memoized computed values
+  const teachers = useMemo(() => {
+    return [...new Set((slots || []).map(slot => slot.teacher.name))];
+  }, [slots]);
 
-  // Filter slots based on selected criteria
-  const filteredSlots = (slots || []).filter(slot => {
-    const matchesDate = !selectedDate || slot.date === selectedDate;
-    const matchesTeacher = selectedTeacher === 'all' || slot.teacher.name === selectedTeacher;
-    const matchesService = selectedService === 'all' || slot.serviceType.name === selectedService;
-    const matchesSearch = !searchTerm || 
-      slot.teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      slot.serviceType.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      slot.venue.name.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    return matchesDate && matchesTeacher && matchesService && matchesSearch;
-  });
+  const services = useMemo(() => {
+    return [...new Set((slots || []).map(slot => slot.serviceType.name))];
+  }, [slots]);
 
-  // Group slots by date
-  const groupedSlots = filteredSlots.reduce((acc, slot) => {
-    if (!acc[slot.date]) {
-      acc[slot.date] = [];
-    }
-    acc[slot.date].push(slot);
-    return acc;
-  }, {} as Record<string, ScheduleSlot[]>);
+  // ULTRA-OPTIMIZATION: Memoized filtered slots
+  const filteredSlots = useMemo(() => {
+    return (slots || []).filter(slot => {
+      const matchesDate = !selectedDate || slot.date === selectedDate;
+      const matchesTeacher = selectedTeacher === 'all' || slot.teacher.name === selectedTeacher;
+      const matchesService = selectedService === 'all' || slot.serviceType.name === selectedService;
+      const matchesSearch = !searchTerm || 
+        slot.teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        slot.serviceType.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        slot.venue.name.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      return matchesDate && matchesTeacher && matchesService && matchesSearch;
+    });
+  }, [slots, selectedDate, selectedTeacher, selectedService, searchTerm]);
 
-  // Get available dates
-  const availableDates = Object.keys(groupedSlots).sort();
+  // ULTRA-OPTIMIZATION: Memoized grouped slots
+  const groupedSlots = useMemo(() => {
+    return filteredSlots.reduce((acc, slot) => {
+      if (!acc[slot.date]) {
+        acc[slot.date] = [];
+      }
+      acc[slot.date].push(slot);
+      return acc;
+    }, {} as Record<string, ScheduleSlot[]>);
+  }, [filteredSlots]);
+
+  // ULTRA-OPTIMIZATION: Memoized available dates
+  const availableDates = useMemo(() => {
+    return Object.keys(groupedSlots).sort();
+  }, [groupedSlots]);
 
   // Format date for display
   const formatDate = (dateString: string) => {
@@ -455,13 +478,21 @@ export function EnhancedSchedule({
   // Debug logging
   console.log('🔍 EnhancedSchedule render - loading:', loading, 'slots:', slots?.length || 0, 'error:', error);
 
-  // Show loading state only if actually loading
+  // ULTRA-OPTIMIZATION: Minimal loading state since API is ultra-fast
   if (loading) {
     return (
       <div className={`enhanced-schedule ${className} bg-white`}>
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-          <span className="ml-2 text-lg">Loading schedule...</span>
+        <div className="space-y-6">
+          {/* Minimal Loading Header */}
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Available Classes</h2>
+            <p className="text-gray-600">Loading schedule...</p>
+          </div>
+          
+          {/* Subtle Loading Animation - Same as packages */}
+          <div className="flex justify-center py-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-green-200 border-t-green-600"></div>
+          </div>
         </div>
       </div>
     );
@@ -520,44 +551,6 @@ export function EnhancedSchedule({
                 <p className="text-gray-600">Book your favorite classes with our expert instructors</p>
               </div>
 
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    // Check if there are products in cart that require address
-                    const cart = localStorage.getItem('cart');
-                    if (cart) {
-                      try {
-                        const cartItems = JSON.parse(cart);
-                        const hasProducts = cartItems.some((item: { type: string }) => item.type === 'product');
-                        const hasPackages = cartItems.some((item: { type: string }) => item.type === 'package');
-
-                        if (hasPackages) {
-                          // If packages are in cart, go to step 2 (personal information)
-                          // The system will automatically determine if address is needed based on products
-                          window.location.href = '/checkout?step=2';
-                        } else if (hasProducts) {
-                          // If only products (no packages), go to step 2 (personal information)
-                          // The system will automatically determine if address is needed
-                          window.location.href = '/checkout?step=2';
-                        } else {
-                          // No items, go to default checkout
-                          window.location.href = '/checkout';
-                        }
-                      } catch (error) {
-                        console.error('Error parsing cart:', error);
-                        // Fallback to default checkout
-                        window.location.href = '/checkout';
-                      }
-                    } else {
-                      // No cart items, go to default checkout
-                      window.location.href = '/checkout';
-                    }
-                  }}
-                  className="px-6 py-3 text-lg font-medium rounded-lg transition-all duration-200 bg-[#6ea058] text-white hover:bg-[#5a8a47] hover:scale-105 active:scale-95"
-                >
-                  Proceed to Checkout
-                </button>
-              </div>
             </div>
 
             {/* Filters */}
@@ -659,57 +652,84 @@ export function EnhancedSchedule({
                         className={`schedule-slot card-base card-hover hover-scale ${!slot.isAvailable ? 'schedule-slot--unavailable' : ''} ${isSlotBooked(slot) ? 'schedule-slot--booked opacity-75' : ''} ${!hasMultiplePackages && isSlotLocked(slot) ? 'schedule-slot--locked opacity-75' : ''} ${isSlotBookedByAllPackages(slot) ? 'schedule-slot--fully-booked opacity-75' : ''} ${isSlotSelected(slot) ? 'schedule-slot--selected ring-2 ring-green-500 ring-opacity-75' : ''}`}
                       >
                         <div className="schedule-slot__header">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-2xl">
-                              {getServiceIcon(slot.serviceType.name)}
-                            </span>
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-gray-900">
-                                {slot.serviceType.name}
-                              </h4>
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex flex-col gap-1">
+                              <div className="flex items-center gap-2">
+                                <span className="text-2xl">
+                                  {getServiceIcon(slot.serviceType.name)}
+                                </span>
+                                <h4 className="text-lg font-bold text-gray-900">
+                                  {slot.serviceType.name}
+                                </h4>
+                              </div>
                               <div className="flex items-center gap-2">
                                 <Clock className="h-4 w-4 text-gray-500" />
-                                <span className="text-sm text-gray-600">
+                                <span className="text-sm text-gray-600 font-medium">
                                   {slot.time} ({slot.duration} min)
                                 </span>
                               </div>
-                            </div>
-                            {isSlotBooked(slot) && (
-                              <div className="flex items-center gap-1 text-green-600">
-                                <CheckCircle className="h-4 w-4" />
-                                <span className="text-xs font-medium">
-                                  Selected ({getSlotBookingCount(slot)}/{maxBookingsPerSlot})
-                                </span>
+                              {/* Late Notice */}
+                              {slot.isLate && (
+                                <div className="text-xs text-red-600 font-medium">
+                                  ⚠️ Running Late ({slot.lateMinutes} min)
+                                  {slot.lateMessage && (
+                                    <div className="text-red-500 italic mt-1">
+                                      "{slot.lateMessage}"
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                              {/* Teacher Notice Space */}
+                              <div className="h-4 text-xs text-gray-500">
+                                {slot.teacherNotice && !slot.isLate && (
+                                  <span className={`font-medium ${
+                                    slot.teacherNotice.type === 'cancelled' ? 'text-red-600' :
+                                    slot.teacherNotice.type === 'substitution' ? 'text-blue-600' :
+                                    'text-gray-600'
+                                  }`}>
+                                    {slot.teacherNotice.type === 'cancelled' && '❌ '}
+                                    {slot.teacherNotice.type === 'substitution' && '🔄 '}
+                                    {slot.teacherNotice.message}
+                                  </span>
+                                )}
                               </div>
-                            )}
+                            </div>
+                            <div className="flex items-center gap-3">
+                              {/* Teacher Info */}
+                              <div className="flex flex-col items-center gap-1">
+                                <div className="relative">
+                                  {slot.teacher.avatarUrl ? (
+                                    <Image
+                                      src={slot.teacher.avatarUrl}
+                                      alt={slot.teacher.name}
+                                      width={40}
+                                      height={40}
+                                      className={`rounded-full object-cover ${slot.teacher.name === 'Lucia Meza' ? 'grayscale' : ''}`}
+                                    />
+                                  ) : (
+                                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                      <User className="h-5 w-5 text-blue-600" />
+                                    </div>
+                                  )}
+                                </div>
+                                <p className="font-medium text-gray-900 text-sm text-center">
+                                  {slot.teacher.name}
+                                </p>
+                              </div>
+                              {isSlotBooked(slot) && (
+                                <div className="flex items-center gap-1 text-green-600">
+                                  <CheckCircle className="h-4 w-4" />
+                                  <span className="text-xs font-medium">
+                                    Selected ({getSlotBookingCount(slot)}/{maxBookingsPerSlot})
+                                  </span>
+                                </div>
+                              )}
+                            </div>
                           </div>
                           
                         </div>
 
                         <div className="schedule-slot__content">
-                          {/* Teacher Info */}
-                          <div className="flex items-center gap-3 mb-3">
-                            <div className="relative">
-                              {slot.teacher.avatarUrl ? (
-                                <Image
-                                  src={slot.teacher.avatarUrl}
-                                  alt={slot.teacher.name}
-                                  width={40}
-                                  height={40}
-                                  className="rounded-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                  <User className="h-5 w-5 text-blue-600" />
-                                </div>
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-gray-900 truncate">
-                                {slot.teacher.name}
-                              </p>
-                            </div>
-                          </div>
 
                           {/* Service Description */}
                           {slot.serviceType.shortDescription && (
@@ -727,10 +747,11 @@ export function EnhancedSchedule({
                             )}
                           </div>
 
+
                           {/* Available Spots Info */}
                           <div className="flex items-center gap-2 text-sm mb-3">
                             <div className="flex items-center gap-1">
-                              <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                              <div className={`w-2 h-2 rounded-full ${slot.isLate ? 'bg-yellow-500' : 'bg-green-500'}`}></div>
                               <span className="text-gray-600">
                                 {slot.capacity - slot.bookedCount} of {slot.capacity} spots available
                               </span>
@@ -806,4 +827,4 @@ export function EnhancedSchedule({
       </div>
     </div>
   );
-}
+});

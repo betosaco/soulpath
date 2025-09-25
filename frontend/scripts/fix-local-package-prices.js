@@ -28,7 +28,7 @@ async function fixLocalPackagePrices() {
 
     // Define package prices
     const packagePrices = [
-      { packageId: 1, name: '24 MATPASS', price: 530.00 },
+      { packageId: 1, name: '24 MATPASS', price: 550.00 },
       { packageId: 2, name: '01 MATPASS', price: 60.00 },
       { packageId: 3, name: '08 MATPASS', price: 350.00 },
       { packageId: 4, name: '12 MATPASS', price: 420.00 },

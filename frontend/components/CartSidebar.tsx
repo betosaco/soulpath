@@ -133,6 +133,18 @@ export function CartSidebar() {
                     transition={{ duration: 0.2, delay: index * 0.05 }}
                   >
                     <div className="relative flex items-center space-x-3 p-3 border border-green-300 rounded-lg bg-white">
+                      {/* Matpass image in top-right corner for packages */}
+                      {item.type === 'package' && (
+                        <div className="absolute top-2 right-2 z-10">
+                          <Image
+                            src="/matpass-logo.png"
+                            alt="Matpass"
+                            width={24}
+                            height={24}
+                            className="rounded-full object-cover shadow-sm"
+                          />
+                        </div>
+                      )}
                       <div className="flex-shrink-0">
                         <Image
                           src={
@@ -397,8 +409,8 @@ export function CartSidebar() {
                   </button>
                 )}
 
-                {/* Only show separate Proceed to Checkout button when not all sessions are booked */}
-                {!allSessionsBooked && (
+                {/* Only show separate Proceed to Checkout button when not all sessions are booked AND there are packages */}
+                {!allSessionsBooked && hasPackages && (
                   <button
                     className="w-full bg-[#6ea058] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#5a8a4a] transition-colors text-center"
                     onClick={() => {
@@ -438,7 +450,7 @@ export function CartSidebar() {
                   </button>
                 )}
 
-                {/* Checkout button for products only */}
+                {/* Checkout button for products only (when no packages) */}
                 {hasProducts && !hasPackages && (
                   <button
                     className="w-full bg-[#6ea058] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#5a8a4a] transition-colors text-center"

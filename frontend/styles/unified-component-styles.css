@@ -16,7 +16,8 @@
    CSS CUSTOM PROPERTIES (DESIGN TOKENS)
    ============================================================================ */
 
-:root {
+:root,
+.teacher-theme {
   /* Primary Colors - Green theme */
   --unified-primary: #6ea058;
   --unified-primary-hover: #5a8a47;

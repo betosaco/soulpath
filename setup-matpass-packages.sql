@@ -87,7 +87,7 @@ INSERT INTO package_prices (package_definition_id, currency_id, price, pricing_m
 (2, (SELECT id FROM currencies WHERE code = 'PEN'), 190.00, 'custom', true),
 (3, (SELECT id FROM currencies WHERE code = 'PEN'), 350.00, 'custom', true),
 (4, (SELECT id FROM currencies WHERE code = 'PEN'), 420.00, 'custom', true),
-(5, (SELECT id FROM currencies WHERE code = 'PEN'), 530.00, 'custom', true)
+(5, (SELECT id FROM currencies WHERE code = 'PEN'), 550.00, 'custom', true)
 ON CONFLICT (package_definition_id, currency_id) DO UPDATE SET
   price = EXCLUDED.price,
   pricing_mode = EXCLUDED.pricing_mode,

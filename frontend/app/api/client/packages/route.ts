@@ -83,6 +83,7 @@ export async function GET(request: NextRequest) {
             select: {
               id: true,
               price: true,
+              pricePerClass: true,
               pricingMode: true,
               isActive: true,
               currency: {

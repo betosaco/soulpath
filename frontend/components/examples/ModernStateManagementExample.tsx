@@ -21,7 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
  */
 export function ModernStateManagementExample() {
   // TanStack Query hooks for server state
-  const { packages, loading: packagesLoading, error: packagesError } = usePackages('S/.');
+  const { packages, loading: packagesLoading, error: packagesError } = usePackages('PEN');
   const { user, isLoading: authLoading, isAuthenticated, signIn, signOut } = useAuthQuery();
   
   // Zustand hooks for client state

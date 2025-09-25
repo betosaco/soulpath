@@ -18,7 +18,7 @@ import { CustomerDashboard } from '@/components/CustomerDashboard';
 // }
 
 export default function AccountPage() {
-  const { user, isAdmin, isLoading: authLoading } = useAuth();
+  const { user, isAdmin, isTeacher, isLoading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -30,6 +30,13 @@ export default function AccountPage() {
       }
     }
   }, [user, authLoading]);
+
+  // Redirect teachers to their dashboard
+  useEffect(() => {
+    if (!authLoading && user && isTeacher) {
+      window.location.href = '/account/teacher';
+    }
+  }, [user, isTeacher, authLoading]);
 
   if (authLoading || loading) {
     return (

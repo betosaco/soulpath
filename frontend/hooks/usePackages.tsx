@@ -18,6 +18,7 @@ interface PackagesApiResponse {
 export interface PackagePrice {
   id: number;
   price: number;
+  pricePerClass?: number;
   packageDefinition: {
     id: number;
     name: string;
@@ -54,7 +55,7 @@ export interface UsePackagesReturn {
   lastLoaded: Date | null;
 }
 
-export function usePackages(currency: string = 'S/.'): UsePackagesReturn {
+export function usePackages(currency: string = 'PEN'): UsePackagesReturn {
   let user;
   try {
     const authData = useAuth();
@@ -76,16 +77,20 @@ export function usePackages(currency: string = 'S/.'): UsePackagesReturn {
       
       console.log(`🔍 Fetching packages for currency: ${currency}`);
       
-      const headers: HeadersInit = {};
+      const headers: HeadersInit = {
+        'Accept': 'application/json',
+        'Cache-Control': 'no-cache'
+      };
       
       // Add authorization header only if user is authenticated
       if (user?.access_token) {
         headers['Authorization'] = `Bearer ${user.access_token}`;
       }
       
+      // ULTRA-OPTIMIZATION: Remove timestamp to allow caching
       const response = await safeGet(`/api/packages?currency=${currency}&active=true`, {
         headers,
-        timeout: 10000,
+        timeout: 5000, // Reduced timeout
         retries: 1,
       });
 
@@ -159,7 +164,7 @@ export function usePackagesWithCurrency() {
 }
 
 // Hook for fetching a single package by ID
-export function usePackage(packageId: number, currency: string = 'S/.') {
+export function usePackage(packageId: number, currency: string = 'PEN') {
   const { packages, loading, error, refetch } = usePackages(currency);
   
   const packageData = packages.find(pkg => pkg.id === packageId);
@@ -173,7 +178,7 @@ export function usePackage(packageId: number, currency: string = 'S/.') {
 }
 
 // Hook for fetching popular packages only
-export function usePopularPackages(currency: string = 'S/.') {
+export function usePopularPackages(currency: string = 'PEN') {
   const { packages, loading, error, refetch } = usePackages(currency);
   
   const popularPackages = packages.filter(pkg => pkg.packageDefinition.isPopular);

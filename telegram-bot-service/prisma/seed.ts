@@ -571,6 +571,7 @@ async function main() {
       where: { packageDefinitionId_currencyId: { packageDefinitionId: packageDefinitions[0].id, currencyId: penCurrencyId } },
       update: {
         price: 60.00,
+        pricePerClass: 60.00,
         pricingMode: 'custom',
         isActive: true
       },
@@ -578,6 +579,7 @@ async function main() {
         packageDefinitionId: packageDefinitions[0].id,
         currencyId: penCurrencyId,
         price: 60.00,
+        pricePerClass: 60.00,
         pricingMode: 'custom',
         isActive: true
       }
@@ -586,6 +588,7 @@ async function main() {
       where: { packageDefinitionId_currencyId: { packageDefinitionId: packageDefinitions[1].id, currencyId: penCurrencyId } },
       update: {
         price: 190.00,
+        pricePerClass: 47.50,
         pricingMode: 'custom',
         isActive: true
       },
@@ -593,6 +596,7 @@ async function main() {
         packageDefinitionId: packageDefinitions[1].id,
         currencyId: penCurrencyId,
         price: 190.00,
+        pricePerClass: 47.50,
         pricingMode: 'custom',
         isActive: true
       }
@@ -601,6 +605,7 @@ async function main() {
       where: { packageDefinitionId_currencyId: { packageDefinitionId: packageDefinitions[2].id, currencyId: penCurrencyId } },
       update: {
         price: 350.00,
+        pricePerClass: 43.75,
         pricingMode: 'custom',
         isActive: true
       },
@@ -608,6 +613,7 @@ async function main() {
         packageDefinitionId: packageDefinitions[2].id,
         currencyId: penCurrencyId,
         price: 350.00,
+        pricePerClass: 43.75,
         pricingMode: 'custom',
         isActive: true
       }
@@ -616,6 +622,7 @@ async function main() {
       where: { packageDefinitionId_currencyId: { packageDefinitionId: packageDefinitions[3].id, currencyId: penCurrencyId } },
       update: {
         price: 420.00,
+        pricePerClass: 35.00,
         pricingMode: 'custom',
         isActive: true
       },
@@ -623,6 +630,7 @@ async function main() {
         packageDefinitionId: packageDefinitions[3].id,
         currencyId: penCurrencyId,
         price: 420.00,
+        pricePerClass: 35.00,
         pricingMode: 'custom',
         isActive: true
       }
@@ -630,14 +638,16 @@ async function main() {
     prisma.packagePrice.upsert({
       where: { packageDefinitionId_currencyId: { packageDefinitionId: packageDefinitions[4].id, currencyId: penCurrencyId } },
       update: {
-        price: 530.00,
+        price: 550.00,
+        pricePerClass: 22.92,
         pricingMode: 'custom',
         isActive: true
       },
       create: {
         packageDefinitionId: packageDefinitions[4].id,
         currencyId: penCurrencyId,
-        price: 530.00,
+        price: 550.00,
+        pricePerClass: 22.92,
         pricingMode: 'custom',
         isActive: true
       }

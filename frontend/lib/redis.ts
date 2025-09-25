@@ -85,8 +85,8 @@ export const cacheKeys = {
 // Cache TTL (Time To Live) in seconds
 export const cacheTTL = {
   schedule: 300, // 5 minutes - schedule changes frequently
-  packages: 1800, // 30 minutes - packages change less frequently
-  packageDetail: 3600, // 1 hour - individual package details
+  packages: 900, // 15 minutes - optimized for better performance
+  packageDetail: 1800, // 30 minutes - individual package details
   popularPackages: 1800, // 30 minutes
   featuredPackages: 1800, // 30 minutes
   products: 900, // 15 minutes - products change moderately

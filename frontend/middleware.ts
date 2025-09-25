@@ -12,14 +12,17 @@ const ADMIN_ROUTES = [
 const PUBLIC_ROUTES = [
   '/',
   '/login',
+  '/set-password',
   '/packages',
   '/api/auth/login',
+  '/api/auth/set-password',
   '/api/auth/verify',
   '/api/packages',
   '/api/health',
   '/api/content',
   '/api/sections',
   '/api/schedule-slots',
+  '/api/teacher-schedule-slots',
   '/api/schedules',
   '/api/booking',
   '/api/feedback',
@@ -33,6 +36,12 @@ const PUBLIC_ROUTES = [
   '/api/telegram/webhook',
   '/api/whatsapp/webhook',
   '/api/whatsapp-business/webhook'
+];
+
+// Define teacher-protected routes
+const TEACHER_ROUTES = [
+  '/account/teacher',
+  '/api/teacher'
 ];
 
 interface JWTPayload {
@@ -105,6 +114,17 @@ async function verifyToken(token: string): Promise<JWTPayload | null> {
  */
 function isAdminRoute(pathname: string): boolean {
   return ADMIN_ROUTES.some(route => pathname.startsWith(route));
+}
+
+/**
+ * Check if the current path matches any of the protected teacher routes
+ */
+function isTeacherRoute(pathname: string): boolean {
+  // Only match exact teacher dashboard and API under /api/teacher/*, not routes like /api/teacher-schedule-slots
+  if (pathname === '/account/teacher') return true;
+  if (pathname === '/api/teacher') return true;
+  if (pathname.startsWith('/api/teacher/')) return true;
+  return false;
 }
 
 /**
@@ -217,6 +237,43 @@ export async function middleware(request: NextRequest) {
       request: {
         headers: requestHeaders,
       },
+    });
+  }
+
+  // Check if this is a teacher route (requires authentication, DB check is done in API/page)
+  if (isTeacherRoute(pathname)) {
+    console.log('🔐 Middleware: Teacher route detected, requiring authentication');
+
+    const token = extractToken(request);
+    if (!token) {
+      console.log('🔐 Middleware: No token for teacher route');
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json({ code: 401, message: 'Authentication required' }, { status: 401 });
+      }
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    const userData = await verifyToken(token);
+    if (!userData) {
+      console.log('🔐 Middleware: Invalid token for teacher route');
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json({ code: 401, message: 'Invalid or expired token' }, { status: 401 });
+      }
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    // Forward user headers; actual teacher verification is enforced in API handlers
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-user-id', userData.userId);
+    requestHeaders.set('x-user-email', userData.email);
+    requestHeaders.set('x-user-role', userData.role || 'USER');
+
+    return NextResponse.next({
+      request: { headers: requestHeaders }
     });
   }
 

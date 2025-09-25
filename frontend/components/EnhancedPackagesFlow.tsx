@@ -85,7 +85,7 @@ interface BookingStep {
 }
 
 export function EnhancedPackagesFlow() {
-  const { packages, loading: packagesLoading, error: packagesError } = usePackages('S/.');
+  const { packages, loading: packagesLoading, error: packagesError } = usePackages('PEN');
   const typedPackages = packages as PackagePrice[] | undefined;
   
   const { language } = useLanguage();

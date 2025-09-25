@@ -13174,6 +13174,19 @@ export const departments: Department[] = [
             ]
           },
           {
+            "code": "LIM-LIM-SID",
+            "name": "San Isidro",
+            "postalCodes": [
+              "15036",
+              "15046",
+              "15047",
+              "15072",
+              "15073",
+              "15074",
+              "15076"
+            ]
+          },
+          {
             "code": "LIM-LIM-SUR",
             "name": "Surquillo",
             "postalCodes": [
@@ -30653,6 +30666,19 @@ export const provinces: Province[] = [
           "15841",
           "15842"
         ]
+      },
+      {
+        "code": "LIM-LIM-SID",
+        "name": "San Isidro",
+        "postalCodes": [
+          "15036",
+          "15046",
+          "15047",
+          "15072",
+          "15073",
+          "15074",
+          "15076"
+        ]
       }
     ],
     "cities": [
@@ -44956,6 +44982,19 @@ export const districts: District[] = [
       "15855",
       "15856",
       "15861"
+    ]
+  },
+  {
+    "code": "LIM-LIM-SID",
+    "name": "San Isidro",
+    "postalCodes": [
+      "15036",
+      "15046",
+      "15047",
+      "15072",
+      "15073",
+      "15074",
+      "15076"
     ]
   },
   {

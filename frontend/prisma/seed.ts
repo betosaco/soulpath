@@ -198,6 +198,35 @@ async function main() {
         }
       }
     })
+    ,
+    // Teacher enrollment email template
+    prisma.communicationTemplate.upsert({
+      where: { templateKey: 'teacher_enrollment' },
+      update: {},
+      create: {
+        templateKey: 'teacher_enrollment',
+        name: 'Teacher Enrollment',
+        description: 'Sent to a teacher to set password and access dashboard',
+        type: 'email',
+        category: 'teacher',
+        isActive: true,
+        isDefault: true,
+        translations: {
+          create: [
+            {
+              language: 'en',
+              subject: 'Welcome to MatMax • Teacher Account Setup',
+              content: '<h1>Welcome, {{teacherName}}!</h1><p>Your teacher account has been created with email <strong>{{teacherEmail}}</strong>.</p><p>Please set your password to access your dashboard:</p><p><a href="{{setPasswordUrl}}" style="display:inline-block;padding:12px 18px;background:#000;color:#fff;border-radius:6px;text-decoration:none">Set Password</a></p><p>If the button does not work, copy this link: {{setPasswordUrl}}</p><p>You can access your dashboard at any time: {{dashboardUrl}}</p><p>— MatMax Yoga Studio</p>'
+            },
+            {
+              language: 'es',
+              subject: 'Bienvenida a MatMax • Configura tu Cuenta de Profesora',
+              content: '<h1>¡Bienvenida, {{teacherName}}!</h1><p>Hemos creado tu cuenta de profesora con el correo <strong>{{teacherEmail}}</strong>.</p><p>Por favor configura tu contraseña para acceder a tu panel:</p><p><a href="{{setPasswordUrl}}" style="display:inline-block;padding:12px 18px;background:#000;color:#fff;border-radius:6px;text-decoration:none">Configurar Contraseña</a></p><p>Si el botón no funciona, copia este enlace: {{setPasswordUrl}}</p><p>Puedes acceder a tu panel cuando quieras: {{dashboardUrl}}</p><p>— MatMax Yoga Studio</p>'
+            }
+          ]
+        }
+      }
+    })
   ]);
   console.log('✅ Communication templates created:', communicationTemplates.length);
 
@@ -366,8 +395,14 @@ async function main() {
   const rates = await Promise.all([
     // Individual session rates
     prisma.rate.upsert({
-      where: { id: 1 },
-      update: {},
+      where: { currencyId_sessionDurationId_sessionType: { currencyId: 1, sessionDurationId: 1, sessionType: 'individual' } },
+      update: {
+        base_price: 50.00,
+        group_discount_percent: 0,
+        min_group_size: 1,
+        max_group_size: 1,
+        isActive: true
+      },
       create: {
         currencyId: 1, // USD
         sessionDurationId: 1, // 1 hour
@@ -380,8 +415,14 @@ async function main() {
       }
     }),
     prisma.rate.upsert({
-      where: { id: 2 },
-      update: {},
+      where: { currencyId_sessionDurationId_sessionType: { currencyId: 1, sessionDurationId: 2, sessionType: 'individual' } },
+      update: {
+        base_price: 80.00,
+        group_discount_percent: 0,
+        min_group_size: 1,
+        max_group_size: 1,
+        isActive: true
+      },
       create: {
         currencyId: 1, // USD
         sessionDurationId: 2, // 90 minutes
@@ -394,11 +435,17 @@ async function main() {
       }
     }),
     prisma.rate.upsert({
-      where: { id: 3 },
-      update: {},
+      where: { currencyId_sessionDurationId_sessionType: { currencyId: 1, sessionDurationId: 3, sessionType: 'individual' } },
+      update: {
+        base_price: 120.00,
+        group_discount_percent: 0,
+        min_group_size: 1,
+        max_group_size: 1,
+        isActive: true
+      },
       create: {
         currencyId: 1, // USD
-        sessionDurationId: 1, // 90 minutes
+        sessionDurationId: 3, // 120 minutes
         sessionType: 'individual',
         base_price: 120.00,
         group_discount_percent: 0,
@@ -409,8 +456,14 @@ async function main() {
     }),
     // Group session rates - using different currency to avoid conflict
     prisma.rate.upsert({
-      where: { id: 4 },
-      update: {},
+      where: { currencyId_sessionDurationId_sessionType: { currencyId: 2, sessionDurationId: 1, sessionType: 'group' } },
+      update: {
+        base_price: 60.00,
+        group_discount_percent: 25.00,
+        min_group_size: 2,
+        max_group_size: 5,
+        isActive: true
+      },
       create: {
         currencyId: 2, // EUR
         sessionDurationId: 1, // 1 hour - different duration to avoid conflict
@@ -571,6 +624,7 @@ async function main() {
       where: { packageDefinitionId_currencyId: { packageDefinitionId: packageDefinitions[0].id, currencyId: penCurrencyId } },
       update: {
         price: 60.00,
+        pricePerClass: 60.00,
         pricingMode: 'custom',
         isActive: true
       },
@@ -578,6 +632,7 @@ async function main() {
         packageDefinitionId: packageDefinitions[0].id,
         currencyId: penCurrencyId,
         price: 60.00,
+        pricePerClass: 60.00,
         pricingMode: 'custom',
         isActive: true
       }
@@ -586,6 +641,7 @@ async function main() {
       where: { packageDefinitionId_currencyId: { packageDefinitionId: packageDefinitions[1].id, currencyId: penCurrencyId } },
       update: {
         price: 190.00,
+        pricePerClass: 47.50,
         pricingMode: 'custom',
         isActive: true
       },
@@ -593,6 +649,7 @@ async function main() {
         packageDefinitionId: packageDefinitions[1].id,
         currencyId: penCurrencyId,
         price: 190.00,
+        pricePerClass: 47.50,
         pricingMode: 'custom',
         isActive: true
       }
@@ -601,6 +658,7 @@ async function main() {
       where: { packageDefinitionId_currencyId: { packageDefinitionId: packageDefinitions[2].id, currencyId: penCurrencyId } },
       update: {
         price: 350.00,
+        pricePerClass: 43.75,
         pricingMode: 'custom',
         isActive: true
       },
@@ -608,6 +666,7 @@ async function main() {
         packageDefinitionId: packageDefinitions[2].id,
         currencyId: penCurrencyId,
         price: 350.00,
+        pricePerClass: 43.75,
         pricingMode: 'custom',
         isActive: true
       }
@@ -616,6 +675,7 @@ async function main() {
       where: { packageDefinitionId_currencyId: { packageDefinitionId: packageDefinitions[3].id, currencyId: penCurrencyId } },
       update: {
         price: 420.00,
+        pricePerClass: 35.00,
         pricingMode: 'custom',
         isActive: true
       },
@@ -623,6 +683,7 @@ async function main() {
         packageDefinitionId: packageDefinitions[3].id,
         currencyId: penCurrencyId,
         price: 420.00,
+        pricePerClass: 35.00,
         pricingMode: 'custom',
         isActive: true
       }
@@ -630,14 +691,16 @@ async function main() {
     prisma.packagePrice.upsert({
       where: { packageDefinitionId_currencyId: { packageDefinitionId: packageDefinitions[4].id, currencyId: penCurrencyId } },
       update: {
-        price: 530.00,
+        price: 550.00,
+        pricePerClass: 22.92,
         pricingMode: 'custom',
         isActive: true
       },
       create: {
         packageDefinitionId: packageDefinitions[4].id,
         currencyId: penCurrencyId,
-        price: 530.00,
+        price: 550.00,
+        pricePerClass: 22.92,
         pricingMode: 'custom',
         isActive: true
       }
@@ -736,7 +799,7 @@ async function main() {
       where: { id: 1 },
       update: {},
       create: {
-        scheduleTemplateId: 7, // Monday template (actual ID from database)
+        scheduleTemplateId: 1, // Monday template
         startTime: new Date('2024-01-01T09:00:00Z'),
         endTime: new Date('2024-01-01T17:00:00Z'),
         capacity: 3,
@@ -748,7 +811,7 @@ async function main() {
       where: { id: 2 },
       update: {},
       create: {
-        scheduleTemplateId: 8, // Tuesday template (actual ID from database)
+        scheduleTemplateId: 2, // Tuesday template
         startTime: new Date('2024-01-02T09:00:00Z'),
         endTime: new Date('2024-01-02T17:00:00Z'),
         capacity: 3,
@@ -954,6 +1017,18 @@ async function main() {
         question: 'What wellness services do you offer?',
         language: 'en'
       }
+    }),
+    // Ensure Lucia exists as a user (no password yet)
+    prisma.user.upsert({
+      where: { email: 'luciamezac@gmail.com' },
+      update: {},
+      create: {
+        email: 'luciamezac@gmail.com',
+        fullName: 'Lucia Meza',
+        status: 'PENDING',
+        language: 'es',
+        role: 'USER'
+      }
     })
   ]);
   console.log('✅ Test clients created:', clients.length);
@@ -1146,8 +1221,8 @@ async function main() {
       update: {},
       create: {
         userId: clients[0].id,
-        userPackageId: 1,
-        scheduleSlotId: 1,
+        userPackageId: userPackages[0].id,
+        scheduleSlotId: legacyScheduleSlots[0].id,
         sessionType: 'Wellness Session',
         status: 'confirmed',
         notes: 'Test booking for development'
@@ -1158,8 +1233,8 @@ async function main() {
       update: {},
       create: {
         userId: clients[1].id,
-        userPackageId: 2,
-        scheduleSlotId: 2,
+        userPackageId: userPackages[1].id,
+        scheduleSlotId: legacyScheduleSlots[1].id,
         sessionType: 'Wellness Session',
         status: 'confirmed',
         notes: 'Sesión en español'
@@ -1319,11 +1394,11 @@ async function main() {
   // 25. Create Lucia Meza teacher profile
   console.log('👩‍🏫 Creating Lucia Meza teacher profile...');
   const luciaMeza = await prisma.teacher.upsert({
-    where: { email: 'lucia.meza@matmax.store' },
+    where: { email: 'luciamezac@gmail.com' },
     update: {},
     create: {
       name: 'Lucia Meza',
-      email: 'lucia.meza@matmax.store',
+      email: 'luciamezac@gmail.com',
       phone: '+1234567893',
       bio: 'Experienced yoga instructor specializing in Hatha and Vinyasa yoga. With over 8 years of teaching experience, Lucia brings a gentle yet powerful approach to her classes, helping students find balance and strength both on and off the mat.',
       shortBio: 'Experienced yoga instructor specializing in Hatha and Vinyasa yoga with 8+ years of teaching experience.',

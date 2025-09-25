@@ -117,7 +117,7 @@ export async function sendOrderConfirmationEmail(orderData: OrderEmailData): Pro
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Confirmación de Pedido - MatMax Yoga Studio</title>
+    <title>Confirmación de Pedido - MatMax Wellness Studio</title>
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -139,7 +139,7 @@ export async function sendOrderConfirmationEmail(orderData: OrderEmailData): Pro
 <body>
     <div class="container">
         <div class="header">
-            <h1>🧘‍♀️ MatMax Yoga Studio</h1>
+            <h1>🧘‍♀️ MatMax Wellness Studio</h1>
             <h2>¡Pedido Confirmado!</h2>
         </div>
         
@@ -151,6 +151,7 @@ export async function sendOrderConfirmationEmail(orderData: OrderEmailData): Pro
             <div class="order-info">
                 <h3>📋 Detalles del Pedido</h3>
                 <p><strong>Número de Pedido:</strong> ${orderData.orderNumber}</p>
+                <p><strong>ID de Pedido:</strong> ${orderData.orderId}</p>
                 <p><strong>Fecha:</strong> ${orderData.orderDate}</p>
                 <p><strong>Estado:</strong> <span class="status-badge status-${orderData.orderStatus}">${orderData.orderStatusText}</span></p>
                 <p><strong>Estado de Pago:</strong> <span class="status-badge status-${orderData.paymentStatus}">${orderData.paymentStatusText}</span></p>
@@ -270,7 +271,7 @@ export async function sendOrderConfirmationEmail(orderData: OrderEmailData): Pro
         </div>
         
         <div class="footer">
-            <p><strong>MatMax Yoga Studio</strong></p>
+            <p><strong>MatMax Wellness Studio</strong></p>
             <p>📧 info@matmax.store | 📞 +51 999 999 999</p>
         </div>
     </div>
@@ -279,7 +280,7 @@ export async function sendOrderConfirmationEmail(orderData: OrderEmailData): Pro
 
     // Generate text content for the email
     const textContent = `
-Confirmación de Pedido - MatMax Yoga Studio
+Confirmación de Pedido - MatMax Wellness Studio
 
 Hola ${orderData.customerName},
 
@@ -287,6 +288,7 @@ Hola ${orderData.customerName},
 
 DETALLES DEL PEDIDO:
 - Número de Pedido: ${orderData.orderNumber}
+- ID de Pedido: ${orderData.orderId}
 - Fecha: ${orderData.orderDate}
 - Estado: ${orderData.orderStatusText}
 - Estado de Pago: ${orderData.paymentStatusText}
@@ -367,7 +369,7 @@ Ver detalles del pedido: ${orderData.order_url}
 
 Si tienes alguna pregunta sobre tu pedido, no dudes en contactarnos.
 
-MatMax Yoga Studio
+MatMax Wellness Studio
 📧 info@matmax.store | 📞 +51 999 999 999
     `;
 
@@ -375,7 +377,7 @@ MatMax Yoga Studio
     const emailResult = await emailService.sendEmailWithBCC({
       to: orderData.customerEmail,
       bcc: 'alberto@matmax.world',
-      subject: '¡Gracias por tu pedido! - MatMax Yoga Studio',
+      subject: '¡Gracias por tu pedido! - MatMax Wellness Studio',
       html: htmlContent,
       text: textContent
     });

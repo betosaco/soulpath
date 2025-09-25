@@ -227,7 +227,7 @@ export class LabsMobileSmsService {
       'BR': /^\d{10,11}$/, // 10-11 digits for Brazil (11987654321)
       'AR': /^\d{10,11}$/, // 10-11 digits for Argentina (91123456789)
       'CL': /^\d{8,9}$/,  // 8-9 digits for Chile (912345678)
-      'PE': /^\d{7,9}$/,  // 7-9 digits for Peru (flexible: 1234567, 12345678, 912345678)
+      'PE': /^9\d{8}$/,  // 9 digits for Peru mobile (must start with 9: 912345678)
     };
 
     const validation = localValidations[countryCode];

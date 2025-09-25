@@ -82,12 +82,12 @@ ON CONFLICT (id) DO UPDATE SET
   updated_at = NOW();
 
 -- Insert MATPASS package prices (Peruvian Sol)
-INSERT INTO package_prices (package_definition_id, currency_id, price, pricing_mode, is_active) VALUES
-(1, (SELECT id FROM currencies WHERE code = 'PEN'), 60.00, 'custom', true),
-(2, (SELECT id FROM currencies WHERE code = 'PEN'), 190.00, 'custom', true),
-(3, (SELECT id FROM currencies WHERE code = 'PEN'), 350.00, 'custom', true),
-(4, (SELECT id FROM currencies WHERE code = 'PEN'), 420.00, 'custom', true),
-(5, (SELECT id FROM currencies WHERE code = 'PEN'), 530.00, 'custom', true)
+INSERT INTO package_prices (package_definition_id, currency_id, price, price_per_class, pricing_mode, is_active) VALUES
+(1, (SELECT id FROM currencies WHERE code = 'PEN'), 60.00, 60.00, 'custom', true),
+(2, (SELECT id FROM currencies WHERE code = 'PEN'), 190.00, 47.50, 'custom', true),
+(3, (SELECT id FROM currencies WHERE code = 'PEN'), 350.00, 43.75, 'custom', true),
+(4, (SELECT id FROM currencies WHERE code = 'PEN'), 420.00, 35.00, 'custom', true),
+(5, (SELECT id FROM currencies WHERE code = 'PEN'), 550.00, 22.92, 'custom', true)
 ON CONFLICT (package_definition_id, currency_id) DO UPDATE SET
   price = EXCLUDED.price,
   pricing_mode = EXCLUDED.pricing_mode,

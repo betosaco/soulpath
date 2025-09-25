@@ -98,10 +98,20 @@ export default function ProductsPage() {
   if (loading) {
     return (
       <AppShell>
-        <div className="min-h-screen flex items-center justify-center bg-white">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-400 mx-auto mb-4"></div>
-            <p className="text-gray-600 text-lg">Loading products...</p>
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="space-y-6">
+              {/* Minimal Loading Header */}
+              <div className="text-center">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Available Products</h2>
+                <p className="text-gray-600">Loading products...</p>
+              </div>
+              
+              {/* Subtle Loading Animation - Same as packages */}
+              <div className="flex justify-center py-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-green-200 border-t-green-600"></div>
+              </div>
+            </div>
           </div>
         </div>
       </AppShell>
@@ -111,16 +121,18 @@ export default function ProductsPage() {
   if (error) {
     return (
       <AppShell>
-        <div className="min-h-screen flex items-center justify-center bg-white">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Products</h1>
-            <p className="text-gray-600">{error}</p>
-            <Button 
-              onClick={() => window.location.reload()} 
-              className="mt-4"
-            >
-              Try Again
-            </Button>
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Products</h1>
+              <p className="text-gray-600">{error}</p>
+              <Button 
+                onClick={() => window.location.reload()} 
+                className="mt-4"
+              >
+                Try Again
+              </Button>
+            </div>
           </div>
         </div>
       </AppShell>

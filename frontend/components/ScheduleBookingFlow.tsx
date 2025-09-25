@@ -10,6 +10,7 @@
  */
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Calendar,
@@ -271,7 +272,7 @@ export function ScheduleBookingFlow({
   onSlotsChange,
   onStepChange
 }: ScheduleBookingFlowProps = {}) {
-  const { packages, loading: packagesLoading, error: packagesError } = usePackages('S/.');
+  const { packages, loading: packagesLoading, error: packagesError } = usePackages('PEN');
   const cartContext = useCart();
   const { items: cartItems, addItem: addToCart, removeItem: removeFromCart, updateQuantity } = cartContext;
   const { openCart: setIsCartOpen } = useCartUI();
@@ -1453,7 +1454,17 @@ export function ScheduleBookingFlow({
                     const cartItem = cartItemsOfThisType[0]; // Use first instance for display purposes
 
                     return (
-                      <Card key={pkg.id} className="card-base card-hover hover-scale">
+                      <Card key={pkg.id} className="card-base card-hover hover-scale relative">
+                        {/* Matpass image in top-right corner */}
+                        <div className="absolute top-3 right-3 z-10">
+                          <Image
+                            src="/matpass-logo.png"
+                            alt="Matpass"
+                            width={36}
+                            height={36}
+                            className="rounded-full object-cover shadow-sm"
+                          />
+                        </div>
                         <CardHeader className="text-center">
                           <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
                             <Package className="w-8 h-8 text-white" />
@@ -1464,6 +1475,9 @@ export function ScheduleBookingFlow({
                           <div className="text-3xl font-bold text-black">
                             {pkg.currency.symbol}{pkg.price}
                           </div>
+                          <div className="text-xs text-gray-600">
+                            {pkg.currency.symbol}{pkg.pricePerClass?.toFixed(2) || (pkg.price / (pkg.packageDefinition.sessionsCount || 1)).toFixed(2)} per class
+                          </div>
                         </CardHeader>
                         <CardContent>
                           <p className="text-muted mb-4 text-center">
@@ -1472,7 +1486,7 @@ export function ScheduleBookingFlow({
                           <div className="space-y-3 mb-6">
                             <div className="flex items-center text-sm">
                               <Users className="w-4 h-4 mr-2 text-primary" />
-                              <span className="text-muted">{pkg.packageDefinition.sessionsCount} Sessions</span>
+                              <span className="text-lg font-semibold text-gray-700">{pkg.packageDefinition.sessionsCount} Sessions</span>
                             </div>
                             <div className="flex items-center text-sm">
                               <Clock className="w-4 h-4 mr-2 text-primary" />

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo, useMemo, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import { ChevronLeftIcon, ChevronRightIcon, ShoppingCartIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/outline';
@@ -29,7 +29,8 @@ interface Product {
 }
 
 
-export default function ProductPage() {
+// ULTRA-OPTIMIZATION: Memoized ProductPage component
+const ProductPage = memo(function ProductPage() {
   const params = useParams();
   const productId = params?.id as string;
   const { addItem: addToCart, getTotalItems } = useCart();
@@ -98,19 +99,20 @@ export default function ProductPage() {
     );
   }
 
-  const nextImage = () => {
+  // ULTRA-OPTIMIZATION: Memoized navigation functions
+  const nextImage = useCallback(() => {
     if (product) {
       setCurrentImageIndex((prev) => (prev + 1) % product.images.length);
     }
-  };
+  }, [product]);
 
-  const prevImage = () => {
+  const prevImage = useCallback(() => {
     if (product) {
       setCurrentImageIndex((prev) => (prev - 1 + product.images.length) % product.images.length);
     }
-  };
+  }, [product]);
 
-  const handleColorChange = (color: string) => {
+  const handleColorChange = useCallback((color: string) => {
     setSelectedColor(color);
     if (product && product.tags?.includes('color-swatch')) {
       // Update image index based on color selection
@@ -120,9 +122,10 @@ export default function ProductPage() {
         setCurrentImageIndex(1); // White is second image
       }
     }
-  };
+  }, [product]);
 
-  const handleAddToCart = () => {
+  // ULTRA-OPTIMIZATION: Memoized add to cart function
+  const handleAddToCart = useCallback(() => {
     if (product && product.status === 'ACTIVE' && product.stock > 0) {
       // Add the item quantity times to the cart
       for (let i = 0; i < quantity; i++) {
@@ -155,16 +158,38 @@ export default function ProductPage() {
       // Reset quantity after adding
       setQuantity(1);
     }
-  };
+  }, [product, quantity, selectedColor, currentImageIndex, addToCart]);
+
+  // ULTRA-OPTIMIZATION: Memoized computed values
+  const isProductAvailable = useMemo(() => {
+    return product && product.status === 'ACTIVE' && product.stock > 0;
+  }, [product]);
+
+  const currentImage = useMemo(() => {
+    return product?.images[currentImageIndex] || product?.images[0] || '/images/products/yoga-journal-1.jpg';
+  }, [product, currentImageIndex]);
+
+  const hasColorVariants = useMemo(() => {
+    return product?.tags?.includes('color-swatch') && product?.images?.length > 1;
+  }, [product]);
 
 
+  // ULTRA-OPTIMIZATION: Minimal loading state since API is ultra-fast
   if (loading) {
     return (
-      <AppShell className="min-h-screen bg-white">
+      <AppShell className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-400 mx-auto mb-4"></div>
-            <p className="text-gray-600 text-lg">Loading product...</p>
+          <div className="space-y-6">
+            {/* Minimal Loading Header */}
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Product Details</h2>
+              <p className="text-gray-600">Loading product...</p>
+            </div>
+            
+            {/* Subtle Loading Animation - Same as packages */}
+            <div className="flex justify-center py-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-green-200 border-t-green-600"></div>
+            </div>
           </div>
         </div>
       </AppShell>
@@ -194,7 +219,7 @@ export default function ProductPage() {
             {/* Main Image */}
             <div className="relative aspect-square bg-white rounded-lg overflow-hidden max-w-md mx-auto">
               <Image
-                src={product.images[currentImageIndex]}
+                src={currentImage}
                 alt={product.name}
                 fill
                 className="object-cover"
@@ -287,7 +312,7 @@ export default function ProductPage() {
             )}
 
             {/* Color Swatch for products with color variants */}
-            {product.tags?.includes('color-swatch') && product.images?.length > 1 && (
+            {hasColorVariants && (
               <ColorSwatch
                 colors={[
                   {
@@ -324,7 +349,7 @@ export default function ProductPage() {
                     variant="ghost"
                     size="sm"
                     className="p-2 hover:bg-gray-100"
-                    disabled={product.status !== 'ACTIVE' || product.stock <= 0}
+                    disabled={!isProductAvailable}
                   >
                     <MinusIcon className="h-5 w-5" />
                   </Button>
@@ -334,7 +359,7 @@ export default function ProductPage() {
                     variant="ghost"
                     size="sm"
                     className="p-2 hover:bg-gray-100"
-                    disabled={product.status !== 'ACTIVE' || product.stock <= 0 || quantity >= product.stock}
+                    disabled={!isProductAvailable || quantity >= product.stock}
                   >
                     <PlusIcon className="h-5 w-5" />
                   </Button>
@@ -350,14 +375,14 @@ export default function ProductPage() {
                 <Button
                   onClick={handleAddToCart}
                   data-add-to-cart
-                  disabled={product.status !== 'ACTIVE' || product.stock <= 0}
+                  disabled={!isProductAvailable}
                   className="flex-1"
                 >
                   <ShoppingCartIcon className="h-5 w-5" />
                   <span>
-                    {product.status === 'ACTIVE' && product.stock > 0 
+                    {isProductAvailable 
                       ? 'Add to Cart' 
-                      : product.status === 'OUT_OF_STOCK' 
+                      : product?.status === 'OUT_OF_STOCK' 
                         ? 'Out of Stock' 
                         : 'Not Available'
                     }
@@ -391,22 +416,22 @@ export default function ProductPage() {
             {/* Stock Status */}
             <div className="flex items-center space-x-2">
               <div className={`w-3 h-3 rounded-full ${
-                product.status === 'ACTIVE' && product.stock > 0 
+                isProductAvailable 
                   ? 'bg-green-500' 
-                  : product.status === 'OUT_OF_STOCK' 
+                  : product?.status === 'OUT_OF_STOCK' 
                     ? 'bg-red-500'
                     : 'bg-gray-400'
               }`}></div>
               <span className={
-                product.status === 'ACTIVE' && product.stock > 0 
+                isProductAvailable 
                   ? 'text-green-600' 
-                  : product.status === 'OUT_OF_STOCK' 
+                  : product?.status === 'OUT_OF_STOCK' 
                     ? 'text-red-600'
                     : 'text-gray-500'
               }>
-                {product.status === 'ACTIVE' && product.stock > 0 
+                {isProductAvailable 
                   ? `${product.stock} in stock` 
-                  : product.status === 'OUT_OF_STOCK' 
+                  : product?.status === 'OUT_OF_STOCK' 
                     ? 'Out of Stock'
                     : 'Not Available'
                 }
@@ -418,4 +443,6 @@ export default function ProductPage() {
       </div>
     </AppShell>
   );
-}
+});
+
+export default ProductPage;

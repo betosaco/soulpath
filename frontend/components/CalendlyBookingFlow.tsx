@@ -563,7 +563,7 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         className={`
-                          p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all duration-300 mobile-touch-target mobile-tap-highlight
+                          p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all duration-300 mobile-touch-target mobile-tap-highlight relative
                           ${bookingData.packageId === pkg.id 
                             ? 'border-[#FFD700] bg-[#FFD700]/10' 
                             : 'border-[#C0C0C0]/20 hover:border-[#FFD700]/50'
@@ -571,6 +571,16 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
                         `}
                         onClick={() => updateBookingData('packageId', pkg.id)}
                       >
+                        {/* Matpass image in top-right corner */}
+                        <div className="absolute top-2 right-2 z-10">
+                          <Image
+                            src="/matpass-logo.png"
+                            alt="Matpass"
+                            width={32}
+                            height={32}
+                            className="rounded-full object-cover shadow-sm"
+                          />
+                        </div>
                         <div className="flex justify-between items-start mb-2">
                           <div className="flex items-center gap-2 flex-1 min-w-0">
                             <h4 className={`font-medium text-[#EAEAEA] truncate ${isMobile ? 'text-sm' : 'text-base'}`}>
@@ -587,7 +597,7 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
                               {pkg.currency} {pkg.price}
                             </div>
                             <div className="text-xs text-[#C0C0C0]/70">
-                              {pkg.sessionsCount} session{pkg.sessionsCount > 1 ? 's' : ''}
+                              <span className="text-lg font-semibold text-white">{pkg.sessionsCount} session{pkg.sessionsCount > 1 ? 's' : ''}</span>
                             </div>
                           </div>
                         </div>

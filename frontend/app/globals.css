@@ -1192,6 +1192,12 @@
     --ring: 51 100% 50%;
     --radius: 0.625rem;
     
+    /* Fixed header heights for spacing calculations */
+    --header-height-mobile: 64px;
+    --header-height-desktop: 80px;
+    /* Computed top offset for mobile including safe area */
+    --page-top-offset-mobile: calc(env(safe-area-inset-top) + var(--header-height-mobile));
+    
     /* Typography */
     --font-heading: 'Cormorant Garamond', serif;
     --font-body: 'Lato', sans-serif;
@@ -1737,7 +1743,8 @@ html, body {
   .mobile-content {
     height: 100vh !important;
     height: 100svh !important;
-    padding-top: 0 !important;
+    /* Ensure pages start below the fixed header on mobile */
+    padding-top: var(--page-top-offset-mobile) !important;
     margin-top: 0 !important;
   }
   

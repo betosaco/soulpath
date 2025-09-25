@@ -133,39 +133,41 @@ model ServicePrice {
 }
 
 model User {
-  id               String            @id @default(cuid())
-  email            String            @unique
-  password         String?
-  fullName         String?           @map("full_name")
-  avatarUrl        String?           @map("avatar_url")
-  role             UserRole          @default(USER)
-  phone            String?
-  status           UserStatus        @default(ACTIVE)
-  birthDate        DateTime?         @map("birth_date") @db.Date
-  birthTime        DateTime?         @map("birth_time") @db.Time(6)
-  birthPlace       String?           @map("birth_place")
-  question         String?
-  language         String?           @default("en")
-  adminNotes       String?           @map("admin_notes")
-  scheduledDate    DateTime?         @map("scheduled_date") @db.Date
-  scheduledTime    DateTime?         @map("scheduled_time") @db.Time(6)
-  sessionType      String?           @map("session_type")
-  lastReminderSent DateTime?         @map("last_reminder_sent") @db.Timestamptz(6)
-  lastBooking      DateTime?         @map("last_booking") @db.Timestamptz(6)
-  notes            String?
-  createdAt        DateTime?         @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt        DateTime?         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  bookings         Booking[]
-  bugComments      BugComment[]      @relation("BugCommentAuthor")
-  assignedBugs     BugReport[]       @relation("BugReportAssignee")
-  reportedBugs     BugReport[]       @relation("BugReportReporter")
-  conversationLogs ConversationLog[]
-  customerProfile  Customer?         @relation("CustomerProfile")
-  orders           Order[]           @relation("CustomerOrders")
-  otpVerifications OtpVerification[]
-  purchases        Purchase[]
-  userPackages     UserPackage[]
-  telegramUsers    TelegramUser[]
+  id                  String               @id @default(cuid())
+  email               String               @unique
+  password            String?
+  fullName            String?              @map("full_name")
+  avatarUrl           String?              @map("avatar_url")
+  role                UserRole             @default(USER)
+  phone               String?
+  status              UserStatus           @default(ACTIVE)
+  birthDate           DateTime?            @map("birth_date") @db.Date
+  birthTime           DateTime?            @map("birth_time") @db.Time(6)
+  birthPlace          String?              @map("birth_place")
+  question            String?
+  language            String?              @default("en")
+  adminNotes          String?              @map("admin_notes")
+  scheduledDate       DateTime?            @map("scheduled_date") @db.Date
+  scheduledTime       DateTime?            @map("scheduled_time") @db.Time(6)
+  sessionType         String?              @map("session_type")
+  lastReminderSent    DateTime?            @map("last_reminder_sent") @db.Timestamptz(6)
+  lastBooking         DateTime?            @map("last_booking") @db.Timestamptz(6)
+  notes               String?
+  createdAt           DateTime?            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime?            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  bookings            Booking[]
+  bugComments         BugComment[]         @relation("BugCommentAuthor")
+  assignedBugs        BugReport[]          @relation("BugReportAssignee")
+  reportedBugs        BugReport[]          @relation("BugReportReporter")
+  conversationLogs    ConversationLog[]
+  customerProfile     Customer?            @relation("CustomerProfile")
+  orders              Order[]              @relation("CustomerOrders")
+  otpVerifications    OtpVerification[]
+  passwordResetTokens PasswordResetToken[]
+  purchases           Purchase[]
+  teacherProfile      Teacher?
+  telegramUsers       TelegramUser[]
+  userPackages        UserPackage[]
 
   @@index([email], map: "idx_users_email")
   @@index([status], map: "idx_users_status")
@@ -249,6 +251,7 @@ model Teacher {
   createdAt        DateTime?              @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt        DateTime?              @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   venueId          Int?                   @map("venue_id")
+  userId           String?                @unique @map("user_id")
   bookings         Booking[]
   faqs             FAQ[]
   servicePrices    ServicePrice[]
@@ -257,6 +260,7 @@ model Teacher {
   teacherSchedules TeacherSchedule[]
   serviceTypes     TeacherServiceType[]
   specialties      TeacherSpecialty[]
+  user             User?                  @relation(fields: [userId], references: [id], onUpdate: Restrict)
   venue            Venue?                 @relation(fields: [venueId], references: [id], onUpdate: Restrict)
   testimonials     Testimonial[]
 
@@ -265,6 +269,7 @@ model Teacher {
   @@index([featured], map: "idx_teachers_featured")
   @@index([venueId], map: "idx_teachers_venue")
   @@index([slug], map: "idx_teachers_slug")
+  @@index([userId], map: "idx_teachers_user_id")
   @@map("teachers")
 }
 
@@ -445,6 +450,12 @@ model TeacherScheduleSlot {
   maxBookings       Int?            @default(1) @map("max_bookings")
   createdAt         DateTime?       @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt         DateTime?       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  isLate            Boolean?        @default(false) @map("is_late")
+  lateMessage       String?         @map("late_message")
+  lateMinutes       Int?            @default(0) @map("late_minutes")
+  lateNotifiedAt    DateTime?       @map("late_notified_at") @db.Timestamptz(6)
+  originalEndTime   DateTime?       @map("original_end_time") @db.Timestamptz(6)
+  originalStartTime DateTime?       @map("original_start_time") @db.Timestamptz(6)
   bookings          Booking[]
   teacherSchedule   TeacherSchedule @relation(fields: [teacherScheduleId], references: [id], onDelete: Cascade, onUpdate: Restrict)
 
@@ -453,6 +464,8 @@ model TeacherScheduleSlot {
   @@index([endTime], map: "idx_teacher_schedule_slots_end_time")
   @@index([isAvailable], map: "idx_teacher_schedule_slots_available")
   @@index([bookedCount], map: "idx_teacher_schedule_slots_booked_count")
+  @@index([isLate], map: "idx_teacher_schedule_slots_is_late")
+  @@index([lateNotifiedAt], map: "idx_teacher_schedule_slots_late_notified_at")
   @@map("teacher_schedule_slots")
 }
 
@@ -493,6 +506,7 @@ model PackagePrice {
   isActive            Boolean?          @default(true) @map("is_active")
   createdAt           DateTime?         @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt           DateTime?         @default(now()) @map("updated_at") @db.Timestamptz(6)
+  pricePerClass       Decimal?          @map("price_per_class") @db.Decimal(10, 2)
   orderItems          OrderItem[]
   currency            Currency          @relation("PackagePriceCurrency", fields: [currencyId], references: [id], onDelete: Cascade, onUpdate: Restrict)
   packageDefinition   PackageDefinition @relation(fields: [packageDefinitionId], references: [id], onDelete: Cascade, onUpdate: Restrict)
@@ -787,21 +801,21 @@ model Section {
 }
 
 model CommunicationConfig {
-  id                  Int       @id @default(autoincrement())
-  createdAt           DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt           DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  email_enabled       Boolean?  @default(true) @map("email_enabled")
-  brevo_api_key       String?   @default("") @map("brevo_api_key")
-  sender_email        String?   @default("noreply@soulpath.lat") @map("sender_email")
-  sender_name         String?   @default("SOULPATH") @map("sender_name")
-  admin_email         String?   @default("admin@soulpath.lat") @map("admin_email")
-  sms_enabled         Boolean?  @default(false) @map("sms_enabled")
-  sms_provider        String?   @default("labsmobile") @map("sms_provider")
-  labsmobile_username String?   @default("") @map("labsmobile_username")
-  labsmobile_token    String?   @default("") @map("labsmobile_token")
-  sms_sender_name     String?   @default("SoulPath") @map("sms_sender_name")
-  order_confirmation_template_id Int? @default(1) @map("order_confirmation_template_id")
-  booking_confirmation_template_id Int? @default(2) @map("booking_confirmation_template_id")
+  id                               Int       @id @default(autoincrement())
+  createdAt                        DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                        DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  email_enabled                    Boolean?  @default(true) @map("email_enabled")
+  brevo_api_key                    String?   @default("") @map("brevo_api_key")
+  sender_email                     String?   @default("noreply@soulpath.lat") @map("sender_email")
+  sender_name                      String?   @default("SOULPATH") @map("sender_name")
+  admin_email                      String?   @default("admin@soulpath.lat") @map("admin_email")
+  sms_enabled                      Boolean?  @default(false) @map("sms_enabled")
+  sms_provider                     String?   @default("labsmobile") @map("sms_provider")
+  labsmobile_username              String?   @default("") @map("labsmobile_username")
+  labsmobile_token                 String?   @default("") @map("labsmobile_token")
+  sms_sender_name                  String?   @default("SoulPath") @map("sms_sender_name")
+  order_confirmation_template_id   Int?      @default(1) @map("order_confirmation_template_id")
+  booking_confirmation_template_id Int?      @default(2) @map("booking_confirmation_template_id")
 
   @@map("communication_config")
 }
@@ -958,6 +972,7 @@ model ExternalAPIConfig {
   name           String    @unique
   provider       String
   category       String
+  connectionType String    @default("standard") @map("connection_type")
   apiKey         String?   @map("api_key")
   apiSecret      String?   @map("api_secret")
   apiUrl         String?   @map("api_url")
@@ -980,6 +995,7 @@ model ExternalAPIConfig {
 
   @@index([name], map: "idx_external_api_configs_name")
   @@index([category], map: "idx_external_api_configs_category")
+  @@index([connectionType], map: "idx_external_api_configs_connection_type")
   @@index([isActive], map: "idx_external_api_configs_active")
   @@map("external_api_configs")
 }
@@ -1289,10 +1305,46 @@ model PaymentRecord {
   @@map("payment_records")
 }
 
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String    @map("user_id")
+  token     String    @unique
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(6)
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@index([userId], map: "idx_password_reset_token_user")
+  @@index([expiresAt], map: "idx_password_reset_token_expires")
+  @@map("password_reset_tokens")
+}
+
+model TelegramUser {
+  id                String    @id @default(cuid())
+  userId            String?   @map("user_id")
+  telegramChatId    String    @map("telegram_chat_id") @db.VarChar(50)
+  telegramUserId    String?   @map("telegram_user_id") @db.VarChar(50)
+  telegramUsername  String?   @map("telegram_username") @db.VarChar(100)
+  telegramFirstName String?   @map("telegram_first_name") @db.VarChar(100)
+  telegramLastName  String?   @map("telegram_last_name") @db.VarChar(100)
+  isActive          Boolean   @default(true) @map("is_active")
+  lastInteraction   DateTime? @map("last_interaction") @db.Timestamptz(6)
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user              User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "idx_telegram_users_user_id")
+  @@index([telegramChatId], map: "idx_telegram_users_telegram_chat_id")
+  @@index([isActive], map: "idx_telegram_users_active")
+  @@map("telegram_users")
+}
+
 enum UserRole {
   USER
   ADMIN
   SUPER_ADMIN
+  TEACHER
 }
 
 enum UserStatus {
@@ -1418,26 +1470,6 @@ enum CustomerStatus {
   ACTIVE
   INACTIVE
   BLOCKED
-}
-
-model TelegramUser {
-  id                String    @id @default(cuid())
-  userId            String?   @map("user_id")
-  telegramChatId    String    @map("telegram_chat_id") @db.VarChar(50)
-  telegramUserId    String?   @map("telegram_user_id") @db.VarChar(50)
-  telegramUsername  String?   @map("telegram_username") @db.VarChar(100)
-  telegramFirstName String?   @map("telegram_first_name") @db.VarChar(100)
-  telegramLastName  String?   @map("telegram_last_name") @db.VarChar(100)
-  isActive          Boolean   @default(true) @map("is_active")
-  lastInteraction   DateTime? @map("last_interaction") @db.Timestamptz(6)
-  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  user              User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId], map: "idx_telegram_users_user_id")
-  @@index([telegramChatId], map: "idx_telegram_users_telegram_chat_id")
-  @@index([isActive], map: "idx_telegram_users_active")
-  @@map("telegram_users")
 }
 
 enum OrderItemType {

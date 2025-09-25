@@ -4,6 +4,7 @@ import './globals.css';
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/lib/theme/ThemeProvider';
 import { Providers } from '@/lib/providers';
+import { Analytics } from '@vercel/analytics/next';
 
 export const metadata: Metadata = {
   title: 'MatMax Yoga Studio',
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
     siteName: 'MatMax Yoga Studio',
     images: [
       {
-        url: '/matmaxstudio.png',
+        url: '/matpass-logo.png',
         width: 1200,
         height: 630,
         alt: 'MatMax Yoga Studio',
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'MatMax Yoga Studio',
     description: 'Yoga classes for all levels. Build strength, flexibility, and inner peace with MatMax Yoga Studio.',
-    images: ['/matmaxstudio.png'],
+    images: ['/matpass-logo.png'],
   },
 };
 
@@ -61,6 +62,7 @@ export default function RootLayout({
             {children}
           </ThemeProvider>
         </Providers>
+        <Analytics />
       </body>
     </html>
   );

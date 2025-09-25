@@ -35,9 +35,11 @@ import { BookingLayout } from '@/components/booking/layout/BookingLayout';
 export default function MultiPackageSchedulePage() {
   return (
     <AppShell>
-      <BookingLayout>
-        <ScheduleSelectionStep />
-      </BookingLayout>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <BookingLayout>
+          <ScheduleSelectionStep />
+        </BookingLayout>
+      </div>
     </AppShell>
   );
 }

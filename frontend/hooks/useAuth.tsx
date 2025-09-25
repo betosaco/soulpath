@@ -27,8 +27,9 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Calculate isAdmin reactively - only based on database role
+  // Calculate isAdmin and isTeacher reactively - only based on database role
   const isAdmin = Boolean(user?.role === 'ADMIN');
+  const isTeacher = Boolean(user?.role === 'TEACHER');
   
   useEffect(() => {
     console.log('🔐 useAuth: useEffect triggered');
@@ -148,6 +149,7 @@ export function useAuth() {
     isLoading,
     signIn,
     signOut,
-    isAdmin
+    isAdmin,
+    isTeacher
   };
 }

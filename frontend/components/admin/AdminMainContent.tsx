@@ -21,7 +21,7 @@ import { RasaMonitoring } from '../RasaMonitoring';
 import { RasaModelTuning } from '../RasaModelTuning';
 import ConversationLogsManagement from './ConversationLogsManagement';
 import { VenueManagement } from './VenueManagement';
-import { TeacherManagement } from './TeacherManagement';
+import { TeacherManagementEnhanced } from './TeacherManagementEnhanced';
 // import { TeacherScheduleManagement } from './TeacherScheduleManagement'; // Replaced by UnifiedScheduleManagement
 import { ServiceTypeManagement } from './ServiceTypeManagement';
 
@@ -64,7 +64,7 @@ export function AdminMainContent({ activeTab, bugReportManagementRef }: AdminMai
             {activeTab === 'rasa-tuning' && <RasaModelTuning />}
             {activeTab === 'conversation-logs' && <ConversationLogsManagement />}
             {activeTab === 'venues' && <VenueManagement />}
-            {activeTab === 'teachers' && <TeacherManagement />}
+            {activeTab === 'teachers' && <TeacherManagementEnhanced />}
             {activeTab === 'teacher-schedules' && <UnifiedScheduleManagement />}
             {activeTab === 'service-types' && <ServiceTypeManagement />}
           </motion.div>

@@ -309,13 +309,23 @@ export function PackagePurchaseFlow() {
               {packages.map((pkg) => (
                 <Card 
                   key={pkg.id} 
-                  className={`cursor-pointer transition-all ${
+                  className={`cursor-pointer transition-all relative ${
                     formData.selectedPackage?.id === pkg.id 
                       ? 'ring-2 ring-[#ffd700] bg-[#1a1a2e]' 
                       : 'bg-[#1a1a2e] border-[#16213e] hover:border-[#ffd700]/50'
                   }`}
                   onClick={() => handlePackageSelect(pkg)}
                 >
+                  {/* Matpass image in top-right corner */}
+                  <div className="absolute top-3 right-3 z-10">
+                    <Image
+                      src="/matpass-logo.png"
+                      alt="Matpass"
+                      width={36}
+                      height={36}
+                      className="rounded-full object-cover shadow-sm"
+                    />
+                  </div>
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start">
                       <div className="flex items-center space-x-2">
@@ -325,6 +335,9 @@ export function PackagePurchaseFlow() {
                       <div className="text-right">
                         <div className="text-2xl font-bold text-[#ffd700]">
                           {pkg.currency.symbol}{pkg.price}
+                        </div>
+                        <div className="text-xs text-gray-300">
+                          {pkg.currency.symbol}{pkg.pricePerClass?.toFixed(2) || (pkg.price / (pkg.packageDefinition.sessionsCount || 1)).toFixed(2)} per class
                         </div>
                         <div className="text-sm text-gray-400">{pkg.currency.code}</div>
                       </div>
@@ -336,7 +349,7 @@ export function PackagePurchaseFlow() {
                     <div className="flex items-center space-x-4 text-sm text-gray-400">
                       <div className="flex items-center space-x-1">
                         <Users className="w-4 h-4" />
-                        <span>{pkg.packageDefinition.sessionsCount} sessions</span>
+                        <span className="text-lg font-semibold text-white">{pkg.packageDefinition.sessionsCount} sessions</span>
                       </div>
                     </div>
 

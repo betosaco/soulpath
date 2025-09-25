@@ -23,7 +23,8 @@ import {
   ArrowDown,
   Users,
   CheckSquare,
-  Square
+  Square,
+  Send
 } from 'lucide-react';
 
 interface Teacher {
@@ -87,6 +88,10 @@ export function TeacherManagementEnhanced() {
   const [_showForm, setShowForm] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
+  const [enrollOpen, setEnrollOpen] = useState(false);
+  const [enrollName, setEnrollName] = useState('');
+  const [enrollEmail, setEnrollEmail] = useState('');
+  const [enrolling, setEnrolling] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_specialties, setSpecialties] = useState<Array<{ id: number; name: string; category?: string }>>([]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -254,7 +259,7 @@ export function TeacherManagementEnhanced() {
   }, []);
 
   // Filter and sort teachers
-  const filteredAndSortedTeachers = teachers
+  const filteredAndSortedTeachers = (teachers || [])
     .filter(teacher => {
       const matchesSearch = teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            teacher.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -444,6 +449,14 @@ export function TeacherManagementEnhanced() {
             <Plus size={16} />
             Add Teacher
           </button>
+          <button
+            className="admin-button admin-button--secondary"
+            onClick={() => setEnrollOpen(true)}
+            title="Enroll teacher and send Brevo invite"
+          >
+            <Send size={16} />
+            Enroll Teacher
+          </button>
         </div>
       </div>
 
@@ -489,14 +502,85 @@ export function TeacherManagementEnhanced() {
           >
             <option value="all">All Venues</option>
             <option value="unassigned">Unassigned</option>
-            {venues.map(venue => (
+            {venues?.map(venue => (
               <option key={venue.id} value={venue.id.toString()}>
                 {venue.name}
               </option>
-            ))}
+            )) || []}
           </select>
         </div>
       </div>
+
+      {/* Enroll Teacher Modal */}
+      {enrollOpen && (
+        <div className="admin-modal-backdrop">
+          <div className="admin-modal">
+            <div className="admin-modal__header">
+              <h3>Enroll Teacher</h3>
+              <button className="admin-modal__close" onClick={() => setEnrollOpen(false)}>
+                <X size={16} />
+              </button>
+            </div>
+            <div className="admin-modal__body">
+              <div className="admin-form-group">
+                <label className="admin-label">Name</label>
+                <input
+                  className="admin-input"
+                  value={enrollName}
+                  onChange={(e) => setEnrollName(e.target.value)}
+                  placeholder="Full name"
+                />
+              </div>
+              <div className="admin-form-group">
+                <label className="admin-label">Email</label>
+                <input
+                  className="admin-input"
+                  type="email"
+                  value={enrollEmail}
+                  onChange={(e) => setEnrollEmail(e.target.value)}
+                  placeholder="teacher@example.com"
+                />
+              </div>
+              <p className="admin-help-text">This will send an enrollment email via Brevo with a password setup link.</p>
+            </div>
+            <div className="admin-modal__footer">
+              <button className="admin-button admin-button--secondary" onClick={() => setEnrollOpen(false)}>
+                Cancel
+              </button>
+              <button
+                className="admin-button admin-button--primary"
+                disabled={enrolling || !enrollName || !enrollEmail}
+                onClick={async () => {
+                  setEnrolling(true);
+                  try {
+                    const res = await fetch('/api/admin/teachers/enroll', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ name: enrollName, email: enrollEmail })
+                    });
+                    const j = await res.json().catch(() => ({}));
+                    if (!res.ok || !j.success) {
+                      alert(j.error || 'Failed to send enrollment email');
+                    } else {
+                      alert('Enrollment email sent');
+                      setEnrollOpen(false);
+                      setEnrollName('');
+                      setEnrollEmail('');
+                      await fetchTeachers();
+                    }
+                  } catch (e) {
+                    alert('Network error');
+                  } finally {
+                    setEnrolling(false);
+                  }
+                }}
+              >
+                {enrolling ? 'Sending...' : 'Send Enrollment Email'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Bulk Actions */}
       {selectedTeachers.length > 0 && (

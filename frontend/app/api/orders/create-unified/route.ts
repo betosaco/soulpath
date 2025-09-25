@@ -51,6 +51,7 @@ interface OrderRequest {
   totalAmount: number;
   currency: string;
   paymentIntentId?: string;
+  paymentMethod?: string;
   notes?: string;
   scheduleDetails?: {
     selectedDate?: string;
@@ -130,24 +131,35 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Verify payment intent if provided
+    // Verify payment intent if provided (only for Stripe payments)
     let paymentIntent: Stripe.PaymentIntent | undefined;
-    if (orderData.paymentIntentId) {
+    if (orderData.paymentIntentId && orderData.paymentMethod !== 'pay_later') {
       try {
+        console.log('Verifying payment intent:', orderData.paymentIntentId);
         paymentIntent = await stripe.paymentIntents.retrieve(orderData.paymentIntentId);
+        console.log('Payment intent status:', paymentIntent.status);
+        
         if (paymentIntent.status !== 'succeeded') {
-          return NextResponse.json(
-            { success: false, error: 'Payment not completed' },
-            { status: 400 }
-          );
+          console.warn('Payment intent not succeeded, status:', paymentIntent.status);
+          // Don't fail the order creation if payment is processing
+          if (paymentIntent.status === 'processing' || paymentIntent.status === 'requires_capture') {
+            console.log('Payment is processing, allowing order creation');
+          } else {
+            return NextResponse.json(
+              { success: false, error: `Payment not completed. Status: ${paymentIntent.status}` },
+              { status: 400 }
+            );
+          }
         }
       } catch (error) {
         console.error('Error verifying payment intent:', error);
-        return NextResponse.json(
-          { success: false, error: 'Invalid payment intent' },
-          { status: 400 }
-        );
+        // Don't fail order creation if we can't verify payment intent
+        // This could happen due to network issues or temporary Stripe API problems
+        console.warn('Payment intent verification failed, but continuing with order creation');
+        console.warn('Error details:', error instanceof Error ? error.message : 'Unknown error');
       }
+    } else if (orderData.paymentMethod === 'pay_later') {
+      console.log('Pay-later payment method detected, skipping payment intent verification');
     }
 
     // Test database connection
@@ -241,7 +253,8 @@ export async function POST(request: NextRequest) {
           ruc: orderData.customerInfo.ruc || null,
           companyName: orderData.customerInfo.companyName || null,
           status: 'PENDING',
-          paymentStatus: paymentIntent ? 'COMPLETED' : 'PENDING',
+          paymentStatus: orderData.paymentMethod === 'pay_later' ? 'PENDING' : 
+                        (paymentIntent && paymentIntent.status === 'succeeded' ? 'COMPLETED' : 'PENDING'),
           shippingStatus: orderData.shippingAddress ? 'PENDING' : 'PENDING',
           subtotal: subtotal,
           taxAmount: tax,
@@ -529,25 +542,42 @@ export async function POST(request: NextRequest) {
         console.log('🔍 Using user package for bookings:', userPackage.id);
         
         // Prepare booking data for batch creation
-        const bookingData = scheduleDetails
-          .filter(scheduleDetail => {
-            console.log('🔍 Filtering schedule detail:', scheduleDetail);
-            const hasSlotId = !!scheduleDetail.scheduleSlotId;
-            console.log('🔍 Has scheduleSlotId:', hasSlotId);
-            return hasSlotId;
-          })
-          .map(scheduleDetail => {
-            const bookingDataItem = {
-              userId: result.order.customerId!,
-              userPackageId: userPackage.id,
-              teacherScheduleSlotId: scheduleDetail.scheduleSlotId,
-              sessionType: scheduleDetail.serviceType || 'Yoga Class',
-              notes: orderData.notes || '',
-              status: 'confirmed'
-            };
-            console.log('🔍 Created booking data item:', bookingDataItem);
-            return bookingDataItem;
-          });
+        const bookingData = await Promise.all(
+          scheduleDetails
+            .filter(scheduleDetail => {
+              console.log('🔍 Filtering schedule detail:', scheduleDetail);
+              const hasSlotId = !!scheduleDetail.scheduleSlotId;
+              console.log('🔍 Has scheduleSlotId:', hasSlotId);
+              return hasSlotId;
+            })
+            .map(async (scheduleDetail) => {
+              // Get teacher information from the teacher schedule slot
+              const teacherScheduleSlot = await prisma.teacherScheduleSlot.findUnique({
+                where: { id: scheduleDetail.scheduleSlotId },
+                include: {
+                  teacherSchedule: {
+                    include: {
+                      teacher: true
+                    }
+                  }
+                }
+              });
+
+              const teacherId = teacherScheduleSlot?.teacherSchedule?.teacher?.id;
+
+              const bookingDataItem = {
+                userId: result.order.customerId!,
+                userPackageId: userPackage.id,
+                teacherScheduleSlotId: scheduleDetail.scheduleSlotId,
+                teacherId: teacherId,
+                sessionType: scheduleDetail.serviceType || 'Yoga Class',
+                notes: orderData.notes || '',
+                status: 'confirmed'
+              };
+              console.log('🔍 Created booking data item:', bookingDataItem);
+              return bookingDataItem;
+            })
+        );
         
         // Create all bookings in a single batch operation
         if (bookingData.length > 0) {
@@ -653,14 +683,9 @@ export async function POST(request: NextRequest) {
       }))
     };
 
-    // Send notifications asynchronously in the background (don't wait for completion)
-    // This significantly improves Pay Later processing speed
-    setImmediate(async () => {
-      // Set a timeout to prevent background task from hanging
-      const timeoutId = setTimeout(() => {
-        console.log('⚠️ Background notification task timed out after 30 seconds');
-      }, 30000);
-      
+    // Send Telegram notifications immediately (but don't wait for completion)
+    // This ensures notifications are sent before the serverless function terminates
+    const sendNotifications = async () => {
       try {
         const orderUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/order-confirmation?orderId=${result.order.id}`;
 
@@ -720,7 +745,11 @@ export async function POST(request: NextRequest) {
                 hour: '2-digit',
                 minute: '2-digit'
               }) : scheduleDetails?.[0]?.selectedTime,
-              teacher: scheduleDetails?.[0]?.teacher || 'Instructor',
+              teacher: firstBooking.teacher?.fullName || 
+                       (firstBooking.teacher?.firstName && firstBooking.teacher?.lastName ? 
+                        `${firstBooking.teacher.firstName} ${firstBooking.teacher.lastName}` : 
+                        firstBooking.teacher?.name) || 
+                       scheduleDetails?.[0]?.teacher || 'Por asignar',
               serviceType: firstBooking.sessionType || scheduleDetails?.[0]?.serviceType,
               venue: firstBooking.scheduleSlot?.scheduleTemplate?.venue?.name || scheduleDetails?.[0]?.venue,
               dayOfWeek: scheduleDetails?.[0]?.dayOfWeek || 'Unknown'
@@ -807,6 +836,7 @@ export async function POST(request: NextRequest) {
               const bookingEmailData = {
                 customerName: result.order.customerName,
                 customerEmail: result.order.customerEmail,
+                customerPhone: result.order.customerPhone || orderData.customerInfo.phone || '',
                 bookingId: bookingResult.id?.toString() || '',
                 bookingDate: bookingResult.scheduleSlot?.startTime ? bookingResult.scheduleSlot.startTime.toLocaleDateString('es-ES', {
                   weekday: 'long',
@@ -818,15 +848,17 @@ export async function POST(request: NextRequest) {
                   hour: '2-digit',
                   minute: '2-digit'
                 }) : '',
-                sessionType: bookingResult.sessionType || '',
-                instructor: 'Por asignar',
+                sessionType: bookingResult.sessionType || bookingResult.scheduleSlot?.scheduleTemplate?.serviceType?.name || 'Yoga',
+                instructor: bookingResult.scheduleSlot?.scheduleTemplate?.teacher?.fullName || 
+                          bookingResult.scheduleSlot?.scheduleTemplate?.teacher?.firstName + ' ' + bookingResult.scheduleSlot?.scheduleTemplate?.teacher?.lastName || 
+                          'Por asignar',
                 venue: bookingResult.scheduleSlot?.scheduleTemplate?.venue?.name || 'MatMax Yoga Studio',
                 duration: bookingResult.scheduleSlot?.scheduleTemplate?.sessionDuration?.duration_minutes || 60,
                 packageName: bookingResult.userPackage?.packagePrice?.packageDefinition?.name || 'Paquete de Yoga',
-                packageDescription: '',
-                sessionsUsed: 0,
-                sessionsRemaining: bookingResult.userPackage?.packagePrice?.packageDefinition?.sessionsCount || 0,
-                packageType: 'INDIVIDUAL',
+                packageDescription: bookingResult.userPackage?.packagePrice?.packageDefinition?.description || '',
+                sessionsUsed: 1, // This booking uses 1 session
+                sessionsRemaining: (bookingResult.userPackage?.packagePrice?.packageDefinition?.sessionsCount || 0) - 1,
+                packageType: bookingResult.userPackage?.packagePrice?.packageDefinition?.packageType || 'INDIVIDUAL',
                 bookingUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/bookings`,
                 language: orderData.customerInfo.language || 'es'
               };
@@ -847,159 +879,124 @@ export async function POST(request: NextRequest) {
         try {
           console.log('📱 Starting Telegram notification process for order:', result.order.id);
 
-          // Create a new Prisma client instance for background processing
-          const backgroundPrisma = new PrismaClient({
-            log: ['error'],
+          // Send notifications to ALL active Telegram users
+          const allTelegramUsers = await prisma.telegramUser.findMany({
+            where: { isActive: true },
+            include: {
+              user: {
+                select: { email: true, fullName: true }
+              }
+            }
           });
 
-          // Test database connection before proceeding
-          try {
-            await backgroundPrisma.$connect();
-          } catch (connectionError) {
-            console.error('❌ Failed to connect to database for Telegram notification:', connectionError);
-            await backgroundPrisma.$disconnect();
-            return; // Skip Telegram notification if database is unavailable
-          }
+          console.log('📱 Found active Telegram users:', allTelegramUsers.length);
+          allTelegramUsers.forEach(user => {
+            console.log(`   - ${user.user?.email || 'Unknown'} (Chat ID: ${user.telegramChatId})`);
+          });
 
-          try {
-            // Always send notifications to info@matmax.store for ALL orders
-            const businessUser = await backgroundPrisma.user.findFirst({
-              where: { email: 'info@matmax.store' },
-              select: { id: true }
-            });
+          if (allTelegramUsers.length > 0) {
+            // Send notification to each active Telegram user
+            for (const telegramUser of allTelegramUsers) {
+              console.log(`📱 Sending Telegram order confirmation to ${telegramUser.user?.email || 'Unknown'} (Chat ID: ${telegramUser.telegramChatId})`);
 
-          console.log('🏢 Business user lookup result:', businessUser ? 'Found' : 'Not found');
+              if (telegramUser) {
+                try {
+                  // Prepare order details for Telegram (matching email format)
+                  const telegramOrderDetails: OrderDetails = {
+                    orderId: result.order.id,
+                    orderNumber: result.order.orderNumber,
+                    customerName: result.order.customerName,
+                    customerEmail: result.order.customerEmail,
+                    customerPhone: result.order.customerPhone || '',
+                    orderDate: result.order.createdAt.toLocaleDateString('es-ES', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    }),
+                    orderStatus: result.order.status.toLowerCase(),
+                    orderStatusText: result.order.status === 'CONFIRMED' ? 'Confirmado' : result.order.status,
+                    paymentStatus: result.order.paymentStatus.toLowerCase(),
+                    paymentStatusText: result.order.paymentStatus === 'COMPLETED' ? 'Completado' :
+                      result.order.paymentStatus === 'PENDING' ? 'Pendiente' : result.order.paymentStatus,
+                    billingDocumentType: result.order.billingDocumentType || 'boleta_simple',
+                    dni: result.order.dni || undefined,
+                    ruc: result.order.ruc || undefined,
+                    companyName: result.order.companyName || undefined,
+                    items: emailOrderItems.filter(item => item !== null), // Use the same formatted items as email
+                    subtotal: Number(result.order.subtotal),
+                    taxAmount: Number(result.order.taxAmount),
+                    shippingAmount: Number(result.order.shippingAmount),
+                    total: Number(result.order.total),
+                    currency: result.order.currency,
+                    notes: result.order.notes || undefined,
+                    shippingAddress: result.order.shippingAddress ? {
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      address: (result.order.shippingAddress as any).address,
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      city: (result.order.shippingAddress as any).city,
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      state: (result.order.shippingAddress as any).state,
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      zipCode: (result.order.shippingAddress as any).zipCode,
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      country: (result.order.shippingAddress as any).country
+                    } : undefined,
+                    scheduleDetails: enhancedScheduleDetails?.map(schedule => ({
+                      selectedDate: schedule.selectedDate,
+                      selectedTime: schedule.selectedTime,
+                      teacher: schedule.teacher,
+                      serviceType: schedule.serviceType,
+                      venue: schedule.venue
+                    })),
+                    packageBookingDetails: packageBookingDetails || undefined,
+                    // Add group booking information
+                    isGroupBooking: orderData.isGroupBooking || false,
+                    groupMembers: orderData.groupMembers?.map(member => ({
+                      firstName: member.firstName,
+                      lastName: member.lastName,
+                      email: member.email,
+                      phone: member.phone,
+                      countryCode: member.countryCode, // This is the phone prefix like "+51"
+                      packageName: orderData.items.find(item => item.id === member.packageId)?.name || 'Package',
+                      birthDate: member.birthDate,
+                      birthTime: member.birthTime,
+                      birthPlace: member.birthPlace,
+                      question: member.question
+                    })) || []
+                  };
 
-          if (businessUser) {
-            console.log('🔍 Looking for Telegram user with userId:', businessUser.id);
-            
-            const telegramUser = await backgroundPrisma.telegramUser.findFirst({
-              where: { 
-                userId: businessUser.id,
-                isActive: true
+                  // Send Telegram notification to MatMax Bot Service
+                  console.log('📡 Calling bot service with chat ID:', telegramUser.telegramChatId);
+                  console.log('📡 Telegram order details:', JSON.stringify(telegramOrderDetails, null, 2));
+                  const telegramResponse = await fetch('https://telemax-p2m6q066b-matmaxworlds-projects.vercel.app/api/orders/send-notification', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      orderDetails: telegramOrderDetails,
+                      telegramChatId: telegramUser.telegramChatId
+                    }),
+                  });
+
+                  console.log('📡 Bot service response status:', telegramResponse.status);
+                  if (telegramResponse.ok) {
+                    console.log(`✅ Telegram order confirmation sent successfully to ${telegramUser.user?.email || 'Unknown'}`);
+                  } else {
+                    console.error(`❌ Failed to send Telegram order confirmation to ${telegramUser.user?.email || 'Unknown'}, status:`, telegramResponse.status);
+                    const errorText = await telegramResponse.text();
+                    console.error('❌ Bot service error:', errorText);
+                  }
+                } catch (userError) {
+                  console.error(`❌ Error sending notification to ${telegramUser.user?.email || 'Unknown'}:`, userError);
+                }
               }
-            });
-
-            console.log('📱 Telegram user lookup result:', telegramUser ? 'Found' : 'Not found');
-            if (telegramUser) {
-              console.log('📱 Telegram user details:', {
-                id: telegramUser.id,
-                chatId: telegramUser.telegramChatId,
-                isActive: telegramUser.isActive
-              });
-            } else {
-              console.log('❌ No Telegram user found for business user:', businessUser.id);
-              // Let's also check if there are any Telegram users at all
-              const allTelegramUsers = await backgroundPrisma.telegramUser.findMany({
-                where: { isActive: true },
-                select: { id: true, userId: true, telegramChatId: true, isActive: true }
-              });
-              console.log('📱 All active Telegram users:', allTelegramUsers);
-            }
-
-            if (telegramUser) {
-              console.log('📱 Sending Telegram order confirmation to business account (info@matmax.store):', telegramUser.telegramChatId);
-
-              // Prepare order details for Telegram (matching email format)
-              const telegramOrderDetails: OrderDetails = {
-                orderId: result.order.id,
-                orderNumber: result.order.orderNumber,
-                customerName: result.order.customerName,
-                customerEmail: result.order.customerEmail,
-                customerPhone: result.order.customerPhone || '',
-                orderDate: result.order.createdAt.toLocaleDateString('es-ES', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                }),
-                orderStatus: result.order.status.toLowerCase(),
-                orderStatusText: result.order.status === 'CONFIRMED' ? 'Confirmado' : result.order.status,
-                paymentStatus: result.order.paymentStatus.toLowerCase(),
-                paymentStatusText: result.order.paymentStatus === 'COMPLETED' ? 'Completado' :
-                                  result.order.paymentStatus === 'PENDING' ? 'Pendiente' : result.order.paymentStatus,
-                billingDocumentType: result.order.billingDocumentType || 'boleta_simple',
-                dni: result.order.dni || undefined,
-                ruc: result.order.ruc || undefined,
-                companyName: result.order.companyName || undefined,
-                items: emailOrderItems.filter(item => item !== null), // Use the same formatted items as email
-                subtotal: Number(result.order.subtotal),
-                taxAmount: Number(result.order.taxAmount),
-                shippingAmount: Number(result.order.shippingAmount),
-                total: Number(result.order.total),
-                currency: result.order.currency,
-                notes: result.order.notes || undefined,
-                shippingAddress: result.order.shippingAddress ? {
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  address: (result.order.shippingAddress as any).address,
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  city: (result.order.shippingAddress as any).city,
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  state: (result.order.shippingAddress as any).state,
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  zipCode: (result.order.shippingAddress as any).zipCode,
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  country: (result.order.shippingAddress as any).country
-                } : undefined,
-                scheduleDetails: enhancedScheduleDetails?.map(schedule => ({
-                  selectedDate: schedule.selectedDate,
-                  selectedTime: schedule.selectedTime,
-                  teacher: schedule.teacher,
-                  serviceType: schedule.serviceType,
-                  venue: schedule.venue
-                })),
-                packageBookingDetails: packageBookingDetails || undefined,
-                // Add group booking information
-                isGroupBooking: orderData.isGroupBooking || false,
-                groupMembers: orderData.groupMembers?.map(member => ({
-                  firstName: member.firstName,
-                  lastName: member.lastName,
-                  email: member.email,
-                  phone: member.phone,
-                  countryCode: member.countryCode, // This is the phone prefix like "+51"
-                  packageName: orderData.items.find(item => item.id === member.packageId)?.name || 'Package',
-                  birthDate: member.birthDate,
-                  birthTime: member.birthTime,
-                  birthPlace: member.birthPlace,
-                  question: member.question
-                })) || []
-              };
-
-              // Send Telegram notification to MatMax Bot Service
-              console.log('📡 Calling bot service with chat ID:', telegramUser.telegramChatId);
-              console.log('📡 Telegram order details:', JSON.stringify(telegramOrderDetails, null, 2));
-              const telegramResponse = await fetch('https://telemax-p2m6q066b-matmaxworlds-projects.vercel.app/api/orders/send-notification', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  orderDetails: telegramOrderDetails,
-                  telegramChatId: telegramUser.telegramChatId
-                }),
-              });
-
-              console.log('📡 Bot service response status:', telegramResponse.status);
-              if (telegramResponse.ok) {
-                console.log('✅ Telegram order confirmation sent successfully');
-              } else {
-                console.error('❌ Failed to send Telegram order confirmation to business account, status:', telegramResponse.status);
-                const errorText = await telegramResponse.text();
-                console.error('❌ Bot service error:', errorText);
-              }
-            } else {
-              console.log('⚠️ Business account (info@matmax.store) does not have Telegram linked');
             }
           } else {
-            console.log('⚠️ Business account (info@matmax.store) not found');
-          }
-          } catch (dbError) {
-            console.error('Database error in Telegram notification:', dbError);
-          } finally {
-            // Always disconnect the background Prisma client
-            await backgroundPrisma.$disconnect();
+            console.log('⚠️ No active Telegram users found');
           }
         } catch (telegramError) {
           console.error('Error sending Telegram order notification:', telegramError);
@@ -1009,11 +1006,11 @@ export async function POST(request: NextRequest) {
       } catch (emailError) {
         console.error('Error preparing order confirmation email:', emailError);
         // Don't fail the order creation if email preparation fails
-      } finally {
-        // Clear the timeout
-        clearTimeout(timeoutId);
       }
-    });
+    };
+
+    // Send notifications immediately
+    await sendNotifications();
 
     console.log('Order created successfully, returning response:', successResponse);
     return NextResponse.json(successResponse);

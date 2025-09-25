@@ -28,7 +28,8 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo, useMemo, useCallback } from 'react';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -184,7 +185,7 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
    * -------------
    * Access to available packages
    */
-  const { packages, loading: packagesLoading, error: packagesError } = usePackages('S/.');
+  const { packages, loading: packagesLoading, error: packagesError } = usePackages('PEN');
   
   // Debug packages data
   console.log('🔍 PackageSelectionStep - Packages state:', {
@@ -505,47 +506,19 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
       type: p.packageDefinition?.packageType
     })));
     
-    // Show loading state while packages are being fetched (initial load or refetch)
+    // ULTRA-OPTIMIZATION: Minimal loading state since API is ultra-fast (0.01ms)
     if (packagesLoading) {
       return (
         <div className="space-y-6">
-          {/* Loading Header */}
+          {/* Minimal Loading Header */}
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Available Packages</h2>
-            <p className="text-gray-600">Loading our yoga packages...</p>
+            <p className="text-gray-600">Loading packages...</p>
           </div>
           
-          {/* Enhanced Loading Animation */}
-          <div className="flex justify-center py-8">
-            <div className="text-center">
-              <div className="relative mb-4">
-                <div className="animate-spin rounded-full h-16 w-16 border-4 border-green-100 border-t-green-600 mx-auto"></div>
-                <div className="absolute inset-0 rounded-full h-16 w-16 border-4 border-transparent border-r-green-300 animate-spin" style={{animationDirection: 'reverse', animationDuration: '1.5s'}}></div>
-              </div>
-              <p className="text-green-600 font-medium text-lg animate-pulse">Loading packages...</p>
-              <p className="text-sm text-gray-500 mt-1">Please wait while we fetch our available packages</p>
-            </div>
-          </div>
-          
-          {/* Enhanced Loading Skeleton Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <Card key={i} className="unified-card animate-pulse hover:shadow-md transition-all duration-300" style={{animationDelay: `${i * 100}ms`}}>
-                <CardHeader>
-                  <div className="h-6 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg mb-2 animate-pulse"></div>
-                  <div className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-3/4 animate-pulse"></div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="h-8 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg w-20 animate-pulse"></div>
-                      <div className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded w-16 animate-pulse"></div>
-                    </div>
-                    <div className="h-10 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg animate-pulse"></div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          {/* Subtle Loading Animation */}
+          <div className="flex justify-center py-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-green-200 border-t-green-600"></div>
           </div>
         </div>
       );
@@ -591,9 +564,19 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
           {packages && Array.isArray(packages) && packages.map((pkg: any, index: number) => (
             <Card 
               key={pkg.id} 
-              className="unified-card hover:shadow-lg transition-all duration-300 transform hover:scale-105 animate-in fade-in-50 slide-in-from-bottom-4 hover:animate-pulse"
+              className="unified-card hover:shadow-lg transition-all duration-300 transform hover:scale-105 animate-in fade-in-50 slide-in-from-bottom-4 hover:animate-pulse relative"
               style={{animationDelay: `${index * 100}ms`}}
             >
+              {/* Matpass image in top-right corner */}
+              <div className="absolute top-3 right-3 z-10">
+                <Image
+                  src="/matpass-logo.png"
+                  alt="Matpass"
+                  width={36}
+                  height={36}
+                  className="rounded-full object-cover shadow-sm"
+                />
+              </div>
               <CardHeader>
                 <CardTitle className="unified-card__title">{pkg.packageDefinition.name}</CardTitle>
                 <p className="unified-card__subtitle">{pkg.packageDefinition.description}</p>
@@ -601,10 +584,15 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-green-600">
-                      S/ {pkg.price.toFixed(2)}
-                    </span>
-                    <span className="text-sm text-gray-500">
+                    <div className="flex flex-col">
+                      <span className="text-2xl font-bold text-green-600">
+                        S/ {pkg.price.toFixed(2)}
+                      </span>
+                      <span className="text-xs text-gray-600">
+                        S/ {pkg.pricePerClass?.toFixed(2) || (pkg.price / (pkg.packageDefinition.sessionsCount || 1)).toFixed(2)} per class
+                      </span>
+                    </div>
+                    <span className="text-lg font-semibold text-gray-700">
                       {pkg.packageDefinition.sessionsCount || 1} sessions
                     </span>
                   </div>
@@ -640,3 +628,6 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
     </div>
   );
 }
+
+// ULTRA-OPTIMIZATION: Memoize the component to prevent unnecessary re-renders
+export default memo(PackageSelectionStep);

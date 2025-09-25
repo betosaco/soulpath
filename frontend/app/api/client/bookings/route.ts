@@ -287,11 +287,19 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Verify the schedule slot is available
+    // Verify the schedule slot is available and get teacher information
     const scheduleSlot = await prisma.scheduleSlot.findFirst({
       where: {
         id: scheduleSlotId,
         isAvailable: true
+      },
+      include: {
+        scheduleTemplate: {
+          include: {
+            venue: true,
+            sessionDuration: true
+          }
+        }
       }
     });
 
@@ -302,6 +310,32 @@ export async function POST(request: NextRequest) {
         message: 'Schedule slot not found or not available'
       }, { status: 400 });
     }
+
+    // Find the teacher for this time slot
+    const teacherScheduleSlot = await prisma.teacherScheduleSlot.findFirst({
+      where: {
+        startTime: scheduleSlot.startTime,
+        endTime: scheduleSlot.endTime,
+        isAvailable: true
+      },
+      include: {
+        teacherSchedule: {
+          include: {
+            teacher: true
+          }
+        }
+      }
+    });
+
+    const teacherId = teacherScheduleSlot?.teacherSchedule?.teacher?.id;
+    console.log('🔍 Teacher lookup result:', {
+      teacherScheduleSlot: teacherScheduleSlot ? 'found' : 'not found',
+      teacherId: teacherId,
+      teacherName: teacherScheduleSlot?.teacherSchedule?.teacher?.name
+    });
+    
+    console.log('   - teacherId:', teacherId);
+    console.log('   - teacher name:', teacherScheduleSlot?.teacherSchedule?.teacher?.name);
 
     // Check if slot has capacity
     if (scheduleSlot.bookedCount && scheduleSlot.capacity && scheduleSlot.bookedCount >= scheduleSlot.capacity) {
@@ -320,6 +354,7 @@ export async function POST(request: NextRequest) {
           userId: user.id,
           userPackageId: userPackageId,
           scheduleSlotId: scheduleSlotId,
+          teacherId: teacherId,
           sessionType: sessionType,
           notes: notes,
           status: 'confirmed'
@@ -436,9 +471,12 @@ export async function POST(request: NextRequest) {
               hour: '2-digit',
               minute: '2-digit'
             }) || '',
+            dayOfWeek: completeBooking.scheduleSlot?.startTime.toLocaleDateString('es-ES', {
+              weekday: 'long'
+            }) || '',
             sessionType: completeBooking.sessionType,
-            instructor: completeBooking.teacher?.name || 'Por asignar',
-            venue: completeBooking.venue?.name || 'MatMax Yoga Studio',
+            teacher: completeBooking.teacher?.name || 'Por asignar',
+            venue: completeBooking.venue?.name || 'MatMax Wellness Studio',
             duration: completeBooking.scheduleSlot?.scheduleTemplate?.sessionDuration?.duration_minutes || 60,
             packageName: completeBooking.userPackage?.packagePrice?.packageDefinition?.name || 'Paquete de Yoga',
             packageDescription: completeBooking.userPackage?.packagePrice?.packageDefinition?.description || '',

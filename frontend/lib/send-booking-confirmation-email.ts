@@ -7,8 +7,9 @@ interface BookingEmailData {
   bookingId: string;
   bookingDate: string;
   bookingTime: string;
+  dayOfWeek?: string;
   sessionType: string;
-  instructor?: string;
+  teacher?: string;
   venue?: string;
   duration: number;
   packageName: string;
@@ -36,7 +37,7 @@ export async function sendBookingConfirmationEmail(bookingData: BookingEmailData
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Confirmación de Reserva - MatMax Yoga Studio</title>
+    <title>Confirmación de Reserva - MatMax Wellness Studio</title>
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
         .container { max-width: 600px; margin: 0 auto; background-color: white; border-radius: 10px; overflow: hidden; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -55,14 +56,14 @@ export async function sendBookingConfirmationEmail(bookingData: BookingEmailData
 <body>
     <div class="container">
         <div class="header">
-            <h1>🧘‍♀️ MatMax Yoga Studio</h1>
+            <h1>🧘‍♀️ MatMax Wellness Studio</h1>
             <h2>¡Reserva Confirmada!</h2>
         </div>
 
         <div class="content">
             <p>Hola <strong>${bookingData.customerName}</strong>,</p>
 
-            <p>¡Tu reserva ha sido confirmada exitosamente! Te esperamos en MatMax Yoga Studio.</p>
+            <p>¡Tu reserva ha sido confirmada exitosamente! Te esperamos en MatMax Wellness Studio.</p>
 
             <div class="customer-info">
                 <h3>👤 Información del Cliente</h3>
@@ -72,15 +73,13 @@ export async function sendBookingConfirmationEmail(bookingData: BookingEmailData
             </div>
 
             <div class="booking-info">
-                <h3>📅 Detalles de tu Clase</h3>
+                <h3>📅 Sesión 1</h3>
                 <p><strong>Fecha:</strong> ${bookingData.bookingDate}</p>
                 <p><strong>Hora:</strong> ${bookingData.bookingTime}</p>
+                ${bookingData.dayOfWeek ? `<p><strong>Día:</strong> ${bookingData.dayOfWeek}</p>` : ''}
+                ${bookingData.teacher ? `<p><strong>Instructor:</strong> ${bookingData.teacher}</p>` : ''}
                 <p><strong>Tipo de Clase:</strong> ${bookingData.sessionType}</p>
-                ${bookingData.instructor ? `<p><strong>Instructor:</strong> ${bookingData.instructor}</p>` : ''}
                 ${bookingData.venue ? `<p><strong>Ubicación:</strong> ${bookingData.venue}</p>` : ''}
-                <p><strong>Duración:</strong> ${bookingData.duration} minutos</p>
-                <p><strong>Número de Reserva:</strong> ${bookingData.bookingId}</p>
-                <p><strong>Estado:</strong> <span class="highlight">Confirmada</span></p>
             </div>
 
             <div class="package-info">
@@ -96,16 +95,13 @@ export async function sendBookingConfirmationEmail(bookingData: BookingEmailData
                 <h4>📋 Instrucciones Importantes:</h4>
                 <ul>
                     <li>Llega 10 minutos antes de tu clase</li>
-                    <li>Trae tu propia colchoneta de yoga</li>
+                    <li>Te prestamos un mat MatMax</li>
                     <li>Usa ropa cómoda y flexible</li>
                     <li>Evita comer 2 horas antes de la clase</li>
                     <li>Mantén tu teléfono en silencio</li>
                 </ul>
             </div>
 
-            <div style="text-align: center; margin: 30px 0;">
-                <a href="${bookingData.bookingUrl}" class="button">Ver Mis Reservas</a>
-            </div>
 
             <p><strong>¿Necesitas cancelar o reprogramar?</strong><br>
             Puedes hacerlo hasta 2 horas antes de tu clase desde tu cuenta o contactándonos.</p>
@@ -120,7 +116,7 @@ export async function sendBookingConfirmationEmail(bookingData: BookingEmailData
 
         <div class="footer">
             <p>¡Te esperamos pronto! 🙏</p>
-            <p><strong>MatMax Yoga Studio</strong></p>
+            <p><strong>MatMax Wellness Studio</strong></p>
         </div>
     </div>
 </body>
@@ -128,26 +124,24 @@ export async function sendBookingConfirmationEmail(bookingData: BookingEmailData
 
     // Create text version
     const textContent = `
-Confirmación de Reserva - MatMax Yoga Studio
+Confirmación de Reserva - MatMax Wellness Studio
 
 Hola ${bookingData.customerName},
 
-¡Tu reserva ha sido confirmada exitosamente! Te esperamos en MatMax Yoga Studio.
+¡Tu reserva ha sido confirmada exitosamente! Te esperamos en MatMax Wellness Studio.
 
 INFORMACIÓN DEL CLIENTE:
 Nombre: ${bookingData.customerName}
 Email: ${bookingData.customerEmail}
 ${bookingData.customerPhone ? `Teléfono: ${bookingData.customerPhone}` : ''}
 
-DETALLES DE TU CLASE:
+📅 Sesión 1:
 Fecha: ${bookingData.bookingDate}
 Hora: ${bookingData.bookingTime}
+${bookingData.dayOfWeek ? `Día: ${bookingData.dayOfWeek}` : ''}
+${bookingData.teacher ? `Instructor: ${bookingData.teacher}` : ''}
 Tipo de Clase: ${bookingData.sessionType}
-${bookingData.instructor ? `Instructor: ${bookingData.instructor}` : ''}
 ${bookingData.venue ? `Ubicación: ${bookingData.venue}` : ''}
-Duración: ${bookingData.duration} minutos
-Número de Reserva: ${bookingData.bookingId}
-Estado: Confirmada
 
 INFORMACIÓN DEL PAQUETE UTILIZADO:
 Paquete: ${bookingData.packageName}
@@ -158,7 +152,7 @@ Sesiones Restantes: ${bookingData.sessionsRemaining}
 
 INSTRUCCIONES IMPORTANTES:
 - Llega 10 minutos antes de tu clase
-- Trae tu propia colchoneta de yoga
+- Te prestamos un mat MatMax
 - Usa ropa cómoda y flexible
 - Evita comer 2 horas antes de la clase
 - Mantén tu teléfono en silencio
@@ -173,14 +167,14 @@ CONTACTO:
 
 ¡Te esperamos pronto!
 
-MatMax Yoga Studio
+MatMax Wellness Studio
 `;
 
     // Send email using Brevo service with BCC
     const emailResult = await emailService.sendEmailWithBCC({
       to: bookingData.customerEmail,
       bcc: 'alberto@matmax.world',
-      subject: '¡Reserva Confirmada! - MatMax Yoga Studio',
+      subject: '¡Reserva Confirmada! - MatMax Wellness Studio',
       html: htmlContent,
       text: textContent
     });

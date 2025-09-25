@@ -75,48 +75,160 @@ export function TermsAndConditionsModal({
           <div className="prose prose-sm max-w-none text-gray-700">
             {currentLanguage === 'en' ? (
               <>
-                <h3 className="font-semibold text-lg mb-4">Wellness Studio Terms and Conditions</h3>
-                <h4 className="font-semibold mb-2">1. Booking and Payment</h4>
-                <p className="mb-4">All bookings are subject to availability. Payment is required to confirm your reservation. We accept various payment methods including credit cards and bank transfers.</p>
-                <h4 className="font-semibold mb-2">2. Cancellation Policy</h4>
-                <p className="mb-4">Cancellations made 24 hours or more before the scheduled session will receive a full refund. Cancellations made less than 24 hours before the session will be charged 50% of the session fee.</p>
-                <h4 className="font-semibold mb-2">3. Package Validity</h4>
-                <p className="mb-4">All wellness packages are valid for 6 months from the date of purchase. Unused sessions will expire after this period.</p>
-                <h4 className="font-semibold mb-2">4. Health and Safety</h4>
-                <p className="mb-4">Participants must inform instructors of any health conditions or injuries before participating in sessions. The studio is not responsible for injuries that occur during sessions.</p>
-                <h4 className="font-semibold mb-2">5. Personal Belongings</h4>
+                <h3 className="font-semibold text-lg mb-4">Terms and Conditions - MatMax Wellness Studio</h3>
+                <p className="text-sm text-gray-500 mb-6">Last updated: January 31, 2025</p>
+                
+                <h4 className="font-semibold mb-2">1. Definitions</h4>
+                <ul className="mb-4 space-y-1">
+                  <li>• MATPASS: Access pass to MatMax Wellness Studio facilities and services with a duration of 30 natural days from its activation.</li>
+                  <li>• User: Physical person holder of the MATPASS.</li>
+                  <li>• Establishment: MatMax Wellness Studio facilities where services are provided.</li>
+                </ul>
+
+                <h4 className="font-semibold mb-2">2. MATPASS - General Conditions</h4>
+                <h5 className="font-medium mb-2">2.1 Validity and Activation</h5>
+                <ul className="mb-4 space-y-1">
+                  <li>• The MATPASS is valid for 30 natural days from its activation date.</li>
+                  <li>• Activation occurs automatically when making the first reservation.</li>
+                  <li>• The activation date cannot be postponed beyond 30 days from the purchase date.</li>
+                </ul>
+
+                <h5 className="font-medium mb-2">2.2 MATPASS Characteristics</h5>
+                <ul className="mb-4 space-y-1">
+                  <li>• The pass is personal and non-transferable.</li>
+                  <li>• It is non-refundable under any circumstances.</li>
+                  <li>• The user has the option to extend their MATPASS for 7 additional days after the original expiration date.</li>
+                </ul>
+
+                <h4 className="font-semibold mb-2">3. Payment Methods</h4>
+                <ul className="mb-4 space-y-1">
+                  <li>• Credit and debit cards</li>
+                  <li>• Bank transfer</li>
+                  <li>• Cash at establishment</li>
+                  <li>• Digital wallets</li>
+                </ul>
+
+                <h4 className="font-semibold mb-2">4. Facility Usage</h4>
+                <ul className="mb-4 space-y-1">
+                  <li>• Users must present their MATPASS for access to facilities.</li>
+                  <li>• Respectful behavior is required at all times.</li>
+                  <li>• Follow all safety and hygiene protocols.</li>
+                </ul>
+
+                <h4 className="font-semibold mb-2">5. Cancellation and Refund Policy</h4>
+                <ul className="mb-4 space-y-1">
+                  <li>• MATPASS purchases are non-refundable.</li>
+                  <li>• Session cancellations must be made at least 2 hours in advance.</li>
+                  <li>• No-shows will be charged as used sessions.</li>
+                </ul>
+
+                <h4 className="font-semibold mb-2">6. Health and Safety</h4>
+                <ul className="mb-4 space-y-1">
+                  <li>• Users must inform instructors of any health conditions.</li>
+                  <li>• The studio is not responsible for injuries during sessions.</li>
+                  <li>• Follow all safety instructions provided by staff.</li>
+                </ul>
+
+                <h4 className="font-semibold mb-2">7. Personal Belongings</h4>
                 <p className="mb-4">The studio is not responsible for lost or stolen personal belongings. Please keep valuables secure during your visit.</p>
-                <h4 className="font-semibold mb-2">6. Privacy Policy</h4>
+
+                <h4 className="font-semibold mb-2">8. Privacy Policy</h4>
                 <p className="mb-4">We respect your privacy and will only use your personal information in accordance with our privacy policy. Your data will not be shared with third parties without your consent.</p>
-                <h4 className="font-semibold mb-2">7. Changes to Terms</h4>
+
+                <h4 className="font-semibold mb-2">9. Changes to Terms</h4>
                 <p className="mb-4">We reserve the right to modify these terms and conditions at any time. Changes will be effective immediately upon posting on our website.</p>
-                <h4 className="font-semibold mb-2">8. Contact Information</h4>
-                <p className="mb-4">For questions about these terms, please contact us at info@wellnessstudio.com or call +1 (555) 123-4567.</p>
+
+                <h4 className="font-semibold mb-2">10. Contact</h4>
+                <p className="mb-4">For any questions, clarifications, or requests related to these terms and conditions, contact:</p>
+                <ul className="mb-4 space-y-1">
+                  <li>• Email: info@matmax.store</li>
+                  <li>• Phone: +51916172368</li>
+                  <li>• Address: Calle Alcanfores 425, Miraflores Piso 2</li>
+                </ul>
+
+                <h4 className="font-semibold mb-2">11. Jurisdiction</h4>
+                <p className="mb-4">Any controversy arising from these terms and conditions will be resolved in accordance with the laws in force in Lima, Peru.</p>
               </>
             ) : (
               <>
-                <h3 className="font-semibold text-lg mb-4">Términos y Condiciones del Estudio de Bienestar</h3>
-                <h4 className="font-semibold mb-2">1. Reservas y Pagos</h4>
-                <p className="mb-4">Todas las reservas están sujetas a disponibilidad. Se requiere pago para confirmar su reservación. Aceptamos varios métodos de pago incluyendo tarjetas de crédito y transferencias bancarias.</p>
-                <h4 className="font-semibold mb-2">2. Política de Cancelación</h4>
-                <p className="mb-4">Las cancelaciones realizadas con 24 horas o más de anticipación recibirán un reembolso completo. Las cancelaciones realizadas con menos de 24 horas de anticipación serán cobradas al 50% del costo de la sesión.</p>
-                <h4 className="font-semibold mb-2">3. Validez de Paquetes</h4>
-                <p className="mb-4">Todos los paquetes de bienestar son válidos por 6 meses desde la fecha de compra. Las sesiones no utilizadas expirarán después de este período.</p>
-                <h4 className="font-semibold mb-2">4. Salud y Seguridad</h4>
-                <p className="mb-4">Los participantes deben informar a los instructores sobre cualquier condición de salud o lesión antes de participar en las sesiones. El estudio no es responsable de lesiones que ocurran durante las sesiones.</p>
-                <h4 className="font-semibold mb-2">5. Pertenencias Personales</h4>
+                <h3 className="font-semibold text-lg mb-4">Términos y Condiciones - MatMax Wellness Studio</h3>
+                <p className="text-sm text-gray-500 mb-6">Última actualización: 31 de enero de 2025</p>
+                
+                <h4 className="font-semibold mb-2">1. Definiciones</h4>
+                <ul className="mb-4 space-y-1">
+                  <li>• MATPASS: Pase de acceso a las instalaciones y servicios de MatMax Wellness Studio con una duración de 30 días naturales desde su activación.</li>
+                  <li>• Usuario: Persona física titular del MATPASS.</li>
+                  <li>• Establecimiento: Instalaciones de MatMax Wellness Studio donde se prestan los servicios.</li>
+                </ul>
+
+                <h4 className="font-semibold mb-2">2. MATPASS - Condiciones Generales</h4>
+                <h5 className="font-medium mb-2">2.1 Vigencia y Activación</h5>
+                <ul className="mb-4 space-y-1">
+                  <li>• El MATPASS tiene una vigencia de 30 días naturales a partir de su fecha de activación.</li>
+                  <li>• La activación se realiza automáticamente al momento de realizar la primera reserva.</li>
+                  <li>• La fecha de activación no puede posponerse más allá de 30 días desde la fecha de compra.</li>
+                </ul>
+
+                <h5 className="font-medium mb-2">2.2 Características del MATPASS</h5>
+                <ul className="mb-4 space-y-1">
+                  <li>• El pase es personal e intransferible.</li>
+                  <li>• No es reembolsable bajo ninguna circunstancia.</li>
+                  <li>• El usuario tiene la opción de extender su MATPASS por 7 días adicionales posteriores a la fecha de vencimiento original.</li>
+                </ul>
+
+                <h4 className="font-semibold mb-2">3. Métodos de Pago</h4>
+                <ul className="mb-4 space-y-1">
+                  <li>• Tarjetas de crédito y débito</li>
+                  <li>• Transferencia bancaria</li>
+                  <li>• Efectivo en establecimiento</li>
+                  <li>• Billeteras digitales</li>
+                </ul>
+
+                <h4 className="font-semibold mb-2">4. Uso de Instalaciones</h4>
+                <ul className="mb-4 space-y-1">
+                  <li>• Los usuarios deben presentar su MATPASS para acceder a las instalaciones.</li>
+                  <li>• Se requiere comportamiento respetuoso en todo momento.</li>
+                  <li>• Seguir todos los protocolos de seguridad e higiene.</li>
+                </ul>
+
+                <h4 className="font-semibold mb-2">5. Política de Cancelación y Reembolso</h4>
+                <ul className="mb-4 space-y-1">
+                  <li>• Las compras de MATPASS no son reembolsables.</li>
+                  <li>• Las cancelaciones de sesiones deben realizarse con al menos 2 horas de anticipación.</li>
+                  <li>• Las inasistencias serán cobradas como sesiones utilizadas.</li>
+                </ul>
+
+                <h4 className="font-semibold mb-2">6. Salud y Seguridad</h4>
+                <ul className="mb-4 space-y-1">
+                  <li>• Los usuarios deben informar a los instructores sobre cualquier condición de salud.</li>
+                  <li>• El estudio no es responsable de lesiones durante las sesiones.</li>
+                  <li>• Seguir todas las instrucciones de seguridad proporcionadas por el personal.</li>
+                </ul>
+
+                <h4 className="font-semibold mb-2">7. Pertenencias Personales</h4>
                 <p className="mb-4">El estudio no es responsable de pertenencias personales perdidas o robadas. Por favor mantenga sus objetos de valor seguros durante su visita.</p>
-                <h4 className="font-semibold mb-2">6. Política de Privacidad</h4>
+
+                <h4 className="font-semibold mb-2">8. Política de Privacidad</h4>
                 <p className="mb-4">Respetamos su privacidad y solo usaremos su información personal de acuerdo con nuestra política de privacidad. Sus datos no serán compartidos con terceros sin su consentimiento.</p>
-                <h4 className="font-semibold mb-2">7. Cambios en los Términos</h4>
+
+                <h4 className="font-semibold mb-2">9. Cambios en los Términos</h4>
                 <p className="mb-4">Nos reservamos el derecho de modificar estos términos y condiciones en cualquier momento. Los cambios serán efectivos inmediatamente al publicarlos en nuestro sitio web.</p>
-                <h4 className="font-semibold mb-2">8. Información de Contacto</h4>
-                <p className="mb-4">Para preguntas sobre estos términos, por favor contáctenos en info@wellnessstudio.com o llame al +1 (555) 123-4567.</p>
+
+                <h4 className="font-semibold mb-2">10. Contacto</h4>
+                <p className="mb-4">Para cualquier duda, aclaración o solicitud relacionada con estos términos y condiciones, contactar a:</p>
+                <ul className="mb-4 space-y-1">
+                  <li>• Correo electrónico: info@matmax.store</li>
+                  <li>• Teléfono: +51916172368</li>
+                  <li>• Dirección: Calle Alcanfores 425, Miraflores Piso 2</li>
+                </ul>
+
+                <h4 className="font-semibold mb-2">11. Jurisdicción</h4>
+                <p className="mb-4">Cualquier controversia derivada de estos términos y condiciones se resolverá conforme a las leyes vigentes en Lima, Perú.</p>
               </>
             )}
                   </div>
           <div className="mt-6 text-sm text-gray-500 text-center">
-            {currentLanguage === 'en' ? 'Last updated: January 2024' : 'Última actualización: Enero 2024'}
+            {currentLanguage === 'en' ? 'Last updated: January 31, 2025' : 'Última actualización: 31 de enero de 2025'}
               </div>
             </div>
 

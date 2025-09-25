@@ -20,6 +20,7 @@ interface PackagesApiResponse {
 export interface PackagePrice {
   id: number;
   price: number;
+  pricePerClass?: number;
   packageDefinition: {
     id: number;
     name: string;
@@ -102,7 +103,7 @@ async function fetchPackagesAPI(currency: string, accessToken?: string): Promise
  * - Loading states management
  * - Optimistic updates support
  */
-export function usePackages(currency: string = 'S/.') {
+export function usePackages(currency: string = 'PEN') {
   console.log('🚀 usePackagesQuery hook called with currency:', currency);
   const { user } = useAuth();
   
@@ -127,7 +128,7 @@ export function usePackages(currency: string = 'S/.') {
 /**
  * usePackage - Hook for fetching a single package by ID
  */
-export function usePackage(packageId: number, currency: string = 'S/.') {
+export function usePackage(packageId: number, currency: string = 'PEN') {
   const { user } = useAuth();
   
   return useQuery({
@@ -152,7 +153,7 @@ export function usePackage(packageId: number, currency: string = 'S/.') {
 /**
  * usePopularPackages - Hook for fetching popular packages only
  */
-export function usePopularPackages(currency: string = 'S/.') {
+export function usePopularPackages(currency: string = 'PEN') {
   const { user } = useAuth();
   
   return useQuery({
@@ -170,7 +171,7 @@ export function usePopularPackages(currency: string = 'S/.') {
 /**
  * useFeaturedPackages - Hook for fetching featured packages only
  */
-export function useFeaturedPackages(currency: string = 'S/.') {
+export function useFeaturedPackages(currency: string = 'PEN') {
   const { user } = useAuth();
   
   return useQuery({

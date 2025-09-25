@@ -15,21 +15,25 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-  const { signIn, signOut, user, isAdmin } = useAuth();
+  const { signIn, signOut, user, isAdmin, isTeacher } = useAuth();
 
   // Redirect if user is already logged in
   useEffect(() => {
     if (user) {
       console.log('🔐 LoginPage: User already logged in, redirecting...', user);
-      console.log('🔐 LoginPage: User role:', user.role, 'isAdmin:', isAdmin);
+      console.log('🔐 LoginPage: User role:', user.role, 'isAdmin:', isAdmin, 'isTeacher:', isTeacher);
       if (isAdmin) {
         // Admin users always go to admin dashboard first
         router.push('/admin');
+      } else if (isTeacher) {
+        // Teacher users go to teacher dashboard
+        router.push('/account/teacher');
       } else {
+        // Regular users go to account page
         router.push('/account');
       }
     }
-  }, [user, isAdmin, router]);
+  }, [user, isAdmin, isTeacher, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
