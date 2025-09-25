@@ -13,11 +13,6 @@
       "NODE_ENV": "production"
     }
   },
-  "functions": {
-    "frontend/app/api/**/*.ts": {
-      "maxDuration": 30
-    }
-  },
   "headers": [
     {
       "source": "/(.*)",
