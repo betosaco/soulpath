@@ -10,7 +10,7 @@ interface MobileCartToggleProps {
 }
 
 export function MobileCartToggle({ className = '' }: MobileCartToggleProps) {
-  const { getTotalItems, items } = useCart();
+  const { getTotalItems: _getTotalItems, items } = useCart();
   const { isCartOpen, toggleCart } = useCartUI();
   const [isHydrated, setIsHydrated] = useState(false);
 

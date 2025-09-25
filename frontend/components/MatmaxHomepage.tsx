@@ -11,7 +11,7 @@ export function MatmaxHomepage() {
   const translations = t as Record<string, string | Record<string, string>>;
   
   // Mobile detection
-  const [isMobile, setIsMobile] = useState(false);
+  const [_isMobile, setIsMobile] = useState(false);
   
   useEffect(() => {
     const checkMobile = () => {

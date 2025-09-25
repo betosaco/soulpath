@@ -151,7 +151,7 @@ export function BookingLayout({
    */
   const {
     currentStep,
-    canGoNext,
+    canGoNext: _canGoNext,
     goToNextStep,
     isMultiPackage,
     isDirectCheckout

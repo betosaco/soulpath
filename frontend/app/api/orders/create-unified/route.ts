@@ -381,7 +381,7 @@ export async function POST(request: NextRequest) {
             expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
           }));
           
-          const createdUserPackages = await tx.userPackage.createMany({
+          const _createdUserPackages = await tx.userPackage.createMany({
             data: userPackageData
           });
           
@@ -551,7 +551,7 @@ export async function POST(request: NextRequest) {
         
         // Create all bookings in a single batch operation
         if (bookingData.length > 0) {
-          const createdBookings = await prisma.booking.createMany({
+          const _createdBookings = await prisma.booking.createMany({
             data: bookingData
           });
           
