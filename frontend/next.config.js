@@ -29,35 +29,12 @@ const nextConfig = {
   },
   // Note: swcMinify is deprecated in Next.js 15+, minification is handled by webpack config
   // Disable CSS optimization completely
-  productionBrowserSourceMaps: false,
-  webpack: (config, { dev: _dev, isServer }) => {
+  webpack: (config, { dev, isServer }) => {
     // Configure webpack to handle module resolution
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': path.resolve(__dirname),
     };
-    
-    // Disable source maps completely
-    config.devtool = false;
-    
-    // Additional source map configuration
-    if (!_dev) {
-      config.optimization = {
-        ...config.optimization,
-        minimize: false,
-      };
-    }
-    
-    // Disable source map generation at webpack level
-    config.module.rules.forEach((rule) => {
-      if (rule.use && Array.isArray(rule.use)) {
-        rule.use.forEach((use) => {
-          if (use.loader && use.loader.includes('source-map-loader')) {
-            use.options = { ...use.options, disable: true };
-          }
-        });
-      }
-    });
 
     // Configure CSS handling to prevent differences between localhost and production
     if (!isServer) {
