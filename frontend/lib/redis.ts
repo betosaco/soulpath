@@ -11,19 +11,18 @@ const redisConfig = {
     password: process.env.REDIS_PASSWORD,
     username: process.env.REDIS_USERNAME,
   }),
-  // Add connection timeout and retry settings for Redis Cloud
+  // Redis Cloud specific settings
   connectTimeout: parseInt(process.env.REDIS_CONNECT_TIMEOUT || '10000'),
+  commandTimeout: parseInt(process.env.REDIS_COMMAND_TIMEOUT || '5000'),
   retryDelayOnFailover: 100,
   maxRetriesPerRequest: parseInt(process.env.REDIS_MAX_RETRIES || '3'),
   lazyConnect: true,
+  enableReadyCheck: false,
+  maxLoadingTimeout: parseInt(process.env.REDIS_LOADING_TIMEOUT || '10000'),
   
   // Connection pool settings
   family: 4,
   keepAlive: 30000,
-  
-  // Timeout settings
-  connectTimeout: parseInt(process.env.REDIS_CONNECT_TIMEOUT || '10000'),
-  commandTimeout: parseInt(process.env.REDIS_COMMAND_TIMEOUT || '5000'),
   
   // TLS settings for secure connections
   ...(process.env.REDIS_TLS === 'true' && {
@@ -42,6 +41,14 @@ const redis = new Redis(redisConfig);
 // Handle Redis connection errors gracefully
 redis.on('error', (error) => {
   console.warn('⚠️ Redis connection error (non-critical):', error.message);
+  console.warn('⚠️ Error details:', {
+    message: error.message,
+    code: error.code,
+    errno: error.errno,
+    syscall: error.syscall,
+    address: error.address,
+    port: error.port
+  });
   // Don't throw the error, just log it as Redis is optional
 });
 
