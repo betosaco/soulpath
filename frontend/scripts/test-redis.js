@@ -11,7 +11,7 @@ import { performance } from 'perf_hooks';
 async function testRedisConnection() {
   console.log('🔍 Testing Redis connection...\n');
 
-  const redisUrl = process.env.REDIS_REDIS_URL || process.env.REDIS_URL || process.env.REDISCLOUD_URL;
+  const redisUrl = process.env.REDIS_REDIS_URL || process.env.REDIS_URL || process.env.REDISCLOUD_URL || 'redis://default:ZJWP2BAecQigeygptCB4onqGyPYJovlH@redis-12183.c16.us-east-1-3.ec2.redns.redis-cloud.com:12183';
 
   if (!redisUrl) {
     console.log('⚠️  No Redis URL found in environment variables');

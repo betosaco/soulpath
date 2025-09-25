@@ -11,8 +11,8 @@ const redisConfig = {
     password: process.env.REDIS_PASSWORD,
     username: process.env.REDIS_USERNAME,
   }),
-  
-  // Connection settings
+  // Add connection timeout and retry settings for Redis Cloud
+  connectTimeout: parseInt(process.env.REDIS_CONNECT_TIMEOUT || '10000'),
   retryDelayOnFailover: 100,
   maxRetriesPerRequest: parseInt(process.env.REDIS_MAX_RETRIES || '3'),
   lazyConnect: true,
