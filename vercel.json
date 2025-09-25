@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "cd frontend && npm ci && npm run build:vercel",
+  "buildCommand": "cd frontend && npm ci && npm install && npx prisma generate && npm run build",
   "outputDirectory": "frontend/.next",
   "installCommand": "cd frontend && npm ci",
   "devCommand": "cd frontend && npm run dev",
@@ -11,11 +11,6 @@
   "build": {
     "env": {
       "NODE_ENV": "production"
-    }
-  },
-  "functions": {
-    "frontend/app/api/**/*.ts": {
-      "maxDuration": 30
     }
   },
   "headers": [
