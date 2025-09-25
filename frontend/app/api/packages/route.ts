@@ -213,35 +213,24 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Try to insert into database
-    const { data, error } = await supabase
-      .from('package_definitions')
-      .insert({
+    // Try to insert into database using Prisma
+    const data = await prisma.packageDefinition.create({
+      data: {
         name: body.name,
         description: body.description,
-        sessions_count: body.sessionsCount || 1,
-        package_type: body.packageType || 'standard',
-        max_group_size: body.maxGroupSize || 1,
-        is_active: body.isActive !== false,
-        is_popular: body.isPopular || false,
+        sessionsCount: body.sessionsCount || 1,
+        packageType: body.packageType || 'standard',
+        maxGroupSize: body.maxGroupSize || 1,
+        isActive: body.isActive !== false,
+        isPopular: body.isPopular || false,
         featured: body.featured || false,
-        display_order: body.displayOrder || 0,
-        session_duration_id: body.sessionDurationId || 1,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .select()
-      .single();
+        displayOrder: body.displayOrder || 0,
+        sessionDurationId: body.sessionDurationId || 1,
+      }
+    });
 
-    if (error) {
-      console.error('Error creating package:', error);
-      return NextResponse.json({
-        success: false,
-        error: 'Database error',
-        message: 'Failed to create package',
-        details: error.message
-      }, { status: 500 });
-    }
+    // Clear cache after creating new package
+    await cache.del('packages:*');
 
     return NextResponse.json({
       success: true,

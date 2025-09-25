@@ -64,8 +64,8 @@ export async function GET(request: NextRequest) {
 
     // Cache the response
     try {
-      await cache.set(cacheKey, schedules, cacheTTL.schedules || 1800); // 30 minutes default
-      console.log('✅ Cached schedules data for key:', cacheKey, 'TTL:', cacheTTL.schedules || 1800);
+      await cache.set(cacheKey, schedules, cacheTTL.schedule || 1800); // 30 minutes default
+      console.log('✅ Cached schedules data for key:', cacheKey, 'TTL:', cacheTTL.schedule || 1800);
     } catch (error) {
       console.warn('⚠️ Cache write error:', error);
     }

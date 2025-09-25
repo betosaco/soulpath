@@ -112,7 +112,7 @@ export class CacheService {
       console.log(`❌ Cache miss for key: ${key}`);
       return null;
     } catch (error) {
-      console.warn(`⚠️ Redis get error for key ${key} (falling back to no cache):`, error.message);
+      console.warn(`⚠️ Redis get error for key ${key} (falling back to no cache):`, error instanceof Error ? error.message : String(error));
       return null;
     }
   }
@@ -127,7 +127,7 @@ export class CacheService {
       }
       console.log(`✅ Cached data for key: ${key}${ttl ? ` (TTL: ${ttl}s)` : ''}`);
     } catch (error) {
-      console.warn(`⚠️ Redis set error for key ${key} (cache disabled):`, error.message);
+      console.warn(`⚠️ Redis set error for key ${key} (cache disabled):`, error instanceof Error ? error.message : String(error));
     }
   }
 

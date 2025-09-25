@@ -26,8 +26,8 @@ export async function GET(request: NextRequest) {
       console.log('✅ Returning cached products data');
       return NextResponse.json({
         success: true,
-        data: cachedData.data,
-        pagination: cachedData.pagination,
+        data: (cachedData as any).data,
+        pagination: (cachedData as any).pagination,
         cached: true
       });
     }

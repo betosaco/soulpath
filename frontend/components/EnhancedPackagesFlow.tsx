@@ -431,7 +431,7 @@ export function EnhancedPackagesFlow() {
                 ) : packagesError ? (
                   <div className="text-center py-8">
                     <AlertCircle className="w-6 h-6 mx-auto mb-3 text-red-500" />
-                    <p className="text-red-600 text-sm mb-4">Error loading packages: {packagesError?.message}</p>
+                    <p className="text-red-600 text-sm mb-4">Error loading packages: {typeof packagesError === 'string' ? packagesError : (packagesError as Error)?.message || 'Unknown error'}</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 gap-4 mobile-grid-responsive">
@@ -534,7 +534,7 @@ export function EnhancedPackagesFlow() {
                 ) : packagesError ? (
                   <div className="text-center py-12">
                     <AlertCircle className="w-8 h-8 mx-auto mb-4 text-red-500" />
-                    <p className="text-red-600 text-lg mb-4">Error loading packages: {packagesError?.message}</p>
+                    <p className="text-red-600 text-lg mb-4">Error loading packages: {typeof packagesError === 'string' ? packagesError : (packagesError as Error)?.message || 'Unknown error'}</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

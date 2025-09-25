@@ -163,7 +163,7 @@ export function ModernStateManagementExample() {
             ) : packagesError ? (
               <div className="flex items-center gap-2 text-red-600 p-4 bg-red-50 rounded-lg">
                 <AlertCircle size={20} />
-                <span>Error loading packages: {packagesError.message}</span>
+                <span>Error loading packages: {typeof packagesError === 'string' ? packagesError : (packagesError as Error)?.message || 'Unknown error'}</span>
               </div>
             ) : (
               <div className="unified-grid unified-grid-cols-1 md:unified-grid-cols-2 lg:unified-grid-cols-3 gap-4">
