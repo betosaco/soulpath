@@ -117,7 +117,7 @@
             "cache:clear": "node -e \"require('./lib/cache').apiCache.clear(); console.log('Cache cleared')\"",
             "vercel:setup": "./vercel-deploy.sh",
             "vercel:link": "vercel link",
-            "vercel:env:add": "vercel env add REDIS_URL",
+            "vercel:env:add": "vercel env add REDIS_REDIS_URL",
             "vercel:env:pull": "vercel env pull .env.local",
             "redis:setup": "./scripts/setup-redis-vercel.sh",
             "redis:install": "npm install ioredis",

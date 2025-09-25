@@ -2,9 +2,9 @@ import { Redis } from 'ioredis';
 
 // Redis client configuration for Vercel
 const redisConfig = {
-  // Use Vercel's REDIS_URL if available, otherwise fallback to REDIS_REDIS_URL, then individual components
-  ...(process.env.REDIS_URL || process.env.REDIS_REDIS_URL ? {
-    url: process.env.REDIS_URL || process.env.REDIS_REDIS_URL,
+  // Use REDIS_REDIS_URL first (your actual env var), then fallback to REDIS_URL, then individual components
+  ...(process.env.REDIS_REDIS_URL || process.env.REDIS_URL ? {
+    url: process.env.REDIS_REDIS_URL || process.env.REDIS_URL,
   } : {
     host: process.env.REDIS_HOST || 'localhost',
     port: parseInt(process.env.REDIS_PORT || '6379'),

@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
         keys: stats.keys
       },
       environment: {
-        hasRedisUrl: !!(process.env.REDIS_URL || process.env.REDIS_REDIS_URL),
+        hasRedisUrl: !!(process.env.REDIS_REDIS_URL || process.env.REDIS_URL),
         hasRedisHost: !!process.env.REDIS_HOST,
         hasRedisPassword: !!process.env.REDIS_PASSWORD,
         nodeEnv: process.env.NODE_ENV
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
       error: 'Redis test failed',
       message: error instanceof Error ? error.message : 'Unknown error',
       environment: {
-        hasRedisUrl: !!(process.env.REDIS_URL || process.env.REDIS_REDIS_URL),
+        hasRedisUrl: !!(process.env.REDIS_REDIS_URL || process.env.REDIS_URL),
         hasRedisHost: !!process.env.REDIS_HOST,
         hasRedisPassword: !!process.env.REDIS_PASSWORD,
         nodeEnv: process.env.NODE_ENV
