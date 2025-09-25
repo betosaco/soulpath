@@ -9,7 +9,7 @@ interface CartIconProps {
 }
 
 export function CartIcon({ className = '' }: CartIconProps) {
-  const { getTotalItems, items } = useCart();
+  const { getTotalItems: _getTotalItems, items } = useCart();
   const { openCart } = useCartUI();
   const [isHydrated, setIsHydrated] = useState(false);
 

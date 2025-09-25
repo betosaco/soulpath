@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { cache, cacheKeys, cacheTTL } from '@/lib/redis';
+// import { cache, cacheKeys, cacheTTL } from '@/lib/redis';
 
 export async function GET(request: NextRequest) {
   const prisma = new PrismaClient();
@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
 }
 
 // Generate mock schedule slots for development
-function generateMockScheduleSlots() {
+function _generateMockScheduleSlots() {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const startOfWeek = new Date(today);

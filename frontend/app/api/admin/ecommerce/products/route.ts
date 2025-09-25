@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { cache, cacheKeys, cacheTTL } from '@/lib/redis';
+import { cache, cacheTTL } from '@/lib/redis';
 
 const prisma = new PrismaClient();
 

@@ -319,7 +319,7 @@ export async function POST(request: NextRequest) {
             idType: typeof item.id
           });
 
-          let packagePriceId = parseInt(item.id);
+          const packagePriceId = parseInt(item.id);
 
           // Validate package exists and is active
           if (isNaN(packagePriceId) || packagePriceId <= 0) {

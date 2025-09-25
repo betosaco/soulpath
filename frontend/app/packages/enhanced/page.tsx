@@ -8,7 +8,7 @@ import { BookingLayout } from '@/components/booking/layout/BookingLayout';
 import { usePackages } from '@/hooks/usePackages';
 
 export default function EnhancedPackagesPage() {
-  const router = useRouter();
+  const _router = useRouter();
   
   // Check if packages are loading to show page-level loading state
   const { loading: packagesLoading } = usePackages('S/.');
