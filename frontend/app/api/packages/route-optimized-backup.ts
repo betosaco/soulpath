@@ -96,13 +96,16 @@ export async function GET(request: NextRequest) {
     if (includeSchedule) {
       try {
         // Run schedule fetch in parallel with data processing
-        const schedulePromise = getPackagesScheduleService()
-          .then(service => service.getSchedules({ available: true }))
-          .then(response => response.success ? response.data : null)
-          .catch(error => {
+        const schedulePromise = (async () => {
+          try {
+            const service = getPackagesScheduleService();
+            const response = await service.getSchedules({ available: true });
+            return response.success ? response.data : null;
+          } catch (error) {
             console.warn('⚠️ Failed to fetch schedule data:', error);
             return null;
-          });
+          }
+        })();
         
         scheduleData = await schedulePromise;
         if (scheduleData) {

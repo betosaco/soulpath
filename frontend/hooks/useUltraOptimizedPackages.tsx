@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { PackagePrice } from '@/types/package';
+import { PackagePrice } from '@/hooks/usePackages';
 
 // ULTRA-OPTIMIZATION 1: In-memory cache for packages
 const packageCache = new Map();
@@ -37,7 +37,7 @@ export function useUltraOptimizedPackages(currency: string = 'PEN'): UseUltraOpt
 
   // ULTRA-OPTIMIZATION 5: Optimized fetch function with request deduplication
   const fetchPackages = useCallback(async () => {
-    const startTime = performance.now();
+    const startTime = Date.now();
     
     // Check cache first
     const cached = packageCache.get(cacheKey);
@@ -102,7 +102,7 @@ export function useUltraOptimizedPackages(currency: string = 'PEN'): UseUltraOpt
         });
 
         // Update performance metrics
-        const responseTime = performance.now() - startTime;
+        const responseTime = Date.now() - startTime;
         performanceMetrics.totalRequests++;
         performanceMetrics.avgResponseTime = 
           (performanceMetrics.avgResponseTime * (performanceMetrics.totalRequests - 1) + responseTime) / 

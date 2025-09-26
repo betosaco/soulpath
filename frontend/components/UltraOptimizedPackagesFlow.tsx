@@ -1,9 +1,8 @@
 'use client';
 
 import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
-import { usePackages } from '@/hooks/usePackages';
-import { useCart } from '@/hooks/useCart';
-import { PackagePrice } from '@/types/package';
+import { usePackages, PackagePrice } from '@/hooks/usePackages';
+import { useCart } from '@/store/appStore';
 
 // ULTRA-OPTIMIZATION 1: Memoized package card component
 const PackageCard = memo(({ 
@@ -126,15 +125,14 @@ export function UltraOptimizedPackagesFlow() {
   // ULTRA-OPTIMIZATION 7: Memoized add to cart handler
   const handleAddToCart = useCallback((pkg: PackagePrice) => {
     addItem({
-      id: pkg.id,
+      id: pkg.id.toString(),
       name: pkg.packageDefinition.name,
       price: pkg.price,
       image: '/images/products/yoga-journal-1.jpg',
       sku: `PKG-${pkg.id}`,
       currency: pkg.currency.code,
       type: 'package',
-      sessions: pkg.packageDefinition.sessionsCount,
-      quantity: 1
+      sessions: pkg.packageDefinition.sessionsCount
     });
   }, [addItem]);
 

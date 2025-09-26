@@ -17,12 +17,12 @@ export interface ScheduleData {
   dayOfWeek: string;
   startTime: string;
   endTime: string;
-  capacity?: number;
-  isAvailable: boolean;
-  autoAvailable?: boolean;
-  sessionDurationId?: number;
-  createdAt?: Date;
-  updatedAt?: Date;
+  capacity?: number | null;
+  isAvailable: boolean | null;
+  autoAvailable?: boolean | null;
+  sessionDurationId?: number | null;
+  createdAt?: Date | null;
+  updatedAt?: Date | null;
 }
 
 export interface ScheduleApiResponse {
@@ -179,14 +179,18 @@ export class ScheduleApiService {
         where: whereClause,
         orderBy: { startTime: 'asc' },
         include: {
-          teacher: {
-            select: { id: true, name: true }
-          },
-          serviceType: {
-            select: { id: true, name: true }
-          },
-          venue: {
-            select: { id: true, name: true }
+          teacherSchedule: {
+            include: {
+              teacher: {
+                select: { id: true, name: true }
+              },
+              serviceType: {
+                select: { id: true, name: true }
+              },
+              venue: {
+                select: { id: true, name: true }
+              }
+            }
           }
         }
       });
@@ -197,10 +201,10 @@ export class ScheduleApiService {
         dayOfWeek: slot.startTime.toLocaleDateString('en-US', { weekday: 'long' }),
         startTime: slot.startTime.toTimeString().slice(0, 5),
         endTime: slot.endTime.toTimeString().slice(0, 5),
-        capacity: slot.capacity,
+        capacity: slot.maxBookings,
         isAvailable: slot.isAvailable,
-        autoAvailable: slot.autoAvailable,
-        sessionDurationId: slot.sessionDurationId,
+        autoAvailable: null, // Not available in TeacherScheduleSlot
+        sessionDurationId: null, // Not available in TeacherScheduleSlot
         createdAt: slot.createdAt,
         updatedAt: slot.updatedAt
       }));
@@ -280,12 +284,12 @@ export class ScheduleApiService {
           dayOfWeek: newSchedule.dayOfWeek,
           startTime: newSchedule.startTime,
           endTime: newSchedule.endTime,
-          capacity: newSchedule.capacity,
-          isAvailable: newSchedule.isAvailable,
-          autoAvailable: newSchedule.autoAvailable,
-          sessionDurationId: newSchedule.sessionDurationId,
-          createdAt: newSchedule.createdAt,
-          updatedAt: newSchedule.updatedAt
+          capacity: newSchedule.capacity ?? null,
+          isAvailable: newSchedule.isAvailable ?? null,
+          autoAvailable: newSchedule.autoAvailable ?? null,
+          sessionDurationId: newSchedule.sessionDurationId ?? null,
+          createdAt: newSchedule.createdAt ?? null,
+          updatedAt: newSchedule.updatedAt ?? null
         }],
         message: 'Schedule created successfully'
       };
@@ -320,12 +324,12 @@ export class ScheduleApiService {
           dayOfWeek: updatedSchedule.dayOfWeek,
           startTime: updatedSchedule.startTime,
           endTime: updatedSchedule.endTime,
-          capacity: updatedSchedule.capacity,
-          isAvailable: updatedSchedule.isAvailable,
-          autoAvailable: updatedSchedule.autoAvailable,
-          sessionDurationId: updatedSchedule.sessionDurationId,
-          createdAt: updatedSchedule.createdAt,
-          updatedAt: updatedSchedule.updatedAt
+          capacity: updatedSchedule.capacity ?? null,
+          isAvailable: updatedSchedule.isAvailable ?? null,
+          autoAvailable: updatedSchedule.autoAvailable ?? null,
+          sessionDurationId: updatedSchedule.sessionDurationId ?? null,
+          createdAt: updatedSchedule.createdAt ?? null,
+          updatedAt: updatedSchedule.updatedAt ?? null
         }],
         message: 'Schedule availability updated successfully'
       };

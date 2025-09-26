@@ -148,7 +148,9 @@ export async function GET(
     if (productDetailCache.size >= MAX_CACHE_SIZE) {
       // Remove oldest entries
       const oldestKey = productDetailCache.keys().next().value;
-      productDetailCache.delete(oldestKey);
+      if (oldestKey) {
+        productDetailCache.delete(oldestKey);
+      }
     }
     
     productDetailCache.set(cacheKey, { data: response, timestamp: now });

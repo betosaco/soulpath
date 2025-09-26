@@ -18,36 +18,39 @@
 
 :root,
 .teacher-theme {
-  /* Primary Colors - Green theme */
-  --unified-primary: #6ea058;
-  --unified-primary-hover: #5a8a47;
-  --unified-primary-light: #8bb570;
-  --unified-primary-dark: #4f7c41;
+  /* Primary Colors - Gunmetal palette */
+  /* gunmetal */
+  --unified-primary: #22333b;
+  --unified-primary-hover: #1b2930;
+  --unified-primary-light: #3a4a53;
+  --unified-primary-dark: #162025;
   --unified-primary-contrast: #ffffff;
   
-  /* Background Colors - Beige theme */
-  --unified-bg-primary: #f4eeed;
-  --unified-bg-secondary: #ede6e5;
-  --unified-bg-tertiary: #e0d6d4;
+  /* Background Colors - Almond theme */
+  /* almond */
+  --unified-bg-primary: #eae0d5;
+  --unified-bg-secondary: #e2d6c6;
+  --unified-bg-tertiary: #d6c8b5;
   --unified-bg-surface: #ffffff;
   --unified-bg-overlay: rgba(0, 0, 0, 0.5);
   
   /* Text Colors */
-  --unified-text-primary: #383838;
-  --unified-text-secondary: #666666;
-  --unified-text-tertiary: #888888;
+  /* black / gunmetal */
+  --unified-text-primary: #0a0908;
+  --unified-text-secondary: #22333b;
+  --unified-text-tertiary: #5e503f; /* walnut-brown as tertiary */
   --unified-text-inverse: #ffffff;
   
-  /* Accent Colors - Orange theme */
-  --unified-accent: #f4a556;
-  --unified-accent-hover: #e07c2f;
-  --unified-accent-light: #f5b369;
-  --unified-accent-dark: #bb5f25;
-  --unified-accent-contrast: #383838;
+  /* Accent Colors - Khaki / Walnut-brown */
+  --unified-accent: #c6ac8f; /* khaki */
+  --unified-accent-hover: #b2977c;
+  --unified-accent-light: #d8c5ad;
+  --unified-accent-dark: #5e503f; /* walnut-brown */
+  --unified-accent-contrast: #0a0908;
   
   /* Status Colors */
-  --unified-success: #6ea058;
-  --unified-warning: #f4a556;
+  --unified-success: #22333b;
+  --unified-warning: #c6ac8f;
   --unified-error: #dc2626;
   --unified-info: #3b82f6;
   

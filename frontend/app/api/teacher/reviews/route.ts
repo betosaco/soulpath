@@ -22,20 +22,22 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * limit;
 
     const [reviews, totalCount] = await withConnection(async () => {
-      const list = await prisma.review.findMany({
+      const list = await prisma.testimonial.findMany({
         where: { teacherId: teacher.id },
         select: {
           id: true,
           rating: true,
-          comment: true,
+          text: true,
           createdAt: true,
-          user: { select: { id: true, fullName: true, email: true } },
+          authorName: true,
+          authorTitle: true,
+          authorImage: true,
         },
         orderBy: { createdAt: 'desc' },
         skip: offset,
         take: limit,
       });
-      const count = await prisma.review.count({ where: { teacherId: teacher.id } });
+      const count = await prisma.testimonial.count({ where: { teacherId: teacher.id } });
       return [list, count];
     });
 

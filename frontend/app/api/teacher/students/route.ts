@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
       email: string | null;
       fullName: string | null;
       phone: string | null;
-      lastBookingAt: Date;
+      lastBookingAt: Date | null;
       bookingsCount: number;
       // aggregates
       completedCount: number;
@@ -86,7 +86,9 @@ export async function GET(request: NextRequest) {
         });
       } else {
         existing.bookingsCount += 1;
-        if (b.createdAt > existing.lastBookingAt) existing.lastBookingAt = b.createdAt;
+        if (b.createdAt && (!existing.lastBookingAt || b.createdAt > existing.lastBookingAt)) {
+          existing.lastBookingAt = b.createdAt;
+        }
         if (b.status === 'completed') existing.completedCount += 1;
         if (b.status === 'cancelled') existing.cancelledCount += 1;
         if (b.status === 'confirmed') existing.confirmedCount += 1;
@@ -111,7 +113,11 @@ export async function GET(request: NextRequest) {
           attendanceRate
         };
       })
-      .sort((a, b) => b.lastBookingAt.getTime() - a.lastBookingAt.getTime());
+      .sort((a, b) => {
+        const aTime = a.lastBookingAt ? a.lastBookingAt.getTime() : 0;
+        const bTime = b.lastBookingAt ? b.lastBookingAt.getTime() : 0;
+        return bTime - aTime;
+      });
 
     return NextResponse.json({ success: true, data: students });
   } catch (error) {

@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       class_date: new Date().toLocaleDateString('es-ES'),
       class_time: '08:15',
       class_type: 'Hatha Yoga',
-      instructor_name: 'Lucia Meza',
+      instructor_name: 'Test Instructor',
       class_duration: 60,
       venue_address: '123 Wellness Street, Yoga District, Lima',
       booking_reference: 'TEST-' + Math.random().toString(36).substr(2, 9).toUpperCase()

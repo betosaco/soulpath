@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     // Calculate stats
     let todayBookings = 0;
     let upcomingSessions = 0;
-    let totalStudents = new Set();
+    const totalStudents = new Set();
 
     for (const schedule of teacherSchedules) {
       for (const slot of schedule.teacherScheduleSlots) {

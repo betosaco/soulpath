@@ -165,8 +165,7 @@ export async function POST(request: NextRequest) {
             status: { not: 'cancelled' }
           },
           data: {
-            startTime: newStart,
-            endTime: newEnd
+            // Note: startTime and endTime are stored in TeacherScheduleSlot, not Booking
           }
         });
         console.log('🔔 Bookings updated successfully:', updatedBookings.count);
@@ -191,7 +190,7 @@ export async function POST(request: NextRequest) {
         email: booking.user.email,
         name: booking.user.fullName
       })),
-      serviceType: slot.teacherSchedule.serviceType.name,
+      serviceType: slot.teacherSchedule.serviceType?.name || 'Unknown',
       venue: slot.teacherSchedule.venue.name
     };
 

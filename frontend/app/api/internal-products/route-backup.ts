@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
           status: true,
           isFeatured: true,
           isPopular: true,
-          isInternal: true, // Include internal flag
+          isDigital: true, // Include digital flag
           seoTitle: true,
           seoDescription: true,
           slug: true,
@@ -185,7 +185,7 @@ export async function POST(request: NextRequest) {
         status: body.status || 'ACTIVE',
         isFeatured: body.isFeatured || false,
         isPopular: body.isPopular || false,
-        isInternal: true, // Mark as internal product
+        isDigital: true, // Mark as digital product
         seoTitle: body.seoTitle,
         seoDescription: body.seoDescription,
         slug: body.slug

@@ -12,6 +12,7 @@ interface Teacher {
   shortBio?: string;
   experience: number;
   avatarUrl?: string;
+  isActive?: boolean;
 }
 
 interface ServiceType {
@@ -247,7 +248,7 @@ export function SchedulePreview({
                         alt={slot.teacher.name}
                         width={24}
                         height={24}
-                        className={`rounded-full object-cover ${slot.teacher.name === 'Lucia Meza' ? 'grayscale' : ''}`}
+                        className={`rounded-full object-cover ${!slot.teacher.isActive ? 'grayscale' : ''}`}
                       />
                     ) : (
                       <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">

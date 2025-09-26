@@ -36,7 +36,7 @@ const testData = {
       selectedDate: "2025-01-15",
       selectedTime: "10:00",
       dayOfWeek: "Wednesday",
-      teacher: "Lucia Meza",
+      teacher: "Test Teacher",
       serviceType: "Hatha Yoga",
       venue: "MatMax Yoga Studio"
     },

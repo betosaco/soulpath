@@ -519,7 +519,7 @@ function WeeklyView({ dates, getSlotsForDate, formatDate, formatTime, isToday, o
                   return (
                     <div key={slot.id} className={`p-2 rounded-lg border text-xs relative group ${
                       slot.isAvailable && !isFullyBooked
-                        ? 'bg-green-50 border-green-200 text-green-800' 
+                        ? 'bg-[var(--unified-accent)]/15 border-[var(--unified-accent-dark)] text-[var(--unified-text-primary)]' 
                         : 'bg-red-50 border-red-200 text-red-800'
                     }`}>
                       <div className="font-medium">{formatTime(new Date(slot.originalStartTime ?? slot.startTime))}</div>
@@ -533,7 +533,7 @@ function WeeklyView({ dates, getSlotsForDate, formatDate, formatTime, isToday, o
                       </div>
                       {/* Available Spots Info */}
                       <div className="flex items-center gap-1 mt-1">
-                        <div className={`w-2 h-2 rounded-full ${slot.isLate ? 'bg-yellow-500' : (slot.isAvailable && !isFullyBooked ? 'bg-green-500' : 'bg-red-500')}`}></div>
+                        <div className={`w-2 h-2 rounded-full ${slot.isLate ? 'bg-yellow-500' : (slot.isAvailable && !isFullyBooked ? 'bg-[var(--unified-accent-dark)]' : 'bg-red-500')}`}></div>
                         <span className="text-xs">
                           {availableSpots} of {capacity} spots
                         </span>
@@ -556,7 +556,7 @@ function WeeklyView({ dates, getSlotsForDate, formatDate, formatTime, isToday, o
                                   onClick={() => onRevertLate(slot)}
                                   className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                                 >
-                                  <ClockIcon className="h-4 w-4 text-green-600" />
+                                  <ClockIcon className="h-4 w-4 text-[var(--unified-accent-dark)]" />
                                   Revert Late
                                 </button>
                               ) : (

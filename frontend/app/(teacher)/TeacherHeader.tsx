@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { BellIcon, UserIcon, CalendarIcon, ClockIcon } from 'lucide-react';
+import { BellIcon, UserIcon, CalendarIcon, ClockIcon, HomeIcon, UsersIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { teacherUI } from '@/lib/styles/teacher-ui';
 
@@ -100,6 +100,28 @@ export default function TeacherHeader({ user }: TeacherHeaderProps) {
 
         {/* Right side - Actions */}
         <div className={teacherUI.header.right}>
+          {/* Navigation buttons */}
+          <div className="flex items-center space-x-2 mr-4">
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-[var(--unified-border-light)] text-[var(--unified-text-secondary)] hover:bg-[var(--unified-bg-tertiary)] hover:text-[var(--unified-text-primary)]"
+              onClick={() => window.open('/', '_blank')}
+            >
+              <HomeIcon className="h-4 w-4 mr-2" />
+              Front Page
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-[var(--unified-border-light)] text-[var(--unified-text-secondary)] hover:bg-[var(--unified-bg-tertiary)] hover:text-[var(--unified-text-primary)]"
+              onClick={() => window.open('/account', '_blank')}
+            >
+              <UsersIcon className="h-4 w-4 mr-2" />
+              Student Dashboard
+            </Button>
+          </div>
+          
           <Button
             variant="outline"
             size="sm"

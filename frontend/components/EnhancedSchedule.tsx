@@ -25,6 +25,7 @@ interface Teacher {
   shortBio?: string;
   experience: number;
   avatarUrl?: string;
+  isActive?: boolean;
 }
 
 interface ServiceType {
@@ -704,7 +705,7 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
                                       alt={slot.teacher.name}
                                       width={40}
                                       height={40}
-                                      className={`rounded-full object-cover ${slot.teacher.name === 'Lucia Meza' ? 'grayscale' : ''}`}
+                                      className={`rounded-full object-cover ${!slot.teacher.isActive ? 'grayscale' : ''}`}
                                     />
                                   ) : (
                                     <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">

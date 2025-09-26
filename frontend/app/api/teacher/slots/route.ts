@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Forbidden', message: 'Admin role required' }, { status: 403 });
     }
 
-    const teacher = await withConnection(() => prisma.teacher.findFirst({ where: { email: user.email } }));
+    const teacher = await prisma.teacher.findFirst({ where: { email: user.email } });
     if (!teacher) {
       return NextResponse.json({ success: false, error: 'Forbidden', message: 'Teacher profile not found' }, { status: 403 });
     }
@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
     const scheduleEndTime = buildTimeOfDay(end);
 
     // Find or create a TeacherSchedule for this time window and day
-    const existingSchedule = await withConnection(() => prisma.teacherSchedule.findFirst({
+    const existingSchedule = await prisma.teacherSchedule.findFirst({
       where: {
         teacherId: teacher.id,
         venueId: Number(venueId),
@@ -151,9 +151,9 @@ export async function POST(request: NextRequest) {
         startTime: scheduleStartTime,
         endTime: scheduleEndTime,
       }
-    }));
+    });
 
-    const schedule = existingSchedule || await withConnection(() => prisma.teacherSchedule.create({
+    const schedule = existingSchedule || await prisma.teacherSchedule.create({
       data: {
         teacherId: teacher.id,
         venueId: Number(venueId),
@@ -164,10 +164,10 @@ export async function POST(request: NextRequest) {
         isAvailable: true,
         maxBookings: maxBookings ? Number(maxBookings) : 1,
       }
-    }));
+    });
 
     // Create the slot instance
-    const slot = await withConnection(() => prisma.teacherScheduleSlot.create({
+    const slot = await prisma.teacherScheduleSlot.create({
       data: {
         teacherScheduleId: schedule.id,
         startTime: start,
@@ -183,7 +183,7 @@ export async function POST(request: NextRequest) {
         maxBookings: true,
         bookedCount: true,
       }
-    }));
+    });
 
     return NextResponse.json({ success: true, data: slot });
   } catch (error) {
@@ -200,7 +200,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    const teacher = await withConnection(() => prisma.teacher.findFirst({ where: { email: user.email } }));
+    const teacher = await prisma.teacher.findFirst({ where: { email: user.email } });
     if (!teacher) {
       return NextResponse.json({ success: false, error: 'Forbidden', message: 'Teacher profile not found' }, { status: 403 });
     }
@@ -211,13 +211,19 @@ export async function PUT(request: NextRequest) {
     // Cancel by single slot
     if (slotId) {
       // Verify slot belongs to this teacher via its schedule
-    const slot = await withConnection(() => prisma.teacherScheduleSlot.findUnique({
+    const slot = await prisma.teacherScheduleSlot.findUnique({
         where: { id: Number(slotId) },
         select: { 
           id: true, 
           teacherSchedule: { 
             select: { 
               teacherId: true,
+              dayOfWeek: true,
+              startTime: true,
+              endTime: true,
+              venueId: true,
+              serviceTypeId: true,
+              maxBookings: true,
               serviceType: { select: { name: true } },
               venue: { select: { name: true } }
             } 
@@ -231,7 +237,7 @@ export async function PUT(request: NextRequest) {
             }
           }
         }
-    }));
+    });
 
     if (!slot || slot.teacherSchedule.teacherId !== teacher.id) {
         return NextResponse.json({ success: false, error: 'Not found or unauthorized' }, { status: 404 });
@@ -239,7 +245,7 @@ export async function PUT(request: NextRequest) {
 
       // Handle transfer to substitute teacher
       if (action === 'cancel' && transferToTeacherId) {
-        const result = await withConnection(() => prisma.$transaction(async (tx) => {
+        const result = await prisma.$transaction(async (tx) => {
           // Update the slot to be assigned to the substitute teacher
           const substituteTeacher = await tx.teacher.findUnique({
             where: { id: Number(transferToTeacherId) }
@@ -291,17 +297,17 @@ export async function PUT(request: NextRequest) {
           });
 
           return { 
-            message: `Class transferred to ${substituteTeacher.fullName}`,
-            substituteTeacher: substituteTeacher.fullName
+            message: `Class transferred to ${substituteTeacher.name}`,
+            substituteTeacher: substituteTeacher.name
           };
-        }));
+        });
 
         return NextResponse.json({ success: true, data: result });
       }
 
       // Handle regular cancellation
       if (action === 'cancel') {
-        const result = await withConnection(() => prisma.$transaction(async (tx) => {
+        const result = await prisma.$transaction(async (tx) => {
           // Cancel all bookings for this slot
           const cancelledBookings = await tx.booking.updateMany({
             where: { 
@@ -332,7 +338,7 @@ export async function PUT(request: NextRequest) {
               if (booking.userPackageId) {
                 await tx.userPackage.update({
                   where: { id: booking.userPackageId },
-                  data: { sessionsRemaining: { increment: 1 } }
+                  data: { sessionsUsed: { decrement: 1 } }
                 });
               }
             }
@@ -342,16 +348,16 @@ export async function PUT(request: NextRequest) {
             message: 'Class cancelled successfully',
             cancelledBookings: cancelledBookings.count
           };
-        }));
+        });
 
         return NextResponse.json({ success: true, data: result });
       }
 
       // Legacy: Simple cancellation (mark unavailable)
-      await withConnection(() => prisma.teacherScheduleSlot.update({
+      await prisma.teacherScheduleSlot.update({
         where: { id: Number(slotId) },
         data: { isAvailable: false }
-      }));
+      });
 
       return NextResponse.json({ success: true });
     }
@@ -362,14 +368,14 @@ export async function PUT(request: NextRequest) {
       const dayEnd = new Date(day + 'T23:59:59.999Z');
 
       // Find all slots for this teacher on that day
-      const slots = await withConnection(() => prisma.teacherScheduleSlot.findMany({
+      const slots = await prisma.teacherScheduleSlot.findMany({
         where: {
           startTime: { gte: dayStart, lte: dayEnd },
           isAvailable: true,
           teacherSchedule: { teacherId: teacher.id }
         },
         select: { id: true }
-      }));
+      });
 
       if (slots.length === 0) {
         return NextResponse.json({ success: true, message: 'No published slots to cancel for that day', data: { cancelled: 0 } });

@@ -18,7 +18,7 @@ const redisConfig = {
   maxRetriesPerRequest: parseInt(process.env.REDIS_MAX_RETRIES || '3'),
   lazyConnect: true,
   enableReadyCheck: false,
-  maxLoadingTimeout: parseInt(process.env.REDIS_LOADING_TIMEOUT || '10000'),
+  maxLoadingTimeout: parseInt(process.env.REDIS_LOADING_TIMEOUT || '5000'),
   
   // Connection pool settings
   family: 4,
@@ -30,10 +30,6 @@ const redisConfig = {
       rejectUnauthorized: false
     }
   }),
-  
-  // Vercel-specific optimizations
-  enableReadyCheck: false,
-  maxLoadingTimeout: 5000,
 };
 
 const redis = new Redis(redisConfig);
@@ -43,11 +39,11 @@ redis.on('error', (error) => {
   console.warn('⚠️ Redis connection error (non-critical):', error.message);
   console.warn('⚠️ Error details:', {
     message: error.message,
-    code: error.code,
-    errno: error.errno,
-    syscall: error.syscall,
-    address: error.address,
-    port: error.port
+    ...(error as any).code && { code: (error as any).code },
+    ...(error as any).errno && { errno: (error as any).errno },
+    ...(error as any).syscall && { syscall: (error as any).syscall },
+    ...(error as any).address && { address: (error as any).address },
+    ...(error as any).port && { port: (error as any).port }
   });
   // Don't throw the error, just log it as Redis is optional
 });

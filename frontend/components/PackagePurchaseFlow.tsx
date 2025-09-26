@@ -337,7 +337,7 @@ export function PackagePurchaseFlow() {
                           {pkg.currency.symbol}{pkg.price}
                         </div>
                         <div className="text-xs text-gray-300">
-                          {pkg.currency.symbol}{pkg.pricePerClass?.toFixed(2) || (pkg.price / (pkg.packageDefinition.sessionsCount || 1)).toFixed(2)} per class
+                          {pkg.currency.symbol}{(pkg.price / (pkg.packageDefinition.sessionsCount || 1)).toFixed(2)} per class
                         </div>
                         <div className="text-sm text-gray-400">{pkg.currency.code}</div>
                       </div>

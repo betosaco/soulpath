@@ -38,7 +38,8 @@ const minimalScheduleSelect = {
           bio: true,
           shortBio: true,
           experience: true,
-          avatarUrl: true
+          avatarUrl: true,
+          isActive: true
         }
       },
       serviceType: {
@@ -210,7 +211,9 @@ export async function GET(request: NextRequest) {
     if (scheduleSlotsCache.size >= MAX_CACHE_SIZE) {
       // Remove oldest entries
       const oldestKey = scheduleSlotsCache.keys().next().value;
-      scheduleSlotsCache.delete(oldestKey);
+      if (oldestKey) {
+        scheduleSlotsCache.delete(oldestKey);
+      }
     }
     
     scheduleSlotsCache.set(cacheKey, { data: response, timestamp: now });

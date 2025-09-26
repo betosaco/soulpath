@@ -52,6 +52,12 @@ export default function TeacherDashboardPage() {
   const [loading, setLoading] = React.useState(true);
   const [slots, setSlots] = React.useState<Slot[]>([]);
   const [bookings, setBookings] = React.useState<Booking[]>([]);
+  const [stats, setStats] = React.useState<{
+    todayBookings: number;
+    upcomingSessions: number;
+    totalStudents: number;
+    rating: number;
+  } | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [activeTab, setActiveTab] = React.useState<'slots' | 'bookings'>('slots');
 
@@ -61,14 +67,16 @@ export default function TeacherDashboardPage() {
     try {
       console.log('🔄 Loading teacher dashboard data...');
       
-      const [slotsRes, bookingsRes] = await Promise.all([
+      const [slotsRes, bookingsRes, statsRes] = await Promise.all([
         fetch('/api/teacher/slots?days=30', { cache: 'no-store' }),
-        fetch('/api/teacher/bookings?status=upcoming&limit=50', { cache: 'no-store' })
+        fetch('/api/teacher/bookings?status=upcoming&limit=50', { cache: 'no-store' }),
+        fetch('/api/teacher/stats', { cache: 'no-store' })
       ]);
 
       console.log('📊 API responses:', { 
         slotsStatus: slotsRes.status, 
-        bookingsStatus: bookingsRes.status 
+        bookingsStatus: bookingsRes.status,
+        statsStatus: statsRes.status
       });
 
       if (!slotsRes.ok) {
@@ -81,19 +89,27 @@ export default function TeacherDashboardPage() {
         console.error('❌ Bookings API error:', bookingsError);
         throw new Error(`Failed to load bookings: ${bookingsRes.status} ${bookingsError}`);
       }
+      if (!statsRes.ok) {
+        const statsError = await statsRes.text();
+        console.error('❌ Stats API error:', statsError);
+        throw new Error(`Failed to load stats: ${statsRes.status} ${statsError}`);
+      }
 
       const slotsJson = await slotsRes.json();
       const bookingsJson = await bookingsRes.json();
+      const statsJson = await statsRes.json();
       
       console.log('📊 Loaded data:', { 
         slotsCount: slotsJson.data?.length || 0, 
         bookingsCount: bookingsJson.data?.length || 0,
+        statsData: statsJson.data,
         slotsData: slotsJson.data,
         bookingsData: bookingsJson.data
       });
       
       setSlots(slotsJson.data || []);
       setBookings(bookingsJson.data || []);
+      setStats(statsJson.data || null);
     } catch (e) {
       console.error('❌ Load data error:', e);
       setError(e instanceof Error ? e.message : 'Error loading data');
@@ -143,29 +159,27 @@ export default function TeacherDashboardPage() {
     return d.toLocaleString();
   };
 
-  // Calculate stats
-  const today = new Date().toDateString();
-  const todayBookings = bookings.filter(b => 
-    b.teacherScheduleSlot?.startTime && 
-    new Date(b.teacherScheduleSlot.startTime).toDateString() === today
-  ).length;
-
-  const upcomingBookings = bookings.length;
+  // Use stats from API or fallback to calculated values
+  const todayBookings = stats?.todayBookings || 0;
+  const upcomingBookings = stats?.upcomingSessions || bookings.length;
   const availableSlots = slots.filter(s => s.isAvailable).length;
 
   console.log('📊 Teacher Dashboard state:', {
     loading,
     slotsCount: slots.length,
     bookingsCount: bookings.length,
+    stats,
     error,
     activeTab,
-    availableSlots
+    availableSlots,
+    todayBookings,
+    upcomingBookings
   });
 
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className={teacherUI.card.container + ' p-6'}>
           <div className="flex items-center">
             <div className="p-2 bg-[var(--color-primary-500)] rounded-lg">
@@ -198,6 +212,18 @@ export default function TeacherDashboardPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-[var(--unified-text-secondary)]">Available Slots</p>
               <p className="text-2xl font-bold text-[var(--unified-text-primary)]">{availableSlots}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className={teacherUI.card.container + ' p-6'}>
+          <div className="flex items-center">
+            <div className="p-2 bg-[var(--color-primary-500)] rounded-lg">
+              <TrendingUpIcon className="h-6 w-6 text-white" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-[var(--unified-text-secondary)]">Total Students</p>
+              <p className="text-2xl font-bold text-[var(--unified-text-primary)]">{stats?.totalStudents || 0}</p>
             </div>
           </div>
         </div>
@@ -277,23 +303,11 @@ export default function TeacherDashboardPage() {
                     const isFullyBooked = availableSpots <= 0;
                     const isAvailable = slot.isAvailable && !isFullyBooked;
                     
-                    // Debug logging
-                    console.log('Slot data:', {
-                      id: slot.id,
-                      capacity,
-                      bookedCount,
-                      availableSpots,
-                      isAvailable,
-                      isFullyBooked,
-                      maxBookings: slot.maxBookings,
-                      bookedCountRaw: slot.bookedCount
-                    });
-                    
                     return (
                       <div key={slot.id} className={`rounded-lg p-4 border transition-colors ${
-                        isAvailable 
-                          ? 'bg-green-50 border-green-200 hover:bg-green-100' 
-                          : 'bg-red-50 border-red-200 hover:bg-red-100'
+                       isAvailable 
+                           ? 'bg-[var(--unified-accent)]/15 border-[var(--unified-accent-dark)] hover:bg-[var(--unified-accent)]/25' 
+                           : 'bg-red-50 border-red-200 hover:bg-red-100'
                       }`}>
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
@@ -302,9 +316,9 @@ export default function TeacherDashboardPage() {
                                 {formatDate(slot.startTime)} - {formatDate(slot.endTime)}
                               </p>
                               <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                isAvailable 
-                                  ? 'bg-green-100 text-green-800' 
-                                  : 'bg-red-100 text-red-800'
+                               isAvailable 
+                                   ? 'bg-[var(--unified-accent)]/30 text-[var(--unified-text-primary)]' 
+                                   : 'bg-red-100 text-red-800'
                               }`}>
                                 {isAvailable ? 'Available' : 'Fully Booked'}
                               </span>
@@ -315,7 +329,7 @@ export default function TeacherDashboardPage() {
                             {/* Available Spots Info - matching EnhancedSchedule format */}
                             <div className="flex items-center gap-2 text-sm">
                               <div className="flex items-center gap-1">
-                                <div className={`w-2 h-2 rounded-full ${slot.isLate ? 'bg-yellow-500' : 'bg-green-500'}`}></div>
+                                 <div className={`w-2 h-2 rounded-full ${slot.isLate ? 'bg-yellow-500' : 'bg-[var(--unified-accent-dark)]'}`}></div>
                                 <span className="text-[var(--unified-text-secondary)]">
                                   {availableSpots} of {capacity} spots available
                                 </span>
@@ -327,10 +341,6 @@ export default function TeacherDashboardPage() {
                               )}
                             </div>
                             
-                            {/* Debug info - temporary */}
-                            <div className="text-xs text-gray-400 mt-1">
-                              Debug: maxBookings={slot.maxBookings}, bookedCount={slot.bookedCount}, isAvailable={slot.isAvailable}
-                            </div>
                             {slot.isLate && (
                               <div className="mt-2 text-xs text-red-600 font-medium">
                                 ⚠️ Running Late ({slot.lateMinutes} min)

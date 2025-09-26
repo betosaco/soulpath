@@ -230,7 +230,7 @@ export async function POST(request: NextRequest) {
           status: body.status || 'ACTIVE',
           isFeatured: body.isFeatured || false,
           isPopular: body.isPopular || false,
-          isInternal: true, // Internal products are always internal
+          isDigital: true, // Internal products are digital
           slug: body.slug,
           seoTitle: body.seoTitle,
           seoDescription: body.seoDescription

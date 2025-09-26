@@ -133,7 +133,7 @@ export default function TeacherEarningsPage() {
                                   </span>
                                 )}
                                 {typeof item.pass?.pricePerClass === 'number' && (
-                                  <span className="px-2 py-1 rounded-full border bg-green-50 text-green-700 border-green-200">
+                            <span className="px-2 py-1 rounded-full border bg-[var(--unified-accent)]/30 text-[var(--unified-text-primary)] border-[var(--unified-accent-dark)]">
                                     Price per class: {item.symbol}{item.pass.pricePerClass.toFixed(2)}
                                   </span>
                                 )}
