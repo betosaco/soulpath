@@ -1439,7 +1439,7 @@ export function ScheduleBookingFlow({
               {packagesLoading ? (
                 <div className="text-center py-12">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                  <p className="text-gray-600 text-lg">Loading packages...</p>
+                  <p className="text-[var(--color-text-secondary)] text-lg">Loading packages...</p>
                 </div>
               ) : packagesError ? (
                 <div className="text-center py-12">
@@ -1575,7 +1575,8 @@ export function ScheduleBookingFlow({
                                   onStepChange?.(0);
                                 }
                               }}
-                              className="w-full bg-[#6ea058] hover:bg-[#5a8a47] text-white"
+                              variant="success"
+                              className="w-full"
                             >
                               <Plus className="w-4 h-4 mr-2" />
                               Add to Cart

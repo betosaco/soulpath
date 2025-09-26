@@ -95,7 +95,7 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
     console.warn('⚠️ PackageSelectionStep: useBookingFlow failed:', error);
     return (
       <div className="text-center py-8">
-        <p className="text-gray-600">Loading booking flow...</p>
+        <p className="text-[var(--color-text-secondary)]">Loading booking flow...</p>
       </div>
     );
   }
@@ -105,7 +105,7 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
     console.warn('⚠️ PackageSelectionStep: useBookingFlow returned undefined');
     return (
       <div className="text-center py-8">
-        <p className="text-gray-600">Loading booking flow...</p>
+        <p className="text-[var(--color-text-secondary)]">Loading booking flow...</p>
       </div>
     );
   }
@@ -128,7 +128,7 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
     console.warn('⚠️ PackageSelectionStep: useCart failed:', error);
     return (
       <div className="text-center py-8">
-        <p className="text-gray-600">Loading cart...</p>
+        <p className="text-[var(--color-text-secondary)]">Loading cart...</p>
       </div>
     );
   }
@@ -138,7 +138,7 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
     console.warn('⚠️ PackageSelectionStep: useCart returned undefined');
     return (
       <div className="text-center py-8">
-        <p className="text-gray-600">Loading cart...</p>
+        <p className="text-[var(--color-text-secondary)]">Loading cart...</p>
       </div>
     );
   }
@@ -163,7 +163,7 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
     console.warn('⚠️ PackageSelectionStep: useCartUI failed:', error);
     return (
       <div className="text-center py-8">
-        <p className="text-gray-600">Loading cart UI...</p>
+        <p className="text-[var(--color-text-secondary)]">Loading cart UI...</p>
       </div>
     );
   }
@@ -173,7 +173,7 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
     console.warn('⚠️ PackageSelectionStep: useCartUI returned undefined');
     return (
       <div className="text-center py-8">
-        <p className="text-gray-600">Loading cart UI...</p>
+        <p className="text-[var(--color-text-secondary)]">Loading cart UI...</p>
       </div>
     );
   }
@@ -376,12 +376,37 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
       setPreSelectedSchedules([]); // Clear schedules (now in package)
       updateLockedTimeSlots(); // Update locked slots
 
-      // OPEN CART: After first booking
+      // Keep cart open across navigation
+      if (typeof window !== 'undefined') {
+        try { localStorage.setItem('isCartOpen', 'true'); } catch {}
+      }
+
+      // Determine max sessions for this package
+      const maxSessions = Number(pkg.packageDefinition?.sessionsCount || 1);
+      const scheduledNow = preSelectedSchedules.length;
+
+      // If we've reached the session cap (e.g., 1 for MATPASS), navigate directly
+      if (scheduledNow >= (Number.isFinite(maxSessions) && maxSessions > 0 ? maxSessions : 1)) {
+        // Ensure cart remains open across navigation
+        try { localStorage.setItem('isCartOpen', 'true'); } catch {}
+        // Use router push to avoid full reload and preserve state
+        try {
+          // Avoid duplicate navigation if already on target
+          const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+          if (!currentPath.startsWith('/booking/customer-info')) {
+            (window as any).next?.router?.push?.('/booking/customer-info?isDirectCheckout=true') || (window.location.href = '/booking/customer-info?isDirectCheckout=true');
+          }
+        } catch (err) {
+          console.warn('⚠️ Navigation fallback to window.location', err);
+          window.location.href = '/booking/customer-info?isDirectCheckout=true';
+        }
+        return;
+      }
+
+      // Otherwise, show cart and continue normal flow
       setTimeout(() => {
         openCart();
-      }, 500);
-
-      // Navigate to customer info (skip schedule step)
+      }, 300);
       goToNextStep();
     } else {
       // SCENARIO B: Package-first flow - just add to cart, no automatic redirect
@@ -440,30 +465,30 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
 
     return (
       <div className="mt-8">
-        <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl p-6 shadow-sm">
+        <div className="bg-gradient-to-r from-[var(--color-status-success)]/10 to-[var(--color-primary-500)]/10 border border-[var(--color-status-success)]/30 rounded-xl p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex items-center justify-center w-10 h-10 bg-green-100 rounded-full">
-              <Calendar className="h-5 w-5 text-green-600" />
+            <div className="flex items-center justify-center w-10 h-10 bg-[var(--color-status-success)]/20 rounded-full">
+              <Calendar className="h-5 w-5 text-[var(--color-status-success)]" />
             </div>
             <div>
-              <h3 className="text-xl font-semibold text-gray-900">
+              <h3 className="text-xl font-semibold text-[var(--color-text-primary)]">
                 Your Selected Schedule
               </h3>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-[var(--color-text-secondary)]">
                 You've selected 1 time slot. Now choose a package that matches your needs.
               </p>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+          <div className="bg-[var(--color-surface-primary)] rounded-lg p-4 border border-[var(--color-border-500)] shadow-sm">
             {preSelectedSchedules.map((schedule, index) => (
               <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
+                  <div className="flex items-center justify-center w-8 h-8 bg-[var(--color-status-success)]/20 rounded-full">
+                    <CheckCircle className="h-4 w-4 text-[var(--color-status-success)]" />
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">
+                    <p className="font-medium text-[var(--color-text-primary)]">
                       {new Date(schedule.selectedDate).toLocaleDateString('en-US', { 
                         weekday: 'long', 
                         year: 'numeric', 
@@ -471,19 +496,19 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
                         day: 'numeric' 
                       })}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-[var(--color-text-secondary)]">
                       {schedule.selectedTime} - {schedule.serviceType}
                     </p>
                     {schedule.teacher && (
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-[var(--color-text-tertiary)]">
                         with {schedule.teacher}
                       </p>
                     )}
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-medium text-green-600">Selected</p>
-                  <p className="text-xs text-gray-500">Ready to book</p>
+                  <p className="text-sm font-medium text-[var(--color-status-success)]">Selected</p>
+                  <p className="text-xs text-[var(--color-text-tertiary)]">Ready to book</p>
                 </div>
               </div>
             ))}
@@ -512,13 +537,13 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
         <div className="space-y-6">
           {/* Minimal Loading Header */}
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Available Packages</h2>
-            <p className="text-gray-600">Loading packages...</p>
+            <h2 className="text-2xl font-bold text-[var(--color-text-primary)] mb-2">Available Packages</h2>
+            <p className="text-[var(--color-text-secondary)]">Loading packages...</p>
           </div>
           
           {/* Subtle Loading Animation */}
           <div className="flex justify-center py-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-green-200 border-t-green-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-[var(--color-border-200)] border-t-[var(--color-primary-500)]"></div>
           </div>
         </div>
       );
@@ -528,11 +553,11 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
     if (!packagesLoading && packages && Array.isArray(packages) && packages.length === 0) {
       return (
         <div className="text-center py-12">
-          <div className="text-gray-400 mb-4">
+          <div className="text-[var(--color-text-tertiary)] mb-4">
             <Package className="h-16 w-16 mx-auto" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No Packages Available</h3>
-          <p className="text-gray-600">We're currently updating our package offerings. Please check back later.</p>
+          <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">No Packages Available</h3>
+          <p className="text-[var(--color-text-secondary)]">We're currently updating our package offerings. Please check back later.</p>
         </div>
       );
     }
@@ -542,21 +567,21 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
         {/* Packages Header */}
         <div className="text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <h2 className="text-2xl font-bold text-gray-900">Available Packages</h2>
+            <h2 className="text-2xl font-bold text-[var(--color-text-primary)]">Available Packages</h2>
             {packagesLoading && hasLoadedOnce && (
-              <div className="animate-spin rounded-full h-5 w-5 border-2 border-green-200 border-t-green-600"></div>
+              <div className="animate-spin rounded-full h-5 w-5 border-2 border-[var(--color-border-200)] border-t-[var(--color-primary-500)]"></div>
             )}
           </div>
-          <p className="text-gray-600">Choose the perfect package for your yoga journey</p>
+          <p className="text-[var(--color-text-secondary)]">Choose the perfect package for your yoga journey</p>
         </div>
         
         {/* Packages Grid with Smooth Animations */}
         <div className="relative">
           {packagesLoading && hasLoadedOnce && (
-            <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-10 rounded-lg flex items-center justify-center">
+            <div className="absolute inset-0 bg-[var(--color-background-primary)]/50 backdrop-blur-sm z-10 rounded-lg flex items-center justify-center">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-2 border-green-200 border-t-green-600 mx-auto mb-2"></div>
-                <p className="text-sm text-gray-600">Refreshing packages...</p>
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-[var(--color-border-200)] border-t-[var(--color-primary-500)] mx-auto mb-2"></div>
+                <p className="text-sm text-[var(--color-text-secondary)]">Refreshing packages...</p>
               </div>
             </div>
           )}
@@ -578,27 +603,28 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
                 />
               </div>
               <CardHeader>
-                <CardTitle className="unified-card__title">{pkg.packageDefinition.name}</CardTitle>
+                <CardTitle as="h2" className="unified-card__title">{pkg.packageDefinition.name}</CardTitle>
                 <p className="unified-card__subtitle">{pkg.packageDefinition.description}</p>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex flex-col">
-                      <span className="text-2xl font-bold text-green-600">
+                      <span className="text-2xl font-bold text-[var(--color-accent-500)]">
                         S/ {pkg.price.toFixed(2)}
                       </span>
-                      <span className="text-xs text-gray-600">
+                      <span className="text-xs text-[var(--color-text-secondary)]">
                         S/ {pkg.pricePerClass?.toFixed(2) || (pkg.price / (pkg.packageDefinition.sessionsCount || 1)).toFixed(2)} per class
                       </span>
                     </div>
-                    <span className="text-lg font-semibold text-gray-700">
+                    <span className="text-lg font-semibold text-[var(--color-text-primary)]">
                       {pkg.packageDefinition.sessionsCount || 1} sessions
                     </span>
                   </div>
                   <Button
                     onClick={() => handleAddPackage(pkg)}
-                    className="w-full btn-primary"
+                    variant="success"
+                    className="w-full"
                   >
                     <Package className="w-4 h-4 mr-2" />
                     Add to Cart

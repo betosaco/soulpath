@@ -11,6 +11,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "unified-button--primary",
+        success: "unified-button--success",
         destructive: "unified-button--danger",
         outline: "unified-button--outline",
         secondary: "unified-button--secondary",

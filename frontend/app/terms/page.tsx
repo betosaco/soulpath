@@ -279,17 +279,17 @@ export default function TermsPage() {
 
   return (
     <AppShell>
-      <div className="min-h-screen bg-gray-50 py-12 mobile-container mobile-scrollable">
+      <div className="min-h-screen bg-[var(--color-surface-primary)] py-12 mobile-container mobile-scrollable">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Language Toggle */}
           <div className="mb-8">
-            <div className="flex space-x-1 bg-gray-200 rounded-lg p-1 w-fit">
+            <div className="flex space-x-1 bg-muted rounded-lg p-1 w-fit">
               <button
                 onClick={() => setActiveTab('es')}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   activeTab === 'es'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-card text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 Español
@@ -298,8 +298,8 @@ export default function TermsPage() {
                 onClick={() => setActiveTab('en')}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   activeTab === 'en'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-card text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 English
@@ -308,12 +308,12 @@ export default function TermsPage() {
           </div>
 
           {/* Terms Content */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+          <div className="bg-card rounded-lg shadow-sm border border-border p-8">
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-3xl font-bold text-foreground mb-2">
                 {currentContent.title}
               </h1>
-              <p className="text-gray-600 text-sm">
+              <p className="text-muted-foreground text-sm">
                 {currentContent.lastUpdated}
               </p>
             </div>
@@ -321,17 +321,17 @@ export default function TermsPage() {
             <div className="space-y-8">
               {currentContent.sections.map((section, index) => (
                 <div key={index} className="space-y-4">
-                  <h2 className="text-xl font-semibold text-gray-900">
+                  <h2 className="text-xl font-semibold text-foreground">
                     {section.title}
                   </h2>
                   {section.subtitle && (
-                    <h3 className="text-lg font-medium text-gray-800">
+                    <h3 className="text-lg font-medium text-foreground">
                       {section.subtitle}
                     </h3>
                   )}
                   <ul className="space-y-2">
                     {section.content.map((item, itemIndex) => (
-                      <li key={itemIndex} className="text-gray-700 leading-relaxed">
+                      <li key={itemIndex} className="text-foreground leading-relaxed">
                         {item}
                       </li>
                     ))}

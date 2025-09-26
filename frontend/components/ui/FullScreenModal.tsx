@@ -85,7 +85,8 @@ export function FullScreenModal({
   const contentClasses = cn(
     'unified-modal unified-modal--fullscreen',
     'flex-1 flex flex-col',
-    'overflow-hidden'
+    'overflow-hidden',
+    'bg-[var(--color-surface-primary)] border border-[var(--color-border-500)]'
   );
 
   if (!isOpen) return null;
@@ -95,10 +96,10 @@ export function FullScreenModal({
       <div className={contentClasses}>
         {/* Header */}
         {(title || headerContent || showCloseButton) && (
-          <div className="fullscreen-modal-header flex items-center justify-between p-6 border-b border-gray-600 bg-gray-800">
+          <div className="fullscreen-modal-header flex items-center justify-between p-6 border-b" style={{ borderColor: 'var(--color-border-500)', background: 'var(--color-surface-secondary)', color: 'var(--color-text-primary)' }}>
             <div className="flex items-center space-x-4">
               {title && (
-                <h2 className="text-2xl font-bold text-white">
+                <h2 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
                   {title}
                 </h2>
               )}
@@ -114,7 +115,8 @@ export function FullScreenModal({
                 onClick={onClose}
                 variant="ghost"
                 size="sm"
-                className="text-gray-400 hover:text-white hover:bg-gray-700"
+                className="hover:opacity-90"
+                style={{ color: 'var(--color-text-secondary)' }}
               >
                 <X size={20} />
               </BaseButton>
@@ -129,7 +131,7 @@ export function FullScreenModal({
 
         {/* Footer */}
         {footerContent && (
-          <div className="fullscreen-modal-footer p-6 border-t border-gray-600 bg-gray-800">
+          <div className="fullscreen-modal-footer p-6 border-t" style={{ borderColor: 'var(--color-border-500)', background: 'var(--color-surface-secondary)' }}>
             {footerContent}
           </div>
         )}

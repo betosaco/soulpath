@@ -24,15 +24,15 @@ export function SessionSection({ t, scrollToSection }: SessionSectionProps) {
             transition={{ duration: 0.8 }}
             className="order-2 md:order-1"
           >
-            <h2 className="text-2xl xs:text-3xl sm:text-4xl md:text-3xl lg:text-4xl xl:text-5xl font-heading text-[#EAEAEA] mb-4 sm:mb-6 leading-tight">
+            <h2 className="text-2xl xs:text-3xl sm:text-4xl md:text-3xl lg:text-4xl xl:text-5xl font-heading mb-4 sm:mb-6 leading-tight" style={{ color: 'var(--color-text-primary)' }}>
               {typeof t.session === 'object' && t.session?.title || 'Book Your Session'}
             </h2>
 
-            <div className="text-3xl xs:text-4xl sm:text-5xl md:text-3xl lg:text-4xl font-heading text-[#FFD700] mb-4 sm:mb-6 cosmic-glow">
+            <div className="text-3xl xs:text-4xl sm:text-5xl md:text-3xl lg:text-4xl font-heading mb-4 sm:mb-6 cosmic-glow" style={{ color: 'var(--color-primary-500)' }}>
               {typeof t.session === 'object' && t.session?.price || '$150'}
             </div>
 
-            <p className="text-sm sm:text-base md:text-sm lg:text-base text-[#EAEAEA]/80 leading-relaxed mb-6 sm:mb-8 max-w-2xl">
+            <p className="text-sm sm:text-base md:text-sm lg:text-base leading-relaxed mb-6 sm:mb-8 max-w-2xl" style={{ color: 'var(--color-text-secondary)' }}>
               {typeof t.session === 'object' && t.session?.description || 'Ready to begin your spiritual journey?'}
             </p>
 
@@ -47,10 +47,10 @@ export function SessionSection({ t, scrollToSection }: SessionSectionProps) {
                     transition={{ duration: 0.5, delay: index * 0.1 }}
                     className="flex items-start space-x-3 sm:space-x-4"
                   >
-                    <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 bg-[#FFD700]/10 rounded-full flex items-center justify-center border border-[#FFD700]/20">
-                      <Icon size={16} className="sm:w-5 sm:h-5 text-[#FFD700]" />
+                    <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center" style={{ background: 'color-mix(in srgb, var(--color-primary-500) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--color-primary-500) 20%, transparent)' }}>
+                      <Icon size={16} className="sm:w-5 sm:h-5" style={{ color: 'var(--color-primary-500)' }} />
                     </div>
-                    <span className="text-sm sm:text-base text-[#EAEAEA] leading-relaxed pt-1 sm:pt-1.5">{item}</span>
+                    <span className="text-sm sm:text-base leading-relaxed pt-1 sm:pt-1.5" style={{ color: 'var(--color-text-primary)' }}>{item}</span>
                   </motion.div>
                 );
               })}
@@ -63,7 +63,8 @@ export function SessionSection({ t, scrollToSection }: SessionSectionProps) {
             >
               <Button
                 onClick={() => scrollToSection('apply')}
-                className="bg-[#FFD700] text-[#0A0A23] hover:bg-[#FFD700]/90 px-8 sm:px-10 py-3 sm:py-4 text-base sm:text-lg font-medium rounded-lg shadow-lg shadow-[#FFD700]/20 cosmic-glow w-full sm:w-auto touch-manipulation"
+                className="px-8 sm:px-10 py-3 sm:py-4 text-base sm:text-lg font-medium rounded-lg shadow-lg cosmic-glow w-full sm:w-auto touch-manipulation"
+                style={{ backgroundColor: 'var(--color-primary-500)', color: 'var(--primary-foreground)' }}
               >
                 {typeof t.session === 'object' && t.session?.cta || 'Get Started'}
               </Button>
@@ -76,7 +77,7 @@ export function SessionSection({ t, scrollToSection }: SessionSectionProps) {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="relative order-1 md:order-2"
           >
-            <div className="bg-gradient-to-br from-[#191970]/30 to-[#0A0A23]/30 p-3 sm:p-6 md:p-4 lg:p-8 rounded-xl sm:rounded-2xl backdrop-blur-sm border border-[#C0C0C0]/10 relative overflow-hidden">
+            <div className="p-3 sm:p-6 md:p-4 lg:p-8 rounded-xl sm:rounded-2xl backdrop-blur-sm relative overflow-hidden" style={{ background: 'color-mix(in srgb, var(--color-text-primary) 12%, transparent)', border: '1px solid color-mix(in srgb, var(--color-text-primary) 15%, transparent)' }}>
               {/* Background cosmic elements */}
               <div className="absolute inset-0 opacity-5">
                 <motion.div
@@ -108,10 +109,10 @@ export function SessionSection({ t, scrollToSection }: SessionSectionProps) {
                 transition={{ duration: 0.8, delay: 1.2 }}
                 className="text-center mt-3 sm:mt-6"
               >
-                <p className="text-[#FFD700] font-heading text-sm sm:text-base lg:text-lg">
+                <p className="font-heading text-sm sm:text-base lg:text-lg" style={{ color: 'var(--color-accent-500)' }}>
                   Your Wellness Journey
                 </p>
-                <p className="text-[#EAEAEA]/60 text-xs sm:text-sm mt-1 sm:mt-2">
+                <p className="text-xs sm:text-sm mt-1 sm:mt-2" style={{ color: 'color-mix(in srgb, var(--color-text-primary) 70%, transparent)' }}>
                   Personalized wellness analysis
                 </p>
               </motion.div>

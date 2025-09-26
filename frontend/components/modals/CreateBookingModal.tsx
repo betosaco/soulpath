@@ -265,8 +265,8 @@ const CreateBookingModal: React.FC<CreateBookingModalProps> = ({
     >
       <BaseModal.Header icon={<Calendar className="w-5 h-5" />}>
         <div className="flex items-center gap-2">
-          <Calendar className={`w-5 h-5 text-[#007BFF]`} />
-          <h3 className={`text-[1.125rem] font-[500] text-[#1F2937]`}>
+          <Calendar className={`w-5 h-5`} style={{ color: 'var(--color-accent-500)' }} />
+          <h3 className={`text-[1.125rem] font-[500]`} style={{ color: 'var(--color-text-primary)' }}>
             Create New Booking
           </h3>
         </div>
@@ -278,19 +278,19 @@ const CreateBookingModal: React.FC<CreateBookingModalProps> = ({
           {step === 1 && (
             <div className="space-y-[0.5rem]">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-[#E0F2FE] text-[#007BFF] rounded-full flex items-center justify-center text-[0.75rem] font-[500]">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-[0.75rem] font-[500]" style={{ background: 'color-mix(in srgb, var(--color-accent-500) 10%, transparent)', color: 'var(--color-accent-500)' }}>
                   1
                 </div>
-                <h3 className={`text-[1.125rem] font-[600] text-[#1F2937]`}>
+                <h3 className={`text-[1.125rem] font-[600]`} style={{ color: 'var(--color-text-primary)' }}>
                   Select Package
                 </h3>
               </div>
 
               {userPackages.length === 0 ? (
                 <div className="text-center py-8">
-                  <Package className={`w-12 h-12 text-[#9CA3AF] mx-auto mb-[0.5rem]`} />
-                  <p className={`text-[#6B7280]`}>No active packages found for this client</p>
-                  <p className={`text-[0.75rem] text-[#9CA3AF] mt-[0.25rem]`}>
+                  <Package className={`w-12 h-12 mx-auto mb-[0.5rem]`} style={{ color: 'var(--color-text-tertiary)' }} />
+                  <p className={``} style={{ color: 'var(--color-text-secondary)' }}>No active packages found for this client</p>
+                  <p className={`text-[0.75rem] mt-[0.25rem]`} style={{ color: 'var(--color-text-tertiary)' }}>
                     The client needs to purchase a package first
                   </p>
                 </div>
@@ -299,25 +299,25 @@ const CreateBookingModal: React.FC<CreateBookingModalProps> = ({
                   {userPackages.map((pkg) => (
                     <div
                       key={pkg.id}
-                      className={`p-[0.5rem] border rounded-[0.5rem] cursor-pointer transition-all hover:border-[#90CDF4] hover:bg-[#EBF8FF] ${
+                      className={`p-[0.5rem] border rounded-[0.5rem] cursor-pointer transition-all ${
                         formData.user_package_id === pkg.id.toString() 
-                          ? `border-[#63B3ED] bg-[#EBF8FF]` 
-                          : `border-[#E2E8F0]`
+                          ? `bg-[var(--color-accent-500)]/10 border-[var(--color-accent-500)]` 
+                          : `border-[var(--color-border-500)]`
                       }`}
                       onClick={() => handlePackageSelect(pkg.id.toString())}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <h4 className={`font-[600] text-[#1F2937]`}>
+                            <h4 className={`font-[600]`} style={{ color: 'var(--color-text-primary)' }}>
                               {pkg.package_definition.name}
                             </h4>
                             {getPackageTypeBadge(pkg.package_definition.package_type)}
                           </div>
-                          <p className={`text-[0.75rem] text-[#6B7280] mb-[0.25rem]`}>
+                          <p className={`text-[0.75rem] mb-[0.25rem]`} style={{ color: 'var(--color-text-secondary)' }}>
                             {pkg.package_definition.description}
                           </p>
-                          <div className="flex items-center gap-[0.5rem] text-[0.75rem] text-[#9CA3AF]">
+                          <div className="flex items-center gap-[0.5rem] text-[0.75rem]" style={{ color: 'var(--color-text-tertiary)' }}>
                             <span className="flex items-center gap-1">
                               <Clock className="w-4 h-4" />
                               {pkg.package_definition.session_durations.duration_minutes} min
@@ -333,7 +333,7 @@ const CreateBookingModal: React.FC<CreateBookingModalProps> = ({
                           </div>
                         </div>
                         <div className="text-right">
-                          <Badge className={pkg.is_active ? `bg-[#4CAF50] text-white` : `bg-[#F44336] text-white`}>
+                          <Badge className={pkg.is_active ? `bg-[var(--color-status-success)] text-white` : `bg-[var(--color-status-error)] text-white`}>
                             {pkg.is_active ? 'Active' : 'Inactive'}
                           </Badge>
                         </div>
@@ -349,17 +349,17 @@ const CreateBookingModal: React.FC<CreateBookingModalProps> = ({
           {step === 2 && (
             <div className="space-y-[0.5rem]">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-[#E0F2FE] text-[#007BFF] rounded-full flex items-center justify-center text-[0.75rem] font-[500]">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-[0.75rem] font-[500]" style={{ background: 'color-mix(in srgb, var(--color-accent-500) 10%, transparent)', color: 'var(--color-accent-500)' }}>
                   2
                 </div>
-                <h3 className={`text-[1.125rem] font-[600] text-[#1F2937]`}>
+                <h3 className={`text-[1.125rem] font-[600]`} style={{ color: 'var(--color-text-primary)' }}>
                   Select Time Slot
                 </h3>
               </div>
 
               {selectedPackage && (
-                <div className="mb-[0.5rem] p-[0.375rem] bg-[#EBF8FF] border border-[#90CDF4] rounded-[0.5rem]">
-                  <p className={`text-[0.75rem] text-[#4299E1]`}>
+                <div className="mb-[0.5rem] p-[0.375rem] rounded-[0.5rem]" style={{ background: 'color-mix(in srgb, var(--color-accent-500) 10%, transparent)', border: '1px solid var(--color-accent-500)' }}>
+                  <p className={`text-[0.75rem]`} style={{ color: 'var(--color-accent-500)' }}>
                     <strong>Selected Package:</strong> {selectedPackage.package_definition.name} 
                     ({selectedPackage.package_definition.session_durations.duration_minutes} min)
                   </p>
@@ -379,24 +379,24 @@ const CreateBookingModal: React.FC<CreateBookingModalProps> = ({
                   {scheduleSlots.map((slot) => (
                     <div
                       key={slot.id}
-                      className={`p-[0.5rem] border rounded-[0.5rem] cursor-pointer transition-all hover:border-[#90CDF4] hover:bg-[#EBF8FF] ${
+                      className={`p-[0.5rem] border rounded-[0.5rem] cursor-pointer transition-all ${
                         formData.schedule_slot_id === slot.id.toString() 
-                          ? `border-[#63B3ED] bg-[#EBF8FF]` 
-                          : `border-[#E2E8F0]`
+                          ? `bg-[var(--color-accent-500)]/10 border-[var(--color-accent-500)]` 
+                          : `border-[var(--color-border-500)]`
                       }`}
                       onClick={() => handleSlotSelect(slot.id.toString())}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="text-lg font-semibold">
+                          <div className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
                             {slot.start_time} - {slot.end_time}
                           </div>
-                          <div className={`text-[0.75rem] text-[#6B7280]`}>
+                          <div className={`text-[0.75rem]`} style={{ color: 'var(--color-text-secondary)' }}>
                             {slot.schedule_templates.day_of_week}
                           </div>
                         </div>
                         <div className="text-right">
-                          <Badge className={`bg-[#4CAF50] text-white`}>
+                          <Badge className={`text-white`} style={{ background: 'var(--color-status-success)' }}>
                             Available
                           </Badge>
                         </div>
@@ -412,31 +412,31 @@ const CreateBookingModal: React.FC<CreateBookingModalProps> = ({
           {step === 3 && (
             <div className="space-y-[0.5rem]">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-[#E0F2FE] text-[#007BFF] rounded-full flex items-center justify-center text-[0.75rem] font-[500]">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-[0.75rem] font-[500]" style={{ background: 'color-mix(in srgb, var(--color-accent-500) 10%, transparent)', color: 'var(--color-accent-500)' }}>
                   3
                 </div>
-                <h3 className={`text-[1.125rem] font-[600] text-[#1F2937]`}>
+                <h3 className={`text-[1.125rem] font-[600]`} style={{ color: 'var(--color-text-primary)' }}>
                   Booking Details
                 </h3>
               </div>
 
               <div className="grid grid-cols-2 gap-[0.5rem]">
                 <div className="space-y-[0.25rem]">
-                  <Label className={`text-[0.75rem] font-[500] text-[#6B7280]`}>
+                  <Label className={`text-[0.75rem] font-[500]`} style={{ color: 'var(--color-text-secondary)' }}>
                     Booking Type
                   </Label>
                   <Select
                     value={formData.booking_type}
                     onValueChange={(value) => setFormData(prev => ({ ...prev, booking_type: value as 'individual' | 'group' }))}
                   >
-                    <SelectTrigger className={`bg-[#F9FAFB] border-[#D1D5DB] text-[#1F2937]`}>
+                    <SelectTrigger className={``} style={{ background: 'var(--color-surface-secondary)', borderColor: 'var(--color-border-500)', color: 'var(--color-text-primary)' }}>
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className={`bg-[#F9FAFB] border-[#D1D5DB]`}>
-                      <SelectItem value="individual" className={`text-[#1F2937] hover:bg-[#F4F6F8]`}>
+                    <SelectContent className={``} style={{ background: 'var(--color-surface-primary)', borderColor: 'var(--color-border-500)' }}>
+                      <SelectItem value="individual" className={``} style={{ color: 'var(--color-text-primary)' }}>
                         Individual
                       </SelectItem>
-                      <SelectItem value="group" className={`text-[#1F2937] hover:bg-[#F4F6F8]`}>
+                      <SelectItem value="group" className={``} style={{ color: 'var(--color-text-primary)' }}>
                         Group
                       </SelectItem>
                     </SelectContent>
@@ -445,7 +445,7 @@ const CreateBookingModal: React.FC<CreateBookingModalProps> = ({
 
                 {formData.booking_type === 'group' && (
                   <div className="space-y-[0.25rem]">
-                    <Label className={`text-[0.75rem] font-[500] text-[#6B7280]`}>
+                    <Label className={`text-[0.75rem] font-[500]`} style={{ color: 'var(--color-text-secondary)' }}>
                       Group Size
                     </Label>
                     <BaseInput
@@ -460,24 +460,25 @@ const CreateBookingModal: React.FC<CreateBookingModalProps> = ({
               </div>
 
               <div className="space-y-[0.25rem]">
-                <Label className={`text-[0.75rem] font-[500] text-[#6B7280]`}>
+                <Label className={`text-[0.75rem] font-[500]`} style={{ color: 'var(--color-text-secondary)' }}>
                   Notes (Optional)
                 </Label>
                 <Textarea
                   placeholder="Add any special requirements or notes..."
                   value={formData.notes}
                   onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                  className={`bg-[#F9FAFB] border-[#D1D5DB] text-[#1F2937] placeholder:text-[#9CA3AF]`}
+                  className={``}
+                  style={{ background: 'var(--color-surface-secondary)', borderColor: 'var(--color-border-500)', color: 'var(--color-text-primary)' }}
                   rows={3}
                 />
               </div>
 
               {selectedPackage && (
-                <div className="p-[0.5rem] bg-[#F9FAFB] rounded-[0.5rem] border border-[#D1D5DB]">
-                  <h4 className="text-sm font-medium text-white mb-2">
+                <div className="p-[0.5rem] rounded-[0.5rem] border" style={{ background: 'var(--color-surface-secondary)', borderColor: 'var(--color-border-500)' }}>
+                  <h4 className="text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
                     Booking Summary
                   </h4>
-                  <div className="space-y-2 text-sm text-gray-300">
+                  <div className="space-y-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                     <div className="flex items-center gap-2">
                       <Package className="w-4 h-4" />
                       <span>{selectedPackage.package_definition.name}</span>

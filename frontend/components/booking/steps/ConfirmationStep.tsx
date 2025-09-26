@@ -173,7 +173,7 @@ export function ConfirmationStep({
       <Card className="unified-card">
         <CardHeader>
           <CardTitle className="unified-card__title flex items-center">
-            <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+            <CheckCircle className="w-5 h-5 text-[var(--color-status-success)] mr-2" />
             Order Details
           </CardTitle>
         </CardHeader>
@@ -181,20 +181,20 @@ export function ConfirmationStep({
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <strong className="text-gray-700">Order Number:</strong>
-                <p className="text-lg font-mono text-gray-900">{orderData.orderNumber}</p>
+                <strong className="text-foreground">Order Number:</strong>
+                <p className="text-lg font-mono text-foreground">{orderData.orderNumber}</p>
               </div>
               <div>
-                <strong className="text-gray-700">Total Amount:</strong>
-                <p className="text-lg font-bold text-green-600">S/ {orderData.total.toFixed(2)}</p>
+                <strong className="text-foreground">Total Amount:</strong>
+                <p className="text-lg font-bold text-primary">S/ {orderData.total.toFixed(2)}</p>
               </div>
             </div>
 
             <div>
-              <strong className="text-gray-700 mb-2 block">Items Purchased:</strong>
+              <strong className="text-foreground mb-2 block">Items Purchased:</strong>
               <ul className="space-y-2">
                 {orderData.items.map((item, index) => (
-                  <li key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                  <li key={index} className="flex justify-between items-center p-2 bg-secondary rounded">
                     <span>{item.name} x {item.quantity}</span>
                     <span className="font-medium">S/ {(item.price * item.quantity).toFixed(2)}</span>
                   </li>
@@ -221,90 +221,90 @@ export function ConfirmationStep({
       <Card className="unified-card">
         <CardHeader>
           <CardTitle className="unified-card__title flex items-center">
-            <Calendar className="w-5 h-5 text-blue-600 mr-2" />
+            <Calendar className="w-5 h-5 text-[var(--color-accent-500)] mr-2" />
             Your Bookings
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {packageItems.map((item, itemIndex) => (
-              <div key={itemIndex} className="border border-gray-200 rounded-lg p-4">
-                <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+              <div key={itemIndex} className="border border-border rounded-lg p-4">
+                <h4 className="font-semibold text-foreground mb-3 flex items-center">
                   <Package className="w-4 h-4 mr-2" />
                   {item.name}
                 </h4>
 
                 <div className="space-y-2">
                   {item.bookingDetails?.map((booking, bookingIndex) => (
-                    <div key={bookingIndex} className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div key={bookingIndex} className="rounded-lg p-3" style={{ background: 'color-mix(in srgb, var(--color-accent-500) 8%, transparent)', border: '1px solid color-mix(in srgb, var(--color-accent-500) 25%, transparent)' }}>
                       {/* Compact Session Header */}
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center space-x-2">
-                          <Calendar className="w-4 h-4 text-blue-600" />
-                          <span className="text-sm font-semibold text-blue-900">
+                          <Calendar className="w-4 h-4 text-[var(--color-accent-500)]" />
+                          <span className="text-sm font-semibold text-foreground">
                             Session {bookingIndex + 1}
                           </span>
                         </div>
                         <div className="flex items-center space-x-1">
-                          <CheckCircle className="w-3 h-3 text-green-500" />
-                          <span className="text-xs text-green-600 font-medium">Confirmed</span>
+                          <CheckCircle className="w-3 h-3 text-[var(--color-status-success)]" />
+                          <span className="text-xs text-[var(--color-status-success)] font-medium">Confirmed</span>
                         </div>
                       </div>
 
                       {/* Compact Session Details - Two Column Layout */}
-                      <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
                         {/* Date & Time */}
                         <div className="flex items-center space-x-1">
-                          <Clock className="w-3 h-3 text-gray-500" />
-                          <span className="text-gray-600">Date:</span>
-                          <span className="font-medium text-gray-900">{booking.selectedDate}</span>
+                          <Clock className="w-3 h-3" />
+                          <span>Date:</span>
+                          <span className="font-medium text-foreground">{booking.selectedDate}</span>
                         </div>
                         <div className="flex items-center space-x-1">
-                          <Clock className="w-3 h-3 text-gray-500" />
-                          <span className="text-gray-600">Time:</span>
-                          <span className="font-medium text-gray-900">{booking.selectedTime}</span>
+                          <Clock className="w-3 h-3" />
+                          <span>Time:</span>
+                          <span className="font-medium text-foreground">{booking.selectedTime}</span>
                         </div>
 
                         {/* Teacher & Service */}
                         {booking.teacher && (
                           <div className="flex items-center space-x-1">
-                            <User className="w-3 h-3 text-gray-500" />
-                            <span className="text-gray-600">Teacher:</span>
-                            <span className="font-medium text-gray-900 truncate">{booking.teacher}</span>
+                            <User className="w-3 h-3" />
+                            <span>Teacher:</span>
+                            <span className="font-medium text-foreground truncate">{booking.teacher}</span>
                           </div>
                         )}
                         {booking.serviceType && (
                           <div className="flex items-center space-x-1">
-                            <Calendar className="w-3 h-3 text-gray-500" />
-                            <span className="text-gray-600">Service:</span>
-                            <span className="font-medium text-gray-900 truncate">{booking.serviceType}</span>
+                            <Calendar className="w-3 h-3" />
+                            <span>Service:</span>
+                            <span className="font-medium text-foreground truncate">{booking.serviceType}</span>
                           </div>
                         )}
 
                         {/* Day & Venue */}
                         {booking.dayOfWeek && (
                           <div className="flex items-center space-x-1">
-                            <Clock className="w-3 h-3 text-gray-500" />
-                            <span className="text-gray-600">Day:</span>
-                            <span className="font-medium text-gray-900">{booking.dayOfWeek}</span>
+                            <Clock className="w-3 h-3" />
+                            <span>Day:</span>
+                            <span className="font-medium text-foreground">{booking.dayOfWeek}</span>
                           </div>
                         )}
                         {booking.venue && (
                           <div className="flex items-center space-x-1">
-                            <MapPin className="w-3 h-3 text-gray-500" />
-                            <span className="text-gray-600">Location:</span>
-                            <span className="font-medium text-gray-900 truncate">{booking.venue}</span>
+                            <MapPin className="w-3 h-3" />
+                            <span>Location:</span>
+                            <span className="font-medium text-foreground truncate">{booking.venue}</span>
                           </div>
                         )}
 
                         {/* Slot ID (if available) */}
                         {booking.scheduleSlotId && (
                           <div className="flex items-center space-x-1 col-span-2">
-                            <div className="w-3 h-3 bg-gray-300 rounded-full flex items-center justify-center">
-                              <span className="text-xs text-gray-600">#</span>
+                            <div className="w-3 h-3 bg-muted rounded-full flex items-center justify-center">
+                              <span className="text-xs text-muted-foreground">#</span>
                             </div>
-                            <span className="text-gray-600">Slot ID:</span>
-                            <span className="font-mono text-xs text-gray-700">{booking.scheduleSlotId}</span>
+                            <span>Slot ID:</span>
+                            <span className="font-mono text-xs text-foreground">{booking.scheduleSlotId}</span>
                           </div>
                         )}
                       </div>
@@ -312,8 +312,8 @@ export function ConfirmationStep({
                   ))}
                 </div>
 
-                <div className="mt-3 pt-3 border-t border-gray-200">
-                  <p className="text-sm text-gray-600">
+                <div className="mt-3 pt-3 border-t border-border">
+                  <p className="text-sm text-muted-foreground">
                     {item.bookingDetails?.length || 0} of {item.sessions || 1} sessions scheduled
                   </p>
                 </div>
@@ -339,7 +339,7 @@ export function ConfirmationStep({
       <Card className="unified-card">
         <CardHeader>
           <CardTitle className="unified-card__title flex items-center">
-            <User className="w-5 h-5 text-purple-600 mr-2" />
+            <User className="w-5 h-5 text-[var(--color-accent-500)] mr-2" />
             Customer Information
           </CardTitle>
         </CardHeader>
@@ -368,7 +368,7 @@ export function ConfirmationStep({
       <Card className="unified-card">
         <CardHeader>
           <CardTitle className="unified-card__title flex items-center">
-            <Truck className="w-5 h-5 text-orange-600 mr-2" />
+            <Truck className="w-5 h-5 text-[var(--color-accent-500)] mr-2" />
             Shipping Address
           </CardTitle>
         </CardHeader>
@@ -388,14 +388,14 @@ export function ConfirmationStep({
    * Provides guidance on what happens next
    */
   const renderNextSteps = () => (
-    <Card className="unified-card bg-blue-50 border-blue-200">
+    <Card className="unified-card" style={{ background: 'color-mix(in srgb, var(--color-primary-500) 6%, transparent)', border: '1px solid color-mix(in srgb, var(--color-primary-500) 20%, transparent)' }}>
       <CardHeader>
-        <CardTitle className="unified-card__title text-blue-800">
+        <CardTitle className="unified-card__title text-foreground">
           What&apos;s Next?
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3 text-blue-700">
+        <div className="space-y-3 text-muted-foreground">
           <div className="flex items-start space-x-3">
             <Mail className="w-5 h-5 mt-0.5 flex-shrink-0" />
             <div>
@@ -467,17 +467,17 @@ export function ConfirmationStep({
     <div className="space-y-6">
       {/* Header */}
       <div className="text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-          <CheckCircle className="w-8 h-8 text-green-600" />
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" style={{ background: 'color-mix(in srgb, var(--color-status-success) 12%, transparent)' }}>
+          <CheckCircle className="w-8 h-8 text-[var(--color-status-success)]" />
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+        <h2 className="text-3xl font-bold text-foreground mb-2">
           Order Confirmed!
         </h2>
-        <p className="text-gray-600 text-lg">
+        <p className="text-muted-foreground text-lg">
           Thank you for your purchase. Your booking is confirmed.
         </p>
         {orderData?.orderNumber && (
-          <p className="text-lg font-semibold text-gray-800 mt-2">
+          <p className="text-lg font-semibold text-foreground mt-2">
             Order Number: {orderData.orderNumber}
           </p>
         )}
@@ -503,22 +503,7 @@ export function ConfirmationStep({
         {renderActionButtons()}
       </div>
 
-      {/* Debug Information (remove in production) */}
-      {process.env.NODE_ENV === 'development' && (
-        <details className="mt-8 p-4 bg-gray-50 rounded-lg">
-          <summary className="cursor-pointer font-medium text-gray-700">
-            Debug Information
-          </summary>
-          <pre className="mt-2 text-xs text-gray-600 overflow-auto">
-            {JSON.stringify({
-              orderData,
-              customerData,
-              shippingData,
-              cartItemsCount: cartItems.length
-            }, null, 2)}
-          </pre>
-        </details>
-      )}
+      
     </div>
   );
 }

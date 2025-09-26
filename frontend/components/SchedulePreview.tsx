@@ -150,8 +150,8 @@ export function SchedulePreview({
     return (
       <div className={`schedule-preview ${className}`}>
         <div className="flex items-center justify-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-          <span className="ml-2 text-gray-600">Loading upcoming classes...</span>
+          <Loader2 className="h-6 w-6 animate-spin text-[var(--color-status-info)]" />
+          <span className="ml-2 text-[var(--color-text-secondary)]">Loading upcoming classes...</span>
         </div>
       </div>
     );

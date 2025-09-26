@@ -1,5 +1,5 @@
 import React from 'react';
-import { AdminLayout } from './admin/AdminLayout';
+import { AdminLayoutNew } from './admin/AdminLayoutNew';
 
 interface AdminDashboardProps {
   onClose?: () => void;
@@ -9,6 +9,6 @@ interface AdminDashboardProps {
 
 export function AdminDashboard({ onClose, isModal = true }: AdminDashboardProps) {
   return (
-    <AdminLayout onClose={onClose} isModal={isModal} />
+    <AdminLayoutNew onClose={onClose} isModal={isModal} />
   );
 }

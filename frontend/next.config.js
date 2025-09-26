@@ -13,8 +13,11 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   experimental: {
-    optimizeCss: false,
+    optimizeCss: true,
   },
+  // Modern JS targets are handled via browserslist; avoid legacy polyfills
+  // Prefer modern JS output and avoid legacy polyfills
+  // Next 15+ already targets modern browsers; browserslist is configured in package.json
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
@@ -38,8 +41,8 @@ const nextConfig = {
     // Base CSP directives
     const baseDirectives = [
       "default-src 'self'",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "font-src 'self' https://fonts.gstatic.com",
+      "style-src 'self' 'unsafe-inline'",
+      "font-src 'self'",
       "img-src 'self' data: https: blob:",
       `connect-src 'self' ${isDevelopment ? 'http://localhost:* ws://localhost:* ' : ''}https://*.vercel.app https://matmax.world https://www.matmax.world https://api.stripe.com https://js.stripe.com https://static.micuentaweb.pe`,
       "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://checkout.stripe.com",
@@ -52,8 +55,8 @@ const nextConfig = {
 
     // Add script-src with payment providers and unsafe-eval for production
     const scriptSrc = isDevelopment
-      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://static.micuentaweb.pe"
-      : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://static.micuentaweb.pe";
+      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://static.micuentaweb.pe https://va.vercel-scripts.com"
+      : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://static.micuentaweb.pe https://va.vercel-scripts.com";
 
     return [
       {
@@ -84,6 +87,35 @@ const nextConfig = {
             key: 'Access-Control-Max-Age',
             value: '86400'
           }
+        ]
+      }
+      ,
+      // Long-term caching for Next.js static assets
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }
+        ]
+      },
+      // Cache images aggressively
+      {
+        source: '/images/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }
+        ]
+      },
+      // Cache fonts aggressively
+      {
+        source: '/fonts/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }
+        ]
+      },
+      // Do not cache API routes
+      {
+        source: '/api/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'no-store' }
         ]
       }
     ];

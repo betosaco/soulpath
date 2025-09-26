@@ -17,7 +17,7 @@ export default function TestProductsPage() {
         setError(null);
         console.log('🛒 Fetching products...');
         
-        const response = await fetch('/api/products?limit=50');
+        const response = await fetch('/api/products?limit=20');
         console.log('🛒 Response status:', response.status);
         
         if (!response.ok) {
@@ -46,10 +46,10 @@ export default function TestProductsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--color-background-primary)]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-400 mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg">Loading products...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-text-tertiary)] mx-auto mb-4"></div>
+          <p className="text-[var(--color-text-secondary)] text-lg">Loading products...</p>
         </div>
       </div>
     );
@@ -59,8 +59,8 @@ export default function TestProductsPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Products</h1>
-          <p className="text-gray-600">{error}</p>
+          <h1 className="text-2xl font-bold text-[var(--color-text-primary)] mb-4">Error Loading Products</h1>
+          <p className="text-[var(--color-text-secondary)]">{error}</p>
         </div>
       </div>
     );

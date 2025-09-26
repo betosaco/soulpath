@@ -94,19 +94,19 @@ export default function TeacherSidebarNav({ user }: TeacherSidebarNavProps) {
   return (
     <div className={teacherUI.sidebar.container}>
       {/* Logo/Brand */}
-      <div className="px-2 py-0 border-b border-gray-700 flex items-center justify-center">
+      <div className="px-2 pt-6 pb-0 border-b border-gray-700 flex items-center justify-center">
         <div className="text-center">
           <div className="flex justify-center mb-0 mt-0">
             <Image
               src="/logo_matmax.webp"
               alt="MatMax Yoga Studio Logo"
-              width={240}
-              height={240}
-              className="h-32 w-32 object-contain -mt-8 brightness-0 invert"
+              width={120}
+              height={120}
+              className="h-4 sm:h-5 md:h-6 lg:h-6 w-auto object-contain brightness-0 invert"
               priority
             />
           </div>
-          <p className={`${teacherUI.sidebar.brandTagline} -mt-2`}>Teacher Portal</p>
+          <p className={`${teacherUI.sidebar.brandTagline} mt-2`}>Teacher Portal</p>
         </div>
       </div>
 

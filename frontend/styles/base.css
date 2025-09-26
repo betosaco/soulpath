@@ -1,7 +1,6 @@
 /* Base styles and CSS custom properties */
 
-/* Font imports */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700;900&family=Poppins:wght@300;400;500;600;700;900&display=swap');
+/* Font imports removed; fonts are loaded via next/font in app/fonts.ts */
 
 /* MATMAX YOGA STUDIO - COMPLETE DESIGN SYSTEM */
 
@@ -85,8 +84,11 @@
   --space-96: 24rem;    /* 384px */
 
   /* TYPOGRAPHY SYSTEM */
-  --font-heading: 'Poppins', sans-serif;
-  --font-body: 'Roboto', sans-serif;
+  /* These variables are provided by next/font via CSS variables in app/layout.tsx */
+  /* --font-heading and --font-body are set by next/font and applied on <html> */
+  /* Keep fallbacks to system fonts in case font files fail to load */
+  --font-heading: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+  --font-body: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
 
   /* Font Sizes */
   --text-xs: 0.75rem;     /* 12px */

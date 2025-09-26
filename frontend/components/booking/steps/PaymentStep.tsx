@@ -40,8 +40,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useBookingFlow } from '../hooks/useBookingFlow';
-import { useCart, useAppStore, useShipping, useOrder } from '@/store/appStore';
-import { TermsAndConditionsModal } from '../../TermsAndConditionsModal';
+import { useCart, useAppStore, useShipping, useOrder, useTermsUI } from '@/store/appStore';
 import { CreditCard, Clock, User, MapPin, Calendar, CheckCircle, AlertCircle, Mail, Phone, Edit } from 'lucide-react';
 
 /**
@@ -126,8 +125,8 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
    */
   const [paymentStatus, setPaymentStatus] = React.useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const { orderData, setOrderData } = useOrder();
-  const [showTermsModal, setShowTermsModal] = React.useState(false);
-  const [termsAccepted, setTermsAccepted] = React.useState(false);
+  const [termsAccepted, setTermsAccepted] = React.useState(true);
+  const { openTerms, closeTerms } = useTermsUI();
 
   // ============================================================================
   // BUSINESS LOGIC - ORDER VALIDATION
@@ -417,7 +416,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
    */
   const handlePayLater = async () => {
     if (!termsAccepted) {
-      setShowTermsModal(true);
+      openTerms();
       return;
     }
 
@@ -565,7 +564,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
    */
   const handleTermsAccept = () => {
     setTermsAccepted(true);
-    setShowTermsModal(false);
+    closeTerms();
     toast.success('Terms and conditions accepted');
   };
 
@@ -602,32 +601,32 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
         <div className="space-y-6">
           {/* Price Details */}
           <div>
-            <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-              <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
+            <h4 className="font-semibold text-foreground mb-3 flex items-center">
+              <CheckCircle className="w-5 h-5 mr-2 text-[var(--color-status-success)]" />
               Price Details
             </h4>
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <div className="bg-card border border-border rounded-lg p-4">
               <div className="space-y-2 text-sm">
                 {/* Subtotal */}
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Subtotal:</span>
-                  <span className="font-medium text-gray-900">
+                  <span className="text-muted-foreground">Subtotal:</span>
+                  <span className="font-medium text-foreground">
                     {isClient && cartItems.length > 0 && cartItems[0].currency} {isClient ? (getTotalPrice() / 1.18).toFixed(2) : '0.00'}
                   </span>
                 </div>
                 
                 {/* IGV (18%) */}
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">IGV (18%):</span>
-                  <span className="font-medium text-gray-900">
+                  <span className="text-muted-foreground">IGV (18%):</span>
+                  <span className="font-medium text-foreground">
                     {isClient && cartItems.length > 0 && cartItems[0].currency} {isClient ? (getTotalPrice() - (getTotalPrice() / 1.18)).toFixed(2) : '0.00'}
                   </span>
                 </div>
                 
                 {/* Total */}
-                <div className="flex justify-between items-center pt-2 border-t border-gray-300">
-                  <span className="text-lg font-semibold text-gray-900">Total:</span>
-                  <span className="text-xl font-bold text-green-600">
+                <div className="flex justify-between items-center pt-2 border-t border-border">
+                  <span className="text-lg font-semibold text-foreground">Total:</span>
+                  <span className="text-xl font-bold text-primary">
                     {isClient && cartItems.length > 0 && cartItems[0].currency} {isClient ? getTotalPrice().toFixed(2) : '0.00'}
                   </span>
                 </div>
@@ -638,96 +637,96 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
 
           {/* Packages and Bookings */}
           <div>
-            <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+            <h4 className="font-semibold text-foreground mb-3 flex items-center">
               <Calendar className="w-5 h-5 mr-2" />
               Packages & Bookings
             </h4>
             <div className="space-y-4">
               {isClient && cartItems.map((item, index) => (
-                <div key={`${item.id}-${index}`} className="border rounded-lg p-4">
+                <div key={`${item.id}-${index}`} className="border border-border rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <h5 className="font-medium text-gray-900">{item.name}</h5>
-                    <span className="font-semibold text-green-600">
+                    <h5 className="font-medium text-foreground">{item.name}</h5>
+                    <span className="font-semibold text-primary">
                       {isClient && item.currency} {isClient ? (item.price * item.quantity).toFixed(2) : '0.00'}
                     </span>
                   </div>
                   
                   {item.type === 'package' && item.bookingDetails && item.bookingDetails.length > 0 && (
                     <div className="mt-3">
-                      <p className="text-sm text-gray-600 mb-3">
+                      <p className="text-sm text-muted-foreground mb-3">
                         Booked Sessions ({item.bookingDetails.length}):
                       </p>
                       <div className="space-y-2">
                         {item.bookingDetails.map((booking, bookingIndex) => (
-                          <div key={bookingIndex} className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                          <div key={bookingIndex} className="rounded-lg p-3" style={{ background: 'color-mix(in srgb, var(--color-accent-500) 8%, transparent)', border: '1px solid color-mix(in srgb, var(--color-accent-500) 25%, transparent)' }}>
                             {/* Compact Session Header */}
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center space-x-2">
-                                <Calendar className="w-4 h-4 text-blue-600" />
-                                <span className="text-sm font-semibold text-blue-900">
+                                <Calendar className="w-4 h-4 text-[var(--color-accent-500)]" />
+                                <span className="text-sm font-semibold text-foreground">
                                   Session {bookingIndex + 1}
                                 </span>
                               </div>
                               <div className="flex items-center space-x-1">
-                                <CheckCircle className="w-3 h-3 text-green-500" />
-                                <span className="text-xs text-green-600 font-medium">Ready</span>
+                                <CheckCircle className="w-3 h-3 text-[var(--color-status-success)]" />
+                                <span className="text-xs text-[var(--color-status-success)] font-medium">Ready</span>
                               </div>
                             </div>
 
                             {/* Compact Session Details - Two Column Layout */}
-                            <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
                               {/* Date & Time */}
                               <div className="flex items-center space-x-1">
-                                <Clock className="w-3 h-3 text-gray-500" />
-                                <span className="text-gray-600">Date:</span>
-                                <span className="font-medium text-gray-900">{booking.selectedDate}</span>
+                                <Clock className="w-3 h-3" />
+                                <span>Date:</span>
+                                <span className="font-medium text-foreground">{booking.selectedDate}</span>
                               </div>
                               <div className="flex items-center space-x-1">
-                                <Clock className="w-3 h-3 text-gray-500" />
-                                <span className="text-gray-600">Time:</span>
-                                <span className="font-medium text-gray-900">{booking.selectedTime}</span>
+                                <Clock className="w-3 h-3" />
+                                <span>Time:</span>
+                                <span className="font-medium text-foreground">{booking.selectedTime}</span>
                               </div>
 
                               {/* Teacher & Service */}
                               {booking.teacher && (
                                 <div className="flex items-center space-x-1">
-                                  <User className="w-3 h-3 text-gray-500" />
-                                  <span className="text-gray-600">Teacher:</span>
-                                  <span className="font-medium text-gray-900 truncate">{booking.teacher}</span>
+                                  <User className="w-3 h-3" />
+                                  <span>Teacher:</span>
+                                  <span className="font-medium text-foreground truncate">{booking.teacher}</span>
                                 </div>
                               )}
                               {booking.serviceType && (
                                 <div className="flex items-center space-x-1">
-                                  <Calendar className="w-3 h-3 text-gray-500" />
-                                  <span className="text-gray-600">Service:</span>
-                                  <span className="font-medium text-gray-900 truncate">{booking.serviceType}</span>
+                                  <Calendar className="w-3 h-3" />
+                                  <span>Service:</span>
+                                  <span className="font-medium text-foreground truncate">{booking.serviceType}</span>
                                 </div>
                               )}
 
                               {/* Day & Venue */}
                               {booking.dayOfWeek && (
                                 <div className="flex items-center space-x-1">
-                                  <Clock className="w-3 h-3 text-gray-500" />
-                                  <span className="text-gray-600">Day:</span>
-                                  <span className="font-medium text-gray-900">{booking.dayOfWeek}</span>
+                                  <Clock className="w-3 h-3" />
+                                  <span>Day:</span>
+                                  <span className="font-medium text-foreground">{booking.dayOfWeek}</span>
                                 </div>
                               )}
                               {booking.venue && (
                                 <div className="flex items-center space-x-1">
-                                  <MapPin className="w-3 h-3 text-gray-500" />
-                                  <span className="text-gray-600">Location:</span>
-                                  <span className="font-medium text-gray-900 truncate">{booking.venue}</span>
+                                  <MapPin className="w-3 h-3" />
+                                  <span>Location:</span>
+                                  <span className="font-medium text-foreground truncate">{booking.venue}</span>
                                 </div>
                               )}
 
                               {/* Slot ID (if available) */}
                               {booking.scheduleSlotId && (
                                 <div className="flex items-center space-x-1 col-span-2">
-                                  <div className="w-3 h-3 bg-gray-300 rounded-full flex items-center justify-center">
-                                    <span className="text-xs text-gray-600">#</span>
+                                  <div className="w-3 h-3 bg-muted rounded-full flex items-center justify-center">
+                                    <span className="text-xs text-muted-foreground">#</span>
                                   </div>
-                                  <span className="text-gray-600">Slot ID:</span>
-                                  <span className="font-mono text-xs text-gray-700">{booking.scheduleSlotId}</span>
+                                  <span>Slot ID:</span>
+                                  <span className="font-mono text-xs text-foreground">{booking.scheduleSlotId}</span>
                                 </div>
                               )}
                             </div>
@@ -757,17 +756,17 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
     const statusConfig = {
       processing: {
         message: 'Processing payment...',
-        color: 'text-blue-600',
+        color: 'text-[var(--color-status-info)]',
         icon: '⏳'
       },
       success: {
         message: 'Payment successful! Redirecting...',
-        color: 'text-green-600',
+        color: 'text-[var(--color-status-success)]',
         icon: '✅'
       },
       error: {
         message: 'Payment failed. Please try again.',
-        color: 'text-red-600',
+        color: 'text-[var(--color-status-error)]',
         icon: '❌'
       }
     };
@@ -775,7 +774,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
     const config = statusConfig[paymentStatus];
 
     return (
-      <div className={`text-center p-4 rounded-lg bg-gray-50 border ${config.color}`}>
+      <div className={`text-center p-4 rounded-lg bg-secondary border border-border ${config.color}`}>
         <div className="text-2xl mb-2">{config.icon}</div>
         <p className="font-medium">{config.message}</p>
       </div>
@@ -799,10 +798,10 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
   return (
     <div className="space-y-6 pb-20">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        <h2 className="text-2xl font-bold text-foreground mb-2">
           Payment
         </h2>
-        <p className="text-gray-600">
+        <p className="text-muted-foreground">
           Review your order and complete your purchase
         </p>
       </div>
@@ -828,7 +827,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                       variant="outline"
                       size="sm"
                       onClick={handleEditCustomerInfo}
-                      className="flex items-center space-x-1 text-blue-600 border-blue-200 hover:bg-blue-50"
+                      className="flex items-center space-x-1 text-[var(--color-accent-500)] border-[var(--color-accent-500)] hover:bg-[var(--color-accent-500)]/10"
                     >
                       <Edit className="w-4 h-4" />
                       <span>Edit</span>
@@ -836,36 +835,36 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="bg-secondary p-4 rounded-lg">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div className="flex items-center space-x-2">
-                        <User className="w-4 h-4 text-gray-500" />
-                        <span className="text-gray-600">Name:</span>
-                        <span className="font-medium text-gray-900">
+                        <User className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-muted-foreground">Name:</span>
+                        <span className="font-medium text-foreground">
                           {customerData.name}
                         </span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Mail className="w-4 h-4 text-gray-500" />
-                        <span className="text-gray-600">Email:</span>
-                        <span className="font-medium text-gray-900">
+                        <Mail className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-muted-foreground">Email:</span>
+                        <span className="font-medium text-foreground">
                           {customerData.email}
                         </span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Phone className="w-4 h-4 text-gray-500" />
-                        <span className="text-gray-600">Phone:</span>
-                        <span className="font-medium text-gray-900">
+                        <Phone className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-muted-foreground">Phone:</span>
+                        <span className="font-medium text-foreground">
                           {customerData.phone ? `${customerData.countryCode} ${customerData.phone}` : 'Not provided'}
                         </span>
                       </div>
                       {/* Shipping Address Information - when available */}
                       {shippingData && (
                         <div className="flex items-start space-x-2 md:col-span-2">
-                          <MapPin className="w-4 h-4 text-gray-500 mt-0.5" />
+                          <MapPin className="w-4 h-4 text-muted-foreground mt-0.5" />
                           <div className="flex-1">
-                            <span className="text-gray-600">Shipping Address:</span>
-                            <div className="font-medium text-gray-900">
+                            <span className="text-muted-foreground">Shipping Address:</span>
+                            <div className="font-medium text-foreground">
                               {shippingData.address}
                               {shippingData.city && `, ${shippingData.city}`}
                               {shippingData.country && `, ${shippingData.country}`}
@@ -890,22 +889,22 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                   <div className="space-y-4">
                     {/* Disabled Payment Forms */}
                     <div className="space-y-3">
-                      <div className="p-4 bg-gray-100 border border-gray-300 rounded-lg opacity-60">
+                      <div className="p-4 bg-muted border border-border rounded-lg opacity-60">
                         <div className="flex items-center space-x-3 mb-3">
-                          <CreditCard className="w-6 h-6 text-gray-500" />
-                          <h4 className="font-medium text-gray-700">Credit/Debit Card</h4>
+                          <CreditCard className="w-6 h-6 text-muted-foreground" />
+                          <h4 className="font-medium text-foreground">Credit/Debit Card</h4>
                         </div>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-muted-foreground">
                           Payment forms are temporarily disabled
                         </p>
                       </div>
 
-                      <div className="p-4 bg-gray-100 border border-gray-300 rounded-lg opacity-60">
+                      <div className="p-4 bg-muted border border-border rounded-lg opacity-60">
                         <div className="flex items-center space-x-3 mb-3">
-                          <CreditCard className="w-6 h-6 text-gray-500" />
-                          <h4 className="font-medium text-gray-700">Bank Transfer</h4>
+                          <CreditCard className="w-6 h-6 text-muted-foreground" />
+                          <h4 className="font-medium text-foreground">Bank Transfer</h4>
                         </div>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-muted-foreground">
                           Bank transfer option is temporarily disabled
                         </p>
                       </div>
@@ -914,11 +913,11 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                     {/* Pay Later Option */}
                     <div className="border-t pt-4">
                       <div className="flex items-center space-x-3 mb-4">
-                        <Clock className="w-6 h-6 text-orange-500" />
-                        <h4 className="font-medium text-gray-900">Pay Later</h4>
+                        <Clock className="w-6 h-6 text-[var(--color-accent-500)]" />
+                        <h4 className="font-medium text-foreground">Pay Later</h4>
                       </div>
                       
-                      <p className="text-sm text-gray-600 mb-4">
+                      <p className="text-sm text-muted-foreground mb-4">
                         Complete your order now and pay later. We will contact you to arrange payment.
                       </p>
 
@@ -929,13 +928,13 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                             type="checkbox"
                             checked={termsAccepted}
                             onChange={(e) => setTermsAccepted(e.target.checked)}
-                            className="mt-1 w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                            className="mt-1 w-4 h-4 text-primary border-border rounded focus:ring-primary"
                           />
-                          <span className="text-sm text-gray-700">
+                          <span className="text-sm text-foreground">
                             I agree to the{' '}
                             <button
-                              onClick={() => setShowTermsModal(true)}
-                              className="text-blue-600 hover:text-blue-800 underline"
+                              onClick={() => openTerms()}
+                              className="text-[var(--color-accent-500)] hover:text-[var(--color-accent-600)] underline"
                             >
                               Terms and Conditions
                             </button>
@@ -948,8 +947,8 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                         disabled={!termsAccepted}
                         className={`w-full py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2 ${
                           termsAccepted
-                            ? 'bg-orange-600 text-white hover:bg-orange-700'
-                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            ? 'bg-[var(--color-accent-500)] text-white hover:bg-[var(--color-accent-600)]'
+                            : 'bg-muted text-muted-foreground cursor-not-allowed'
                         }`}
                       >
                         <Clock className="w-5 h-5" />
@@ -957,7 +956,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                       </button>
 
                       {!termsAccepted && (
-                        <p className="text-xs text-gray-500 mt-2 text-center">
+                        <p className="text-xs text-muted-foreground mt-2 text-center">
                           Please accept the Terms and Conditions to proceed
                         </p>
                       )}
@@ -966,12 +965,12 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                 </CardContent>
               </Card>
             ) : (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-center">
-                <AlertCircle className="w-8 h-8 text-red-500 mx-auto mb-2" />
-                <p className="text-red-800 font-medium">
+              <div className="p-4 rounded-lg text-center" style={{ background: 'color-mix(in srgb, var(--color-status-error) 8%, transparent)', border: '1px solid color-mix(in srgb, var(--color-status-error) 25%, transparent)' }}>
+                <AlertCircle className="w-8 h-8 text-[var(--color-status-error)] mx-auto mb-2" />
+                <p className="font-medium" style={{ color: 'color-mix(in srgb, var(--color-status-error) 85%, black)' }}>
                   ⚠️ Cannot proceed with payment
                 </p>
-                <p className="text-red-600 text-sm mt-1">
+                <p className="text-sm mt-1" style={{ color: 'color-mix(in srgb, var(--color-status-error) 75%, black)' }}>
                   {validation.error}
                 </p>
               </div>
@@ -979,8 +978,8 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
 
             {/* Validation Error Display */}
             {!validation.isValid && (
-              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-red-800 text-sm">
+              <div className="mt-4 p-3 rounded-lg" style={{ background: 'color-mix(in srgb, var(--color-status-error) 8%, transparent)', border: '1px solid color-mix(in srgb, var(--color-status-error) 25%, transparent)' }}>
+                <p className="text-sm" style={{ color: 'color-mix(in srgb, var(--color-status-error) 85%, black)' }}>
                   ⚠️ {validation.error}
                 </p>
               </div>
@@ -1001,15 +1000,15 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
       {/* Post-Payment Success State */}
       {paymentStatus === 'success' && orderData && (
         <div className="text-center">
-          <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-            <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-green-800 mb-2">
+          <div className="rounded-lg p-6" style={{ background: 'color-mix(in srgb, var(--color-status-success) 8%, transparent)', border: '1px solid color-mix(in srgb, var(--color-status-success) 25%, transparent)' }}>
+            <CheckCircle className="w-12 h-12 text-[var(--color-status-success)] mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2" style={{ color: 'color-mix(in srgb, var(--color-status-success) 85%, black)' }}>
               🎉 Order Confirmed!
             </h3>
-            <p className="text-green-700 mb-4">
+            <p className="mb-4" style={{ color: 'color-mix(in srgb, var(--color-status-success) 75%, black)' }}>
               Your order has been confirmed. We will contact you to arrange payment.
             </p>
-            <div className="text-sm text-green-600">
+            <div className="text-sm text-[var(--color-status-success)]">
               <p>Order #{orderData.orderNumber}</p>
               <p>Total: {cartItems.length > 0 && cartItems[0].currency} {orderData.total.toFixed(2)}</p>
             </div>
@@ -1017,13 +1016,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
         </div>
       )}
 
-      {/* Terms and Conditions Modal */}
-      <TermsAndConditionsModal
-        isOpen={showTermsModal}
-        onClose={() => setShowTermsModal(false)}
-        onAccept={handleTermsAccept}
-        language="en"
-      />
+      {/* Terms modal handled globally via AppShell */}
     </div>
   );
 }

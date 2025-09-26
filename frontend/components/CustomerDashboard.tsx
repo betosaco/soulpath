@@ -329,6 +329,12 @@ export function CustomerDashboard() {
     );
   }
 
+  const allStatsZero =
+    stats.totalBookings === 0 &&
+    stats.activePackages === 0 &&
+    stats.totalSpent === 0 &&
+    stats.loyaltyPoints === 0;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -353,75 +359,92 @@ export function CustomerDashboard() {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-[#1a1a2e] border-[#16213e]">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-400">Total Bookings</p>
-                <p className="text-2xl font-heading text-white">{stats.totalBookings}</p>
+      {/* Stats Cards (hidden if all values are zero) */}
+      {!allStatsZero && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="bg-[#1a1a2e] border-[#16213e]">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-400">Total Bookings</p>
+                  <p className="text-2xl font-heading text-white">{stats.totalBookings}</p>
+                </div>
+                <Calendar size={24} className="text-[#ffd700]" />
               </div>
-              <Calendar size={24} className="text-[#ffd700]" />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="bg-[#1a1a2e] border-[#16213e]">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-400">Active Packages</p>
-                <p className="text-2xl font-heading text-[#ffd700]">{stats.activePackages}</p>
+          <Card className="bg-[#1a1a2e] border-[#16213e]">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-400">Active Packages</p>
+                  <p className="text-2xl font-heading text-[#ffd700]">{stats.activePackages}</p>
+                </div>
+                <Package size={24} className="text-[#ffd700]" />
               </div>
-              <Package size={24} className="text-[#ffd700]" />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="bg-[#1a1a2e] border-[#16213e]">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-400">Total Spent</p>
-                <p className="text-2xl font-heading text-green-400">
-                  {formatCurrency(stats.totalSpent)}
-                </p>
+          <Card className="bg-[#1a1a2e] border-[#16213e]">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-400">Total Spent</p>
+                  <p className="text-2xl font-heading text-green-400">
+                    {formatCurrency(stats.totalSpent)}
+                  </p>
+                </div>
+                <DollarSign size={24} className="text-green-400" />
               </div>
-              <DollarSign size={24} className="text-green-400" />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="bg-[#1a1a2e] border-[#16213e]">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-400">Loyalty Points</p>
-                <p className="text-2xl font-heading text-purple-400">{stats.loyaltyPoints}</p>
+          <Card className="bg-[#1a1a2e] border-[#16213e]">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-400">Loyalty Points</p>
+                  <p className="text-2xl font-heading text-purple-400">{stats.loyaltyPoints}</p>
+                </div>
+                <Star size={24} className="text-purple-400" />
               </div>
-              <Star size={24} className="text-purple-400" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5 bg-[#1a1a2e] border border-[#16213e]">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-[#ffd700] data-[state=active]:text-black">
+        <TabsList className="grid w-full grid-cols-5 bg-[var(--unified-bg-secondary)] border border-[var(--unified-border-light)]">
+          <TabsTrigger
+            value="overview"
+            className="text-[var(--unified-text-primary)] hover:bg-[var(--unified-bg-secondary)] border border-[var(--unified-border-light)] data-[state=active]:bg-[var(--unified-primary)] data-[state=active]:text-[var(--unified-primary-contrast)]"
+          >
             Overview
           </TabsTrigger>
-          <TabsTrigger value="packages" className="data-[state=active]:bg-[#ffd700] data-[state=active]:text-black">
+          <TabsTrigger
+            value="packages"
+            className="text-[var(--unified-text-primary)] hover:bg-[var(--unified-bg-secondary)] border border-[var(--unified-border-light)] data-[state=active]:bg-[var(--unified-primary)] data-[state=active]:text-[var(--unified-primary-contrast)]"
+          >
             My Packages
           </TabsTrigger>
-          <TabsTrigger value="bookings" className="data-[state=active]:bg-[#ffd700] data-[state=active]:text-black">
+          <TabsTrigger
+            value="bookings"
+            className="text-[var(--unified-text-primary)] hover:bg-[var(--unified-bg-secondary)] border border-[var(--unified-border-light)] data-[state=active]:bg-[var(--unified-primary)] data-[state=active]:text-[var(--unified-primary-contrast)]"
+          >
             Bookings
           </TabsTrigger>
-          <TabsTrigger value="purchases" className="data-[state=active]:bg-[#ffd700] data-[state=active]:text-black">
+          <TabsTrigger
+            value="purchases"
+            className="text-[var(--unified-text-primary)] hover:bg-[var(--unified-bg-secondary)] border border-[var(--unified-border-light)] data-[state=active]:bg-[var(--unified-primary)] data-[state=active]:text-[var(--unified-primary-contrast)]"
+          >
             Purchase History
           </TabsTrigger>
-          <TabsTrigger value="profile" className="data-[state=active]:bg-[#ffd700] data-[state=active]:text-black">
+          <TabsTrigger
+            value="profile"
+            className="text-[var(--unified-text-primary)] hover:bg-[var(--unified-bg-secondary)] border border-[var(--unified-border-light)] data-[state=active]:bg-[var(--unified-primary)] data-[state=active]:text-[var(--unified-primary-contrast)]"
+          >
             Profile
           </TabsTrigger>
         </TabsList>

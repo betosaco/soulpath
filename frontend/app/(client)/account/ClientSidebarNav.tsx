@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { sidebarButtonStyles, combineStyles } from '@/lib/styles/common';
+import { teacherUI } from '@/lib/styles/teacher-ui';
 import { createClient } from '@/lib/supabase/client';
 
 interface User {
@@ -89,14 +90,14 @@ export default function ClientSidebarNav({ user }: ClientSidebarNavProps) {
   };
 
   return (
-    <div className="flex w-64 flex-col bg-[var(--color-sidebar-800)] border-r border-[var(--color-border-500)]">
+    <div className={teacherUI.sidebar.container}>
       {/* Logo/Brand */}
-      <div className="flex h-16 items-center justify-center border-b border-[var(--color-border-500)]">
-        <h1 className="text-xl font-bold text-[var(--color-text-inverse)]">MatMax</h1>
+      <div className={teacherUI.sidebar.header}>
+        <h1 className={teacherUI.sidebar.brandTitle}>MatMax</h1>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 px-4 py-6">
+      <nav className={teacherUI.sidebar.nav}>
         {navigation.map((item) => {
           const Icon = item.icon;
           return (
@@ -120,7 +121,7 @@ export default function ClientSidebarNav({ user }: ClientSidebarNavProps) {
       </nav>
 
       {/* User Info & Sign Out */}
-      <div className="border-t border-[var(--color-border-500)] p-4">
+      <div className={teacherUI.sidebar.footer}>
         <div className="mb-4">
           <p className="text-sm text-[var(--color-text-secondary)]">Signed in as</p>
           <p className="text-sm font-medium text-[var(--color-text-inverse)] truncate">{user.email}</p>

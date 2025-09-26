@@ -40,34 +40,38 @@ export function GroupBookingSelectionStep() {
     <div className="max-w-2xl mx-auto">
       {/* Header */}
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+        <h1 className="text-3xl font-bold mb-4" style={{ color: 'var(--unified-text-primary)' }}>
           Booking Type Selection
         </h1>
-        <p className="text-lg text-gray-600">
+        <p className="text-lg" style={{ color: 'var(--unified-text-secondary)' }}>
           You have {packageCount} package{packageCount > 1 ? 's' : ''} in your cart. 
           Choose how to assign these packages to users.
         </p>
       </div>
 
       {/* Package Summary */}
-      <div className="bg-gray-50 rounded-lg p-6 mb-8">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Packages:</h3>
+      <div className="unified-card p-6 mb-8">
+        <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--unified-text-primary)' }}>Your Packages:</h3>
         <div className="space-y-3">
           {packageItems.map((pkg, index) => (
-            <div key={`package-${index}`} className="flex items-center justify-between bg-white p-4 rounded-lg border">
+            <div
+              key={`package-${index}`}
+              className="flex items-center justify-between p-4 rounded-lg border"
+              style={{ background: 'var(--unified-bg-surface)', borderColor: 'var(--unified-border-light)' }}
+            >
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                  <span className="text-green-600 font-semibold">{index + 1}</span>
+                <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'color-mix(in srgb, var(--color-status-success) 12%, transparent)' }}>
+                  <span className="font-semibold" style={{ color: 'var(--unified-success)' }}>{index + 1}</span>
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-900">{pkg.name}</h4>
-                  <p className="text-sm text-gray-600">
+                  <h4 className="font-medium" style={{ color: 'var(--unified-text-primary)' }}>{pkg.name}</h4>
+                  <p className="text-sm" style={{ color: 'var(--unified-text-secondary)' }}>
                     {pkg.bookingDetails?.length || 0} / {pkg.sessions || 1} sessions booked
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="font-semibold text-gray-900">
+                <p className="font-semibold" style={{ color: 'var(--unified-text-primary)' }}>
                   {pkg.currency} {pkg.price?.toFixed(2) || '0.00'}
                 </p>
               </div>
@@ -81,20 +85,21 @@ export function GroupBookingSelectionStep() {
         {/* Group Booking Option */}
         <button
           onClick={handleGroupBooking}
-          className="group p-8 border-2 border-gray-200 rounded-xl hover:border-green-500 hover:bg-green-50 transition-all duration-200 text-left"
+          className="group unified-card p-8 text-left"
+          style={{ borderColor: 'var(--unified-border-light)' }}
         >
           <div className="flex items-center space-x-4 mb-4">
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors">
-              <Users className="w-6 h-6 text-green-600" />
+            <div className="w-12 h-12 rounded-full flex items-center justify-center transition-colors" style={{ background: 'color-mix(in srgb, var(--color-status-success) 12%, transparent)' }}>
+              <Users className="w-6 h-6" style={{ color: 'var(--unified-success)' }} />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 group-hover:text-green-800">
+            <h3 className="text-xl font-semibold" style={{ color: 'var(--unified-text-primary)' }}>
               Group Booking
             </h3>
           </div>
-          <p className="text-gray-600 mb-4">
+          <p className="mb-4" style={{ color: 'var(--unified-text-secondary)' }}>
             Each package will be assigned to a different person. You&apos;ll provide contact information for each participant.
           </p>
-          <div className="flex items-center text-green-600 font-medium">
+          <div className="flex items-center font-medium" style={{ color: 'var(--unified-success)' }}>
             <CheckCircle className="w-5 h-5 mr-2" />
             Perfect for families, friends, or teams
           </div>
@@ -103,20 +108,21 @@ export function GroupBookingSelectionStep() {
         {/* Individual Booking Option */}
         <button
           onClick={handleIndividualBooking}
-          className="group p-8 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 text-left"
+          className="group unified-card p-8 text-left"
+          style={{ borderColor: 'var(--unified-border-light)' }}
         >
           <div className="flex items-center space-x-4 mb-4">
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-              <User className="w-6 h-6 text-blue-600" />
+            <div className="w-12 h-12 rounded-full flex items-center justify-center transition-colors" style={{ background: 'color-mix(in srgb, var(--unified-accent) 12%, transparent)' }}>
+              <User className="w-6 h-6" style={{ color: 'var(--unified-accent)' }} />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 group-hover:text-blue-800">
+            <h3 className="text-xl font-semibold" style={{ color: 'var(--unified-text-primary)' }}>
               Individual Booking
             </h3>
           </div>
-          <p className="text-gray-600 mb-4">
+          <p className="mb-4" style={{ color: 'var(--unified-text-secondary)' }}>
             All packages will be assigned to you. You&apos;ll provide your contact information once.
           </p>
-          <div className="flex items-center text-blue-600 font-medium">
+          <div className="flex items-center font-medium" style={{ color: 'var(--unified-accent-dark)' }}>
             <CheckCircle className="w-5 h-5 mr-2" />
             Perfect for personal use
           </div>

@@ -154,17 +154,17 @@ export function PaymentForm({
     >
       {/* Payment Processing Overlay */}
       {false && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[9999]">
-          <div className="bg-white rounded-xl p-8 max-w-md mx-4 text-center shadow-2xl border-2 border-primary">
-            <div className="animate-spin rounded-full h-20 w-20 border-4 border-primary border-t-transparent mx-auto mb-6"></div>
-            <h3 className="text-2xl font-bold text-primary mb-3">Procesando Pago</h3>
-            <p className="text-gray-700 mb-6 text-lg">Por favor, no cierres esta ventana mientras procesamos tu pago...</p>
-            <div className="flex items-center justify-center space-x-2 text-sm text-primary">
+        <div className="fixed inset-0 flex items-center justify-center z-[9999]" style={{ background: 'rgba(0,0,0,0.75)' }}>
+          <div className="rounded-xl p-8 max-w-md mx-4 text-center shadow-2xl border-2" style={{ background: 'var(--color-surface-primary)', borderColor: 'var(--color-primary-500)' }}>
+            <div className="animate-spin rounded-full h-20 w-20 border-4 mx-auto mb-6" style={{ borderColor: 'var(--color-primary-500)', borderTopColor: 'transparent' }}></div>
+            <h3 className="text-2xl font-bold mb-3" style={{ color: 'var(--color-primary-500)' }}>Procesando Pago</h3>
+            <p className="mb-6 text-lg" style={{ color: 'var(--color-text-secondary)' }}>Por favor, no cierres esta ventana mientras procesamos tu pago...</p>
+            <div className="flex items-center justify-center space-x-2 text-sm" style={{ color: 'var(--color-primary-500)' }}>
               <div className="w-3 h-3 bg-primary rounded-full animate-bounce"></div>
               <div className="w-3 h-3 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
               <div className="w-3 h-3 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
             </div>
-            <div className="mt-4 text-xs text-gray-500">
+            <div className="mt-4 text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
               Esto puede tomar unos segundos...
             </div>
           </div>
@@ -173,8 +173,8 @@ export function PaymentForm({
 
       {/* Header - Same pattern as packages */}
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-primary mb-4">Complete Your Payment</h2>
-        <p className="text-xl text-muted">Secure payment processing</p>
+        <h2 className="text-3xl font-bold mb-4" style={{ color: 'var(--color-primary-500)' }}>Complete Your Payment</h2>
+        <p className="text-xl" style={{ color: 'var(--color-text-secondary)' }}>Secure payment processing</p>
       </div>
 
       {/* Main Content - Mobile-first: Order Summary first, then Payment Form */}
@@ -184,26 +184,26 @@ export function PaymentForm({
         <div className="space-y-6 order-1 lg:order-2">
           <Card className="card-base">
             <CardHeader>
-              <CardTitle className="text-2xl text-primary flex items-center gap-2">
+              <CardTitle className="text-2xl flex items-center gap-2" style={{ color: 'var(--color-primary-500)' }}>
                 <Shield className="w-6 h-6" />
                 Order Summary
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Package Details */}
-              <div className="p-4 bg-primary/10 rounded-lg">
-                <h4 className="font-semibold text-lg text-primary mb-2">{packageData.name}</h4>
+              <div className="p-4 rounded-lg" style={{ background: 'color-mix(in srgb, var(--color-primary-500) 10%, transparent)' }}>
+                <h4 className="font-semibold text-lg mb-2" style={{ color: 'var(--color-primary-500)' }}>{packageData.name}</h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted">Sessions:</span>
+                    <span className="text-muted-foreground">Sessions:</span>
                     <span className="font-medium">{packageData.sessions}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted">Duration:</span>
+                    <span className="text-muted-foreground">Duration:</span>
                     <span className="font-medium">{packageData.duration} min each</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted">Valid for:</span>
+                    <span className="text-muted-foreground">Valid for:</span>
                     <span className="font-medium">30 days</span>
                   </div>
                 </div>
@@ -211,40 +211,40 @@ export function PaymentForm({
 
               {/* Booking Details */}
               {bookingData && (
-                <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                  <h4 className="font-semibold text-lg text-green-700 mb-2 flex items-center gap-2">
+                <div className="p-4 rounded-lg" style={{ background: 'color-mix(in srgb, var(--color-status-success) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--color-status-success) 25%, transparent)' }}>
+                  <h4 className="font-semibold text-lg mb-2 flex items-center gap-2" style={{ color: 'var(--color-status-success)' }}>
                     <Calendar className="w-5 h-5" />
                     Booking Schedule
                   </h4>
                   <div className="space-y-2 text-sm">
                     {bookingData.teacher && (
                       <div className="flex justify-between">
-                        <span className="text-muted">Teacher:</span>
-                        <span className="font-medium text-green-800">{bookingData.teacher.name}</span>
+                        <span className="text-muted-foreground">Teacher:</span>
+                        <span className="font-medium" style={{ color: 'var(--color-status-success)' }}>{bookingData.teacher.name}</span>
                       </div>
                     )}
                     {bookingData.selectedDate && (
                       <div className="flex justify-between">
-                        <span className="text-muted">Date:</span>
-                        <span className="font-medium text-green-800">{new Date(bookingData.selectedDate).toLocaleDateString('es-PE')}</span>
+                        <span className="text-muted-foreground">Date:</span>
+                        <span className="font-medium" style={{ color: 'var(--color-status-success)' }}>{new Date(bookingData.selectedDate).toLocaleDateString('es-PE')}</span>
                       </div>
                     )}
                     {bookingData.dayOfWeek && (
                       <div className="flex justify-between">
-                        <span className="text-muted">Day:</span>
-                        <span className="font-medium text-green-800 capitalize">{bookingData.dayOfWeek}</span>
+                        <span className="text-muted-foreground">Day:</span>
+                        <span className="font-medium capitalize" style={{ color: 'var(--color-status-success)' }}>{bookingData.dayOfWeek}</span>
                       </div>
                     )}
                     {bookingData.selectedTime && (
                       <div className="flex justify-between">
-                        <span className="text-muted">Time:</span>
-                        <span className="font-medium text-green-800">{bookingData.selectedTime}</span>
+                        <span className="text-muted-foreground">Time:</span>
+                        <span className="font-medium" style={{ color: 'var(--color-status-success)' }}>{bookingData.selectedTime}</span>
                       </div>
                     )}
                     {bookingData.serviceType && (
                       <div className="flex justify-between">
-                        <span className="text-muted">Service:</span>
-                        <span className="font-medium text-green-800">{bookingData.serviceType.name}</span>
+                        <span className="text-muted-foreground">Service:</span>
+                        <span className="font-medium" style={{ color: 'var(--color-status-success)' }}>{bookingData.serviceType.name}</span>
                       </div>
                     )}
                   </div>
@@ -261,8 +261,8 @@ export function PaymentForm({
                   <span className="text-muted">IGV (18%):</span>
                   <span className="font-medium">{getCurrencySymbol(packageData.currency)}{igvAmount.toFixed(2)}</span>
                 </div>
-                <div className="border-t pt-2">
-                  <div className="flex justify-between text-xl font-bold text-primary">
+                <div className="border-t pt-2" style={{ borderColor: 'var(--color-border-200)' }}>
+                  <div className="flex justify-between text-xl font-bold" style={{ color: 'var(--color-primary-500)' }}>
                     <span>Total a Pagar:</span>
                     <span>{getCurrencySymbol(packageData.currency)}{totalAmount.toFixed(2)}</span>
                   </div>
@@ -270,9 +270,9 @@ export function PaymentForm({
               </div>
 
               {/* Customer Information */}
-              <div className="p-4 border border-gray-200 rounded-lg">
+              <div className="p-4 border rounded-lg" style={{ borderColor: 'var(--color-border-200)' }}>
                 <h4 className="font-semibold text-lg mb-2">Customer Information</h4>
-                <div className="space-y-1 text-sm text-muted">
+                <div className="space-y-1 text-sm text-muted-foreground">
                   <div><strong>Name:</strong> {personalInfo.name}</div>
                   <div><strong>Email:</strong> {personalInfo.email}</div>
                   <div><strong>Phone:</strong> {personalInfo.countryCode}{personalInfo.phone}</div>
@@ -280,12 +280,12 @@ export function PaymentForm({
               </div>
 
               {/* Security Notice */}
-              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div className="p-4 rounded-lg" style={{ background: 'color-mix(in srgb, var(--color-status-success) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--color-status-success) 25%, transparent)' }}>
                 <div className="flex items-start gap-2">
-                  <Lock className="w-5 h-5 text-green-600 mt-0.5" />
+                  <Lock className="w-5 h-5 mt-0.5" style={{ color: 'var(--color-status-success)' }} />
                   <div>
-                    <p className="text-green-800 font-medium text-sm">Secure Payment</p>
-                    <p className="text-green-700 text-xs mt-1">
+                    <p className="font-medium text-sm" style={{ color: 'var(--color-status-success)' }}>Secure Payment</p>
+                    <p className="text-xs mt-1" style={{ color: 'color-mix(in srgb, var(--color-status-success) 75%, black)' }}>
                       Your payment is processed securely. We never store your card details.
                     </p>
                   </div>

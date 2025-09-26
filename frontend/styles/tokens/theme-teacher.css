@@ -1,0 +1,54 @@
+/* Teacher Theme Tokens (gunmetal + almond) */
+
+.teacher-theme {
+  --color-background-primary: #eae0d5; /* almond */
+  --color-background-secondary: #e2d6c6;
+  --color-surface-primary: #ffffff;
+  --color-surface-secondary: #f5efe7;
+  --color-surface-tertiary: #e8ded3;
+
+  --color-text-primary: #0a0908; /* black */
+  --color-text-secondary: #22333b; /* gunmetal */
+  --color-text-tertiary: #5e503f; /* walnut-brown */
+  --color-text-inverse: #ffffff;
+
+  --color-primary-500: #22333b; /* gunmetal */
+  --color-primary-600: #1b2930;
+  --color-primary-700: #162025;
+
+  --color-accent-500: #c6ac8f; /* khaki */
+  --color-accent-600: #b2977c;
+
+  --color-border-500: #c7b8b5;
+  --color-border-400: #e0d6d4;
+  --color-border-300: #e7dedb;
+  --color-border-200: #efe8e6;
+
+  --color-status-success: #10b981;
+  --color-status-warning: #f59e0b;
+  --color-status-error: #ef4444;
+  --color-status-info: #3b82f6;
+
+  /* Bridge tokens */
+  --background: var(--color-background-primary);
+  --foreground: var(--color-text-primary);
+  --card: var(--color-surface-primary);
+  --card-foreground: var(--color-text-primary);
+  --popover: var(--color-surface-secondary);
+  --popover-foreground: var(--color-text-primary);
+  --primary: var(--color-primary-500);
+  --primary-foreground: var(--color-text-inverse);
+  --secondary: var(--color-surface-secondary);
+  --secondary-foreground: var(--color-text-primary);
+  --muted: var(--color-surface-secondary);
+  --muted-foreground: var(--color-text-secondary);
+  --accent: var(--color-accent-500);
+  --accent-foreground: var(--color-text-primary);
+  --destructive: var(--color-status-error);
+  --destructive-foreground: #ffffff;
+  --border: var(--color-border-500);
+  --input: var(--color-border-400);
+  --ring: var(--color-primary-500);
+}
+
+

@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { poppins, roboto } from './fonts';
 import './globals.css';
+import '@/styles/tailwind.css';
+// Scoped feature CSS moved to segment layouts to reduce unused CSS on non-client routes
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/lib/theme/ThemeProvider';
 import { Providers } from '@/lib/providers';
@@ -10,6 +12,7 @@ export const metadata: Metadata = {
   title: 'MatMax Yoga Studio',
   description: 'Yoga classes for all levels. Build strength, flexibility, and inner peace with MatMax Yoga Studio.',
   keywords: ['yoga', 'yoga classes', 'wellness', 'meditation', 'flexibility', 'strength', 'balance', 'mindfulness'],
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001'),
   openGraph: {
     title: 'MatMax Yoga Studio',
     description: 'Yoga classes for all levels. Build strength, flexibility, and inner peace with MatMax Yoga Studio.',
@@ -50,13 +53,17 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${poppins.variable} ${roboto.variable}`}>
       <head>
-        <script src="https://static.micuentaweb.pe/static/js/krypton-client/V4.0/ext/neon.js" async></script>
+        <link rel="preconnect" href="https://www.matmax.world" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://matmax.world" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://va.vercel-scripts.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://js.stripe.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://api.stripe.com" crossOrigin="anonymous" />
       </head>
       <body className={cn(
         "antialiased",
         poppins.variable,
         roboto.variable
-      )}>
+      , 'frontpage-theme')}>
         <Providers>
           <ThemeProvider initialTheme="light">
             {children}

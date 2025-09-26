@@ -355,34 +355,35 @@ export function CustomerInfoStep({ initialData, onDataSaved }: CustomerInfoStepP
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
           Customer Information
         </h2>
-        <p className="text-gray-600">
+        <p style={{ color: 'var(--color-text-secondary)' }}>
           {isExistingCustomer ? 'Existing customer information' : 'Provide your details'}
         </p>
         
         {/* Existing Customer Indicator */}
         {isExistingCustomer && existingCustomer && (
-          <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+          <div className="mt-4 p-3 rounded-lg" style={{ background: 'color-mix(in srgb, var(--color-status-success) 8%, transparent)', border: '1px solid color-mix(in srgb, var(--color-status-success) 25%, transparent)' }}>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" style={{ color: 'var(--color-status-success)' }}>
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
-              <span className="text-green-800 font-medium">
+              <span className="font-medium" style={{ color: 'color-mix(in srgb, var(--color-status-success) 80%, black)' }}>
                 Existing Customer: {existingCustomer.fullName || (existingCustomer.emailMasked || maskEmailForDisplay(existingCustomer.email))}
               </span>
               </div>
               <button
                 onClick={handleResetCustomer}
-                className="text-xs text-green-600 hover:text-green-800 underline"
+                className="text-xs underline"
+                style={{ color: 'var(--color-status-success)' }}
                 type="button"
               >
                 Use different info
               </button>
             </div>
-            <p className="text-green-700 text-sm mt-1">
+            <p className="text-sm mt-1" style={{ color: 'color-mix(in srgb, var(--color-status-success) 70%, black)' }}>
               Name and email are locked. You can only modify other details.
             </p>
           </div>
@@ -431,9 +432,10 @@ export function CustomerInfoStep({ initialData, onDataSaved }: CustomerInfoStepP
             disabled={!isFormValid}
             className={`w-full px-6 py-3 rounded-md font-medium transition-all duration-200 ${
               isFormValid
-                ? 'bg-green-600 hover:bg-green-700 text-white shadow-md'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                ? 'text-[var(--primary-foreground)] shadow-md'
+                : 'cursor-not-allowed'
             }`}
+            style={{ backgroundColor: isFormValid ? 'var(--color-primary-500)' : 'var(--color-border-500)', color: isFormValid ? 'var(--primary-foreground)' : 'var(--color-text-tertiary)' }}
           >
             Continue to Next Step
           </button>

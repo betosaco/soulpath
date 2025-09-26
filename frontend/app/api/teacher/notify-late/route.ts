@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, getAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { createEmailService } from '@/lib/brevo-email-service';
+import { renderEmailLayout, getEmailTheme } from '@/lib/brevo-email';
 
 // Add CORS headers
 function addCorsHeaders(response: NextResponse) {
@@ -175,9 +177,38 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // TODO: Send email notifications to students
-    // This would integrate with your email service (Brevo, etc.)
-    // For now, we'll just log the notification details
+    // Send email notifications to students (tokenized, teacher theme)
+    try {
+      const emailService = await createEmailService();
+      if (emailService && slot.bookings.length > 0) {
+        const subject = `Actualización de horario: inicio retrasado ${lateMinutes} min`;
+        const theme = getEmailTheme('frontpage');
+        for (const booking of slot.bookings) {
+          if (!booking.user.email) continue;
+          const rawHtml = `
+            <h2 style="margin:0 0 8px 0;">Estimado/a ${booking.user.fullName || 'alumno/a'}</h2>
+            <p>Tu sesión de <strong>${slot.teacherSchedule.serviceType?.name || 'clase'}</strong> en <strong>${slot.teacherSchedule.venue?.name || 'sede'}</strong> será reprogramada por un retraso de <strong>${lateMinutes} minutos</strong>.</p>
+            <div class="divider"></div>
+            <p><strong>Inicio original:</strong> ${originalStart.toLocaleString()}</p>
+            <p><strong>Nuevo inicio:</strong> ${newStart.toLocaleString()}</p>
+            ${message ? `<p><strong>Mensaje de la profesora:</strong> ${message}</p>` : ''}
+            <p style="margin-top:12px;">Gracias por tu comprensión.</p>
+          `;
+          const html = renderEmailLayout(rawHtml, subject, theme);
+          await emailService.sendEmailWithBCC({
+            to: booking.user.email,
+            bcc: 'alberto@matmax.world',
+            subject,
+            html,
+            text: `${booking.user.fullName || 'Alumno'}: Tu sesión se retrasa ${lateMinutes} minutos. Nuevo inicio: ${newStart.toLocaleString()}`
+          });
+        }
+      }
+    } catch (emailError) {
+      console.warn('Email notifications failed (notify-late):', emailError);
+    }
+
+    // Log notification details
     
     const notificationDetails = {
       slotId: slot.id,

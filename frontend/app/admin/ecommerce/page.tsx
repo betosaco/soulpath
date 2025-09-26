@@ -18,11 +18,11 @@ export default function EcommercePage() {
 
   if (loading) {
     return (
-      <AppShell className="min-h-screen bg-white">
+      <AppShell className="min-h-screen bg-[var(--color-background-primary)]">
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-400 mx-auto mb-4"></div>
-            <p className="text-gray-600 text-lg">Loading ecommerce dashboard...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-text-tertiary)] mx-auto mb-4"></div>
+            <p className="text-[var(--color-text-secondary)] text-lg">Loading ecommerce dashboard...</p>
           </div>
         </div>
       </AppShell>

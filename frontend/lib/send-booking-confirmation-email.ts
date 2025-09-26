@@ -1,4 +1,5 @@
 import { createEmailService } from '@/lib/brevo-email-service';
+import { renderEmailLayout, getEmailTheme, EmailThemeKey } from '@/lib/brevo-email';
 
 interface BookingEmailData {
   customerName: string;
@@ -21,7 +22,7 @@ interface BookingEmailData {
   language?: string;
 }
 
-export async function sendBookingConfirmationEmail(bookingData: BookingEmailData): Promise<boolean> {
+export async function sendBookingConfirmationEmail(bookingData: BookingEmailData, themeKey: EmailThemeKey = 'client'): Promise<boolean> {
   try {
     // Get email configuration using the same method as createEmailService
     const emailService = await createEmailService();
@@ -32,7 +33,7 @@ export async function sendBookingConfirmationEmail(bookingData: BookingEmailData
     }
 
     // Generate HTML content for the booking confirmation email
-    const htmlContent = `
+    const rawHtml = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -171,6 +172,9 @@ MatMax Wellness Studio
 `;
 
     // Send email using Brevo service with BCC
+    const theme = getEmailTheme(themeKey);
+    const htmlContent = renderEmailLayout(rawHtml, '¡Reserva Confirmada! - MatMax Wellness Studio', theme);
+
     const emailResult = await emailService.sendEmailWithBCC({
       to: bookingData.customerEmail,
       bcc: 'alberto@matmax.world',

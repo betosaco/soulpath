@@ -195,11 +195,7 @@ export default function TeacherSettingsPage() {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                        activeTab === tab.id
-                          ? 'border-[var(--unified-primary)] text-[var(--unified-primary)]'
-                          : 'border-transparent text-[var(--unified-text-secondary)] hover:text-[var(--unified-text-primary)] hover:border-[var(--unified-border-light)]'
-                      }`}
+                      className={`flex items-center gap-2 ${teacherUI.tabs.base} ${activeTab === tab.id ? teacherUI.tabs.active : teacherUI.tabs.inactive}`}
                     >
                       <Icon className="h-4 w-4" />
                       {tab.label}
@@ -220,30 +216,30 @@ export default function TeacherSettingsPage() {
                 </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm text-[var(--unified-text-secondary)] mb-1">Bank name</label>
+                    <label className="unified-form-label">Bank name</label>
                           <input 
                             name="bankName" 
                             value={paymentForm.bankName || ''} 
                             onChange={onChangePayment} 
-                            className="w-full border rounded px-3 py-2 bg-[var(--unified-bg-surface)] text-[var(--unified-text-primary)] border-[var(--unified-border-light)]" 
+                            className="unified-form-input" 
                           />
                   </div>
                   <div>
-                    <label className="block text-sm text-[var(--unified-text-secondary)] mb-1">Account number</label>
+                    <label className="unified-form-label">Account number</label>
                           <input 
                             name="accountNumber" 
                             value={paymentForm.accountNumber || ''} 
                             onChange={onChangePayment} 
-                            className="w-full border rounded px-3 py-2 bg-[var(--unified-bg-surface)] text-[var(--unified-text-primary)] border-[var(--unified-border-light)]" 
+                            className="unified-form-input" 
                           />
                   </div>
                   <div>
-                    <label className="block text-sm text-[var(--unified-text-secondary)] mb-1">Account type</label>
+                    <label className="unified-form-label">Account type</label>
                           <input 
                             name="accountType" 
                             value={paymentForm.accountType || ''} 
                             onChange={onChangePayment} 
-                            className="w-full border rounded px-3 py-2 bg-[var(--unified-bg-surface)] text-[var(--unified-text-primary)] border-[var(--unified-border-light)]" 
+                            className="unified-form-input" 
                           />
                   </div>
                 </div>
@@ -259,23 +255,23 @@ export default function TeacherSettingsPage() {
                 </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm text-[var(--unified-text-secondary)] mb-1">Payout email</label>
+                    <label className="unified-form-label">Payout email</label>
                           <input 
                             type="email" 
                             name="payoutEmail" 
                             value={paymentForm.payoutEmail || ''} 
                             onChange={onChangePayment} 
-                            className="w-full border rounded px-3 py-2 bg-[var(--unified-bg-surface)] text-[var(--unified-text-primary)] border-[var(--unified-border-light)]" 
+                            className="unified-form-input" 
                           />
                   </div>
                   <div>
-                    <label className="block text-sm text-[var(--unified-text-secondary)] mb-1">Payout phone</label>
+                    <label className="unified-form-label">Payout phone</label>
                           <input 
                             type="tel" 
                             name="payoutPhone" 
                             value={paymentForm.payoutPhone || ''} 
                             onChange={onChangePayment} 
-                            className="w-full border rounded px-3 py-2 bg-[var(--unified-bg-surface)] text-[var(--unified-text-primary)] border-[var(--unified-border-light)]" 
+                            className="unified-form-input" 
                           />
                   </div>
                 </div>
@@ -291,39 +287,39 @@ export default function TeacherSettingsPage() {
                 </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm text-[var(--unified-text-secondary)] mb-1">RUC</label>
+                    <label className="unified-form-label">RUC</label>
                           <input 
                             name="ruc" 
                             value={paymentForm.ruc || ''} 
                             onChange={onChangePayment} 
-                            className="w-full border rounded px-3 py-2 bg-[var(--unified-bg-surface)] text-[var(--unified-text-primary)] border-[var(--unified-border-light)]" 
+                            className="unified-form-input" 
                           />
                   </div>
                   <div>
-                    <label className="block text-sm text-[var(--unified-text-secondary)] mb-1">Document type</label>
+                    <label className="unified-form-label">Document type</label>
                           <input 
                             name="documentType" 
                             value={paymentForm.documentType || ''} 
                             onChange={onChangePayment} 
-                            className="w-full border rounded px-3 py-2 bg-[var(--unified-bg-surface)] text-[var(--unified-text-primary)] border-[var(--unified-border-light)]" 
+                            className="unified-form-input" 
                           />
                   </div>
                   <div>
-                    <label className="block text-sm text-[var(--unified-text-secondary)] mb-1">Document number</label>
+                    <label className="unified-form-label">Document number</label>
                           <input 
                             name="documentNumber" 
                             value={paymentForm.documentNumber || ''} 
                             onChange={onChangePayment} 
-                            className="w-full border rounded px-3 py-2 bg-[var(--unified-bg-surface)] text-[var(--unified-text-primary)] border-[var(--unified-border-light)]" 
+                            className="unified-form-input" 
                           />
                   </div>
                 </div>
               </section>
 
-              <div className="flex justify-end border-t border-[var(--unified-border-light)] pt-4">
+                    <div className="flex justify-end border-t border-[var(--unified-border-light)] pt-4">
                       <button 
                         onClick={onSavePayment} 
-                        className="flex items-center gap-2 px-4 py-2 bg-[var(--unified-primary)] text-white rounded hover:bg-[var(--unified-primary-hover)] transition-colors"
+                        className={`${teacherUI.button.primary} flex items-center gap-2`}
                       >
                         <Save className="h-4 w-4" />
                         Save Payment Settings
@@ -342,32 +338,32 @@ export default function TeacherSettingsPage() {
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-sm text-[var(--unified-text-secondary)] mb-1">Full Name</label>
+                          <label className="unified-form-label">Full Name</label>
                           <input 
                             name="name" 
                             value={profileForm.name || ''} 
                             onChange={onChangeProfile} 
-                            className="w-full border rounded px-3 py-2 bg-[var(--unified-bg-surface)] text-[var(--unified-text-primary)] border-[var(--unified-border-light)]" 
+                            className="unified-form-input" 
                           />
                         </div>
                         <div>
-                          <label className="block text-sm text-[var(--unified-text-secondary)] mb-1">Email</label>
+                          <label className="unified-form-label">Email</label>
                           <input 
                             type="email" 
                             name="email" 
                             value={profileForm.email || ''} 
                             onChange={onChangeProfile} 
-                            className="w-full border rounded px-3 py-2 bg-[var(--unified-bg-surface)] text-[var(--unified-text-primary)] border-[var(--unified-border-light)]" 
+                            className="unified-form-input" 
                           />
                         </div>
                         <div>
-                          <label className="block text-sm text-[var(--unified-text-secondary)] mb-1">Phone</label>
+                          <label className="unified-form-label">Phone</label>
                           <input 
                             type="tel" 
                             name="phone" 
                             value={profileForm.phone || ''} 
                             onChange={onChangeProfile} 
-                            className="w-full border rounded px-3 py-2 bg-[var(--unified-bg-surface)] text-[var(--unified-text-primary)] border-[var(--unified-border-light)]" 
+                            className="unified-form-input" 
                           />
                         </div>
                       </div>
@@ -383,27 +379,27 @@ export default function TeacherSettingsPage() {
                       </div>
                       <div className="space-y-3">
                         <div>
-                          <label className="block text-sm text-[var(--unified-text-secondary)] mb-1">Short Bio (max 500 characters)</label>
+                          <label className="unified-form-label">Short Bio (max 500 characters)</label>
                           <textarea 
                             name="shortBio" 
                             value={profileForm.shortBio || ''} 
                             onChange={onChangeProfile} 
                             rows={3}
                             maxLength={500}
-                            className="w-full border rounded px-3 py-2 bg-[var(--unified-bg-surface)] text-[var(--unified-text-primary)] border-[var(--unified-border-light)]" 
+                            className="unified-form-textarea" 
                           />
                           <p className="text-xs text-[var(--unified-text-secondary)] mt-1">
                             {profileForm.shortBio?.length || 0}/500 characters
                           </p>
                         </div>
                         <div>
-                          <label className="block text-sm text-[var(--unified-text-secondary)] mb-1">Full Bio</label>
+                          <label className="unified-form-label">Full Bio</label>
                           <textarea 
                             name="bio" 
                             value={profileForm.bio || ''} 
                             onChange={onChangeProfile} 
                             rows={6}
-                            className="w-full border rounded px-3 py-2 bg-[var(--unified-bg-surface)] text-[var(--unified-text-primary)] border-[var(--unified-border-light)]" 
+                            className="unified-form-textarea" 
                           />
                         </div>
                       </div>
@@ -419,40 +415,40 @@ export default function TeacherSettingsPage() {
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-sm text-[var(--unified-text-secondary)] mb-1">Website</label>
+                          <label className="unified-form-label">Website</label>
                           <input 
                             type="url" 
                             name="website" 
                             value={profileForm.website || ''} 
                             onChange={onChangeProfile} 
-                            className="w-full border rounded px-3 py-2 bg-[var(--unified-bg-surface)] text-[var(--unified-text-primary)] border-[var(--unified-border-light)]" 
+                            className="unified-form-input" 
                           />
                         </div>
                         <div>
-                          <label className="block text-sm text-[var(--unified-text-secondary)] mb-1">Instagram</label>
+                          <label className="unified-form-label">Instagram</label>
                           <input 
                             name="instagram" 
                             value={profileForm.instagram || ''} 
                             onChange={onChangeProfile} 
-                            className="w-full border rounded px-3 py-2 bg-[var(--unified-bg-surface)] text-[var(--unified-text-primary)] border-[var(--unified-border-light)]" 
+                            className="unified-form-input" 
                           />
                         </div>
                         <div>
-                          <label className="block text-sm text-[var(--unified-text-secondary)] mb-1">Facebook</label>
+                          <label className="unified-form-label">Facebook</label>
                           <input 
                             name="facebook" 
                             value={profileForm.facebook || ''} 
                             onChange={onChangeProfile} 
-                            className="w-full border rounded px-3 py-2 bg-[var(--unified-bg-surface)] text-[var(--unified-text-primary)] border-[var(--unified-border-light)]" 
+                            className="unified-form-input" 
                           />
                         </div>
                         <div>
-                          <label className="block text-sm text-[var(--unified-text-secondary)] mb-1">LinkedIn</label>
+                          <label className="unified-form-label">LinkedIn</label>
                           <input 
                             name="linkedin" 
                             value={profileForm.linkedin || ''} 
                             onChange={onChangeProfile} 
-                            className="w-full border rounded px-3 py-2 bg-[var(--unified-bg-surface)] text-[var(--unified-text-primary)] border-[var(--unified-border-light)]" 
+                            className="unified-form-input" 
                           />
                         </div>
                       </div>
@@ -461,7 +457,7 @@ export default function TeacherSettingsPage() {
                     <div className="flex justify-end border-t border-[var(--unified-border-light)] pt-4">
                       <button 
                         onClick={onSaveProfile} 
-                        className="flex items-center gap-2 px-4 py-2 bg-[var(--unified-primary)] text-white rounded hover:bg-[var(--unified-primary-hover)] transition-colors"
+                        className={`${teacherUI.button.primary} flex items-center gap-2`}
                       >
                         <Save className="h-4 w-4" />
                         Save Profile Settings
@@ -480,57 +476,57 @@ export default function TeacherSettingsPage() {
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-sm text-[var(--unified-text-secondary)] mb-1">Minimum Students</label>
+                          <label className="unified-form-label">Minimum Students</label>
                           <input 
                             type="number" 
                             name="minStudents" 
                             value={preferencesForm.minStudents || ''} 
                             onChange={onChangePreferences} 
                             min="1"
-                            className="w-full border rounded px-3 py-2 bg-[var(--unified-bg-surface)] text-[var(--unified-text-primary)] border-[var(--unified-border-light)]" 
+                            className="unified-form-input" 
                           />
                         </div>
                         <div>
-                          <label className="block text-sm text-[var(--unified-text-secondary)] mb-1">Maximum Students</label>
+                          <label className="unified-form-label">Maximum Students</label>
                           <input 
                             type="number" 
                             name="maxStudents" 
                             value={preferencesForm.maxStudents || ''} 
                             onChange={onChangePreferences} 
                             min="1"
-                            className="w-full border rounded px-3 py-2 bg-[var(--unified-bg-surface)] text-[var(--unified-text-primary)] border-[var(--unified-border-light)]" 
+                            className="unified-form-input" 
                           />
                         </div>
                       </div>
                       <div className="space-y-3">
                         <div>
-                          <label className="block text-sm text-[var(--unified-text-secondary)] mb-1">Teaching Style</label>
+                          <label className="unified-form-label">Teaching Style</label>
                           <textarea 
                             name="teachingStyle" 
                             value={preferencesForm.teachingStyle || ''} 
                             onChange={onChangePreferences} 
                             rows={3}
-                            className="w-full border rounded px-3 py-2 bg-[var(--unified-bg-surface)] text-[var(--unified-text-primary)] border-[var(--unified-border-light)]" 
+                            className="unified-form-textarea" 
                           />
                         </div>
                         <div>
-                          <label className="block text-sm text-[var(--unified-text-secondary)] mb-1">Teaching Philosophy</label>
+                          <label className="unified-form-label">Teaching Philosophy</label>
                           <textarea 
                             name="philosophy" 
                             value={preferencesForm.philosophy || ''} 
                             onChange={onChangePreferences} 
                             rows={3}
-                            className="w-full border rounded px-3 py-2 bg-[var(--unified-bg-surface)] text-[var(--unified-text-primary)] border-[var(--unified-border-light)]" 
+                            className="unified-form-textarea" 
                           />
                         </div>
                         <div>
-                          <label className="block text-sm text-[var(--unified-text-secondary)] mb-1">Teaching Approach</label>
+                          <label className="unified-form-label">Teaching Approach</label>
                           <textarea 
                             name="approach" 
                             value={preferencesForm.approach || ''} 
                             onChange={onChangePreferences} 
                             rows={3}
-                            className="w-full border rounded px-3 py-2 bg-[var(--unified-bg-surface)] text-[var(--unified-text-primary)] border-[var(--unified-border-light)]" 
+                            className="unified-form-textarea" 
                           />
                         </div>
                       </div>
@@ -581,7 +577,7 @@ export default function TeacherSettingsPage() {
                     <div className="flex justify-end border-t border-[var(--unified-border-light)] pt-4">
                       <button 
                         onClick={onSavePreferences} 
-                        className="flex items-center gap-2 px-4 py-2 bg-[var(--unified-primary)] text-white rounded hover:bg-[var(--unified-primary-hover)] transition-colors"
+                        className={`${teacherUI.button.primary} flex items-center gap-2`}
                       >
                         <Save className="h-4 w-4" />
                         Save Preferences

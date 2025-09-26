@@ -43,16 +43,17 @@ export function AboutSection({ t }: AboutSectionProps) {
             transition={{ duration: 0.8 }}
             className="order-2 md:order-1 space-y-4 sm:space-y-6"
           >
-            <h2 className="text-2xl xs:text-3xl sm:text-4xl md:text-3xl lg:text-4xl xl:text-5xl font-heading text-[#EAEAEA] leading-tight">
+            <h2 className="text-2xl xs:text-3xl sm:text-4xl md:text-3xl lg:text-4xl xl:text-5xl font-heading leading-tight" style={{ color: 'var(--color-text-primary)' }}>
               {(t.about as Record<string, string>).title}
             </h2>
             <motion.div
               initial={{ width: 0 }}
               whileInView={{ width: "4rem" }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="h-0.5 bg-gradient-to-r from-[#FFD700] to-transparent"
+              className="h-0.5"
+              style={{ backgroundImage: 'linear-gradient(to right, var(--color-accent-500), transparent)' }}
             />
-            <p className="text-sm sm:text-base md:text-sm lg:text-base xl:text-lg text-[#EAEAEA]/80 leading-relaxed max-w-2xl">
+            <p className="text-sm sm:text-base md:text-sm lg:text-base xl:text-lg leading-relaxed max-w-2xl" style={{ color: 'var(--color-text-secondary)' }}>
               {(t.about as Record<string, string>).text}
             </p>
             
@@ -61,7 +62,8 @@ export function AboutSection({ t }: AboutSectionProps) {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
-              className="flex items-center space-x-2 text-[#FFD700]/60 pt-4"
+              className="flex items-center space-x-2 pt-4"
+              style={{ color: 'color-mix(in srgb, var(--color-accent-500) 60%, transparent)' }}
             >
               {[...Array(5)].map((_, i) => (
                 <motion.div
@@ -75,7 +77,8 @@ export function AboutSection({ t }: AboutSectionProps) {
                     repeat: Infinity,
                     delay: i * 0.2
                   }}
-                  className="w-1 h-1 bg-[#FFD700] rounded-full"
+                  className="w-1 h-1 rounded-full"
+                  style={{ backgroundColor: 'var(--color-accent-500)' }}
                 />
               ))}
             </motion.div>
@@ -97,10 +100,11 @@ export function AboutSection({ t }: AboutSectionProps) {
                 <motion.div
                   animate={{ rotate: -360 }}
                   transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-                  className="absolute inset-2 border border-[#FFD700]/10 rounded-full"
+                  className="absolute inset-2 border rounded-full"
+                  style={{ borderColor: 'color-mix(in srgb, var(--color-accent-500) 15%, transparent)' }}
                 />
                 
-                <div className="w-full h-full rounded-full overflow-hidden border-1 xs:border-2 border-[#FFD700]/30 relative z-10 flex items-center justify-center image-container">
+                <div className="w-full h-full rounded-full overflow-hidden border-1 xs:border-2 relative z-10 flex items-center justify-center image-container" style={{ borderColor: 'color-mix(in srgb, var(--color-accent-500) 30%, transparent)' }}>
                   {isImageLoading ? (
                     <div className="w-full h-full bg-[#191970]/30 flex items-center justify-center">
                       <motion.div
@@ -126,7 +130,7 @@ export function AboutSection({ t }: AboutSectionProps) {
                 </div>
                 
                 {/* Cosmic overlay effect */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#191970]/20 to-transparent rounded-full pointer-events-none" />
+                <div className="absolute inset-0 rounded-full pointer-events-none" style={{ backgroundImage: 'linear-gradient(to top, color-mix(in srgb, var(--color-text-primary) 20%, transparent), transparent)' }} />
               </motion.div>
               
               {/* Enhanced decorative cosmic elements around the photo */}
@@ -135,11 +139,11 @@ export function AboutSection({ t }: AboutSectionProps) {
                 transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
                 className="absolute inset-0 pointer-events-none"
               >
-                <div className="w-2 h-2 sm:w-3 sm:h-3 bg-[#FFD700] rounded-full absolute top-8 sm:top-12 right-8 sm:right-12 opacity-70 cosmic-glow-small"></div>
-                <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-[#C0C0C0] rounded-full absolute bottom-12 sm:bottom-16 left-4 sm:left-8 opacity-80"></div>
-                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-[#FFD700] rounded-full absolute top-16 sm:top-20 left-8 sm:left-12 opacity-60"></div>
-                <div className="w-1 h-1 bg-[#C0C0C0] rounded-full absolute top-1/3 right-4 sm:right-8 opacity-50"></div>
-                <div className="w-1.5 h-1.5 bg-[#FFD700] rounded-full absolute bottom-1/3 right-12 sm:right-16 opacity-40"></div>
+                <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full absolute top-8 sm:top-12 right-8 sm:right-12 opacity-70 cosmic-glow-small" style={{ backgroundColor: 'var(--color-accent-500)' }}></div>
+                <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full absolute bottom-12 sm:bottom-16 left-4 sm:left-8 opacity-80" style={{ backgroundColor: 'var(--color-text-tertiary)' }}></div>
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full absolute top-16 sm:top-20 left-8 sm:left-12 opacity-60" style={{ backgroundColor: 'var(--color-accent-500)' }}></div>
+                <div className="w-1 h-1 rounded-full absolute top-1/3 right-4 sm:right-8 opacity-50" style={{ backgroundColor: 'var(--color-text-tertiary)' }}></div>
+                <div className="w-1.5 h-1.5 rounded-full absolute bottom-1/3 right-12 sm:right-16 opacity-40" style={{ backgroundColor: 'var(--color-accent-500)' }}></div>
               </motion.div>
               
               {/* Floating particles */}

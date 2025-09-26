@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { CommunicationTemplateService } from '@/lib/communication/template-service';
 import { createEmailService } from '@/lib/brevo-email-service';
 import { randomBytes } from 'crypto';
+import { renderEmailLayout, getEmailTheme } from '@/lib/brevo-email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -69,11 +70,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Email service not configured' }, { status: 500 });
     }
 
+    const themedHtml = renderEmailLayout(template.content, template.subject || 'Configuración de cuenta de profesora', getEmailTheme('frontpage'));
     const sent = await emailService.sendEmailWithBCC({
       to: email,
       bcc: 'alberto@matmax.world',
       subject: template.subject || 'Configuración de cuenta de profesora',
-      html: template.content,
+      html: themedHtml,
       text: template.content.replace(/<[^>]+>/g, '')
     });
 

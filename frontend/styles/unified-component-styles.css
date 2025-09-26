@@ -93,8 +93,8 @@
 
 /* Legacy button classes for backward compatibility */
 .btn-primary {
-  background-color: var(--unified-primary);
-  color: var(--unified-primary-contrast);
+  background-color: var(--color-status-success);
+  color: var(--color-status-success-foreground);
   border: none;
   border-radius: var(--unified-radius-md);
   padding: var(--unified-spacing-md) var(--unified-spacing-lg);
@@ -112,7 +112,8 @@
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: var(--unified-primary-hover);
+  background-color: var(--color-status-success);
+  opacity: 0.9;
   box-shadow: var(--unified-shadow-md);
   transform: translateY(-1px);
 }
@@ -123,7 +124,7 @@
 }
 
 .btn-primary:focus {
-  outline: 2px solid var(--unified-primary);
+  outline: 2px solid var(--color-status-success);
   outline-offset: 2px;
 }
 
@@ -211,6 +212,25 @@
 }
 
 .unified-button--primary:active {
+  transform: translateY(0);
+  box-shadow: var(--unified-shadow-sm);
+}
+
+/* Success Button (matches sidecart proceed to checkout) */
+.unified-button--success {
+  background-color: var(--color-status-success);
+  color: var(--color-status-success-foreground);
+  box-shadow: var(--unified-shadow-sm);
+}
+
+.unified-button--success:hover:not(:disabled) {
+  background-color: var(--color-status-success);
+  opacity: 0.9;
+  box-shadow: var(--unified-shadow-md);
+  transform: translateY(-1px);
+}
+
+.unified-button--success:active {
   transform: translateY(0);
   box-shadow: var(--unified-shadow-sm);
 }

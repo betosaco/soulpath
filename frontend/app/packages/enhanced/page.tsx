@@ -20,12 +20,10 @@ export default function EnhancedPackagesPage() {
   // ULTRA-OPTIMIZATION: Remove unnecessary page-level loading
   // Let PackageSelectionStep handle its own loading state
   return (
-    <AppShell>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <BookingLayout>
-          <PackageSelectionStep onPackageAdded={handlePackageAdded} />
-        </BookingLayout>
-      </div>
+    <AppShell className="min-h-screen bg-[var(--color-surface-primary)]">
+      <BookingLayout>
+        <PackageSelectionStep onPackageAdded={handlePackageAdded} />
+      </BookingLayout>
     </AppShell>
   );
 }

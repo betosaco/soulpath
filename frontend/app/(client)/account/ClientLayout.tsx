@@ -4,6 +4,8 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import ClientSidebarNav from './ClientSidebarNav';
+import ClientHeader from './ClientHeader';
+import { teacherUI } from '@/lib/styles/teacher-ui';
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -18,10 +20,10 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-[#0a0a23]">
+      <div className="flex items-center justify-center h-screen bg-[var(--color-background-primary)]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ffd700] mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-accent-500)] mx-auto mb-4"></div>
+          <p className="text-[var(--color-text-secondary)]">Loading...</p>
         </div>
       </div>
     );
@@ -32,11 +34,14 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   }
 
   return (
-    <div className="flex h-screen bg-[#0a0a23] inner-page mobile-scrollable">
+    <div className={`${teacherUI.layout.shell} teacher-theme`}>
       <ClientSidebarNav user={user} />
-      <main className="flex-1 overflow-y-auto p-6 mobile-scrollable">
-        {children}
-      </main>
+      <div className={teacherUI.layout.main}>
+        <ClientHeader user={user} />
+        <main className={teacherUI.layout.content}>
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

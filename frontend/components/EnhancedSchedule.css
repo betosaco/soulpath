@@ -17,12 +17,12 @@
 
 /* Schedule Day */
 .schedule-day {
-  @apply bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden;
+  @apply bg-[var(--color-primary-500)]/5 rounded-lg shadow-sm border border-[var(--color-primary-500)]/20 overflow-hidden;
   margin-bottom: 1.5rem;
 }
 
 .schedule-day__header {
-  @apply bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center justify-between;
+  @apply bg-[var(--color-primary-500)]/10 px-6 py-4 border-b border-[var(--color-primary-500)]/20 flex items-center justify-between;
 }
 
 /* Schedule Slot */
@@ -106,7 +106,7 @@
 }
 
 .capacity-bar__fill {
-  @apply bg-[#6ea058] h-2 rounded-full transition-all duration-300;
+  @apply bg-[var(--color-status-success)] h-2 rounded-full transition-all duration-300;
 }
 
 /* Responsive Design */
@@ -184,7 +184,7 @@
 /* Filter Styles */
 .enhanced-schedule__filters input,
 .enhanced-schedule__filters select {
-  @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6ea058] focus:border-transparent transition-colors;
+  @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-status-success)] focus:border-transparent transition-colors;
 }
 
 .enhanced-schedule__filters input:focus,
@@ -194,7 +194,7 @@
 
 /* Button Styles */
 .btn-primary {
-  @apply bg-[#6ea058] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#5a8a47] focus:ring-2 focus:ring-[#6ea058] focus:outline-none transition-colors;
+  @apply bg-[var(--color-status-success)] text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 focus:ring-2 focus:ring-[var(--color-status-success)] focus:outline-none transition-colors;
 }
 
 .btn-secondary {
@@ -211,11 +211,11 @@
 }
 
 .view-mode-button--active {
-  @apply bg-[#6ea058] text-white;
+  @apply bg-[var(--color-status-success)] text-white;
 }
 
 .view-mode-button--inactive {
-  @apply bg-gray-100 text-gray-700 hover:bg-[#6ea058]/10 hover:text-[#6ea058];
+  @apply bg-gray-100 text-gray-700 hover:bg-[var(--color-status-success)]/10 hover:text-[var(--color-status-success)];
 }
 
 /* Status Indicators */
@@ -247,7 +247,7 @@
 
 /* Focus States */
 .schedule-slot:focus-within {
-  @apply ring-2 ring-[#6ea058];
+  @apply ring-2 ring-[var(--color-status-success)];
 }
 
 /* Accessibility */

@@ -243,21 +243,13 @@ export default function TeacherDashboardPage() {
         <div className={teacherUI.card.body}>
           <div className="flex gap-2 mb-6">
             <button
-              className={`px-4 py-2 rounded-lg border transition-colors ${
-                activeTab === 'slots' 
-                  ? 'bg-[var(--unified-primary)] text-[var(--unified-primary-contrast)] border-[var(--unified-primary)]' 
-                  : 'bg-transparent text-[var(--unified-text-primary)] border-[var(--unified-border-light)] hover:bg-[var(--unified-bg-secondary)]'
-              }`}
+              className={`${teacherUI.tabs.base} ${activeTab === 'slots' ? teacherUI.tabs.active : teacherUI.tabs.inactive}`}
               onClick={() => setActiveTab('slots')}
             >
               Available Schedule
             </button>
             <button
-              className={`px-4 py-2 rounded-lg border transition-colors ${
-                activeTab === 'bookings' 
-                  ? 'bg-[var(--unified-primary)] text-[var(--unified-primary-contrast)] border-[var(--unified-primary)]' 
-                  : 'bg-transparent text-[var(--unified-text-primary)] border-[var(--unified-border-light)] hover:bg-[var(--unified-bg-secondary)]'
-              }`}
+              className={`${teacherUI.tabs.base} ${activeTab === 'bookings' ? teacherUI.tabs.active : teacherUI.tabs.inactive}`}
               onClick={() => setActiveTab('bookings')}
             >
               Upcoming Bookings
@@ -291,7 +283,7 @@ export default function TeacherDashboardPage() {
               ) : (
                 <div className="space-y-4">
                   {/* Subtle indicator of loaded data */}
-                  <div className="text-xs text-gray-400 text-right">
+                  <div className="text-xs text-[var(--unified-text-secondary)] text-right">
                     Showing {slots.length} schedule slot{slots.length !== 1 ? 's' : ''}
                   </div>
                   
@@ -307,7 +299,7 @@ export default function TeacherDashboardPage() {
                       <div key={slot.id} className={`rounded-lg p-4 border transition-colors ${
                        isAvailable 
                            ? 'bg-[var(--unified-accent)]/15 border-[var(--unified-accent-dark)] hover:bg-[var(--unified-accent)]/25' 
-                           : 'bg-red-50 border-red-200 hover:bg-red-100'
+                           : 'bg-[var(--color-status-error)]/10 border-[var(--color-status-error)]/30 hover:bg-[var(--color-status-error)]/20'
                       }`}>
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
@@ -315,11 +307,7 @@ export default function TeacherDashboardPage() {
                               <p className="font-medium text-[var(--unified-text-primary)]">
                                 {formatDate(slot.startTime)} - {formatDate(slot.endTime)}
                               </p>
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                               isAvailable 
-                                   ? 'bg-[var(--unified-accent)]/30 text-[var(--unified-text-primary)]' 
-                                   : 'bg-red-100 text-red-800'
-                              }`}>
+                              <span className={`${teacherUI.badge.base} ${isAvailable ? teacherUI.badge.available : teacherUI.badge.unavailable}`}>
                                 {isAvailable ? 'Available' : 'Fully Booked'}
                               </span>
                             </div>
@@ -329,7 +317,7 @@ export default function TeacherDashboardPage() {
                             {/* Available Spots Info - matching EnhancedSchedule format */}
                             <div className="flex items-center gap-2 text-sm">
                               <div className="flex items-center gap-1">
-                                 <div className={`w-2 h-2 rounded-full ${slot.isLate ? 'bg-yellow-500' : 'bg-[var(--unified-accent-dark)]'}`}></div>
+                                 <div className={`w-2 h-2 rounded-full ${slot.isLate ? 'bg-[var(--color-status-warning)]' : 'bg-[var(--unified-accent-dark)]'}`}></div>
                                 <span className="text-[var(--unified-text-secondary)]">
                                   {availableSpots} of {capacity} spots available
                                 </span>
@@ -342,7 +330,7 @@ export default function TeacherDashboardPage() {
                             </div>
                             
                             {slot.isLate && (
-                              <div className="mt-2 text-xs text-red-600 font-medium">
+                              <div className="mt-2 text-xs text-[var(--color-status-warning)] font-medium">
                                 ⚠️ Running Late ({slot.lateMinutes} min)
                               </div>
                             )}
@@ -350,7 +338,7 @@ export default function TeacherDashboardPage() {
                           <div className="ml-4">
                             <button 
                               onClick={() => cancelSlot(slot.id)} 
-                              className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-sm"
+                              className={teacherUI.button.dangerSm + ' text-sm'}
                             >
                               Cancel
                             </button>

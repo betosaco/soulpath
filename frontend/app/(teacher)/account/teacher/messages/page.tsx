@@ -10,12 +10,12 @@ export default function TeacherMessagesPage() {
       <div className={teacherUI.card.container}>
         <div className={teacherUI.card.header}>
           <div className="flex items-center gap-3">
-            <MessageSquareIcon className="h-5 w-5 text-[var(--color-primary-500)]" />
-            <h2 className="text-xl font-semibold text-[var(--color-text-inverse)]">Messages</h2>
+            <MessageSquareIcon className="h-5 w-5 text-[var(--unified-primary)]" />
+            <h2 className="text-xl font-semibold text-[var(--unified-text-primary)]">Messages</h2>
           </div>
         </div>
         <div className={teacherUI.card.body}>
-          <p className="text-[var(--color-text-secondary)]">Teacher-student messaging coming soon.</p>
+          <p className="text-[var(--unified-text-secondary)]">Teacher-student messaging coming soon.</p>
         </div>
       </div>
     </div>

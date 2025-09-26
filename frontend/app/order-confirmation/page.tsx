@@ -168,10 +168,10 @@ export default function OrderConfirmationPage() {
   if (loading) {
     return (
       <AppShell>
-        <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center bg-background">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading order details...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-2 mx-auto mb-4" style={{ borderColor: 'color-mix(in srgb, var(--color-primary-500) 25%, transparent)', borderTopColor: 'var(--color-primary-500)' }}></div>
+            <p className="text-muted-foreground">Loading order details...</p>
           </div>
         </div>
       </AppShell>
@@ -181,16 +181,16 @@ export default function OrderConfirmationPage() {
   if (error || !order) {
     return (
       <AppShell>
-        <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center bg-background">
           <div className="text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="w-8 h-8 text-red-600" />
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'color-mix(in srgb, var(--color-status-error) 12%, transparent)' }}>
+              <CheckCircle className="w-8 h-8 text-[var(--color-status-error)]" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Order Not Found</h1>
-            <p className="text-gray-600 mb-6">{error || 'The order you are looking for does not exist.'}</p>
+            <h1 className="text-2xl font-bold mb-2 text-foreground">Order Not Found</h1>
+            <p className="mb-6 text-muted-foreground">{error || 'The order you are looking for does not exist.'}</p>
             <Button
               onClick={() => window.location.href = '/'}
-              className="bg-primary hover:bg-primary/90 text-white"
+              className="text-primary-foreground bg-primary"
             >
               Return Home
             </Button>
@@ -203,7 +203,7 @@ export default function OrderConfirmationPage() {
   return (
     <AppShell>
       {/* No step indicators - clean order confirmation page */}
-      <div className="min-h-screen bg-white py-8">
+      <div className="min-h-screen py-8 bg-background">
         <div className="container mx-auto px-4 max-w-6xl">
           {/* Success Header */}
           <motion.div
@@ -211,22 +211,22 @@ export default function OrderConfirmationPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-8"
           >
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-10 h-10 text-green-600" />
+            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: 'color-mix(in srgb, var(--color-status-success) 12%, transparent)' }}>
+              <CheckCircle className="w-10 h-10 text-[var(--color-status-success)]" />
             </div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            <h1 className="text-4xl font-bold mb-4 text-foreground">
               {order.paymentStatus === 'PENDING' ? 'Order Created!' : 'Order Confirmed!'}
             </h1>
-            <p className="text-xl text-gray-600 mb-2">
+            <p className="text-xl mb-2 text-muted-foreground">
               Thank you for your {order.paymentStatus === 'PENDING' ? 'order' : 'purchase'}, {order.customerName}!
             </p>
-            <p className="text-gray-500">
+            <p className="text-muted-foreground">
               Order #{order.orderNumber} • {formatDate(order.createdAt)}
             </p>
             {order.paymentStatus === 'PENDING' && (
-              <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
-                <p className="text-orange-800 font-medium">Payment Pending</p>
-                <p className="text-orange-700 text-sm">
+              <div className="mt-4 p-4 rounded-lg" style={{ background: 'color-mix(in srgb, var(--color-status-warning) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--color-status-warning) 25%, transparent)' }}>
+                <p className="font-medium" style={{ color: 'color-mix(in srgb, var(--color-status-warning) 85%, black)' }}>Payment Pending</p>
+                <p className="text-sm" style={{ color: 'color-mix(in srgb, var(--color-status-warning) 75%, black)' }}>
                   You&apos;ll receive payment instructions via email shortly. Your order is confirmed.
                 </p>
               </div>
@@ -252,9 +252,9 @@ export default function OrderConfirmationPage() {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg"
+                        className="flex items-center gap-4 p-4 border border-border rounded-lg"
                       >
-                        <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <div className="w-16 h-16 rounded-lg flex items-center justify-center bg-secondary">
                           {item.type === 'package' ? (
                             <Package className="w-8 h-8 text-primary" />
                           ) : (
@@ -262,21 +262,21 @@ export default function OrderConfirmationPage() {
                           )}
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-semibold text-lg">{item.name}</h3>
-                          <p className="text-gray-600">
+                          <h3 className="font-semibold text-lg text-foreground">{item.name}</h3>
+                          <p className="text-muted-foreground">
                             {item.type === 'package' ? 'Yoga Package' : 'Product'}
                             {item.sessions && ` • ${item.sessions} sessions`}
                             {item.duration && ` • ${item.duration} min each`}
                           </p>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-muted-foreground">
                             Quantity: {item.quantity}
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold text-lg">
+                          <p className="font-semibold text-lg text-foreground">
                             {formatCurrency(item.price * item.quantity, order.currency)}
                           </p>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-muted-foreground">
                             {formatCurrency(item.price, order.currency)} each
                           </p>
                         </div>
@@ -305,14 +305,14 @@ export default function OrderConfirmationPage() {
                           transition={{ delay: index * 0.1 }}
                           className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg"
                         >
-                          <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <Calendar className="w-8 h-8 text-blue-600" />
+                          <div className="w-16 h-16 rounded-lg flex items-center justify-center" style={{ background: 'color-mix(in srgb, var(--color-accent-500) 12%, transparent)' }}>
+                            <Calendar className="w-8 h-8 text-[var(--color-accent-500)]" />
                           </div>
                           <div className="flex-1">
-                            <h3 className="font-semibold text-lg">
+                            <h3 className="font-semibold text-lg text-foreground">
                               {booking.serviceType || 'Yoga Class'}
                             </h3>
-                            <div className="space-y-1 text-sm text-gray-600">
+                            <div className="space-y-1 text-sm text-muted-foreground">
                               <p className="flex items-center gap-2">
                                 <Clock className="w-4 h-4" />
                                 {new Date(booking.selectedDate).toLocaleDateString('en-US', {
@@ -354,30 +354,30 @@ export default function OrderConfirmationPage() {
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-gray-500">Name</p>
-                      <p className="font-medium">{order.customerName}</p>
+                      <p className="text-sm text-muted-foreground">Name</p>
+                      <p className="font-medium text-foreground">{order.customerName}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Email</p>
-                      <p className="font-medium">{order.customerEmail}</p>
+                      <p className="text-sm text-muted-foreground">Email</p>
+                      <p className="font-medium text-foreground">{order.customerEmail}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Phone</p>
-                      <p className="font-medium">{order.customerPhone}</p>
+                      <p className="text-sm text-muted-foreground">Phone</p>
+                      <p className="font-medium text-foreground">{order.customerPhone}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Order Status</p>
-                      <p className="font-medium capitalize">{order.status.toLowerCase()}</p>
+                      <p className="text-sm text-muted-foreground">Order Status</p>
+                      <p className="font-medium capitalize text-foreground">{order.status.toLowerCase()}</p>
                     </div>
                   </div>
                   
                   {/* Billing Document Information */}
-                  <div className="mt-6 pt-4 border-t border-gray-200">
+                  <div className="mt-6 pt-4 border-t border-border">
                     <div className="flex items-center gap-2 mb-3">
-                      <FileText className="w-4 h-4 text-gray-600" />
-                      <p className="text-sm font-medium text-gray-700">Billing Document</p>
+                      <FileText className="w-4 h-4 text-muted-foreground" />
+                      <p className="text-sm font-medium text-foreground">Billing Document</p>
                     </div>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-muted-foreground">
                       {formatBillingDocument(order)}
                     </p>
                   </div>
@@ -387,7 +387,7 @@ export default function OrderConfirmationPage() {
               {/* Shipping Address */}
               {order.shippingAddress && (
                 <Card>
-                  <CardHeader>
+                <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <MapPin className="w-5 h-5" />
                       Shipping Address
@@ -395,11 +395,11 @@ export default function OrderConfirmationPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      <p className="font-medium">{order.shippingAddress.address}</p>
-                      <p className="text-gray-600">
+                    <p className="font-medium text-foreground">{order.shippingAddress.address}</p>
+                    <p className="text-muted-foreground">
                         {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}
                       </p>
-                      <p className="text-gray-600">{order.shippingAddress.country}</p>
+                    <p className="text-muted-foreground">{order.shippingAddress.country}</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -418,29 +418,29 @@ export default function OrderConfirmationPage() {
                 <CardContent>
                   <div className="space-y-3">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Subtotal</span>
-                      <span className="font-medium">
+                      <span className="text-muted-foreground">Subtotal</span>
+                      <span className="font-medium text-foreground">
                         {formatCurrency(order.subtotal, order.currency)}
                       </span>
                     </div>
                     {order.taxAmount > 0 && (
                       <div className="flex justify-between">
-                        <span className="text-gray-600">IGV (18%)</span>
-                        <span className="font-medium">
+                        <span className="text-muted-foreground">IGV (18%)</span>
+                        <span className="font-medium text-foreground">
                           {formatCurrency(order.taxAmount, order.currency)}
                         </span>
                       </div>
                     )}
                     {order.shippingAmount > 0 && (
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Shipping</span>
-                        <span className="font-medium">
+                        <span className="text-muted-foreground">Shipping</span>
+                        <span className="font-medium text-foreground">
                           {formatCurrency(order.shippingAmount, order.currency)}
                         </span>
                       </div>
                     )}
                     <div className="border-t pt-3">
-                      <div className="flex justify-between text-lg font-semibold">
+                      <div className="flex justify-between text-lg font-semibold text-foreground">
                         <span>Total</span>
                         <span className="text-primary">
                           {formatCurrency(order.total, order.currency)}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { DownloadIcon } from 'lucide-react';
 
@@ -10,12 +11,18 @@ interface SessionReportButtonProps {
 
 export default function SessionReportButton({ bookingId }: SessionReportButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
 
   const handleDownload = async () => {
     try {
       setIsLoading(true);
       
-      const response = await fetch(`/api/client/bookings/${bookingId}/report`);
+      const response = await fetch(`/api/client/bookings/${bookingId}/report`, {
+        headers: {
+          'Authorization': `Bearer ${user?.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       const data = await response.json();
       
       if (data.success && data.data.downloadUrl) {

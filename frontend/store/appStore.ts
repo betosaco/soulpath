@@ -10,6 +10,11 @@ interface UiState {
   openCart: () => void;
   closeCart: () => void;
   
+  // Terms & Conditions modal state
+  isTermsOpen: boolean;
+  openTerms: () => void;
+  closeTerms: () => void;
+  
   // Mobile menu state
   isMobileMenuOpen: boolean;
   toggleMobileMenu: () => void;
@@ -198,6 +203,15 @@ export const useAppStore = create<AppStore>()(
       }),
       closeCart: () => set((state) => {
         state.isCartOpen = false;
+      }),
+      
+      // Terms & Conditions modal
+      isTermsOpen: false,
+      openTerms: () => set((state) => {
+        state.isTermsOpen = true;
+      }),
+      closeTerms: () => set((state) => {
+        state.isTermsOpen = false;
       }),
       
       isMobileMenuOpen: false,
@@ -502,6 +516,24 @@ export const useCartUI = () => {
     toggleCart,
     openCart,
     closeCart,
+  };
+};
+
+// Terms & Conditions UI selectors
+export const useTermsIsOpen = () => useAppStore((state) => state.isTermsOpen);
+export const useTermsOpen = () => useAppStore((state) => state.openTerms);
+export const useTermsClose = () => useAppStore((state) => state.closeTerms);
+
+// Combined terms UI hook
+export const useTermsUI = () => {
+  const isTermsOpen = useTermsIsOpen();
+  const openTerms = useTermsOpen();
+  const closeTerms = useTermsClose();
+  
+  return {
+    isTermsOpen,
+    openTerms,
+    closeTerms,
   };
 };
 

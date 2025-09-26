@@ -47,14 +47,14 @@ export default function TeacherEarningsPage() {
         <div className={teacherUI.card.body}>
           <div className="flex flex-wrap items-end gap-3 mb-4">
             <div>
-              <label className="block text-xs text-[var(--unified-text-secondary)] mb-1">Start date</label>
-              <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="border rounded px-2 py-1 bg-[var(--unified-bg-surface)] text-[var(--unified-text-primary)]" />
+              <label className="unified-form-label">Start date</label>
+              <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="unified-form-input" />
             </div>
             <div>
-              <label className="block text-xs text-[var(--unified-text-secondary)] mb-1">End date</label>
-              <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="border rounded px-2 py-1 bg-[var(--unified-bg-surface)] text-[var(--unified-text-primary)]" />
+              <label className="unified-form-label">End date</label>
+              <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="unified-form-input" />
             </div>
-            <button onClick={loadEarnings} className="px-3 py-2 bg-[var(--unified-primary)] text-white rounded hover:bg-[var(--unified-primary-hover)] transition-colors flex items-center gap-2">
+            <button onClick={loadEarnings} className={`${teacherUI.button.primary} flex items-center gap-2`}>
               <CalendarIcon className="h-4 w-4" /> Apply
             </button>
           </div>
@@ -88,7 +88,7 @@ export default function TeacherEarningsPage() {
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
                   <thead>
-                    <tr className="text-left text-[var(--unified-text-secondary)] border-b">
+                    <tr className="text-left text-[var(--unified-text-secondary)] border-b border-[var(--unified-border-light)]">
                       <th className="py-2 pr-4"></th>
                       <th className="py-2 pr-4">Date</th>
                       <th className="py-2 pr-4">Service</th>
@@ -100,7 +100,7 @@ export default function TeacherEarningsPage() {
                   <tbody>
                     {data.items?.map((item: any) => (
                       <React.Fragment key={item.id}>
-                        <tr className="border-b last:border-0">
+                        <tr className="border-b last:border-0 border-[var(--unified-border-light)]">
                           <td className="py-2 pr-4 align-top">
                             <button onClick={() => toggle(item.id)} className="text-[var(--unified-primary)] hover:underline text-xs">
                               {expanded[item.id] ? 'Hide' : 'Details'}
@@ -116,24 +116,24 @@ export default function TeacherEarningsPage() {
                           <tr className="bg-[var(--unified-bg-secondary)]">
                             <td colSpan={6} className="py-3 px-4">
                               <div className="flex flex-wrap items-center gap-3 text-xs">
-                                <span className="px-2 py-1 rounded-full border bg-gray-100 text-gray-700 border-gray-200">
+                                <span className={`${teacherUI.badge.base} ${teacherUI.badge.neutral} border border-[var(--unified-border-light)]`}>
                                   Student: {item.student?.name}
                                 </span>
-                                <span className="px-2 py-1 rounded-full border bg-purple-50 text-purple-700 border-purple-200">
+                                <span className={`${teacherUI.badge.base} ${teacherUI.badge.neutral} border border-[var(--unified-border-light)]`}>
                                   Pass: {item.pass?.name}
                                 </span>
                                 {item.pass?.sessionsCount != null && (
-                                  <span className="px-2 py-1 rounded-full border bg-blue-50 text-blue-700 border-blue-200">
+                                  <span className={`${teacherUI.badge.base} ${teacherUI.badge.info} border border-[var(--unified-border-light)]`}>
                                     Sessions: {item.pass.sessionsCount}
                                   </span>
                                 )}
                                 {item.pass?.packageType && (
-                                  <span className="px-2 py-1 rounded-full border bg-amber-50 text-amber-700 border-amber-200">
+                                  <span className={`${teacherUI.badge.base} ${teacherUI.badge.warning} border border-[var(--unified-border-light)]`}>
                                     Type: {item.pass.packageType}
                                   </span>
                                 )}
                                 {typeof item.pass?.pricePerClass === 'number' && (
-                            <span className="px-2 py-1 rounded-full border bg-[var(--unified-accent)]/30 text-[var(--unified-text-primary)] border-[var(--unified-accent-dark)]">
+                            <span className={`${teacherUI.badge.base} ${teacherUI.badge.success} border border-[var(--unified-border-light)]`}>
                                     Price per class: {item.symbol}{item.pass.pricePerClass.toFixed(2)}
                                   </span>
                                 )}

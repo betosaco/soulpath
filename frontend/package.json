@@ -97,6 +97,21 @@
             "tsx": "^4.20.5",
             "typescript": "^5.4.3"
       },
+      "browserslist": {
+            "production": [
+                  "chrome >= 113",
+                  "edge >= 113",
+                  "safari >= 16.4",
+                  "firefox >= 102",
+                  "not ie <= 11",
+                  "not op_mini all"
+            ],
+            "development": [
+                  "last 1 chrome version",
+                  "last 1 firefox version",
+                  "last 1 safari version"
+            ]
+      },
       "scripts": {
             "dev": "next dev",
             "build": "prisma generate && next build",

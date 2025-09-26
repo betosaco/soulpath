@@ -79,8 +79,8 @@ export default function BookPage() {
         <div className="container mx-auto p-6">
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
-              <div className="w-16 h-16 border-4 border-[#FFD700] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-[#FFD700] text-lg font-semibold">Preparing your booking...</p>
+              <div className="w-16 h-16 border-4 border-[var(--color-accent-500)] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-[var(--color-text-secondary)] text-lg font-semibold">Preparing your booking...</p>
             </div>
           </div>
         </div>

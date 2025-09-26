@@ -210,8 +210,8 @@ export function TemplateEditor({ template, type, onSave, onClose }: TemplateEdit
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#0A0A23] rounded-lg border border-[#C0C0C0]/20 w-full max-w-6xl max-h-[90vh] overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-[#C0C0C0]/20">
+      <div className="rounded-lg border w-full max-w-6xl max-h-[90vh] overflow-hidden bg-[var(--card)] border-[var(--border)]">
+        <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: 'var(--border)' }}>
           <CardTitle className="dashboard-text-primary text-xl">
             {template ? 'Edit Template' : 'Create New Template'}
           </CardTitle>
@@ -248,12 +248,12 @@ export function TemplateEditor({ template, type, onSave, onClose }: TemplateEdit
 
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
           {validationErrors.length > 0 && (
-            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+            <div className="mb-6 p-4 rounded-lg" style={{ background: 'color-mix(in srgb, var(--color-status-error) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--color-status-error) 25%, transparent)' }}>
               <div className="flex items-center gap-2 mb-2">
-                <AlertCircle size={16} className="text-red-400" />
-                <span className="text-red-400 font-medium">Validation Errors</span>
+                <AlertCircle size={16} className="" style={{ color: 'var(--color-status-error)' }} />
+                <span className="font-medium" style={{ color: 'var(--color-status-error)' }}>Validation Errors</span>
               </div>
-              <ul className="text-red-400 text-sm space-y-1">
+              <ul className="text-sm space-y-1" style={{ color: 'var(--color-status-error)' }}>
                 {validationErrors.map((error, index) => (
                   <li key={index}>• {error}</li>
                 ))}
@@ -264,7 +264,7 @@ export function TemplateEditor({ template, type, onSave, onClose }: TemplateEdit
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Template Settings */}
             <div className="lg:col-span-1 space-y-6">
-              <Card className="bg-[#0A0A23]/50 border-[#C0C0C0]/20">
+              <Card className="bg-[var(--card)] border-[var(--border)]">
                 <CardHeader>
                   <CardTitle className="dashboard-card-title text-lg">Template Settings</CardTitle>
                 </CardHeader>
@@ -287,7 +287,7 @@ export function TemplateEditor({ template, type, onSave, onClose }: TemplateEdit
                       placeholder="template_key"
                       className="dashboard-input"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-[var(--color-text-tertiary)] mt-1">
                       Used to reference this template in code
                     </p>
                   </div>
@@ -322,10 +322,10 @@ export function TemplateEditor({ template, type, onSave, onClose }: TemplateEdit
               </Card>
 
               {/* Placeholders */}
-              <Card className="bg-[#0A0A23]/50 border-[#C0C0C0]/20">
+              <Card className="bg-[var(--card)] border-[var(--border)]">
                 <CardHeader>
                   <CardTitle className="dashboard-card-title text-lg">Available Placeholders</CardTitle>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-[var(--color-text-tertiary)]">
                     Click to insert placeholder into {activeLanguage.toUpperCase()} content
                   </p>
                   <div className="mt-2">
@@ -340,29 +340,30 @@ export function TemplateEditor({ template, type, onSave, onClose }: TemplateEdit
                 <CardContent className="space-y-4 max-h-96 overflow-y-auto">
                   {Object.keys(filteredPlaceholders).length === 0 ? (
                     <div className="text-center py-4">
-                      <p className="text-gray-400 text-sm">No placeholders found matching your search.</p>
+                      <p className="text-[var(--color-text-tertiary)] text-sm">No placeholders found matching your search.</p>
                     </div>
                   ) : (
                     Object.entries(filteredPlaceholders).map(([category, placeholderList]) => (
                     <div key={category}>
-                      <h4 className="text-sm font-medium text-[#EAEAEA] mb-2 capitalize flex items-center gap-2">
-                        <span className="w-2 h-2 bg-[#6366F1] rounded-full"></span>
+                      <h4 className="text-sm font-medium text-foreground mb-2 capitalize flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full" style={{ background: 'var(--accent)' }}></span>
                         {category}
                       </h4>
                       <div className="space-y-1">
                         {placeholderList.map(placeholder => (
                           <div
                             key={placeholder.key}
-                            className="group flex items-center justify-between p-2 bg-[#0A0A23]/30 rounded border border-[#C0C0C0]/10 hover:border-[#6366F1]/50 transition-colors cursor-pointer"
+                            className="group flex items-center justify-between p-2 rounded border transition-colors cursor-pointer"
+                            style={{ background: 'color-mix(in srgb, var(--card) 85%, transparent)', borderColor: 'var(--border)' }}
                             onClick={() => insertPlaceholderAtCursor(placeholder.key)}
                           >
                             <div className="flex-1">
-                              <code className="text-xs text-[#EAEAEA] font-mono bg-[#0A0A23]/50 px-1 py-0.5 rounded">
+                              <code className="text-xs font-mono px-1 py-0.5 rounded text-foreground" style={{ background: 'color-mix(in srgb, var(--card) 80%, transparent)' }}>
                                 {placeholder.key}
                               </code>
-                              <p className="text-xs text-gray-400 mt-1">{placeholder.description}</p>
+                              <p className="text-xs text-[var(--color-text-tertiary)] mt-1">{placeholder.description}</p>
                               {placeholder.example && (
-                                <p className="text-xs text-gray-500 mt-1 italic">
+                                <p className="text-xs mt-1 italic" style={{ color: 'var(--color-text-tertiary)' }}>
                                   Example: {placeholder.example}
                                 </p>
                               )}
@@ -390,7 +391,7 @@ export function TemplateEditor({ template, type, onSave, onClose }: TemplateEdit
 
             {/* Content Editor */}
             <div className="lg:col-span-2">
-              <Card className="bg-[#0A0A23]/50 border-[#C0C0C0]/20">
+              <Card className="bg-[var(--card)] border-[var(--border)]">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="dashboard-card-title text-lg">Content Editor</CardTitle>
@@ -401,7 +402,8 @@ export function TemplateEditor({ template, type, onSave, onClose }: TemplateEdit
                           size="sm"
                           variant={activeLanguage === lang.code ? "primary" : "outline"}
                           onClick={() => setActiveLanguage(lang.code)}
-                          className={activeLanguage === lang.code ? "bg-[#6366F1] text-white" : "text-[#EAEAEA] border-[#C0C0C0]/30"}
+                          className={activeLanguage === lang.code ? "text-white" : ""}
+                          style={activeLanguage === lang.code ? { background: 'var(--accent)' } : { color: 'var(--foreground)', borderColor: 'var(--border)' }}
                         >
                           {lang.name}
                         </BaseButton>
@@ -437,7 +439,7 @@ export function TemplateEditor({ template, type, onSave, onClose }: TemplateEdit
                       className="dashboard-input font-mono"
                       rows={12}
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
                       {type === 'email' 
                         ? 'Use HTML tags for formatting. Placeholders will be replaced with actual data.'
                         : 'Plain text only. Placeholders will be replaced with actual data.'

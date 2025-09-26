@@ -327,11 +327,11 @@ export default function PurchasePage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[var(--unified-bg-surface)]">
       <div className="container mx-auto py-8">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-4">Purchase Packages</h1>
-          <p className="text-gray-400 text-lg">Choose your spiritual journey package and complete your purchase</p>
+          <h1 className="text-4xl font-bold text-[var(--unified-text-primary)] mb-4">Purchase Packages</h1>
+          <p className="text-[var(--unified-text-secondary)] text-lg">Choose your spiritual journey package and complete your purchase</p>
         </div>
 
         {/* Progress Steps */}
@@ -379,18 +379,18 @@ export default function PurchasePage() {
               >
                 {/* Step 1: Package Selection */}
                 {currentStep === 0 && (
-                  <Card className="bg-[#1a1a2e] border-[#16213e]">
-                    <CardHeader>
-                      <CardTitle className="text-white flex items-center space-x-2">
-                        <Package className="w-5 h-5 text-[#ffd700]" />
+                  <Card className="unified-card">
+                    <CardHeader className="unified-card__header">
+                      <CardTitle className="unified-card__title flex items-center space-x-2">
+                        <Package className="w-5 h-5 text-[var(--unified-accent)]" />
                         <span>Select Your Package</span>
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className="unified-card__content space-y-4">
                       {packages.length === 0 ? (
                         <div className="text-center py-8">
                           <Package className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-                          <p className="text-gray-400">No packages available at the moment</p>
+                          <p className="text-[var(--unified-text-secondary)]">No packages available at the moment</p>
                         </div>
                       ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -400,19 +400,19 @@ export default function PurchasePage() {
                               className={`cursor-pointer transition-all duration-200 ${
                                 formData.selectedPackage?.id === pkg.id
                                   ? 'border-[#ffd700] bg-[#ffd700]/10'
-                                  : 'border-[#16213e] hover:border-[#ffd700]/50'
+                                  : 'unified-border hover:border-[#ffd700]/50'
                               }`}
                               onClick={() => handlePackageSelect(pkg)}
                             >
                               <CardContent className="p-4">
                                 <div className="flex items-center justify-between mb-2">
-                                  <h3 className="text-white font-semibold">{pkg.packageDefinition.name}</h3>
+                                  <h3 className="text-[var(--unified-text-primary)] font-semibold">{pkg.packageDefinition.name}</h3>
                                   <Badge className="bg-[#ffd700] text-black">
                                     {pkg.currency.symbol}{pkg.price}
                                   </Badge>
                                 </div>
-                                <p className="text-gray-400 text-sm mb-3">{pkg.packageDefinition.description}</p>
-                                <div className="flex items-center justify-between text-sm text-gray-300">
+                                <p className="text-[var(--unified-text-secondary)] text-sm mb-3">{pkg.packageDefinition.description}</p>
+                                <div className="flex items-center justify-between text-sm text-[var(--unified-text-secondary)]">
                                   <span>{pkg.packageDefinition.sessionsCount} sessions</span>
                                   <span>{pkg.currency.code.toUpperCase()}</span>
                                 </div>
@@ -427,28 +427,28 @@ export default function PurchasePage() {
 
                 {/* Step 2: Review Details */}
                 {currentStep === 1 && (
-                  <Card className="bg-[#1a1a2e] border-[#16213e]">
-                    <CardHeader>
-                      <CardTitle className="text-white flex items-center space-x-2">
-                        <User className="w-5 h-5 text-[#ffd700]" />
+                  <Card className="unified-card">
+                    <CardHeader className="unified-card__header">
+                      <CardTitle className="unified-card__title flex items-center space-x-2">
+                        <User className="w-5 h-5 text-[var(--unified-accent)]" />
                         <span>Review Your Details</span>
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-6">
+                    <CardContent className="unified-card__content space-y-6">
                       {/* Selected Package */}
                       {formData.selectedPackage && (
-                        <div className="bg-[#16213e] p-4 rounded-lg">
-                          <h3 className="text-white font-semibold mb-2">Selected Package</h3>
+                        <div className="unified-bg-secondary p-4 rounded-lg">
+                          <h3 className="text-[var(--unified-text-primary)] font-semibold mb-2">Selected Package</h3>
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="text-white">{formData.selectedPackage.packageDefinition.name}</p>
-                              <p className="text-gray-400 text-sm">{formData.selectedPackage.packageDefinition.description}</p>
+                              <p className="text-[var(--unified-text-primary)]">{formData.selectedPackage.packageDefinition.name}</p>
+                              <p className="text-[var(--unified-text-secondary)] text-sm">{formData.selectedPackage.packageDefinition.description}</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-[#ffd700] font-semibold">
+                              <p className="text-[var(--unified-accent-dark)] font-semibold">
                                 {formData.selectedPackage.currency.symbol}{formData.selectedPackage.price}
                               </p>
-                              <p className="text-gray-400 text-sm">per package</p>
+                              <p className="text-[var(--unified-text-secondary)] text-sm">per package</p>
                             </div>
                           </div>
                         </div>
@@ -456,7 +456,7 @@ export default function PurchasePage() {
 
                       {/* Quantity */}
                       <div>
-                        <Label className="text-gray-300">Quantity</Label>
+                        <Label className="unified-form-label">Quantity</Label>
                         <div className="flex items-center space-x-2 mt-1">
                           <BaseButton
                             onClick={() => handleQuantityChange(formData.quantity - 1)}
@@ -465,7 +465,7 @@ export default function PurchasePage() {
                           >
                             -
                           </BaseButton>
-                          <span className="text-white px-4">{formData.quantity}</span>
+                          <span className="text-[var(--unified-text-primary)] px-4">{formData.quantity}</span>
                           <BaseButton
                             onClick={() => handleQuantityChange(formData.quantity + 1)}
                             disabled={formData.quantity >= 10}
@@ -478,94 +478,94 @@ export default function PurchasePage() {
 
                       {/* Personal Information */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="clientName" className="text-gray-300">Full Name</Label>
+                        <div className="unified-form-group">
+                          <Label htmlFor="clientName" className="unified-form-label">Full Name</Label>
                           <Input
                             id="clientName"
                             value={formData.clientName}
                             onChange={(e) => handleInputChange('clientName', e.target.value)}
-                            className="bg-[#16213e] border-[#0a0a23] text-white"
+                            className="unified-form-input"
                             placeholder="Enter your full name"
                           />
                         </div>
-                        <div>
-                          <Label htmlFor="clientEmail" className="text-gray-300">Email</Label>
+                        <div className="unified-form-group">
+                          <Label htmlFor="clientEmail" className="unified-form-label">Email</Label>
                           <Input
                             id="clientEmail"
                             type="email"
                             value={formData.clientEmail}
                             onChange={(e) => handleInputChange('clientEmail', e.target.value)}
-                            className="bg-[#16213e] border-[#0a0a23] text-white"
+                            className="unified-form-input"
                             placeholder="Enter your email"
                           />
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="clientPhone" className="text-gray-300">Phone</Label>
+                        <div className="unified-form-group">
+                          <Label htmlFor="clientPhone" className="unified-form-label">Phone</Label>
                           <Input
                             id="clientPhone"
                             value={formData.clientPhone}
                             onChange={(e) => handleInputChange('clientPhone', e.target.value)}
-                            className="bg-[#16213e] border-[#0a0a23] text-white"
+                            className="unified-form-input"
                             placeholder="Enter your phone number"
                           />
                         </div>
-                        <div>
-                          <Label htmlFor="birthDate" className="text-gray-300">Birth Date</Label>
+                        <div className="unified-form-group">
+                          <Label htmlFor="birthDate" className="unified-form-label">Birth Date</Label>
                           <Input
                             id="birthDate"
                             type="date"
                             value={formData.birthDate}
                             onChange={(e) => handleInputChange('birthDate', e.target.value)}
-                            className="bg-[#16213e] border-[#0a0a23] text-white"
+                            className="unified-form-input"
                           />
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="birthTime" className="text-gray-300">Birth Time</Label>
+                        <div className="unified-form-group">
+                          <Label htmlFor="birthTime" className="unified-form-label">Birth Time</Label>
                           <Input
                             id="birthTime"
                             type="time"
                             value={formData.birthTime}
                             onChange={(e) => handleInputChange('birthTime', e.target.value)}
-                            className="bg-[#16213e] border-[#0a0a23] text-white"
+                            className="unified-form-input"
                           />
                         </div>
-                        <div>
-                          <Label htmlFor="birthPlace" className="text-gray-300">Birth Place</Label>
+                        <div className="unified-form-group">
+                          <Label htmlFor="birthPlace" className="unified-form-label">Birth Place</Label>
                           <Input
                             id="birthPlace"
                             value={formData.birthPlace}
                             onChange={(e) => handleInputChange('birthPlace', e.target.value)}
-                            className="bg-[#16213e] border-[#0a0a23] text-white"
+                            className="unified-form-input"
                             placeholder="Enter your birth place"
                           />
                         </div>
                       </div>
 
-                      <div>
-                        <Label htmlFor="question" className="text-gray-300">Spiritual Question</Label>
+                      <div className="unified-form-group">
+                        <Label htmlFor="question" className="unified-form-label">Spiritual Question</Label>
                         <Textarea
                           id="question"
                           value={formData.question}
                           onChange={(e) => handleInputChange('question', e.target.value)}
-                          className="bg-[#16213e] border-[#0a0a23] text-white"
+                          className="unified-form-textarea"
                           placeholder="What would you like to explore in your spiritual journey?"
                           rows={3}
                         />
                       </div>
 
-                      <div>
-                        <Label htmlFor="notes" className="text-gray-300">Additional Notes</Label>
+                      <div className="unified-form-group">
+                        <Label htmlFor="notes" className="unified-form-label">Additional Notes</Label>
                         <Textarea
                           id="notes"
                           value={formData.notes}
                           onChange={(e) => handleInputChange('notes', e.target.value)}
-                          className="bg-[#16213e] border-[#0a0a23] text-white"
+                          className="unified-form-textarea"
                           placeholder="Any special requests or additional information..."
                           rows={2}
                         />
@@ -576,21 +576,21 @@ export default function PurchasePage() {
 
                 {/* Step 3: Payment */}
                 {currentStep === 2 && (
-                  <Card className="bg-[#1a1a2e] border-[#16213e]">
-                    <CardHeader>
-                      <CardTitle className="text-white flex items-center space-x-2">
-                        <CreditCard className="w-5 h-5 text-[#ffd700]" />
+                  <Card className="unified-card">
+                    <CardHeader className="unified-card__header">
+                      <CardTitle className="unified-card__title flex items-center space-x-2">
+                        <CreditCard className="w-5 h-5 text-[var(--unified-accent)]" />
                         <span>Complete Payment</span>
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-6">
+                    <CardContent className="unified-card__content space-y-6">
                       {/* Payment Method Selection */}
                       <div>
-                        <Label className="text-gray-300">Payment Method</Label>
+                        <Label className="unified-form-label">Payment Method</Label>
                         <div className="relative mt-1">
                           <BaseButton
                             onClick={() => setShowPaymentMethodDropdown(!showPaymentMethodDropdown)}
-                            className="w-full justify-between bg-[#16213e] border-[#0a0a23] text-white hover:bg-[#0a0a23]"
+                            className="w-full justify-between unified-button unified-button--secondary"
                           >
                             <div className="flex items-center space-x-2">
                               {formData.selectedPaymentMethod?.icon && (
@@ -608,22 +608,22 @@ export default function PurchasePage() {
                           </BaseButton>
                           
                           {showPaymentMethodDropdown && (
-                            <div className="absolute top-full left-0 right-0 mt-1 bg-[#16213e] border border-[#0a0a23] rounded-lg shadow-lg z-10">
+                            <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--unified-bg-surface)] border border-[var(--unified-border-light)] rounded-lg shadow-lg z-10">
                               {paymentMethods.map((method) => (
                                 <button
                                   key={method.id}
                                   onClick={() => handlePaymentMethodSelect(method)}
-                                  className="w-full flex items-center space-x-2 px-4 py-2 text-left hover:bg-[#0a0a23] text-white"
+                                  className="w-full flex items-center space-x-2 px-4 py-2 text-left hover:bg-[var(--unified-bg-secondary)] text-[var(--unified-text-primary)]"
                                 >
                                   {method.icon && (
                                     <Image src={method.icon} alt={method.name} width={20} height={20} className="w-5 h-5" />
                                   )}
                                   <div>
-                                    <p className="font-medium">{method.name}</p>
-                                    <p className="text-sm text-gray-400">{method.description}</p>
+                                    <p className="font-medium text-[var(--unified-text-primary)]">{method.name}</p>
+                                    <p className="text-sm text-[var(--unified-text-secondary)]">{method.description}</p>
                                   </div>
                                   {formData.selectedPaymentMethod?.id === method.id && (
-                                    <Check className="w-4 h-4 text-[#ffd700] ml-auto" />
+                                    <Check className="w-4 h-4 text-[var(--unified-accent)] ml-auto" />
                                   )}
                                 </button>
                               ))}
@@ -634,8 +634,8 @@ export default function PurchasePage() {
 
                       {/* Stripe Payment Form */}
                       {formData.selectedPaymentMethod?.type === 'stripe' && formData.selectedPackage && (
-                        <div className="bg-[#16213e] p-4 rounded-lg">
-                          <h3 className="text-white font-semibold mb-4">Secure Payment</h3>
+                        <div className="unified-bg-secondary p-4 rounded-lg">
+                          <h3 className="text-[var(--unified-text-primary)] font-semibold mb-4">Secure Payment</h3>
                           <StripeInlineForm
                             amount={formData.selectedPackage.price * formData.quantity * 100}
                             currency={formData.selectedPackage.currency.code}
@@ -649,16 +649,16 @@ export default function PurchasePage() {
 
                       {/* Other Payment Methods */}
                       {formData.selectedPaymentMethod?.type !== 'stripe' && (
-                        <div className="bg-[#16213e] p-4 rounded-lg">
-                          <h3 className="text-white font-semibold mb-4">Payment Information</h3>
-                          <p className="text-gray-400 mb-4">
+                        <div className="unified-bg-secondary p-4 rounded-lg">
+                          <h3 className="text-[var(--unified-text-primary)] font-semibold mb-4">Payment Information</h3>
+                          <p className="text-[var(--unified-text-secondary)] mb-4">
                             You have selected {formData.selectedPaymentMethod?.name}. 
                             Please complete your payment using the selected method.
                           </p>
                           <BaseButton
                             onClick={handlePurchase}
                             disabled={processing}
-                            className="w-full bg-[#ffd700] text-black hover:bg-[#ffd700]/90 disabled:opacity-50"
+                            className="w-full unified-button unified-button--primary disabled:opacity-50"
                           >
                             {processing ? 'Processing...' : 'Complete Purchase'}
                           </BaseButton>
@@ -675,7 +675,7 @@ export default function PurchasePage() {
               <BaseButton
                 onClick={handlePrevious}
                 disabled={currentStep === 0}
-                className="bg-[#16213e] border-[#0a0a23] text-white hover:bg-[#0a0a23] disabled:opacity-50"
+                className="unified-button unified-button--outline disabled:opacity-50"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Previous
@@ -688,7 +688,7 @@ export default function PurchasePage() {
                     (currentStep === 0 && !formData.selectedPackage) ||
                     (currentStep === 1 && (!formData.clientName || !formData.clientEmail))
                   }
-                  className="bg-[#ffd700] text-black hover:bg-[#ffd700]/90 disabled:opacity-50"
+                  className="unified-button unified-button--primary disabled:opacity-50"
                 >
                   Next
                   <ArrowRight className="w-4 h-4 ml-2" />
@@ -697,7 +697,7 @@ export default function PurchasePage() {
                 <BaseButton
                   onClick={handlePurchase}
                   disabled={!formData.selectedPackage || !formData.selectedPaymentMethod || processing}
-                  className="bg-[#ffd700] text-black hover:bg-[#ffd700]/90 disabled:opacity-50"
+                  className="unified-button unified-button--primary disabled:opacity-50"
                 >
                   {processing ? 'Processing...' : 'Complete Purchase'}
                 </BaseButton>
@@ -707,34 +707,34 @@ export default function PurchasePage() {
 
           {/* Sidebar - Order Summary */}
           <div className="space-y-6">
-            <Card className="bg-[#1a1a2e] border-[#16213e]">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center space-x-2">
-                  <ShoppingCart className="w-5 h-5 text-[#ffd700]" />
+            <Card className="unified-card">
+              <CardHeader className="unified-card__header">
+                <CardTitle className="unified-card__title flex items-center space-x-2">
+                  <ShoppingCart className="w-5 h-5 text-[var(--unified-accent)]" />
                   <span>Order Summary</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="unified-card__content space-y-4">
                 {formData.selectedPackage ? (
                   <>
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-300">Package</span>
-                      <span className="text-white">{formData.selectedPackage.packageDefinition.name}</span>
+                      <span className="text-[var(--unified-text-secondary)]">Package</span>
+                      <span className="text-[var(--unified-text-primary)]">{formData.selectedPackage.packageDefinition.name}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-300">Quantity</span>
-                      <span className="text-white">{formData.quantity}</span>
+                      <span className="text-[var(--unified-text-secondary)]">Quantity</span>
+                      <span className="text-[var(--unified-text-primary)]">{formData.quantity}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-300">Price per unit</span>
-                      <span className="text-white">
+                      <span className="text-[var(--unified-text-secondary)]">Price per unit</span>
+                      <span className="text-[var(--unified-text-primary)]">
                         {formData.selectedPackage.currency.symbol}{formData.selectedPackage.price}
                       </span>
                     </div>
                     <div className="border-t border-[#16213e] pt-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-white font-semibold">Total</span>
-                        <span className="text-[#ffd700] font-bold text-lg">
+                        <span className="text-[var(--unified-text-primary)] font-semibold">Total</span>
+                        <span className="text-[var(--unified-accent-dark)] font-bold text-lg">
                           {formData.selectedPackage.currency.symbol}
                           {typeof formData.selectedPackage.price === 'number' && !isNaN(formData.selectedPackage.price)
                             ? (formData.selectedPackage.price * formData.quantity).toFixed(2)
@@ -747,35 +747,35 @@ export default function PurchasePage() {
                     </div>
                   </>
                 ) : (
-                  <p className="text-gray-400 text-center py-4">Select a package to see order details</p>
+                  <p className="text-[var(--unified-text-secondary)] text-center py-4">Select a package to see order details</p>
                 )}
               </CardContent>
             </Card>
 
             {/* User Information Summary */}
-            <Card className="bg-[#1a1a2e] border-[#16213e]">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center space-x-2">
+            <Card className="unified-card">
+              <CardHeader className="unified-card__header">
+                <CardTitle className="unified-card__title flex items-center space-x-2">
                   <User className="w-5 h-5 text-[#ffd700]" />
                   <span>Your Information</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="unified-card__content space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-300">Name</span>
-                  <span className="text-white text-sm">{formData.clientName || 'Not provided'}</span>
+                  <span className="text-[var(--unified-text-secondary)]">Name</span>
+                  <span className="text-[var(--unified-text-primary)] text-sm">{formData.clientName || 'Not provided'}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-300">Email</span>
-                  <span className="text-white text-sm">{formData.clientEmail || 'Not provided'}</span>
+                  <span className="text-[var(--unified-text-secondary)]">Email</span>
+                  <span className="text-[var(--unified-text-primary)] text-sm">{formData.clientEmail || 'Not provided'}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-300">Phone</span>
-                  <span className="text-white text-sm">{formData.clientPhone || 'Not provided'}</span>
+                  <span className="text-[var(--unified-text-secondary)]">Phone</span>
+                  <span className="text-[var(--unified-text-primary)] text-sm">{formData.clientPhone || 'Not provided'}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-300">Language</span>
-                  <span className="text-white text-sm capitalize">{formData.language}</span>
+                  <span className="text-[var(--unified-text-secondary)]">Language</span>
+                  <span className="text-[var(--unified-text-primary)] text-sm capitalize">{formData.language}</span>
                 </div>
               </CardContent>
             </Card>

@@ -488,7 +488,7 @@ export async function POST(request: NextRequest) {
           };
 
           // Send email asynchronously (don't wait for it to complete)
-          sendBookingConfirmationEmail(bookingData).catch(error => {
+          sendBookingConfirmationEmail(bookingData, 'client').catch(error => {
             console.error('Failed to send booking confirmation email:', error);
             // Don't fail the booking creation if email fails
           });

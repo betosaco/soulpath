@@ -13,6 +13,8 @@ export function MatmaxHomepage() {
   
   // Mobile detection
   const [_isMobile, setIsMobile] = useState(false);
+  const titleRef = React.useRef<HTMLHeadingElement | null>(null);
+  const [mobileTitleWidth, setMobileTitleWidth] = useState<number | null>(null);
   
   useEffect(() => {
     const checkMobile = () => {
@@ -25,8 +27,27 @@ export function MatmaxHomepage() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Measure title width for mobile and set button widths to match
+  useEffect(() => {
+    const updateHeroWidths = () => {
+      const isMobile = window.innerWidth < 640; // sm breakpoint
+      if (isMobile && titleRef.current) {
+        const rect = titleRef.current.getBoundingClientRect();
+        // Use ~80% of the title width on mobile (more narrow than the first line)
+        const widthTarget = Math.max(120, Math.min(Math.round(rect.width * 0.8), window.innerWidth - 56));
+        setMobileTitleWidth(widthTarget);
+      } else {
+        setMobileTitleWidth(null);
+      }
+    };
+
+    updateHeroWidths();
+    window.addEventListener('resize', updateHeroWidths);
+    return () => window.removeEventListener('resize', updateHeroWidths);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[var(--color-background-primary)] text-[var(--color-text-primary)]">
       {/* Header */}
       <CentralizedHeader />
       
@@ -98,11 +119,11 @@ export function MatmaxHomepage() {
           </div>
           
           {/* Overlay */}
-          <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+          <div className="absolute inset-0" style={{ background: 'color-mix(in srgb, var(--color-text-primary) 10%, transparent)' }}></div>
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto flex flex-col items-center justify-center min-h-full">
+        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto flex flex-col items-center justify-center min-h-full" style={{ color: 'var(--primary-foreground)' }}>
           {/* Logo */}
           <div className="mb-4 sm:mb-6 md:mb-8 flex justify-center">
             <Image
@@ -116,27 +137,30 @@ export function MatmaxHomepage() {
           </div>
           
           <h1 
-            className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold mb-4 sm:mb-6 leading-tight px-2 text-white"
-            style={{ fontFamily: 'var(--font-heading)' }}
+            ref={titleRef}
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold mb-4 sm:mb-6 leading-tight px-2"
+            style={{ fontFamily: 'var(--font-heading)', color: 'var(--primary-foreground)' }}
           >
             {typeof translations?.hero === 'object' && translations.hero?.title || 'Find Your Flow, Transform Your Body & Mind'}
           </h1>
           <p 
             className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 leading-relaxed px-4"
-            style={{ fontFamily: 'var(--font-body)' }}
+            style={{ fontFamily: 'var(--font-body)', color: 'color-mix(in srgb, var(--primary-foreground) 85%, transparent)' }}
           >
             {typeof translations?.hero === 'object' && (translations.hero?.description || translations.hero?.subtitle) || 'Daily Vinyasa and Hatha Yoga for all levels.'}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center w-full max-w-md sm:max-w-none">
             <a 
               href="/schedule"
-              className="btn-primary w-full sm:w-auto px-6 py-3 text-center"
+              className="sm:w-auto px-8 sm:px-10 py-3 text-center sm:min-w-[220px] md:min-w-[240px] bg-[var(--color-primary-500)] text-[var(--primary-foreground)] rounded-[var(--unified-radius-md)] hover:bg-[var(--color-primary-600)] transition-colors block"
+              style={mobileTitleWidth ? { width: `${mobileTitleWidth}px` } : undefined}
             >
               {typeof translations?.nav === 'object' && (translations.nav?.schedule || translations.nav?.session) || 'View Schedule'}
             </a>
             <a 
               href="/packages"
-              className="btn-secondary w-full sm:w-auto px-6 py-3 text-center"
+              className="sm:w-auto px-8 sm:px-10 py-3 text-center sm:min-w-[220px] md:min-w-[240px] bg-white text-[var(--color-text-primary)] border border-[var(--color-border-500)] rounded-[var(--unified-radius-md)] hover:bg-[var(--color-surface-secondary)] transition-colors block"
+              style={mobileTitleWidth ? { width: `${mobileTitleWidth}px` } : undefined}
             >
               {typeof translations?.nav === 'object' && translations.nav?.packages || 'View Packages'}
             </a>

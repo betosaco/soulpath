@@ -13,16 +13,16 @@ export function Footer() {
   const footer = (t && typeof t === 'object' && 'footer' in t) ? t.footer as Record<string, string> : {};
   
   return (
-    <footer className="bg-gradient-to-br from-gray-50 to-gray-100 border-t border-gray-200">
+    <footer className="bg-[var(--color-surface-secondary)] border-t border-[var(--color-border-500)]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           {/* Brand & Description */}
           <div className="space-y-4">
-            <h3 className="text-xl font-bold text-gray-900" style={{ fontFamily: 'var(--font-heading)' }}>
+            <h3 className="text-xl font-bold text-[var(--color-text-primary)]" style={{ fontFamily: 'var(--font-heading)' }}>
               {footer.studioTitle || 'Matmax Yoga Studio'}
             </h3>
-            <p className="text-gray-600 text-sm leading-relaxed" style={{ fontFamily: 'var(--font-body)' }}>
+            <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed" style={{ fontFamily: 'var(--font-body)' }}>
               {footer.studioDescription || 'Your sanctuary for wellness, growth, and transformation.'}
             </p>
             <div className="flex space-x-3">
@@ -30,21 +30,21 @@ export function Footer() {
                 href="https://instagram.com/matmaxyoga" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="p-2 text-gray-400 hover:text-purple-600 transition-colors"
+                className="p-2 text-[var(--color-text-tertiary)] hover:text-[var(--color-accent-500)] transition-colors"
                 aria-label="Instagram"
               >
                 <Instagram className="w-5 h-5" />
               </a>
               <a 
                 href="mailto:info@matmax.world" 
-                className="p-2 text-gray-400 hover:text-purple-600 transition-colors"
+                className="p-2 text-[var(--color-text-tertiary)] hover:text-[var(--color-accent-500)] transition-colors"
                 aria-label="Email"
               >
                 <Mail className="w-5 h-5" />
               </a>
               <a 
                 href="tel:+51916172368" 
-                className="p-2 text-gray-400 hover:text-purple-600 transition-colors"
+                className="p-2 text-[var(--color-text-tertiary)] hover:text-[var(--color-accent-500)] transition-colors"
                 aria-label="Phone"
               >
                 <Phone className="w-5 h-5" />
@@ -54,23 +54,23 @@ export function Footer() {
 
           {/* Quick Links */}
           <div className="space-y-4">
-            <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wide" style={{ fontFamily: 'var(--font-heading)' }}>
+            <h4 className="text-sm font-semibold text-[var(--color-text-primary)] uppercase tracking-wide" style={{ fontFamily: 'var(--font-heading)' }}>
               {footer.quickLinksTitle || 'Quick Links'}
             </h4>
             <nav className="space-y-2">
-              <Link href="/" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <Link href="/" className="block text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent-500)] transition-colors">
                 {footer.home || 'Home'}
               </Link>
-              <Link href="/about" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <Link href="/about" className="block text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent-500)] transition-colors">
                 {footer.about || 'About'}
               </Link>
-              <Link href="/packages" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <Link href="/packages" className="block text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent-500)] transition-colors">
                 {footer.packages || 'Packages'}
               </Link>
-              <Link href="/schedule" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <Link href="/schedule" className="block text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent-500)] transition-colors">
                 {footer.schedule || 'Schedule'}
               </Link>
-              <Link href="/schedule" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <Link href="/schedule" className="block text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent-500)] transition-colors">
                 {footer.bookSession || 'Book Session'}
               </Link>
             </nav>
@@ -78,14 +78,14 @@ export function Footer() {
 
           {/* Legal Links */}
           <div className="space-y-4">
-            <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wide" style={{ fontFamily: 'var(--font-heading)' }}>
+            <h4 className="text-sm font-semibold text-[var(--color-text-primary)] uppercase tracking-wide" style={{ fontFamily: 'var(--font-heading)' }}>
               {footer.legalTitle || 'Legal'}
             </h4>
             <nav className="space-y-2">
-              <Link href="/terms" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <Link href="/terms" className="block text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent-500)] transition-colors">
                 {footer.termsAndConditions || 'Terms & Conditions'}
               </Link>
-              <Link href="/privacy" className="block text-sm text-gray-600 hover:text-purple-600 transition-colors">
+              <Link href="/privacy" className="block text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent-500)] transition-colors">
                 {footer.privacyPolicy || 'Privacy Policy'}
               </Link>
             </nav>
@@ -93,23 +93,23 @@ export function Footer() {
 
           {/* Contact Info */}
           <div className="space-y-4">
-            <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wide" style={{ fontFamily: 'var(--font-heading)' }}>
+            <h4 className="text-sm font-semibold text-[var(--color-text-primary)] uppercase tracking-wide" style={{ fontFamily: 'var(--font-heading)' }}>
               {footer.contactTitle || 'Contact'}
             </h4>
             <div className="space-y-3">
-              <div className="flex items-center space-x-3 text-sm text-gray-600">
-                <MapPin className="w-4 h-4 text-purple-600 flex-shrink-0" />
+              <div className="flex items-center space-x-3 text-sm text-[var(--color-text-secondary)]">
+                <MapPin className="w-4 h-4 text-[var(--color-accent-500)] flex-shrink-0" />
                 <span>Calle Alcanfores 425, Miraflores, Lima</span>
               </div>
-              <div className="flex items-center space-x-3 text-sm text-gray-600">
-                <Phone className="w-4 h-4 text-purple-600 flex-shrink-0" />
-                <a href="tel:+51916172368" className="hover:text-purple-600 transition-colors">
+              <div className="flex items-center space-x-3 text-sm text-[var(--color-text-secondary)]">
+                <Phone className="w-4 h-4 text-[var(--color-accent-500)] flex-shrink-0" />
+                <a href="tel:+51916172368" className="hover:text-[var(--color-accent-500)] transition-colors">
                   +51 916 172 368
                 </a>
               </div>
-              <div className="flex items-center space-x-3 text-sm text-gray-600">
-                <Mail className="w-4 h-4 text-purple-600 flex-shrink-0" />
-                <a href="mailto:info@matmax.world" className="hover:text-purple-600 transition-colors">
+              <div className="flex items-center space-x-3 text-sm text-[var(--color-text-secondary)]">
+                <Mail className="w-4 h-4 text-[var(--color-accent-500)] flex-shrink-0" />
+                <a href="mailto:info@matmax.world" className="hover:text-[var(--color-accent-500)] transition-colors">
                   info@matmax.world
                 </a>
               </div>
@@ -118,14 +118,14 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-6 border-t border-gray-200">
+        <div className="pt-6 border-t border-[var(--color-border-500)]">
           <div className="flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
-            <p className="text-xs text-gray-500" style={{ fontFamily: 'var(--font-body)' }}>
+            <p className="text-xs text-[var(--color-text-tertiary)]" style={{ fontFamily: 'var(--font-body)' }}>
               {footer.copyright || '© 2024 Matmax Yoga Studio. All rights reserved.'}
             </p>
-            <div className="flex items-center space-x-1 text-xs text-gray-500">
+            <div className="flex items-center space-x-1 text-xs text-[var(--color-text-tertiary)]">
               <span>Made with</span>
-              <Heart className="w-3 h-3 text-red-500" />
+              <Heart className="w-3 h-3 text-[var(--color-status-error)]" />
               <span>in Lima, Peru</span>
             </div>
           </div>

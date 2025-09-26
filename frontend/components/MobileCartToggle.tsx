@@ -34,7 +34,7 @@ export function MobileCartToggle({ className = '' }: MobileCartToggleProps) {
       aria-expanded={isCartOpen}
     >
       {/* Mobile: Show "Cart" text with icon */}
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2 font-heading">
         <span className="text-sm font-medium">
           {isCartOpen ? 'Close' : 'Cart'}
         </span>
@@ -48,14 +48,14 @@ export function MobileCartToggle({ className = '' }: MobileCartToggleProps) {
 
       {/* Item count badge - only show after hydration */}
       {isHydrated && totalItems > 0 && (
-        <span className="absolute -top-1 -right-1 bg-[#6ea058] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+        <span className="absolute -top-1 -right-1 bg-[var(--color-primary-500)] text-[var(--primary-foreground)] text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
           {totalItems > 99 ? '99+' : totalItems}
         </span>
       )}
 
       {/* Ripple effect for mobile */}
       <motion.div
-        className="absolute inset-0 bg-white/10 rounded-lg"
+        className="absolute inset-0 bg-background/10 rounded-lg"
         initial={{ scale: 0, opacity: 0 }}
         whileTap={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.2 }}

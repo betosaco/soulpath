@@ -605,8 +605,8 @@ export function PackagePurchaseFlow() {
                   {/* Other Payment Methods */}
                   {formData.selectedPaymentMethod?.type !== 'stripe' && 
                    formData.selectedPaymentMethod && (
-                    <div className="mt-4 p-4 bg-[#16213e] rounded-lg">
-                      <p className="text-gray-300 text-sm">
+                    <div className="mt-4 p-4 bg-secondary rounded-lg">
+                      <p className="text-muted-foreground text-sm">
                         You selected {formData.selectedPaymentMethod.name}. 
                         {formData.selectedPaymentMethod.requiresConfirmation 
                           ? ' Please contact us to complete your payment.' 
@@ -620,31 +620,31 @@ export function PackagePurchaseFlow() {
 
             {/* Purchase Summary */}
             {formData.selectedPackage && (
-              <Card className="bg-[#1a1a2e] border-[#16213e]">
+              <Card className="bg-card border-border">
                 <CardHeader>
-                  <CardTitle className="text-white">Order Summary</CardTitle>
+                  <CardTitle className="text-foreground">Order Summary</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-300">Package:</span>
-                    <span className="text-white font-medium">{formData.selectedPackage.packageDefinition.name}</span>
+                    <span className="text-muted-foreground">Package:</span>
+                    <span className="text-foreground font-medium">{formData.selectedPackage.packageDefinition.name}</span>
                   </div>
                   
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-300">Quantity:</span>
-                    <span className="text-white font-medium">{formData.quantity}</span>
+                    <span className="text-muted-foreground">Quantity:</span>
+                    <span className="text-foreground font-medium">{formData.quantity}</span>
                   </div>
                   
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-300">Price per package:</span>
-                    <span className="text-white font-medium">
+                    <span className="text-muted-foreground">Price per package:</span>
+                    <span className="text-foreground font-medium">
                       {formData.selectedPackage.currency.symbol}{formData.selectedPackage.price}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center text-lg font-bold border-t border-[#0a0a23] pt-4">
-                    <span className="text-gray-300">Total:</span>
-                    <span className="text-[#ffd700]">
+                  <div className="flex justify-between items-center text-lg font-bold border-t border-border pt-4">
+                    <span className="text-muted-foreground">Total:</span>
+                    <span className="text-primary">
                       {formData.selectedPackage.currency.symbol}
                       {typeof formData.selectedPackage.price === 'number' && !isNaN(formData.selectedPackage.price)
                         ? (formData.selectedPackage.price * formData.quantity).toFixed(2)
@@ -688,10 +688,10 @@ export function PackagePurchaseFlow() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px] bg-white">
+      <div className="flex items-center justify-center min-h-[400px] bg-[var(--color-background-primary)]">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#FFD700] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-[#FFD700] text-lg font-semibold">Loading purchase options...</p>
+          <div className="w-16 h-16 border-4 border-[var(--color-accent-500)] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-[var(--color-accent-500)] text-lg font-semibold">Loading purchase options...</p>
         </div>
       </div>
     );

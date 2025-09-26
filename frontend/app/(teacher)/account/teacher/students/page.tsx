@@ -78,8 +78,8 @@ export default function TeacherStudentsPage() {
                     const daysSince = lastBooking ? Math.floor((Date.now() - lastBooking.getTime()) / (1000 * 60 * 60 * 24)) : Infinity;
                     const isActive = Number.isFinite(daysSince) && daysSince <= 60; // active if booked within last ~2 months
                     const statusClass = isActive
-                      ? 'bg-[var(--unified-accent)]/30 text-[var(--unified-text-primary)] border-[var(--unified-accent-dark)]'
-                      : 'bg-gray-100 text-gray-700 border-gray-200';
+                      ? `${teacherUI.badge.base} ${teacherUI.badge.success} border border-[var(--unified-border-light)]`
+                      : `${teacherUI.badge.base} ${teacherUI.badge.neutral} border border-[var(--unified-border-light)]`;
 
                     return (
                       <div key={s.id} className="py-3 flex items-center justify-between">
@@ -93,30 +93,30 @@ export default function TeacherStudentsPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2 flex-wrap justify-end">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium border ${statusClass}`}>
+                          <span className={`${statusClass}`}>
                             {isActive ? 'Active' : 'Inactive'}
                           </span>
-                          <span className="px-2 py-1 rounded-full text-xs font-medium border bg-blue-50 text-blue-700 border-blue-200">
+                          <span className={`${teacherUI.badge.base} ${teacherUI.badge.info} border border-[var(--unified-border-light)]`}>
                             {s.bookingsCount || 0} bookings
                           </span>
                           {typeof s.attendanceRate === 'number' && (
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium border ${
+                            <span className={`${teacherUI.badge.base} border ${
                               s.attendanceRate >= 80
-                                ? 'bg-[var(--unified-accent)]/30 text-[var(--unified-text-primary)] border-[var(--unified-accent-dark)]'
+                                ? 'bg-[var(--color-status-success)]/20 text-[var(--unified-text-primary)] border-[var(--color-status-success)]/30'
                                 : s.attendanceRate >= 50
-                                  ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
-                                  : 'bg-red-50 text-red-700 border-red-200'
+                                  ? 'bg-[var(--color-status-warning)]/20 text-[var(--unified-text-primary)] border-[var(--color-status-warning)]/30'
+                                  : 'bg-[var(--color-status-error)]/20 text-[var(--unified-text-primary)] border-[var(--color-status-error)]/30'
                             }`}>
                               {s.attendanceRate}% attendance
                             </span>
                           )}
                           {s.topServiceType?.name && (
-                            <span className="px-2 py-1 rounded-full text-xs font-medium border bg-purple-50 text-purple-700 border-purple-200">
+                            <span className={`${teacherUI.badge.base} ${teacherUI.badge.neutral} border border-[var(--unified-border-light)]`}>
                               Class: {s.topServiceType.name}
                             </span>
                           )}
                           {s.topVenue?.name && (
-                            <span className="px-2 py-1 rounded-full text-xs font-medium border bg-gray-100 text-gray-700 border-gray-200">
+                            <span className={`${teacherUI.badge.base} ${teacherUI.badge.neutral} border border-[var(--unified-border-light)]`}>
                               Venue: {s.topVenue.name}{s.topVenue.city ? `, ${s.topVenue.city}` : ''}
                             </span>
                           )}

@@ -229,6 +229,54 @@ export function PackageSelectionModal({
     );
   };
 
+  /**
+   * RENDER PACKAGE TOKEN
+   * --------------------
+   * Renders an individual package as a compact token/chip to adhere to styles
+   *
+   * @param pkg - Package data
+   * @returns Package token JSX
+   */
+  const renderPackageToken = (pkg: any) => {
+    const actualPackageId = pkg.originalId || pkg.id;
+    const remaining = getPackageRemainingSessions(actualPackageId);
+    const hasBookedThisSlot = pkg.bookingDetails?.some((booking: any) =>
+      booking.selectedDate === scheduleData.selectedDate &&
+      booking.selectedTime === scheduleData.selectedTime
+    ) || false;
+
+    const canSelect = remaining > 0 && !hasBookedThisSlot;
+
+    return (
+      <button
+        key={`token-${pkg.id}`}
+        onClick={() => canSelect ? handlePackageSelect(pkg.id, pkg.originalId) : null}
+        disabled={!canSelect}
+        title={canSelect ? `Select ${pkg.name} for this booking` :
+               hasBookedThisSlot ? `${pkg.name} has already booked this time slot` :
+               `${pkg.name} has no remaining sessions`}
+        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm border transition-colors ${
+          canSelect
+            ? 'bg-[var(--matmax-purple-50)] text-[var(--matmax-purple-800)] border-[var(--matmax-purple-200)] hover:bg-[var(--matmax-purple-100)] hover:border-[var(--matmax-purple-300)]'
+            : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-70'
+        }`}
+      >
+        <span className="truncate max-w-[14rem]">{pkg.name}</span>
+        {hasBookedThisSlot && (
+          <span className="badge badge-warning">Booked</span>
+        )}
+        <span
+          className={`ml-1 text-xs px-2 py-0.5 rounded-full border ${
+            canSelect ? 'bg-white/70 text-[var(--matmax-purple-900)] border-[var(--matmax-purple-200)]' : 'bg-gray-50 text-gray-400 border-gray-200'
+          }`}
+          aria-label="remaining sessions"
+        >
+          {remaining}
+        </span>
+      </button>
+    );
+  };
+
   // Use portal to render modal at document body level
   const modalContent = (
     <>
@@ -270,8 +318,8 @@ export function PackageSelectionModal({
               You have multiple packages available. Which package would you like to use for this booking?
             </p>
 
-            <div className="space-y-3">
-              {availablePackages.map(renderPackageCard)}
+            <div className="flex flex-wrap gap-2">
+              {availablePackages.map(renderPackageToken)}
 
               {availablePackages.length === 0 && (
                 <div className="text-center py-8 text-gray-500">

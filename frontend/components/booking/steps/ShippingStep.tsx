@@ -316,7 +316,7 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
           placeholder={placeholder}
         />
         {hasError && (
-          <p className="text-red-600 text-sm mt-1">{errorMessage}</p>
+          <p className="text-sm mt-1" style={{ color: 'var(--color-status-error)' }}>{errorMessage}</p>
         )}
       </div>
     );
@@ -332,12 +332,12 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
     return (
       <div className="max-w-2xl mx-auto h-full space-y-6">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
             Shipping Address
           </h2>
           <div className="mt-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
-            <p className="text-sm text-gray-500 mt-2">Loading...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-2 mx-auto" style={{ borderColor: 'color-mix(in srgb, var(--color-primary-500) 25%, transparent)', borderTopColor: 'var(--color-primary-500)' }}></div>
+            <p className="text-sm mt-2" style={{ color: 'var(--color-text-tertiary)' }}>Loading...</p>
           </div>
         </div>
       </div>
@@ -349,15 +349,15 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
     return (
       <div className="max-w-2xl mx-auto h-full space-y-6">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
             Shipping Address
           </h2>
-          <p className="text-gray-600">
+          <p style={{ color: 'var(--color-text-secondary)' }}>
             No shipping required for your order
           </p>
           <div className="mt-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
-            <p className="text-sm text-gray-500 mt-2">Continuing to payment...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-2 mx-auto" style={{ borderColor: 'color-mix(in srgb, var(--color-primary-500) 25%, transparent)', borderTopColor: 'var(--color-primary-500)' }}></div>
+            <p className="text-sm mt-2" style={{ color: 'var(--color-text-tertiary)' }}>Continuing to payment...</p>
           </div>
         </div>
       </div>
@@ -367,10 +367,10 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
   return (
     <div className="max-w-2xl mx-auto h-full space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
           Shipping Address
         </h2>
-        <p className="text-gray-600">
+        <p style={{ color: 'var(--color-text-secondary)' }}>
           Provide shipping address details for your physical products
         </p>
       </div>
@@ -539,10 +539,9 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
           onClick={handleSubmit}
           disabled={!isFormValid}
           className={`w-full px-6 py-3 rounded-md font-medium transition-all duration-200 ${
-            isFormValid
-              ? 'bg-green-600 hover:bg-green-700 text-white shadow-md'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            isFormValid ? '' : 'cursor-not-allowed'
           }`}
+          style={{ background: isFormValid ? 'var(--color-primary-500)' : 'var(--color-border-500)', color: isFormValid ? 'var(--primary-foreground)' : 'var(--color-text-tertiary)' }}
         >
           Continue to Payment
         </button>

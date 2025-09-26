@@ -6,6 +6,7 @@ import { Footer } from './Footer';
 import { CartSidebar } from './CartSidebar';
 import { MobileViewportHandler } from './MobileViewportHandler';
 import { QueryProvider } from './providers/QueryProvider';
+import { TermsModal } from './TermsModal';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -56,6 +57,9 @@ export function AppShell({
         
         {/* Cart sidebar for e-commerce functionality */}
         <CartSidebar />
+
+        {/* Global Terms & Conditions modal */}
+        <TermsModal />
       </div>
     </QueryProvider>
   );

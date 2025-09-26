@@ -155,43 +155,52 @@ export function GroupCustomerInfoStep() {
     <div className="max-w-4xl mx-auto">
       {/* Header */}
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+        <h1 className="text-3xl font-bold mb-4" style={{ color: 'var(--unified-text-primary)' }}>
           Group Booking
         </h1>
-        <p className="text-lg text-gray-600">
+        <p className="text-lg" style={{ color: 'var(--unified-text-secondary)' }}>
           {allFormsCompleted ? 'Final Assignment Summary' : 'Enter details for each person'}
         </p>
       </div>
 
       {/* Show Final Assignment Summary when all forms are completed */}
       {allFormsCompleted ? (
-        <div className="bg-white rounded-lg border p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
+        <div className="unified-card p-8">
+          <h2 className="text-2xl font-bold mb-2 text-center" style={{ color: 'var(--unified-text-primary)' }}>
             Package Assignments Complete
           </h2>
-          <p className="text-center text-gray-600 mb-6">
+          <p className="text-center mb-6" style={{ color: 'var(--unified-text-secondary)' }}>
             All packages have been assigned. Review the assignments below.
           </p>
           <div className="space-y-4">
             {packageItems.map((pkg, index) => {
               const customerInfo = customerInfos[pkg.id];
               return (
-                <div key={`final-${index}`} className="flex items-center justify-between bg-gray-50 p-4 rounded-lg cursor-default">
+                <div
+                  key={`final-${index}`}
+                  className="flex items-center justify-between p-4 rounded-lg cursor-default"
+                  style={{
+                    background: 'var(--unified-bg-secondary)'
+                  }}
+                >
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                      <span className="text-green-600 font-semibold text-lg">✓</span>
+                    <div
+                      className="w-12 h-12 rounded-full flex items-center justify-center"
+                      style={{ background: 'color-mix(in srgb, var(--color-status-success) 15%, transparent)' }}
+                    >
+                      <span className="font-semibold text-lg" style={{ color: 'var(--color-status-success)' }}>✓</span>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">{pkg.name}</h3>
-                      <p className="text-sm text-gray-600">
+                      <h3 className="font-semibold" style={{ color: 'var(--unified-text-primary)' }}>{pkg.name}</h3>
+                      <p className="text-sm" style={{ color: 'var(--unified-text-secondary)' }}>
                         {pkg.currency} {pkg.price?.toFixed(2)}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-medium text-gray-900">{customerInfo.name}</p>
-                    <p className="text-sm text-gray-600">{customerInfo.email}</p>
-                    <p className="text-sm text-gray-600">{customerInfo.phone}</p>
+                    <p className="font-medium" style={{ color: 'var(--unified-text-primary)' }}>{customerInfo.name}</p>
+                    <p className="text-sm" style={{ color: 'var(--unified-text-secondary)' }}>{customerInfo.email}</p>
+                    <p className="text-sm" style={{ color: 'var(--unified-text-secondary)' }}>{customerInfo.phone}</p>
                   </div>
                 </div>
               );
@@ -203,8 +212,8 @@ export function GroupCustomerInfoStep() {
         <div className="grid lg:grid-cols-3 gap-8">
         {/* Left Side - Package List */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg border p-6 sticky top-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Packages</h3>
+          <div className="unified-card p-6 sticky top-4">
+            <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--unified-text-primary)' }}>Your Packages</h3>
             <div className="space-y-3">
               {packageItems.map((pkg, index) => {
                 const customerInfo = customerInfos[pkg.id];
@@ -214,13 +223,19 @@ export function GroupCustomerInfoStep() {
                 return (
                   <div 
                     key={`sidebar-${index}`} 
-                    className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                      isCurrent 
-                        ? 'border-blue-500 bg-blue-50' 
-                        : isCompleted 
-                          ? 'border-green-500 bg-green-50' 
-                          : 'border-gray-200 hover:border-gray-300'
-                    }`}
+                    className={`p-3 rounded-lg border cursor-pointer transition-all`}
+                    style={{
+                      borderColor: isCurrent
+                        ? 'var(--unified-primary)'
+                        : isCompleted
+                          ? 'var(--color-status-success)'
+                          : 'var(--unified-border-light)',
+                      background: isCurrent
+                        ? 'var(--unified-bg-secondary)'
+                        : isCompleted
+                          ? 'color-mix(in srgb, var(--color-status-success) 10%, transparent)'
+                          : 'var(--unified-bg-surface)'
+                    }}
                     onClick={() => {
                       // Don't allow navigation if all forms are completed
                       if (!allFormsCompleted) {
@@ -229,18 +244,22 @@ export function GroupCustomerInfoStep() {
                     }}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <h4 className="font-medium text-gray-900 text-sm">{pkg.name}</h4>
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${
-                        isCompleted 
-                          ? 'bg-green-500 text-white' 
-                          : isCurrent 
-                            ? 'bg-blue-500 text-white' 
-                            : 'bg-gray-300 text-gray-600'
-                      }`}>
+                      <h4 className="font-medium text-sm" style={{ color: 'var(--unified-text-primary)' }}>{pkg.name}</h4>
+                      <div
+                        className={`w-5 h-5 rounded-full flex items-center justify-center text-xs`}
+                        style={{
+                          background: isCompleted
+                            ? 'var(--color-status-success)'
+                            : isCurrent
+                              ? 'var(--unified-primary)'
+                              : 'var(--unified-border-medium)',
+                          color: isCompleted || isCurrent ? 'var(--unified-text-inverse)' : 'var(--unified-text-secondary)'
+                        }}
+                      >
                         {isCompleted ? '✓' : '○'}
                       </div>
                     </div>
-                    <p className="text-xs text-gray-600">
+                    <p className="text-xs" style={{ color: 'var(--unified-text-secondary)' }}>
                       {isCompleted 
                         ? `${customerInfo.name}`
                         : isCurrent 
@@ -257,12 +276,12 @@ export function GroupCustomerInfoStep() {
 
         {/* Right Side - Form */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-lg border p-6">
+          <div className="unified-card p-6">
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              <h2 className="text-xl font-semibold mb-2" style={{ color: 'var(--unified-text-primary)' }}>
                 {currentPackage.name}
               </h2>
-              <p className="text-gray-600">
+              <p style={{ color: 'var(--unified-text-secondary)' }}>
                 Enter contact information for the person who will use this package
               </p>
             </div>
@@ -327,7 +346,7 @@ export function GroupCustomerInfoStep() {
                   <select
                     value={currentPackage.id}
                     onChange={(e) => handlePackageSelection(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    className="unified-form-select"
                   >
                     {packageItems.map((pkg, index) => {
                       const customerInfo = customerInfos[pkg.id];
@@ -350,9 +369,16 @@ export function GroupCustomerInfoStep() {
                 <button
                   type="button"
                   onClick={() => setShowPackageModal(true)}
-                  className="md:hidden w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left bg-white hover:bg-gray-50 transition-colors"
+                  className="md:hidden w-full text-left transition-colors"
+                  style={{
+                    padding: 'var(--unified-spacing-md)',
+                    border: '1px solid var(--unified-border-medium)',
+                    borderRadius: 'var(--unified-radius-md)',
+                    background: 'var(--unified-bg-surface)',
+                    color: 'var(--unified-text-primary)'
+                  }}
                 >
-                  <span className="text-gray-900">
+                  <span style={{ color: 'var(--unified-text-primary)' }}>
                     {currentPackage.name} - {currentPackage.currency} {currentPackage.price?.toFixed(2)}
                   </span>
                 </button>
@@ -368,7 +394,7 @@ export function GroupCustomerInfoStep() {
       <div className="flex justify-between pt-8 pb-8">
         <button
           onClick={handlePrevious}
-          className="flex items-center space-x-2 px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+          className="unified-button unified-button--secondary"
         >
           <ArrowLeft className="w-5 h-5" />
           <span>{currentPackageIndex === 0 ? 'Back to Selection' : 'Previous Package'}</span>
@@ -377,7 +403,7 @@ export function GroupCustomerInfoStep() {
         {!allFormsCompleted && (
           <button
             onClick={handleSubmit}
-            className="px-6 py-3 rounded-md font-medium transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+            className="unified-button unified-button--primary"
           >
             {findNextUnassignedPackage() !== -1 ? 'NEXT' : 'CONTINUE TO CHECKOUT'}
           </button>
@@ -386,7 +412,7 @@ export function GroupCustomerInfoStep() {
         {allFormsCompleted && (
           <button
             onClick={handleSubmit}
-            className="px-6 py-3 rounded-md font-medium transition-all duration-200 bg-green-600 hover:bg-green-700 text-white shadow-md"
+            className="unified-button unified-button--success"
           >
             CONTINUE TO CHECKOUT
           </button>
@@ -395,14 +421,14 @@ export function GroupCustomerInfoStep() {
 
       {/* Package Selection Modal - Mobile Only */}
       {showPackageModal && (
-        <div className="md:hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full max-h-[80vh] overflow-y-auto">
+        <div className="md:hidden fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'var(--unified-bg-overlay)' }}>
+          <div className="unified-modal" style={{ maxWidth: '32rem', width: '100%', maxHeight: '80vh' }}>
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Select Package</h3>
+                <h3 className="text-lg font-semibold" style={{ color: 'var(--unified-text-primary)' }}>Select Package</h3>
                 <button
                   onClick={() => setShowPackageModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="unified-button unified-button--ghost"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -410,7 +436,7 @@ export function GroupCustomerInfoStep() {
                 </button>
               </div>
               
-              <p className="text-gray-600 mb-4">
+              <p className="mb-4" style={{ color: 'var(--unified-text-secondary)' }}>
                 Select which package to edit:
               </p>
               
@@ -424,25 +450,25 @@ export function GroupCustomerInfoStep() {
                     <button
                       key={`modal-${index}`}
                       onClick={() => handlePackageSelection(pkg.id)}
-                      className={`w-full p-4 rounded-lg border text-left transition-all ${
-                        isCurrent
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                      }`}
+                      className={`w-full p-4 rounded-lg border text-left transition-all`}
+                      style={{
+                        borderColor: isCurrent ? 'var(--unified-primary)' : 'var(--unified-border-light)',
+                        background: isCurrent ? 'var(--unified-bg-secondary)' : 'var(--unified-bg-surface)'
+                      }}
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <h4 className="font-medium text-gray-900">{pkg.name}</h4>
-                          <p className="text-sm text-gray-600">
+                          <h4 className="font-medium" style={{ color: 'var(--unified-text-primary)' }}>{pkg.name}</h4>
+                          <p className="text-sm" style={{ color: 'var(--unified-text-secondary)' }}>
                             {pkg.currency} {pkg.price?.toFixed(2)}
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs" style={{ color: 'var(--unified-text-tertiary)' }}>
                             {isCompleted ? `Assigned to: ${customerInfo.name}` : 'Not assigned yet'}
                           </p>
                         </div>
                         {isCurrent && (
-                          <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
-                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ background: 'var(--unified-primary)' }}>
+                            <svg className="w-3 h-3" style={{ color: 'var(--unified-text-inverse)' }} fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                             </svg>
                           </div>

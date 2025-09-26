@@ -329,27 +329,19 @@ export default function TeacherSchedulePage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <CalendarIcon className="h-5 w-5 text-[var(--unified-primary)]" />
-              <h2 className="text-xl font-semibold text-gray-800">My Schedule</h2>
+              <h2 className="text-xl font-semibold text-[var(--unified-text-primary)]">My Schedule</h2>
             </div>
             
             {/* View Mode Toggle */}
             <div className="flex gap-2">
               <button
-                className={`px-4 py-2 rounded-lg border transition-all duration-200 font-medium ${
-                  viewMode === 'weekly'
-                    ? 'bg-[var(--unified-primary)] text-white border-[var(--unified-primary)] shadow-md'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                }`}
+                className={`${teacherUI.tabs.base} ${viewMode === 'weekly' ? teacherUI.tabs.active : teacherUI.tabs.inactive}`}
                 onClick={() => setViewMode('weekly')}
               >
                 Weekly
               </button>
               <button
-                className={`px-4 py-2 rounded-lg border transition-all duration-200 font-medium ${
-                  viewMode === 'monthly'
-                    ? 'bg-[var(--unified-primary)] text-white border-[var(--unified-primary)] shadow-md'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                }`}
+                className={`${teacherUI.tabs.base} ${viewMode === 'monthly' ? teacherUI.tabs.active : teacherUI.tabs.inactive}`}
                 onClick={() => setViewMode('monthly')}
               >
                 Monthly
@@ -363,12 +355,12 @@ export default function TeacherSchedulePage() {
           <div className="flex items-center justify-between mb-6">
             <button
               onClick={() => navigateDate('prev')}
-              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+              className={`${teacherUI.tabs.base} ${teacherUI.tabs.inactive}`}
             >
-              <ChevronLeftIcon className="h-5 w-5 text-gray-600" />
+              <ChevronLeftIcon className="h-5 w-5 text-[var(--unified-text-secondary)]" />
             </button>
             
-            <h3 className="text-lg font-semibold text-gray-800">
+            <h3 className="text-lg font-semibold text-[var(--unified-text-primary)]">
               {viewMode === 'weekly' 
                 ? `Week of ${currentDate.toLocaleDateString('en-GB', { 
                     day: 'numeric', 
@@ -384,16 +376,16 @@ export default function TeacherSchedulePage() {
             
             <button
               onClick={() => navigateDate('next')}
-              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+              className={`${teacherUI.tabs.base} ${teacherUI.tabs.inactive}`}
             >
-              <ChevronRightIcon className="h-5 w-5 text-gray-600" />
+              <ChevronRightIcon className="h-5 w-5 text-[var(--unified-text-secondary)]" />
             </button>
           </div>
 
           {loading && (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--unified-primary)]"></div>
-              <span className="ml-2 text-gray-600">Loading schedule...</span>
+              <span className="ml-2 text-[var(--color-text-secondary)]">Loading schedule...</span>
             </div>
           )}
 
@@ -499,8 +491,8 @@ function WeeklyView({ dates, getSlotsForDate, formatDate, formatTime, isToday, o
           <div key={index} className="min-h-[200px]">
             <div className={`text-center p-3 rounded-lg mb-2 ${
               isToday(date) 
-                ? 'bg-[var(--unified-primary)] text-white' 
-                : 'bg-gray-100 text-gray-700'
+                ? 'bg-[var(--unified-primary)] text-[var(--unified-primary-contrast)]' 
+                : 'bg-[var(--unified-bg-secondary)] text-[var(--unified-text-primary)]'
             }`}>
               <div className="text-sm font-medium">{weekDays[index]}</div>
               <div className="text-lg font-semibold">{formatDate(date)}</div>
@@ -508,7 +500,7 @@ function WeeklyView({ dates, getSlotsForDate, formatDate, formatTime, isToday, o
             
             <div className="space-y-2">
               {daySlots.length === 0 ? (
-                <p className="text-gray-500 text-sm text-center py-4">No slots</p>
+                <p className="text-[var(--unified-text-secondary)] text-sm text-center py-4">No slots</p>
               ) : (
                 daySlots.map((slot: any) => {
                   const capacity = slot.maxBookings || 12;
@@ -520,11 +512,11 @@ function WeeklyView({ dates, getSlotsForDate, formatDate, formatTime, isToday, o
                     <div key={slot.id} className={`p-2 rounded-lg border text-xs relative group ${
                       slot.isAvailable && !isFullyBooked
                         ? 'bg-[var(--unified-accent)]/15 border-[var(--unified-accent-dark)] text-[var(--unified-text-primary)]' 
-                        : 'bg-red-50 border-red-200 text-red-800'
+                        : 'bg-[var(--color-status-error)]/10 border-[var(--color-status-error)]/30 text-[var(--unified-text-primary)]'
                     }`}>
                       <div className="font-medium">{formatTime(new Date(slot.originalStartTime ?? slot.startTime))}</div>
                       {slot.isLate && (
-                        <div className="text-xs text-red-600 font-medium">
+                        <div className="text-xs text-[var(--color-status-warning)] font-medium">
                           ⚠️ Running Late ({slot.lateMinutes} min)
                         </div>
                       )}
@@ -533,7 +525,7 @@ function WeeklyView({ dates, getSlotsForDate, formatDate, formatTime, isToday, o
                       </div>
                       {/* Available Spots Info */}
                       <div className="flex items-center gap-1 mt-1">
-                        <div className={`w-2 h-2 rounded-full ${slot.isLate ? 'bg-yellow-500' : (slot.isAvailable && !isFullyBooked ? 'bg-[var(--unified-accent-dark)]' : 'bg-red-500')}`}></div>
+                        <div className={`w-2 h-2 rounded-full ${slot.isLate ? 'bg-[var(--color-status-warning)]' : (slot.isAvailable && !isFullyBooked ? 'bg-[var(--unified-accent-dark)]' : 'bg-[var(--color-status-error)]')}`}></div>
                         <span className="text-xs">
                           {availableSpots} of {capacity} spots
                         </span>
@@ -543,18 +535,19 @@ function WeeklyView({ dates, getSlotsForDate, formatDate, formatTime, isToday, o
                         <div className="relative">
                           <button
                             onClick={() => onSlotMenuToggle(slot.id)}
-                            className="p-1 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
+                            className={`${teacherUI.tabs.base} ${teacherUI.tabs.inactive} p-1`
+                            }
                             title="Slot options"
                           >
                             <MoreVerticalIcon className="h-3 w-3" />
                           </button>
                           
                           {showSlotMenu === slot.id && (
-                            <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[160px]">
+                            <div className="absolute right-0 top-8 bg-[var(--unified-bg-surface)] border border-[var(--unified-border-light)] rounded-lg shadow-lg z-10 min-w-[160px]">
                               {slot.isLate ? (
                                 <button
                                   onClick={() => onRevertLate(slot)}
-                                  className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                  className="w-full px-3 py-2 text-left text-sm text-[var(--unified-text-primary)] hover:bg-[var(--unified-bg-secondary)] flex items-center gap-2"
                                 >
                                   <ClockIcon className="h-4 w-4 text-[var(--unified-accent-dark)]" />
                                   Revert Late
@@ -562,17 +555,17 @@ function WeeklyView({ dates, getSlotsForDate, formatDate, formatTime, isToday, o
                               ) : (
                                 <button
                                   onClick={() => onLateNotification(slot)}
-                                  className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                  className="w-full px-3 py-2 text-left text-sm text-[var(--unified-text-primary)] hover:bg-[var(--unified-bg-secondary)] flex items-center gap-2"
                                 >
-                                  <ClockIcon className="h-4 w-4 text-yellow-600" />
+                                  <ClockIcon className="h-4 w-4 text-[var(--color-status-warning)]" />
                                   Notify Late
                                 </button>
                               )}
                               <button
                                 onClick={() => onCancelSlot(slot)}
-                                className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                className="w-full px-3 py-2 text-left text-sm text-[var(--unified-text-primary)] hover:bg-[var(--unified-bg-secondary)] flex items-center gap-2"
                               >
-                                <XIcon className="h-4 w-4 text-red-600" />
+                                <XIcon className="h-4 w-4 text-[var(--color-status-error)]" />
                                 Cancel Class
                               </button>
                             </div>
@@ -885,13 +878,13 @@ function LateNotificationModal({ slot, lateMinutes, setLateMinutes, lateMessage,
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="unified-form-label">
                 How many minutes late will you be?
               </label>
               <select
                 value={lateMinutes}
                 onChange={(e) => setLateMinutes(Number(e.target.value))}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--unified-primary)] focus:border-transparent"
+                className="unified-form-select"
               >
                 <option value={5}>5 minutes</option>
                 <option value={10}>10 minutes</option>
@@ -904,14 +897,14 @@ function LateNotificationModal({ slot, lateMinutes, setLateMinutes, lateMessage,
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="unified-form-label">
                 Additional Message (Optional)
               </label>
               <textarea
                 value={lateMessage}
                 onChange={(e) => setLateMessage(e.target.value)}
                 placeholder="e.g., Traffic jam, please wait for me..."
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--unified-primary)] focus:border-transparent resize-none"
+                className="unified-form-textarea resize-none"
                 rows={3}
                 maxLength={200}
               />

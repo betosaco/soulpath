@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
+import { renderEmailLayout, getEmailTheme } from '@/lib/brevo-email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -86,9 +87,10 @@ export async function POST(request: NextRequest) {
       `
     };
 
-    // Send the test email
+    // Wrap with admin theme and send the test email
     console.log('📧 Sending test email to:', testEmailData.to);
-    const emailSent = await emailService.sendEmail(testEmailData);
+    const themedHtml = renderEmailLayout(testEmailData.html, testEmailData.subject, getEmailTheme('frontpage'));
+    const emailSent = await emailService.sendEmail({ ...testEmailData, html: themedHtml });
 
     if (emailSent) {
       console.log('✅ Test email sent successfully via Brevo');

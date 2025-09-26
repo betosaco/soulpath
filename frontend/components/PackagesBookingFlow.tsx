@@ -278,7 +278,7 @@ export function PackagesBookingFlow() {
               {packagesLoading ? (
                 <div className="text-center py-12">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                  <p className="text-gray-600 text-lg">Loading packages...</p>
+                  <p className="text-[var(--color-text-secondary)] text-lg">Loading packages...</p>
                 </div>
               ) : packagesError ? (
                 <div className="text-center py-12">
@@ -324,7 +324,7 @@ export function PackagesBookingFlow() {
                         </div>
                         <Button
                           onClick={() => handlePackageSelect(pkg)}
-                          className="w-full bg-[#6ea058] hover:bg-[#5a8a47] text-white"
+                          className="w-full btn-primary"
                         >
                           Select Package
                         </Button>

@@ -487,12 +487,12 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
           {/* Minimal Loading Header */}
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Available Classes</h2>
-            <p className="text-gray-600">Loading schedule...</p>
+            <p className="text-[var(--color-text-secondary)]">Loading schedule...</p>
           </div>
           
           {/* Subtle Loading Animation - Same as packages */}
           <div className="flex justify-center py-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-green-200 border-t-green-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-[var(--color-border-200)] border-t-[var(--color-primary-500)]"></div>
           </div>
         </div>
       </div>
@@ -570,7 +570,11 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
             </div>
 
             {/* Date Filter */}
+            <label className="sr-only" htmlFor="schedule-date-filter">Filter by date</label>
             <select
+              id="schedule-date-filter"
+              name="date"
+              aria-label="Filter by date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6ea058] focus:border-transparent"
@@ -584,7 +588,11 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
             </select>
 
             {/* Teacher Filter */}
+            <label className="sr-only" htmlFor="schedule-teacher-filter">Filter by teacher</label>
             <select
+              id="schedule-teacher-filter"
+              name="teacher"
+              aria-label="Filter by teacher"
               value={selectedTeacher}
               onChange={(e) => setSelectedTeacher(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6ea058] focus:border-transparent"
@@ -598,7 +606,11 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
             </select>
 
             {/* Service Filter */}
+            <label className="sr-only" htmlFor="schedule-service-filter">Filter by service</label>
             <select
+              id="schedule-service-filter"
+              name="service"
+              aria-label="Filter by service"
               value={selectedService}
               onChange={(e) => setSelectedService(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6ea058] focus:border-transparent"
@@ -633,9 +645,19 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
                   key={date}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="schedule-day"
+                  className="schedule-day rounded-lg shadow-sm border overflow-hidden"
+                  style={{
+                    backgroundColor: 'color-mix(in srgb, var(--color-primary-500) 6%, transparent)',
+                    borderColor: 'color-mix(in srgb, var(--color-primary-500) 20%, transparent)'
+                  }}
                 >
-                  <div className="schedule-day__header">
+                  <div
+                    className="schedule-day__header px-6 py-4 border-b flex items-center justify-between"
+                    style={{
+                      backgroundColor: 'color-mix(in srgb, var(--color-primary-500) 10%, transparent)',
+                      borderBottomColor: 'color-mix(in srgb, var(--color-primary-500) 20%, transparent)'
+                    }}
+                  >
                     <h3 className="text-xl font-semibold text-gray-900">
                       {formatDate(date)}
                     </h3>

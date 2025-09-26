@@ -122,10 +122,10 @@ export default function PurchaseHistoryPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-[400px] bg-[var(--color-background-primary)]">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#FFD700] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-[#FFD700] text-lg font-semibold">Loading purchase history...</p>
+          <div className="w-16 h-16 border-4 border-[var(--color-accent-500)] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-[var(--color-text-secondary)] text-lg font-semibold">Loading purchase history...</p>
         </div>
       </div>
     );
@@ -134,49 +134,49 @@ export default function PurchaseHistoryPage() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-white">Purchase History</h1>
-        <p className="text-gray-400 mt-2">View your complete purchase history and transaction details</p>
+        <h1 className="text-3xl font-bold text-[var(--unified-text-primary)]">Purchase History</h1>
+        <p className="text-[var(--unified-text-secondary)] mt-2">View your complete purchase history and transaction details</p>
       </div>
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-[#1a1a2e] border-[#16213e] text-white">
-          <CardContent className="p-6">
+        <Card className="unified-card">
+          <CardContent className="unified-card__content p-6">
             <div className="flex items-center space-x-4">
-              <div className="p-3 bg-[#ffd700]/20 rounded-full">
-                <ShoppingCart className="w-6 h-6 text-[#ffd700]" />
+              <div className="p-3 bg-[var(--unified-accent)]/20 rounded-full">
+                <ShoppingCart className="w-6 h-6 text-[var(--unified-accent)]" />
               </div>
               <div>
-                <div className="text-2xl font-bold text-white">{totalPurchases}</div>
-                <div className="text-sm text-gray-400">Total Purchases</div>
+                <div className="text-2xl font-bold text-[var(--unified-text-primary)]">{totalPurchases}</div>
+                <div className="text-sm text-[var(--unified-text-secondary)]">Total Purchases</div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-[#1a1a2e] border-[#16213e] text-white">
-          <CardContent className="p-6">
+        <Card className="unified-card">
+          <CardContent className="unified-card__content p-6">
             <div className="flex items-center space-x-4">
               <div className="p-3 bg-green-500/20 rounded-full">
                 <CreditCard className="w-6 h-6 text-green-400" />
               </div>
               <div>
-                <div className="text-2xl font-bold text-white">${totalSpent.toFixed(2)}</div>
-                <div className="text-sm text-gray-400">Total Spent</div>
+                <div className="text-2xl font-bold text-[var(--unified-text-primary)]">${totalSpent.toFixed(2)}</div>
+                <div className="text-sm text-[var(--unified-text-secondary)]">Total Spent</div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-[#1a1a2e] border-[#16213e] text-white">
-          <CardContent className="p-6">
+        <Card className="unified-card">
+          <CardContent className="unified-card__content p-6">
             <div className="flex items-center space-x-4">
               <div className="p-3 bg-blue-500/20 rounded-full">
                 <PackageIcon className="w-6 h-6 text-blue-400" />
               </div>
               <div>
-                <div className="text-2xl font-bold text-white">{completedPurchases}</div>
-                <div className="text-sm text-gray-400">Completed Orders</div>
+                <div className="text-2xl font-bold text-[var(--unified-text-primary)]">{completedPurchases}</div>
+                <div className="text-sm text-[var(--unified-text-secondary)]">Completed Orders</div>
               </div>
             </div>
           </CardContent>
@@ -184,17 +184,17 @@ export default function PurchaseHistoryPage() {
       </div>
 
       {/* Filters */}
-      <Card className="bg-[#1a1a2e] border-[#16213e] text-white">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
+      <Card className="unified-card">
+        <CardHeader className="unified-card__header">
+          <CardTitle className="unified-card__title flex items-center space-x-2">
             <Filter className="w-5 h-5" />
             <span>Filters</span>
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="unified-card__content">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <Label htmlFor="search" className="text-gray-300">Search</Label>
+              <Label htmlFor="search" className="unified-form-label">Search</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <Input
@@ -202,18 +202,18 @@ export default function PurchaseHistoryPage() {
                   placeholder="Search packages or transaction ID..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-[#16213e] border-[#0a0a23] text-white"
+                  className="pl-10 unified-form-input"
                 />
               </div>
             </div>
 
             <div>
-              <Label htmlFor="status" className="text-gray-300">Payment Status</Label>
+              <Label htmlFor="status" className="unified-form-label">Payment Status</Label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="bg-[#16213e] border-[#0a0a23] text-white">
+                <SelectTrigger className="unified-form-select">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#16213e] border-[#0a0a23] text-white">
+                <SelectContent className="unified-form-select">
                   <SelectItem value="all">All Statuses</SelectItem>
                   <SelectItem value="completed">Completed</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
@@ -223,12 +223,12 @@ export default function PurchaseHistoryPage() {
             </div>
 
             <div>
-              <Label htmlFor="date" className="text-gray-300">Date Range</Label>
+              <Label htmlFor="date" className="unified-form-label">Date Range</Label>
               <Select value={dateFilter} onValueChange={setDateFilter}>
-                <SelectTrigger className="bg-[#16213e] border-[#0a0a23] text-white">
+                <SelectTrigger className="unified-form-select">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#16213e] border-[#0a0a23] text-white">
+                <SelectContent className="unified-form-select">
                   <SelectItem value="all">All Time</SelectItem>
                   <SelectItem value="7days">Last 7 Days</SelectItem>
                   <SelectItem value="30days">Last 30 Days</SelectItem>
@@ -243,19 +243,19 @@ export default function PurchaseHistoryPage() {
 
       {/* Purchase History */}
       {filteredPurchases.length === 0 ? (
-        <Card className="bg-[#1a1a2e] border-[#16213e] text-white">
-          <CardContent className="p-8 text-center">
+        <Card className="unified-card">
+          <CardContent className="unified-card__content p-8 text-center">
             <div className="space-y-4">
-              <ShoppingCart className="w-16 h-16 text-gray-500 mx-auto" />
-              <h3 className="text-xl font-semibold text-gray-300">No Purchases Found</h3>
-              <p className="text-gray-400">
+              <ShoppingCart className="w-16 h-16 text-[var(--unified-text-tertiary)] mx-auto" />
+              <h3 className="text-xl font-semibold text-[var(--unified-text-primary)]">No Purchases Found</h3>
+              <p className="text-[var(--unified-text-secondary)]">
                 {purchases.length === 0 
                   ? "You haven't made any purchases yet. Start your spiritual journey today!"
                   : "No purchases match your current filters. Try adjusting your search criteria."
                 }
               </p>
               {purchases.length === 0 && (
-                <Button className="bg-[#ffd700] text-black hover:bg-[#ffd700]/90">
+                <Button className="unified-button unified-button--primary">
                   <PackageIcon className="w-4 h-4 mr-2" />
                   Browse Packages
                 </Button>
@@ -266,64 +266,64 @@ export default function PurchaseHistoryPage() {
       ) : (
         <div className="space-y-4">
           {filteredPurchases.map((purchase) => (
-            <Card key={purchase.id} className="bg-[#1a1a2e] border-[#16213e] text-white hover:border-[#ffd700]/50 transition-all">
-              <CardHeader className="pb-3">
+            <Card key={purchase.id} className="unified-card hover:unified-shadow transition-all">
+              <CardHeader className="unified-card__header pb-3">
                 <div className="flex justify-between items-start">
                   <div className="flex items-center space-x-2">
-                    <PackageIcon className="w-5 h-5 text-[#ffd700]" />
-                    <CardTitle className="text-lg">{purchase.packageName}</CardTitle>
+                    <PackageIcon className="w-5 h-5 text-[var(--unified-accent)]" />
+                    <CardTitle className="text-lg text-[var(--unified-text-primary)]">{purchase.packageName}</CardTitle>
                   </div>
                   <Badge className={getStatusColor(purchase.paymentStatus)}>
                     {purchase.paymentStatus}
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-gray-300 text-sm">{purchase.packageDescription}</p>
+              <CardContent className="unified-card__content space-y-4">
+                <p className="text-[var(--unified-text-secondary)] text-sm">{purchase.packageDescription}</p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div>
-                    <div className="text-sm text-gray-400">Purchase Date</div>
-                    <div className="text-white font-medium">
+                    <div className="text-sm text-[var(--unified-text-secondary)]">Purchase Date</div>
+                    <div className="text-[var(--unified-text-primary)] font-medium">
                       {new Date(purchase.purchaseDate).toLocaleDateString()}
                     </div>
                   </div>
                   <div>
-                    <div className="text-sm text-gray-400">Quantity</div>
-                    <div className="text-white font-medium">{purchase.quantity}</div>
+                    <div className="text-sm text-[var(--unified-text-secondary)]">Quantity</div>
+                    <div className="text-[var(--unified-text-primary)] font-medium">{purchase.quantity}</div>
                   </div>
                   <div>
-                    <div className="text-sm text-gray-400">Total Amount</div>
-                    <div className="text-[#ffd700] font-bold">
+                    <div className="text-sm text-[var(--unified-text-secondary)]">Total Amount</div>
+                    <div className="text-[var(--unified-accent-dark)] font-bold">
                       {purchase.currency} {purchase.totalAmount.toFixed(2)}
                     </div>
                   </div>
                   <div>
-                    <div className="text-sm text-gray-400">Payment Method</div>
-                    <div className="text-white font-medium">{purchase.paymentMethod}</div>
+                    <div className="text-sm text-[var(--unified-text-secondary)]">Payment Method</div>
+                    <div className="text-[var(--unified-text-primary)] font-medium">{purchase.paymentMethod}</div>
                   </div>
                 </div>
 
                 {purchase.transactionId && (
-                  <div className="bg-[#16213e] p-3 rounded-lg">
-                    <div className="text-sm text-gray-400">Transaction ID</div>
-                    <div className="text-white font-mono text-sm">{purchase.transactionId}</div>
+                  <div className="unified-bg-secondary p-3 rounded-lg">
+                    <div className="text-sm text-[var(--unified-text-secondary)]">Transaction ID</div>
+                    <div className="text-[var(--unified-text-primary)] font-mono text-sm">{purchase.transactionId}</div>
                   </div>
                 )}
 
                 {purchase.notes && (
-                  <div className="bg-[#16213e] p-3 rounded-lg">
-                    <div className="text-sm text-gray-400">Notes</div>
-                    <div className="text-white text-sm">{purchase.notes}</div>
+                  <div className="unified-bg-secondary p-3 rounded-lg">
+                    <div className="text-sm text-[var(--unified-text-secondary)]">Notes</div>
+                    <div className="text-[var(--unified-text-primary)] text-sm">{purchase.notes}</div>
                   </div>
                 )}
 
                 <div className="flex justify-end space-x-2">
-                  <Button variant="outline" size="sm" className="border-[#2a2a4a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white">
+                  <Button variant="outline" size="sm" className="unified-button unified-button--outline">
                     <Eye className="w-4 h-4 mr-2" />
                     View Details
                   </Button>
-                  <Button variant="outline" size="sm" className="border-[#2a2a4a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white">
+                  <Button variant="outline" size="sm" className="unified-button unified-button--outline">
                     <Download className="w-4 h-4 mr-2" />
                     Download Receipt
                   </Button>

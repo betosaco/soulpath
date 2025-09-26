@@ -57,7 +57,7 @@ export default function TeacherReviewsPage() {
               ) : (
                 <div className="grid gap-4">
                   {reviews.map((r: any) => (
-                    <div key={r.id} className="bg-[var(--color-sidebar-600)] rounded-lg p-4 border border-[var(--color-border-500)]">
+                    <div key={r.id} className="bg-[var(--unified-bg-surface)] rounded-lg p-4 border border-[var(--unified-border-light)]">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-[var(--unified-text-primary)]">
@@ -69,7 +69,7 @@ export default function TeacherReviewsPage() {
                         </div>
                         <div className="flex items-center gap-1">
                           {Array.from({ length: 5 }, (_, i) => (
-                            <StarIcon key={i} className={`h-4 w-4 ${i < (r.rating || 0) ? 'text-yellow-400' : 'text-[var(--color-text-secondary)]'}`} />
+                            <StarIcon key={i} className={`h-4 w-4 ${i < (r.rating || 0) ? 'text-[var(--color-status-warning)]' : 'text-[var(--unified-text-secondary)]'}`} />
                           ))}
                         </div>
                       </div>

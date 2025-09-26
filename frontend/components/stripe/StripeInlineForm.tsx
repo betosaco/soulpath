@@ -6,7 +6,7 @@ import { Elements, CardElement, useStripe, useElements } from '@stripe/react-str
 import { BaseButton } from '@/components/ui/BaseButton';
 import { BaseCard } from '@/components/ui/BaseCard';
 import { CreditCard, Lock, Shield, CheckCircle, Link as LinkIcon, AlertCircle, Loader2 } from 'lucide-react';
-import { TermsAndConditionsModal } from '@/components/TermsAndConditionsModal';
+import { useTermsUI } from '@/store/appStore';
 
 interface StripeInlineFormProps {
   amount: number; // Amount in cents
@@ -65,8 +65,8 @@ function StripeFormInner({
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   
   // Terms and Conditions state
-  const [showTermsModal, setShowTermsModal] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(true);
+  const { openTerms } = useTermsUI();
   const [email, setEmail] = useState(customerEmail || '');
 
   // Create payment intent on mount
@@ -115,7 +115,7 @@ function StripeFormInner({
 
     // Check if terms are accepted first
     if (!termsAccepted) {
-      setShowTermsModal(true);
+      openTerms();
       return;
     }
 
@@ -183,27 +183,30 @@ function StripeFormInner({
     <>
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Amount display */}
-      <div className="bg-gray-50 rounded-lg p-4">
+      <div className="rounded-lg p-4" style={{ background: 'var(--color-surface-secondary)' }}>
         <div className="flex justify-between items-center">
-          <span className="text-gray-700 font-medium">Total Amount:</span>
-          <span className="text-2xl font-bold text-gray-900">
+          <span className="font-medium" style={{ color: 'var(--color-text-secondary)' }}>Total Amount:</span>
+          <span className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
             {formatAmount(amount, currency)}
           </span>
         </div>
-        <p className="text-sm text-gray-600 mt-1">{description}</p>
+        <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>{description}</p>
       </div>
 
       {/* Email field (if not provided) */}
       {!customerEmail && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
             Email Address
           </label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent"
+            style={{ borderColor: 'var(--color-border-300)' }}
+            onFocus={(e) => (e.currentTarget.style.boxShadow = `0 0 0 2px var(--color-primary-500)`)}
+            onBlur={(e) => (e.currentTarget.style.boxShadow = 'none')}
             placeholder="your@email.com"
             required
           />
@@ -212,54 +215,85 @@ function StripeFormInner({
 
       {/* Card element */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
           Card Information
         </label>
-        <div className="border border-gray-300 rounded-md p-3 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent">
+        <div className="border rounded-md p-3 focus-within:ring-2 focus-within:border-transparent" style={{ borderColor: 'var(--color-border-300)' }}>
           <CardElement options={cardElementOptions} />
         </div>
       </div>
 
       {/* Stripe Link notice */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+      <div className="rounded-lg p-3" style={{ background: 'color-mix(in srgb, var(--color-status-info) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--color-status-info) 25%, transparent)' }}>
         <div className="flex items-center">
-          <LinkIcon className="w-5 h-5 text-blue-600 mr-2" />
-          <span className="text-sm text-blue-800">
+          <LinkIcon className="w-5 h-5" style={{ color: 'var(--color-status-info)' }} />
+          <span className="text-sm" style={{ color: 'var(--color-status-info)' }}>
             <strong>Fast checkout:</strong> If you&apos;ve used Stripe Link before, your saved card will appear here automatically.
           </span>
         </div>
       </div>
 
       {/* Security badges */}
-      <div className="flex items-center justify-center space-x-6 text-sm text-gray-600">
+      <div className="flex items-center justify-center space-x-6 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
         <div className="flex items-center">
-          <Shield className="w-4 h-4 mr-1 text-green-500" />
+          <Shield className="w-4 h-4 mr-1" style={{ color: 'var(--color-status-success)' }} />
           <span>256-bit SSL</span>
         </div>
         <div className="flex items-center">
-          <Lock className="w-4 h-4 mr-1 text-green-500" />
+          <Lock className="w-4 h-4 mr-1" style={{ color: 'var(--color-status-success)' }} />
           <span>PCI Compliant</span>
         </div>
         <div className="flex items-center">
-          <CheckCircle className="w-4 h-4 mr-1 text-green-500" />
+          <CheckCircle className="w-4 h-4 mr-1" style={{ color: 'var(--color-status-success)' }} />
           <span>Secure Payment</span>
         </div>
       </div>
 
       {/* Error display */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+        <div className="rounded-lg p-3" style={{ background: 'color-mix(in srgb, var(--color-status-error) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--color-status-error) 25%, transparent)' }}>
           <div className="flex items-center">
-            <AlertCircle className="w-5 h-5 text-red-600 mr-2" />
-            <span className="text-sm text-red-800">{error}</span>
+            <AlertCircle className="w-5 h-5" style={{ color: 'var(--color-status-error)' }} />
+            <span className="text-sm" style={{ color: 'var(--color-status-error)' }}>{error}</span>
           </div>
         </div>
       )}
 
+      {/* Terms acceptance */}
+      <div className="mb-1">
+        <label className="flex items-start space-x-3">
+          <input
+            type="checkbox"
+            checked={termsAccepted}
+            onChange={(e) => {
+              if (e.target.checked) {
+                openTerms();
+              } else {
+                setTermsAccepted(false);
+              }
+            }}
+            required
+            aria-required="true"
+            className="mt-1 w-4 h-4 text-primary border-border rounded focus:ring-primary"
+          />
+          <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+            I agree to the{' '}
+            <button
+              type="button"
+              onClick={() => openTerms()}
+              className="underline"
+              style={{ color: 'var(--color-accent-500)' }}
+            >
+              Terms and Conditions
+            </button>
+          </span>
+        </label>
+      </div>
+
       {/* Submit button */}
       <BaseButton
         type="submit"
-        disabled={!stripe || !elements || isLoading || !clientSecret}
+        disabled={!stripe || !elements || isLoading || !clientSecret || !termsAccepted}
         loading={isLoading}
         className="w-full"
         variant="primary"
@@ -291,21 +325,12 @@ function StripeFormInner({
       )}
 
       {/* Terms */}
-      <p className="text-xs text-gray-500 text-center">
+      <p className="text-xs text-center" style={{ color: 'var(--color-text-tertiary)' }}>
         By clicking &ldquo;Pay&rdquo;, you agree to our terms of service and privacy policy.
       </p>
     </form>
 
-    {/* Terms and Conditions Modal */}
-    <TermsAndConditionsModal
-      isOpen={showTermsModal}
-      onClose={() => setShowTermsModal(false)}
-      onAccept={() => {
-        setTermsAccepted(true);
-        setShowTermsModal(false);
-        processPayment();
-      }}
-    />
+    {/* Terms modal is mounted globally in AppShell */}
   </>
   );
 }
@@ -385,7 +410,7 @@ export function StripeInlineForm({
       <BaseCard className={`max-w-md mx-auto ${className}`}>
         <div className="p-6 text-center">
           <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-500" />
-          <p className="text-gray-600">Loading payment system...</p>
+          <p className="text-[var(--color-text-secondary)]">Loading payment system...</p>
         </div>
       </BaseCard>
     );

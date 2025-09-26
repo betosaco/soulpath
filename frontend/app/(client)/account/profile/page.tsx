@@ -151,10 +151,10 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-[400px] bg-[var(--color-background-primary)]">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#FFD700] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-[#FFD700] text-lg font-semibold">Loading your profile...</p>
+          <div className="w-16 h-16 border-4 border-[var(--color-accent-500)] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-[var(--color-text-secondary)] text-lg font-semibold">Loading your profile...</p>
         </div>
       </div>
     );
@@ -174,19 +174,19 @@ export default function ProfilePage() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-white">Profile</h1>
-          <p className="text-gray-400 mt-2">Manage your personal information</p>
+          <h1 className="text-3xl font-bold text-[var(--unified-text-primary)]">Profile</h1>
+          <p className="text-[var(--unified-text-secondary)] mt-2">Manage your personal information</p>
         </div>
         {!isEditing ? (
-          <Button onClick={() => setIsEditing(true)} className="bg-[#ffd700] text-black hover:bg-[#ffd700]/90">
+          <Button onClick={() => setIsEditing(true)} className="unified-button unified-button--primary">
             Edit Profile
           </Button>
         ) : (
           <div className="flex space-x-2">
-            <Button onClick={handleCancel} variant="outline" className="border-[#0a0a23] text-white hover:bg-[#0a0a23]">
+            <Button onClick={handleCancel} variant="outline" className="unified-button unified-button--outline">
               Cancel
             </Button>
-            <Button onClick={handleSave} disabled={saving} className="bg-[#ffd700] text-black hover:bg-[#ffd700]/90">
+            <Button onClick={handleSave} disabled={saving} className="unified-button unified-button--primary">
               {saving ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
@@ -195,127 +195,127 @@ export default function ProfilePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Basic Information */}
-        <Card className="bg-[#1a1a2e] border-[#16213e] text-white">
-          <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
-            <CardDescription>Your personal details</CardDescription>
+        <Card className="unified-card">
+          <CardHeader className="unified-card__header">
+            <CardTitle className="unified-card__title">Basic Information</CardTitle>
+            <CardDescription className="unified-card__subtitle">Your personal details</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="email" className="text-gray-300">Email</Label>
+          <CardContent className="unified-card__content space-y-4">
+            <div className="unified-form-group">
+              <Label htmlFor="email" className="unified-form-label">Email</Label>
               <Input
                 id="email"
                 value={profile.email}
                 disabled
-                className="bg-[#16213e] border-[#0a0a23] text-gray-400"
+                className="unified-form-input"
               />
             </div>
 
-            <div>
-              <Label htmlFor="fullName" className="text-gray-300">Full Name</Label>
+            <div className="unified-form-group">
+              <Label htmlFor="fullName" className="unified-form-label">Full Name</Label>
               <Input
                 id="fullName"
                 value={formData.fullName}
                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                 disabled={!isEditing}
-                className="bg-[#16213e] border-[#0a0a23] text-white"
+                className="unified-form-input"
               />
             </div>
 
-            <div>
-              <Label htmlFor="phone" className="text-gray-300">Phone</Label>
+            <div className="unified-form-group">
+              <Label htmlFor="phone" className="unified-form-label">Phone</Label>
               <Input
                 id="phone"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 disabled={!isEditing}
-                className="bg-[#16213e] border-[#0a0a23] text-white"
+                className="unified-form-input"
               />
             </div>
 
-            <div>
-              <Label htmlFor="birthDate" className="text-gray-300">Date of Birth</Label>
+            <div className="unified-form-group">
+              <Label htmlFor="birthDate" className="unified-form-label">Date of Birth</Label>
               <Input
                 id="birthDate"
                 type="date"
                 value={formData.birthDate}
                 onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
                 disabled={!isEditing}
-                className="bg-[#16213e] border-[#0a0a23] text-white"
+                className="unified-form-input"
               />
             </div>
 
-            <div>
-              <Label htmlFor="birthTime" className="text-gray-300">Time of Birth</Label>
+            <div className="unified-form-group">
+              <Label htmlFor="birthTime" className="unified-form-label">Time of Birth</Label>
               <Input
                 id="birthTime"
                 type="time"
                 value={formData.birthTime}
                 onChange={(e) => setFormData({ ...formData, birthTime: e.target.value })}
                 disabled={!isEditing}
-                className="bg-[#16213e] border-[#0a0a23] text-white"
+                className="unified-form-input"
               />
             </div>
           </CardContent>
         </Card>
 
         {/* Additional Information */}
-        <Card className="bg-[#1a1a2e] border-[#16213e] text-white">
-          <CardHeader>
-            <CardTitle>Additional Information</CardTitle>
-            <CardDescription>Help us provide better service</CardDescription>
+        <Card className="unified-card">
+          <CardHeader className="unified-card__header">
+            <CardTitle className="unified-card__title">Additional Information</CardTitle>
+            <CardDescription className="unified-card__subtitle">Help us provide better service</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="birthPlace" className="text-gray-300">Place of Birth</Label>
+          <CardContent className="unified-card__content space-y-4">
+            <div className="unified-form-group">
+              <Label htmlFor="birthPlace" className="unified-form-label">Place of Birth</Label>
               <Input
                 id="birthPlace"
                 value={formData.birthPlace}
                 onChange={(e) => setFormData({ ...formData, birthPlace: e.target.value })}
                 disabled={!isEditing}
-                className="bg-[#16213e] border-[#0a0a23] text-white"
+                className="unified-form-input"
                 placeholder="City, Country"
               />
             </div>
 
-            <div>
-              <Label htmlFor="language" className="text-gray-300">Preferred Language</Label>
+            <div className="unified-form-group">
+              <Label htmlFor="language" className="unified-form-label">Preferred Language</Label>
               <Select 
                 value={formData.language} 
                 onValueChange={(value) => setFormData({ ...formData, language: value })}
                 disabled={!isEditing}
               >
-                <SelectTrigger className="bg-[#16213e] border-[#0a0a23] text-white">
+                <SelectTrigger className="unified-form-select">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#16213e] border-[#0a0a23] text-white">
+                <SelectContent className="unified-form-select">
                   <SelectItem value="en">English</SelectItem>
                   <SelectItem value="es">Español</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div>
-              <Label htmlFor="question" className="text-gray-300">Spiritual Question/Preferences</Label>
+            <div className="unified-form-group">
+              <Label htmlFor="question" className="unified-form-label">Spiritual Question/Preferences</Label>
               <Textarea
                 id="question"
                 value={formData.question}
                 onChange={(e) => setFormData({ ...formData, question: e.target.value })}
                 disabled={!isEditing}
-                className="bg-[#16213e] border-[#0a0a23] text-white"
+                className="unified-form-textarea"
                 rows={3}
                 placeholder="Your spiritual questions or preferences..."
               />
             </div>
 
-            <div>
-              <Label htmlFor="notes" className="text-gray-300">Additional Notes</Label>
+            <div className="unified-form-group">
+              <Label htmlFor="notes" className="unified-form-label">Additional Notes</Label>
               <Textarea
                 id="notes"
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 disabled={!isEditing}
-                className="bg-[#16213e] border-[#0a0a23] text-white"
+                className="unified-form-textarea"
                 rows={2}
                 placeholder="Any additional information you'd like to share..."
               />

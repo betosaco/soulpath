@@ -21,6 +21,7 @@ const responseTemplate = {
 };
 
 // ULTRA-OPTIMIZATION 3: Minimal data selection for products
+// Fields required by products listing page
 const minimalProductSelect = {
   id: true,
   name: true,
@@ -28,19 +29,14 @@ const minimalProductSelect = {
   shortDescription: true,
   sku: true,
   price: true,
+  // include comparePrice for strike-through display
+  comparePrice: true,
   currency: true,
   stock: true,
   category: true,
-  tags: true,
   images: true,
   status: true,
   isFeatured: true,
-  isPopular: true,
-  slug: true,
-  seoTitle: true,
-  seoDescription: true,
-  createdAt: true,
-  updatedAt: true
 };
 
 // ULTRA-OPTIMIZATION 4: Streamlined product transformation
@@ -52,19 +48,13 @@ function transformProduct(product: any) {
     shortDescription: product.shortDescription,
     sku: product.sku,
     price: Number(product.price),
+    comparePrice: product.comparePrice ? Number(product.comparePrice) : null,
     currency: product.currency,
     stock: product.stock,
     category: product.category,
-    tags: product.tags,
     images: product.images,
     status: product.status,
     isFeatured: product.isFeatured,
-    isPopular: product.isPopular,
-    slug: product.slug,
-    seoTitle: product.seoTitle,
-    seoDescription: product.seoDescription,
-    createdAt: product.createdAt,
-    updatedAt: product.updatedAt
   };
 }
 
@@ -74,7 +64,8 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
-    const limit = Math.min(parseInt(searchParams.get('limit') || '10'), 50); // Cap at 50
+    // Default to 20 items; hard cap at 20 to keep payloads small
+    const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 20);
     const search = searchParams.get('search') || '';
     const category = searchParams.get('category') || '';
     const sortBy = searchParams.get('sortBy') || 'createdAt';

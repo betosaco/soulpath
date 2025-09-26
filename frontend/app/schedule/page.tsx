@@ -56,19 +56,19 @@ const SchedulePage = memo(function SchedulePage() {
   // ULTRA-OPTIMIZATION: Show consistent loading state
   if (isInitialLoading) {
     return (
-      <AppShell>
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <AppShell className="min-h-screen bg-[var(--color-surface-primary)]">
+        <div className="min-h-screen">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="space-y-6">
               {/* Minimal Loading Header */}
               <div className="text-center">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Available Classes</h2>
-                <p className="text-gray-600">Loading schedule...</p>
+                <p className="text-[var(--color-text-secondary)]">Loading schedule...</p>
               </div>
               
               {/* Subtle Loading Animation - Same as other pages */}
               <div className="flex justify-center py-4">
-                <div className="animate-spin rounded-full h-8 w-8 border-2 border-green-200 border-t-green-600"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-[var(--color-border-200)] border-t-[var(--color-primary-500)]"></div>
               </div>
             </div>
           </div>
@@ -78,8 +78,8 @@ const SchedulePage = memo(function SchedulePage() {
   }
 
   return (
-    <AppShell>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <AppShell className="min-h-screen bg-[var(--color-surface-primary)]">
+      <div className="min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <EnhancedSchedule
             onBookSlot={handleScheduleSelected}

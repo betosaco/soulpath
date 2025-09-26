@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import { motion } from 'framer-motion';
 import {
   Package,
@@ -35,14 +36,22 @@ export default function OrdersPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const { user } = useAuth();
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    if (user?.access_token) {
+      fetchOrders();
+    }
+  }, [user?.access_token]);
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch('/api/orders/user-orders');
+      const response = await fetch('/api/orders/user-orders', {
+        headers: {
+          'Authorization': `Bearer ${user?.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       const data = await response.json();
 
       if (data.success) {
@@ -100,7 +109,7 @@ export default function OrdersPage() {
         <div className="min-h-screen bg-white flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading your orders...</p>
+            <p className="text-[var(--color-text-secondary)]">Loading your orders...</p>
           </div>
         </div>
       </AppShell>
@@ -112,7 +121,7 @@ export default function OrdersPage() {
       <AppShell>
         <div className="min-h-screen bg-white flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Orders</h1>
+            <h1 className="text-2xl font-bold text-[var(--color-text-primary)] mb-2">Error Loading Orders</h1>
             <p className="text-gray-600 mb-6">{error}</p>
             <Button
               onClick={fetchOrders}

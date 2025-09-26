@@ -8,7 +8,7 @@ export const teacherUI = {
     content: 'flex-1 overflow-y-auto p-6 mobile-scrollable',
   },
   sidebar: {
-    container: 'flex w-64 flex-col bg-gray-800 border-r border-gray-700',
+    container: 'flex w-64 flex-col bg-gray-800 border-r border-gray-700 overflow-y-auto',
     header: 'flex h-16 items-center justify-center border-b border-gray-700',
     section: 'px-4 py-4 border-b border-gray-700',
     nav: 'flex-1 space-y-1 px-4 py-6',
@@ -43,6 +43,20 @@ export const teacherUI = {
   button: {
     primary: 'px-4 py-2 bg-[var(--unified-primary)] text-[var(--unified-primary-contrast)] rounded-lg hover:bg-[var(--unified-primary-hover)] transition-colors',
     dangerSm: 'px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors',
+  },
+  tabs: {
+    base: 'px-4 py-2 rounded-lg border transition-colors',
+    active: 'bg-[var(--unified-primary)] text-[var(--unified-primary-contrast)] border-[var(--unified-primary)]',
+    inactive: 'bg-transparent text-[var(--unified-text-primary)] border-[var(--unified-border-light)] hover:bg-[var(--unified-bg-secondary)]',
+  },
+  badge: {
+    base: 'px-2 py-1 rounded-full text-xs font-medium',
+    available: 'bg-[var(--unified-accent)]/30 text-[var(--unified-text-primary)]',
+    unavailable: 'bg-[var(--color-status-error)]/20 text-[var(--unified-text-primary)]',
+    info: 'bg-[var(--color-status-info)]/20 text-[var(--unified-text-primary)]',
+    success: 'bg-[var(--color-status-success)]/20 text-[var(--unified-text-primary)]',
+    warning: 'bg-[var(--color-status-warning)]/20 text-[var(--unified-text-primary)]',
+    neutral: 'bg-[var(--unified-bg-secondary)] text-[var(--unified-text-primary)]',
   },
 };
 

@@ -222,10 +222,10 @@ export default function LiveSessionPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px] bg-white">
+      <div className="flex items-center justify-center min-h-[400px] bg-[var(--color-background-primary)]">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#FFD700] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-[#FFD700] text-lg font-semibold">Loading live sessions...</p>
+          <div className="w-16 h-16 border-4 border-[var(--color-accent-500)] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-[var(--color-text-secondary)] text-lg font-semibold">Loading live sessions...</p>
         </div>
       </div>
     );

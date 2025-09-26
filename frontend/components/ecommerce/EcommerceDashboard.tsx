@@ -18,6 +18,7 @@ import {
   Download,
   Upload
 } from 'lucide-react';
+import { teacherUI } from '@/lib/styles/teacher-ui';
 
 interface EcommerceStats {
   totalRevenue: number;
@@ -62,8 +63,10 @@ interface Customer {
   status: 'active' | 'inactive';
 }
 
-export function EcommerceDashboard() {
-  const [activeTab, setActiveTab] = useState('overview');
+export function EcommerceDashboard({ activeTab, onTabChange }: { activeTab?: string; onTabChange?: (tab: string) => void }) {
+  const [internalTab, setInternalTab] = useState('overview');
+  const currentTab = activeTab ?? internalTab;
+  const setTab = onTabChange ?? setInternalTab;
   const [stats, setStats] = useState<EcommerceStats>({
     totalRevenue: 0,
     totalOrders: 0,
@@ -218,23 +221,22 @@ export function EcommerceDashboard() {
     }).format(amount);
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusBadgeClasses = (status: string) => {
     switch (status) {
       case 'active':
       case 'delivered':
-        return 'bg-green-100 text-green-800';
+        return `${teacherUI.badge.base} ${teacherUI.badge.success} border border-[var(--unified-border-light)]`;
       case 'processing':
       case 'shipped':
-        return 'bg-blue-100 text-blue-800';
+        return `${teacherUI.badge.base} ${teacherUI.badge.info} border border-[var(--unified-border-light)]`;
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
+        return `${teacherUI.badge.base} ${teacherUI.badge.warning} border border-[var(--unified-border-light)]`;
       case 'cancelled':
       case 'inactive':
-        return 'bg-red-100 text-red-800';
       case 'out_of_stock':
-        return 'bg-orange-100 text-orange-800';
+        return `${teacherUI.badge.base} ${teacherUI.badge.unavailable} border border-[var(--unified-border-light)]`;
       default:
-        return 'bg-gray-100 text-gray-800';
+        return `${teacherUI.badge.base} ${teacherUI.badge.neutral} border border-[var(--unified-border-light)]`;
     }
   };
 
@@ -304,11 +306,11 @@ export function EcommerceDashboard() {
     icon: React.ElementType;
     color: string;
   }) => (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div className={`${teacherUI.card.container} p-6`}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-2xl font-bold text-gray-900">{value}</p>
+          <p className="text-sm font-medium text-[var(--unified-text-secondary)]">{title}</p>
+          <p className="text-2xl font-bold text-[var(--unified-text-primary)]">{value}</p>
         </div>
         <div className={`p-3 rounded-full ${color}`}>
           <Icon className="h-6 w-6" />
@@ -316,14 +318,14 @@ export function EcommerceDashboard() {
       </div>
       <div className="mt-4 flex items-center">
         {change >= 0 ? (
-          <TrendingUp className="h-4 w-4 text-green-500" />
+          <TrendingUp className="h-4 w-4 text-[var(--color-status-success)]" />
         ) : (
-          <TrendingDown className="h-4 w-4 text-red-500" />
+          <TrendingDown className="h-4 w-4 text-[var(--color-status-error)]" />
         )}
-        <span className={`ml-2 text-sm font-medium ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+        <span className={`ml-2 text-sm font-medium ${change >= 0 ? 'text-[var(--color-status-success)]' : 'text-[var(--color-status-error)]'}`}>
           {Math.abs(change)}%
         </span>
-        <span className="ml-1 text-sm text-gray-500">vs last month</span>
+        <span className="ml-1 text-sm text-[var(--unified-text-secondary)]">vs last month</span>
       </div>
     </div>
   );
@@ -332,41 +334,19 @@ export function EcommerceDashboard() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-400 mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg">Loading ecommerce data...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--unified-text-secondary)] mx-auto mb-4"></div>
+          <p className="text-[var(--unified-text-secondary)] text-lg">Loading ecommerce data...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Ecommerce Dashboard</h1>
-              <p className="text-gray-600">Manage your online store, inventory, and orders</p>
-            </div>
-            <div className="flex space-x-3">
-              <button className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                <Download className="h-4 w-4 mr-2" />
-                Export
-              </button>
-              <button className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Product
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen teacher-theme">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {/* Navigation Tabs */}
-        <div className="mb-8">
-          <nav className="flex space-x-8">
+        <div>
+          <nav className="flex gap-2">
             {[
               { key: 'overview', label: 'Overview' },
               { key: 'products', label: 'Products' },
@@ -376,12 +356,8 @@ export function EcommerceDashboard() {
             ].map((tab) => (
               <button
                 key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === tab.key
-                    ? 'border-green-500 text-green-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                onClick={() => setTab(tab.key)}
+                className={`${teacherUI.tabs.base} ${currentTab === tab.key ? teacherUI.tabs.active : teacherUI.tabs.inactive}`}
               >
                 {tab.label}
               </button>
@@ -390,7 +366,7 @@ export function EcommerceDashboard() {
         </div>
 
         {/* Overview Tab */}
-        {activeTab === 'overview' && (
+        {currentTab === 'overview' && (
           <div className="space-y-8">
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -399,61 +375,61 @@ export function EcommerceDashboard() {
                 value={formatCurrency(stats.totalRevenue)}
                 change={stats.revenueChange}
                 icon={DollarSign}
-                color="bg-green-100 text-green-600"
+                color="bg-[var(--color-status-success)]/10 text-[var(--color-status-success)]"
               />
               <StatCard
                 title="Total Orders"
                 value={stats.totalOrders.toLocaleString()}
                 change={stats.ordersChange}
                 icon={ShoppingCart}
-                color="bg-blue-100 text-blue-600"
+                color="bg-[var(--color-status-info)]/10 text-[var(--color-status-info)]"
               />
               <StatCard
                 title="Total Products"
                 value={stats.totalProducts}
                 change={stats.productsChange}
                 icon={Package}
-                color="bg-purple-100 text-purple-600"
+                color="bg-[var(--color-accent-500)]/10 text-[var(--color-accent-500)]"
               />
               <StatCard
                 title="Total Customers"
                 value={stats.totalCustomers}
                 change={stats.customersChange}
                 icon={Users}
-                color="bg-orange-100 text-orange-600"
+                color="bg-[var(--color-accent-500)]/10 text-[var(--color-accent-500)]"
               />
             </div>
 
             {/* Recent Orders */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">Recent Orders</h3>
+            <div className={`${teacherUI.card.container}`}>
+              <div className={teacherUI.card.header}>
+                <h3 className="text-lg font-medium text-[var(--unified-text-primary)]">Recent Orders</h3>
               </div>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-[var(--unified-border-light)]">
+                  <thead className="bg-[var(--unified-bg-secondary)]">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[var(--unified-text-secondary)] uppercase tracking-wider">Order ID</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[var(--unified-text-secondary)] uppercase tracking-wider">Items</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[var(--unified-text-secondary)] uppercase tracking-wider">Total</th>
+                      <th className="px-6 py-3 text-left text-left text-xs font-medium text-[var(--unified-text-secondary)] uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[var(--unified-text-secondary)] uppercase tracking-wider">Date</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-[var(--unified-bg-surface)] divide-y divide-[var(--unified-border-light)]">
                     {orders.map((order) => (
                       <tr key={order.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{order.id}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.customerName}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.items}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(order.total)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[var(--unified-text-primary)]">{order.id}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--unified-text-primary)]">{order.customerName}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--unified-text-primary)]">{order.items}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--unified-text-primary)]">{formatCurrency(order.total)}</td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
+                          <span className={getStatusBadgeClasses(order.status)}>
                             {order.status}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.createdAt}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--unified-text-primary)]">{order.createdAt}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -464,20 +440,20 @@ export function EcommerceDashboard() {
         )}
 
         {/* Products Tab */}
-        {activeTab === 'products' && (
+        {currentTab === 'products' && (
           <div className="space-y-6">
             {/* Products Header */}
             <div className="flex justify-between items-center">
               <div className="flex space-x-4">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--unified-text-secondary)] h-4 w-4" />
                   <input
                     type="text"
                     placeholder="Search products..."
-                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                    className="pl-10 pr-4 py-2 border border-[var(--unified-border-light)] rounded-md bg-[var(--unified-bg-surface)] text-[var(--unified-text-primary)] focus:ring-[var(--unified-primary)] focus:border-[var(--unified-primary)]"
                   />
                 </div>
-                <button className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                <button className="inline-flex items-center px-4 py-2 border border-[var(--unified-border-light)] rounded-md shadow-sm text-sm font-medium text-[var(--unified-text-secondary)] bg-[var(--unified-bg-surface)] hover:bg-[var(--unified-bg-secondary)]">
                   <Filter className="h-4 w-4 mr-2" />
                   Filter
                 </button>
@@ -485,20 +461,20 @@ export function EcommerceDashboard() {
             </div>
 
             {/* Products Table */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="bg-[var(--unified-bg-surface)] rounded-lg shadow-sm border border-[var(--unified-border-light)]">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-[var(--unified-border-light)]">
+                  <thead className="bg-[var(--unified-bg-secondary)]">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[var(--unified-text-secondary)] uppercase tracking-wider">Product</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider">Price</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider">Stock</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider">Category</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-[var(--unified-bg-surface)] divide-y divide-[var(--unified-border-light)]">
                     {products.map((product) => (
                       <tr key={product.id}>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -507,16 +483,16 @@ export function EcommerceDashboard() {
                               <Image className="h-10 w-10 rounded-md object-cover" src={product.image} alt={product.name} width={40} height={40} />
                             </div>
                             <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                              <div className="text-sm text-gray-500">ID: {product.id}</div>
+                              <div className="text-sm font-medium text-[var(--unified-text-primary)]">{product.name}</div>
+                              <div className="text-sm text-[var(--unified-text-secondary)]">ID: {product.id}</div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(product.price)}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.stock}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.category}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--unified-text-primary)]">{formatCurrency(product.price)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--unified-text-primary)]">{product.stock}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--unified-text-primary)]">{product.category}</td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(product.status)}`}>
+                          <span className={getStatusBadgeClasses(product.status)}>
                             {product.status.replace('_', ' ')}
                           </span>
                         </td>
@@ -524,14 +500,14 @@ export function EcommerceDashboard() {
                           <div className="flex space-x-2">
                             <button 
                               onClick={() => handleEditProduct(product)}
-                              className="text-blue-600 hover:text-blue-900"
+                              className="text-[var(--color-status-info)] hover:text-[var(--color-status-info)]/80"
                               title="Edit product"
                             >
                               <Edit className="h-4 w-4" />
                             </button>
                             <button 
                               onClick={() => handleDeleteProduct(product.id)}
-                              className="text-red-600 hover:text-red-900"
+                              className="text-[var(--color-status-error)] hover:text-[var(--color-status-error)]/80"
                               title="Delete product"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -548,46 +524,46 @@ export function EcommerceDashboard() {
         )}
 
         {/* Orders Tab */}
-        {activeTab === 'orders' && (
+        {currentTab === 'orders' && (
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">All Orders</h3>
+            <div className={`${teacherUI.card.container}`}>
+              <div className={teacherUI.card.header}>
+                <h3 className="text-lg font-medium text-[var(--unified-text-primary)]">All Orders</h3>
               </div>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-[var(--unified-border-light)]">
+                  <thead className="bg-[var(--unified-bg-secondary)]">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider">Order ID</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider">Email</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider">Items</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider">Total</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider">Date</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-[var(--unified-bg-surface)] divide-y divide-[var(--unified-border-light)]">
                     {orders.map((order) => (
                       <tr key={order.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{order.id}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.customerName}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.customerEmail}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.items}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(order.total)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[var(--unified-text-primary)]">{order.id}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--unified-text-primary)]">{order.customerName}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--unified-text-primary)]">{order.customerEmail}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--unified-text-primary)]">{order.items}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--unified-text-primary)]">{formatCurrency(order.total)}</td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
+                          <span className={getStatusBadgeClasses(order.status)}>
                             {order.status}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.createdAt}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--unified-text-primary)]">{order.createdAt}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex space-x-2">
-                            <button className="text-green-600 hover:text-green-900">
+                            <button className="text-[var(--color-status-success)] hover:text-[var(--color-status-success)]/80">
                               <Eye className="h-4 w-4" />
                             </button>
-                            <button className="text-blue-600 hover:text-blue-900">
+                            <button className="text-[var(--color-status-info)] hover:text-[var(--color-status-info)]/80">
                               <Edit className="h-4 w-4" />
                             </button>
                           </div>
@@ -602,44 +578,44 @@ export function EcommerceDashboard() {
         )}
 
         {/* Customers Tab */}
-        {activeTab === 'customers' && (
+        {currentTab === 'customers' && (
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">All Customers</h3>
+            <div className={`${teacherUI.card.container}`}>
+              <div className={teacherUI.card.header}>
+                <h3 className="text-lg font-medium text-[var(--unified-text-primary)]">All Customers</h3>
               </div>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-[var(--unified-border-light)]">
+                  <thead className="bg-[var(--unified-bg-secondary)]">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider">Name</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider">Email</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Orders</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Spent</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Order</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-[var(--unified-bg-surface)] divide-y divide-[var(--unified-border-light)]">
                     {customers.map((customer) => (
                       <tr key={customer.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{customer.name}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{customer.email}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{customer.totalOrders}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(customer.totalSpent)}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{customer.lastOrder}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[var(--unified-text-primary)]">{customer.name}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--unified-text-primary)]">{customer.email}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--unified-text-primary)]">{customer.totalOrders}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--unified-text-primary)]">{formatCurrency(customer.totalSpent)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--unified-text-primary)]">{customer.lastOrder}</td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(customer.status)}`}>
+                          <span className={getStatusBadgeClasses(customer.status)}>
                             {customer.status}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex space-x-2">
-                            <button className="text-green-600 hover:text-green-900">
+                            <button className="text-[var(--color-status-success)] hover:text-[var(--color-status-success)]/80">
                               <Eye className="h-4 w-4" />
                             </button>
-                            <button className="text-blue-600 hover:text-blue-900">
+                            <button className="text-[var(--color-status-info)] hover:text-[var(--color-status-info)]/80">
                               <Edit className="h-4 w-4" />
                             </button>
                           </div>
@@ -654,25 +630,25 @@ export function EcommerceDashboard() {
         )}
 
         {/* Inventory Tab */}
-        {activeTab === 'inventory' && (
+        {currentTab === 'inventory' && (
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">Inventory Management</h3>
+            <div className={`${teacherUI.card.container}`}>
+              <div className={teacherUI.card.header}>
+                <h3 className="text-lg font-medium text-[var(--unified-text-primary)]">Inventory Management</h3>
               </div>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-[var(--unified-border-light)]">
+                  <thead className="bg-[var(--unified-bg-secondary)]">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider">Product</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Stock</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Min Stock</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider">Status</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Updated</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-[var(--unified-bg-surface)] divide-y divide-[var(--unified-border-light)]">
                     {products.map((product) => (
                       <tr key={product.id}>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -681,31 +657,31 @@ export function EcommerceDashboard() {
                               <Image className="h-10 w-10 rounded-md object-cover" src={product.image} alt={product.name} width={40} height={40} />
                             </div>
                             <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                              <div className="text-sm text-gray-500">{product.category}</div>
+                              <div className="text-sm font-medium text-[var(--unified-text-primary)]">{product.name}</div>
+                              <div className="text-sm text-[var(--unified-text-secondary)]">{product.category}</div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.stock}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">10</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--unified-text-primary)]">{product.stock}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--unified-text-primary)]">10</td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            product.stock === 0 ? 'bg-red-100 text-red-800' : 
-                            product.stock < 10 ? 'bg-yellow-100 text-yellow-800' : 
-                            'bg-green-100 text-green-800'
+                          <span className={`${teacherUI.badge.base} border ${
+                            product.stock === 0
+                              ? `${teacherUI.badge.unavailable} border-[var(--color-status-error)]/30`
+                              : product.stock < 10
+                                ? `${teacherUI.badge.warning} border-[var(--color-status-warning)]/30`
+                                : `${teacherUI.badge.success} border-[var(--color-status-success)]/30`
                           }`}>
-                            {product.stock === 0 ? 'Out of Stock' : 
-                             product.stock < 10 ? 'Low Stock' : 
-                             'In Stock'}
+                            {product.stock === 0 ? 'Out of Stock' : product.stock < 10 ? 'Low Stock' : 'In Stock'}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.updatedAt}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--unified-text-primary)]">{product.updatedAt}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex space-x-2">
-                            <button className="text-blue-600 hover:text-blue-900">
+                            <button className="text-[var(--color-status-info)] hover:text-[var(--color-status-info)]/80">
                               <Edit className="h-4 w-4" />
                             </button>
-                            <button className="text-green-600 hover:text-green-900">
+                            <button className="text-[var(--color-status-success)] hover:text-[var(--color-status-success)]/80">
                               <Upload className="h-4 w-4" />
                             </button>
                           </div>

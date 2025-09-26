@@ -426,7 +426,7 @@ export function EnhancedPackagesFlow() {
                 {packagesLoading ? (
                   <div className="text-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-3"></div>
-                    <p className="text-gray-600">Loading typedPackages...</p>
+                    <p className="text-[var(--color-text-secondary)]">Loading typedPackages...</p>
                   </div>
                 ) : packagesError ? (
                   <div className="text-center py-8">
@@ -510,7 +510,8 @@ export function EnhancedPackagesFlow() {
                             ) : (
                               <Button
                                 onClick={() => handleAddPackage(pkg)}
-                                className="w-full bg-[#6ea058] hover:bg-[#5a8a47] text-white"
+                                variant="success"
+                                className="w-full"
                               >
                                 <Plus className="w-4 h-4 mr-2" />
                                 Add to Cart
@@ -529,7 +530,7 @@ export function EnhancedPackagesFlow() {
                 {packagesLoading ? (
                   <div className="text-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                    <p className="text-gray-600 text-lg">Loading typedPackages...</p>
+                    <p className="text-[var(--color-text-secondary)] text-lg">Loading typedPackages...</p>
                   </div>
                 ) : packagesError ? (
                   <div className="text-center py-12">
@@ -609,7 +610,8 @@ export function EnhancedPackagesFlow() {
                           ) : (
                             <Button
                               onClick={() => handleAddPackage(pkg)}
-                              className="w-full bg-[#6ea058] hover:bg-[#5a8a47] text-white"
+                              variant="success"
+                              className="w-full"
                             >
                               <Plus className="w-4 h-4 mr-2" />
                               Add to Cart

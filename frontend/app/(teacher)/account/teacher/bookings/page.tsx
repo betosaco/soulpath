@@ -42,11 +42,7 @@ export default function TeacherBookingsPage() {
             {(['upcoming', 'past', 'all'] as const).map((s) => (
               <button
                 key={s}
-                className={`px-4 py-2 rounded-lg border transition-all duration-200 font-medium ${
-                  status === s
-                    ? 'bg-[var(--unified-primary)] text-white border-[var(--unified-primary)] shadow-md'
-                    : 'bg-white text-[var(--unified-text-primary)] border-[var(--unified-border-light)] hover:bg-[var(--unified-primary)] hover:text-white hover:border-[var(--unified-primary)] hover:shadow-sm'
-                }`}
+                className={`${teacherUI.tabs.base} ${status === s ? teacherUI.tabs.active : teacherUI.tabs.inactive}`}
                 onClick={() => setStatus(s)}
               >
                 {s.charAt(0).toUpperCase() + s.slice(1)}
@@ -57,7 +53,7 @@ export default function TeacherBookingsPage() {
           {loading && (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--unified-primary)]"></div>
-              <span className="ml-2 text-gray-600">Loading bookings...</span>
+              <span className="ml-2 text-[var(--color-text-secondary)]">Loading bookings...</span>
             </div>
           )}
           {error && (
@@ -94,13 +90,13 @@ export default function TeacherBookingsPage() {
                     return Object.values(groupedBookings).map((group: any) => (
                       <div key={group.slot.id} className="bg-[var(--unified-bg-surface)] rounded-lg border border-[var(--unified-border-light)] overflow-hidden">
                         {/* Schedule Header */}
-                        <div className="bg-white border-b-2 border-[var(--unified-primary)] px-4 py-3">
+                        <div className="bg-[var(--unified-bg-surface)] border-b-2 border-[var(--unified-primary)] px-4 py-3">
                           <div className="flex items-center justify-between">
                             <div>
-                              <h3 className="font-semibold text-black">
+                              <h3 className="font-semibold text-[var(--unified-text-primary)]">
                                 {group.slot.teacherSchedule?.serviceType?.name || 'Service'}
                               </h3>
-                              <p className="text-sm text-gray-700">
+                              <p className="text-sm text-[var(--unified-text-secondary)]">
                                 {new Date(group.slot.startTime).toLocaleDateString('en-GB', { 
                                   weekday: 'long', 
                                   year: 'numeric', 
@@ -110,17 +106,17 @@ export default function TeacherBookingsPage() {
                               </p>
                             </div>
                             <div className="text-right">
-                              <p className="font-medium text-black">
+                              <p className="font-medium text-[var(--unified-text-primary)]">
                                 {new Date(group.slot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 {' - '}
                                 {new Date(group.slot.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                               </p>
                               {group.slot.isLate && (
-                                <p className="text-xs text-red-600 font-medium">
+                                <p className="text-xs text-[var(--color-status-warning)] font-medium">
                                   ⚠️ Running Late ({group.slot.lateMinutes} min)
                                 </p>
                               )}
-                              <p className="text-sm text-gray-700">
+                              <p className="text-sm text-[var(--unified-text-secondary)]">
                                 {group.slot.teacherSchedule?.venue?.name || 'Venue'}
                               </p>
                             </div>
@@ -130,42 +126,38 @@ export default function TeacherBookingsPage() {
                         {/* Students List */}
                         <div className="p-4">
                           <div className="flex items-center justify-between mb-3">
-                            <h4 className="font-medium text-gray-800">
+                            <h4 className="font-medium text-[var(--unified-text-primary)]">
                               Students ({group.bookings.length})
                             </h4>
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                              group.slot.isAvailable 
-                                ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' 
-                                : 'bg-amber-100 text-amber-700 border border-amber-200'
-                            }`}>
+                            <span className={`${teacherUI.badge.base} ${group.slot.isAvailable ? teacherUI.badge.success : teacherUI.badge.warning} border border-[var(--unified-border-light)]`}>
                               {group.slot.isAvailable ? 'Available' : 'Fully Booked'}
                             </span>
                           </div>
                           
                           {group.bookings.length === 0 ? (
-                            <p className="text-gray-600 text-sm">No students booked</p>
+                            <p className="text-[var(--unified-text-secondary)] text-sm">No students booked</p>
                           ) : (
                             <div className="space-y-2">
                               {group.bookings.map((booking: any) => (
-                                <div key={booking.id} className="flex items-center justify-between py-3 px-4 bg-white rounded-lg border border-[var(--unified-border-light)] hover:border-[var(--unified-primary)] transition-colors">
+                                <div key={booking.id} className="flex items-center justify-between py-3 px-4 bg-[var(--unified-bg-surface)] rounded-lg border border-[var(--unified-border-light)] hover:border-[var(--unified-primary)] transition-colors">
                                   <div>
-                                    <p className="font-medium text-gray-800">
+                                    <p className="font-medium text-[var(--unified-text-primary)]">
                                       {booking.user?.fullName || booking.user?.email || 'Unknown Student'}
                                     </p>
                                   </div>
                                   <div className="text-right">
-                                    <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
+                                    <span className={`${teacherUI.badge.base} border ${
                                       booking.status === 'confirmed' 
-                                        ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                        ? 'bg-[var(--color-status-info)]/20 text-[var(--unified-text-primary)] border-[var(--color-status-info)]/30'
                                         : booking.status === 'completed'
-                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                        ? 'bg-[var(--color-status-success)]/20 text-[var(--unified-text-primary)] border-[var(--color-status-success)]/30'
                                         : booking.status === 'cancelled'
-                                        ? 'bg-red-50 text-red-700 border-red-200'
-                                        : 'bg-gray-50 text-gray-700 border-gray-200'
+                                        ? 'bg-[var(--color-status-error)]/20 text-[var(--unified-text-primary)] border-[var(--color-status-error)]/30'
+                                        : 'bg-[var(--unified-bg-secondary)] text-[var(--unified-text-primary)] border-[var(--unified-border-light)]'
                                     }`}>
                                       {booking.status}
                                     </span>
-                                    <p className="text-xs text-gray-600 mt-1">
+                                    <p className="text-xs text-[var(--unified-text-secondary)] mt-1">
                                       📅 Booked {new Date(booking.createdAt).toLocaleDateString('en-GB')}
                                     </p>
                                   </div>

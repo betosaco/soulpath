@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import { AdminHeader } from './AdminHeader';
 import { AdminSidebar } from './AdminSidebar';
-import { AdminMainContent } from './AdminMainContent';
-import { BugReportManagementRef } from '../BugReportManagement';
+import { AdminHeader } from './AdminHeader';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
+import { adminUI } from '@/lib/styles/admin-ui';
 
 interface AdminLayoutProps {
   onClose?: () => void;
@@ -13,63 +14,48 @@ interface AdminLayoutProps {
 }
 
 export function AdminLayout({ onClose, isModal = true }: AdminLayoutProps) {
-  const { user, isAdmin, isLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState('clients');
-  const bugReportManagementRef = useRef<BugReportManagementRef>(null);
+  const { user, isLoading, isAdmin } = useAuth();
+  const router = useRouter();
 
-  console.log('🎯 AdminLayout: activeTab =', activeTab);
+  useEffect(() => {
+    if (!isLoading && !user) {
+      console.log('🔐 No user found, redirecting to home');
+      router.push('/');
+    } else if (!isLoading && user && !isAdmin) {
+      console.log('🔐 User is not an admin, redirecting to account');
+      router.push('/account');
+    }
+  }, [user, isLoading, isAdmin, router]);
 
-  // Show loading state while authentication is being checked
   if (isLoading) {
     return (
-      <div className="admin-loading">
-        <div className="admin-loading__spinner"></div>
-        <p className="admin-loading__text">Loading...</p>
+      <div className="flex items-center justify-center h-screen bg-[var(--unified-bg-primary)]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--unified-primary)] mx-auto mb-4"></div>
+          <p className="text-[var(--unified-text-secondary)]">Loading admin dashboard...</p>
+        </div>
       </div>
     );
   }
 
-  // Show loading state if no user (after auth check is complete)
-  if (!user) {
-    return (
-      <div className="admin-loading">
-        <div className="admin-loading__spinner"></div>
-        <p className="admin-loading__text">Loading...</p>
-      </div>
-    );
-  }
-
-  // Show access denied if not admin (only after auth check is complete)
-  if (!isAdmin) {
-    return (
-      <div className="admin-access-denied">
-        <div className="admin-access-denied__icon">🚫</div>
-        <h2 className="admin-access-denied__title">Access Denied</h2>
-        <p className="admin-access-denied__message">
-          You don&apos;t have permission to access the admin dashboard.
-        </p>
-      </div>
-    );
+  if (!user || !isAdmin) {
+    return null; // Will redirect in useEffect
   }
 
   const containerClasses = isModal 
-    ? 'admin-dashboard admin-dashboard--modal'
-    : 'admin-dashboard admin-dashboard--fullscreen';
+    ? `${adminUI.layout.shell} admin-theme`
+    : `${adminUI.layout.shell} admin-theme`;
 
   return (
     <div className={containerClasses}>
-      <AdminHeader onClose={onClose} isModal={isModal} />
-      
-      <div className="admin-dashboard__body">
-        <AdminSidebar 
-          activeTab={activeTab} 
-          onTabChange={setActiveTab} 
-        />
-        
-        <AdminMainContent 
-          activeTab={activeTab}
-          bugReportManagementRef={bugReportManagementRef}
-        />
+      {/* AdminSidebar in this legacy layout does not accept user prop */}
+      <AdminSidebar activeTab={"dashboard"} onTabChange={() => {}} />
+      <div className={adminUI.layout.main}>
+        {/* AdminHeader uses useAuth internally; do not pass user */}
+        <AdminHeader onClose={onClose} isModal={isModal} />
+        <main className={adminUI.layout.content}>
+          {/* Content will be rendered by parent components */}
+        </main>
       </div>
     </div>
   );

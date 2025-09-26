@@ -12,17 +12,17 @@ export default function PackagesPage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+    <div className="min-h-screen bg-[var(--color-surface-primary)] flex items-center justify-center">
       <div className="space-y-6">
         {/* Minimal Loading Header */}
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Available Packages</h2>
-          <p className="text-gray-600">Loading packages...</p>
+          <h2 className="text-2xl font-bold text-[var(--color-text-primary)] mb-2">Available Packages</h2>
+          <p className="text-[var(--color-text-secondary)]">Loading packages...</p>
         </div>
         
         {/* Subtle Loading Animation - Same as other pages */}
         <div className="flex justify-center py-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-green-200 border-t-green-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-[var(--color-primary-500)]/25 border-t-[var(--color-primary-500)]"></div>
         </div>
       </div>
     </div>

@@ -88,11 +88,11 @@ const ProductPage = memo(function ProductPage() {
   // Safety check for params - moved after hooks
   if (!params || !productId) {
     return (
-      <AppShell className="min-h-screen bg-white">
+      <AppShell className="min-h-screen bg-[var(--color-background-primary)]">
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-400 mx-auto mb-4"></div>
-            <p className="text-gray-600 text-lg">Loading product...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-text-tertiary)] mx-auto mb-4"></div>
+            <p className="text-[var(--color-text-secondary)] text-lg">Loading product...</p>
           </div>
         </div>
       </AppShell>
@@ -177,18 +177,18 @@ const ProductPage = memo(function ProductPage() {
   // ULTRA-OPTIMIZATION: Minimal loading state since API is ultra-fast
   if (loading) {
     return (
-      <AppShell className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <AppShell className="min-h-screen bg-[var(--color-surface-primary)]">
         <div className="min-h-screen flex items-center justify-center">
           <div className="space-y-6">
             {/* Minimal Loading Header */}
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Product Details</h2>
-              <p className="text-gray-600">Loading product...</p>
+              <h2 className="text-2xl font-bold text-foreground mb-2">Product Details</h2>
+              <p className="text-muted-foreground">Loading product...</p>
             </div>
             
             {/* Subtle Loading Animation - Same as packages */}
             <div className="flex justify-center py-4">
-              <div className="animate-spin rounded-full h-8 w-8 border-2 border-green-200 border-t-green-600"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-muted border-t-primary"></div>
             </div>
           </div>
         </div>
@@ -198,11 +198,11 @@ const ProductPage = memo(function ProductPage() {
 
   if (!product) {
     return (
-      <AppShell className="min-h-screen bg-white">
+      <AppShell className="min-h-screen bg-background">
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h1>
-            <p className="text-gray-600">The product you&apos;re looking for doesn&apos;t exist.</p>
+            <h1 className="text-2xl font-bold text-foreground mb-4">Product Not Found</h1>
+            <p className="text-muted-foreground">The product you&apos;re looking for doesn&apos;t exist.</p>
           </div>
         </div>
       </AppShell>
@@ -376,6 +376,7 @@ const ProductPage = memo(function ProductPage() {
                   onClick={handleAddToCart}
                   data-add-to-cart
                   disabled={!isProductAvailable}
+                  variant="success"
                   className="flex-1"
                 >
                   <ShoppingCartIcon className="h-5 w-5" />

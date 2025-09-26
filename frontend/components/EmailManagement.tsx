@@ -853,7 +853,8 @@ export function EmailManagement() {
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          className="w-8 h-8 border-4 border-[#FFD700] border-t-transparent rounded-full"
+          className="w-8 h-8 border-4 rounded-full"
+          style={{ borderColor: 'var(--color-accent-500)', borderTopColor: 'transparent' }}
         />
       </div>
     );
@@ -907,9 +908,9 @@ export function EmailManagement() {
       </div>
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 flex items-center space-x-3">
-          <AlertCircle size={20} className="text-red-400" />
-          <span className="text-red-400">{error}</span>
+        <div className="rounded-lg p-4 flex items-center space-x-3" style={{ background: 'color-mix(in srgb, var(--color-status-error) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--color-status-error) 25%, transparent)' }}>
+          <AlertCircle size={20} style={{ color: 'var(--color-status-error)' }} />
+          <span style={{ color: 'var(--color-status-error)' }}>{error}</span>
       </div>
       )}
 

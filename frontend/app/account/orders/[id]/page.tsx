@@ -123,17 +123,17 @@ export default function OrderDetailsPage() {
       case 'cancelled':
         return 'bg-red-100 text-red-800';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-muted text-foreground';
     }
   };
 
   if (loading) {
     return (
       <AppShell>
-        <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading order details...</p>
+            <p className="text-muted-foreground">Loading order details...</p>
           </div>
         </div>
       </AppShell>
@@ -143,13 +143,13 @@ export default function OrderDetailsPage() {
   if (error || !order) {
     return (
       <AppShell>
-        <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="w-8 h-8 text-red-600" />
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'color-mix(in srgb, var(--color-status-error) 20%, transparent)' }}>
+              <CheckCircle className="w-8 h-8 text-[var(--color-status-error)]" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Order Not Found</h1>
-            <p className="text-gray-600 mb-6">{error || 'The order you are looking for does not exist.'}</p>
+            <h1 className="text-2xl font-bold text-foreground mb-2">Order Not Found</h1>
+            <p className="text-muted-foreground mb-6">{error || 'The order you are looking for does not exist.'}</p>
             <div className="flex gap-4 justify-center">
               <Button
                 onClick={() => window.location.href = '/account/orders'}
@@ -159,7 +159,7 @@ export default function OrderDetailsPage() {
               </Button>
               <Button
                 onClick={() => window.location.href = '/'}
-                className="bg-primary hover:bg-primary/90 text-white"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 Return Home
               </Button>

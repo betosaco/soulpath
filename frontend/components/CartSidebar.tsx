@@ -23,10 +23,22 @@ export function CartSidebar() {
   
   const {
     isCartOpen,
+    openCart,
     closeCart
   } = useCartUI();
 
   const totalPrice = getTotalPrice();
+
+  // Ensure cart opens if a previous step set the flag to keep it open
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const keepOpen = localStorage.getItem('isCartOpen') === 'true';
+    if (keepOpen && !isCartOpen) {
+      openCart();
+      // Clear the flag so the cart doesn't stay open forever after navigation
+      try { localStorage.removeItem('isCartOpen'); } catch {}
+    }
+  }, [isCartOpen, openCart]);
 
   // Check if cart has products (not packages)
   const hasProducts = cartItems.some(item => item.type === 'product');
@@ -38,10 +50,23 @@ export function CartSidebar() {
   const packagesWithBooking = packageItems.filter(item => item.bookingDetails).length;
 
   // Check if all packages have reached their maximum sessions
+  const getMaxSessionsForItem = (item: any): number => {
+    // Robustly resolve max sessions for the package item
+    const candidates = [
+      item.sessions,
+      (item as any).sessionsCount,
+      (item as any).packageDefinition?.sessionsCount,
+      (item as any).maxSessions
+    ].filter((v) => v !== undefined && v !== null);
+    if (candidates.length === 0) return 1;
+    const numeric = Number(candidates[0]);
+    return Number.isFinite(numeric) && numeric > 0 ? numeric : 1;
+  };
+
   const isAtMaxSessions = () => {
     if (packageItems.length === 0) return false;
     return packageItems.every(item => {
-      const sessions = item.sessions || 1;
+      const sessions = getMaxSessionsForItem(item);
       const booked = item.bookingDetails?.length || 0;
       return booked >= sessions;
     });
@@ -51,6 +76,44 @@ export function CartSidebar() {
   
   // Debug logging
   console.log('🔍 CartSidebar render - cartItems:', cartItems.length, 'packageItems:', packageItems.length, 'hasPackages:', hasPackages);
+
+  // Auto-advance when all sessions are booked for packages, keep cart open
+  React.useEffect(() => {
+    if (!hasPackages) return;
+    if (!allSessionsBooked) {
+      // Reset guard when user goes below max again
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('autoAdvancedAfterMaxSessions');
+      }
+      return;
+    }
+
+    if (typeof window === 'undefined') return;
+    const alreadyAdvanced = sessionStorage.getItem('autoAdvancedAfterMaxSessions') === 'true';
+    const currentPath = window.location.pathname;
+    const isOnTarget = currentPath.startsWith('/booking/customer-info') || currentPath.startsWith('/booking/group-selection') || currentPath === '/checkout';
+    if (alreadyAdvanced || isOnTarget) return;
+
+    try {
+      // Keep cart open across navigation
+      localStorage.setItem('isCartOpen', 'true');
+      sessionStorage.setItem('autoAdvancedAfterMaxSessions', 'true');
+
+      if (packageCount > 1) {
+        router.push('/booking/group-selection');
+      } else {
+        router.push('/booking/customer-info?isDirectCheckout=true');
+      }
+    } catch (err) {
+      console.error('⚠️ Auto-advance navigation error:', err);
+      // Fallback
+      if (packageCount > 1) {
+        window.location.href = '/booking/group-selection';
+      } else {
+        window.location.href = '/booking/customer-info?isDirectCheckout=true';
+      }
+    }
+  }, [allSessionsBooked, hasPackages, packageCount, router]);
 
   return (
     <AnimatePresence>
@@ -62,7 +125,7 @@ export function CartSidebar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black bg-opacity-50 z-50"
+            className="fixed inset-0 bg-background/50 z-50"
             onClick={() => closeCart()}
           />
           
@@ -77,21 +140,21 @@ export function CartSidebar() {
               stiffness: 200,
               duration: 0.3 
             }}
-            className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-xl z-50"
+            className="fixed right-0 top-0 h-full w-full max-w-md bg-card shadow-xl z-50"
           >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <div className="flex items-center justify-between p-4 border-b border-[var(--color-border-500)]">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold text-gray-900">Shopping Cart</h2>
+              <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">Shopping Cart</h2>
               {hasPackages && (
                 <div className="flex items-center gap-1">
                   {packagesWithBooking > 0 && (
-                    <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">
+                    <span className="unified-badge unified-badge--success text-xs">
                       {packagesWithBooking} scheduled
                     </span>
                   )}
-                  <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full font-medium">
+                  <span className="unified-badge unified-badge--accent text-xs">
                     {packageCount} package{packageCount > 1 ? 's' : ''}
                   </span>
                 </div>
@@ -99,7 +162,7 @@ export function CartSidebar() {
             </div>
             <button
               onClick={() => closeCart()}
-              className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+              className="p-2 text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] transition-colors"
             >
               <XMarkIcon className="h-5 w-5" />
             </button>
@@ -109,13 +172,13 @@ export function CartSidebar() {
           <div className="flex-1 overflow-y-auto p-4">
             {cartItems.length === 0 ? (
               <div className="text-center py-8">
-                <div className="text-gray-400 mb-4">
+                <div className="text-[var(--color-text-tertiary)] mb-4">
                   <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
                   </svg>
                 </div>
-                <p className="text-gray-500">Your cart is empty</p>
-                <p className="text-sm text-gray-400 mt-1">Add some products to get started</p>
+                <p className="text-[var(--color-text-secondary)]">Your cart is empty</p>
+                <p className="text-sm text-[var(--color-text-tertiary)] mt-1">Add some products to get started</p>
               </div>
             ) : (
               <motion.div 
@@ -132,7 +195,7 @@ export function CartSidebar() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.2, delay: index * 0.05 }}
                   >
-                    <div className="relative flex items-center space-x-3 p-3 border border-green-300 rounded-lg bg-white">
+                    <div className="relative flex items-center space-x-3 p-3 border border-[var(--color-border-500)] rounded-lg bg-[var(--color-surface-primary)]">
                       {/* Matpass image in top-right corner for packages */}
                       {item.type === 'package' && (
                         <div className="absolute top-2 right-2 z-10">
@@ -159,40 +222,40 @@ export function CartSidebar() {
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-medium text-gray-900 truncate">
+                        <h3 className="text-sm font-medium text-[var(--color-text-primary)] truncate">
                           {item.name}
                         </h3>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-[var(--color-text-secondary)]">
                           {item.currency === 'S/.' ? 'S/ ' : item.currency + ' '}{item.price.toFixed(2)}
                         </p>
                         {item.type === 'package' && (
-                          <div className="text-xs text-gray-500 mt-1 space-y-1">
+                          <div className="text-xs text-[var(--color-text-secondary)] mt-1 space-y-1">
                             <div className="flex items-center gap-2">
-                              <span className="bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full text-xs font-medium">
+                              <span className="unified-badge unified-badge--secondary">
                                 {item.sessions} sessions
                               </span>
                               {item.duration && (
-                                <span className="bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full text-xs font-medium">
+                                <span className="unified-badge unified-badge--secondary">
                                   {item.duration} min each
                                 </span>
                               )}
                             </div>
                             {item.packageType && (
-                              <div className="text-gray-600 font-medium capitalize">
+                              <div className="text-[var(--color-text-secondary)] font-medium capitalize">
                                 {item.packageType.toLowerCase()} package
                               </div>
                             )}
                           </div>
                         )}
                         {item.type === 'product' && item.sku && (
-                          <div className="text-xs text-gray-400 mt-1">
+                          <div className="text-xs text-[var(--color-text-tertiary)] mt-1">
                             SKU: {item.sku}
                           </div>
                         )}
                         <div className="flex items-center space-x-2 mt-2">
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                            className="p-1 text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] transition-colors"
                           >
                             <MinusIcon className="h-4 w-4" />
                           </button>
@@ -234,19 +297,19 @@ export function CartSidebar() {
                                 updateQuantity(item.id, item.quantity + 1);
                               }
                             }}
-                            className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                            className="p-1 text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] transition-colors"
                           >
                             <PlusIcon className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => removeItem(item.id)}
-                            className="p-1 text-red-400 hover:text-red-600 transition-colors ml-2"
+                            className="p-1 text-[var(--color-status-error)] hover:opacity-90 transition-colors ml-2"
                           >
                             <TrashIcon className="h-4 w-4" />
                           </button>
                         </div>
                       </div>
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-[var(--color-text-primary)]">
                         {item.currency === 'S/.' ? 'S/ ' : item.currency + ' '}{(item.price * item.quantity).toFixed(2)}
                       </div>
                     </div>
@@ -310,14 +373,14 @@ export function CartSidebar() {
           {/* Footer */}
           {cartItems.length > 0 && (
             <motion.div 
-              className="border-t border-gray-200 p-4 space-y-4"
+              className="border-t border-[var(--color-border-500)] p-4 space-y-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.2 }}
             >
               <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold text-gray-900">Total:</span>
-                <span className="text-lg font-bold text-[#6ea058]">
+                <span className="text-lg font-semibold text-[var(--color-text-primary)]">Total:</span>
+                <span className="text-lg font-bold text-[var(--color-primary-500)]">
                   {cartItems.length > 0 && cartItems[0].currency === 'S/.' ? 'S/ ' : cartItems.length > 0 ? cartItems[0].currency + ' ' : ''}{totalPrice.toFixed(2)}
                 </span>
               </div>
@@ -331,7 +394,8 @@ export function CartSidebar() {
 
                       // Check if all sessions are already booked
                       if (allSessionsBooked) {
-                        console.log('🚫 All sessions booked - automatically proceeding to checkout');
+                        console.log('🚫 All sessions booked - proceeding to next step and closing cart');
+                        // Close cart explicitly when user clicks Proceed to Checkout in this state
                         closeCart();
                         
                         // If multiple packages, go to group selection first
@@ -391,8 +455,8 @@ export function CartSidebar() {
                     }}
                     className={`w-full py-3 px-4 rounded-lg font-medium transition-colors text-center flex items-center justify-center gap-2 ${
                       allSessionsBooked
-                        ? 'bg-green-600 text-white hover:bg-green-700'
-                        : 'bg-orange-600 text-white hover:bg-orange-700'
+                        ? 'bg-[var(--color-status-success)] text-white hover:opacity-90'
+                        : 'bg-[var(--color-accent-500)] text-[var(--color-accent-foreground)] hover:bg-[var(--color-accent-600)]'
                     }`}
                   >
                     {allSessionsBooked ? (
@@ -402,7 +466,7 @@ export function CartSidebar() {
                     )}
                     {allSessionsBooked ? 'Proceed to Checkout' : 'Book a Class Now'}
                     {packageCount > 1 && !allSessionsBooked && (
-                      <span className="text-xs bg-orange-500 px-2 py-1 rounded-full">
+                      <span className="unified-badge unified-badge--accent text-xs">
                         {packageCount} packages
                       </span>
                     )}
@@ -412,7 +476,7 @@ export function CartSidebar() {
                 {/* Only show separate Proceed to Checkout button when not all sessions are booked AND there are packages */}
                 {!allSessionsBooked && hasPackages && (
                   <button
-                    className="w-full bg-[#6ea058] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#5a8a4a] transition-colors text-center"
+                    className="w-full bg-[var(--color-primary-500)] text-[var(--primary-foreground)] py-2 px-4 rounded-lg font-medium hover:bg-[var(--color-primary-600)] transition-colors text-center"
                     onClick={() => {
                       // Check if we're already on the checkout page
                       const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
@@ -453,7 +517,7 @@ export function CartSidebar() {
                 {/* Checkout button for products only (when no packages) */}
                 {hasProducts && !hasPackages && (
                   <button
-                    className="w-full bg-[#6ea058] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#5a8a4a] transition-colors text-center"
+                    className="w-full bg-[var(--color-primary-500)] text-[var(--primary-foreground)] py-2 px-4 rounded-lg font-medium hover:bg-[var(--color-primary-600)] transition-colors text-center"
                     onClick={() => {
                       console.log('🛒 Product checkout clicked');
                       closeCart();
@@ -467,7 +531,7 @@ export function CartSidebar() {
 
                 <button
                   onClick={clearCart}
-                  className="w-full text-gray-500 py-2 px-4 rounded-lg font-medium hover:text-red-600 transition-colors"
+                  className="w-full text-[var(--color-text-secondary)] py-2 px-4 rounded-lg font-medium hover:text-[var(--color-status-error)] transition-colors"
                 >
                   Clear Cart
                 </button>

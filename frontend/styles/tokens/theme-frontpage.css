@@ -1,0 +1,49 @@
+/* Frontpage Theme Tokens */
+
+.frontpage-theme {
+  --color-background-primary: #f4eeed; /* beige */
+  --color-background-secondary: #efe7e5;
+  --color-surface-primary: #ffffff;
+  --color-surface-secondary: #f8f6f5;
+  --color-surface-tertiary: #eee7e3;
+
+  --color-text-primary: #383838; /* deep gray */
+  --color-text-secondary: #4a4a4a;
+  --color-text-tertiary: #6b6b6b;
+  --color-text-inverse: #ffffff;
+
+  --color-primary-500: #6ea058; /* green */
+  --color-primary-600: #5a8a4a;
+  --color-primary-700: #4b733f;
+
+  --color-accent-500: #f4a556; /* orange */
+  --color-accent-600: #e79241;
+
+  --color-border-500: #e3d9d6;
+  --color-border-400: #efe7e5;
+  --color-border-300: #e8dfdc;
+  --color-border-200: #f3ecea;
+
+  /* Bridge tokens */
+  --background: var(--color-background-primary);
+  --foreground: var(--color-text-primary);
+  --card: var(--color-surface-primary);
+  --card-foreground: var(--color-text-primary);
+  --popover: var(--color-surface-secondary);
+  --popover-foreground: var(--color-text-primary);
+  --primary: var(--color-primary-500);
+  --primary-foreground: var(--color-text-inverse);
+  --secondary: var(--color-surface-secondary);
+  --secondary-foreground: var(--color-text-primary);
+  --muted: var(--color-surface-secondary);
+  --muted-foreground: var(--color-text-secondary);
+  --accent: var(--color-accent-500);
+  --accent-foreground: var(--color-text-inverse);
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: var(--color-border-500);
+  --input: var(--color-border-400);
+  --ring: var(--color-primary-500);
+}
+
+

@@ -233,31 +233,32 @@ export function PhoneVerificationModal({
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-md bg-gradient-to-br from-[#191970]/95 to-[#0A0A23]/95 backdrop-blur-sm rounded-2xl border border-[#C0C0C0]/20 shadow-2xl overflow-hidden"
+          className="relative w-full max-w-md rounded-2xl shadow-2xl overflow-hidden"
+          style={{ background: 'var(--color-surface-primary)', border: '1px solid var(--color-border-500)', color: 'var(--color-text-primary)' }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-[#C0C0C0]/20">
+          <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: 'var(--color-border-500)' }}>
             <div className="flex items-center gap-3">
               {step === 'otp' && (
                 <button
                   onClick={handleBackToPhone}
-                  className="p-1 hover:bg-[#191970]/20 rounded-full transition-colors"
+                  className="p-1 rounded-full transition-colors hover:opacity-90"
                 >
-                  <ArrowLeft size={20} className="text-[#EAEAEA]" />
+                  <ArrowLeft size={20} style={{ color: 'var(--color-text-secondary)' }} />
                 </button>
               )}
               <div className="flex items-center gap-2">
-                <Phone size={20} className="text-[#FFD700]" />
-                <h2 className="text-lg font-semibold text-[#EAEAEA]">
+                <Phone size={20} style={{ color: 'var(--color-accent-500)' }} />
+                <h2 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
                   {step === 'phone' ? 'Verify Phone Number' : 'Enter Verification Code'}
                 </h2>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-1 hover:bg-[#191970]/20 rounded-full transition-colors"
+              className="p-1 rounded-full transition-colors hover:opacity-90"
             >
-              <X size={20} className="text-[#EAEAEA]" />
+              <X size={20} style={{ color: 'var(--color-text-secondary)' }} />
             </button>
           </div>
 
@@ -266,32 +267,34 @@ export function PhoneVerificationModal({
             {step === 'phone' ? (
               <div className="space-y-6">
                 <div className="text-center">
-                  <p className="text-[#EAEAEA]/80">
+                  <p style={{ color: 'var(--color-text-secondary)' }}>
                     Enter your phone number to receive a verification code
                   </p>
                 </div>
 
                 {/* Country Selector */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-[#EAEAEA]">
+                  <label className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
                     Country
                   </label>
                   <div className="relative country-dropdown">
                     <button
                       type="button"
                       onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
-                      className="w-full p-3 bg-[#191970]/10 border border-[#C0C0C0]/20 text-[#EAEAEA] rounded-lg focus:ring-2 focus:ring-[#FFD700] focus:border-transparent flex items-center justify-between mobile-touch-target"
+                      className="w-full p-3 rounded-lg focus:ring-2 flex items-center justify-between mobile-touch-target"
+                      style={{ background: 'var(--color-surface-secondary)', border: '1px solid var(--color-border-500)', color: 'var(--color-text-primary)' }}
                     >
                       <div className="flex items-center space-x-3">
                         <span className="text-lg">{selectedCountry.flag}</span>
                         <span className="text-sm">{selectedCountry.name}</span>
-                        <span className="text-xs text-[#C0C0C0]/70">({selectedCountry.prefix})</span>
+                        <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>({selectedCountry.prefix})</span>
                       </div>
                       <svg 
-                        className={`w-4 h-4 text-[#C0C0C0] transition-transform duration-200 ${isCountryDropdownOpen ? 'rotate-180' : ''}`} 
+                        className={`w-4 h-4 transition-transform duration-200 ${isCountryDropdownOpen ? 'rotate-180' : ''}`}
                         fill="none" 
                         stroke="currentColor" 
                         viewBox="0 0 24 24"
+                        style={{ color: 'var(--color-text-tertiary)' }}
                       >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
@@ -299,7 +302,7 @@ export function PhoneVerificationModal({
                     
                     {/* Dropdown Menu */}
                     {isCountryDropdownOpen && (
-                      <div className="absolute top-full left-0 right-0 mt-1 bg-[#191970]/95 backdrop-blur-xl border border-[#C0C0C0]/20 rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto mobile-scroll">
+                      <div className="absolute top-full left-0 right-0 mt-1 rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto mobile-scroll" style={{ background: 'var(--color-surface-primary)', border: '1px solid var(--color-border-500)' }}>
                         {countries.map((country) => (
                           <button
                             key={country.code}
@@ -308,17 +311,18 @@ export function PhoneVerificationModal({
                               setSelectedCountry(country);
                               setIsCountryDropdownOpen(false);
                             }}
-                            className={`w-full px-4 py-3 text-left hover:bg-[#FFD700]/10 transition-colors duration-200 flex items-center space-x-3 mobile-touch-target ${
-                              selectedCountry.code === country.code ? 'bg-[#FFD700]/15 text-[#FFD700]' : 'text-[#EAEAEA]'
+                            className={`w-full px-4 py-3 text-left transition-colors duration-200 flex items-center space-x-3 mobile-touch-target ${
+                              selectedCountry.code === country.code ? 'bg-[var(--color-accent-500)]/15 text-[var(--color-accent-500)]' : ''
                             }`}
+                            style={{ color: selectedCountry.code === country.code ? 'var(--color-accent-500)' : 'var(--color-text-primary)' }}
                           >
                             <span className="text-lg">{country.flag}</span>
                             <div className="flex-1">
                               <div className="text-sm font-medium">{country.name}</div>
-                              <div className="text-xs text-[#C0C0C0]/70">{country.prefix}</div>
+                              <div className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>{country.prefix}</div>
                             </div>
                             {selectedCountry.code === country.code && (
-                              <svg className="w-4 h-4 text-[#FFD700]" fill="currentColor" viewBox="0 0 20 20">
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" style={{ color: 'var(--color-accent-500)' }}>
                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                               </svg>
                             )}
@@ -331,40 +335,42 @@ export function PhoneVerificationModal({
 
                 {/* Phone Number Input */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-[#EAEAEA]">
+                  <label className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
                     Phone Number
                   </label>
                   <div className="flex gap-2">
-                    <div className="flex items-center px-3 py-3 bg-[#191970]/20 border border-[#C0C0C0]/20 rounded-lg">
-                      <span className="text-[#EAEAEA]">{selectedCountry.prefix}</span>
+                    <div className="flex items-center px-3 py-3 rounded-lg" style={{ background: 'var(--color-surface-secondary)', border: '1px solid var(--color-border-500)' }}>
+                      <span style={{ color: 'var(--color-text-primary)' }}>{selectedCountry.prefix}</span>
                     </div>
                     <input
                       type="tel"
                       value={phoneNumber}
                       onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
                       placeholder={selectedCountry.example}
-                      className="flex-1 p-3 bg-[#191970]/10 border border-[#C0C0C0]/20 text-[#EAEAEA] placeholder-[#C0C0C0]/50 rounded-lg focus:ring-2 focus:ring-[#FFD700] focus:border-transparent"
+                      className="flex-1 p-3 rounded-lg focus:ring-2 focus:border-transparent"
+                      style={{ background: 'var(--color-surface-secondary)', border: '1px solid var(--color-border-500)', color: 'var(--color-text-primary)' }}
                     />
                   </div>
-                  <p className="text-xs text-[#C0C0C0]/70">
+                  <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
                     Example: {selectedCountry.example} (without country code)
                   </p>
-                  <p className="text-xs text-[#FFD700]">
+                  <p className="text-xs" style={{ color: 'var(--color-accent-500)' }}>
                     💡 Enter only the local number, the country code {selectedCountry.prefix} will be added automatically
                   </p>
                 </div>
 
                 {error && (
-                  <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-                    <AlertCircle size={16} className="text-red-400" />
-                    <span className="text-sm text-red-400">{error}</span>
+                  <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: 'color-mix(in srgb, var(--color-status-error) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--color-status-error) 20%, transparent)' }}>
+                    <AlertCircle size={16} style={{ color: 'var(--color-status-error)' }} />
+                    <span className="text-sm" style={{ color: 'color-mix(in srgb, var(--color-status-error) 85%, black)' }}>{error}</span>
                   </div>
                 )}
 
                 <button
                   onClick={handleSendOtp}
                   disabled={isLoading || !phoneNumber.trim()}
-                  className="w-full py-3 px-4 bg-[#FFD700] text-[#0A0A23] rounded-lg font-medium hover:bg-[#FFD700]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                  className="w-full py-3 px-4 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                  style={{ background: 'var(--color-primary-500)', color: 'var(--primary-foreground)' }}
                 >
                   {isLoading ? (
                     <>
@@ -379,18 +385,18 @@ export function PhoneVerificationModal({
             ) : (
               <div className="space-y-6">
                 <div className="text-center">
-                  <CheckCircle size={48} className="mx-auto text-[#FFD700] mb-3" />
-                  <p className="text-[#EAEAEA]/80">
+                  <CheckCircle size={48} className="mx-auto mb-3" style={{ color: 'var(--color-accent-500)' }} />
+                  <p style={{ color: 'var(--color-text-secondary)' }}>
                     We sent a 6-digit code to
                   </p>
-                  <p className="font-medium text-[#EAEAEA]">
+                  <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>
                     {selectedCountry.prefix} {phoneNumber}
                   </p>
                 </div>
 
                 {/* OTP Input */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-[#EAEAEA]">
+                  <label className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
                     Verification Code
                   </label>
                   <input
@@ -398,22 +404,24 @@ export function PhoneVerificationModal({
                     value={otpCode}
                     onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                     placeholder="000000"
-                    className="w-full p-3 text-center text-2xl font-mono bg-[#191970]/10 border border-[#C0C0C0]/20 text-[#EAEAEA] rounded-lg focus:ring-2 focus:ring-[#FFD700] focus:border-transparent tracking-widest"
+                    className="w-full p-3 text-center text-2xl font-mono rounded-lg focus:ring-2 focus:border-transparent tracking-widest"
+                    style={{ background: 'var(--color-surface-secondary)', border: '1px solid var(--color-border-500)', color: 'var(--color-text-primary)' }}
                     maxLength={6}
                   />
                 </div>
 
                 {error && (
-                  <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-                    <AlertCircle size={16} className="text-red-400" />
-                    <span className="text-sm text-red-400">{error}</span>
+                  <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: 'color-mix(in srgb, var(--color-status-error) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--color-status-error) 20%, transparent)' }}>
+                    <AlertCircle size={16} style={{ color: 'var(--color-status-error)' }} />
+                    <span className="text-sm" style={{ color: 'color-mix(in srgb, var(--color-status-error) 85%, black)' }}>{error}</span>
                   </div>
                 )}
 
                 <button
                   onClick={handleVerifyOtp}
                   disabled={isLoading || otpCode.length !== 6}
-                  className="w-full py-3 px-4 bg-[#FFD700] text-[#0A0A23] rounded-lg font-medium hover:bg-[#FFD700]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                  className="w-full py-3 px-4 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                  style={{ background: 'var(--color-primary-500)', color: 'var(--primary-foreground)' }}
                 >
                   {isLoading ? (
                     <>
@@ -427,12 +435,13 @@ export function PhoneVerificationModal({
 
                 {/* Resend OTP */}
                 <div className="text-center">
-                  <p className="text-sm text-[#EAEAEA]/80">
+                  <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                     Didn&apos;t receive the code?{' '}
                     <button
                       onClick={handleResendOtp}
                       disabled={timeRemaining > 0}
-                      className="text-[#FFD700] hover:text-[#FFD700]/80 disabled:text-[#C0C0C0]/50 disabled:cursor-not-allowed font-medium"
+                      className="font-medium disabled:cursor-not-allowed"
+                      style={{ color: timeRemaining > 0 ? 'var(--color-text-tertiary)' : 'var(--color-accent-500)' }}
                     >
                       {timeRemaining > 0 ? `Resend in ${formatTime(timeRemaining)}` : 'Resend Code'}
                     </button>

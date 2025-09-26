@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,15 +26,23 @@ interface Session {
 export default function SessionsPage() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
-    fetchSessions();
-  }, []);
+    if (user?.access_token) {
+      fetchSessions();
+    }
+  }, [user?.access_token]);
 
   const fetchSessions = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/client/my-bookings');
+      const response = await fetch('/api/client/my-bookings', {
+        headers: {
+          'Authorization': `Bearer ${user?.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       const result = await response.json();
       
       if (result.success) {

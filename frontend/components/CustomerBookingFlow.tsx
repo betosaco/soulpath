@@ -1160,7 +1160,7 @@ export function CustomerBookingFlow({ initialSlotData }: CustomerBookingFlowProp
                   <CardContent className="pt-6">
                     <div className="text-center space-y-4">
                       <div className="w-8 h-8 border-4 border-[#ffd700] border-t-transparent rounded-full animate-spin mx-auto"></div>
-                      <p className="text-gray-400">Loading payment options...</p>
+                      <p className="text-[var(--color-text-tertiary)]">Loading payment options...</p>
                     </div>
                   </CardContent>
                 </Card>

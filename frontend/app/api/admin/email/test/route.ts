@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { sendEmail } from '@/lib/email';
+import { renderEmailLayout, getEmailTheme } from '@/lib/brevo-email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,17 +19,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Send test email
-    const success = await sendEmail(
-      to,
-      'Test Email - SOULPATH',
-      `
-        <h2>Test Email</h2>
-        <p>This is a test email from the SOULPATH system.</p>
-        <p>If you received this email, the email configuration is working correctly.</p>
-        <p>Sent at: ${new Date().toLocaleString()}</p>
-        <p>Language: ${language}</p>
-      `
-    );
+    const subject = 'Test Email - SOULPATH';
+    const rawHtml = `
+      <h2>Test Email</h2>
+      <p>This is a test email from the SOULPATH system.</p>
+      <p>If you received this email, the email configuration is working correctly.</p>
+      <p>Sent at: ${new Date().toLocaleString()}</p>
+      <p>Language: ${language}</p>
+    `;
+    const themedHtml = renderEmailLayout(rawHtml, subject, getEmailTheme('frontpage'));
+    const success = await sendEmail(to, subject, themedHtml);
 
     if (success) {
       return NextResponse.json({ 

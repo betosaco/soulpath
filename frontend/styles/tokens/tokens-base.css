@@ -1,0 +1,155 @@
+/*
+  Base Design Tokens (semantic, neutral defaults)
+  - DO NOT theme here; use theme-*.css files to override per area
+  - These tokens provide fallbacks so nothing is missing
+*/
+
+:root {
+  /* Semantic background and surface colors */
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f7f7f8;
+  --color-surface-primary: #ffffff;
+  --color-surface-secondary: #f3f4f6;
+  --color-surface-tertiary: #e5e7eb;
+  --color-surface-quaternary: #e5e7eb;
+
+  /* Text colors */
+  --color-text-primary: #0f172a; /* slate-900 */
+  --color-text-secondary: #475569; /* slate-600 */
+  --color-text-tertiary: #64748b; /* slate-500 */
+  --color-text-inverse: #ffffff;
+
+  /* Primary palette */
+  --color-primary-500: #6ea058; /* brand green */
+  --color-primary-600: #5a8a4a;
+  --color-primary-700: #4b733f;
+
+  /* Accent palette */
+  --color-accent-500: #f4a556; /* brand orange */
+  --color-accent-600: #e79241;
+
+  /* Borders */
+  --color-border-200: #f1f5f9; /* slate-100 */
+  --color-border-300: #e5e7eb; /* gray-200 */
+  --color-border-400: #d1d5db; /* gray-300 */
+  --color-border-500: #9ca3af; /* gray-400 */
+
+  /* Status */
+  --color-status-success: #10b981;
+  --color-status-warning: #f59e0b;
+  --color-status-error: #ef4444;
+  --color-status-info: #3b82f6;
+  --color-status-success-foreground: #ffffff;
+  --color-status-warning-foreground: #0a0a0a;
+  --color-status-error-foreground: #ffffff;
+  --color-status-info-foreground: #ffffff;
+
+  /* Radii and spacing (keep in sync with Tailwind mapping) */
+  --border-radius-sm: 0.375rem;
+  --border-radius-md: 0.5rem;
+  --border-radius-lg: 0.75rem;
+  --border-radius-xl: 1rem;
+  --border-radius-full: 9999px;
+
+  --spacing-0\.5: 0.125rem;
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-12: 3rem;
+  --spacing-16: 4rem;
+  --spacing-20: 5rem;
+
+  /* Typography weights and sizes */
+  --font-heading: var(--font-poppins, ui-sans-serif);
+  --font-body: var(--font-roboto, ui-sans-serif);
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  /* Elevation (visual weight tiers) */
+  --elevation-1-surface: var(--color-surface-primary);
+  --elevation-1-shadow: var(--shadow-sm);
+  --elevation-2-surface: var(--color-surface-primary);
+  --elevation-2-shadow: var(--shadow-md);
+  --elevation-3-surface: var(--color-surface-primary);
+  --elevation-3-shadow: var(--shadow-lg);
+
+  /* Interactive states */
+  --interactive-hover: 0.06; /* overlay alpha */
+  --interactive-active: 0.12; /* overlay alpha */
+  --opacity-disabled: 0.5;
+
+  /* Bridge tokens used by Tailwind theme config */
+  --background: var(--color-background-primary);
+  --foreground: var(--color-text-primary);
+  --card: var(--color-surface-primary);
+  --card-foreground: var(--color-text-primary);
+  --popover: var(--color-surface-secondary);
+  --popover-foreground: var(--color-text-primary);
+  --primary: var(--color-primary-500);
+  --primary-foreground: var(--color-text-inverse);
+  --secondary: var(--color-surface-secondary);
+  --secondary-foreground: var(--color-text-primary);
+  --muted: var(--color-surface-secondary);
+  --muted-foreground: var(--color-text-secondary);
+  --accent: var(--color-accent-500);
+  --accent-foreground: var(--color-text-inverse);
+  --destructive: var(--color-status-error);
+  --destructive-foreground: #ffffff;
+  --border: var(--color-border-300);
+  --input: var(--color-border-300);
+  --ring: var(--color-primary-500);
+  --radius: var(--border-radius-lg);
+
+  /* Brand palette (MatMax) for legacy utilities and components) */
+  --matmax-purple-50: #f3f0ff;
+  --matmax-purple-100: #e9e3ff;
+  --matmax-purple-200: #d1c7ff;
+  --matmax-purple-300: #b9aaff;
+  --matmax-purple-400: #a18eff;
+  --matmax-purple-500: #8b5cf6;
+  --matmax-purple-600: #7c3aed;
+  --matmax-purple-700: #6d28d9;
+  --matmax-purple-800: #5b21b6;
+  --matmax-purple-900: #4c1d95;
+
+  --matmax-teal-50: #f0fdfa;
+  --matmax-teal-100: #ccfbf1;
+  --matmax-teal-200: #99f6e4;
+  --matmax-teal-300: #5eead4;
+  --matmax-teal-400: #2dd4bf;
+  --matmax-teal-500: #14b8a6;
+  --matmax-teal-600: #0d9488;
+  --matmax-teal-700: #0f766e;
+  --matmax-teal-800: #115e59;
+  --matmax-teal-900: #134e4a;
+
+  --matmax-orange-50: #fff7ed;
+  --matmax-orange-100: #ffedd5;
+  --matmax-orange-200: #fed7aa;
+  --matmax-orange-300: #fdba74;
+  --matmax-orange-400: #fb923c;
+  --matmax-orange-500: #f59e0b;
+  --matmax-orange-600: #d97706;
+  --matmax-orange-700: #b45309;
+  --matmax-orange-800: #92400e;
+  --matmax-orange-900: #78350f;
+}
+
+

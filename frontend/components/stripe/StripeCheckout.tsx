@@ -5,6 +5,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { BaseButton } from '@/components/ui/BaseButton';
 import { BaseCard } from '@/components/ui/BaseCard';
 import { CreditCard, Lock, Shield, CheckCircle } from 'lucide-react';
+import { useTermsUI } from '@/store/appStore';
 
 interface StripeCheckoutProps {
   amount: number; // Amount in cents
@@ -34,6 +35,7 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
   const [loading, setLoading] = useState(false);
   const [stripe, setStripe] = useState<import('@stripe/stripe-js').Stripe | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { openTerms } = useTermsUI();
 
   useEffect(() => {
     // Load Stripe
@@ -115,40 +117,40 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
     <BaseCard className={`max-w-md mx-auto ${className}`}>
       <div className="p-6">
         <div className="text-center mb-6">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CreditCard className="w-8 h-8 text-green-600" />
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'color-mix(in srgb, var(--color-status-success) 12%, transparent)' }}>
+            <CreditCard className="w-8 h-8" style={{ color: 'var(--color-status-success)' }} />
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">Secure Checkout</h3>
-          <p className="text-gray-600">{description}</p>
+          <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>Secure Checkout</h3>
+          <p style={{ color: 'var(--color-text-secondary)' }}>{description}</p>
         </div>
 
-        <div className="bg-gray-50 rounded-lg p-4 mb-6">
+        <div className="rounded-lg p-4 mb-6" style={{ background: 'var(--color-surface-secondary)' }}>
           <div className="flex justify-between items-center">
-            <span className="text-gray-700">Total Amount:</span>
-            <span className="text-2xl font-bold text-gray-900">
+            <span style={{ color: 'var(--color-text-secondary)' }}>Total Amount:</span>
+            <span className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
               {formatAmount(amount, currency)}
             </span>
           </div>
         </div>
 
         <div className="space-y-4 mb-6">
-          <div className="flex items-center text-sm text-gray-600">
-            <Shield className="w-4 h-4 mr-2 text-green-500" />
+          <div className="flex items-center text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+            <Shield className="w-4 h-4 mr-2" style={{ color: 'var(--color-status-success)' }} />
             <span>256-bit SSL encryption</span>
           </div>
-          <div className="flex items-center text-sm text-gray-600">
-            <Lock className="w-4 h-4 mr-2 text-green-500" />
+          <div className="flex items-center text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+            <Lock className="w-4 h-4 mr-2" style={{ color: 'var(--color-status-success)' }} />
             <span>PCI DSS compliant</span>
           </div>
-          <div className="flex items-center text-sm text-gray-600">
-            <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+          <div className="flex items-center text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+            <CheckCircle className="w-4 h-4 mr-2" style={{ color: 'var(--color-status-success)' }} />
             <span>Secure payment processing</span>
           </div>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-            <p className="text-red-700 text-sm">{error}</p>
+          <div className="rounded-lg p-3 mb-4" style={{ background: 'color-mix(in srgb, var(--color-status-error) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--color-status-error) 25%, transparent)' }}>
+            <p className="text-sm" style={{ color: 'var(--color-status-error)' }}>{error}</p>
           </div>
         )}
 
@@ -162,8 +164,12 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
           {loading ? 'Processing...' : `Pay ${formatAmount(amount, currency)}`}
         </BaseButton>
 
-        <p className="text-xs text-gray-500 text-center mt-4">
-          By clicking &ldquo;Pay&rdquo;, you agree to our terms of service and privacy policy.
+        <p className="text-xs text-center mt-4" style={{ color: 'var(--color-text-tertiary)' }}>
+          By clicking &ldquo;Pay&rdquo;, you agree to our{' '}
+          <button type="button" onClick={() => openTerms()} className="underline" style={{ color: 'var(--color-accent-500)' }}>
+            Terms & Conditions
+          </button>
+          {' '}and Privacy Policy.
         </p>
       </div>
     </BaseCard>

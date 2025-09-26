@@ -100,11 +100,11 @@ export function BaseModal({
   };
 
   const variantClasses = {
-    default: 'bg-white border-gray-200',
-    danger: 'bg-white border-red-500',
-    warning: 'bg-white border-yellow-500',
-    success: 'bg-white border-green-500',
-    info: 'bg-white border-blue-500',
+    default: 'bg-[var(--color-surface-primary)] border-[var(--color-border-500)]',
+    danger: 'bg-[var(--color-surface-primary)] border-[var(--color-status-error)]',
+    warning: 'bg-[var(--color-surface-primary)] border-[var(--color-status-warning)]',
+    success: 'bg-[var(--color-surface-primary)] border-[var(--color-status-success)]',
+    info: 'bg-[var(--color-surface-primary)] border-[var(--color-status-info)]',
   };
 
   const modalClasses = cn(
@@ -159,10 +159,10 @@ BaseModal.Header = function BaseModalHeader({
   };
 
   return (
-    <div className={cn(`pb-4 border-b border-gray-600/20`, className)}>
+    <div className={cn(`pb-4 border-b`, className)} style={{ borderColor: 'var(--color-border-500)' }}>
       <div className="flex items-center gap-2">
         {icon && (
-          <div className={`text-[${variantIconColors[variant]}]`}>
+          <div style={{ color: variantIconColors[variant] }}>
             {icon}
           </div>
         )}
@@ -207,10 +207,10 @@ BaseModal.Footer = function BaseModalFooter({
 
   return (
     <div className={cn(
-      'flex items-center gap-3 pt-4 border-t border-gray-600/20',
+      'flex items-center gap-3 pt-4 border-t',
       alignmentClasses[alignment],
       className
-    )}>
+    )} style={{ borderColor: 'var(--color-border-500)' }}>
       {children}
     </div>
   );

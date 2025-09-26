@@ -89,17 +89,8 @@ export function MobileViewportHandler() {
         });
       }
 
-      // Prevent zoom on input focus (iOS)
-      const preventZoom = () => {
-        const viewport = document.querySelector('meta[name="viewport"]');
-        if (viewport && isMobile) {
-          viewport.setAttribute('content', 
-            'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'
-          );
-        }
-      };
-
-      preventZoom();
+      // Note: Do not disable user zoom for accessibility. Avoid setting
+      // user-scalable=no or restrictive maximum-scale values.
 
       // Cleanup function
       return () => {
@@ -125,10 +116,8 @@ export function MobileViewportHandler() {
       document.head.appendChild(viewportMeta);
     }
 
-    // Set mobile-optimized viewport
-    viewportMeta.setAttribute('content', 
-      'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover'
-    );
+    // Set mobile-optimized viewport without restricting user zoom
+    viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1, viewport-fit=cover');
 
     // Add theme color for mobile browsers
     let themeColorMeta = document.querySelector('meta[name="theme-color"]');

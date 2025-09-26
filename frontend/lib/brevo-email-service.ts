@@ -1,3 +1,5 @@
+import { renderEmailLayout, getEmailTheme } from '@/lib/brevo-email';
+
 interface EmailData {
   to: string;
   subject: string;
@@ -136,10 +138,13 @@ export class BrevoEmailService {
       subject = subject.replace(new RegExp(placeholder, 'g'), value);
     });
 
+    // Wrap with themed layout (default to frontpage brand theme)
+    const themedHtml = renderEmailLayout(html, subject, getEmailTheme('frontpage'));
+
     return this.sendEmail({
       to,
       subject,
-      html
+      html: themedHtml
     });
   }
 

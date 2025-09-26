@@ -103,7 +103,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
   }, [isMenuOpen]);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-[9997] bg-white shadow-sm border-b border-gray-200 safe-padding">
+    <header className={`fixed top-0 left-0 right-0 z-[9997] bg-[var(--color-surface-primary)] shadow-sm border-b border-[var(--color-border-500)] safe-padding`}>
       <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-0 flex items-center justify-between header-container h-8 sm:h-10">
         <motion.div 
           className="flex items-center space-x-2 cursor-pointer touch-manipulation min-h-[24px] min-w-[24px] flex items-center justify-center"
@@ -116,7 +116,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
             alt="MatMax Yoga Studio Logo" 
             width={120}
             height={120}
-            className="h-12 sm:h-16 md:h-20 lg:h-24 object-contain"
+            className="h-4 sm:h-5 md:h-6 lg:h-6 w-auto object-contain"
             priority
           />
         </motion.div>
@@ -129,7 +129,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="hidden sm:flex items-center space-x-1 header-button-account"
+                className={`hidden sm:flex items-center space-x-1 header-button-account font-heading ${isActiveRoute('/schedule') ? 'text-[var(--color-primary-500)] font-semibold' : ''}`}
               >
                 <span>{getTranslation('nav.schedule', 'Schedule')}</span>
               </motion.button>
@@ -141,7 +141,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleMenuItemClick}
-                className="hidden sm:flex items-center space-x-1 header-button-account"
+                className={`hidden sm:flex items-center space-x-1 header-button-account font-heading ${isActiveRoute('/packages') ? 'text-[var(--color-primary-500)] font-semibold' : ''}`}
               >
                 <span>{getTranslation('nav.packages', 'Packages')}</span>
               </motion.button>
@@ -152,9 +152,9 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="hidden sm:flex items-center space-x-1 header-button-account"
+                className={`hidden sm:flex items-center space-x-1 header-button-account font-heading ${isActiveRoute('/products') ? 'text-[var(--color-primary-500)] font-semibold' : ''}`}
               >
-                <span>{getTranslation('nav.products', 'Products')}</span>
+                <span>{getTranslation('nav.products', language === 'es' ? 'Productos' : 'Products')}</span>
               </motion.button>
             </Link>
 
@@ -164,7 +164,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                 onClick={() => router.push('/account')}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="hidden sm:flex items-center space-x-1 header-button-account"
+                className={`hidden sm:flex items-center space-x-1 header-button-account font-heading ${isActiveRoute('/account') ? 'text-[var(--color-primary-500)] font-semibold' : ''}`}
               >
                 <span>{getTranslation('common.account', 'Account')}</span>
               </motion.button>
@@ -176,7 +176,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                 onClick={() => router.push('/admin')}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="hidden sm:flex items-center space-x-1 header-button-account"
+                className={`hidden sm:flex items-center space-x-1 header-button-account font-heading ${isActiveRoute('/admin') ? 'text-[var(--color-primary-500)] font-semibold' : ''}`}
               >
                 <span>{getTranslation('common.dashboard', 'Dashboard')}</span>
               </motion.button>
@@ -185,7 +185,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                 onClick={() => router.push('/login')}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="hidden sm:flex items-center space-x-1 header-button-language-inactive"
+                className={`hidden sm:flex items-center space-x-1 header-button-language-inactive font-heading ${isActiveRoute('/login') ? 'text-[var(--color-primary-500)] font-semibold' : ''}`}
               >
                 <span>{getTranslation('common.login', 'Login')}</span>
               </motion.button>
@@ -201,19 +201,19 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
               onClick={() => setLanguage('en')}
               className={`px-3 py-1 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation ${
                 language === 'en' 
-                  ? 'bg-[#6ea058] text-white shadow-sm' 
-                  : 'text-gray-600 hover:text-[#6ea058]'
+                  ? 'bg-[var(--color-primary-500)] text-[var(--primary-foreground)] shadow-sm' 
+                  : 'text-[var(--color-text-secondary)] hover:text-[var(--color-primary-500)]'
               }`}
             >
               EN
             </button>
-            <span className="text-gray-400">|</span>
+            <span className="text-[var(--color-text-tertiary)]">|</span>
             <button 
               onClick={() => setLanguage('es')}
               className={`px-3 py-1 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation ${
                 language === 'es' 
-                  ? 'bg-[#6ea058] text-white shadow-sm' 
-                  : 'text-gray-600 hover:text-[#6ea058]'
+                  ? 'bg-[var(--color-primary-500)] text-[var(--primary-foreground)] shadow-sm' 
+                  : 'text-[var(--color-text-secondary)] hover:text-[var(--color-primary-500)]'
               }`}
             >
               ES
@@ -292,7 +292,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                     alt="MatMax Yoga Studio Logo" 
                     width={80}
                     height={80}
-                    className="h-8 sm:h-10 object-contain"
+                    className="h-8 sm:h-10 w-auto object-contain"
                   />
                   <button 
                     onClick={() => setIsMenuOpen(false)}
@@ -345,7 +345,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                           : 'text-black hover:text-[#6ea058]'
                       }`}
                     >
-                      <span className="text-base sm:text-lg font-medium">{getTranslation('nav.products', 'Products')}</span>
+                      <span className="text-base sm:text-lg font-medium">{getTranslation('nav.products', language === 'es' ? 'Productos' : 'Products')}</span>
                     </motion.button>
                   </Link>
 

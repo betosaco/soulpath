@@ -17,14 +17,16 @@ export function HeroSection({ t }: HeroSectionProps) {
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 1, ease: "easeOut" }}
-          className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 bg-[#FFD700] rounded-full mb-4 sm:mb-6 md:mb-8 shadow-lg shadow-[#FFD700]/50 cosmic-glow"
+          className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 rounded-full mb-4 sm:mb-6 md:mb-8 shadow-lg"
+          style={{ backgroundColor: 'var(--color-accent-500)', boxShadow: '0 10px 15px -3px color-mix(in srgb, var(--color-accent-500) 40%, transparent)' }}
         />
         
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.5 }}
-          className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-heading text-[#EAEAEA] mb-3 sm:mb-4 md:mb-6 max-w-6xl leading-[1.1] sm:leading-tight px-2 font-bold"
+          className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-heading mb-3 sm:mb-4 md:mb-6 max-w-6xl leading-[1.1] sm:leading-tight px-2 font-bold"
+          style={{ color: 'var(--primary-foreground)' }}
         >
           {(t.hero as Record<string, string>).title}
         </motion.h1>
@@ -33,7 +35,8 @@ export function HeroSection({ t }: HeroSectionProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.8 }}
-          className="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl text-[#EAEAEA]/90 max-w-4xl mb-6 sm:mb-8 md:mb-12 leading-relaxed px-3 sm:px-4 font-light"
+          className="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl max-w-4xl mb-6 sm:mb-8 md:mb-12 leading-relaxed px-3 sm:px-4 font-light"
+          style={{ color: 'color-mix(in srgb, var(--primary-foreground) 85%, transparent)' }}
         >
           {(t.hero as Record<string, string>).subtitle}
         </motion.p>
@@ -42,7 +45,8 @@ export function HeroSection({ t }: HeroSectionProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 1.2 }}
-          className="flex items-center space-x-2 sm:space-x-3 text-[#C0C0C0] mt-2 sm:mt-4"
+          className="flex items-center space-x-2 sm:space-x-3 mt-2 sm:mt-4"
+          style={{ color: 'color-mix(in srgb, var(--primary-foreground) 70%, transparent)' }}
         >
           <span className="text-xs sm:text-sm md:text-base font-body">{(t.hero as Record<string, string>).scrollDown}</span>
           <motion.div

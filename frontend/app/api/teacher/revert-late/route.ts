@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, getAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { createEmailService } from '@/lib/brevo-email-service';
+import { renderEmailLayout, getEmailTheme } from '@/lib/brevo-email';
 
 // Add CORS headers
 function addCorsHeaders(response: NextResponse) {
@@ -174,9 +176,36 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // TODO: Send email notifications to students about the time restoration
-    // This would integrate with your email service (Brevo, etc.)
-    // For now, we'll just log the notification details
+    // Send email notifications to students about the time restoration (teacher theme)
+    try {
+      const emailService = await createEmailService();
+      if (emailService && slot.bookings.length > 0 && slot.originalStartTime && slot.originalEndTime) {
+        const subject = 'Actualización de horario: restauración de hora original';
+        const theme = getEmailTheme('frontpage');
+        for (const booking of slot.bookings) {
+          if (!booking.user.email) continue;
+          const rawHtml = `
+            <h2 style="margin:0 0 8px 0;">Estimado/a ${booking.user.fullName || 'alumno/a'}</h2>
+            <p>Tu sesión de <strong>${slot.teacherSchedule.serviceType?.name || 'clase'}</strong> en <strong>${slot.teacherSchedule.venue?.name || 'sede'}</strong> ha sido restaurada a su horario original.</p>
+            <div class="divider"></div>
+            <p><strong>Horario original:</strong> ${slot.originalStartTime.toLocaleString()} - ${slot.originalEndTime.toLocaleString()}</p>
+            <p>Gracias por tu comprensión.</p>
+          `;
+          const html = renderEmailLayout(rawHtml, subject, theme);
+          await emailService.sendEmailWithBCC({
+            to: booking.user.email,
+            bcc: 'alberto@matmax.world',
+            subject,
+            html,
+            text: `${booking.user.fullName || 'Alumno'}: La sesión vuelve a su horario original: ${slot.originalStartTime.toLocaleString()}`
+          });
+        }
+      }
+    } catch (emailError) {
+      console.warn('Email notifications failed (revert-late):', emailError);
+    }
+
+    // Log revert details
     
     const revertDetails = {
       slotId: slot.id,

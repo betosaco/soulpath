@@ -1,10 +1,9 @@
-'use client';
+import AdminLayoutWrapper from './AdminLayoutWrapper';
+import '@/styles/admin-dashboard.css';
+import '@/styles/tokens/theme-admin.css';
+import '@/styles/unified-schedule-management.css';
+import '@/styles/schedule-calendar-view.css';
 
-import React from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
-
-export default function AdminLayoutWrapper() {
-  return (
-    <AdminLayout isModal={false} />
-  );
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  return <AdminLayoutWrapper>{children}</AdminLayoutWrapper>;
 }

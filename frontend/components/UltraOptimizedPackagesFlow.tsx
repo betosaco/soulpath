@@ -22,7 +22,7 @@ const PackageCard = memo(({
     <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200">
       <div className="flex justify-between items-start mb-4">
         <h3 className="text-xl font-semibold text-gray-900">{pkg.packageDefinition.name}</h3>
-        <span className="text-2xl font-bold text-[#6ea058]">
+        <span className="text-2xl font-bold text-[var(--color-status-success)]">
           {pkg.currency.symbol} {pkg.price.toFixed(2)}
         </span>
       </div>
@@ -48,7 +48,7 @@ const PackageCard = memo(({
         className={`w-full py-2 px-4 rounded-md font-medium transition-colors duration-200 ${
           isInCart
             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            : 'bg-[#6ea058] text-white hover:bg-[#5a8a4a]'
+            : 'btn-primary text-white'
         }`}
       >
         {isInCart ? 'Added to Cart' : 'Add to Cart'}
