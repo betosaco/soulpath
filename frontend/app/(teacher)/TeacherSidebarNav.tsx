@@ -1,17 +1,18 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { 
   CalendarIcon, 
   UsersIcon,
-  ClockIcon,
   BarChart3Icon,
   SettingsIcon,
   LogOutIcon,
   BookOpenIcon,
   MessageSquareIcon,
-  StarIcon
+  StarIcon,
+  TrendingUpIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { sidebarButtonStyles, combineStyles } from '@/lib/styles/common';
@@ -48,16 +49,16 @@ export default function TeacherSidebarNav({ user }: TeacherSidebarNavProps) {
       current: pathname === '/account/teacher/schedule'
     },
     {
-      name: 'Available Slots',
-      href: '/account/teacher/slots',
-      icon: ClockIcon,
-      current: pathname === '/account/teacher/slots'
-    },
-    {
       name: 'My Bookings',
       href: '/account/teacher/bookings',
       icon: BookOpenIcon,
       current: pathname === '/account/teacher/bookings'
+    },
+    {
+      name: 'Earnings',
+      href: '/account/teacher/earnings',
+      icon: TrendingUpIcon,
+      current: pathname === '/account/teacher/earnings'
     },
     {
       name: 'Students',
@@ -93,25 +94,39 @@ export default function TeacherSidebarNav({ user }: TeacherSidebarNavProps) {
   return (
     <div className={teacherUI.sidebar.container}>
       {/* Logo/Brand */}
-      <div className={teacherUI.sidebar.header}>
+      <div className="px-2 py-0 border-b border-gray-700 flex items-center justify-center">
         <div className="text-center">
-          <h1 className={teacherUI.sidebar.brandTitle}>MatMax</h1>
-          <p className={teacherUI.sidebar.brandTagline}>Teacher Portal</p>
+          <div className="flex justify-center mb-0 mt-0">
+            <Image
+              src="/logo_matmax.webp"
+              alt="MatMax Yoga Studio Logo"
+              width={240}
+              height={240}
+              className="h-32 w-32 object-contain -mt-8 brightness-0 invert"
+              priority
+            />
+          </div>
+          <p className={`${teacherUI.sidebar.brandTagline} -mt-2`}>Teacher Portal</p>
         </div>
       </div>
 
       {/* Teacher Info */}
       <div className={teacherUI.sidebar.section}>
         <div className="text-center">
-          <div className={combineStyles(teacherUI.avatar.circleLg, 'mx-auto mb-2')}>
-            <span className={teacherUI.avatar.initialLg}>
-              {user.fullName?.charAt(0) || user.email.charAt(0).toUpperCase()}
-            </span>
+          <div className="w-12 h-12 bg-[var(--unified-primary)] rounded-full flex items-center justify-center mx-auto mb-2 overflow-hidden">
+            <Image
+              src="/teacher-avatars/lucia-meza.jpg"
+              alt="Teacher Profile"
+              width={48}
+              height={48}
+              className="w-full h-full object-cover rounded-full"
+              priority
+            />
           </div>
-          <p className="text-sm font-medium text-[var(--unified-text-primary)] truncate">
+          <p className="text-sm font-medium text-white truncate">
             {user.fullName || 'Teacher'}
           </p>
-          <p className="text-xs text-[var(--unified-text-secondary)] truncate">
+          <p className="text-xs text-gray-300 truncate">
             {user.email}
           </p>
         </div>
@@ -128,8 +143,7 @@ export default function TeacherSidebarNav({ user }: TeacherSidebarNavProps) {
               className={combineStyles(
                 'group',
                 sidebarButtonStyles.base,
-                item.current ? sidebarButtonStyles.variants.active : sidebarButtonStyles.variants.inactive,
-                'text-[var(--unified-text-primary)]'
+                item.current ? sidebarButtonStyles.variants.active : sidebarButtonStyles.variants.inactive
               )}
             >
               <Icon
@@ -143,15 +157,13 @@ export default function TeacherSidebarNav({ user }: TeacherSidebarNavProps) {
 
       {/* Sign Out */}
       <div className={teacherUI.sidebar.footer}>
-        <Button
+        <button
           onClick={handleSignOut}
-          variant="outline"
-          size="sm"
-          className="w-full border-[var(--unified-border-light)] text-[var(--unified-text-secondary)] hover:bg-[var(--unified-bg-secondary)] hover:text-[var(--unified-text-primary)]"
+          className="w-full flex items-center justify-center px-3 py-2 text-sm font-medium border border-gray-600 text-white hover:bg-gray-700 hover:text-white hover:border-gray-500 rounded-md transition-all duration-200"
         >
-          <LogOutIcon className="mr-2 h-4 w-4" />
+          <LogOutIcon className="mr-2 h-4 w-4 text-white" />
           Sign Out
-        </Button>
+        </button>
       </div>
     </div>
   );

@@ -35,6 +35,16 @@ export async function GET(request: NextRequest) {
         createdAt: true,
         userId: true,
         user: { select: { id: true, email: true, fullName: true, phone: true } },
+        teacherScheduleSlot: {
+          select: {
+            teacherSchedule: {
+              select: {
+                serviceType: { select: { id: true, name: true } },
+                venue: { select: { id: true, name: true, city: true } }
+              }
+            }
+          }
+        }
       },
       orderBy: { createdAt: 'desc' }
     }));
@@ -46,11 +56,20 @@ export async function GET(request: NextRequest) {
       phone: string | null;
       lastBookingAt: Date;
       bookingsCount: number;
+      // aggregates
+      completedCount: number;
+      cancelledCount: number;
+      confirmedCount: number;
+      topServiceType?: { id: number; name: string } | null;
+      topVenue?: { id: number; name: string; city: string | null } | null;
     }>();
 
     for (const b of bookings) {
       if (!b.user) continue;
       const existing = studentMap.get(b.user.id);
+      const serviceType = b.teacherScheduleSlot?.teacherSchedule?.serviceType || null;
+      const venue = b.teacherScheduleSlot?.teacherSchedule?.venue || null;
+
       if (!existing) {
         studentMap.set(b.user.id, {
           id: b.user.id,
@@ -59,14 +78,40 @@ export async function GET(request: NextRequest) {
           phone: b.user.phone,
           lastBookingAt: b.createdAt,
           bookingsCount: 1,
+          completedCount: b.status === 'completed' ? 1 : 0,
+          cancelledCount: b.status === 'cancelled' ? 1 : 0,
+          confirmedCount: b.status === 'confirmed' ? 1 : 0,
+          topServiceType: serviceType ? { id: serviceType.id, name: serviceType.name } : null,
+          topVenue: venue ? { id: venue.id, name: venue.name, city: venue.city ?? null } : null,
         });
       } else {
         existing.bookingsCount += 1;
         if (b.createdAt > existing.lastBookingAt) existing.lastBookingAt = b.createdAt;
+        if (b.status === 'completed') existing.completedCount += 1;
+        if (b.status === 'cancelled') existing.cancelledCount += 1;
+        if (b.status === 'confirmed') existing.confirmedCount += 1;
+
+        // Rough "top" calculation: prefer most recently seen if none set; for a better approach we can tally frequency
+        if (!existing.topServiceType && serviceType) {
+          existing.topServiceType = { id: serviceType.id, name: serviceType.name };
+        }
+        if (!existing.topVenue && venue) {
+          existing.topVenue = { id: venue.id, name: venue.name, city: venue.city ?? null };
+        }
       }
     }
 
-    const students = Array.from(studentMap.values()).sort((a, b) => b.lastBookingAt.getTime() - a.lastBookingAt.getTime());
+    const students = Array.from(studentMap.values())
+      .map(s => {
+        const attended = s.completedCount + s.confirmedCount; // considered attended/going
+        const total = s.bookingsCount || 1;
+        const attendanceRate = Math.round((attended / total) * 100);
+        return {
+          ...s,
+          attendanceRate
+        };
+      })
+      .sort((a, b) => b.lastBookingAt.getTime() - a.lastBookingAt.getTime());
 
     return NextResponse.json({ success: true, data: students });
   } catch (error) {

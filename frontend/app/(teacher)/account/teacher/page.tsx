@@ -11,6 +11,11 @@ type Slot = {
   isAvailable: boolean;
   bookedCount: number | null;
   maxBookings: number | null;
+  isLate?: boolean | null;
+  lateMinutes?: number | null;
+  lateMessage?: string | null;
+  originalStartTime?: string | null;
+  originalEndTime?: string | null;
   teacherSchedule?: {
     serviceType?: { id: number; name: string; duration?: number | null } | null;
     venue?: { id: number; name: string; city?: string | null } | null;
@@ -41,6 +46,9 @@ type Booking = {
 };
 
 export default function TeacherDashboardPage() {
+  console.log('🏠 Teacher Dashboard: Component rendering...');
+  console.log('🏠 Teacher Dashboard: Component file loaded successfully');
+  
   const [loading, setLoading] = React.useState(true);
   const [slots, setSlots] = React.useState<Slot[]>([]);
   const [bookings, setBookings] = React.useState<Booking[]>([]);
@@ -51,19 +59,43 @@ export default function TeacherDashboardPage() {
     setLoading(true);
     setError(null);
     try {
+      console.log('🔄 Loading teacher dashboard data...');
+      
       const [slotsRes, bookingsRes] = await Promise.all([
         fetch('/api/teacher/slots?days=30', { cache: 'no-store' }),
         fetch('/api/teacher/bookings?status=upcoming&limit=50', { cache: 'no-store' })
       ]);
 
-      if (!slotsRes.ok) throw new Error('Failed to load slots');
-      if (!bookingsRes.ok) throw new Error('Failed to load bookings');
+      console.log('📊 API responses:', { 
+        slotsStatus: slotsRes.status, 
+        bookingsStatus: bookingsRes.status 
+      });
+
+      if (!slotsRes.ok) {
+        const slotsError = await slotsRes.text();
+        console.error('❌ Slots API error:', slotsError);
+        throw new Error(`Failed to load slots: ${slotsRes.status} ${slotsError}`);
+      }
+      if (!bookingsRes.ok) {
+        const bookingsError = await bookingsRes.text();
+        console.error('❌ Bookings API error:', bookingsError);
+        throw new Error(`Failed to load bookings: ${bookingsRes.status} ${bookingsError}`);
+      }
 
       const slotsJson = await slotsRes.json();
       const bookingsJson = await bookingsRes.json();
+      
+      console.log('📊 Loaded data:', { 
+        slotsCount: slotsJson.data?.length || 0, 
+        bookingsCount: bookingsJson.data?.length || 0,
+        slotsData: slotsJson.data,
+        bookingsData: bookingsJson.data
+      });
+      
       setSlots(slotsJson.data || []);
       setBookings(bookingsJson.data || []);
     } catch (e) {
+      console.error('❌ Load data error:', e);
       setError(e instanceof Error ? e.message : 'Error loading data');
     } finally {
       setLoading(false);
@@ -71,6 +103,7 @@ export default function TeacherDashboardPage() {
   }, []);
 
   React.useEffect(() => {
+    console.log('🔄 Teacher Dashboard: useEffect triggered, calling loadData...');
     loadData();
   }, [loadData]);
 
@@ -119,6 +152,15 @@ export default function TeacherDashboardPage() {
 
   const upcomingBookings = bookings.length;
   const availableSlots = slots.filter(s => s.isAvailable).length;
+
+  console.log('📊 Teacher Dashboard state:', {
+    loading,
+    slotsCount: slots.length,
+    bookingsCount: bookings.length,
+    error,
+    activeTab,
+    availableSlots
+  });
 
   return (
     <div className="space-y-6">
@@ -211,33 +253,103 @@ export default function TeacherDashboardPage() {
 
           {!loading && !error && activeTab === 'slots' && (
             <div className="space-y-4">
+              {/* Show loading state if no data yet */}
               {slots.length === 0 ? (
                 <div className="text-center py-8">
-                  <ClockIcon className="h-12 w-12 text-[var(--color-text-secondary)] mx-auto mb-4" />
-                  <p className="text-[var(--color-text-secondary)]">No available slots found</p>
+                  <ClockIcon className="h-12 w-12 text-[var(--unified-text-secondary)] mx-auto mb-4" />
+                  <p className="text-[var(--unified-text-secondary)]">No available slots found</p>
+                  <p className="text-xs text-gray-400 mt-2">
+                    {loading ? 'Loading...' : 'No slots available for the next 30 days'}
+                  </p>
                 </div>
               ) : (
-                <div className="grid gap-4">
-                  {slots.map((slot) => (
-                    <div key={slot.id} className="bg-[var(--color-sidebar-600)] rounded-lg p-4 border border-[var(--color-border-500)]">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-[var(--color-text-inverse)]">
-                            {formatDate(slot.startTime)} - {formatDate(slot.endTime)}
-                          </p>
-                          <p className="text-sm text-[var(--color-text-secondary)]">
-                            {slot.teacherSchedule?.serviceType?.name} at {slot.teacherSchedule?.venue?.name}
-                          </p>
-                          <p className="text-sm text-[var(--color-text-secondary)]">
-                            {slot.bookedCount || 0} / {slot.maxBookings || '∞'} bookings
-                          </p>
+                <div className="space-y-4">
+                  {/* Subtle indicator of loaded data */}
+                  <div className="text-xs text-gray-400 text-right">
+                    Showing {slots.length} schedule slot{slots.length !== 1 ? 's' : ''}
+                  </div>
+                  
+                  <div className="grid gap-4">
+                    {slots.map((slot) => {
+                    const capacity = slot.maxBookings || 12;
+                    const bookedCount = slot.bookedCount || 0;
+                    const availableSpots = capacity - bookedCount;
+                    const isFullyBooked = availableSpots <= 0;
+                    const isAvailable = slot.isAvailable && !isFullyBooked;
+                    
+                    // Debug logging
+                    console.log('Slot data:', {
+                      id: slot.id,
+                      capacity,
+                      bookedCount,
+                      availableSpots,
+                      isAvailable,
+                      isFullyBooked,
+                      maxBookings: slot.maxBookings,
+                      bookedCountRaw: slot.bookedCount
+                    });
+                    
+                    return (
+                      <div key={slot.id} className={`rounded-lg p-4 border transition-colors ${
+                        isAvailable 
+                          ? 'bg-green-50 border-green-200 hover:bg-green-100' 
+                          : 'bg-red-50 border-red-200 hover:bg-red-100'
+                      }`}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <p className="font-medium text-[var(--unified-text-primary)]">
+                                {formatDate(slot.startTime)} - {formatDate(slot.endTime)}
+                              </p>
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                isAvailable 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : 'bg-red-100 text-red-800'
+                              }`}>
+                                {isAvailable ? 'Available' : 'Fully Booked'}
+                              </span>
+                            </div>
+                            <p className="text-sm text-[var(--unified-text-secondary)] mb-1">
+                              {slot.teacherSchedule?.serviceType?.name} at {slot.teacherSchedule?.venue?.name}
+                            </p>
+                            {/* Available Spots Info - matching EnhancedSchedule format */}
+                            <div className="flex items-center gap-2 text-sm">
+                              <div className="flex items-center gap-1">
+                                <div className={`w-2 h-2 rounded-full ${slot.isLate ? 'bg-yellow-500' : 'bg-green-500'}`}></div>
+                                <span className="text-[var(--unified-text-secondary)]">
+                                  {availableSpots} of {capacity} spots available
+                                </span>
+                              </div>
+                              {bookedCount > 0 && (
+                                <span className="text-xs text-[var(--unified-text-secondary)]">
+                                  ({bookedCount} booked)
+                                </span>
+                              )}
+                            </div>
+                            
+                            {/* Debug info - temporary */}
+                            <div className="text-xs text-gray-400 mt-1">
+                              Debug: maxBookings={slot.maxBookings}, bookedCount={slot.bookedCount}, isAvailable={slot.isAvailable}
+                            </div>
+                            {slot.isLate && (
+                              <div className="mt-2 text-xs text-red-600 font-medium">
+                                ⚠️ Running Late ({slot.lateMinutes} min)
+                              </div>
+                            )}
+                          </div>
+                          <div className="ml-4">
+                            <button 
+                              onClick={() => cancelSlot(slot.id)} 
+                              className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-sm"
+                            >
+                              Cancel
+                            </button>
+                          </div>
                         </div>
-                        <button onClick={() => cancelSlot(slot.id)} className={teacherUI.button.dangerSm}>
-                          Cancel
-                        </button>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
+                  </div>
                 </div>
               )}
             </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { BellIcon, UserIcon, CalendarIcon, ClockIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { teacherUI } from '@/lib/styles/teacher-ui';
@@ -109,10 +110,15 @@ export default function TeacherHeader({ user }: TeacherHeaderProps) {
           </Button>
           
           <div className="flex items-center space-x-2">
-            <div className={teacherUI.avatar.circleSm}>
-              <span className={teacherUI.avatar.initialSm}>
-                {user.fullName?.charAt(0) || user.email.charAt(0).toUpperCase()}
-              </span>
+            <div className="w-8 h-8 bg-[var(--unified-primary)] rounded-full flex items-center justify-center overflow-hidden">
+              <Image
+                src="/teacher-avatars/lucia-meza.jpg"
+                alt="Teacher Profile"
+                width={32}
+                height={32}
+                className="w-full h-full object-cover rounded-full"
+                priority
+              />
             </div>
             <div className="hidden sm:block">
               <p className="text-sm font-medium text-[var(--unified-text-primary)]">

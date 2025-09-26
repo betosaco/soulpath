@@ -26,6 +26,20 @@ export default function TeacherStudentsPage() {
 
   React.useEffect(() => { loadStudents(); }, [loadStudents]);
 
+  // Format relative time like "3 days ago"
+  const formatRelativeTime = (dateInput: string | number | Date) => {
+    const date = new Date(dateInput);
+    const diffMs = Date.now() - date.getTime();
+    const sec = Math.floor(diffMs / 1000);
+    const min = Math.floor(sec / 60);
+    const hr = Math.floor(min / 60);
+    const day = Math.floor(hr / 24);
+    if (day > 0) return `${day} day${day !== 1 ? 's' : ''} ago`;
+    if (hr > 0) return `${hr} hour${hr !== 1 ? 's' : ''} ago`;
+    if (min > 0) return `${min} minute${min !== 1 ? 's' : ''} ago`;
+    return 'just now';
+  };
+
   return (
     <div className="space-y-6">
       <div className={teacherUI.card.container}>
@@ -56,20 +70,60 @@ export default function TeacherStudentsPage() {
                 </div>
               ) : (
                 <div className="divide-y divide-[var(--color-border-500)]">
-                  {students.map((s: any) => (
-                    <div key={s.id} className="py-3 flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-[var(--unified-text-primary)]">{s.fullName || s.email}</p>
-                        <p className="text-sm text-[var(--unified-text-secondary)]">
-                          Last booking: {new Date(s.lastBookingAt).toLocaleString()} • Total bookings: {s.bookingsCount}
-                        </p>
+                  {students.map((s: any) => {
+                    const name: string = s.fullName || 'Unknown student';
+                    const initial: string = (name?.trim?.()[0] || '?').toUpperCase();
+                    const lastBooking = s.lastBookingAt ? new Date(s.lastBookingAt) : null;
+                    const lastBookingRelative = lastBooking ? formatRelativeTime(lastBooking) : 'No bookings yet';
+                    const daysSince = lastBooking ? Math.floor((Date.now() - lastBooking.getTime()) / (1000 * 60 * 60 * 24)) : Infinity;
+                    const isActive = Number.isFinite(daysSince) && daysSince <= 60; // active if booked within last ~2 months
+                    const statusClass = isActive
+                      ? 'bg-green-100 text-green-700 border-green-200'
+                      : 'bg-gray-100 text-gray-700 border-gray-200';
+
+                    return (
+                      <div key={s.id} className="py-3 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-[var(--unified-primary)]/10 border border-[var(--unified-border-light)] flex items-center justify-center text-[var(--unified-primary)] font-semibold">
+                            {initial}
+                          </div>
+                          <div>
+                            <p className="font-medium text-[var(--unified-text-primary)]">{name}</p>
+                            <p className="text-sm text-[var(--unified-text-secondary)]">Last booking: {lastBookingRelative}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap justify-end">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium border ${statusClass}`}>
+                            {isActive ? 'Active' : 'Inactive'}
+                          </span>
+                          <span className="px-2 py-1 rounded-full text-xs font-medium border bg-blue-50 text-blue-700 border-blue-200">
+                            {s.bookingsCount || 0} bookings
+                          </span>
+                          {typeof s.attendanceRate === 'number' && (
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium border ${
+                              s.attendanceRate >= 80
+                                ? 'bg-green-50 text-green-700 border-green-200'
+                                : s.attendanceRate >= 50
+                                  ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                  : 'bg-red-50 text-red-700 border-red-200'
+                            }`}>
+                              {s.attendanceRate}% attendance
+                            </span>
+                          )}
+                          {s.topServiceType?.name && (
+                            <span className="px-2 py-1 rounded-full text-xs font-medium border bg-purple-50 text-purple-700 border-purple-200">
+                              Class: {s.topServiceType.name}
+                            </span>
+                          )}
+                          {s.topVenue?.name && (
+                            <span className="px-2 py-1 rounded-full text-xs font-medium border bg-gray-100 text-gray-700 border-gray-200">
+                              Venue: {s.topVenue.name}{s.topVenue.city ? `, ${s.topVenue.city}` : ''}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm text-[var(--unified-text-secondary)]">{s.email}</p>
-                        {s.phone && <p className="text-sm text-[var(--unified-text-secondary)]">{s.phone}</p>}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

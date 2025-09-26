@@ -68,10 +68,10 @@ export const buttonStyles = {
 
 // Sidebar Navigation Button Styles
 export const sidebarButtonStyles = {
-  base: 'w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors',
+  base: 'w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-all duration-200',
   variants: {
-    active: 'bg-[var(--color-accent-500)] text-[var(--color-text-inverse)]',
-    inactive: 'text-[var(--color-text-secondary)] hover:bg-[var(--color-sidebar-700)] hover:text-[var(--color-text-primary)]',
+    active: 'bg-[var(--unified-primary)] text-white shadow-md',
+    inactive: 'text-gray-300 hover:bg-gray-700 hover:text-white',
   },
   icon: 'w-5 h-5',
   label: 'font-medium',

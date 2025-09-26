@@ -263,6 +263,7 @@ model Teacher {
   user             User?                  @relation(fields: [userId], references: [id], onUpdate: Restrict)
   venue            Venue?                 @relation(fields: [venueId], references: [id], onUpdate: Restrict)
   testimonials     Testimonial[]
+  paymentSettings  TeacherPaymentSettings?
 
   @@index([isActive], map: "idx_teachers_active")
   @@index([displayOrder], map: "idx_teachers_order")
@@ -271,6 +272,25 @@ model Teacher {
   @@index([slug], map: "idx_teachers_slug")
   @@index([userId], map: "idx_teachers_user_id")
   @@map("teachers")
+}
+
+model TeacherPaymentSettings {
+  id             Int       @id @default(autoincrement())
+  teacherId      Int       @unique @map("teacher_id")
+  bankName       String?   @map("bank_name") @db.VarChar(255)
+  accountNumber  String?   @map("account_number") @db.VarChar(60)
+  accountType    String?   @map("account_type") @db.VarChar(50)
+  ruc            String?   @db.VarChar(20)
+  payoutEmail    String?   @map("payout_email") @db.VarChar(255)
+  payoutPhone    String?   @map("payout_phone") @db.VarChar(30)
+  documentType   String?   @map("document_type") @db.VarChar(30)
+  documentNumber String?   @map("document_number") @db.VarChar(30)
+  createdAt      DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  teacher        Teacher   @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@index([teacherId], map: "idx_teacher_payment_settings_teacher")
+  @@map("teacher_payment_settings")
 }
 
 model TeacherSpecialty {

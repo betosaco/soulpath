@@ -152,11 +152,6 @@ export default function TeacherBookingsPage() {
                                     <p className="font-medium text-gray-800">
                                       {booking.user?.fullName || booking.user?.email || 'Unknown Student'}
                                     </p>
-                                    {booking.user?.phone && (
-                                      <p className="text-sm text-gray-600">
-                                        📞 {booking.user.phone}
-                                      </p>
-                                    )}
                                   </div>
                                   <div className="text-right">
                                     <span className={`px-3 py-1 rounded-full text-xs font-medium border ${

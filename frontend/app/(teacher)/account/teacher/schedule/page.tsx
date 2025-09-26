@@ -33,12 +33,12 @@ export default function TeacherSchedulePage() {
       let endDate: string;
       if (viewMode === 'weekly') {
         const week = getWeekDates(currentDate);
-        startDate = week[0].toISOString().split('T')[0];
-        endDate = week[6].toISOString().split('T')[0];
+        startDate = `${week[0].getFullYear()}-${String(week[0].getMonth() + 1).padStart(2, '0')}-${String(week[0].getDate()).padStart(2, '0')}`;
+        endDate = `${week[6].getFullYear()}-${String(week[6].getMonth() + 1).padStart(2, '0')}-${String(week[6].getDate()).padStart(2, '0')}`;
       } else {
         const monthDates = getMonthDates(currentDate);
-        startDate = monthDates[0].toISOString().split('T')[0];
-        endDate = monthDates[monthDates.length - 1].toISOString().split('T')[0];
+        startDate = `${monthDates[0].getFullYear()}-${String(monthDates[0].getMonth() + 1).padStart(2, '0')}-${String(monthDates[0].getDate()).padStart(2, '0')}`;
+        endDate = `${monthDates[monthDates.length - 1].getFullYear()}-${String(monthDates[monthDates.length - 1].getMonth() + 1).padStart(2, '0')}-${String(monthDates[monthDates.length - 1].getDate()).padStart(2, '0')}`;
       }
 
       const url = `/api/teacher/slots?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`;
@@ -291,12 +291,14 @@ export default function TeacherSchedulePage() {
   };
 
   const getSlotsForDate = (date: Date) => {
-    const dateStr = date.toISOString().split('T')[0];
+    // Use local date methods to avoid timezone offset
+    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     return slots.filter(slot => {
       // For late notification slots, use originalStartTime if available
       const slotTime = slot.originalStartTime ? slot.originalStartTime : slot.startTime;
-      const slotDate = new Date(slotTime).toISOString().split('T')[0];
-      return slotDate === dateStr;
+      const slotDate = new Date(slotTime);
+      const slotDateStr = `${slotDate.getFullYear()}-${String(slotDate.getMonth() + 1).padStart(2, '0')}-${String(slotDate.getDate()).padStart(2, '0')}`;
+      return slotDateStr === dateStr;
     });
   };
 
@@ -508,21 +510,34 @@ function WeeklyView({ dates, getSlotsForDate, formatDate, formatTime, isToday, o
               {daySlots.length === 0 ? (
                 <p className="text-gray-500 text-sm text-center py-4">No slots</p>
               ) : (
-                daySlots.map((slot: any) => (
-                  <div key={slot.id} className={`p-2 rounded-lg border text-xs relative group ${
-                    slot.isAvailable 
-                      ? 'bg-green-50 border-green-200 text-green-800' 
-                      : 'bg-red-50 border-red-200 text-red-800'
-                  }`}>
-                    <div className="font-medium">{formatTime(new Date(slot.originalStartTime ?? slot.startTime))}</div>
-                    {slot.isLate && (
-                      <div className="text-xs text-red-600 font-medium">
-                        ⚠️ Running Late ({slot.lateMinutes} min)
+                daySlots.map((slot: any) => {
+                  const capacity = slot.maxBookings || 12;
+                  const bookedCount = slot.bookedCount || 0;
+                  const availableSpots = capacity - bookedCount;
+                  const isFullyBooked = availableSpots <= 0;
+                  
+                  return (
+                    <div key={slot.id} className={`p-2 rounded-lg border text-xs relative group ${
+                      slot.isAvailable && !isFullyBooked
+                        ? 'bg-green-50 border-green-200 text-green-800' 
+                        : 'bg-red-50 border-red-200 text-red-800'
+                    }`}>
+                      <div className="font-medium">{formatTime(new Date(slot.originalStartTime ?? slot.startTime))}</div>
+                      {slot.isLate && (
+                        <div className="text-xs text-red-600 font-medium">
+                          ⚠️ Running Late ({slot.lateMinutes} min)
+                        </div>
+                      )}
+                      <div className="text-xs opacity-75">
+                        {slot.teacherSchedule?.serviceType?.name}
                       </div>
-                    )}
-                    <div className="text-xs opacity-75">
-                      {slot.teacherSchedule?.serviceType?.name}
-                    </div>
+                      {/* Available Spots Info */}
+                      <div className="flex items-center gap-1 mt-1">
+                        <div className={`w-2 h-2 rounded-full ${slot.isLate ? 'bg-yellow-500' : (slot.isAvailable && !isFullyBooked ? 'bg-green-500' : 'bg-red-500')}`}></div>
+                        <span className="text-xs">
+                          {availableSpots} of {capacity} spots
+                        </span>
+                      </div>
                     {slot.isAvailable && (
                       <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <div className="relative">
@@ -565,8 +580,9 @@ function WeeklyView({ dates, getSlotsForDate, formatDate, formatTime, isToday, o
                         </div>
                       </div>
                     )}
-                  </div>
-                ))
+                    </div>
+                  );
+                })
               )}
             </div>
           </div>
@@ -617,18 +633,31 @@ function MonthlyView({ dates, currentDate, getSlotsForDate, formatDate, formatTi
               </div>
               
               <div className="space-y-1">
-                {daySlots.slice(0, 3).map((slot: any) => (
-                  <div key={slot.id} className={`p-1 rounded text-xs relative group ${
-                    slot.isAvailable 
-                      ? 'bg-green-100 text-green-700' 
-                      : 'bg-red-100 text-red-700'
-                  }`}>
-                    <div className="font-medium">{formatTime(new Date(slot.originalStartTime ?? slot.startTime))}</div>
-                    {slot.isLate && (
-                      <div className="text-xs text-red-600 font-medium">
-                        ⚠️ Late ({slot.lateMinutes}min)
+                {daySlots.slice(0, 3).map((slot: any) => {
+                  const capacity = slot.maxBookings || 12;
+                  const bookedCount = slot.bookedCount || 0;
+                  const availableSpots = capacity - bookedCount;
+                  const isFullyBooked = availableSpots <= 0;
+                  
+                  return (
+                    <div key={slot.id} className={`p-1 rounded text-xs relative group ${
+                      slot.isAvailable && !isFullyBooked
+                        ? 'bg-green-100 text-green-700' 
+                        : 'bg-red-100 text-red-700'
+                    }`}>
+                      <div className="font-medium">{formatTime(new Date(slot.originalStartTime ?? slot.startTime))}</div>
+                      {slot.isLate && (
+                        <div className="text-xs text-red-600 font-medium">
+                          ⚠️ Late ({slot.lateMinutes}min)
+                        </div>
+                      )}
+                      {/* Available Spots Info */}
+                      <div className="flex items-center gap-1">
+                        <div className={`w-1.5 h-1.5 rounded-full ${slot.isLate ? 'bg-yellow-500' : (slot.isAvailable && !isFullyBooked ? 'bg-green-500' : 'bg-red-500')}`}></div>
+                        <span className="text-xs">
+                          {availableSpots}/{capacity}
+                        </span>
                       </div>
-                    )}
                     {slot.isAvailable && (
                       <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity">
                         <div className="relative">
@@ -671,8 +700,9 @@ function MonthlyView({ dates, currentDate, getSlotsForDate, formatDate, formatTi
                         </div>
                       </div>
                     )}
-                  </div>
-                ))}
+                    </div>
+                  );
+                })}
                 {daySlots.length > 3 && (
                   <div className="text-xs text-gray-500 text-center">
                     +{daySlots.length - 3} more
