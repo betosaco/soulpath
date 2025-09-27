@@ -37,15 +37,13 @@ export default function TeacherHeader({ user }: TeacherHeaderProps) {
   useEffect(() => {
     const loadTeacherStats = async () => {
       try {
-        const response = await fetch('/api/teacher/stats', {
-          headers: {
-            'Authorization': `Bearer ${user.access_token}`
-          }
+        const response = await fetch('/api/teacher/dashboard?days=30&status=upcoming&limit=1', {
+          headers: { 'Authorization': `Bearer ${user.access_token}` },
+          cache: 'no-store'
         });
-        
         if (response.ok) {
           const data = await response.json();
-          setStats(data.data || stats);
+          setStats(data.data?.stats || stats);
         }
       } catch (error) {
         console.error('Failed to load teacher stats:', error);

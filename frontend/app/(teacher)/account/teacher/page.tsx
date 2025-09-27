@@ -67,49 +67,27 @@ export default function TeacherDashboardPage() {
     try {
       console.log('🔄 Loading teacher dashboard data...');
       
-      const [slotsRes, bookingsRes, statsRes] = await Promise.all([
-        fetch('/api/teacher/slots?days=30', { cache: 'no-store' }),
-        fetch('/api/teacher/bookings?status=upcoming&limit=50', { cache: 'no-store' }),
-        fetch('/api/teacher/stats', { cache: 'no-store' })
-      ]);
+      const dashboardRes = await fetch('/api/teacher/dashboard?days=30&status=upcoming&limit=50', { cache: 'no-store' });
 
-      console.log('📊 API responses:', { 
-        slotsStatus: slotsRes.status, 
-        bookingsStatus: bookingsRes.status,
-        statsStatus: statsRes.status
-      });
+      console.log('📊 API responses:', { dashboardStatus: dashboardRes.status });
 
-      if (!slotsRes.ok) {
-        const slotsError = await slotsRes.text();
-        console.error('❌ Slots API error:', slotsError);
-        throw new Error(`Failed to load slots: ${slotsRes.status} ${slotsError}`);
-      }
-      if (!bookingsRes.ok) {
-        const bookingsError = await bookingsRes.text();
-        console.error('❌ Bookings API error:', bookingsError);
-        throw new Error(`Failed to load bookings: ${bookingsRes.status} ${bookingsError}`);
-      }
-      if (!statsRes.ok) {
-        const statsError = await statsRes.text();
-        console.error('❌ Stats API error:', statsError);
-        throw new Error(`Failed to load stats: ${statsRes.status} ${statsError}`);
+      if (!dashboardRes.ok) {
+        const dashError = await dashboardRes.text();
+        console.error('❌ Dashboard API error:', dashError);
+        throw new Error(`Failed to load dashboard: ${dashboardRes.status} ${dashError}`);
       }
 
-      const slotsJson = await slotsRes.json();
-      const bookingsJson = await bookingsRes.json();
-      const statsJson = await statsRes.json();
+      const dashboardJson = await dashboardRes.json();
       
       console.log('📊 Loaded data:', { 
-        slotsCount: slotsJson.data?.length || 0, 
-        bookingsCount: bookingsJson.data?.length || 0,
-        statsData: statsJson.data,
-        slotsData: slotsJson.data,
-        bookingsData: bookingsJson.data
+        slotsCount: dashboardJson.data?.slots?.length || 0, 
+        bookingsCount: dashboardJson.data?.bookings?.length || 0,
+        statsData: dashboardJson.data?.stats,
       });
       
-      setSlots(slotsJson.data || []);
-      setBookings(bookingsJson.data || []);
-      setStats(statsJson.data || null);
+      setSlots(dashboardJson.data?.slots || []);
+      setBookings(dashboardJson.data?.bookings || []);
+      setStats(dashboardJson.data?.stats || null);
     } catch (e) {
       console.error('❌ Load data error:', e);
       setError(e instanceof Error ? e.message : 'Error loading data');
