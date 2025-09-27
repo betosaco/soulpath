@@ -232,7 +232,9 @@ export function ChatWindow({ conversationId, onBackClick }: ChatWindowProps) {
       <Sheet open={showCatalog} onOpenChange={setShowCatalog}>
         <SheetContent 
           side="right" 
-          className="bg-white w-full sm:max-w-md border-l shadow-xl transition-all duration-300 ease-in-out"
+          className="bg-white w-full sm:max-w-md border-l rounded-l-xl shadow-2xl transform-gpu will-change-transform
+          transition-all data-[state=open]:duration-500 data-[state=closed]:duration-300
+          data-[state=open]:ease-[cubic-bezier(0.22,1,0.36,1)] data-[state=closed]:ease-in"
         >
           <CatalogSheet isOpen={showCatalog} onInsert={handleInsertFromCatalog} />
         </SheetContent>
