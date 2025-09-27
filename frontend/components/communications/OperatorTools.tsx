@@ -44,7 +44,7 @@ export function OperatorTools({ onInsertTemplate, onInsertLink, disabled, onCrea
       </CardHeader>
       <CardContent className="space-y-2">
         {onCreateTicket && (
-          <BaseButton onClick={onCreateTicket} disabled={disabled} className="w-full justify-start">
+          <BaseButton onClick={onCreateTicket} className="w-full justify-start">
             <TicketIcon className="h-4 w-4 mr-2" />
             Create ticket from conversation
           </BaseButton>
@@ -53,7 +53,7 @@ export function OperatorTools({ onInsertTemplate, onInsertLink, disabled, onCrea
           <DollarSign className="h-4 w-4 mr-2" />
           Send payment link
         </BaseButton>
-        <BaseButton onClick={handleCatalog} disabled={disabled} variant="outline" className="w-full justify-start">
+        <BaseButton onClick={handleCatalog} variant="outline" className="w-full justify-start">
           <BookOpen className="h-4 w-4 mr-2" />
           Send catalog
         </BaseButton>
