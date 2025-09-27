@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 import { requireAuth, getAuthenticatedUser } from '@/lib/auth';
 import { prisma, withConnection } from '@/lib/prisma';
+import { cacheKey, withApiCache, cacheHeaders } from '@/lib/apiCache';
 
 // GET: List teacher bookings (upcoming/past/all)
 export async function GET(request: NextRequest) {
@@ -34,8 +35,10 @@ export async function GET(request: NextRequest) {
       where.status = 'completed';
     }
 
-    const [bookings, totalCount] = await withConnection(async () => {
-      return await Promise.all([
+    const cacheTtlMs = 15_000; // 15s cache for list pagination
+    const key = cacheKey('/api/teacher/bookings', { status, page, limit }, String(teacher.id));
+    const [bookings, totalCount] = await withApiCache(key, cacheTtlMs, () => withConnection(async () => {
+      const result = await Promise.all([
         prisma.booking.findMany({
           where,
           select: {
@@ -68,13 +71,17 @@ export async function GET(request: NextRequest) {
         }),
         prisma.booking.count({ where })
       ]);
-    });
+      return result as [any[], number];
+    }));
 
-    return NextResponse.json({
+    const res = NextResponse.json({
       success: true,
       data: bookings,
       pagination: { page, limit, total: totalCount, totalPages: Math.ceil(totalCount / limit) }
     });
+    const headers = cacheHeaders(Math.floor(cacheTtlMs / 1000));
+    Object.entries(headers).forEach(([k, v]) => res.headers.set(k, v));
+    return res;
   } catch (error) {
     console.error('GET /api/teacher/bookings error:', error);
     return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });

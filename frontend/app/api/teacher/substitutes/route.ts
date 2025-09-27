@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 import { requireAuth, getAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { cacheKey, withApiCache, cacheHeaders } from '@/lib/apiCache';
 
 // Add CORS headers
 function addCorsHeaders(response: NextResponse) {
@@ -43,7 +44,9 @@ export async function GET(request: NextRequest) {
 
     // Get all other teachers (excluding current teacher)
     console.log('🔍 Looking up substitute teachers...');
-    const teachers = await prisma.teacher.findMany({
+    const cacheTtlMs = 60_000; // 60s cache for directory list
+    const key = cacheKey('/api/teacher/substitutes', {}, String(currentTeacher.id));
+    const teachers = await withApiCache(key, cacheTtlMs, () => prisma.teacher.findMany({
       where: {
         id: { not: currentTeacher.id },
         isActive: true
@@ -76,7 +79,7 @@ export async function GET(request: NextRequest) {
       orderBy: [
         { name: 'asc' }
       ]
-    });
+    }));
 
     console.log('🔍 Found substitute teachers:', teachers.length);
 
@@ -95,7 +98,10 @@ export async function GET(request: NextRequest) {
     };
 
     console.log('🔍 Returning response with', response.teachers.length, 'teachers');
-    return addCorsHeaders(NextResponse.json(response));
+    const res = addCorsHeaders(NextResponse.json(response));
+    const headers = cacheHeaders(Math.floor(cacheTtlMs / 1000));
+    Object.entries(headers).forEach(([k, v]) => res.headers.set(k, v));
+    return res;
   } catch (error) {
     console.error('🔍 GET /api/teacher/substitutes error:', error);
     console.error('🔍 Error details:', {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 import { requireAuth, getAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { cacheKey, withApiCache, cacheHeaders } from '@/lib/apiCache';
 
 // GET: List upcoming slots for the authenticated teacher
 export async function GET(request: NextRequest) {
@@ -54,7 +55,9 @@ export async function GET(request: NextRequest) {
       ]
     };
 
-    const slots = await prisma.teacherScheduleSlot.findMany({
+    const cacheTtlMs = 20_000; // 20s cache for hot list
+    const key = cacheKey('/api/teacher/slots', { startDate: startDateParam, endDate: endDateParam, days }, String(teacher.id));
+    const slots = await withApiCache(key, cacheTtlMs, () => prisma.teacherScheduleSlot.findMany({
       where,
       select: {
         id: true,
@@ -85,9 +88,12 @@ export async function GET(request: NextRequest) {
         }
       },
       orderBy: { startTime: 'asc'       }
-    });
+    }));
 
-    return NextResponse.json({ success: true, data: slots });
+    const res = NextResponse.json({ success: true, data: slots });
+    const headers = cacheHeaders(Math.floor(cacheTtlMs / 1000));
+    Object.entries(headers).forEach(([k, v]) => res.headers.set(k, v));
+    return res;
   } catch (error) {
     console.error('GET /api/teacher/slots error:', error);
     return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });

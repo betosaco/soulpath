@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 import { requireAuth, getAuthenticatedUser } from '@/lib/auth';
 import { prisma, withConnection } from '@/lib/prisma';
+import { cacheKey, withApiCache, cacheHeaders } from '@/lib/apiCache';
 
 export async function GET(request: NextRequest) {
   try {
@@ -26,8 +27,11 @@ export async function GET(request: NextRequest) {
     const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
 
-    // Get teacher's schedule slots
-    const teacherSchedules = await withConnection(() => prisma.teacherSchedule.findMany({
+    const cacheTtlMs = 30_000; // 30s cache for stats
+    const key = cacheKey('/api/teacher/stats', {}, String(teacher.id));
+
+    // Get teacher's schedule slots (cached)
+    const teacherSchedules = await withApiCache(key + '|schedules', cacheTtlMs, () => withConnection(() => prisma.teacherSchedule.findMany({
       where: { teacherId: teacher.id },
       include: {
         teacherScheduleSlots: {
@@ -40,7 +44,7 @@ export async function GET(request: NextRequest) {
           }
         }
       }
-    }));
+    })));
 
     // Calculate stats
     let todayBookings = 0;
@@ -71,15 +75,16 @@ export async function GET(request: NextRequest) {
     }
 
     // Get average rating (if reviews exist)
-    let reviews: Array<{ rating: number | null }>; 
-    try {
-      reviews = await withConnection(() => prisma.testimonial.findMany({
-        where: { teacherId: teacher.id },
-        select: { rating: true }
-      }));
-    } catch {
-      reviews = [];
-    }
+    const reviews: Array<{ rating: number | null }> = await withApiCache(key + '|reviews', cacheTtlMs, async () => {
+      try {
+        return await withConnection(() => prisma.testimonial.findMany({
+          where: { teacherId: teacher.id },
+          select: { rating: true }
+        }));
+      } catch {
+        return [];
+      }
+    });
 
     const ratings = reviews.map(r => r.rating).filter((v): v is number => typeof v === 'number');
     const averageRating = ratings.length > 0 
@@ -93,10 +98,13 @@ export async function GET(request: NextRequest) {
       rating: Math.round(averageRating * 10) / 10 // Round to 1 decimal place
     };
 
-    return NextResponse.json({
+    const res = NextResponse.json({
       success: true,
       data: stats
     });
+    const headers = cacheHeaders(Math.floor(cacheTtlMs / 1000));
+    Object.entries(headers).forEach(([k, v]) => res.headers.set(k, v));
+    return res;
 
   } catch (error) {
     console.error('Error fetching teacher stats:', error);
