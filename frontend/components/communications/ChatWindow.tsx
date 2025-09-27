@@ -131,6 +131,14 @@ export function ChatWindow({ conversationId, onBackClick }: ChatWindowProps) {
               disabled={isLoading}
             />
 
+            {/* Funnel tabs */}
+            <div className="bg-white border border-gray-200 rounded-lg p-1 w-full max-w-sm">
+              <div className="flex text-sm">
+                <button className="flex-1 py-1.5 rounded-md hover:bg-gray-100 text-gray-700">Clients</button>
+                <button className="flex-1 py-1.5 rounded-md hover:bg-gray-100 text-gray-700">Vendors</button>
+                <button className="flex-1 py-1.5 rounded-md hover:bg-gray-100 text-gray-700">Coworkers</button>
+              </div>
+            </div>
 
             {/* Chat area */}
             <Card className="border-0 shadow-sm bg-white flex-1 flex flex-col min-h-0 max-h-full overflow-hidden">

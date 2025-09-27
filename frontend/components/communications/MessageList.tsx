@@ -14,9 +14,10 @@ interface ConversationState {
 interface MessageListProps {
   conversationId: string;
   conversationState?: ConversationState;
+  funnel?: 'clients' | 'vendors' | 'coworkers';
 }
 
-export function MessageList({ conversationId, conversationState }: MessageListProps) {
+export function MessageList({ conversationId, conversationState, funnel }: MessageListProps) {
   const { data, isLoading } = useMessages({ conversationId, page: 1, limit: 50 });
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
@@ -36,7 +37,31 @@ export function MessageList({ conversationId, conversationState }: MessageListPr
     );
   }
 
-  const messages = data?.messages ?? [];
+  let messages = data?.messages ?? [];
+
+  // Optional funnel filter
+  if (funnel) {
+    const allowedByFunnel: Record<string, string[]> = {
+      clients: ['CUSTOMER'],
+      vendors: ['BOT'],
+      coworkers: ['AGENT', 'SYSTEM'],
+    };
+    const allowed = allowedByFunnel[funnel] || [];
+    messages = messages.filter((m: any) => allowed.includes(String(m.senderType)));
+  }
+  const getChannelBadge = (msg: any) => {
+    const rawName = (msg?.channel?.displayName || msg?.channel?.name || msg?.channelName || '') as string;
+    const name = rawName || (msg?.channelId ? 'Channel' : '');
+    const key = name.toLowerCase();
+    let cls = 'bg-gray-100 text-gray-700 border border-gray-200';
+    if (key.includes('whatsapp')) cls = 'bg-green-100 text-green-700 border border-green-200';
+    else if (key.includes('instagram')) cls = 'bg-pink-100 text-pink-700 border border-pink-200';
+    else if (key.includes('email')) cls = 'bg-blue-100 text-blue-700 border border-blue-200';
+    else if (key.includes('sms')) cls = 'bg-yellow-100 text-yellow-800 border border-yellow-200';
+    else if (key.includes('live')) cls = 'bg-purple-100 text-purple-700 border border-purple-200';
+    else if (key.includes('web') || key.includes('site')) cls = 'bg-indigo-100 text-indigo-700 border border-indigo-200';
+    return { name: name || undefined, cls };
+  };
 
   const getMessageColors = (senderType: string) => {
     switch (senderType) {
@@ -103,6 +128,12 @@ export function MessageList({ conversationId, conversationState }: MessageListPr
             <div className={`max-w-[75%] rounded-2xl px-4 py-3 shadow-sm border-2 ${
               colors.bg
             } ${colors.text} ${colors.border}`}>
+              {/* Channel badge */}
+              {(() => { const ch = getChannelBadge(msg); return ch.name ? (
+                <div className="mb-1 flex justify-end">
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full ${ch.cls}`}>{ch.name}</span>
+                </div>
+              ) : null; })()}
               {/* Sender info for non-customer messages */}
               {!isFromCustomer && (
                 <div className="flex items-center gap-1 mb-1 text-xs opacity-90">

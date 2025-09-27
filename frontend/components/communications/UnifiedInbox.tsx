@@ -36,6 +36,7 @@ interface UnifiedInboxProps {
 export function UnifiedInbox({ onConversationSelect, onBackClick, compact = false }: UnifiedInboxProps) {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
+  const [funnel, setFunnel] = useState<'clients' | 'vendors' | 'coworkers'>('clients');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedPriority, setSelectedPriority] = useState<string>('all');
   const [selectedChannel, setSelectedChannel] = useState<string>('all');
@@ -75,14 +76,23 @@ export function UnifiedInbox({ onConversationSelect, onBackClick, compact = fals
   const filteredConversations = useMemo(() => {
     if (!conversationsData?.conversations) return [];
     
-    if (!searchTerm) return conversationsData.conversations;
+    let list = conversationsData.conversations;
+    // Apply funnel by channel heuristics
+    list = list.filter((conversation) => {
+      const name = (conversation.primaryChannel?.displayName || conversation.primaryChannel?.name || '').toLowerCase();
+      if (funnel === 'vendors') return name.includes('email') || name.includes('instagram');
+      if (funnel === 'coworkers') return name.includes('live') || name.includes('chat') || name.includes('web');
+      return true; // clients = all
+    });
 
-    return conversationsData.conversations.filter(conversation => 
+    if (!searchTerm) return list;
+
+    return list.filter(conversation => 
       conversation.customer?.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       conversation.customer?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       conversation.subject?.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [conversationsData?.conversations, searchTerm]);
+  }, [conversationsData?.conversations, searchTerm, funnel]);
 
   // Get channel icon
   const getChannelIcon = (channelName: string) => {
@@ -141,6 +151,20 @@ export function UnifiedInbox({ onConversationSelect, onBackClick, compact = fals
 
   return (
     <div className={compact ? 'h-full flex flex-col min-h-0' : 'space-y-6'}>
+      {/* Funnel tabs */}
+      <div className="bg-white border border-gray-200 rounded-lg p-1 w-full max-w-sm">
+        <div className="flex text-sm">
+          {(['clients','vendors','coworkers'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setFunnel(tab)}
+              className={`flex-1 py-1.5 rounded-md transition-colors ${funnel === tab ? 'bg-gray-100 text-gray-900' : 'hover:bg-gray-50 text-gray-700'}`}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
+        </div>
+      </div>
       {/* Header moved to CommunicationsHeader */}
 
       {/* Filters */}
