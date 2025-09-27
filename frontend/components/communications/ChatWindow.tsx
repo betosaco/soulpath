@@ -5,13 +5,14 @@ import { ArrowLeft, Send, Bot, User, UserPlus, Shield, AlertCircle, Clock, Check
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { BaseButton } from '../ui/BaseButton';
 import { useConversation, useUpdateConversation } from '@/hooks/useCommunications';
-import { MessageList } from '@/components/communications/MessageList';
+import { MessageListUI } from '@/components/communications/MessageListUI';
 import { MessageComposer } from '@/components/communications/MessageComposer';
 import { OperatorTools } from '@/components/communications/OperatorTools';
 import { ConversationControlBar } from '@/components/communications/ConversationControlBar';
 import { TransferModal } from '@/components/communications/TransferModal';
 import { AdminApprovalModal } from '@/components/communications/AdminApprovalModal';
 import { ConversationStatus, Priority } from '@/lib/types/communications';
+import { useMessages } from '@/hooks/useCommunications';
 import { CreateTicketModal } from '@/components/communications/CreateTicketModal';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { CatalogSheet } from '@/components/communications/CatalogSheet';
@@ -33,6 +34,7 @@ interface ConversationState {
 
 export function ChatWindow({ conversationId, onBackClick }: ChatWindowProps) {
   const { data: conversation, isLoading } = useConversation(conversationId);
+  const { data: messagesData, isLoading: isMessagesLoading } = useMessages({ conversationId, page: 1, limit: 50 });
   const { mutateAsync: updateConversation } = useUpdateConversation();
   const [draft, setDraft] = useState('');
   
@@ -153,8 +155,9 @@ export function ChatWindow({ conversationId, onBackClick }: ChatWindowProps) {
               <CardContent className="p-0 flex-1 flex flex-col h-full">
                 {/* Messages area - scrollable */}
                 <div className="flex-1 overflow-y-auto p-4 bg-white min-h-0">
-                  <MessageList 
-                    conversationId={conversationId} 
+                  <MessageListUI 
+                    messages={messagesData?.messages}
+                    isLoading={isMessagesLoading}
                     conversationState={conversationState}
                   />
                 </div>
