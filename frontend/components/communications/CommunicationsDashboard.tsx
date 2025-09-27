@@ -24,6 +24,7 @@ import { TicketingSystem } from './TicketingSystem';
 import { ConversationView } from './ConversationView';
 import { TicketView } from './TicketView';
 import { CommunicationsSettings } from './CommunicationsSettings';
+import { ChatWindowShell } from './ChatWindowShell';
 
 interface CommunicationsDashboardProps {
   defaultView?: string;
@@ -146,12 +147,9 @@ export function CommunicationsDashboard({ defaultView = 'overview', activeView, 
                   compact
                 />
               </div>
-              {/* Right: Empty state or selected chat prompt */}
-              <div className="h-full min-h-0 border-0 shadow-sm bg-white rounded-lg flex items-center justify-center text-gray-500">
-                <div className="text-center px-6">
-                  <MessageSquare className="h-10 w-10 mx-auto mb-3 text-gray-400" />
-                  <p className="text-sm">Select a conversation to view and reply.</p>
-                </div>
+              {/* Right: Chat window shell rendered immediately */}
+              <div className="h-full min-h-0">
+                <ChatWindowShell />
               </div>
             </div>
           </div>
