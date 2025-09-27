@@ -136,11 +136,24 @@ export function CommunicationsDashboard({ defaultView = 'overview', activeView, 
     switch (currentView) {
       case 'inbox':
         return (
-          <div className="p-6 h-full overflow-y-auto">
-            <UnifiedInbox
-              onConversationSelect={handleConversationSelect}
-              onBackClick={handleBackToOverview}
-            />
+          <div className="h-full p-0">
+            <div className="h-full grid grid-cols-1 xl:grid-cols-[380px_1fr] gap-6 p-6 min-h-0">
+              {/* Left: Conversations list (compact) */}
+              <div className="h-full min-h-0">
+                <UnifiedInbox
+                  onConversationSelect={handleConversationSelect}
+                  onBackClick={handleBackToOverview}
+                  compact
+                />
+              </div>
+              {/* Right: Empty state or selected chat prompt */}
+              <div className="h-full min-h-0 border-0 shadow-sm bg-white rounded-lg flex items-center justify-center text-gray-500">
+                <div className="text-center px-6">
+                  <MessageSquare className="h-10 w-10 mx-auto mb-3 text-gray-400" />
+                  <p className="text-sm">Select a conversation to view and reply.</p>
+                </div>
+              </div>
+            </div>
           </div>
         );
       
@@ -156,21 +169,47 @@ export function CommunicationsDashboard({ defaultView = 'overview', activeView, 
       
       case 'conversation':
         return selectedConversationId ? (
-          <div className="h-full overflow-hidden">
-            <ConversationView
-              conversationId={selectedConversationId}
-              onBackClick={() => {
-                setView('inbox');
-                if (onConversationDataChange) {
-                  onConversationDataChange(undefined);
-                }
-              }}
-            />
+          <div className="h-full p-0">
+            <div className="h-full grid grid-cols-1 xl:grid-cols-[380px_1fr] gap-6 p-6 min-h-0">
+              {/* Left: Conversations list (compact) */}
+              <div className="h-full min-h-0">
+                <UnifiedInbox
+                  onConversationSelect={handleConversationSelect}
+                  onBackClick={handleBackToOverview}
+                  compact
+                />
+              </div>
+              {/* Right: Chat window */}
+              <div className="h-full min-h-0">
+                <ConversationView
+                  conversationId={selectedConversationId}
+                  onBackClick={() => {
+                    setView('inbox');
+                    if (onConversationDataChange) {
+                      onConversationDataChange(undefined);
+                    }
+                  }}
+                />
+              </div>
+            </div>
           </div>
         ) : (
-          <div className="text-center py-8 text-gray-500 p-6">
-            <p>No conversation selected</p>
-            <p>Please select a conversation from the inbox to view it here.</p>
+          <div className="h-full p-0">
+            <div className="h-full grid grid-cols-1 xl:grid-cols-[380px_1fr] gap-6 p-6 min-h-0">
+              <div className="h-full min-h-0">
+                <UnifiedInbox
+                  onConversationSelect={handleConversationSelect}
+                  onBackClick={handleBackToOverview}
+                  compact
+                />
+              </div>
+              <div className="h-full min-h-0 border-0 shadow-sm bg-white rounded-lg flex items-center justify-center text-gray-500">
+                <div className="text-center px-6">
+                  <MessageSquare className="h-10 w-10 mx-auto mb-3 text-gray-400" />
+                  <p className="text-sm">Select a conversation to view and reply.</p>
+                </div>
+              </div>
+            </div>
           </div>
         );
       

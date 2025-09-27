@@ -9,6 +9,7 @@ interface CommunicationsLayoutProps {
   children: React.ReactNode;
   activeView: string;
   onViewChange: (view: string) => void;
+  sidebarCollapsed?: boolean;
   conversationData?: {
     customerName: string;
     channelName: string;
@@ -19,10 +20,10 @@ interface CommunicationsLayoutProps {
   onBackToInbox?: () => void;
 }
 
-export function CommunicationsLayout({ children, activeView, onViewChange, conversationData, onBackToInbox }: CommunicationsLayoutProps) {
+export function CommunicationsLayout({ children, activeView, onViewChange, sidebarCollapsed, conversationData, onBackToInbox }: CommunicationsLayoutProps) {
   return (
     <div className={`${teacherUI.layout.shell} teacher-theme`}>
-      <CommunicationsSidebar activeView={activeView} onViewChange={onViewChange} />
+      <CommunicationsSidebar activeView={activeView} onViewChange={onViewChange} collapsed={!!sidebarCollapsed} />
       <div className={teacherUI.layout.main}>
         <CommunicationsHeader 
           activeView={activeView} 

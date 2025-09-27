@@ -30,9 +30,10 @@ import { Conversation, ConversationFilters, Priority } from '../../lib/types/com
 interface UnifiedInboxProps {
   onConversationSelect: (conversationId: string) => void;
   onBackClick?: () => void;
+  compact?: boolean; // list-only, for two-pane layout
 }
 
-export function UnifiedInbox({ onConversationSelect, onBackClick }: UnifiedInboxProps) {
+export function UnifiedInbox({ onConversationSelect, onBackClick, compact = false }: UnifiedInboxProps) {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
@@ -139,10 +140,11 @@ export function UnifiedInbox({ onConversationSelect, onBackClick }: UnifiedInbox
   };
 
   return (
-    <div className="space-y-6">
+    <div className={compact ? 'h-full flex flex-col min-h-0' : 'space-y-6'}>
       {/* Header moved to CommunicationsHeader */}
 
       {/* Filters */}
+      {!compact && (
       <Card className="border-0 shadow-sm bg-white">
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-4">
@@ -213,10 +215,11 @@ export function UnifiedInbox({ onConversationSelect, onBackClick }: UnifiedInbox
           </div>
         </CardContent>
       </Card>
+      )}
 
       {/* Conversations List */}
-      <Card className="border-0 shadow-sm bg-white">
-        <CardContent className="p-0">
+      <Card className={compact ? 'border-0 shadow-sm bg-white flex-1 min-h-0' : 'border-0 shadow-sm bg-white'}>
+        <CardContent className={compact ? 'p-0 h-full min-h-0 flex flex-col' : 'p-0'}>
           {isLoading ? (
             <div className="p-8 text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
@@ -243,7 +246,7 @@ export function UnifiedInbox({ onConversationSelect, onBackClick }: UnifiedInbox
               )}
             </div>
           ) : (
-            <div className="divide-y divide-gray-200">
+            <div className={compact ? 'divide-y divide-gray-200 overflow-y-auto flex-1 min-h-0' : 'divide-y divide-gray-200'}>
               {filteredConversations.map((conversation) => {
                 const ChannelIcon = getChannelIcon(conversation.primaryChannel?.name || '');
                 const hasUnreadMessages = conversation.lastCustomerMessageAt && 
@@ -253,7 +256,7 @@ export function UnifiedInbox({ onConversationSelect, onBackClick }: UnifiedInbox
                 return (
                   <div
                     key={conversation.id}
-                    className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                    className={compact ? 'px-3 py-3 hover:bg-gray-50 cursor-pointer transition-colors' : 'p-4 hover:bg-gray-50 cursor-pointer transition-colors'}
                     onClick={() => onConversationSelect(conversation.id)}
                   >
                     <div className="flex items-start gap-4">
@@ -263,10 +266,10 @@ export function UnifiedInbox({ onConversationSelect, onBackClick }: UnifiedInbox
                           <img
                             src={conversation.customer.avatarUrl}
                             alt={conversation.customer.fullName || 'Customer'}
-                            className="w-10 h-10 rounded-full object-cover"
+                            className={compact ? 'w-8 h-8 rounded-full object-cover' : 'w-10 h-10 rounded-full object-cover'}
                           />
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                          <div className={compact ? 'w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center' : 'w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center'}>
                             <Users className="h-5 w-5 text-gray-500" />
                           </div>
                         )}
@@ -276,7 +279,7 @@ export function UnifiedInbox({ onConversationSelect, onBackClick }: UnifiedInbox
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
                           <div className="flex items-center gap-2">
-                            <h3 className={`text-sm font-medium ${hasUnreadMessages ? 'text-gray-900 font-semibold' : 'text-gray-900'}`}>
+                            <h3 className={`${compact ? 'text-sm' : 'text-sm'} font-medium ${hasUnreadMessages ? 'text-gray-900 font-semibold' : 'text-gray-900'}`}>
                               {conversation.customer?.fullName || conversation.customer?.email || 'Unknown Customer'}
                             </h3>
                             <ChannelIcon className="h-4 w-4 text-gray-400" />
@@ -284,6 +287,7 @@ export function UnifiedInbox({ onConversationSelect, onBackClick }: UnifiedInbox
                               <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
                             )}
                           </div>
+                          {!compact && (
                           <div className="flex items-center gap-2">
                             <Badge variant="outline" className={getPriorityColor(conversation.priority)}>
                               {conversation.priority}
@@ -292,6 +296,7 @@ export function UnifiedInbox({ onConversationSelect, onBackClick }: UnifiedInbox
                               {conversation.status}
                             </Badge>
                           </div>
+                          )}
                         </div>
 
                         <div className="flex items-center justify-between mb-2">
@@ -303,21 +308,27 @@ export function UnifiedInbox({ onConversationSelect, onBackClick }: UnifiedInbox
                           </p>
                         </div>
 
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4 text-xs text-gray-500">
-                            <span>{conversation.totalMessages} messages</span>
-                            {conversation.assignedAgent && (
-                              <span>Assigned to {conversation.assignedAgent.fullName}</span>
-                            )}
-                            {conversation._count?.tickets && conversation._count.tickets > 0 && (
-                              <span className="flex items-center gap-1">
-                                <CheckCircle className="h-3 w-3" />
-                                {conversation._count.tickets} tickets
-                              </span>
-                            )}
+                        {!compact ? (
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4 text-xs text-gray-500">
+                              <span>{conversation.totalMessages} messages</span>
+                              {conversation.assignedAgent && (
+                                <span>Assigned to {conversation.assignedAgent.fullName}</span>
+                              )}
+                              {conversation._count?.tickets && conversation._count.tickets > 0 && (
+                                <span className="flex items-center gap-1">
+                                  <CheckCircle className="h-3 w-3" />
+                                  {conversation._count.tickets} tickets
+                                </span>
+                              )}
+                            </div>
+                            <ChevronRight className="h-4 w-4 text-gray-400" />
                           </div>
-                          <ChevronRight className="h-4 w-4 text-gray-400" />
-                        </div>
+                        ) : (
+                          <div className="flex items-center justify-end">
+                            <ChevronRight className="h-4 w-4 text-gray-400" />
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -329,7 +340,7 @@ export function UnifiedInbox({ onConversationSelect, onBackClick }: UnifiedInbox
       </Card>
 
       {/* Pagination */}
-      {conversationsData?.pagination && conversationsData.pagination.pages > 1 && (
+      {!compact && conversationsData?.pagination && conversationsData.pagination.pages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-gray-700">
             Showing {((conversationsData.pagination.page - 1) * conversationsData.pagination.limit) + 1} to{' '}

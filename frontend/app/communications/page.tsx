@@ -35,6 +35,7 @@ export default function CommunicationsPage() {
     <CommunicationsLayout 
       activeView={activeView} 
       onViewChange={setActiveView}
+      sidebarCollapsed={activeView === 'inbox' || activeView === 'conversation'}
       conversationData={conversationData}
       onBackToInbox={handleBackToInbox}
     >

@@ -9,9 +9,10 @@ import { teacherUI } from '@/lib/styles/teacher-ui';
 interface CommunicationsSidebarProps {
   activeView: string;
   onViewChange: (view: string) => void;
+  collapsed?: boolean;
 }
 
-export function CommunicationsSidebar({ activeView, onViewChange }: CommunicationsSidebarProps) {
+export function CommunicationsSidebar({ activeView, onViewChange, collapsed = false }: CommunicationsSidebarProps) {
   const [showQuickNav, setShowQuickNav] = useState(false);
   const menu = [
     { key: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -21,8 +22,9 @@ export function CommunicationsSidebar({ activeView, onViewChange }: Communicatio
   ];
 
   return (
-    <div className={teacherUI.sidebar.container}>
+    <div className={`${teacherUI.sidebar.container} ${collapsed ? 'w-16' : ''}`}>
       {/* Quick Navigation */}
+      {!collapsed && (
       <div className={teacherUI.sidebar.section}>
         <div className="relative">
           <button
@@ -62,6 +64,7 @@ export function CommunicationsSidebar({ activeView, onViewChange }: Communicatio
           )}
         </div>
       </div>
+      )}
       <nav className={teacherUI.sidebar.nav}>
         {menu.map((item) => {
           const Icon = item.icon;
@@ -70,14 +73,14 @@ export function CommunicationsSidebar({ activeView, onViewChange }: Communicatio
             <button
               key={item.key}
               onClick={() => onViewChange(item.key)}
-              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-all duration-200 border-l-2 ${
+              className={`w-full flex items-center ${collapsed ? 'justify-center px-0' : 'space-x-3 px-3'} py-2 rounded-lg text-left transition-all duration-200 border-l-2 ${
                 isActive
                   ? 'bg-[var(--unified-accent)] text-white shadow-md border-l-[var(--unified-accent-dark)]'
                   : 'text-[var(--unified-text-inverse)] hover:bg-[var(--unified-accent)] hover:text-white hover:border-l-[var(--unified-accent-dark)] border-transparent'
               }`}
             >
               <Icon className="w-5 h-5" />
-              <span className="font-medium">{item.label}</span>
+              {!collapsed && <span className="font-medium">{item.label}</span>}
             </button>
           );
         })}
