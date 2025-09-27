@@ -140,13 +140,12 @@ export function MessageComposer({
   return (
     <div className="space-y-3"
       onDragOver={(e) => {
-        // Allow drop of product payload
+        // Always allow drop over composer area for smooth DnD
+        e.preventDefault();
         try {
-          const hasJson = Array.from(e.dataTransfer.types || []).includes('application/json');
-          const hasText = Array.from(e.dataTransfer.types || []).includes('text/plain');
-          if (hasJson || hasText) {
-            e.preventDefault();
-          }
+          // Hint UI about copy operation
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (e.dataTransfer as any).dropEffect = 'copy';
         } catch {}
       }}
       onDrop={(e) => {
@@ -273,6 +272,33 @@ export function MessageComposer({
             ref={textareaRef}
             inputMode="text"
             autoComplete="off"
+            onDragOver={(e) => {
+              e.preventDefault();
+              try {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (e.dataTransfer as any).dropEffect = 'copy';
+              } catch {}
+            }}
+            onDrop={(e) => {
+              try {
+                const json = e.dataTransfer.getData('application/json');
+                if (json) {
+                  const payload = JSON.parse(json);
+                  if (payload?.type === 'product' && payload?.name && payload?.url) {
+                    const price = typeof payload.price === 'number' ? payload.price.toFixed(2) : payload.price;
+                    const snippet = `[${payload.name}](${payload.url}) — ${(payload.currency || 'S/.')}${price}`;
+                    insertAtCursor(snippet);
+                    e.preventDefault();
+                    return;
+                  }
+                }
+                const txt = e.dataTransfer.getData('text/plain');
+                if (txt) {
+                  insertAtCursor(txt);
+                  e.preventDefault();
+                }
+              } catch {}
+            }}
           />
           
           {/* Character counter */}

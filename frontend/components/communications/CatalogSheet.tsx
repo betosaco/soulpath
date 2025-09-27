@@ -92,6 +92,9 @@ export function CatalogSheet({ isOpen, onInsert }: CatalogSheetProps) {
     };
     e.dataTransfer.setData('application/json', JSON.stringify(payload));
     e.dataTransfer.setData('text/plain', `${p.name} - ${url}`);
+    try {
+      e.dataTransfer.effectAllowed = 'copy';
+    } catch {}
     // Optional: drag image
     const img = new Image();
     img.src = payload.image || '/images/products/placeholder-product.jpg';
