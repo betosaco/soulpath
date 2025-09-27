@@ -213,6 +213,12 @@ export function AdminSidebarNew({ activeTab, onTabChange, user }: AdminSidebarNe
                 <ShoppingCartIcon className="w-4 h-4 mr-2" /> Ecommerce
               </button>
               <button
+                onClick={() => { setShowQuickNav(false); router.push('/communications'); }}
+                className="w-full flex items-center px-4 py-2 text-sm hover:bg-[var(--unified-bg-secondary)] text-[var(--unified-text-primary)]"
+              >
+                <EnvelopeIcon className="w-4 h-4 mr-2" /> Communications Hub
+              </button>
+              <button
                 onClick={() => { setShowQuickNav(false); router.push('/account'); }}
                 className="w-full flex items-center px-4 py-2 text-sm hover:bg-[var(--unified-bg-secondary)] text-[var(--unified-text-primary)]"
               >

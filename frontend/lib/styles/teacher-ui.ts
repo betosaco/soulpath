@@ -3,9 +3,9 @@
 
 export const teacherUI = {
   layout: {
-    shell: 'flex h-screen bg-[var(--unified-bg-primary)] inner-page mobile-scrollable',
+    shell: 'flex h-screen bg-[var(--unified-bg-primary)] inner-page',
     main: 'flex-1 flex flex-col overflow-hidden',
-    content: 'flex-1 overflow-y-auto p-6 mobile-scrollable',
+    content: 'flex-1 p-6 overflow-hidden',
   },
   sidebar: {
     container: 'flex w-64 flex-col bg-gray-800 border-r border-gray-700 overflow-y-auto',

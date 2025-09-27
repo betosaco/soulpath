@@ -133,41 +133,53 @@ model ServicePrice {
 }
 
 model User {
-  id                  String               @id @default(cuid())
-  email               String               @unique
-  password            String?
-  fullName            String?              @map("full_name")
-  avatarUrl           String?              @map("avatar_url")
-  role                UserRole             @default(USER)
-  phone               String?
-  status              UserStatus           @default(ACTIVE)
-  birthDate           DateTime?            @map("birth_date") @db.Date
-  birthTime           DateTime?            @map("birth_time") @db.Time(6)
-  birthPlace          String?              @map("birth_place")
-  question            String?
-  language            String?              @default("en")
-  adminNotes          String?              @map("admin_notes")
-  scheduledDate       DateTime?            @map("scheduled_date") @db.Date
-  scheduledTime       DateTime?            @map("scheduled_time") @db.Time(6)
-  sessionType         String?              @map("session_type")
-  lastReminderSent    DateTime?            @map("last_reminder_sent") @db.Timestamptz(6)
-  lastBooking         DateTime?            @map("last_booking") @db.Timestamptz(6)
-  notes               String?
-  createdAt           DateTime?            @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt           DateTime?            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  bookings            Booking[]
-  bugComments         BugComment[]         @relation("BugCommentAuthor")
-  assignedBugs        BugReport[]          @relation("BugReportAssignee")
-  reportedBugs        BugReport[]          @relation("BugReportReporter")
-  conversationLogs    ConversationLog[]
-  customerProfile     Customer?            @relation("CustomerProfile")
-  orders              Order[]              @relation("CustomerOrders")
-  otpVerifications    OtpVerification[]
-  passwordResetTokens PasswordResetToken[]
-  purchases           Purchase[]
-  teacherProfile      Teacher?
-  telegramUsers       TelegramUser[]
-  userPackages        UserPackage[]
+  id                            String                   @id @default(cuid())
+  email                         String                   @unique
+  password                      String?
+  fullName                      String?                  @map("full_name")
+  avatarUrl                     String?                  @map("avatar_url")
+  role                          UserRole                 @default(USER)
+  phone                         String?
+  status                        UserStatus               @default(ACTIVE)
+  birthDate                     DateTime?                @map("birth_date") @db.Date
+  birthTime                     DateTime?                @map("birth_time") @db.Time(6)
+  birthPlace                    String?                  @map("birth_place")
+  question                      String?
+  language                      String?                  @default("en")
+  adminNotes                    String?                  @map("admin_notes")
+  scheduledDate                 DateTime?                @map("scheduled_date") @db.Date
+  scheduledTime                 DateTime?                @map("scheduled_time") @db.Time(6)
+  sessionType                   String?                  @map("session_type")
+  lastReminderSent              DateTime?                @map("last_reminder_sent") @db.Timestamptz(6)
+  lastBooking                   DateTime?                @map("last_booking") @db.Timestamptz(6)
+  notes                         String?
+  createdAt                     DateTime?                @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                     DateTime?                @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  agentPerformanceMetrics       AgentPerformanceMetric[] @relation("AgentPerformance")
+  bookings                      Booking[]
+  bugComments                   BugComment[]             @relation("BugCommentAuthor")
+  assignedBugs                  BugReport[]              @relation("BugReportAssignee")
+  reportedBugs                  BugReport[]              @relation("BugReportReporter")
+  conversationLogs              ConversationLog[]
+  conversationsAsAgent          Conversation[]           @relation("ConversationAgent")
+  conversationsAsCustomer       Conversation[]           @relation("ConversationCustomer")
+  customerProfile               Customer?                @relation("CustomerProfile")
+  knowledgeBaseArticlesAuthored KnowledgeBaseArticle[]   @relation("KnowledgeBaseAuthor")
+  knowledgeBaseArticlesModified KnowledgeBaseArticle[]   @relation("KnowledgeBaseModifier")
+  sentMessages                  Message[]                @relation("MessageSender")
+  orders                        Order[]                  @relation("CustomerOrders")
+  otpVerifications              OtpVerification[]
+  passwordResetTokens           PasswordResetToken[]
+  purchases                     Purchase[]
+  satisfactionRatingsAsAgent    SatisfactionRating[]     @relation("SatisfactionRatingAgent")
+  satisfactionRatingsAsCustomer SatisfactionRating[]     @relation("SatisfactionRatingCustomer")
+  teacherProfile                Teacher?
+  telegramUsers                 TelegramUser[]
+  ticketNotesAuthored           TicketNote[]             @relation("TicketNoteAuthor")
+  ticketsAsAgent                Ticket[]                 @relation("TicketAgent")
+  ticketsAssignedBy             Ticket[]                 @relation("TicketAssignedBy")
+  ticketsAsCustomer             Ticket[]                 @relation("TicketCustomer")
+  userPackages                  UserPackage[]
 
   @@index([email], map: "idx_users_email")
   @@index([status], map: "idx_users_status")
@@ -220,50 +232,50 @@ model VenueAmenity {
 }
 
 model Teacher {
-  id               Int                    @id @default(autoincrement())
-  name             String                 @db.VarChar(255)
-  email            String?                @unique @db.VarChar(255)
-  phone            String?                @db.VarChar(20)
+  id               Int                     @id @default(autoincrement())
+  name             String                  @db.VarChar(255)
+  email            String?                 @unique @db.VarChar(255)
+  phone            String?                 @db.VarChar(20)
   bio              String?
-  shortBio         String?                @map("short_bio") @db.VarChar(500)
-  experience       Int?                   @default(0)
-  avatarUrl        String?                @map("avatar_url")
-  coverImage       String?                @map("cover_image")
-  galleryImages    String[]               @default([]) @map("gallery_images")
-  videoUrl         String?                @map("video_url")
-  thumbnailUrl     String?                @map("thumbnail_url")
-  website          String?                @db.VarChar(255)
-  instagram        String?                @db.VarChar(255)
-  facebook         String?                @db.VarChar(255)
-  linkedin         String?                @db.VarChar(255)
-  teachingStyle    String?                @map("teaching_style")
+  shortBio         String?                 @map("short_bio") @db.VarChar(500)
+  experience       Int?                    @default(0)
+  avatarUrl        String?                 @map("avatar_url")
+  coverImage       String?                 @map("cover_image")
+  galleryImages    String[]                @default([]) @map("gallery_images")
+  videoUrl         String?                 @map("video_url")
+  thumbnailUrl     String?                 @map("thumbnail_url")
+  website          String?                 @db.VarChar(255)
+  instagram        String?                 @db.VarChar(255)
+  facebook         String?                 @db.VarChar(255)
+  linkedin         String?                 @db.VarChar(255)
+  teachingStyle    String?                 @map("teaching_style")
   philosophy       String?
   approach         String?
-  maxStudents      Int?                   @default(10) @map("max_students")
-  minStudents      Int?                   @default(1) @map("min_students")
-  preferredTimes   String[]               @default([]) @map("preferred_times")
-  isActive         Boolean?               @default(true) @map("is_active")
-  displayOrder     Int?                   @default(0) @map("display_order")
-  featured         Boolean?               @default(false) @map("featured")
-  slug             String?                @unique @db.VarChar(255)
-  metaTitle        String?                @map("meta_title") @db.VarChar(255)
-  metaDescription  String?                @map("meta_description") @db.VarChar(500)
-  createdAt        DateTime?              @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt        DateTime?              @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  venueId          Int?                   @map("venue_id")
-  userId           String?                @unique @map("user_id")
+  maxStudents      Int?                    @default(10) @map("max_students")
+  minStudents      Int?                    @default(1) @map("min_students")
+  preferredTimes   String[]                @default([]) @map("preferred_times")
+  isActive         Boolean?                @default(true) @map("is_active")
+  displayOrder     Int?                    @default(0) @map("display_order")
+  featured         Boolean?                @default(false) @map("featured")
+  slug             String?                 @unique @db.VarChar(255)
+  metaTitle        String?                 @map("meta_title") @db.VarChar(255)
+  metaDescription  String?                 @map("meta_description") @db.VarChar(500)
+  createdAt        DateTime?               @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime?               @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  venueId          Int?                    @map("venue_id")
+  userId           String?                 @unique @map("user_id")
   bookings         Booking[]
   faqs             FAQ[]
   servicePrices    ServicePrice[]
   certifications   TeacherCertification[]
   languages        TeacherLanguage[]
+  paymentSettings  TeacherPaymentSettings?
   teacherSchedules TeacherSchedule[]
   serviceTypes     TeacherServiceType[]
   specialties      TeacherSpecialty[]
-  user             User?                  @relation(fields: [userId], references: [id], onUpdate: Restrict)
-  venue            Venue?                 @relation(fields: [venueId], references: [id], onUpdate: Restrict)
+  user             User?                   @relation(fields: [userId], references: [id], onUpdate: Restrict)
+  venue            Venue?                  @relation(fields: [venueId], references: [id], onUpdate: Restrict)
   testimonials     Testimonial[]
-  paymentSettings  TeacherPaymentSettings?
 
   @@index([isActive], map: "idx_teachers_active")
   @@index([displayOrder], map: "idx_teachers_order")
@@ -1360,11 +1372,332 @@ model TelegramUser {
   @@map("telegram_users")
 }
 
+model CommunicationChannel {
+  id            Int              @id @default(autoincrement())
+  name          String           @unique @db.VarChar(50)
+  displayName   String           @map("display_name") @db.VarChar(100)
+  description   String?
+  isActive      Boolean          @default(true) @map("is_active")
+  configuration Json?
+  createdAt     DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  webhooks      ChannelWebhook[]
+  conversations Conversation[]
+  messages      Message[]
+
+  @@map("communication_channels")
+}
+
+model Conversation {
+  id                    String                @id @default(cuid())
+  customerId            String                @map("customer_id")
+  subject               String?               @db.VarChar(255)
+  status                ConversationStatus    @default(ACTIVE)
+  priority              Priority              @default(NORMAL)
+  assignedAgentId       String?               @map("assigned_agent_id")
+  assignedAt            DateTime?             @map("assigned_at") @db.Timestamptz(6)
+  primaryChannelId      Int?                  @map("primary_channel_id")
+  channelMetadata       Json?                 @map("channel_metadata")
+  firstMessageAt        DateTime?             @map("first_message_at") @db.Timestamptz(6)
+  lastMessageAt         DateTime?             @map("last_message_at") @db.Timestamptz(6)
+  lastAgentResponseAt   DateTime?             @map("last_agent_response_at") @db.Timestamptz(6)
+  lastCustomerMessageAt DateTime?             @map("last_customer_message_at") @db.Timestamptz(6)
+  totalMessages         Int                   @default(0) @map("total_messages")
+  agentMessagesCount    Int                   @default(0) @map("agent_messages_count")
+  customerMessagesCount Int                   @default(0) @map("customer_messages_count")
+  createdAt             DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime              @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  assignedAgent         User?                 @relation("ConversationAgent", fields: [assignedAgentId], references: [id])
+  customer              User                  @relation("ConversationCustomer", fields: [customerId], references: [id], onDelete: Cascade)
+  primaryChannel        CommunicationChannel? @relation(fields: [primaryChannelId], references: [id])
+  messages              Message[]
+  satisfactionRatings   SatisfactionRating[]
+  tickets               Ticket[]
+
+  @@index([customerId])
+  @@index([assignedAgentId])
+  @@index([status])
+  @@index([priority])
+  @@index([lastMessageAt])
+  @@map("conversations")
+}
+
+model Message {
+  id                String               @id @default(cuid())
+  conversationId    String               @map("conversation_id")
+  content           String
+  messageType       MessageType          @default(TEXT) @map("message_type")
+  senderType        SenderType           @map("sender_type")
+  senderId          String?              @map("sender_id")
+  channelId         Int                  @map("channel_id")
+  externalMessageId String?              @map("external_message_id") @db.VarChar(255)
+  channelMetadata   Json?                @map("channel_metadata")
+  status            MessageStatus        @default(DELIVERED)
+  attachments       Json?
+  replyToMessageId  String?              @map("reply_to_message_id")
+  sentAt            DateTime             @default(now()) @map("sent_at") @db.Timestamptz(6)
+  deliveredAt       DateTime?            @map("delivered_at") @db.Timestamptz(6)
+  readAt            DateTime?            @map("read_at") @db.Timestamptz(6)
+  createdAt         DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  channel           CommunicationChannel @relation(fields: [channelId], references: [id])
+  conversation      Conversation         @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  replyToMessage    Message?             @relation("MessageReply", fields: [replyToMessageId], references: [id])
+  replies           Message[]            @relation("MessageReply")
+  sender            User?                @relation("MessageSender", fields: [senderId], references: [id])
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([channelId])
+  @@index([sentAt])
+  @@index([status])
+  @@index([messageType])
+  @@map("messages")
+}
+
+model TicketStatus {
+  id           Int      @id @default(autoincrement())
+  name         String   @unique @db.VarChar(50)
+  displayName  String   @map("display_name") @db.VarChar(100)
+  description  String?
+  color        String?  @db.VarChar(7)
+  isDefault    Boolean  @default(false) @map("is_default")
+  isFinal      Boolean  @default(false) @map("is_final")
+  displayOrder Int      @default(0) @map("display_order")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  tickets      Ticket[]
+
+  @@map("ticket_statuses")
+}
+
+model Ticket {
+  id                    String               @id @default(cuid())
+  ticketNumber          String               @unique @map("ticket_number") @db.VarChar(20)
+  customerId            String               @map("customer_id")
+  subject               String               @db.VarChar(255)
+  description           String?
+  statusId              Int                  @map("status_id")
+  priority              Priority             @default(NORMAL)
+  assignedAgentId       String?              @map("assigned_agent_id")
+  assignedAt            DateTime?            @map("assigned_at") @db.Timestamptz(6)
+  assignedById          String?              @map("assigned_by_id")
+  category              String?              @db.VarChar(100)
+  tags                  String[]
+  conversationId        String?              @map("conversation_id")
+  slaDueAt              DateTime?            @map("sla_due_at") @db.Timestamptz(6)
+  firstResponseAt       DateTime?            @map("first_response_at") @db.Timestamptz(6)
+  resolvedAt            DateTime?            @map("resolved_at") @db.Timestamptz(6)
+  closedAt              DateTime?            @map("closed_at") @db.Timestamptz(6)
+  responseTimeMinutes   Int?                 @map("response_time_minutes")
+  resolutionTimeMinutes Int?                 @map("resolution_time_minutes")
+  customFields          Json?                @map("custom_fields")
+  createdAt             DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  satisfactionRatings   SatisfactionRating[]
+  notes                 TicketNote[]
+  assignedAgent         User?                @relation("TicketAgent", fields: [assignedAgentId], references: [id])
+  assignedBy            User?                @relation("TicketAssignedBy", fields: [assignedById], references: [id])
+  conversation          Conversation?        @relation(fields: [conversationId], references: [id])
+  customer              User                 @relation("TicketCustomer", fields: [customerId], references: [id], onDelete: Cascade)
+  status                TicketStatus         @relation(fields: [statusId], references: [id])
+
+  @@index([customerId])
+  @@index([assignedAgentId])
+  @@index([statusId])
+  @@index([priority])
+  @@index([category])
+  @@index([conversationId])
+  @@index([slaDueAt])
+  @@index([createdAt])
+  @@map("tickets")
+}
+
+model TicketNote {
+  id          String         @id @default(cuid())
+  ticketId    String         @map("ticket_id")
+  content     String
+  noteType    TicketNoteType @default(NOTE) @map("note_type")
+  authorId    String         @map("author_id")
+  mentions    String[]
+  attachments Json?
+  isInternal  Boolean        @default(true) @map("is_internal")
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  author      User           @relation("TicketNoteAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  ticket      Ticket         @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([authorId])
+  @@index([createdAt])
+  @@map("ticket_notes")
+}
+
+model AssignmentRule {
+  id             Int            @id @default(autoincrement())
+  name           String         @db.VarChar(100)
+  description    String?
+  conditions     Json
+  assignmentType AssignmentType @default(ROUND_ROBIN) @map("assignment_type")
+  targetAgents   String[]       @map("target_agents")
+  isActive       Boolean        @default(true) @map("is_active")
+  priority       Int            @default(0)
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("assignment_rules")
+}
+
+model SlaPolicy {
+  id                  Int      @id @default(autoincrement())
+  name                String   @db.VarChar(100)
+  description         String?
+  firstResponseTarget Int      @map("first_response_target")
+  resolutionTarget    Int      @map("resolution_target")
+  conditions          Json?
+  businessHoursOnly   Boolean  @default(true) @map("business_hours_only")
+  timezone            String   @default("UTC") @db.VarChar(50)
+  isActive            Boolean  @default(true) @map("is_active")
+  isDefault           Boolean  @default(false) @map("is_default")
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("sla_policies")
+}
+
+model HelpdeskTemplate {
+  id           Int                  @id @default(autoincrement())
+  name         String               @db.VarChar(100)
+  description  String?
+  templateType HelpdeskTemplateType @map("template_type")
+  subject      String?              @db.VarChar(255)
+  content      String
+  variables    Json?
+  category     String?              @db.VarChar(50)
+  triggerEvent String?              @map("trigger_event") @db.VarChar(50)
+  language     String               @default("en") @db.VarChar(10)
+  isActive     Boolean              @default(true) @map("is_active")
+  isSystem     Boolean              @default(false) @map("is_system")
+  createdAt    DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("helpdesk_templates")
+}
+
+model AutomationRule {
+  id                     Int      @id @default(autoincrement())
+  name                   String   @db.VarChar(100)
+  description            String?
+  triggerEvent           String   @map("trigger_event") @db.VarChar(50)
+  conditions             Json
+  actions                Json
+  isActive               Boolean  @default(true) @map("is_active")
+  runOncePerConversation Boolean  @default(false) @map("run_once_per_conversation")
+  priority               Int      @default(0)
+  createdAt              DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt              DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("automation_rules")
+}
+
+model KnowledgeBaseArticle {
+  id               Int                          @id @default(autoincrement())
+  title            String                       @db.VarChar(255)
+  content          String
+  summary          String?
+  category         String?                      @db.VarChar(100)
+  tags             String[]
+  keywords         String[]
+  contentType      KnowledgeBaseContentType     @default(ARTICLE) @map("content_type")
+  difficultyLevel  KnowledgeBaseDifficultyLevel @default(BEGINNER) @map("difficulty_level")
+  viewCount        Int                          @default(0) @map("view_count")
+  helpfulVotes     Int                          @default(0) @map("helpful_votes")
+  unhelpfulVotes   Int                          @default(0) @map("unhelpful_votes")
+  isPublished      Boolean                      @default(false) @map("is_published")
+  isFeatured       Boolean                      @default(false) @map("is_featured")
+  authorId         String                       @map("author_id")
+  lastModifiedById String?                      @map("last_modified_by_id")
+  createdAt        DateTime                     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime                     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  author           User                         @relation("KnowledgeBaseAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  lastModifiedBy   User?                        @relation("KnowledgeBaseModifier", fields: [lastModifiedById], references: [id])
+
+  @@index([category])
+  @@index([isPublished])
+  @@index([isFeatured])
+  @@map("knowledge_base_articles")
+}
+
+model AgentPerformanceMetric {
+  id                        Int      @id @default(autoincrement())
+  agentId                   String   @map("agent_id")
+  date                      DateTime @db.Date
+  ticketsAssigned           Int      @default(0) @map("tickets_assigned")
+  ticketsResolved           Int      @default(0) @map("tickets_resolved")
+  ticketsClosed             Int      @default(0) @map("tickets_closed")
+  avgFirstResponseTime      Int?     @map("avg_first_response_time")
+  avgResolutionTime         Int?     @map("avg_resolution_time")
+  slaBreaches               Int      @default(0) @map("sla_breaches")
+  messagesSent              Int      @default(0) @map("messages_sent")
+  conversationsHandled      Int      @default(0) @map("conversations_handled")
+  customerSatisfactionScore Decimal? @map("customer_satisfaction_score") @db.Decimal(3, 2)
+  totalRatingsReceived      Int      @default(0) @map("total_ratings_received")
+  createdAt                 DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                 DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  agent                     User     @relation("AgentPerformance", fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@unique([agentId, date])
+  @@index([agentId])
+  @@index([date])
+  @@map("agent_performance_metrics")
+}
+
+model SatisfactionRating {
+  id             Int                    @id @default(autoincrement())
+  ticketId       String?                @map("ticket_id")
+  conversationId String?                @map("conversation_id")
+  customerId     String                 @map("customer_id")
+  agentId        String?                @map("agent_id")
+  rating         Int                    @db.SmallInt
+  feedback       String?
+  ratingType     SatisfactionRatingType @default(OVERALL) @map("rating_type")
+  createdAt      DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  agent          User?                  @relation("SatisfactionRatingAgent", fields: [agentId], references: [id])
+  conversation   Conversation?          @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  customer       User                   @relation("SatisfactionRatingCustomer", fields: [customerId], references: [id], onDelete: Cascade)
+  ticket         Ticket?                @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([customerId])
+  @@index([agentId])
+  @@index([rating])
+  @@map("satisfaction_ratings")
+}
+
+model ChannelWebhook {
+  id               Int                  @id @default(autoincrement())
+  channelId        Int                  @map("channel_id")
+  webhookUrl       String               @map("webhook_url") @db.VarChar(500)
+  webhookSecret    String?              @map("webhook_secret") @db.VarChar(255)
+  events           String[]
+  isActive         Boolean              @default(true) @map("is_active")
+  lastSuccessAt    DateTime?            @map("last_success_at") @db.Timestamptz(6)
+  lastErrorAt      DateTime?            @map("last_error_at") @db.Timestamptz(6)
+  lastErrorMessage String?              @map("last_error_message")
+  createdAt        DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  channel          CommunicationChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@map("channel_webhooks")
+}
+
 enum UserRole {
   USER
   ADMIN
   SUPER_ADMIN
   TEACHER
+  SUPPORT_AGENT
 }
 
 enum UserStatus {
@@ -1495,4 +1828,84 @@ enum CustomerStatus {
 enum OrderItemType {
   PRODUCT
   PACKAGE
+}
+
+enum ConversationStatus {
+  ACTIVE
+  ARCHIVED
+  CLOSED
+}
+
+enum Priority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  VIDEO
+  DOCUMENT
+  AUDIO
+  LOCATION
+  CONTACT
+  SYSTEM
+}
+
+enum SenderType {
+  CUSTOMER
+  AGENT
+  SYSTEM
+  BOT
+}
+
+enum MessageStatus {
+  PENDING
+  DELIVERED
+  READ
+  FAILED
+  DELETED
+}
+
+enum TicketNoteType {
+  NOTE
+  STATUS_CHANGE
+  ASSIGNMENT
+  SYSTEM
+}
+
+enum AssignmentType {
+  ROUND_ROBIN
+  SKILL_BASED
+  LOAD_BASED
+  SPECIFIC_AGENT
+}
+
+enum HelpdeskTemplateType {
+  EMAIL
+  SMS
+  WHATSAPP
+  CHAT
+}
+
+enum KnowledgeBaseContentType {
+  ARTICLE
+  FAQ
+  PROCEDURE
+  TEMPLATE
+}
+
+enum KnowledgeBaseDifficultyLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum SatisfactionRatingType {
+  OVERALL
+  RESPONSE_TIME
+  RESOLUTION_QUALITY
+  AGENT_HELPFULNESS
 }

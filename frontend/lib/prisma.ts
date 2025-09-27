@@ -5,15 +5,61 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 // Create Prisma client with enhanced configuration
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({
+// Build a resilient database URL for Supabase PgBouncer
+function buildDatabaseUrl(): string {
+  // Prefer a direct (non-pooled) URL when explicitly provided for local/dev failover
+  const directUrl = process.env.DIRECT_DATABASE_URL || process.env.SUPABASE_DIRECT_URL;
+  if (directUrl) {
+    return directUrl;
+  }
+
+  const rawUrl = process.env.DATABASE_URL || 'postgresql://user:password@localhost:5432/wellness_db';
+  try {
+    const url = new URL(rawUrl);
+
+    // Ensure SSL is required for Supabase
+    if (!url.searchParams.has('sslmode')) {
+      url.searchParams.set('sslmode', 'require');
+    }
+
+    // If using Supabase PgBouncer (port 6543 or pooler host), add PgBouncer params
+    const isPgBouncer = url.hostname.includes('pooler.supabase.com') || url.port === '6543';
+    if (isPgBouncer) {
+      // Prisma recommendations when using PgBouncer (transaction mode):
+      // - pgbouncer=true
+      // - connection_limit=1
+      if (!url.searchParams.has('pgbouncer')) {
+        url.searchParams.set('pgbouncer', 'true');
+      }
+      if (!url.searchParams.has('connection_limit')) {
+        url.searchParams.set('connection_limit', '1');
+      }
+      // Optional: shorter timeouts to fail fast rather than hang
+      if (!url.searchParams.has('connect_timeout')) {
+        url.searchParams.set('connect_timeout', '15');
+      }
+      if (!url.searchParams.has('pool_timeout')) {
+        url.searchParams.set('pool_timeout', '30');
+      }
+    }
+
+    return url.toString();
+  } catch {
+    return rawUrl;
+  }
+}
+
+let prismaInstance = globalForPrisma.prisma ?? new PrismaClient({
   log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn', 'info'] : ['error'],
   errorFormat: 'pretty',
   datasources: {
     db: {
-      url: process.env.DATABASE_URL || 'postgresql://user:password@localhost:5432/wellness_db'
+      url: buildDatabaseUrl()
     }
   }
 });
+
+export let prisma: PrismaClient = prismaInstance;
 
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;
@@ -22,6 +68,7 @@ if (process.env.NODE_ENV !== 'production') {
 // Connection state
 let isConnected = false;
 let connectionPromise: Promise<void> | null = null;
+let triedFailover = false;
 
 // Simple connection function
 const connect = async (): Promise<void> => {
@@ -48,6 +95,34 @@ const connect = async (): Promise<void> => {
     } catch (error) {
       console.error('❌ Database connection failed:', error);
       isConnected = false;
+      // Conditional failover: if pooled connection fails and a direct URL is provided, retry once
+      const msg = error instanceof Error ? error.message : String(error);
+      const canFailover = !triedFailover && Boolean(process.env.DIRECT_DATABASE_URL || process.env.SUPABASE_DIRECT_URL);
+      if (canFailover && (msg.includes('P1001') || msg.includes('pooler.supabase.com') || msg.includes('6543'))) {
+        try {
+          console.warn('⚠️ Attempting Prisma failover to direct database URL...');
+          triedFailover = true;
+          prismaInstance = new PrismaClient({
+            log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn', 'info'] : ['error'],
+            errorFormat: 'pretty',
+            datasources: {
+              db: {
+                url: process.env.DIRECT_DATABASE_URL || process.env.SUPABASE_DIRECT_URL as string,
+              }
+            }
+          });
+          prisma = prismaInstance;
+          if (process.env.NODE_ENV !== 'production') {
+            globalForPrisma.prisma = prismaInstance;
+          }
+          await prisma.$connect();
+          isConnected = true;
+          console.log('✅ Failover connection (direct URL) established successfully');
+          return;
+        } catch (failoverError) {
+          console.error('❌ Failover connection attempt failed:', failoverError);
+        }
+      }
       throw error;
     }
   })();

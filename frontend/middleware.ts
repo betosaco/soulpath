@@ -5,7 +5,8 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-producti
 // Define protected admin routes
 const ADMIN_ROUTES = [
   '/admin',
-  '/api/admin'
+  '/api/admin',
+  '/api/communications'
 ];
 
 // Define public routes that should be accessible without authentication
@@ -131,7 +132,10 @@ function isTeacherRoute(pathname: string): boolean {
  * Check if the current path is a public route
  */
 function isPublicRoute(pathname: string): boolean {
-  return PUBLIC_ROUTES.some(route => pathname.startsWith(route));
+  return PUBLIC_ROUTES.some(route => {
+    if (route === '/') return pathname === '/';
+    return pathname.startsWith(route);
+  });
 }
 
 export async function middleware(request: NextRequest) {

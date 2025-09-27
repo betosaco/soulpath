@@ -135,6 +135,8 @@ const PaymentRecordsManagement: React.FC = () => {
       // Add pagination
       params.append('page', pagination.page.toString());
       params.append('limit', pagination.limit.toString());
+      // Ensure enhanced mode to include paymentRecords
+      params.append('enhanced', 'true');
 
       const url = `/api/admin/purchases?${params}`;
       console.log('🌐 Making request to:', url);
@@ -164,7 +166,22 @@ const PaymentRecordsManagement: React.FC = () => {
         return;
       }
       
-      setPurchases(result.data || []);
+      // Derive transactionId from latest payment record when not present
+      const normalizedPurchases: Purchase[] = (result.data || []).map((p: any) => {
+        let derivedTxn: string | undefined = p.transactionId;
+        const records = Array.isArray(p.paymentRecords) ? p.paymentRecords : [];
+        if (!derivedTxn && records.length > 0) {
+          const latest = [...records].sort((a, b) => {
+            const aTime = new Date(a.createdAt || 0).getTime();
+            const bTime = new Date(b.createdAt || 0).getTime();
+            return bTime - aTime;
+          })[0];
+          derivedTxn = latest?.transactionId || undefined;
+        }
+        return { ...p, transactionId: derivedTxn } as Purchase;
+      });
+
+      setPurchases(normalizedPurchases);
       setPagination(prev => ({
         ...prev,
         total: result.pagination?.total || 0,

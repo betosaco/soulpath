@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+export const runtime = 'nodejs';
 import { prisma, withConnection } from '@/lib/prisma';
 import { addCorsHeaders, handleCorsPreflight } from '@/lib/cors';
 
@@ -183,12 +184,14 @@ export async function GET(request: NextRequest) {
 
     console.log('🔍 Querying with:', whereClause);
 
-    // ULTRA-OPTIMIZATION 6: Direct query for debugging
-    const slots = await prisma.teacherScheduleSlot.findMany({
-      where: whereClause,
-      select: minimalScheduleSelect,
-      orderBy: { startTime: 'asc' }
-    });
+    // ULTRA-OPTIMIZATION 6: Direct query (wrapped with connection helper for retry/failover)
+    const slots = await withConnection(() =>
+      prisma.teacherScheduleSlot.findMany({
+        where: whereClause,
+        select: minimalScheduleSelect,
+        orderBy: { startTime: 'asc' }
+      })
+    );
 
     console.log(`✅ Found ${slots.length} raw slots`);
 

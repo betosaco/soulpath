@@ -71,7 +71,6 @@ export async function GET(request: NextRequest) {
       currencyCode: true,
       paymentMethod: true,
       paymentStatus: true,
-      transactionId: true,
       notes: true,
       purchasedAt: true,
       confirmedAt: true,
@@ -124,9 +123,12 @@ export async function GET(request: NextRequest) {
         select: {
           id: true,
           amount: true,
-          paymentStatus: true,
-          paymentDate: true,
-          confirmedAt: true
+          currency: true,
+          paymentMethod: true,
+          status: true,
+          transactionId: true,
+          createdAt: true,
+          updatedAt: true
         }
       };
     }

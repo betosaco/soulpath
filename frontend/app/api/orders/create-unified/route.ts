@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+export const runtime = 'nodejs';
 import { PrismaClient } from '@prisma/client';
 import { CartItem } from '@/store/appStore';
 import Stripe from 'stripe';
@@ -6,9 +7,7 @@ import { sendOrderConfirmationEmail } from '@/lib/send-order-confirmation-email'
 import { sendBookingConfirmationEmail } from '@/lib/send-booking-confirmation-email';
 import { OrderDetails } from '@/lib/services/telegram-order-service';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-08-27.basil',
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 const prisma = new PrismaClient({
   log: ['query', 'info', 'warn', 'error'],

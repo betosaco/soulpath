@@ -66,6 +66,8 @@ export function AdminHeaderNew({ user, onClose, isModal = false }: AdminHeaderNe
 
         {/* Right Section */}
         <div className={adminUI.header.right}>
+          {/* Quick Access removed: Communications Hub now lives in global quick navigate */}
+
           {/* Notifications */}
           <button className="p-2 text-[var(--unified-text-secondary)] hover:text-[var(--unified-text-primary)] hover:bg-[var(--unified-bg-secondary)] rounded-lg transition-colors duration-200 relative">
             <BellIcon className="w-5 h-5" />
