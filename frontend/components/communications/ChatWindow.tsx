@@ -201,7 +201,6 @@ export function ChatWindow({ conversationId, onBackClick }: ChatWindowProps) {
           <OperatorTools
             onInsertTemplate={handleInsertTemplate}
             onInsertLink={handleInsertTemplate}
-            disabled={!channelId}
             onCreateTicket={() => setShowCreateTicket(true)}
             onOpenCatalog={() => setShowCatalog(true)}
           />
