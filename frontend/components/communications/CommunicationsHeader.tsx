@@ -7,7 +7,19 @@ import { ArrowLeft, RefreshCw, MessageSquare, Plus, Ticket as TicketIcon } from 
 import { teacherUI } from '@/lib/styles/teacher-ui';
 import { useDashboardStats } from '@/hooks/useCommunications';
 
-export function CommunicationsHeader({ activeView = 'overview' }: { activeView?: string }) {
+interface CommunicationsHeaderProps {
+  activeView?: string;
+  conversationData?: {
+    customerName: string;
+    channelName: string;
+    messageCount: number;
+    assignedAgent?: string;
+    statusBadges: Array<{ text: string; className: string }>;
+  };
+  onBackToInbox?: () => void;
+}
+
+export function CommunicationsHeader({ activeView = 'overview', conversationData, onBackToInbox }: CommunicationsHeaderProps) {
   const router = useRouter();
   const { data: stats } = useDashboardStats('7d');
   const titleMap: Record<string, string> = {
@@ -22,6 +34,9 @@ export function CommunicationsHeader({ activeView = 'overview' }: { activeView?:
   const goBackToOverview = () => router.push('/communications?view=overview');
 
   const renderContextRight = () => {
+    if (activeView === 'conversation') {
+      return null; // No actions needed for conversation view
+    }
     if (activeView === 'inbox') {
       return (
         <div className="flex items-center gap-2">
@@ -57,6 +72,35 @@ export function CommunicationsHeader({ activeView = 'overview' }: { activeView?:
   };
 
   const renderContextLeft = () => {
+    if (activeView === 'conversation' && conversationData) {
+      return (
+        <div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onBackToInbox}
+              className="px-4 py-2 border border-[var(--unified-border-light)] rounded-lg text-[var(--unified-text-secondary)] hover:bg-[var(--unified-bg-tertiary)] hover:text-[var(--unified-text-primary)] inline-flex items-center"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Inbox
+            </button>
+            <h1 className={teacherUI.header.title}>{conversationData.customerName}</h1>
+            <div className="flex items-center gap-1">
+              {conversationData.statusBadges.map((badge, index) => (
+                <span key={index} className={badge.className}>
+                  {badge.text}
+                </span>
+              ))}
+            </div>
+          </div>
+          <p className={teacherUI.header.subtitle}>
+            {conversationData.channelName} • {conversationData.messageCount} messages
+            {conversationData.assignedAgent && (
+              <span className="ml-2">• Assigned to {conversationData.assignedAgent}</span>
+            )}
+          </p>
+        </div>
+      );
+    }
     if (activeView === 'inbox') {
       return (
         <div>

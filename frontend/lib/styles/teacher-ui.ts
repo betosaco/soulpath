@@ -5,7 +5,7 @@ export const teacherUI = {
   layout: {
     shell: 'flex h-screen bg-[var(--unified-bg-primary)] inner-page',
     main: 'flex-1 flex flex-col overflow-hidden',
-    content: 'flex-1 p-6 overflow-hidden',
+    content: 'flex-1 overflow-hidden relative z-0',
   },
   sidebar: {
     container: 'flex w-64 flex-col bg-gray-800 border-r border-gray-700 overflow-y-auto',
@@ -17,7 +17,7 @@ export const teacherUI = {
     brandTagline: 'text-xs text-gray-300',
   },
   header: {
-    container: 'bg-[var(--unified-bg-secondary)] border-b border-[var(--unified-border-light)] px-6 py-4',
+    container: 'bg-[var(--unified-bg-secondary)] border-b border-[var(--unified-border-light)] px-6 py-4 relative z-10',
     title: 'text-xl font-semibold text-[var(--unified-text-primary)]',
     subtitle: 'text-sm text-[var(--unified-text-secondary)]',
     actions: 'flex items-center space-x-3',

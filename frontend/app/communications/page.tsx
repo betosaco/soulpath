@@ -16,11 +16,33 @@ export default function CommunicationsPage() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Conversation data will be passed from the dashboard component
+  const [conversationData, setConversationData] = useState<{
+    customerName: string;
+    channelName: string;
+    messageCount: number;
+    assignedAgent?: string;
+    statusBadges: Array<{ text: string; className: string }>;
+  } | undefined>(undefined);
+
+  const handleBackToInbox = () => {
+    setActiveView('inbox');
+  };
+
   if (loading) return null;
 
   return (
-    <CommunicationsLayout activeView={activeView} onViewChange={setActiveView}>
-      <CommunicationsDashboard activeView={activeView} onViewChange={setActiveView} />
+    <CommunicationsLayout 
+      activeView={activeView} 
+      onViewChange={setActiveView}
+      conversationData={conversationData}
+      onBackToInbox={handleBackToInbox}
+    >
+      <CommunicationsDashboard 
+        activeView={activeView} 
+        onViewChange={setActiveView}
+        onConversationDataChange={setConversationData}
+      />
     </CommunicationsLayout>
   );
 }

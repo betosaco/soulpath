@@ -29,9 +29,16 @@ interface CommunicationsDashboardProps {
   defaultView?: string;
   activeView?: string;
   onViewChange?: (view: string) => void;
+  onConversationDataChange?: (data: {
+    customerName: string;
+    channelName: string;
+    messageCount: number;
+    assignedAgent?: string;
+    statusBadges: Array<{ text: string; className: string }>;
+  } | undefined) => void;
 }
 
-export function CommunicationsDashboard({ defaultView = 'overview', activeView, onViewChange }: CommunicationsDashboardProps) {
+export function CommunicationsDashboard({ defaultView = 'overview', activeView, onViewChange, onConversationDataChange }: CommunicationsDashboardProps) {
   const [internalView, setInternalView] = useState(defaultView);
   const currentView = activeView ?? internalView;
   const setView = onViewChange ?? setInternalView;
@@ -48,6 +55,20 @@ export function CommunicationsDashboard({ defaultView = 'overview', activeView, 
   const handleConversationSelect = (conversationId: string) => {
     setSelectedConversationId(conversationId);
     setView('conversation');
+    
+    // Update header with mock conversation data (in real app, fetch from API)
+    if (onConversationDataChange) {
+      onConversationDataChange({
+        customerName: 'Sarah Johnson',
+        channelName: 'WhatsApp',
+        messageCount: 12,
+        assignedAgent: 'John Smith',
+        statusBadges: [
+          { text: 'Human', className: 'px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full' },
+          { text: 'Active', className: 'px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full' }
+        ]
+      });
+    }
   };
 
   const handleTicketSelect = (ticketId: string) => {
@@ -59,6 +80,11 @@ export function CommunicationsDashboard({ defaultView = 'overview', activeView, 
     setSelectedConversationId(null);
     setSelectedTicketId(null);
     setView('overview');
+    
+    // Clear conversation data from header
+    if (onConversationDataChange) {
+      onConversationDataChange(undefined);
+    }
   };
 
   // Stats cards data
@@ -110,30 +136,39 @@ export function CommunicationsDashboard({ defaultView = 'overview', activeView, 
     switch (currentView) {
       case 'inbox':
         return (
-          <UnifiedInbox
-            onConversationSelect={handleConversationSelect}
-            onBackClick={handleBackToOverview}
-          />
+          <div className="p-6 h-full overflow-y-auto">
+            <UnifiedInbox
+              onConversationSelect={handleConversationSelect}
+              onBackClick={handleBackToOverview}
+            />
+          </div>
         );
       
       case 'tickets':
         return (
-          <TicketingSystem
-            onTicketSelect={handleTicketSelect}
-            onBackClick={handleBackToOverview}
-          />
+          <div className="p-6 h-full overflow-y-auto">
+            <TicketingSystem
+              onTicketSelect={handleTicketSelect}
+              onBackClick={handleBackToOverview}
+            />
+          </div>
         );
       
       case 'conversation':
         return selectedConversationId ? (
-          <div className="h-full">
+          <div className="h-full overflow-hidden">
             <ConversationView
               conversationId={selectedConversationId}
-              onBackClick={() => setView('inbox')}
+              onBackClick={() => {
+                setView('inbox');
+                if (onConversationDataChange) {
+                  onConversationDataChange(undefined);
+                }
+              }}
             />
           </div>
         ) : (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-gray-500 p-6">
             <p>No conversation selected</p>
             <p>Please select a conversation from the inbox to view it here.</p>
           </div>
@@ -141,17 +176,21 @@ export function CommunicationsDashboard({ defaultView = 'overview', activeView, 
       
       case 'ticket':
         return selectedTicketId ? (
-          <TicketView
-            ticketId={selectedTicketId}
-            onBackClick={() => setView('tickets')}
-          />
+          <div className="p-6 h-full overflow-y-auto">
+            <TicketView
+              ticketId={selectedTicketId}
+              onBackClick={() => setView('tickets')}
+            />
+          </div>
         ) : null;
       
       case 'settings':
         return (
-          <CommunicationsSettings
-            onBackClick={handleBackToOverview}
-          />
+          <div className="p-6 h-full overflow-y-auto">
+            <CommunicationsSettings
+              onBackClick={handleBackToOverview}
+            />
+          </div>
         );
       
       default:
@@ -160,7 +199,7 @@ export function CommunicationsDashboard({ defaultView = 'overview', activeView, 
   };
 
   const renderOverview = () => (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6 overflow-y-auto h-full">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statsCards.map((stat, index) => (
@@ -369,12 +408,12 @@ export function CommunicationsDashboard({ defaultView = 'overview', activeView, 
   );
 
   return (
-    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+    <div className="bg-gray-50 h-full overflow-hidden">
       {/* No page-level title/description; header shows active menu name */}
       {/* No back button; navigation handled via sidebar */}
 
       {/* Main Content (navigation via sidebar) */}
-      <div className="mt-0">
+      <div className="h-full">
         {renderMainContent()}
       </div>
     </div>

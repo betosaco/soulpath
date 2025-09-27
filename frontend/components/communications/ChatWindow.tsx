@@ -116,69 +116,7 @@ export function ChatWindow({ conversationId, onBackClick }: ChatWindowProps) {
 
   return (
     <div className="flex flex-col h-full max-h-screen overflow-hidden">
-      {/* Conversation Header spanning both columns */}
-      <div className="bg-white border-b border-gray-200 p-4 flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <BaseButton variant="outline" size="sm" onClick={onBackClick}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Inbox
-            </BaseButton>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  {conversation?.customer?.fullName || conversation?.customer?.email || 'Conversation'}
-                </h2>
-                {/* Conversation Status Indicators */}
-                <div className="flex items-center gap-1">
-                  {conversationState.botActive && (
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      <Bot className="h-3 w-3 mr-1" />
-                      Bot Active
-                    </span>
-                  )}
-                  {conversationState.humanTakeover && (
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      <User className="h-3 w-3 mr-1" />
-                      Human
-                    </span>
-                  )}
-                  {conversationState.pendingTransfer && (
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                      <Clock className="h-3 w-3 mr-1" />
-                      Transferring
-                    </span>
-                  )}
-                  {conversationState.awaitingApproval && (
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                      <AlertCircle className="h-3 w-3 mr-1" />
-                      Pending Approval
-                    </span>
-                  )}
-                  {conversation?.priority === 'HIGH' && (
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                      High Priority
-                    </span>
-                  )}
-                  {conversation?.priority === 'URGENT' && (
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-500 text-white">
-                      URGENT
-                    </span>
-                  )}
-                </div>
-              </div>
-              <p className="text-gray-600 text-sm">
-                {conversation?.primaryChannel?.displayName || 'Channel'} • {conversation?.totalMessages ?? 0} messages
-                {conversation?.assignedAgent && (
-                  <span className="ml-2">• Assigned to {conversation.assignedAgent.fullName}</span>
-                )}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Two-column content area under the header */}
+      {/* Two-column content area */}
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-6 flex-1 min-h-0 overflow-hidden">
         {/* Left column */}
         <div className="flex flex-col h-full max-h-full overflow-hidden">
