@@ -181,8 +181,9 @@ export function useConversations(filters: ConversationFilters = {}) {
   return useQuery({
     queryKey: communicationsKeys.conversationsList(filters),
     queryFn: () => fetchConversations(filters),
-    staleTime: 1000 * 60 * 2, // 2 minutes
-    gcTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 15, // 15 minutes
+    refetchOnWindowFocus: false, // Don't refetch on window focus
   });
 }
 
@@ -218,7 +219,9 @@ export function useMessages(filters: MessageFilters) {
     queryKey: communicationsKeys.messagesList(filters),
     queryFn: () => fetchMessages(filters),
     enabled: !!filters.conversationId,
-    staleTime: 1000 * 30, // 30 seconds
+    staleTime: 1000 * 60 * 2, // 2 minutes (reduce real-time polling)
+    gcTime: 1000 * 60 * 10, // 10 minutes
+    refetchOnWindowFocus: false, // Don't refetch on window focus
   });
 }
 
@@ -243,8 +246,11 @@ export function useDashboardStats(period: string = '7d') {
   return useQuery({
     queryKey: communicationsKeys.dashboardStats(period),
     queryFn: () => fetchDashboardStats(period),
-    staleTime: 1000 * 60 * 2, // 2 minutes
-    refetchInterval: 1000 * 60 * 5, // Auto-refresh every 5 minutes
+    staleTime: 1000 * 60 * 10, // Cache for 10 minutes
+    gcTime: 1000 * 60 * 30, // Keep in cache for 30 minutes
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    refetchOnReconnect: true, // Only refetch on reconnect
+    // Remove aggressive auto-refresh interval
   });
 }
 

@@ -113,12 +113,12 @@ export function usePackages(currency: string = 'PEN') {
       console.log('🚀 TanStack Query calling fetchPackagesAPI with:', { currency, hasToken: !!user?.access_token });
       return fetchPackagesAPI(currency, user?.access_token);
     },
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
-    retry: 3,
+    staleTime: 15 * 60 * 1000, // Cache for 15 minutes (packages don't change often)
+    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
+    retry: 2, // Reduce retries
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    refetchOnReconnect: true, // Only refetch on reconnect
     // Error handling is now done via error boundary or try-catch
     // Don't provide placeholder data to avoid showing empty state during loading
     // placeholderData: [],
