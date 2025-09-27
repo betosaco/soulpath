@@ -230,7 +230,10 @@ export function ChatWindow({ conversationId, onBackClick }: ChatWindowProps) {
 
       {/* Catalog Drawer */}
       <Sheet open={showCatalog} onOpenChange={setShowCatalog}>
-        <SheetContent side="right" className="bg-white">
+        <SheetContent 
+          side="right" 
+          className="bg-white w-full sm:max-w-md border-l shadow-xl transition-all duration-300 ease-in-out"
+        >
           <CatalogSheet isOpen={showCatalog} onInsert={handleInsertFromCatalog} />
         </SheetContent>
       </Sheet>
