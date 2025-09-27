@@ -22,7 +22,10 @@ export function CommunicationsSidebar({ activeView, onViewChange, collapsed = fa
   ];
 
   return (
-    <div className={`${teacherUI.sidebar.container} ${collapsed ? 'w-16' : ''}`}>
+    <div
+      className={`${teacherUI.sidebar.container} transition-all duration-300 overflow-hidden`}
+      style={{ width: collapsed ? 64 : 256 }}
+    >
       {/* Quick Navigation */}
       {!collapsed && (
       <div className={teacherUI.sidebar.section}>
@@ -80,7 +83,7 @@ export function CommunicationsSidebar({ activeView, onViewChange, collapsed = fa
               }`}
             >
               <Icon className="w-5 h-5" />
-              {!collapsed && <span className="font-medium">{item.label}</span>}
+              <span className={`font-medium transition-opacity duration-200 ${collapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>{item.label}</span>
             </button>
           );
         })}
