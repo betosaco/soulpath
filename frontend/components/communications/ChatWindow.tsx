@@ -1,18 +1,18 @@
 'use client';
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { ArrowLeft, Send, Bot, User, UserPlus, Shield, AlertCircle, Clock, CheckCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { BaseButton } from '../ui/BaseButton';
 import { useConversation, useUpdateConversation } from '@/hooks/useCommunications';
-import { MessageList } from './MessageList';
-import { MessageComposer } from './MessageComposer';
-import { OperatorTools } from './OperatorTools';
-import { ConversationControlBar } from './ConversationControlBar';
-import { TransferModal } from './TransferModal';
-import { AdminApprovalModal } from './AdminApprovalModal';
+import { MessageList } from '@/components/communications/MessageList';
+import { MessageComposer } from '@/components/communications/MessageComposer';
+import { OperatorTools } from '@/components/communications/OperatorTools';
+import { ConversationControlBar } from '@/components/communications/ConversationControlBar';
+import { TransferModal } from '@/components/communications/TransferModal';
+import { AdminApprovalModal } from '@/components/communications/AdminApprovalModal';
 import { ConversationStatus, Priority } from '@/lib/types/communications';
-import { CreateTicketModal } from './CreateTicketModal';
+import { CreateTicketModal } from '@/components/communications/CreateTicketModal';
 
 interface ChatWindowProps {
   conversationId: string;
@@ -114,6 +114,23 @@ export function ChatWindow({ conversationId, onBackClick }: ChatWindowProps) {
     }, 3000);
   }, []);
 
+  useEffect(() => {
+    const onBotToggle = () => handleBotToggle();
+    const onTakeOverEvt = () => handleTakeOver();
+    const onTransferEvt = () => handleTransferRequest();
+    const onAdminEvt = () => handleAdminApproval();
+    window.addEventListener('comm:botToggle', onBotToggle as EventListener);
+    window.addEventListener('comm:takeOver', onTakeOverEvt as EventListener);
+    window.addEventListener('comm:transfer', onTransferEvt as EventListener);
+    window.addEventListener('comm:adminApproval', onAdminEvt as EventListener);
+    return () => {
+      window.removeEventListener('comm:botToggle', onBotToggle as EventListener);
+      window.removeEventListener('comm:takeOver', onTakeOverEvt as EventListener);
+      window.removeEventListener('comm:transfer', onTransferEvt as EventListener);
+      window.removeEventListener('comm:adminApproval', onAdminEvt as EventListener);
+    };
+  }, [handleBotToggle, handleTakeOver, handleTransferRequest, handleAdminApproval]);
+
   return (
     <div className="flex flex-col h-full max-h-screen overflow-hidden">
       {/* Two-column content area */}
@@ -122,29 +139,13 @@ export function ChatWindow({ conversationId, onBackClick }: ChatWindowProps) {
         <div className="flex flex-col h-full max-h-full overflow-hidden">
           <div className="flex-1 flex flex-col space-y-4 p-4 min-h-0 overflow-hidden">
             {/* Conversation Control Bar */}
-            <ConversationControlBar
-              conversationState={conversationState}
-              onBotToggle={handleBotToggle}
-              onTakeOver={handleTakeOver}
-              onTransfer={handleTransferRequest}
-              onAdminApproval={handleAdminApproval}
-              disabled={isLoading}
-            />
-
-            {/* Funnel tabs */}
-            <div className="bg-white border border-gray-200 rounded-lg p-1 w-full max-w-sm">
-              <div className="flex text-sm">
-                <button className="flex-1 py-1.5 rounded-md hover:bg-gray-100 text-gray-700">Clients</button>
-                <button className="flex-1 py-1.5 rounded-md hover:bg-gray-100 text-gray-700">Vendors</button>
-                <button className="flex-1 py-1.5 rounded-md hover:bg-gray-100 text-gray-700">Coworkers</button>
-              </div>
-            </div>
+            <> </>
 
             {/* Chat area */}
             <Card className="border-0 shadow-sm bg-white flex-1 flex flex-col min-h-0 max-h-full overflow-hidden">
               <CardContent className="p-0 flex-1 flex flex-col h-full">
                 {/* Messages area - scrollable */}
-                <div className="flex-1 overflow-y-auto p-4 bg-gray-50 min-h-0">
+                <div className="flex-1 overflow-y-auto p-4 bg-white min-h-0">
                   <MessageList 
                     conversationId={conversationId} 
                     conversationState={conversationState}

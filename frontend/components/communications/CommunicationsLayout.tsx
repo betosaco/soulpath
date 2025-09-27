@@ -30,7 +30,7 @@ export function CommunicationsLayout({ children, activeView, onViewChange, sideb
           conversationData={conversationData}
           onBackToInbox={onBackToInbox}
         />
-        <main className={teacherUI.layout.content}>
+        <main className={teacherUI.layout.content + ' bg-white'}>
           {children}
         </main>
       </div>

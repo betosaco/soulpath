@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Send, Bot, User, Zap, Clock } from 'lucide-react';
 import { useCreateMessage } from '@/hooks/useCommunications';
 import { BaseButton } from '../ui/BaseButton';
@@ -60,8 +60,10 @@ export function MessageComposer({
 }: MessageComposerProps) {
   const [internalValue, setInternalValue] = useState('');
   const [showCannedResponses, setShowCannedResponses] = useState(false);
+  const [showEmojiPanel, setShowEmojiPanel] = useState(false);
   const content = useMemo(() => (value !== undefined ? value : internalValue), [value, internalValue]);
   const setContent = useMemo(() => (onChange ? onChange : setInternalValue), [onChange]);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const { mutateAsync: createMessage, isPending } = useCreateMessage();
 
@@ -88,6 +90,33 @@ export function MessageComposer({
     const newContent = content ? `${content}\n\n${text}` : text;
     setContent(newContent);
     setShowCannedResponses(false);
+  };
+
+  const insertAtCursor = (insertion: string) => {
+    const el = textareaRef.current;
+    if (!el) {
+      setContent((content || '') + insertion);
+      return;
+    }
+    const start = el.selectionStart ?? content.length;
+    const end = el.selectionEnd ?? content.length;
+    const before = content.slice(0, start);
+    const after = content.slice(end);
+    const next = `${before}${insertion}${after}`;
+    setContent(next);
+    // Restore cursor position after state update in next tick
+    setTimeout(() => {
+      try {
+        el.focus();
+        const pos = start + insertion.length;
+        el.setSelectionRange(pos, pos);
+      } catch {}
+    }, 0);
+  };
+
+  const handleEmojiClick = (emoji: string) => {
+    insertAtCursor(emoji);
+    setShowEmojiPanel(false);
   };
   
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -135,13 +164,24 @@ export function MessageComposer({
           </div>
           
           {!isDisabled && (
-            <button
-              onClick={() => setShowCannedResponses(!showCannedResponses)}
-              className="flex items-center gap-1 text-gray-500 hover:text-gray-700 transition-colors"
-            >
-              <Zap className="h-3 w-3" />
-              Quick replies
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowCannedResponses(!showCannedResponses)}
+                className="flex items-center gap-1 text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <Zap className="h-3 w-3" />
+                Quick replies
+              </button>
+              <button
+                onClick={() => setShowEmojiPanel(!showEmojiPanel)}
+                className="text-gray-500 hover:text-gray-700 transition-colors"
+                aria-label="Insert emoji"
+                title="Insert emoji"
+                type="button"
+              >
+                😊
+              </button>
+            </div>
           )}
         </div>
       )}
@@ -163,6 +203,26 @@ export function MessageComposer({
           </div>
         </div>
       )}
+
+      {/* Emoji panel */}
+      {showEmojiPanel && (
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-2">
+          <div className="text-xs font-medium text-gray-700 mb-1">Emojis</div>
+          <div className="flex flex-wrap gap-1 text-xl">
+            {['😀','😂','😍','👍','🙏','🎉','💡','🔥','😅','😎','🤔','🙌','💬','📞','📧','🛠️','🚀','💖'].map((e) => (
+              <button
+                key={e}
+                type="button"
+                onClick={() => handleEmojiClick(e)}
+                className="px-2 py-1 bg-white border border-gray-200 rounded hover:bg-gray-100 transition-colors"
+                aria-label={`Insert ${e}`}
+              >
+                {e}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       
       {/* Message input */}
       <div className="flex items-end gap-2">
@@ -179,6 +239,9 @@ export function MessageComposer({
             onKeyDown={handleKeyPress}
             disabled={isDisabled}
             rows={2}
+            ref={textareaRef}
+            inputMode="text"
+            autoComplete="off"
           />
           
           {/* Character counter */}

@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, RefreshCw, MessageSquare, Plus, Ticket as TicketIcon } from 'lucide-react';
+import { BaseButton } from '../ui/BaseButton';
 import { teacherUI } from '@/lib/styles/teacher-ui';
 import { useDashboardStats } from '@/hooks/useCommunications';
 
@@ -35,7 +36,43 @@ export function CommunicationsHeader({ activeView = 'overview', conversationData
 
   const renderContextRight = () => {
     if (activeView === 'conversation') {
-      return null; // No actions needed for conversation view
+      return (
+        <div className="flex items-center gap-2">
+          <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700 border border-blue-200">Bot responding</span>
+          <BaseButton
+            size="sm"
+            variant="primary"
+            className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+            onClick={() => window.dispatchEvent(new CustomEvent('comm:botToggle'))}
+          >
+            Pause Bot
+          </BaseButton>
+          <BaseButton
+            size="sm"
+            variant="outline"
+            className="text-green-600 border-green-200 hover:bg-green-50"
+            onClick={() => window.dispatchEvent(new CustomEvent('comm:takeOver'))}
+          >
+            Take Over
+          </BaseButton>
+          <BaseButton
+            size="sm"
+            variant="outline"
+            className="text-purple-600 border-purple-200 hover:bg-purple-50"
+            onClick={() => window.dispatchEvent(new CustomEvent('comm:transfer'))}
+          >
+            Transfer
+          </BaseButton>
+          <BaseButton
+            size="sm"
+            variant="outline"
+            className="text-orange-600 border-orange-200 hover:bg-orange-50"
+            onClick={() => window.dispatchEvent(new CustomEvent('comm:adminApproval'))}
+          >
+            Request Admin
+          </BaseButton>
+        </div>
+      );
     }
     if (activeView === 'inbox') {
       return (
@@ -97,6 +134,9 @@ export function CommunicationsHeader({ activeView = 'overview', conversationData
             {conversationData.assignedAgent && (
               <span className="ml-2">• Assigned to {conversationData.assignedAgent}</span>
             )}
+          </p>
+          <p className="text-xs text-[var(--unified-text-secondary)] mt-1">
+            Bot is actively responding to customer messages. Click 'Take Over' to intervene.
           </p>
         </div>
       );

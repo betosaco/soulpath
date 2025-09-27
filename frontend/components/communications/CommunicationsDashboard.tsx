@@ -447,7 +447,7 @@ export function CommunicationsDashboard({ defaultView = 'overview', activeView, 
   );
 
   return (
-    <div className="bg-gray-50 h-full overflow-hidden">
+    <div className="bg-white h-full overflow-hidden">
       {/* No page-level title/description; header shows active menu name */}
       {/* No back button; navigation handled via sidebar */}
 
