@@ -138,7 +138,38 @@ export function MessageComposer({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3"
+      onDragOver={(e) => {
+        // Allow drop of product payload
+        try {
+          const hasJson = Array.from(e.dataTransfer.types || []).includes('application/json');
+          const hasText = Array.from(e.dataTransfer.types || []).includes('text/plain');
+          if (hasJson || hasText) {
+            e.preventDefault();
+          }
+        } catch {}
+      }}
+      onDrop={(e) => {
+        try {
+          const json = e.dataTransfer.getData('application/json');
+          if (json) {
+            const payload = JSON.parse(json);
+            if (payload?.type === 'product' && payload?.name && payload?.url) {
+              const price = typeof payload.price === 'number' ? payload.price.toFixed(2) : payload.price;
+              const snippet = `[${payload.name}](${payload.url}) — ${(payload.currency || 'S/.')}${price}`;
+              insertAtCursor(snippet);
+              e.preventDefault();
+              return;
+            }
+          }
+          const txt = e.dataTransfer.getData('text/plain');
+          if (txt) {
+            insertAtCursor(txt);
+            e.preventDefault();
+          }
+        } catch {}
+      }}
+    >
       {/* Status indicator */}
       {conversationState && (
         <div className="flex items-center justify-between text-xs">

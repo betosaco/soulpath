@@ -13,6 +13,8 @@ import { TransferModal } from '@/components/communications/TransferModal';
 import { AdminApprovalModal } from '@/components/communications/AdminApprovalModal';
 import { ConversationStatus, Priority } from '@/lib/types/communications';
 import { CreateTicketModal } from '@/components/communications/CreateTicketModal';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { CatalogSheet } from '@/components/communications/CatalogSheet';
 
 interface ChatWindowProps {
   conversationId: string;
@@ -38,6 +40,7 @@ export function ChatWindow({ conversationId, onBackClick }: ChatWindowProps) {
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [showCreateTicket, setShowCreateTicket] = useState(false);
+  const [showCatalog, setShowCatalog] = useState(false);
   
   // Conversation state - in real app this would come from the conversation object
   const [conversationState, setConversationState] = useState<ConversationState>({
@@ -53,6 +56,10 @@ export function ChatWindow({ conversationId, onBackClick }: ChatWindowProps) {
 
   const handleInsertTemplate = useCallback((content: string) => {
     setDraft(prev => (prev ? prev + '\n' + content : content));
+  }, []);
+  const handleInsertFromCatalog = useCallback((content: string) => {
+    setDraft(prev => (prev ? prev + '\n' + content : content));
+    setShowCatalog(false);
   }, []);
   
   const handleBotToggle = useCallback(async () => {
@@ -193,6 +200,7 @@ export function ChatWindow({ conversationId, onBackClick }: ChatWindowProps) {
             onInsertLink={handleInsertTemplate}
             disabled={!channelId}
             onCreateTicket={() => setShowCreateTicket(true)}
+            onOpenCatalog={() => setShowCatalog(true)}
           />
         </div>
       </div>
@@ -219,6 +227,13 @@ export function ChatWindow({ conversationId, onBackClick }: ChatWindowProps) {
         customerId={conversation?.customer?.id || ''}
         defaultSubject={conversation?.subject || 'Support needed'}
       />
+
+      {/* Catalog Drawer */}
+      <Sheet open={showCatalog} onOpenChange={setShowCatalog}>
+        <SheetContent side="right" className="bg-white">
+          <CatalogSheet isOpen={showCatalog} onInsert={handleInsertFromCatalog} />
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

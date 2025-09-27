@@ -10,9 +10,10 @@ interface OperatorToolsProps {
   onInsertLink: (content: string) => void;
   disabled?: boolean;
   onCreateTicket?: () => void;
+  onOpenCatalog?: () => void;
 }
 
-export function OperatorTools({ onInsertTemplate, onInsertLink, disabled, onCreateTicket }: OperatorToolsProps) {
+export function OperatorTools({ onInsertTemplate, onInsertLink, disabled, onCreateTicket, onOpenCatalog }: OperatorToolsProps) {
   const handlePaymentLink = () => {
     const amountStr = typeof window !== 'undefined' ? window.prompt('Enter amount to request (e.g., 49.90):') : '';
     if (!amountStr) return;
@@ -23,6 +24,10 @@ export function OperatorTools({ onInsertTemplate, onInsertLink, disabled, onCrea
   };
 
   const handleCatalog = () => {
+    if (onOpenCatalog) {
+      onOpenCatalog();
+      return;
+    }
     const link = '/shop';
     onInsertLink(`Explore our catalog: ${link}`);
   };
