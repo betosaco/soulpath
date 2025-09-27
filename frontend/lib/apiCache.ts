@@ -7,6 +7,7 @@ type CacheEntry<T> = {
 };
 
 const apiCache = new Map<string, CacheEntry<any>>();
+const inflight = new Map<string, Promise<any>>();
 
 export function cacheKey(pathname: string, query?: Record<string, any>, userId?: string): string {
   const q = query ? JSON.stringify(query) : '';
@@ -34,10 +35,18 @@ export function withApiCache<T>(
 ): Promise<T> {
   const cached = getCached<T>(key);
   if (cached !== undefined) return Promise.resolve(cached);
-  return fetcher().then((data) => {
-    setCached(key, data, ttlMs);
-    return data;
-  });
+  const existing = inflight.get(key);
+  if (existing) return existing as Promise<T>;
+  const p = fetcher()
+    .then((data) => {
+      setCached(key, data, ttlMs);
+      return data;
+    })
+    .finally(() => {
+      inflight.delete(key);
+    });
+  inflight.set(key, p);
+  return p;
 }
 
 export function cacheHeaders(ttlSeconds: number): Record<string, string> {

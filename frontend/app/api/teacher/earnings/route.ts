@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 import { getAuthenticatedUser, requireAuth } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { prisma, withConnection } from '@/lib/prisma';
+import { cacheKey, withApiCache, cacheHeaders } from '@/lib/apiCache';
 
 // Commission percent as decimal
 const COMMISSION = 0.5087; // 50.87%
@@ -24,8 +25,10 @@ export async function GET(request: NextRequest) {
     const rangeStart = startDateParam ? new Date(startDateParam + 'T00:00:00.000Z') : new Date(new Date().getFullYear(), 0, 1);
     const rangeEnd = endDateParam ? new Date(endDateParam + 'T23:59:59.999Z') : new Date();
 
+    const cacheTtlMs = 60_000; // 60s earnings cache
+    const key = cacheKey('/api/teacher/earnings', { startDateParam, endDateParam }, String(teacher.id));
     // Fetch completed or confirmed bookings linked to a userPackage (units consumed) for this teacher
-    const bookings = await prisma.booking.findMany({
+    const bookings = await withApiCache(key, cacheTtlMs, () => withConnection(() => prisma.booking.findMany({
       where: {
         createdAt: { gte: rangeStart, lte: rangeEnd },
         status: { in: ['confirmed', 'completed'] },
@@ -61,7 +64,7 @@ export async function GET(request: NextRequest) {
         }
       },
       orderBy: { createdAt: 'desc' }
-    });
+    })));
 
     let totalGross = 0;
     let totalCommission = 0;
@@ -97,7 +100,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({
+    const res = NextResponse.json({
       success: true,
       data: {
         commissionPercent: COMMISSION,
@@ -106,6 +109,9 @@ export async function GET(request: NextRequest) {
         items: rows
       }
     });
+    const headers = cacheHeaders(Math.floor(cacheTtlMs / 1000));
+    Object.entries(headers).forEach(([k, v]) => res.headers.set(k, v));
+    return res;
   } catch (error) {
     console.error('GET /api/teacher/earnings error:', error);
     return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
