@@ -1514,6 +1514,35 @@ model Ticket {
   @@map("tickets")
 }
 
+model Policy {
+  id           String    @id @default(cuid())
+  title        String    @db.VarChar(255)
+  summary      String?   @db.VarChar(500)
+  contentUrl   String?   @map("content_url")
+  contentType  String?   @map("content_type") // 'pdf' | 'video' | 'ppt' | 'url'
+  isActive     Boolean   @default(true) @map("is_active")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  acknowledgments PolicyAcknowledgment[]
+
+  @@map("policies")
+}
+
+model PolicyAcknowledgment {
+  id          String   @id @default(cuid())
+  policyId    String   @map("policy_id")
+  professorId String   @map("professor_id")
+  acknowledgedAt DateTime @default(now()) @map("acknowledged_at") @db.Timestamptz(6)
+
+  policy   Policy  @relation(fields: [policyId], references: [id], onDelete: Cascade)
+  professor User    @relation(fields: [professorId], references: [id], onDelete: Cascade)
+
+  @@index([policyId])
+  @@index([professorId])
+  @@unique([policyId, professorId], map: "uniq_policy_professor")
+  @@map("policy_acknowledgments")
+}
+
 model TicketNote {
   id          String         @id @default(cuid())
   ticketId    String         @map("ticket_id")

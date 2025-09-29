@@ -12,7 +12,8 @@ import {
   BookOpenIcon,
   MessageSquareIcon,
   StarIcon,
-  TrendingUpIcon
+  TrendingUpIcon,
+  ShieldCheckIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { sidebarButtonStyles, combineStyles } from '@/lib/styles/common';
@@ -77,6 +78,12 @@ export default function TeacherSidebarNav({ user }: TeacherSidebarNavProps) {
       href: '/account/teacher/reviews',
       icon: StarIcon,
       current: pathname === '/account/teacher/reviews'
+    },
+    {
+      name: 'Policies',
+      href: '/account/teacher/policies',
+      icon: ShieldCheckIcon,
+      current: pathname === '/account/teacher/policies'
     },
     {
       name: 'Settings',
