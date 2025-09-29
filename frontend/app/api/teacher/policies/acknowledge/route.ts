@@ -13,9 +13,10 @@ export async function POST(req: NextRequest) {
     const { policyId } = body || {};
     if (!policyId) return NextResponse.json({ success: false, error: 'policyId required' }, { status: 400 });
 
+    const professorId = (user as any).userId || (user as any).id || (user as any).email || '';
     const ack = await prisma.policyAcknowledgment.upsert({
-      where: { policyId_professorId: { policyId, professorId: user.userId } },
-      create: { policyId, professorId: user.userId },
+      where: { policyId_professorId: { policyId, professorId: String(professorId) } },
+      create: { policyId, professorId: String(professorId) },
       update: {},
       select: { id: true, acknowledgedAt: true }
     });

@@ -120,6 +120,12 @@ export function AdminSidebarNew({ activeTab, onTabChange, user }: AdminSidebarNe
 
   const advancedNavigation = [
     {
+      name: 'Policies',
+      id: 'policies-admin',
+      icon: ShieldCheckIcon,
+      current: activeTab === 'policies-admin'
+    },
+    {
       name: 'Live Sessions',
       id: 'live-session',
       icon: VideoCameraIcon,

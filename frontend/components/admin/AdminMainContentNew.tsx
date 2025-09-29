@@ -27,6 +27,7 @@ import ConversationLogsManagement from './ConversationLogsManagement';
 import { VenueManagement } from './VenueManagement';
 import { TeacherManagementEnhanced } from './TeacherManagementEnhanced';
 import { ServiceTypeManagement } from './ServiceTypeManagement';
+import PoliciesAdmin from './PoliciesAdmin';
 
 // Import dashboard components
 import { AdminDashboardStats } from './AdminDashboardStats';
@@ -89,6 +90,8 @@ export function AdminMainContentNew({ activeTab = 'dashboard', bugReportManageme
         return <TeacherManagementEnhanced />;
       case 'service-types':
         return <ServiceTypeManagement />;
+      case 'policies-admin':
+        return <PoliciesAdmin />;
       default:
         return <AdminDashboardStats />;
     }

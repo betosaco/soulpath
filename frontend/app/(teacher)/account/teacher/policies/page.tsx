@@ -137,6 +137,9 @@ export default function TeacherPoliciesPage() {
           </div>
           <div className="w-auto flex items-center gap-3">
             <Input placeholder="Search policies..." value={query} onChange={(e) => setQuery(e.target.value)} />
+            <a href="/api/teacher/policies/pdf" target="_blank" rel="noreferrer">
+              <BaseButton size="sm" variant="outline">Download PDF</BaseButton>
+            </a>
             <BaseButton size="sm" variant={allSeen && pendingCount > 0 ? 'primary' : 'outline'} disabled={!allSeen || pendingCount === 0} onClick={acknowledgeAll}>
               Acknowledge All
             </BaseButton>
@@ -149,6 +152,22 @@ export default function TeacherPoliciesPage() {
         {error && (
           <div className="mb-4 text-sm text-red-600">{error}</div>
         )}
+        {/* Introduction */}
+        <Card className="border-0 shadow-sm bg-white mb-4">
+          <CardHeader>
+            <CardTitle className="text-base">Bienvenida y guía</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm text-gray-700 space-y-2">
+            <p>
+              En esta sección revisaremos las políticas y buenas prácticas de MatMax Wellness Studio para profesores.
+              Encontrarás un video introductorio y una serie de tarjetas con los puntos claves. Por favor, revisa todo el contenido y acepta haberlo leído al finalizar.
+            </p>
+            <p>
+              Puedes navegar entre las políticas con los botones de Anterior/Siguiente y abrir materiales complementarios desde cada tarjeta. Cuando hayas visto todo, podrás
+              reconocer las políticas en un solo paso.
+            </p>
+          </CardContent>
+        </Card>
         {/* Featured video */}
         {videoPolicy && (
           <Card className="border-0 shadow-sm bg-white mb-4">
@@ -161,7 +180,16 @@ export default function TeacherPoliciesPage() {
               {videoPolicy.summary && <p className="text-sm text-gray-600">{videoPolicy.summary}</p>}
               <div className="rounded-lg border border-gray-200 overflow-hidden bg-black">
                 {videoPolicy.contentUrl ? (
-                  <ReactPlayer url={videoPolicy.contentUrl} controls width="100%" height="60vh" config={{ file: { attributes: { controlsList: 'nodownload' } } }} />
+                  <ReactPlayer
+                    url={videoPolicy.contentUrl}
+                    controls
+                    playing={false}
+                    muted={false}
+                    volume={1}
+                    width="100%"
+                    height="60vh"
+                    config={{ file: { attributes: { controlsList: 'nodownload', playsInline: true } } }}
+                  />
                 ) : (
                   <div className="p-6 text-sm text-gray-500 bg-white">No video available.</div>
                 )}
@@ -171,7 +199,16 @@ export default function TeacherPoliciesPage() {
                 {videoPolicy.acknowledgments && videoPolicy.acknowledgments.length > 0 ? (
                   <span className="inline-flex items-center text-green-600 text-xs"><CheckCircle className="h-4 w-4 mr-1" /> Acknowledged</span>
                 ) : (
-                  <BaseButton size="sm" disabled={ackSubmitting === videoPolicy.id} onClick={() => handleAcknowledge(videoPolicy.id)}>I acknowledge</BaseButton>
+                  <BaseButton
+                    size="sm"
+                    disabled={ackSubmitting === videoPolicy.id}
+                    onClick={async () => {
+                      await handleAcknowledge(videoPolicy.id);
+                      setPolicies((prev) => prev.map(p => p.id === videoPolicy.id ? { ...p, acknowledgments: [{ id: 'ack', acknowledgedAt: new Date().toISOString() }] } : p));
+                    }}
+                  >
+                    I acknowledge
+                  </BaseButton>
                 )}
               </div>
             </CardContent>
@@ -209,7 +246,16 @@ export default function TeacherPoliciesPage() {
                         {active.acknowledgments && active.acknowledgments.length > 0 ? (
                           <span className="inline-flex items-center text-green-600 text-xs"><CheckCircle className="h-4 w-4 mr-1" /> Acknowledged</span>
                         ) : (
-                          <BaseButton size="sm" disabled={ackSubmitting === active.id} onClick={() => handleAcknowledge(active.id)}>I acknowledge</BaseButton>
+                          <BaseButton
+                            size="sm"
+                            disabled={ackSubmitting === active.id}
+                            onClick={async () => {
+                              await handleAcknowledge(active.id);
+                              setPolicies((prev) => prev.map(p => p.id === active.id ? { ...p, acknowledgments: [{ id: 'ack', acknowledgedAt: new Date().toISOString() }] } : p));
+                            }}
+                          >
+                            I acknowledge
+                          </BaseButton>
                         )}
                       </div>
                       <div className="flex items-center justify-between pt-2 border-t border-gray-200">
@@ -237,7 +283,16 @@ export default function TeacherPoliciesPage() {
             {/* Material */}
             <div className="flex-1 min-h-0 rounded-lg border border-gray-200 overflow-hidden bg-white">
               {viewerPolicy?.contentType === 'video' && viewerPolicy?.contentUrl ? (
-                <ReactPlayer url={viewerPolicy.contentUrl} controls width="100%" height="70vh" config={{ file: { attributes: { controlsList: 'nodownload' } } }} />
+                <ReactPlayer
+                  url={viewerPolicy.contentUrl}
+                  controls
+                  playing={false}
+                  muted={false}
+                  volume={1}
+                  width="100%"
+                  height="70vh"
+                  config={{ file: { attributes: { controlsList: 'nodownload', playsInline: true } } }}
+                />
               ) : viewerPolicy?.contentType === 'pdf' && viewerPolicy?.contentUrl ? (
                 <iframe src={viewerPolicy.contentUrl} className="w-full h-full" title="Policy PDF" />
               ) : viewerPolicy?.contentUrl ? (
@@ -276,6 +331,10 @@ export default function TeacherPoliciesPage() {
           </div>
         </FullScreenModal.Content>
       </FullScreenModal>
+      {/* Download all policies as PDF */}
+      <div className="fixed bottom-4 right-4">
+        <a href="/api/teacher/policies/pdf" className="text-xs text-blue-600 underline">Descargar todas las políticas (PDF)</a>
+      </div>
     </div>
   );
 }

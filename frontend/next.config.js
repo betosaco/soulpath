@@ -44,6 +44,8 @@ const nextConfig = {
       "style-src 'self' 'unsafe-inline'",
       "font-src 'self'",
       "img-src 'self' data: https: blob:",
+      // Allow external media (videos)
+      "media-src 'self' https://*.vercel-storage.com blob:",
       `connect-src 'self' ${isDevelopment ? 'http://localhost:* ws://localhost:* ' : ''}https://*.vercel.app https://matmax.world https://www.matmax.world https://api.stripe.com https://js.stripe.com https://static.micuentaweb.pe`,
       "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://checkout.stripe.com",
       "object-src 'none'",

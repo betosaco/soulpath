@@ -9,6 +9,7 @@ export async function GET(req: NextRequest) {
     const user = await getAuthenticatedUser(req);
     if (!user) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
 
+    const professorId = (user as any).userId || (user as any).id || (user as any).email || '';
     const policies = await prisma.policy.findMany({
       where: { isActive: true },
       orderBy: { createdAt: 'desc' },
@@ -21,7 +22,7 @@ export async function GET(req: NextRequest) {
         createdAt: true,
         updatedAt: true,
         acknowledgments: {
-          where: { professorId: user.userId },
+          where: { professorId: String(professorId) },
           select: { id: true, acknowledgedAt: true }
         }
       }
