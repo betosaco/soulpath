@@ -180,6 +180,7 @@ model User {
   ticketsAssignedBy             Ticket[]                 @relation("TicketAssignedBy")
   ticketsAsCustomer             Ticket[]                 @relation("TicketCustomer")
   userPackages                  UserPackage[]
+  policyAcknowledgments         PolicyAcknowledgment[]
 
   @@index([email], map: "idx_users_email")
   @@index([status], map: "idx_users_status")

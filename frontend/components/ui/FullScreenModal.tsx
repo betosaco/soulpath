@@ -1,3 +1,4 @@
+"use client";
 /**
  * FullScreenModal Component
  * 
@@ -17,6 +18,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 // import { Dialog, DialogContent } from '@/components/ui/dialog'; // Unused for now
 import { cn } from '@/lib/utils';
 import '@/styles/unified-component-styles.css';
@@ -78,7 +80,7 @@ export function FullScreenModal({
   }, [isOpen, onClose, closeOnEscape]);
 
   const modalClasses = cn(
-    'unified-modal-overlay',
+    'unified-modal-overlay fixed inset-0 z-[10000] flex items-stretch justify-stretch bg-black/40 backdrop-blur-[2px]',
     className
   );
 
@@ -91,10 +93,9 @@ export function FullScreenModal({
 
   if (!isOpen) return null;
 
-  return (
+  const node = (
     <div className={modalClasses}>
       <div className={contentClasses}>
-        {/* Header */}
         {(title || headerContent || showCloseButton) && (
           <div className="fullscreen-modal-header flex items-center justify-between p-6 border-b" style={{ borderColor: 'var(--color-border-500)', background: 'var(--color-surface-secondary)', color: 'var(--color-text-primary)' }}>
             <div className="flex items-center space-x-4">
@@ -109,7 +110,6 @@ export function FullScreenModal({
                 </div>
               )}
             </div>
-            
             {showCloseButton && (
               <BaseButton
                 onClick={onClose}
@@ -123,13 +123,9 @@ export function FullScreenModal({
             )}
           </div>
         )}
-
-        {/* Content */}
         <div className="fullscreen-modal-body flex-1 overflow-hidden">
           {children}
         </div>
-
-        {/* Footer */}
         {footerContent && (
           <div className="fullscreen-modal-footer p-6 border-t" style={{ borderColor: 'var(--color-border-500)', background: 'var(--color-surface-secondary)' }}>
             {footerContent}
@@ -138,6 +134,8 @@ export function FullScreenModal({
       </div>
     </div>
   );
+
+  return createPortal(node, document.body);
 }
 
 // ============================================================================
