@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { CentralizedHeader } from './CentralizedHeader';
 import { CartSidebar } from './CartSidebar';
+import { Footer } from './Footer';
 import { useTranslations, useLanguage } from '@/hooks/useTranslations';
 
 export function MatmaxHomepage() {
@@ -55,7 +56,7 @@ export function MatmaxHomepage() {
       <CartSidebar />
       
       {/* Hero Section - Full Width, Outside AppShell Container */}
-      <section id="home" className="relative h-screen flex items-center justify-center overflow-hidden w-full" style={{ height: '100svh' }}>
+      <section id="home" className="relative min-h-screen flex items-center justify-center w-full" style={{ minHeight: '100svh' }}>
         {/* Video Background with Image Fallback */}
         <div className="absolute inset-0">
           {/* Video Background - All Devices */}
@@ -167,6 +168,9 @@ export function MatmaxHomepage() {
           </div>
         </div>
       </section>
+      
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
