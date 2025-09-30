@@ -158,6 +158,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
               </motion.button>
             </Link>
 
+
             {/* User Account Access */}
             {user && !isAdmin && (
               <motion.button

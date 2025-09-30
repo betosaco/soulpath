@@ -73,6 +73,9 @@ export function Footer() {
               <Link href="/schedule" className="block text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent-500)] transition-colors">
                 {footer.bookSession || 'Book Session'}
               </Link>
+              <Link href="/apply-teacher" className="block text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent-500)] transition-colors">
+                {footer.applyTeacher || (language === 'es' ? 'Únete como Profesor' : 'Apply as Teacher')}
+              </Link>
             </nav>
           </div>
 
