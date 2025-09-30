@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import Script from 'next/script';
 import { Loader2, CreditCard, AlertCircle, CheckCircle2 } from 'lucide-react';
 
@@ -42,14 +42,16 @@ export function LyraEmbeddedForm({
   onError,
   displayMode = 'embedded',
 }: LyraEmbeddedFormProps) {
-  const [formToken, setFormToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [formInitialized, setFormInitialized] = useState(false);
+  const [formToken, setFormToken] = useState<string | null>(null);
+  const [isGeneratingToken, setIsGeneratingToken] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
+  const tokenGeneratedRef = useRef(false);
 
   // Get environment variables (check multiple possible variable names)
   const LYRA_PUBLIC_KEY = process.env.NEXT_PUBLIC_LYRA_PUBLIC_KEY || 
@@ -63,8 +65,15 @@ export function LyraEmbeddedForm({
   /**
    * Generate formToken from backend
    */
-  const generateFormToken = async () => {
+  const generateFormToken = useCallback(async () => {
+    // Prevent multiple simultaneous calls
+    if (isGeneratingToken || formToken) {
+      console.log('🔄 FormToken already exists or being generated, skipping...');
+      return;
+    }
+
     try {
+      setIsGeneratingToken(true);
       setLoading(true);
       setError(null);
 
@@ -132,14 +141,16 @@ export function LyraEmbeddedForm({
 
       setFormToken(data.formToken);
       setLoading(false);
+      setIsGeneratingToken(false);
       
     } catch (err) {
       console.error('❌ Error generating formToken:', err);
       setError(err instanceof Error ? err.message : 'Failed to initialize payment');
       setLoading(false);
+      setIsGeneratingToken(false);
       onError?.(err);
     }
-  };
+  }, [amount, currency, orderId, customerEmail, customerPhone, customerFirstName, customerLastName, onError, isGeneratingToken, formToken]);
 
   /**
    * Initialize Lyra SmartForm when script is loaded
@@ -263,8 +274,11 @@ export function LyraEmbeddedForm({
    * Generate formToken on component mount
    */
   useEffect(() => {
-    generateFormToken();
-  }, [formTokenParams.amount, formTokenParams.orderId, formTokenParams.customerEmail]);
+    if (!tokenGeneratedRef.current) {
+      tokenGeneratedRef.current = true;
+      generateFormToken();
+    }
+  }, [generateFormToken]);
 
   /**
    * Render form based on display mode
