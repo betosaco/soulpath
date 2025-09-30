@@ -95,6 +95,17 @@ export function LyraEmbeddedForm({
 
       console.log('📊 FormToken API Response (full):', JSON.stringify(data, null, 2));
 
+      // TEMPORARY DEBUG: Show response in alert
+      if (process.env.NODE_ENV === 'development') {
+        console.log('=== DEBUG INFO ===');
+        console.log('Response keys:', Object.keys(data));
+        console.log('data.success:', data.success);
+        console.log('data.formToken exists:', !!data.formToken);
+        console.log('data.formToken length:', data.formToken?.length);
+        console.log('Full response:', data);
+        console.log('=================');
+      }
+
       if (!data.success || !data.formToken) {
         const errorMessage = data.error || 'Failed to generate payment token';
         console.error('❌ FormToken generation failed:', {

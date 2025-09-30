@@ -41,12 +41,12 @@ const nextConfig = {
     // Base CSP directives
     const baseDirectives = [
       "default-src 'self'",
-      "style-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline' https://static.micuentaweb.pe https://static.lyra.com",
       "font-src 'self'",
       "img-src 'self' data: https: blob:",
       // Allow external media (videos)
       "media-src 'self' https://*.vercel-storage.com blob:",
-      `connect-src 'self' ${isDevelopment ? 'http://localhost:* ws://localhost:* ' : ''}https://*.vercel.app https://matmax.world https://www.matmax.world https://api.stripe.com https://js.stripe.com https://static.micuentaweb.pe`,
+      `connect-src 'self' ${isDevelopment ? 'http://localhost:* ws://localhost:* ' : ''}https://*.vercel.app https://matmax.world https://www.matmax.world https://api.stripe.com https://js.stripe.com https://static.micuentaweb.pe https://api.micuentaweb.pe https://api.lyra.com`,
       "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://checkout.stripe.com",
       "object-src 'none'",
       "base-uri 'self'",
@@ -57,8 +57,8 @@ const nextConfig = {
 
     // Add script-src with payment providers and unsafe-eval for production
     const scriptSrc = isDevelopment
-      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://static.micuentaweb.pe https://va.vercel-scripts.com"
-      : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://static.micuentaweb.pe https://va.vercel-scripts.com";
+      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://static.micuentaweb.pe https://static.lyra.com https://va.vercel-scripts.com"
+      : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://static.micuentaweb.pe https://static.lyra.com https://va.vercel-scripts.com";
 
     return [
       {
