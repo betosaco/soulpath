@@ -1,12 +1,12 @@
 import { NextRequest } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getAuthenticatedUser } from '@/lib/auth';
-import { Document, Page, Text, View, StyleSheet, Link, pdf } from '@react-pdf/renderer';
 import React from 'react';
 
 export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
+  const { Document, Page, Text, View, StyleSheet, Link, pdf } = await import('@react-pdf/renderer');
   const user = await getAuthenticatedUser(req);
   if (!user) {
     return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), { status: 401 });

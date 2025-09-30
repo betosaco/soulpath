@@ -93,21 +93,22 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
     bookingFlow = useBookingFlow();
   } catch (error) {
     console.warn('⚠️ PackageSelectionStep: useBookingFlow failed:', error);
-    return (
-      <div className="text-center py-8">
-        <p className="text-[var(--color-text-secondary)]">Loading booking flow...</p>
-      </div>
-    );
+    // Use default values to prevent crash
+    bookingFlow = {
+      urlParams: {},
+      isScheduleFirst: false,
+      goToNextStep: () => console.warn('goToNextStep not available')
+    };
   }
   
   // Add safety check for bookingFlow
   if (!bookingFlow) {
     console.warn('⚠️ PackageSelectionStep: useBookingFlow returned undefined');
-    return (
-      <div className="text-center py-8">
-        <p className="text-[var(--color-text-secondary)]">Loading booking flow...</p>
-      </div>
-    );
+    bookingFlow = {
+      urlParams: {},
+      isScheduleFirst: false,
+      goToNextStep: () => console.warn('goToNextStep not available')
+    };
   }
   
   const {
@@ -126,21 +127,26 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
     cart = useCart();
   } catch (error) {
     console.warn('⚠️ PackageSelectionStep: useCart failed:', error);
-    return (
-      <div className="text-center py-8">
-        <p className="text-[var(--color-text-secondary)]">Loading cart...</p>
-      </div>
-    );
+    // Use default values to prevent crash
+    cart = {
+      items: [],
+      addItem: () => console.warn('addToCart not available'),
+      removeItem: () => console.warn('removeFromCart not available'),
+      updateQuantity: () => console.warn('updateQuantity not available'),
+      getTotalPrice: () => 0
+    };
   }
   
   // Add safety check for cart
   if (!cart) {
     console.warn('⚠️ PackageSelectionStep: useCart returned undefined');
-    return (
-      <div className="text-center py-8">
-        <p className="text-[var(--color-text-secondary)]">Loading cart...</p>
-      </div>
-    );
+    cart = {
+      items: [],
+      addItem: () => console.warn('addToCart not available'),
+      removeItem: () => console.warn('removeFromCart not available'),
+      updateQuantity: () => console.warn('updateQuantity not available'),
+      getTotalPrice: () => 0
+    };
   }
   
   const {
@@ -161,21 +167,18 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
     cartUI = useCartUI();
   } catch (error) {
     console.warn('⚠️ PackageSelectionStep: useCartUI failed:', error);
-    return (
-      <div className="text-center py-8">
-        <p className="text-[var(--color-text-secondary)]">Loading cart UI...</p>
-      </div>
-    );
+    // Use default values to prevent crash
+    cartUI = {
+      openCart: () => console.warn('openCart not available')
+    };
   }
   
   // Add safety check for cartUI
   if (!cartUI) {
     console.warn('⚠️ PackageSelectionStep: useCartUI returned undefined');
-    return (
-      <div className="text-center py-8">
-        <p className="text-[var(--color-text-secondary)]">Loading cart UI...</p>
-      </div>
-    );
+    cartUI = {
+      openCart: () => console.warn('openCart not available')
+    };
   }
   
   const { openCart = () => console.warn('openCart not available') } = cartUI;
@@ -213,11 +216,8 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
   // Add safety check for packages
   if (packagesError) {
     console.warn('⚠️ PackageSelectionStep: Error loading packages:', packagesError);
-    return (
-      <div className="text-center py-8">
-        <p className="text-red-600">Error loading packages: {packagesError}</p>
-      </div>
-    );
+    // UI-first approach: Don't show error immediately, render skeleton instead
+    // Error will be handled in the render section
   }
 
   // ============================================================================
@@ -519,9 +519,42 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
   };
 
   /**
+   * RENDER PACKAGE CARD SKELETON
+   * ----------------------------
+   * Skeleton component for loading state
+   */
+  const PackageCardSkeleton = ({ index }: { index: number }) => (
+    <Card 
+      className="unified-card animate-pulse"
+      style={{animationDelay: `${index * 100}ms`}}
+    >
+      <div className="absolute top-3 right-3 z-10">
+        <div className="w-9 h-9 rounded-full bg-[var(--color-surface-secondary)]"></div>
+      </div>
+      <CardHeader>
+        <div className="h-6 bg-[var(--color-surface-secondary)] rounded w-3/4 mb-2"></div>
+        <div className="h-4 bg-[var(--color-surface-secondary)] rounded w-full mb-1"></div>
+        <div className="h-4 bg-[var(--color-surface-secondary)] rounded w-5/6"></div>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col space-y-2">
+              <div className="h-8 bg-[var(--color-surface-secondary)] rounded w-24"></div>
+              <div className="h-3 bg-[var(--color-surface-secondary)] rounded w-32"></div>
+            </div>
+            <div className="h-6 bg-[var(--color-surface-secondary)] rounded w-20"></div>
+          </div>
+          <div className="h-10 bg-[var(--color-surface-secondary)] rounded w-full"></div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  /**
    * RENDER PACKAGES GRID
    * --------------------
-   * Displays available packages for selection
+   * Displays available packages for selection with UI-first approach
    */
   const renderPackagesGrid = () => {
     // Debug: Log all package names
@@ -531,40 +564,9 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
       type: p.packageDefinition?.packageType
     })));
     
-    // ULTRA-OPTIMIZATION: Minimal loading state since API is ultra-fast (0.01ms)
-    if (packagesLoading) {
-      return (
-        <div className="space-y-6">
-          {/* Minimal Loading Header */}
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-[var(--color-text-primary)] mb-2">Available Packages</h2>
-            <p className="text-[var(--color-text-secondary)]">Loading packages...</p>
-          </div>
-          
-          {/* Subtle Loading Animation */}
-          <div className="flex justify-center py-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-[var(--color-border-200)] border-t-[var(--color-primary-500)]"></div>
-          </div>
-        </div>
-      );
-    }
-
-    // Show empty state if no packages (only after loading is complete and we have data)
-    if (!packagesLoading && packages && Array.isArray(packages) && packages.length === 0) {
-      return (
-        <div className="text-center py-12">
-          <div className="text-[var(--color-text-tertiary)] mb-4">
-            <Package className="h-16 w-16 mx-auto" />
-          </div>
-          <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">No Packages Available</h3>
-          <p className="text-[var(--color-text-secondary)]">We're currently updating our package offerings. Please check back later.</p>
-        </div>
-      );
-    }
-
     return (
       <div className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-500">
-        {/* Packages Header */}
+        {/* Packages Header - Always renders first */}
         <div className="text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             <h2 className="text-2xl font-bold text-[var(--color-text-primary)]">Available Packages</h2>
@@ -575,66 +577,85 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
           <p className="text-[var(--color-text-secondary)]">Choose the perfect package for your yoga journey</p>
         </div>
         
-        {/* Packages Grid with Smooth Animations */}
-        <div className="relative">
-          {packagesLoading && hasLoadedOnce && (
-            <div className="absolute inset-0 bg-[var(--color-background-primary)]/50 backdrop-blur-sm z-10 rounded-lg flex items-center justify-center">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-2 border-[var(--color-border-200)] border-t-[var(--color-primary-500)] mx-auto mb-2"></div>
-                <p className="text-sm text-[var(--color-text-secondary)]">Refreshing packages...</p>
-              </div>
-            </div>
-          )}
+        {/* UI-first approach: Show skeleton while loading, then show content */}
+        {packagesLoading && !hasLoadedOnce ? (
+          // Initial load - show skeleton cards
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {packages && Array.isArray(packages) && packages.map((pkg: any, index: number) => (
-            <Card 
-              key={pkg.id} 
-              className="unified-card hover:shadow-lg transition-all duration-300 transform hover:scale-105 animate-in fade-in-50 slide-in-from-bottom-4 hover:animate-pulse relative"
-              style={{animationDelay: `${index * 100}ms`}}
-            >
-              {/* Matpass image in top-right corner */}
-              <div className="absolute top-3 right-3 z-10">
-                <Image
-                  src="/matpass-logo.png"
-                  alt="Matpass"
-                  width={36}
-                  height={36}
-                  className="rounded-full object-cover shadow-sm"
-                />
+            {Array.from({ length: 6 }).map((_, index) => (
+              <PackageCardSkeleton key={index} index={index} />
+            ))}
+          </div>
+        ) : !packagesLoading && packages && Array.isArray(packages) && packages.length === 0 ? (
+          // No packages available
+          <div className="text-center py-12">
+            <div className="text-[var(--color-text-tertiary)] mb-4">
+              <Package className="h-16 w-16 mx-auto" />
+            </div>
+            <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">No Packages Available</h3>
+            <p className="text-[var(--color-text-secondary)]">We're currently updating our package offerings. Please check back later.</p>
+          </div>
+        ) : (
+          // Packages loaded - show content
+          <div className="relative">
+            {packagesLoading && hasLoadedOnce && (
+              <div className="absolute inset-0 bg-[var(--color-background-primary)]/50 backdrop-blur-sm z-10 rounded-lg flex items-center justify-center">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-[var(--color-border-200)] border-t-[var(--color-primary-500)] mx-auto mb-2"></div>
+                  <p className="text-sm text-[var(--color-text-secondary)]">Refreshing packages...</p>
+                </div>
               </div>
-              <CardHeader>
-                <CardTitle as="h2" className="unified-card__title">{pkg.packageDefinition.name}</CardTitle>
-                <p className="unified-card__subtitle">{pkg.packageDefinition.description}</p>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-col">
-                      <span className="text-2xl font-bold text-[var(--color-accent-500)]">
-                        S/ {pkg.price.toFixed(2)}
-                      </span>
-                      <span className="text-xs text-[var(--color-text-secondary)]">
-                        S/ {pkg.pricePerClass?.toFixed(2) || (pkg.price / (pkg.packageDefinition.sessionsCount || 1)).toFixed(2)} per class
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {packages && Array.isArray(packages) && packages.map((pkg: any, index: number) => (
+              <Card 
+                key={pkg.id} 
+                className="unified-card hover:shadow-lg transition-all duration-300 transform hover:scale-105 animate-in fade-in-50 slide-in-from-bottom-4 hover:animate-pulse relative"
+                style={{animationDelay: `${index * 100}ms`}}
+              >
+                {/* Matpass image in top-right corner */}
+                <div className="absolute top-3 right-3 z-10">
+                  <Image
+                    src="/matpass-logo.png"
+                    alt="Matpass"
+                    width={36}
+                    height={36}
+                    className="rounded-full object-cover shadow-sm"
+                  />
+                </div>
+                <CardHeader>
+                  <CardTitle as="h2" className="unified-card__title">{pkg.packageDefinition.name}</CardTitle>
+                  <p className="unified-card__subtitle">{pkg.packageDefinition.description}</p>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="text-2xl font-bold text-[var(--color-accent-500)]">
+                          S/ {pkg.price.toFixed(2)}
+                        </span>
+                        <span className="text-xs text-[var(--color-text-secondary)]">
+                          S/ {pkg.pricePerClass?.toFixed(2) || (pkg.price / (pkg.packageDefinition.sessionsCount || 1)).toFixed(2)} per class
+                        </span>
+                      </div>
+                      <span className="text-lg font-semibold text-[var(--color-text-primary)]">
+                        {pkg.packageDefinition.sessionsCount || 1} sessions
                       </span>
                     </div>
-                    <span className="text-lg font-semibold text-[var(--color-text-primary)]">
-                      {pkg.packageDefinition.sessionsCount || 1} sessions
-                    </span>
+                    <Button
+                      onClick={() => handleAddPackage(pkg)}
+                      variant="success"
+                      className="w-full"
+                    >
+                      <Package className="w-4 h-4 mr-2" />
+                      Add to Cart
+                    </Button>
                   </div>
-                  <Button
-                    onClick={() => handleAddPackage(pkg)}
-                    variant="success"
-                    className="w-full"
-                  >
-                    <Package className="w-4 h-4 mr-2" />
-                    Add to Cart
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     );
   };

@@ -34,6 +34,32 @@ interface Product {
   updatedAt: string;
 }
 
+// Skeleton component for loading state
+function ProductCardSkeleton() {
+  return (
+    <div className="rounded-lg shadow-lg overflow-hidden border animate-pulse" style={{ background: 'var(--color-surface-primary)', borderColor: 'var(--color-border-500)' }}>
+      <div className="w-full h-48" style={{ background: 'var(--color-surface-secondary)' }}></div>
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-2">
+          <div className="h-5 w-20 rounded" style={{ background: 'var(--color-surface-secondary)' }}></div>
+          <div className="h-5 w-16 rounded" style={{ background: 'var(--color-surface-secondary)' }}></div>
+        </div>
+        <div className="h-6 w-3/4 mb-2 rounded" style={{ background: 'var(--color-surface-secondary)' }}></div>
+        <div className="h-4 w-full mb-1 rounded" style={{ background: 'var(--color-surface-secondary)' }}></div>
+        <div className="h-4 w-2/3 mb-4 rounded" style={{ background: 'var(--color-surface-secondary)' }}></div>
+        <div className="flex items-center justify-between mb-4">
+          <div className="h-8 w-24 rounded" style={{ background: 'var(--color-surface-secondary)' }}></div>
+          <div className="h-4 w-16 rounded" style={{ background: 'var(--color-surface-secondary)' }}></div>
+        </div>
+        <div className="flex space-x-2">
+          <div className="flex-1 h-10 rounded" style={{ background: 'var(--color-surface-secondary)' }}></div>
+          <div className="flex-1 h-10 rounded" style={{ background: 'var(--color-surface-secondary)' }}></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<Product[]>([]);
@@ -95,29 +121,6 @@ export default function ProductsPage() {
     fetchProducts();
   }, []);
 
-  if (loading) {
-    return (
-      <AppShell className="min-h-screen bg-[var(--color-surface-primary)]">
-        <div className="min-h-screen" style={{ color: 'var(--color-text-primary)' }}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="space-y-6">
-              {/* Minimal Loading Header */}
-              <div className="text-center">
-                <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>Available Products</h2>
-                <p style={{ color: 'var(--color-text-secondary)' }}>Loading products...</p>
-              </div>
-              
-              {/* Subtle Loading Animation - Same as packages */}
-              <div className="flex justify-center py-4">
-                <div className="animate-spin rounded-full h-8 w-8 border-2" style={{ borderColor: 'color-mix(in srgb, var(--color-primary-500) 25%, transparent)', borderTopColor: 'var(--color-primary-500)' }}></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </AppShell>
-    );
-  }
-
   if (error) {
     return (
       <AppShell className="min-h-screen bg-[var(--color-surface-primary)]">
@@ -143,6 +146,7 @@ export default function ProductsPage() {
     <AppLayout>
       <div className="pt-24 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* UI renders immediately */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>Our Products</h1>
             <p className="text-xl max-w-2xl mx-auto" style={{ color: 'var(--color-text-secondary)' }}>
@@ -150,7 +154,14 @@ export default function ProductsPage() {
             </p>
           </div>
           
-          {products.length === 0 ? (
+          {/* Show skeleton while loading */}
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {Array.from({ length: 8 }).map((_, index) => (
+                <ProductCardSkeleton key={index} />
+              ))}
+            </div>
+          ) : products.length === 0 ? (
             <div className="text-center py-12">
               <h2 className="text-xl font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>No Products Available</h2>
               <p style={{ color: 'var(--color-text-secondary)' }}>Check back later for new products!</p>

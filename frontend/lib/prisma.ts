@@ -50,11 +50,22 @@ function buildDatabaseUrl(): string {
 }
 
 let prismaInstance = globalForPrisma.prisma ?? new PrismaClient({
-  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn', 'info'] : ['error'],
-  errorFormat: 'pretty',
+  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  errorFormat: process.env.NODE_ENV === 'development' ? 'pretty' : 'minimal',
   datasources: {
     db: {
       url: buildDatabaseUrl()
+    }
+  },
+  // Performance optimizations
+  __internal: {
+    engine: {
+      connectionTimeout: 10000, // 10 seconds
+      maxWait: 5000, // 5 seconds max wait for connection
+      pool: {
+        timeout: 30000, // 30 seconds
+        idleTimeout: 300000, // 5 minutes
+      }
     }
   }
 });
@@ -103,11 +114,22 @@ const connect = async (): Promise<void> => {
           console.warn('⚠️ Attempting Prisma failover to direct database URL...');
           triedFailover = true;
           prismaInstance = new PrismaClient({
-            log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn', 'info'] : ['error'],
-            errorFormat: 'pretty',
+            log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+            errorFormat: process.env.NODE_ENV === 'development' ? 'pretty' : 'minimal',
             datasources: {
               db: {
                 url: process.env.DIRECT_DATABASE_URL || process.env.SUPABASE_DIRECT_URL as string,
+              }
+            },
+            // Performance optimizations
+            __internal: {
+              engine: {
+                connectionTimeout: 10000,
+                maxWait: 5000,
+                pool: {
+                  timeout: 30000,
+                  idleTimeout: 300000,
+                }
               }
             }
           });

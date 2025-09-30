@@ -479,47 +479,59 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
   // Debug logging
   console.log('🔍 EnhancedSchedule render - loading:', loading, 'slots:', slots?.length || 0, 'error:', error);
 
-  // ULTRA-OPTIMIZATION: Minimal loading state since API is ultra-fast
-  if (loading) {
-    return (
-      <div className={`enhanced-schedule ${className} bg-white`}>
-        <div className="space-y-6">
-          {/* Minimal Loading Header */}
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Available Classes</h2>
-            <p className="text-[var(--color-text-secondary)]">Loading schedule...</p>
+  // Skeleton components for UI-first loading
+  const ScheduleSlotSkeleton = () => (
+    <div className="schedule-slot card-base animate-pulse">
+      <div className="schedule-slot__header">
+        <div className="flex items-start justify-between mb-2">
+          <div className="flex flex-col gap-1 flex-1">
+            <div className="h-5 bg-gray-200 rounded w-20 mb-1"></div>
+            <div className="h-4 bg-gray-200 rounded w-32"></div>
           </div>
-          
-          {/* Subtle Loading Animation - Same as packages */}
-          <div className="flex justify-center py-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-[var(--color-border-200)] border-t-[var(--color-primary-500)]"></div>
-          </div>
+          <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
         </div>
       </div>
-    );
-  }
-
-  // If no slots and not loading, show empty state
-  if (!slots || slots.length === 0) {
-    return (
-      <div className={`enhanced-schedule ${className} bg-white`}>
-        <div className="flex items-center justify-center py-12 text-center">
-          <div>
-            <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No classes available</h3>
-            <p className="text-gray-600 mb-4">There are no classes scheduled for the selected period.</p>
-            <button 
-              onClick={() => fetchSlots()}
-              className="bg-[#6ea058] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#5a8a47] focus:ring-2 focus:ring-[#6ea058] focus:outline-none transition-colors"
-            >
-              Refresh Schedule
-            </button>
-          </div>
+      <div className="schedule-slot__content space-y-3 mt-3">
+        <div className="flex items-center gap-2">
+          <div className="h-4 w-4 bg-gray-200 rounded"></div>
+          <div className="h-4 bg-gray-200 rounded flex-1"></div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-4 w-4 bg-gray-200 rounded"></div>
+          <div className="h-4 bg-gray-200 rounded flex-1"></div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-4 w-4 bg-gray-200 rounded"></div>
+          <div className="h-4 bg-gray-200 rounded flex-1"></div>
         </div>
       </div>
-    );
-  }
+      <div className="schedule-slot__footer mt-4">
+        <div className="h-10 bg-gray-200 rounded-lg w-full"></div>
+      </div>
+    </div>
+  );
 
+  const ScheduleDaySkeleton = ({ slotsCount = 3 }: { slotsCount?: number }) => (
+    <div className="schedule-day rounded-lg shadow-sm border overflow-hidden animate-pulse" style={{
+      backgroundColor: 'color-mix(in srgb, var(--color-primary-500) 6%, transparent)',
+      borderColor: 'color-mix(in srgb, var(--color-primary-500) 20%, transparent)'
+    }}>
+      <div className="schedule-day__header px-6 py-4 border-b flex items-center justify-between" style={{
+        backgroundColor: 'color-mix(in srgb, var(--color-primary-500) 10%, transparent)',
+        borderBottomColor: 'color-mix(in srgb, var(--color-primary-500) 20%, transparent)'
+      }}>
+        <div className="h-7 bg-gray-200 rounded w-48"></div>
+        <div className="h-5 bg-gray-200 rounded w-20"></div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-4">
+        {Array.from({ length: slotsCount }).map((_, index) => (
+          <ScheduleSlotSkeleton key={index} />
+        ))}
+      </div>
+    </div>
+  );
+
+  // Error state
   if (error) {
     return (
       <div className={`enhanced-schedule ${className}`}>
@@ -540,21 +552,21 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
     );
   }
 
+  // UI-first approach: Always render the structure
   return (
     <div className={`enhanced-schedule ${className}`}>
       {showFilters && (
         <>
-          {/* Header */}
+          {/* Header - Always renders first */}
           <div className="enhanced-schedule__header">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
               <div>
                 <h2 className="text-3xl font-bold text-gray-900 mb-2">Class Schedule</h2>
                 <p className="text-gray-600">Book your favorite classes with our expert instructors</p>
               </div>
-
             </div>
 
-            {/* Filters */}
+            {/* Filters - Always rendered (disabled while loading) */}
             <div className="enhanced-schedule__filters">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             {/* Search */}
@@ -565,7 +577,8 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
                 placeholder="Search classes..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6ea058] focus:border-transparent"
+                disabled={loading}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6ea058] focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
 
@@ -577,7 +590,8 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
               aria-label="Filter by date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6ea058] focus:border-transparent"
+              disabled={loading}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6ea058] focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="">All Dates</option>
               {availableDates.map(date => (
@@ -595,7 +609,8 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
               aria-label="Filter by teacher"
               value={selectedTeacher}
               onChange={(e) => setSelectedTeacher(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6ea058] focus:border-transparent"
+              disabled={loading}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6ea058] focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="all">All Teachers</option>
               {teachers.map(teacher => (
@@ -613,7 +628,8 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
               aria-label="Filter by service"
               value={selectedService}
               onChange={(e) => setSelectedService(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6ea058] focus:border-transparent"
+              disabled={loading}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6ea058] focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="all">All Services</option>
               {services.map(service => (
@@ -628,9 +644,32 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
       </>
       )}
 
-      {/* Schedule Content */}
+      {/* Schedule Content - UI-first approach */}
       <div className="enhanced-schedule__content">
-        {Object.keys(groupedSlots).length === 0 ? (
+        {loading ? (
+          // Show skeleton while loading
+          <div className="space-y-6">
+            <ScheduleDaySkeleton slotsCount={3} />
+            <ScheduleDaySkeleton slotsCount={3} />
+            <ScheduleDaySkeleton slotsCount={2} />
+          </div>
+        ) : !slots || slots.length === 0 ? (
+          // No slots available
+          <div className="flex items-center justify-center py-12 text-center">
+            <div>
+              <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No classes available</h3>
+              <p className="text-gray-600 mb-4">There are no classes scheduled for the selected period.</p>
+              <button 
+                onClick={() => fetchSlots()}
+                className="bg-[#6ea058] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#5a8a47] focus:ring-2 focus:ring-[#6ea058] focus:outline-none transition-colors"
+              >
+                Refresh Schedule
+              </button>
+            </div>
+          </div>
+        ) : Object.keys(groupedSlots).length === 0 ? (
+          // No classes match filters
           <div className="text-center py-12">
             <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No classes found</h3>

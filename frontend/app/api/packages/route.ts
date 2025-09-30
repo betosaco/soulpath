@@ -8,7 +8,7 @@ export async function OPTIONS() {
 
 // ULTRA-OPTIMIZATION 1: In-memory cache for frequently accessed data
 const memoryCache = new Map();
-const CACHE_TTL = 30000; // 30 seconds
+const CACHE_TTL = 300000; // 5 minutes (packages don't change frequently)
 const MAX_CACHE_SIZE = 100;
 
 // ULTRA-OPTIMIZATION 2: Pre-computed response templates
@@ -166,7 +166,14 @@ export async function GET(request: NextRequest) {
 
     console.log(`🚀 Ultra-optimized response: ${response.meta.responseTime}`);
 
-    return addCorsHeaders(NextResponse.json(response));
+    // Add HTTP caching headers for CDN/browser caching
+    const jsonResponse = NextResponse.json(response);
+    const corsResponse = addCorsHeaders(jsonResponse);
+    corsResponse.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=300');
+    corsResponse.headers.set('CDN-Cache-Control', 'public, s-maxage=300');
+    corsResponse.headers.set('Vercel-CDN-Cache-Control', 'max-age=300');
+    
+    return corsResponse;
 
   } catch (error) {
     console.error('❌ Ultra-optimized API error:', error);

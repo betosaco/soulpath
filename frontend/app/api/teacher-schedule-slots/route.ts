@@ -5,7 +5,7 @@ import { addCorsHeaders, handleCorsPreflight } from '@/lib/cors';
 
 // ULTRA-OPTIMIZATION 1: In-memory cache for schedule slots
 const scheduleSlotsCache = new Map<string, { data: any; timestamp: number }>();
-const CACHE_TTL_SECONDS = 30; // 30 seconds TTL for schedule slots (frequently changing)
+const CACHE_TTL_SECONDS = 120; // 2 minutes TTL for schedule slots (balance between freshness and performance)
 const MAX_CACHE_SIZE = 50;
 
 // ULTRA-OPTIMIZATION 2: Pre-computed response template
@@ -222,7 +222,14 @@ export async function GET(request: NextRequest) {
     scheduleSlotsCache.set(cacheKey, { data: response, timestamp: now });
     console.log(`✅ Stored in-memory cache for schedule slots`);
 
-    return addCorsHeaders(NextResponse.json(response));
+    // Add HTTP caching headers for CDN/browser caching
+    const jsonResponse = NextResponse.json(response);
+    const corsResponse = addCorsHeaders(jsonResponse);
+    corsResponse.headers.set('Cache-Control', 'public, s-maxage=120, stale-while-revalidate=120');
+    corsResponse.headers.set('CDN-Cache-Control', 'public, s-maxage=120');
+    corsResponse.headers.set('Vercel-CDN-Cache-Control', 'max-age=120');
+    
+    return corsResponse;
   } catch (error) {
     console.error('❌ Error in GET /api/teacher-schedule-slots (ULTRA-OPTIMIZED):', error);
     

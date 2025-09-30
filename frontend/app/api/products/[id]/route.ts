@@ -4,7 +4,7 @@ import { addCorsHeaders, handleCorsPreflight } from '@/lib/cors';
 
 // ULTRA-OPTIMIZATION 1: In-memory cache for product details
 const productDetailCache = new Map<string, { data: any; timestamp: number }>();
-const CACHE_TTL_SECONDS = 60; // 1 minute TTL for product details
+const CACHE_TTL_SECONDS = 300; // 5 minutes TTL for product details (products don't change frequently)
 const MAX_CACHE_SIZE = 100;
 
 // ULTRA-OPTIMIZATION 2: Pre-computed response template
@@ -156,7 +156,14 @@ export async function GET(
     productDetailCache.set(cacheKey, { data: response, timestamp: now });
     console.log(`✅ Stored in-memory cache for product ${id}`);
 
-    return addCorsHeaders(NextResponse.json(response));
+    // Add HTTP caching headers for CDN/browser caching
+    const jsonResponse = NextResponse.json(response);
+    const corsResponse = addCorsHeaders(jsonResponse);
+    corsResponse.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=300');
+    corsResponse.headers.set('CDN-Cache-Control', 'public, s-maxage=300');
+    corsResponse.headers.set('Vercel-CDN-Cache-Control', 'max-age=300');
+    
+    return corsResponse;
   } catch (error) {
     console.error('❌ Error in GET /api/products/[id] (ULTRA-OPTIMIZED):', error);
     

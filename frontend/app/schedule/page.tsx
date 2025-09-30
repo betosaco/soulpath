@@ -6,11 +6,10 @@ import { AppShell } from '@/components/AppShell';
 import { EnhancedSchedule } from '@/components/EnhancedSchedule';
 import { useCart } from '@/store/appStore';
 
-// ULTRA-OPTIMIZATION: Memoized SchedulePage component
+// ULTRA-OPTIMIZATION: Memoized SchedulePage component with UI-first approach
 const SchedulePage = memo(function SchedulePage() {
   const router = useRouter();
   const { items: cartItems } = useCart();
-  const [isInitialLoading, setIsInitialLoading] = React.useState(true);
 
   // ULTRA-OPTIMIZATION: Memoized cart monitoring
   const handleCartChange = useCallback(() => {
@@ -26,16 +25,6 @@ const SchedulePage = memo(function SchedulePage() {
   useEffect(() => {
     handleCartChange();
   }, [handleCartChange]);
-
-  // ULTRA-OPTIMIZATION: Handle initial loading state
-  useEffect(() => {
-    // Simulate a brief loading state for consistency
-    const timer = setTimeout(() => {
-      setIsInitialLoading(false);
-    }, 100); // Very brief to maintain ultra-fast performance
-
-    return () => clearTimeout(timer);
-  }, []);
 
   // ULTRA-OPTIMIZATION: Memoized schedule selection handler
   const handleScheduleSelected = useCallback((slot: any) => {
@@ -53,30 +42,7 @@ const SchedulePage = memo(function SchedulePage() {
     window.location.href = `/booking/packages?${params.toString()}`;
   }, []);
 
-  // ULTRA-OPTIMIZATION: Show consistent loading state
-  if (isInitialLoading) {
-    return (
-      <AppShell className="min-h-screen bg-[var(--color-surface-primary)]">
-        <div className="min-h-screen">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="space-y-6">
-              {/* Minimal Loading Header */}
-              <div className="text-center">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Available Classes</h2>
-                <p className="text-[var(--color-text-secondary)]">Loading schedule...</p>
-              </div>
-              
-              {/* Subtle Loading Animation - Same as other pages */}
-              <div className="flex justify-center py-4">
-                <div className="animate-spin rounded-full h-8 w-8 border-2 border-[var(--color-border-200)] border-t-[var(--color-primary-500)]"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </AppShell>
-    );
-  }
-
+  // UI-first approach: Render immediately, let EnhancedSchedule handle its own loading
   return (
     <AppShell className="min-h-screen bg-[var(--color-surface-primary)]">
       <div className="min-h-screen">
