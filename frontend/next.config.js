@@ -41,13 +41,13 @@ const nextConfig = {
     // Base CSP directives
     const baseDirectives = [
       "default-src 'self'",
-      "style-src 'self' 'unsafe-inline' https://static.micuentaweb.pe https://static.lyra.com",
-      "font-src 'self'",
+      "style-src 'self' 'unsafe-inline' https://static.micuentaweb.pe https://static.lyra.com https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: https: blob:",
       // Allow external media (videos)
       "media-src 'self' https://*.vercel-storage.com blob:",
-      `connect-src 'self' ${isDevelopment ? 'http://localhost:* ws://localhost:* ' : ''}https://*.vercel.app https://matmax.world https://www.matmax.world https://api.stripe.com https://js.stripe.com https://static.micuentaweb.pe https://api.micuentaweb.pe https://api.lyra.com`,
-      "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://checkout.stripe.com",
+      `connect-src 'self' ${isDevelopment ? 'http://localhost:* ws://localhost:* ' : ''}https://*.vercel.app https://matmax.world https://www.matmax.world https://api.stripe.com https://js.stripe.com https://static.micuentaweb.pe https://static.lyra.com https://api.micuentaweb.pe https://api.lyra.com`,
+      "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://checkout.stripe.com https://static.lyra.com https://static.micuentaweb.pe",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self' https://*.vercel.app https://checkout.stripe.com",

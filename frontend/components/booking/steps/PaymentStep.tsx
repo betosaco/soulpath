@@ -1020,7 +1020,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                       <div className="border-t pt-4">
                         <LyraEmbeddedForm
                           amount={getTotalPrice()}
-                          currency={cartItems.length > 0 ? cartItems[0].currency : 'PEN'}
+                          currency="PEN"
                           orderId={`ORDER-${Date.now()}`}
                           customerEmail={customerData?.email || ''}
                           customerPhone={customerData?.phone}

@@ -148,16 +148,23 @@ export function LyraEmbeddedForm({
       try {
         console.log('🔄 Initializing Lyra SmartForm');
 
-        // Set up payment success callback
+        // Set up event handlers BEFORE setFormConfig
         window.KR.onSubmit((paymentData: any) => {
           setPaymentProcessing(true);
           console.log('💳 Payment submitted:', paymentData);
-          return true;
+          
+          // Call success callback
+          onSuccess?.(paymentData);
+          setPaymentSuccess(true);
+          setPaymentProcessing(false);
+          
+          return false; // Prevent default form submission
         });
 
-        // Handle payment success
+        // Handle form ready
         window.KR.onFormReady(() => {
-          console.log('✅ Lyra form ready');
+          console.log('✅ Lyra form ready - fields should now be visible');
+          setLoading(false);
         });
 
         // Handle errors
@@ -168,9 +175,26 @@ export function LyraEmbeddedForm({
           onError?.(error);
         });
 
+        // CRITICAL: Actually render the form with setFormConfig
+        window.KR.setFormConfig({
+          formToken: formToken,
+          'kr-language': 'es-ES',
+        }).then(({ KR }: any) => {
+          console.log('✅ Lyra form configured successfully');
+          // Attach form to DOM
+          return KR.attachForm('.kr-smart-form');
+        }).then(({ KR, result }: any) => {
+          console.log('✅ Lyra form attached to DOM:', result);
+        }).catch((error: any) => {
+          console.error('❌ Error configuring Lyra form:', error);
+          setError('Failed to initialize payment form');
+          setLoading(false);
+        });
+
       } catch (err) {
         console.error('❌ Error initializing Lyra form:', err);
         setError('Failed to initialize payment form');
+        setLoading(false);
       }
     }
   }, [scriptLoaded, formToken]);
@@ -202,7 +226,7 @@ export function LyraEmbeddedForm({
       {/* Load Lyra JavaScript Library */}
       <Script
         src={LYRA_JS_URL}
-        strategy="lazyOnload"
+        strategy="afterInteractive"
         onLoad={() => {
           console.log('✅ Lyra script loaded');
           setScriptLoaded(true);
@@ -211,9 +235,9 @@ export function LyraEmbeddedForm({
           console.error('❌ Failed to load Lyra script:', e);
           setError('Failed to load payment form');
         }}
-        data-kr-public-key={LYRA_PUBLIC_KEY}
-        data-kr-post-url-success={`${window.location.origin}/booking/confirmation`}
-        data-kr-language="es-ES"
+        kr-public-key={LYRA_PUBLIC_KEY}
+        kr-post-url-success={`${typeof window !== 'undefined' ? window.location.origin : ''}/booking/confirmation`}
+        kr-language="es-ES"
       />
 
       {/* Load Neon Theme */}
@@ -300,7 +324,6 @@ export function LyraEmbeddedForm({
           <div
             ref={formRef}
             className={getFormClassName()}
-            kr-form-token={formToken}
           >
             {/* Lyra will inject the payment form here */}
           </div>
