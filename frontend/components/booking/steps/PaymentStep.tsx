@@ -129,6 +129,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
   const [termsAccepted, setTermsAccepted] = React.useState(true);
   const { openTerms, closeTerms } = useTermsUI();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState<'lyra' | 'paylater' | null>(null);
+  const [paymentMethodKey, setPaymentMethodKey] = React.useState(0);
 
   // ============================================================================
   // BUSINESS LOGIC - ORDER VALIDATION
@@ -973,13 +974,19 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                             ? 'border-[var(--color-primary-500)] bg-[var(--color-primary-50)]'
                             : 'border-border hover:border-[var(--color-primary-300)]'
                         }`}
-                        onClick={() => setSelectedPaymentMethod('lyra')}
+                        onClick={() => {
+                          setSelectedPaymentMethod('lyra');
+                          setPaymentMethodKey(prev => prev + 1);
+                        }}
                       >
                         <div className="flex items-center space-x-3 mb-2">
                           <input
                             type="radio"
                             checked={selectedPaymentMethod === 'lyra'}
-                            onChange={() => setSelectedPaymentMethod('lyra')}
+                            onChange={() => {
+                              setSelectedPaymentMethod('lyra');
+                              setPaymentMethodKey(prev => prev + 1);
+                            }}
                             className="w-4 h-4 text-[var(--color-primary-500)]"
                           />
                           <CreditCard className="w-6 h-6 text-[var(--color-primary-500)]" />
@@ -997,13 +1004,19 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                             ? 'border-[var(--color-accent-500)] bg-[var(--color-accent-50)]'
                             : 'border-border hover:border-[var(--color-accent-300)]'
                         }`}
-                        onClick={() => setSelectedPaymentMethod('paylater')}
+                        onClick={() => {
+                          setSelectedPaymentMethod('paylater');
+                          setPaymentMethodKey(prev => prev + 1);
+                        }}
                       >
                         <div className="flex items-center space-x-3 mb-2">
                           <input
                             type="radio"
                             checked={selectedPaymentMethod === 'paylater'}
-                            onChange={() => setSelectedPaymentMethod('paylater')}
+                            onChange={() => {
+                              setSelectedPaymentMethod('paylater');
+                              setPaymentMethodKey(prev => prev + 1);
+                            }}
                             className="w-4 h-4 text-[var(--color-accent-500)]"
                           />
                           <Clock className="w-6 h-6 text-[var(--color-accent-500)]" />
@@ -1019,6 +1032,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                     {selectedPaymentMethod === 'lyra' && (
                       <div className="border-t pt-4">
                         <LyraEmbeddedForm
+                          key={`lyra-form-${paymentMethodKey}`}
                           amount={getTotalPrice()}
                           currency="PEN"
                           orderId={`ORDER-${Date.now()}`}
