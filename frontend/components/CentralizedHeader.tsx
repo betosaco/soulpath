@@ -350,6 +350,21 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                     </motion.button>
                   </Link>
 
+                  <Link href="/apply-teacher">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleMenuItemClick}
+                      className={`w-full text-center px-4 sm:px-6 py-4 sm:py-5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 sm:space-x-4 touch-manipulation min-h-[52px] border border-gray-200 mobile-touch-feedback ${
+                        isActiveRoute('/apply-teacher') 
+                          ? 'text-[#6ea058] font-bold' 
+                          : 'text-black hover:text-[#6ea058]'
+                      }`}
+                    >
+                      <span className="text-base sm:text-lg font-medium">{getTranslation('nav.applyTeacher', language === 'es' ? 'Únete como Profesor' : 'Apply as Teacher')}</span>
+                    </motion.button>
+                  </Link>
+
                   {/* Cart Icon - Mobile */}
                   <div className="flex justify-center">
                     <CartIcon className="sm:hidden" />
