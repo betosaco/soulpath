@@ -82,8 +82,29 @@ export function LyraEmbeddedForm({
 
       const data = await response.json();
 
+      console.log('📊 FormToken API Response:', data);
+
       if (!data.success || !data.formToken) {
-        throw new Error(data.error || 'Failed to generate payment token');
+        const errorMessage = data.error || 'Failed to generate payment token';
+        console.error('❌ FormToken generation failed:', {
+          success: data.success,
+          hasFormToken: !!data.formToken,
+          error: data.error,
+          debug: data.debug,
+          missingVars: data.missingVars
+        });
+        
+        // Show more helpful error message if credentials are missing
+        if (data.missingVars) {
+          throw new Error('Payment system not configured. Missing: ' + 
+            Object.entries(data.missingVars)
+              .filter(([_, missing]) => missing)
+              .map(([key]) => key)
+              .join(', ')
+          );
+        }
+        
+        throw new Error(errorMessage);
       }
 
       setFormToken(data.formToken);

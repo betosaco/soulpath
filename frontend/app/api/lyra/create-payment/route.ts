@@ -44,10 +44,29 @@ export async function POST(request: NextRequest) {
     const LYRA_PASSWORD = process.env.LYRA_PASSWORD;
     const LYRA_API_ENDPOINT = process.env.LYRA_API_ENDPOINT || 'https://api.lyra.com/api-payment/V4/Charge/CreatePayment';
 
+    console.log('🔍 Environment check:', {
+      hasUsername: !!LYRA_USERNAME,
+      hasPassword: !!LYRA_PASSWORD,
+      endpoint: LYRA_API_ENDPOINT,
+      usernameLength: LYRA_USERNAME?.length || 0
+    });
+
     if (!LYRA_USERNAME || !LYRA_PASSWORD) {
       console.error('❌ Lyra credentials not configured');
+      console.error('Available env vars:', {
+        LYRA_USERNAME: !!process.env.LYRA_USERNAME,
+        LYRA_PASSWORD: !!process.env.LYRA_PASSWORD,
+        allEnvKeys: Object.keys(process.env).filter(k => k.includes('LYRA'))
+      });
       return addCorsHeaders(NextResponse.json(
-        { success: false, error: 'Payment gateway not configured' },
+        { 
+          success: false, 
+          error: 'Payment gateway not configured. Please add LYRA_USERNAME and LYRA_PASSWORD environment variables.',
+          missingVars: {
+            LYRA_USERNAME: !LYRA_USERNAME,
+            LYRA_PASSWORD: !LYRA_PASSWORD
+          }
+        },
         { status: 500 }
       ));
     }
@@ -89,6 +108,9 @@ export async function POST(request: NextRequest) {
 
     const responseData = await response.json();
 
+    // Log full response for debugging
+    console.log('📊 Lyra API Response:', JSON.stringify(responseData, null, 2));
+
     if (!response.ok) {
       console.error('❌ Lyra API error:', responseData);
       return addCorsHeaders(NextResponse.json(
@@ -101,18 +123,34 @@ export async function POST(request: NextRequest) {
       ));
     }
 
-    // Extract formToken from response
-    const formToken = responseData.answer?.formToken;
+    // Extract formToken from response - try multiple possible paths
+    const formToken = responseData.answer?.formToken || 
+                     responseData.formToken || 
+                     responseData.data?.formToken;
 
     if (!formToken) {
-      console.error('❌ No formToken in response:', responseData);
+      console.error('❌ No formToken in response. Full response:', JSON.stringify(responseData, null, 2));
+      console.error('❌ Response structure:', {
+        hasAnswer: !!responseData.answer,
+        hasFormToken: !!responseData.formToken,
+        hasData: !!responseData.data,
+        keys: Object.keys(responseData)
+      });
       return addCorsHeaders(NextResponse.json(
-        { success: false, error: 'Invalid payment response' },
+        { 
+          success: false, 
+          error: 'Invalid payment response - no formToken found',
+          debug: {
+            status: responseData.status,
+            responseKeys: Object.keys(responseData),
+            hasAnswer: !!responseData.answer
+          }
+        },
         { status: 500 }
       ));
     }
 
-    console.log('✅ FormToken created successfully');
+    console.log('✅ FormToken created successfully:', formToken.substring(0, 20) + '...');
 
     // Return formToken to client
     return addCorsHeaders(NextResponse.json({
