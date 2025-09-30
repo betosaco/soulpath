@@ -52,12 +52,12 @@ export function LyraEmbeddedForm({
 
   // Get environment variables (check multiple possible variable names)
   const LYRA_PUBLIC_KEY = process.env.NEXT_PUBLIC_LYRA_PUBLIC_KEY || 
-                          process.env.LYRA_TEST_PUBLIC_KEY ||
-                          process.env.LYRA_PUBLIC_KEY || 
-                          '';
+                          '88569105:[test]publickey_oHKEsiKA3i9E1JshcnIA7RktrR163DdRZYzYOWgXqwSXx'; // Fallback to your test key
   const LYRA_JS_URL = process.env.NEXT_PUBLIC_LYRA_JS_LIBRARY_URL || 
-                      process.env.LYRA_JS_LIBRARY_URL ||
                       'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js';
+
+  console.log('🔑 Lyra Public Key loaded:', LYRA_PUBLIC_KEY ? 'Yes ✅' : 'No ❌');
+  console.log('📚 Lyra JS URL:', LYRA_JS_URL);
 
   /**
    * Generate formToken from backend
@@ -67,27 +67,33 @@ export function LyraEmbeddedForm({
       setLoading(true);
       setError(null);
 
+      const requestData = {
+        amount: Math.round(amount * 100), // Convert to cents
+        currency,
+        orderId,
+        customer: {
+          email: customerEmail,
+          phone: customerPhone,
+          firstName: customerFirstName,
+          lastName: customerLastName,
+        },
+      };
+
+      console.log('🔄 Requesting formToken with:', requestData);
+
       const response = await fetch('/api/lyra/create-payment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          amount: Math.round(amount * 100), // Convert to cents
-          currency,
-          orderId,
-          customer: {
-            email: customerEmail,
-            phone: customerPhone,
-            firstName: customerFirstName,
-            lastName: customerLastName,
-          },
-        }),
+        body: JSON.stringify(requestData),
       });
+
+      console.log('📡 API Response status:', response.status, response.statusText);
 
       const data = await response.json();
 
-      console.log('📊 FormToken API Response:', data);
+      console.log('📊 FormToken API Response (full):', JSON.stringify(data, null, 2));
 
       if (!data.success || !data.formToken) {
         const errorMessage = data.error || 'Failed to generate payment token';
