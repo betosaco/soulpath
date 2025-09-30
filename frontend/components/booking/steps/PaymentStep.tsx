@@ -299,7 +299,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
           } : null,
           items: cartItems,
           totalAmount: getTotalPrice(),
-          currency: 'S/.',
+          currency: 'PEN',
           paymentMethod: 'stripe',
           paymentIntentId: paymentIntentId,
           scheduleDetails: scheduleDetails.length > 0 ? scheduleDetails : undefined
@@ -545,7 +545,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
           } : null,
           items: cartItems,
           totalAmount: getTotalPrice(),
-          currency: 'S/.',
+          currency: 'PEN',
           paymentMethod: 'pay_later',
           scheduleDetails: scheduleDetails.length > 0 ? scheduleDetails : undefined
         })
