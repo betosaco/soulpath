@@ -128,8 +128,15 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
   const { orderData, setOrderData } = useOrder();
   const [termsAccepted, setTermsAccepted] = React.useState(true);
   const { openTerms, closeTerms } = useTermsUI();
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState<'lyra' | 'paylater' | null>(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState<'lyra' | 'paylater' | null>('paylater');
   const [paymentMethodKey, setPaymentMethodKey] = React.useState(0);
+
+  // Force paylater selection during debugging
+  React.useEffect(() => {
+    if (selectedPaymentMethod === 'lyra') {
+      setSelectedPaymentMethod('paylater');
+    }
+  }, [selectedPaymentMethod]);
 
   // ============================================================================
   // BUSINESS LOGIC - ORDER VALIDATION
@@ -967,33 +974,33 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                   <div className="space-y-4">
                     {/* Payment Method Selection */}
                     <div className="space-y-3">
-                      {/* Lyra/Izipay Payment Option */}
+                      {/* Lyra/Izipay Payment Option - DISABLED FOR DEBUGGING */}
                       <div 
-                        className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                        className={`p-4 border rounded-lg transition-all opacity-50 cursor-not-allowed ${
                           selectedPaymentMethod === 'lyra'
                             ? 'border-[var(--color-primary-500)] bg-[var(--color-primary-50)]'
-                            : 'border-border hover:border-[var(--color-primary-300)]'
+                            : 'border-border'
                         }`}
-                        onClick={() => {
-                          setSelectedPaymentMethod('lyra');
-                          setPaymentMethodKey(prev => prev + 1);
+                        onClick={(e) => {
+                          e.preventDefault();
+                          toast.error('Credit card payments are temporarily disabled for debugging');
                         }}
                       >
                         <div className="flex items-center space-x-3 mb-2">
                           <input
                             type="radio"
-                            checked={selectedPaymentMethod === 'lyra'}
-                            onChange={() => {
-                              setSelectedPaymentMethod('lyra');
-                              setPaymentMethodKey(prev => prev + 1);
-                            }}
+                            checked={false}
+                            disabled={true}
                             className="w-4 h-4 text-[var(--color-primary-500)]"
                           />
-                          <CreditCard className="w-6 h-6 text-[var(--color-primary-500)]" />
-                          <h4 className="font-medium text-foreground">Credit/Debit Card</h4>
+                          <CreditCard className="w-6 h-6 text-gray-400" />
+                          <h4 className="font-medium text-gray-500">Credit/Debit Card</h4>
+                          <span className="px-2 py-1 text-xs bg-red-100 text-red-600 rounded-full">
+                            DISABLED
+                          </span>
                         </div>
-                        <p className="text-sm text-muted-foreground ml-7">
-                          Pay securely with your credit or debit card via Lyra/Izipay
+                        <p className="text-sm text-gray-400 ml-7">
+                          Credit card payments are temporarily disabled for debugging
                         </p>
                       </div>
 
