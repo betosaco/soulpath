@@ -39,10 +39,10 @@ export async function POST(request: NextRequest) {
       ));
     }
 
-    // Get Lyra credentials from environment
-    const LYRA_USERNAME = process.env.LYRA_USERNAME;
-    const LYRA_PASSWORD = process.env.LYRA_PASSWORD;
-    const LYRA_API_ENDPOINT = process.env.LYRA_API_ENDPOINT || 'https://api.lyra.com/api-payment/V4/Charge/CreatePayment';
+    // Get Lyra credentials from environment (check multiple possible variable names)
+    const LYRA_USERNAME = process.env.LYRA_USERNAME || process.env.LYRA_TEST_USERNAME;
+    const LYRA_PASSWORD = process.env.LYRA_PASSWORD || process.env.LYRA_TEST_PASSWORD;
+    const LYRA_API_ENDPOINT = process.env.LYRA_API_ENDPOINT || 'https://api.micuentaweb.pe/api-payment/V4/Charge/CreatePayment';
 
     console.log('🔍 Environment check:', {
       hasUsername: !!LYRA_USERNAME,

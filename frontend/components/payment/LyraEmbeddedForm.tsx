@@ -50,9 +50,14 @@ export function LyraEmbeddedForm({
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
 
-  // Get environment variables
-  const LYRA_PUBLIC_KEY = process.env.NEXT_PUBLIC_LYRA_PUBLIC_KEY || '';
-  const LYRA_JS_URL = process.env.NEXT_PUBLIC_LYRA_JS_LIBRARY_URL || 'https://static.lyra.com/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js';
+  // Get environment variables (check multiple possible variable names)
+  const LYRA_PUBLIC_KEY = process.env.NEXT_PUBLIC_LYRA_PUBLIC_KEY || 
+                          process.env.LYRA_TEST_PUBLIC_KEY ||
+                          process.env.LYRA_PUBLIC_KEY || 
+                          '';
+  const LYRA_JS_URL = process.env.NEXT_PUBLIC_LYRA_JS_LIBRARY_URL || 
+                      process.env.LYRA_JS_LIBRARY_URL ||
+                      'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js';
 
   /**
    * Generate formToken from backend
