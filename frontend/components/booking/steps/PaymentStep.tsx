@@ -42,6 +42,7 @@ import { useRouter } from 'next/navigation';
 import { useBookingFlow } from '../hooks/useBookingFlow';
 import { useCart, useAppStore, useShipping, useOrder, useTermsUI } from '@/store/appStore';
 import { CreditCard, Clock, User, MapPin, Calendar, CheckCircle, AlertCircle, Mail, Phone, Edit } from 'lucide-react';
+import { LyraEmbeddedForm } from '@/components/payment/LyraEmbeddedForm';
 
 /**
  * PAYMENT STEP PROPS
@@ -127,6 +128,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
   const { orderData, setOrderData } = useOrder();
   const [termsAccepted, setTermsAccepted] = React.useState(true);
   const { openTerms, closeTerms } = useTermsUI();
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState<'lyra' | 'paylater' | null>(null);
 
   // ============================================================================
   // BUSINESS LOGIC - ORDER VALIDATION
@@ -407,6 +409,81 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
 
     // Show error message
     toast.error('Payment failed. Please try again.');
+  };
+
+  /**
+   * HANDLE LYRA PAYMENT SUCCESS
+   * ---------------------------
+   * Process successful Lyra payment and create order
+   */
+  const handleLyraPaymentSuccess = async (paymentData: any) => {
+    try {
+      setPaymentStatus('processing');
+      console.log('✅ Lyra payment successful:', paymentData);
+
+      // Extract schedule details from cart items
+      const scheduleDetails = extractScheduleDetails();
+
+      // Create order with Lyra payment details
+      const orderResponse = await fetch('/api/orders/create-unified', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customerInfo: customerData,
+          shippingAddress: shippingData,
+          items: cartItems,
+          totalAmount: getTotalPrice(),
+          currency: cartItems.length > 0 ? cartItems[0].currency : 'PEN',
+          paymentMethod: 'lyra',
+          lyraTransactionId: paymentData.transactionUuid,
+          scheduleDetails: scheduleDetails.length > 0 ? scheduleDetails : undefined
+        })
+      });
+
+      if (!orderResponse.ok) {
+        throw new Error('Failed to create order after payment');
+      }
+
+      const orderResult = await orderResponse.json();
+      
+      const orderInfo: OrderData = {
+        orderNumber: orderResult.orderNumber,
+        total: getTotalPrice(),
+        items: cartItems.map(item => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price
+        }))
+      };
+
+      setOrderData(orderInfo);
+      setPaymentStatus('success');
+      clearCart();
+
+      toast.success('Payment successful! Order confirmed.');
+
+      setTimeout(() => {
+        goToNextStep();
+      }, 1500);
+
+    } catch (err) {
+      console.error('❌ Error processing Lyra payment:', err);
+      setPaymentStatus('error');
+      toast.error('Failed to process payment. Please contact support.');
+    }
+  };
+
+  /**
+   * HANDLE LYRA PAYMENT ERROR
+   * -------------------------
+   * Handle Lyra payment errors
+   */
+  const handleLyraPaymentError = (error: any) => {
+    console.error('❌ Lyra payment error:', error);
+    setPaymentStatus('error');
+    toast.error(error?.message || 'Payment failed. Please try again.');
   };
 
   /**
@@ -887,36 +964,78 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {/* Disabled Payment Forms */}
+                    {/* Payment Method Selection */}
                     <div className="space-y-3">
-                      <div className="p-4 bg-muted border border-border rounded-lg opacity-60">
-                        <div className="flex items-center space-x-3 mb-3">
-                          <CreditCard className="w-6 h-6 text-muted-foreground" />
+                      {/* Lyra/Izipay Payment Option */}
+                      <div 
+                        className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                          selectedPaymentMethod === 'lyra'
+                            ? 'border-[var(--color-primary-500)] bg-[var(--color-primary-50)]'
+                            : 'border-border hover:border-[var(--color-primary-300)]'
+                        }`}
+                        onClick={() => setSelectedPaymentMethod('lyra')}
+                      >
+                        <div className="flex items-center space-x-3 mb-2">
+                          <input
+                            type="radio"
+                            checked={selectedPaymentMethod === 'lyra'}
+                            onChange={() => setSelectedPaymentMethod('lyra')}
+                            className="w-4 h-4 text-[var(--color-primary-500)]"
+                          />
+                          <CreditCard className="w-6 h-6 text-[var(--color-primary-500)]" />
                           <h4 className="font-medium text-foreground">Credit/Debit Card</h4>
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                          Payment forms are temporarily disabled
+                        <p className="text-sm text-muted-foreground ml-7">
+                          Pay securely with your credit or debit card via Lyra/Izipay
                         </p>
                       </div>
 
-                      <div className="p-4 bg-muted border border-border rounded-lg opacity-60">
-                        <div className="flex items-center space-x-3 mb-3">
-                          <CreditCard className="w-6 h-6 text-muted-foreground" />
-                          <h4 className="font-medium text-foreground">Bank Transfer</h4>
+                      {/* Pay Later Option */}
+                      <div 
+                        className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                          selectedPaymentMethod === 'paylater'
+                            ? 'border-[var(--color-accent-500)] bg-[var(--color-accent-50)]'
+                            : 'border-border hover:border-[var(--color-accent-300)]'
+                        }`}
+                        onClick={() => setSelectedPaymentMethod('paylater')}
+                      >
+                        <div className="flex items-center space-x-3 mb-2">
+                          <input
+                            type="radio"
+                            checked={selectedPaymentMethod === 'paylater'}
+                            onChange={() => setSelectedPaymentMethod('paylater')}
+                            className="w-4 h-4 text-[var(--color-accent-500)]"
+                          />
+                          <Clock className="w-6 h-6 text-[var(--color-accent-500)]" />
+                          <h4 className="font-medium text-foreground">Pay Later</h4>
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                          Bank transfer option is temporarily disabled
+                        <p className="text-sm text-muted-foreground ml-7">
+                          Complete your order now and pay later. We will contact you to arrange payment.
                         </p>
                       </div>
                     </div>
 
-                    {/* Pay Later Option */}
-                    <div className="border-t pt-4">
-                      <div className="flex items-center space-x-3 mb-4">
-                        <Clock className="w-6 h-6 text-[var(--color-accent-500)]" />
-                        <h4 className="font-medium text-foreground">Pay Later</h4>
+                    {/* Lyra Payment Form */}
+                    {selectedPaymentMethod === 'lyra' && (
+                      <div className="border-t pt-4">
+                        <LyraEmbeddedForm
+                          amount={getTotalPrice()}
+                          currency={cartItems.length > 0 ? cartItems[0].currency : 'PEN'}
+                          orderId={`ORDER-${Date.now()}`}
+                          customerEmail={customerData?.email || ''}
+                          customerPhone={customerData?.phone}
+                          customerFirstName={customerData?.name?.split(' ')[0]}
+                          customerLastName={customerData?.name?.split(' ').slice(1).join(' ')}
+                          onSuccess={handleLyraPaymentSuccess}
+                          onError={handleLyraPaymentError}
+                          displayMode="embedded"
+                        />
                       </div>
-                      
+                    )}
+
+                    {/* Pay Later Form */}
+                    {selectedPaymentMethod === 'paylater' && (
+                    <div className="border-t pt-4">
                       <p className="text-sm text-muted-foreground mb-4">
                         Complete your order now and pay later. We will contact you to arrange payment.
                       </p>
@@ -952,7 +1071,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                         }`}
                       >
                         <Clock className="w-5 h-5" />
-                        <span>Pay Later</span>
+                        <span>Complete Order (Pay Later)</span>
                       </button>
 
                       {!termsAccepted && (
@@ -961,6 +1080,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                         </p>
                       )}
                     </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
