@@ -57,8 +57,8 @@ const nextConfig = {
 
     // Add script-src with payment providers and unsafe-eval for production
     const scriptSrc = isDevelopment
-      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://static.micuentaweb.pe https://static.lyra.com https://va.vercel-scripts.com"
-      : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://static.micuentaweb.pe https://static.lyra.com https://va.vercel-scripts.com";
+      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://static.micuentaweb.pe https://static.lyra.com https://secure.micuentaweb.pe https://va.vercel-scripts.com"
+      : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://static.micuentaweb.pe https://static.lyra.com https://secure.micuentaweb.pe https://va.vercel-scripts.com";
 
     return [
       {

@@ -240,13 +240,13 @@ export function LyraEmbeddedForm({
         kr-language="es-ES"
       />
 
-      {/* Load Neon Theme */}
+      {/* Load Neon Theme - Use same domain as main library to avoid warnings */}
       <link
         rel="stylesheet"
-        href="https://static.lyra.com/static/js/krypton-client/V4.0/ext/neon-reset.min.css"
+        href="https://static.micuentaweb.pe/static/js/krypton-client/V4.0/ext/neon-reset.min.css"
       />
       <Script
-        src="https://static.lyra.com/static/js/krypton-client/V4.0/ext/neon.js"
+        src="https://static.micuentaweb.pe/static/js/krypton-client/V4.0/ext/neon.js"
         strategy="lazyOnload"
       />
 
@@ -304,29 +304,28 @@ export function LyraEmbeddedForm({
         </div>
       )}
 
-      {/* Payment Form */}
-      {!loading && !error && formToken && (
-        <div className="lyra-form-wrapper">
-          {/* Header */}
-          <div className="mb-6">
-            <div className="flex items-center space-x-3 mb-2">
-              <CreditCard className="w-6 h-6 text-[var(--color-primary-500)]" />
-              <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">
-                Secure Payment
-              </h3>
-            </div>
-            <p className="text-sm text-[var(--color-text-secondary)]">
-              Enter your payment details securely. All transactions are encrypted and secure.
-            </p>
+      {/* Payment Form - Always render the container, just hide it with CSS */}
+      <div className={`lyra-form-wrapper ${loading || error || !formToken ? 'hidden' : ''}`}>
+        {/* Header */}
+        <div className="mb-6">
+          <div className="flex items-center space-x-3 mb-2">
+            <CreditCard className="w-6 h-6 text-[var(--color-primary-500)]" />
+            <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">
+              Secure Payment
+            </h3>
           </div>
+          <p className="text-sm text-[var(--color-text-secondary)]">
+            Enter your payment details securely. All transactions are encrypted and secure.
+          </p>
+        </div>
 
-          {/* Lyra SmartForm Container */}
-          <div
-            ref={formRef}
-            className={getFormClassName()}
-          >
-            {/* Lyra will inject the payment form here */}
-          </div>
+        {/* Lyra SmartForm Container */}
+        <div
+          ref={formRef}
+          className={getFormClassName()}
+        >
+          {/* Lyra will inject the payment form here */}
+        </div>
 
           {/* Processing Overlay */}
           {paymentProcessing && (
@@ -339,15 +338,14 @@ export function LyraEmbeddedForm({
             </div>
           )}
 
-          {/* Security Badge */}
-          <div className="mt-6 flex items-center justify-center space-x-2 text-xs text-[var(--color-text-tertiary)]">
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-            </svg>
-            <span>Secured by Lyra/Izipay • PCI DSS Compliant</span>
-          </div>
+        {/* Security Badge */}
+        <div className="mt-6 flex items-center justify-center space-x-2 text-xs text-[var(--color-text-tertiary)]">
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+          </svg>
+          <span>Secured by Lyra/Izipay • PCI DSS Compliant</span>
         </div>
-      )}
+      </div>
 
       <style jsx>{`
         .lyra-payment-container {
