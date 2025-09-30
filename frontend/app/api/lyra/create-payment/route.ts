@@ -56,16 +56,33 @@ export async function POST(request: NextRequest) {
       console.error('Available env vars:', {
         LYRA_USERNAME: !!process.env.LYRA_USERNAME,
         LYRA_PASSWORD: !!process.env.LYRA_PASSWORD,
+        LYRA_TEST_USERNAME: !!process.env.LYRA_TEST_USERNAME,
+        LYRA_TEST_PASSWORD: !!process.env.LYRA_TEST_PASSWORD,
         allEnvKeys: Object.keys(process.env).filter(k => k.includes('LYRA'))
       });
+      
+      // For development/testing, provide a mock response
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🧪 Development mode: Returning mock formToken');
+        return addCorsHeaders(NextResponse.json({
+          success: true,
+          formToken: 'mock-form-token-for-development',
+          debug: {
+            mode: 'development',
+            message: 'Using mock formToken for development'
+          }
+        }));
+      }
+      
       return addCorsHeaders(NextResponse.json(
         { 
           success: false, 
-          error: 'Payment gateway not configured. Please add LYRA_USERNAME and LYRA_PASSWORD environment variables.',
+          error: 'Payment gateway not configured. Please add LYRA_USERNAME and LYRA_PASSWORD environment variables to Vercel.',
           missingVars: {
             LYRA_USERNAME: !LYRA_USERNAME,
             LYRA_PASSWORD: !LYRA_PASSWORD
-          }
+          },
+          instructions: 'Add these environment variables in your Vercel dashboard: LYRA_USERNAME, LYRA_PASSWORD'
         },
         { status: 500 }
       ));
