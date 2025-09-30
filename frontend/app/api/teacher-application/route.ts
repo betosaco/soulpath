@@ -55,7 +55,6 @@ export async function POST(request: NextRequest) {
     const BREVO_SENDER_EMAIL = process.env.BREVO_SENDER_EMAIL || 'noreply@matmax.world';
     const BREVO_SENDER_NAME = process.env.BREVO_SENDER_NAME || 'MatMax Wellness';
     const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'alberto@matmax.world';
-    const INFO_EMAIL = 'info@matmax.store';
 
     if (!BREVO_API_KEY) {
       console.error('❌ Brevo API key not configured');
@@ -79,16 +78,6 @@ export async function POST(request: NextRequest) {
       textContent: createTextContent(applicationData)
     });
 
-    // Send copy to info@matmax.store
-    const infoEmailResult = await sendBrevoEmail({
-      apiKey: BREVO_API_KEY,
-      to: [{ email: INFO_EMAIL, name: 'MatMax Info' }],
-      from: { email: BREVO_SENDER_EMAIL, name: BREVO_SENDER_NAME },
-      subject: `New Teacher Application - ${applicationData.firstName} ${applicationData.lastName}`,
-      htmlContent: emailContent,
-      textContent: createTextContent(applicationData)
-    });
-
     // Send confirmation email to applicant
     const confirmationResult = await sendBrevoEmail({
       apiKey: BREVO_API_KEY,
@@ -99,8 +88,8 @@ export async function POST(request: NextRequest) {
       textContent: createConfirmationTextContent(applicationData)
     });
 
-    if (!adminEmailResult.success || !infoEmailResult.success || !confirmationResult.success) {
-      console.error('❌ Failed to send emails:', { adminEmailResult, infoEmailResult, confirmationResult });
+    if (!adminEmailResult.success || !confirmationResult.success) {
+      console.error('❌ Failed to send emails:', { adminEmailResult, confirmationResult });
       return addCorsHeaders(NextResponse.json(
         { success: false, error: 'Failed to send application emails' },
         { status: 500 }
@@ -114,7 +103,6 @@ export async function POST(request: NextRequest) {
       experience: applicationData.experienceYears,
       emailsSent: {
         admin: ADMIN_EMAIL,
-        info: INFO_EMAIL,
         applicant: applicationData.email
       }
     });
