@@ -46,9 +46,9 @@ const nextConfig = {
       "img-src 'self' data: https: blob:",
       // Allow external media (videos)
       "media-src 'self' https://*.vercel-storage.com blob:",
-      `connect-src 'self' ${isDevelopment ? 'http://localhost:* ws://localhost:* ' : ''}https://*.vercel.app https://matmax.world https://www.matmax.world https://api.stripe.com https://js.stripe.com https://static.micuentaweb.pe https://static.lyra.com https://api.micuentaweb.pe https://api.lyra.com`,
-      "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://checkout.stripe.com https://static.lyra.com https://static.micuentaweb.pe",
-      "object-src 'none'",
+      `connect-src 'self' ${isDevelopment ? 'http://localhost:* ws://localhost:* ' : ''}https://*.vercel.app https://matmax.world https://www.matmax.world https://api.stripe.com https://js.stripe.com https://static.micuentaweb.pe https://static.lyra.com https://api.micuentaweb.pe https://api.lyra.com https://secure.micuentaweb.pe https://h.online-metrix.net https://h64.online-metrix.net`,
+      "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://checkout.stripe.com https://static.lyra.com https://static.micuentaweb.pe https://h.online-metrix.net https://h64.online-metrix.net",
+      "object-src 'none' data:",
       "base-uri 'self'",
       "form-action 'self' https://*.vercel.app https://checkout.stripe.com",
       "frame-ancestors 'none'",
@@ -57,8 +57,8 @@ const nextConfig = {
 
     // Add script-src with payment providers and unsafe-eval for production
     const scriptSrc = isDevelopment
-      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://static.micuentaweb.pe https://static.lyra.com https://secure.micuentaweb.pe https://va.vercel-scripts.com"
-      : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://static.micuentaweb.pe https://static.lyra.com https://secure.micuentaweb.pe https://va.vercel-scripts.com";
+      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://static.micuentaweb.pe https://static.lyra.com https://secure.micuentaweb.pe https://h.online-metrix.net https://h64.online-metrix.net https://va.vercel-scripts.com"
+      : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://static.micuentaweb.pe https://static.lyra.com https://secure.micuentaweb.pe https://h.online-metrix.net https://h64.online-metrix.net https://va.vercel-scripts.com";
 
     return [
       {

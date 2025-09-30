@@ -181,8 +181,44 @@ export function LyraEmbeddedForm({
           'kr-language': 'es-ES',
         }).then(({ KR }: any) => {
           console.log('✅ Lyra form configured successfully');
-          // Attach form to DOM
-          return KR.attachForm('.kr-smart-form');
+          
+          // IMPORTANT: Stop loading BEFORE attaching form so it's visible in DOM
+          setLoading(false);
+          
+          // Use double requestAnimationFrame to ensure React has painted the DOM update
+          return new Promise(resolve => {
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                console.log('🔄 DOM should be updated now, attempting to attach form...');
+                resolve({ KR });
+              });
+            });
+          });
+        }).then(({ KR }: any) => {
+          // Verify the element exists before attaching
+          const formElement = document.querySelector('.kr-smart-form');
+          console.log('🔍 Form element found:', formElement ? 'YES ✅' : 'NO ❌');
+          
+          if (!formElement) {
+            throw new Error('Form container not found in DOM');
+          }
+          
+          // Clear the form container and remove any existing forms
+          const formContainer = document.querySelector('.kr-smart-form');
+          if (formContainer) {
+            formContainer.innerHTML = ''; // Clear any existing content
+          }
+          
+          // Try to remove existing forms, then render new ones
+          return Promise.resolve().then(() => {
+            if (window.KR && typeof window.KR.removeForms === 'function') {
+              return window.KR.removeForms();
+            }
+            return Promise.resolve();
+          }).then(() => {
+            console.log('🧹 Cleaned up existing forms, now rendering new form...');
+            return KR.renderElements('.kr-smart-form');
+          });
         }).then(({ KR, result }: any) => {
           console.log('✅ Lyra form attached to DOM:', result);
         }).catch((error: any) => {
@@ -198,6 +234,20 @@ export function LyraEmbeddedForm({
       }
     }
   }, [scriptLoaded, formToken]);
+
+  // Cleanup effect to remove forms when component unmounts
+  useEffect(() => {
+    return () => {
+      if (window.KR && typeof window.KR.removeForms === 'function') {
+        try {
+          window.KR.removeForms();
+          console.log('🧹 Cleaned up Lyra forms on unmount');
+        } catch (error) {
+          console.warn('⚠️ Error cleaning up Lyra forms:', error);
+        }
+      }
+    };
+  }, []);
 
   /**
    * Generate formToken on component mount
@@ -304,8 +354,11 @@ export function LyraEmbeddedForm({
         </div>
       )}
 
-      {/* Payment Form - Always render the container, just hide it with CSS */}
-      <div className={`lyra-form-wrapper ${loading || error || !formToken ? 'hidden' : ''}`}>
+      {/* Payment Form - Always render, control visibility with opacity instead of hidden */}
+      <div 
+        className="lyra-form-wrapper transition-opacity duration-300"
+        style={{ opacity: (loading || error || !formToken) ? 0 : 1, pointerEvents: (loading || error || !formToken) ? 'none' : 'auto' }}
+      >
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center space-x-3 mb-2">
