@@ -48,6 +48,7 @@ export function LyraEmbeddedForm({
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [formInitialized, setFormInitialized] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
 
   // Get environment variables (check multiple possible variable names)
@@ -144,9 +145,10 @@ export function LyraEmbeddedForm({
    * Initialize Lyra SmartForm when script is loaded
    */
   useEffect(() => {
-    if (scriptLoaded && formToken && window.KR) {
+    if (scriptLoaded && formToken && window.KR && !formInitialized) {
       try {
         console.log('🔄 Initializing Lyra SmartForm');
+        setFormInitialized(true);
 
         // Set up event handlers BEFORE setFormConfig
         window.KR.onSubmit((paymentData: any) => {
@@ -203,16 +205,15 @@ export function LyraEmbeddedForm({
             throw new Error('Form container not found in DOM');
           }
           
-          // Clear the form container and remove any existing forms
-          const formContainer = document.querySelector('.kr-smart-form');
-          if (formContainer) {
-            formContainer.innerHTML = ''; // Clear any existing content
-          }
-          
-          // Try to remove existing forms, then render new ones
+          // Only remove forms if they exist, don't clear innerHTML
           return Promise.resolve().then(() => {
             if (window.KR && typeof window.KR.removeForms === 'function') {
-              return window.KR.removeForms();
+              try {
+                return window.KR.removeForms();
+              } catch (error) {
+                console.warn('⚠️ Error removing forms:', error);
+                return Promise.resolve();
+              }
             }
             return Promise.resolve();
           }).then(() => {
@@ -233,7 +234,7 @@ export function LyraEmbeddedForm({
         setLoading(false);
       }
     }
-  }, [scriptLoaded, formToken]);
+  }, [scriptLoaded, formToken, formInitialized]);
 
   // Cleanup effect to remove forms when component unmounts
   useEffect(() => {
