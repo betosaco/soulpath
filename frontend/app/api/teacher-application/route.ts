@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     const BREVO_API_KEY = process.env.BREVO_API_KEY;
     const BREVO_SENDER_EMAIL = process.env.BREVO_SENDER_EMAIL || 'noreply@matmax.world';
     const BREVO_SENDER_NAME = process.env.BREVO_SENDER_NAME || 'MatMax Wellness';
-    const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@matmax.world';
+    const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'alberto@matmax.world';
     const INFO_EMAIL = 'info@matmax.store';
 
     if (!BREVO_API_KEY) {
