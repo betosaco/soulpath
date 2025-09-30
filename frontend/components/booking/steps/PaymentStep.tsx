@@ -1035,7 +1035,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                           key={`lyra-form-${paymentMethodKey}`}
                           amount={getTotalPrice()}
                           currency="PEN"
-                          orderId={`ORDER-${Date.now()}`}
+                          orderId={`ORDER-${paymentMethodKey}`}
                           customerEmail={customerData?.email || ''}
                           customerPhone={customerData?.phone}
                           customerFirstName={customerData?.name?.split(' ')[0]}

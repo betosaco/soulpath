@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import Script from 'next/script';
 import { Loader2, CreditCard, AlertCircle, CheckCircle2 } from 'lucide-react';
 
@@ -251,11 +251,20 @@ export function LyraEmbeddedForm({
   }, []);
 
   /**
+   * Memoize the formToken generation parameters to prevent unnecessary re-renders
+   */
+  const formTokenParams = useMemo(() => ({
+    amount,
+    orderId,
+    customerEmail
+  }), [amount, orderId, customerEmail]);
+
+  /**
    * Generate formToken on component mount
    */
   useEffect(() => {
     generateFormToken();
-  }, [amount, orderId, customerEmail]);
+  }, [formTokenParams.amount, formTokenParams.orderId, formTokenParams.customerEmail]);
 
   /**
    * Render form based on display mode
