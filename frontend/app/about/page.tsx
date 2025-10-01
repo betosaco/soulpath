@@ -66,49 +66,39 @@ export default function AboutPage() {
     setIsSubmitting(true);
     
     try {
-      const whatsappMessage = language === 'es' 
-        ? `¡Hola! Me gustaría contactar con ustedes:
+      const response = await fetch('/api/contact/send-message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: contactForm.name,
+          email: contactForm.email,
+          phone: contactForm.phone,
+          message: contactForm.message,
+          language: language
+        }),
+      });
 
-📋 *Información de Contacto:*
-• Nombre: ${contactForm.name}
-• Email: ${contactForm.email}
-• Teléfono: ${contactForm.phone}
+      const result = await response.json();
 
-💬 *Mensaje:*
-${contactForm.message}
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to send message');
+      }
 
-📍 *Ubicación del Estudio:*
-MatMax Yoga. Calle Alcanfores 425, Miraflores. Lima - Peru
-
-¿Podrían ayudarme? ¡Gracias!`
-        : `Hello! I would like to contact you:
-
-📋 *Contact Information:*
-• Name: ${contactForm.name}
-• Email: ${contactForm.email}
-• Phone: ${contactForm.phone}
-
-💬 *Message:*
-${contactForm.message}
-
-📍 *Studio Location:*
-MatMax Yoga. Calle Alcanfores 425, Miraflores. Lima - Peru
-
-Could you help me? Thank you!`;
-
-      const encodedMessage = encodeURIComponent(whatsappMessage);
-      const phoneNumber = '51916172368';
-      
-      const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodedMessage}`;
-      
-      window.open(whatsappUrl, '_blank');
-      toast.success(language === 'es' ? '¡Redirigido a WhatsApp! Te ayudaremos allí.' : 'Redirected to WhatsApp! We\'ll help you there.');
+      toast.success(language === 'es' 
+        ? '¡Mensaje enviado exitosamente! Te contactaremos pronto.' 
+        : 'Message sent successfully! We will contact you soon.'
+      );
       
       setContactForm({ name: '', email: '', phone: '', message: '' });
       
     } catch (error) {
-      console.error('Error creating WhatsApp message:', error);
-      toast.error(language === 'es' ? 'Error al enviar el mensaje. Inténtalo de nuevo.' : 'Error sending message. Please try again.');
+      console.error('Error sending contact message:', error);
+      toast.error(language === 'es' 
+        ? 'Error al enviar el mensaje. Inténtalo de nuevo.' 
+        : 'Error sending message. Please try again.'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -405,7 +395,7 @@ Could you help me? Thank you!`;
                       {getTranslation('about.sendMessage', 'Send us a Message')}
                     </CardTitle>
                     <p className="text-gray-600 text-center text-lg">
-                      {getTranslation('about.sendMessageDescription', 'Fill out the form below and we\'ll get back to you via WhatsApp')}
+                      {getTranslation('about.sendMessageDescription', 'Fill out the form below and we\'ll get back to you via email')}
                     </p>
                   </CardHeader>
                   <CardContent>
@@ -477,7 +467,7 @@ Could you help me? Thank you!`;
                       >
                         {isSubmitting 
                           ? (language === 'es' ? 'Enviando...' : 'Sending...') 
-                          : (language === 'es' ? 'Enviar por WhatsApp' : 'Send via WhatsApp')
+                          : (language === 'es' ? 'Enviar Mensaje' : 'Send Message')
                         }
                       </Button>
                     </form>

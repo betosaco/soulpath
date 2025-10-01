@@ -7,6 +7,7 @@ import { CartSidebar } from './CartSidebar';
 import { MobileViewportHandler } from './MobileViewportHandler';
 import { QueryProvider } from './providers/QueryProvider';
 import { TermsModal } from './TermsModal';
+import { WhatsAppBubble } from './WhatsAppBubble';
 import { useLanguage } from '@/hooks/useTranslations';
 
 interface AppShellProps {
@@ -63,6 +64,9 @@ export function AppShell({
 
         {/* Global Terms & Conditions modal */}
         <TermsModal />
+
+        {/* WhatsApp Chat Bubble */}
+        <WhatsAppBubble />
       </div>
     </QueryProvider>
   );
