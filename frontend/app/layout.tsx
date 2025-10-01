@@ -41,6 +41,23 @@ export const metadata: Metadata = {
       'es': '/?lang=es',
     },
   },
+  icons: {
+    icon: [
+      { url: '/favicon.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon.png', sizes: '16x16', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/favicon.png', sizes: '180x180', type: 'image/png' },
+    ],
+    other: [
+      {
+        rel: 'mask-icon',
+        url: '/favicon.png',
+        color: '#0A0A23',
+      },
+    ],
+  },
+  manifest: '/site.webmanifest',
   openGraph: {
     type: 'website',
     locale: 'en_US',
@@ -106,6 +123,22 @@ export default function RootLayout({
         <link rel="preconnect" href="https://va.vercel-scripts.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://js.stripe.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://api.stripe.com" crossOrigin="anonymous" />
+        
+        {/* Favicon and Desktop Save Image */}
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png" />
+        <link rel="mask-icon" href="/favicon.png" color="#0A0A23" />
+        <meta name="msapplication-TileImage" content="/favicon.png" />
+        <meta name="msapplication-TileColor" content="#0A0A23" />
+        
+        {/* Web App Manifest for Desktop Save */}
+        <link rel="manifest" href="/site.webmanifest" />
+        <meta name="theme-color" content="#0A0A23" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="MatMax Yoga" />
       </head>
       <body className={cn(
         "antialiased",
