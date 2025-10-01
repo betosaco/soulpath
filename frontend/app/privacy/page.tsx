@@ -1,3 +1,5 @@
+'use client';
+
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -36,8 +38,6 @@ export const metadata: Metadata = {
     canonical: '/privacy',
   },
 };
-
-'use client';
 
 import React, { useState } from 'react';
 import { AppShell } from '@/components/AppShell';

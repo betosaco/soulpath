@@ -1,3 +1,5 @@
+'use client';
+
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -40,8 +42,6 @@ export const metadata: Metadata = {
     canonical: '/packages',
   },
 };
-
-'use client';
 
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
