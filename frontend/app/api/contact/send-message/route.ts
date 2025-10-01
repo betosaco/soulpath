@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createEmailService } from '@/lib/brevo-email-service';
 import { z } from 'zod';
 
 // Validation schema for contact form
@@ -11,6 +10,13 @@ const contactFormSchema = z.object({
   language: z.enum(['en', 'es']).default('en')
 });
 
+// CORS headers helper
+function addCorsHeaders(response: NextResponse) {
+  response.headers.set('Access-Control-Allow-Origin', '*');
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  return response;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,183 +25,283 @@ export async function POST(request: NextRequest) {
     // Validate the request body
     const validation = contactFormSchema.safeParse(body);
     if (!validation.success) {
-      return NextResponse.json({
+      return addCorsHeaders(NextResponse.json({
         success: false,
         error: 'Validation failed',
         details: validation.error.issues
-      }, { status: 400 });
+      }, { status: 400 }));
     }
 
     const { name, email, phone, message, language } = validation.data;
 
-    // Create email service
-    const emailService = await createEmailService();
-    if (!emailService) {
-      return NextResponse.json({
-        success: false,
-        error: 'Email service not configured'
-      }, { status: 500 });
+    // Get Brevo configuration (same as teacher application)
+    const BREVO_API_KEY = process.env.BREVO_API_KEY;
+    const BREVO_SENDER_EMAIL = process.env.BREVO_SENDER_EMAIL || 'noreply@matmax.world';
+    const BREVO_SENDER_NAME = process.env.BREVO_SENDER_NAME || 'MatMax Wellness';
+    const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'alberto@matmax.world';
+
+    if (!BREVO_API_KEY) {
+      console.error('❌ Brevo API key not configured');
+      return addCorsHeaders(NextResponse.json(
+        { success: false, error: 'Email service not configured' },
+        { status: 500 }
+      ));
     }
 
-    // Create admin notification email
-    const adminSubject = language === 'es' 
-      ? `Nuevo mensaje de contacto de ${name} - MatMax Yoga`
-      : `New contact message from ${name} - MatMax Yoga`;
+    // Create email content
+    const adminEmailContent = createAdminEmailContent(name, email, phone, message, language);
+    const userEmailContent = createUserEmailContent(name, message, language);
 
-    const adminHtml = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${adminSubject}</title>
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 20px; background-color: #f4f4f4; }
-          .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
-          .header { background: linear-gradient(135deg, #6ea058, #558b2f); color: white; padding: 30px; text-align: center; }
-          .content { padding: 30px; }
-          .field { margin-bottom: 20px; }
-          .label { font-weight: bold; color: #6ea058; margin-bottom: 5px; }
-          .value { background: #f8f9fa; padding: 10px; border-radius: 5px; border-left: 4px solid #6ea058; }
-          .message-box { background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #6ea058; margin-top: 20px; }
-          .footer { background: #f8f9fa; padding: 20px; text-align: center; color: #666; font-size: 14px; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>${language === 'es' ? 'Nuevo Mensaje de Contacto' : 'New Contact Message'}</h1>
-            <p>${language === 'es' ? 'MatMax Yoga Studio' : 'MatMax Yoga Studio'}</p>
-          </div>
-          <div class="content">
-            <div class="field">
-              <div class="label">${language === 'es' ? 'Nombre:' : 'Name:'}</div>
-              <div class="value">${name}</div>
-            </div>
-            <div class="field">
-              <div class="label">${language === 'es' ? 'Email:' : 'Email:'}</div>
-              <div class="value">${email}</div>
-            </div>
-            ${phone ? `
-            <div class="field">
-              <div class="label">${language === 'es' ? 'Teléfono:' : 'Phone:'}</div>
-              <div class="value">${phone}</div>
-            </div>
-            ` : ''}
-            <div class="message-box">
-              <div class="label">${language === 'es' ? 'Mensaje:' : 'Message:'}</div>
-              <div style="white-space: pre-wrap; margin-top: 10px;">${message}</div>
-            </div>
-            <div style="margin-top: 30px; padding: 20px; background: #e8f5e8; border-radius: 8px; text-align: center;">
-              <p><strong>${language === 'es' ? 'Responder a:' : 'Reply to:'}</strong> ${email}</p>
-            </div>
-          </div>
-          <div class="footer">
-            <p>${language === 'es' ? 'Este mensaje fue enviado desde el formulario de contacto de MatMax Yoga Studio.' : 'This message was sent from the MatMax Yoga Studio contact form.'}</p>
-            <p>${language === 'es' ? 'Fecha:' : 'Date:'} ${new Date().toLocaleString(language === 'es' ? 'es-PE' : 'en-US', { timeZone: 'America/Lima' })}</p>
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
-
-    // Create user confirmation email
-    const userSubject = language === 'es' 
-      ? `Gracias por contactarnos - MatMax Yoga Studio`
-      : `Thank you for contacting us - MatMax Yoga Studio`;
-
-    const userHtml = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${userSubject}</title>
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 20px; background-color: #f4f4f4; }
-          .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
-          .header { background: linear-gradient(135deg, #6ea058, #558b2f); color: white; padding: 30px; text-align: center; }
-          .content { padding: 30px; }
-          .welcome { font-size: 24px; font-weight: bold; color: #6ea058; margin-bottom: 20px; }
-          .message { background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #6ea058; margin: 20px 0; }
-          .contact-info { background: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0; }
-          .cta-button { display: inline-block; background: #6ea058; color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; margin: 20px 0; }
-          .footer { background: #f8f9fa; padding: 20px; text-align: center; color: #666; font-size: 14px; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>${language === 'es' ? 'MatMax Yoga Studio' : 'MatMax Yoga Studio'}</h1>
-            <p>${language === 'es' ? 'Tu santuario para el bienestar' : 'Your sanctuary for wellness'}</p>
-          </div>
-          <div class="content">
-            <div class="welcome">
-              ${language === 'es' ? `¡Hola ${name}!` : `Hello ${name}!`}
-            </div>
-            <div class="message">
-              <p>${language === 'es' 
-                ? 'Gracias por contactarnos. Hemos recibido tu mensaje y nos pondremos en contacto contigo pronto.' 
-                : 'Thank you for contacting us. We have received your message and will get back to you soon.'}
-              </p>
-              <p>${language === 'es' 
-                ? 'Mientras tanto, te invitamos a explorar nuestros paquetes de yoga y reservar tu primera sesión.' 
-                : 'In the meantime, we invite you to explore our yoga packages and book your first session.'}
-              </p>
-            </div>
-            <div class="contact-info">
-              <h3>${language === 'es' ? 'Información de Contacto:' : 'Contact Information:'}</h3>
-              <p><strong>${language === 'es' ? 'Ubicación:' : 'Location:'}</strong> Calle Alcanfores 425, Miraflores, Lima - Peru</p>
-              <p><strong>${language === 'es' ? 'Teléfono:' : 'Phone:'}</strong> +51 916 172 368</p>
-              <p><strong>${language === 'es' ? 'Email:' : 'Email:'}</strong> info@matmax.world</p>
-            </div>
-            <div style="text-align: center;">
-              <a href="https://matmax.world" class="cta-button">
-                ${language === 'es' ? 'Visitar Nuestro Sitio' : 'Visit Our Website'}
-              </a>
-            </div>
-          </div>
-          <div class="footer">
-            <p>${language === 'es' ? 'Este es un mensaje automático. Por favor no respondas a este email.' : 'This is an automated message. Please do not reply to this email.'}</p>
-            <p>© 2024 MatMax Yoga Studio. ${language === 'es' ? 'Todos los derechos reservados.' : 'All rights reserved.'}</p>
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
-
-    // Send emails
-    const adminEmailSent = await emailService.sendEmail({
-      to: 'info@matmax.store',
-      subject: adminSubject,
-      html: adminHtml
+    // Send notification email to admin (same as teacher application)
+    const adminEmailResult = await sendBrevoEmail({
+      apiKey: BREVO_API_KEY,
+      to: [{ email: ADMIN_EMAIL, name: 'MatMax Admin' }],
+      from: { email: BREVO_SENDER_EMAIL, name: BREVO_SENDER_NAME },
+      subject: language === 'es' 
+        ? `Nuevo mensaje de contacto de ${name} - MatMax Yoga`
+        : `New contact message from ${name} - MatMax Yoga`,
+      htmlContent: adminEmailContent,
+      textContent: createAdminTextContent(name, email, phone, message, language)
     });
 
-    const userEmailSent = await emailService.sendEmail({
-      to: email,
-      subject: userSubject,
-      html: userHtml
+    // Send confirmation email to user
+    const userEmailResult = await sendBrevoEmail({
+      apiKey: BREVO_API_KEY,
+      to: [{ email: email, name: name }],
+      from: { email: BREVO_SENDER_EMAIL, name: BREVO_SENDER_NAME },
+      subject: language === 'es' 
+        ? 'Gracias por contactarnos - MatMax Yoga'
+        : 'Thank you for contacting us - MatMax Yoga',
+      htmlContent: userEmailContent,
+      textContent: createUserTextContent(name, message, language)
     });
 
-    if (!adminEmailSent || !userEmailSent) {
-      return NextResponse.json({
-        success: false,
-        error: 'Failed to send emails'
-      }, { status: 500 });
+    if (!adminEmailResult.success || !userEmailResult.success) {
+      console.error('❌ Failed to send contact emails:', { adminEmailResult, userEmailResult });
+      return addCorsHeaders(NextResponse.json(
+        { success: false, error: 'Failed to send contact emails' },
+        { status: 500 }
+      ));
     }
 
-    return NextResponse.json({
+    console.log('✅ Contact form submitted successfully:', {
+      name: name,
+      email: email,
+      phone: phone || 'Not provided',
+      emailsSent: {
+        admin: ADMIN_EMAIL,
+        user: email
+      }
+    });
+
+    return addCorsHeaders(NextResponse.json({
       success: true,
       message: language === 'es' 
         ? 'Mensaje enviado exitosamente. Te contactaremos pronto.' 
         : 'Message sent successfully. We will contact you soon.'
-    });
+    }));
 
   } catch (error) {
-    console.error('Error processing contact form:', error);
-    return NextResponse.json({
-      success: false,
-      error: 'Internal server error'
-    }, { status: 500 });
+    console.error('❌ Error processing contact form:', error);
+    return addCorsHeaders(NextResponse.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    ));
   }
+}
+
+// Brevo email sending function (same as teacher application)
+async function sendBrevoEmail({
+  apiKey,
+  to,
+  from,
+  subject,
+  htmlContent,
+  textContent
+}: {
+  apiKey: string;
+  to: Array<{ email: string; name: string }>;
+  from: { email: string; name: string };
+  subject: string;
+  htmlContent: string;
+  textContent: string;
+}) {
+  try {
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'api-key': apiKey,
+      },
+      body: JSON.stringify({
+        sender: from,
+        to: to,
+        subject: subject,
+        htmlContent: htmlContent,
+        textContent: textContent,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.error('❌ Brevo API error:', result);
+      return { success: false, error: result };
+    }
+
+    return { success: true, messageId: result.messageId };
+  } catch (error) {
+    console.error('❌ Error sending Brevo email:', error);
+    return { success: false, error: error };
+  }
+}
+
+// Email content creation functions
+function createAdminEmailContent(name: string, email: string, phone: string | undefined, message: string, language: string): string {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${language === 'es' ? 'Nuevo Mensaje de Contacto' : 'New Contact Message'}</title>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #6ea058, #8bc34a); color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center; }
+        .content { background: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px; }
+        .field { margin-bottom: 15px; }
+        .label { font-weight: bold; color: #6ea058; }
+        .value { margin-top: 5px; }
+        .message-box { background: white; padding: 15px; border-radius: 5px; border-left: 4px solid #6ea058; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>${language === 'es' ? 'Nuevo Mensaje de Contacto' : 'New Contact Message'}</h1>
+        <p>MatMax Yoga Studio</p>
+      </div>
+      <div class="content">
+        <div class="field">
+          <div class="label">${language === 'es' ? 'Nombre:' : 'Name:'}</div>
+          <div class="value">${name}</div>
+        </div>
+        <div class="field">
+          <div class="label">${language === 'es' ? 'Email:' : 'Email:'}</div>
+          <div class="value">${email}</div>
+        </div>
+        ${phone ? `
+        <div class="field">
+          <div class="label">${language === 'es' ? 'Teléfono:' : 'Phone:'}</div>
+          <div class="value">${phone}</div>
+        </div>
+        ` : ''}
+        <div class="field">
+          <div class="label">${language === 'es' ? 'Mensaje:' : 'Message:'}</div>
+          <div class="message-box">${message.replace(/\n/g, '<br>')}</div>
+        </div>
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #666;">
+          ${language === 'es' 
+            ? 'Este mensaje fue enviado desde el formulario de contacto de MatMax Yoga Studio.' 
+            : 'This message was sent from the MatMax Yoga Studio contact form.'}
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+}
+
+function createUserEmailContent(name: string, message: string, language: string): string {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${language === 'es' ? 'Gracias por contactarnos' : 'Thank you for contacting us'}</title>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #6ea058, #8bc34a); color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center; }
+        .content { background: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px; }
+        .highlight { background: white; padding: 15px; border-radius: 5px; border-left: 4px solid #6ea058; margin: 15px 0; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>${language === 'es' ? '¡Gracias por contactarnos!' : 'Thank you for contacting us!'}</h1>
+        <p>MatMax Yoga Studio</p>
+      </div>
+      <div class="content">
+        <p>Hola ${name},</p>
+        <p>${language === 'es' 
+          ? 'Hemos recibido tu mensaje y te responderemos pronto. Mientras tanto, aquí tienes un resumen de lo que nos escribiste:' 
+          : 'We have received your message and will respond soon. In the meantime, here is a summary of what you wrote to us:'}</p>
+        
+        <div class="highlight">
+          <strong>${language === 'es' ? 'Tu mensaje:' : 'Your message:'}</strong><br>
+          ${message.replace(/\n/g, '<br>')}
+        </div>
+        
+        <p>${language === 'es' 
+          ? 'Te contactaremos en las próximas 24 horas. Si tienes alguna pregunta urgente, no dudes en llamarnos al +51 916 172 368.' 
+          : 'We will contact you within the next 24 hours. If you have any urgent questions, feel free to call us at +51 916 172 368.'}</p>
+        
+        <p>${language === 'es' ? 'Saludos cordiales,' : 'Best regards,'}<br>
+        <strong>El equipo de MatMax Yoga Studio</strong></p>
+        
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #666;">
+          <p><strong>MatMax Yoga Studio</strong><br>
+          Calle Alcanfores 425, Miraflores, Lima<br>
+          +51 916 172 368 | info@matmax.world</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+}
+
+function createAdminTextContent(name: string, email: string, phone: string | undefined, message: string, language: string): string {
+  return `
+${language === 'es' ? 'Nuevo Mensaje de Contacto' : 'New Contact Message'}
+MatMax Yoga Studio
+
+${language === 'es' ? 'Nombre:' : 'Name:'} ${name}
+${language === 'es' ? 'Email:' : 'Email:'} ${email}
+${phone ? `${language === 'es' ? 'Teléfono:' : 'Phone:'} ${phone}` : ''}
+
+${language === 'es' ? 'Mensaje:' : 'Message:'}
+${message}
+
+---
+${language === 'es' 
+  ? 'Este mensaje fue enviado desde el formulario de contacto de MatMax Yoga Studio.' 
+  : 'This message was sent from the MatMax Yoga Studio contact form.'}
+  `;
+}
+
+function createUserTextContent(name: string, message: string, language: string): string {
+  return `
+${language === 'es' ? '¡Gracias por contactarnos!' : 'Thank you for contacting us!'}
+MatMax Yoga Studio
+
+Hola ${name},
+
+${language === 'es' 
+  ? 'Hemos recibido tu mensaje y te responderemos pronto. Mientras tanto, aquí tienes un resumen de lo que nos escribiste:' 
+  : 'We have received your message and will respond soon. In the meantime, here is a summary of what you wrote to us:'}
+
+${language === 'es' ? 'Tu mensaje:' : 'Your message:'}
+${message}
+
+${language === 'es' 
+  ? 'Te contactaremos en las próximas 24 horas. Si tienes alguna pregunta urgente, no dudes en llamarnos al +51 916 172 368.' 
+  : 'We will contact you within the next 24 hours. If you have any urgent questions, feel free to call us at +51 916 172 368.'}
+
+${language === 'es' ? 'Saludos cordiales,' : 'Best regards,'}
+El equipo de MatMax Yoga Studio
+
+---
+MatMax Yoga Studio
+Calle Alcanfores 425, Miraflores, Lima
++51 916 172 368 | info@matmax.world
+  `;
 }
