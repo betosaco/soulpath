@@ -144,6 +144,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
    * Tracks payment processing status
    */
   const [paymentStatus, setPaymentStatus] = React.useState<'idle' | 'processing' | 'success' | 'error'>('idle');
+  const [isPayLaterClicked, setIsPayLaterClicked] = React.useState(false);
   const { orderData, setOrderData } = useOrder();
   const [termsAccepted, setTermsAccepted] = React.useState(true);
   const { openTerms, closeTerms } = useTermsUI();
@@ -524,7 +525,13 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
       return;
     }
 
+    if (isPayLaterClicked) {
+      console.log('⚠️ Pay Later already clicked, preventing duplicate submission');
+      return;
+    }
+
     console.log('💳 Pay Later selected');
+    setIsPayLaterClicked(true);
     setPaymentStatus('processing');
 
     try {
@@ -857,12 +864,26 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
   const renderPaymentStatus = () => {
     if (paymentStatus === 'idle') return null;
 
+    // Show centered loader for processing state
+    if (paymentStatus === 'processing') {
+      return (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white/95 backdrop-blur-md rounded-2xl p-8 flex flex-col items-center space-y-6 shadow-2xl border border-white/20 max-w-sm mx-4">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-[var(--color-accent-500)]"></div>
+            <div className="text-center space-y-2">
+              <p className="text-xl font-semibold text-gray-800">
+                {getTranslation('processing', 'Processing...')}
+              </p>
+              <p className="text-sm text-gray-600 text-center leading-relaxed">
+                {getTranslation('processingOrder', 'Please wait while we process your order')}
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     const statusConfig = {
-      processing: {
-        message: 'Processing payment...',
-        color: 'text-[var(--color-status-info)]',
-        icon: '⏳'
-      },
       success: {
         message: getTranslation('paymentSuccessfulRedirecting', 'Payment successful! Redirecting...'),
         color: 'text-[var(--color-status-success)]',
@@ -914,7 +935,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
       {renderPaymentStatus()}
 
       {/* Main Payment Interface */}
-      {paymentStatus !== 'success' && (
+      {paymentStatus !== 'success' && paymentStatus !== 'processing' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Column 1: User Info and Payment Options */}
           <div className="space-y-6">
@@ -1103,15 +1124,20 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
 
                       <button
                         onClick={handlePayLater}
-                        disabled={!termsAccepted}
+                        disabled={!termsAccepted || isPayLaterClicked || (paymentStatus as string) === 'processing'}
                         className={`w-full py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2 ${
-                          termsAccepted
+                          termsAccepted && !isPayLaterClicked && (paymentStatus as string) !== 'processing'
                             ? 'bg-[var(--color-accent-500)] text-white hover:bg-[var(--color-accent-600)]'
                             : 'bg-muted text-muted-foreground cursor-not-allowed'
                         }`}
                       >
                         <Clock className="w-5 h-5" />
-                        <span>{getTranslation('completeOrderPayLater', 'Complete Order (Pay Later)')}</span>
+                        <span>
+                          {isPayLaterClicked || (paymentStatus as string) === 'processing' 
+                            ? getTranslation('processing', 'Processing...')
+                            : getTranslation('completeOrderPayLater', 'Complete Order (Pay Later)')
+                          }
+                        </span>
                       </button>
 
                       {!termsAccepted && (
