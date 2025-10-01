@@ -607,6 +607,11 @@ export function CalendlyBookingFlow({ t, language }: CalendlyBookingFlowProps) {
                         <div className="text-xs text-[#C0C0C0]/70 mt-2">
                           Duration: {pkg.duration} minutes
                         </div>
+                        {(pkg.name?.includes('MATPASS') || pkg.packageType === 'matpass') && (
+                          <div className="text-xs text-[#FFD700] mt-1 font-medium">
+                            Valid for 30 days
+                          </div>
+                        )}
                       </motion.div>
                       ))}
                     </div>

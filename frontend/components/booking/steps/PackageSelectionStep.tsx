@@ -695,9 +695,16 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
                           S/ {pkg.pricePerClass?.toFixed(2) || (pkg.price / (pkg.packageDefinition.sessionsCount || 1)).toFixed(2)} {packagesTranslations.perClass || 'per class'}
                         </span>
                       </div>
-                      <span className="text-lg font-semibold text-[var(--color-text-primary)]">
-                        {pkg.packageDefinition.sessionsCount || 1} {packagesTranslations.sessions || 'sessions'}
-                      </span>
+                      <div className="flex flex-col items-end">
+                        <span className="text-lg font-semibold text-[var(--color-text-primary)]">
+                          {pkg.packageDefinition.sessionsCount || 1} {packagesTranslations.sessions || 'sessions'}
+                        </span>
+                        {(pkg.packageDefinition.name?.includes('MATPASS') || pkg.packageDefinition.packageType === 'matpass') && (
+                          <span className="text-xs text-[var(--color-accent-500)] font-medium">
+                            {packagesTranslations.validFor30Days || 'Valid for 30 days'}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <Button
                       onClick={() => handleAddPackage(pkg)}

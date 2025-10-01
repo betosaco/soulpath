@@ -1492,10 +1492,12 @@ export function ScheduleBookingFlow({
                               <Clock className="w-4 h-4 mr-2 text-primary" />
                               <span className="text-muted">{pkg.packageDefinition.sessionDuration.duration_minutes === 60 ? '1 hour' : `${pkg.packageDefinition.sessionDuration.duration_minutes} minutes`} each</span>
                             </div>
-                            <div className="flex items-center text-sm">
-                              <Calendar className="w-4 h-4 mr-2 text-primary" />
-                              <span className="text-muted">Valid for 30 days</span>
-                            </div>
+                            {(pkg.packageDefinition.name?.includes('MATPASS') || pkg.packageDefinition.packageType === 'matpass') && (
+                              <div className="flex items-center text-sm">
+                                <Calendar className="w-4 h-4 mr-2 text-primary" />
+                                <span className="text-muted">Valid for 30 days</span>
+                              </div>
+                            )}
                             <div className="flex items-center text-sm">
                               <Star className="w-4 h-4 mr-2 text-primary" />
                               <span className="text-muted">Personalized guidance</span>

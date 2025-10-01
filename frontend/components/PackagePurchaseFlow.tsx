@@ -352,6 +352,12 @@ export function PackagePurchaseFlow() {
                         <span className="text-lg font-semibold text-white">{pkg.packageDefinition.sessionsCount} sessions</span>
                       </div>
                     </div>
+                    
+                    {(pkg.packageDefinition.name?.includes('MATPASS') || pkg.packageDefinition.packageType === 'matpass') && (
+                      <div className="text-xs text-[#ffd700] font-medium">
+                        Valid for 30 days
+                      </div>
+                    )}
 
                     <div className="space-y-2">
                       <h4 className="text-sm font-medium text-white">What&apos;s included:</h4>
