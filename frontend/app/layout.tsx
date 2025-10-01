@@ -9,31 +9,79 @@ import { Providers } from '@/lib/providers';
 import { Analytics } from '@vercel/analytics/next';
 
 export const metadata: Metadata = {
-  title: 'MatMax Yoga Studio',
-  description: 'Yoga classes for all levels. Build strength, flexibility, and inner peace with MatMax Yoga Studio.',
-  keywords: ['yoga', 'yoga classes', 'wellness', 'meditation', 'flexibility', 'strength', 'balance', 'mindfulness'],
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001'),
+  title: {
+    default: 'MatMax Yoga Studio | Premium Yoga Classes in Miraflores, Lima',
+    template: '%s | MatMax Yoga Studio'
+  },
+  description: 'Transform your wellness journey with MatMax Yoga Studio in Miraflores, Lima. Expert yoga classes, personalized sessions, and evidence-based wellness programs. Book your session today!',
+  keywords: [
+    'yoga classes lima',
+    'yoga miraflores',
+    'yoga studio lima',
+    'hatha yoga',
+    'vinyasa yoga',
+    'yoga classes peru',
+    'wellness lima',
+    'meditation classes',
+    'yoga instructor lima',
+    'personalized yoga',
+    'yoga sessions',
+    'mindfulness lima',
+    'yoga packages',
+    'yoga booking lima'
+  ],
+  authors: [{ name: 'MatMax Yoga Studio' }],
+  creator: 'MatMax Yoga Studio',
+  publisher: 'MatMax Yoga Studio',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://matmax.world'),
+  alternates: {
+    canonical: '/',
+    languages: {
+      'en': '/',
+      'es': '/?lang=es',
+    },
+  },
   openGraph: {
-    title: 'MatMax Yoga Studio',
-    description: 'Yoga classes for all levels. Build strength, flexibility, and inner peace with MatMax Yoga Studio.',
     type: 'website',
-    url: 'https://matmax.store',
+    locale: 'en_US',
+    alternateLocale: ['es_PE'],
+    url: 'https://matmax.world',
     siteName: 'MatMax Yoga Studio',
+    title: 'MatMax Yoga Studio | Premium Yoga Classes in Miraflores, Lima',
+    description: 'Transform your wellness journey with MatMax Yoga Studio in Miraflores, Lima. Expert yoga classes, personalized sessions, and evidence-based wellness programs.',
     images: [
       {
         url: '/matpass-logo.png',
         width: 1200,
         height: 630,
-        alt: 'MatMax Yoga Studio',
+        alt: 'MatMax Yoga Studio - Premium Yoga Classes in Miraflores, Lima',
+        type: 'image/png',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'MatMax Yoga Studio',
-    description: 'Yoga classes for all levels. Build strength, flexibility, and inner peace with MatMax Yoga Studio.',
+    site: '@matmaxyoga',
+    creator: '@matmaxyoga',
+    title: 'MatMax Yoga Studio | Premium Yoga Classes in Miraflores, Lima',
+    description: 'Transform your wellness journey with MatMax Yoga Studio in Miraflores, Lima. Expert yoga classes and personalized sessions.',
     images: ['/matpass-logo.png'],
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: process.env.GOOGLE_VERIFICATION_ID,
+  },
+  category: 'wellness',
 };
 
 export const viewport = {

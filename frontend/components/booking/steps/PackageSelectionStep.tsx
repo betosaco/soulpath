@@ -46,6 +46,7 @@ import { useCart, useCartUI } from '@/store/appStore';
 import { usePackages } from '@/hooks/usePackages';
 import { useLanguage, useTranslations } from '@/hooks/useTranslations';
 import { defaultTranslations } from '@/lib/data/translations';
+import { StructuredData } from '@/components/StructuredData';
 
 // Debug the import
 console.log('🔍 Imported defaultTranslations:', defaultTranslations);
@@ -654,6 +655,25 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
                 </div>
               </div>
             )}
+            {/* Structured Data for each package */}
+            {packages && Array.isArray(packages) && packages.map((pkg: any) => (
+              <StructuredData
+                key={`structured-data-${pkg.id}`}
+                type="YogaPackage"
+                data={{
+                  name: pkg.packageDefinition?.name || pkg.name,
+                  description: pkg.packageDefinition?.description || pkg.description,
+                  image: "/matpass-logo.png",
+                  sku: pkg.id,
+                  price: pkg.packagePrice?.price || pkg.price,
+                  url: `https://matmax.world/packages/enhanced`,
+                  sessions: pkg.packageDefinition?.sessionsCount || pkg.sessions,
+                  duration: pkg.sessionDuration?.durationMinutes ? `${pkg.sessionDuration.durationMinutes} minutes` : "60 minutes",
+                  packageType: pkg.packageDefinition?.packageType || pkg.packageType || "Individual"
+                }}
+              />
+            ))}
+            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {packages && Array.isArray(packages) && packages.map((pkg: any, index: number) => (
               <Card 
