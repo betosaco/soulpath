@@ -43,6 +43,8 @@ import { useBookingFlow } from '../hooks/useBookingFlow';
 import { useCart, useAppStore, useShipping, useOrder, useTermsUI } from '@/store/appStore';
 import { CreditCard, Clock, User, MapPin, Calendar, CheckCircle, AlertCircle, Mail, Phone, Edit } from 'lucide-react';
 import { LyraEmbeddedForm } from '@/components/payment/LyraEmbeddedForm';
+import { useLanguage, useTranslations } from '@/hooks/useTranslations';
+import { defaultTranslations } from '@/lib/data/translations';
 
 /**
  * PAYMENT STEP PROPS
@@ -83,6 +85,23 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
   // ============================================================================
   // HOOKS AND STATE MANAGEMENT
   // ============================================================================
+
+  /**
+   * TRANSLATION HOOKS
+   * -----------------
+   * Access to language and translation system
+   */
+  const { language } = useLanguage();
+  const { t } = useTranslations(undefined, language);
+  
+  // Use default translations directly to ensure checkout translations are always available
+  const checkoutTranslations = defaultTranslations[language]?.checkout || defaultTranslations.en.checkout || {};
+  const paymentTranslations = checkoutTranslations.payment || {};
+
+  // Helper function to get translations
+  const getTranslation = (key: string, fallback: string = ''): string => {
+    return (paymentTranslations as Record<string, any>)[key] || fallback;
+  };
 
   /**
    * ROUTER
@@ -158,7 +177,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
     // Check if total price is valid
     const totalPrice = getTotalPrice();
     if (totalPrice <= 0) {
-      return { isValid: false, error: 'Invalid total price' };
+      return { isValid: false, error: getTranslation('invalidTotalPrice', 'Invalid total price') };
     }
 
     // Check for duplicate time slots within each package individually
@@ -368,7 +387,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
       onPaymentSuccess?.(paymentIntentId, orderInfo);
 
       // Show success message
-      toast.success('Payment successful! Processing your order...');
+      toast.success(getTranslation('paymentSuccessful', 'Payment successful! Processing your order...'));
 
       // Navigate to confirmation after a brief delay
       setTimeout(() => {
@@ -378,7 +397,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
     } catch (error) {
       console.error('❌ Error creating order:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      toast.error(`Payment successful but failed to create order: ${errorMessage}. Please contact support.`);
+      toast.error(`${getTranslation('paymentSuccessfulButOrderFailed', 'Payment successful but failed to create order')}: ${errorMessage}. ${getTranslation('pleaseContactSupport', 'Please contact support.')}`);
       
       // Still set order data with pending status
       const orderInfo: OrderData = {
@@ -416,7 +435,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
     onPaymentError?.(error);
 
     // Show error message
-    toast.error('Payment failed. Please try again.');
+    toast.error(getTranslation('paymentFailed', 'Payment failed. Please try again.'));
   };
 
   /**
@@ -470,7 +489,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
       setPaymentStatus('success');
       clearCart();
 
-      toast.success('Payment successful! Order confirmed.');
+      toast.success(getTranslation('paymentSuccessfulOrderConfirmed', 'Payment successful! Order confirmed.'));
 
       setTimeout(() => {
         goToNextStep();
@@ -491,7 +510,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
   const handleLyraPaymentError = (error: any) => {
     console.error('❌ Lyra payment error:', error);
     setPaymentStatus('error');
-    toast.error(error?.message || 'Payment failed. Please try again.');
+    toast.error(error?.message || getTranslation('paymentFailed', 'Payment failed. Please try again.'));
   };
 
   /**
@@ -680,7 +699,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
   const renderOrderSummary = () => (
     <Card className="unified-card">
       <CardHeader>
-        <CardTitle className="unified-card__title">Complete Order Summary</CardTitle>
+        <CardTitle className="unified-card__title">{getTranslation('orderSummary', 'Complete Order Summary')}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
@@ -688,13 +707,13 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
           <div>
             <h4 className="font-semibold text-foreground mb-3 flex items-center">
               <CheckCircle className="w-5 h-5 mr-2 text-[var(--color-status-success)]" />
-              Price Details
+              {getTranslation('priceDetails', 'Price Details')}
             </h4>
             <div className="bg-card border border-border rounded-lg p-4">
               <div className="space-y-2 text-sm">
                 {/* Subtotal */}
                 <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Subtotal:</span>
+                  <span className="text-muted-foreground">{getTranslation('subtotal', 'Subtotal')}:</span>
                   <span className="font-medium text-foreground">
                     {isClient && cartItems.length > 0 && cartItems[0].currency} {isClient ? (getTotalPrice() / 1.18).toFixed(2) : '0.00'}
                   </span>
@@ -702,7 +721,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                 
                 {/* IGV (18%) */}
                 <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">IGV (18%):</span>
+                  <span className="text-muted-foreground">{getTranslation('tax', 'IGV (18%)')}:</span>
                   <span className="font-medium text-foreground">
                     {isClient && cartItems.length > 0 && cartItems[0].currency} {isClient ? (getTotalPrice() - (getTotalPrice() / 1.18)).toFixed(2) : '0.00'}
                   </span>
@@ -710,7 +729,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                 
                 {/* Total */}
                 <div className="flex justify-between items-center pt-2 border-t border-border">
-                  <span className="text-lg font-semibold text-foreground">Total:</span>
+                  <span className="text-lg font-semibold text-foreground">{getTranslation('total', 'Total')}:</span>
                   <span className="text-xl font-bold text-primary">
                     {isClient && cartItems.length > 0 && cartItems[0].currency} {isClient ? getTotalPrice().toFixed(2) : '0.00'}
                   </span>
@@ -724,7 +743,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
           <div>
             <h4 className="font-semibold text-foreground mb-3 flex items-center">
               <Calendar className="w-5 h-5 mr-2" />
-              Packages & Bookings
+              {getTranslation('packagesAndBookings', 'Packages & Bookings')}
             </h4>
             <div className="space-y-4">
               {isClient && cartItems.map((item, index) => (
@@ -845,12 +864,12 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
         icon: '⏳'
       },
       success: {
-        message: 'Payment successful! Redirecting...',
+        message: getTranslation('paymentSuccessfulRedirecting', 'Payment successful! Redirecting...'),
         color: 'text-[var(--color-status-success)]',
         icon: '✅'
       },
       error: {
-        message: 'Payment failed. Please try again.',
+        message: getTranslation('paymentFailed', 'Payment failed. Please try again.'),
         color: 'text-[var(--color-status-error)]',
         icon: '❌'
       }
@@ -884,10 +903,10 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
     <div className="space-y-6 pb-20">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-foreground mb-2">
-          Payment
+          {getTranslation('title', 'Payment')}
         </h2>
         <p className="text-muted-foreground">
-          Review your order and complete your purchase
+          {getTranslation('subtitle', 'Review your order and complete your purchase')}
         </p>
       </div>
 
@@ -906,7 +925,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                   <div className="flex items-center justify-between">
                     <CardTitle className="unified-card__title flex items-center">
                       <User className="w-5 h-5 mr-2" />
-                      Customer Information
+{getTranslation('customerInfo', 'Customer Information')}
                     </CardTitle>
                     <Button
                       variant="outline"
@@ -924,21 +943,21 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div className="flex items-center space-x-2">
                         <User className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">Name:</span>
+                        <span className="text-muted-foreground">{getTranslation('name', 'Name')}:</span>
                         <span className="font-medium text-foreground">
                           {customerData.name}
                         </span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Mail className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">Email:</span>
+                        <span className="text-muted-foreground">{getTranslation('email', 'Email')}:</span>
                         <span className="font-medium text-foreground">
                           {customerData.email}
                         </span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Phone className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">Phone:</span>
+                        <span className="text-muted-foreground">{getTranslation('phone', 'Phone')}:</span>
                         <span className="font-medium text-foreground">
                           {customerData.phone ? `${customerData.countryCode} ${customerData.phone}` : 'Not provided'}
                         </span>
@@ -948,7 +967,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                         <div className="flex items-start space-x-2 md:col-span-2">
                           <MapPin className="w-4 h-4 text-muted-foreground mt-0.5" />
                           <div className="flex-1">
-                            <span className="text-muted-foreground">Shipping Address:</span>
+                            <span className="text-muted-foreground">{getTranslation('shippingAddress', 'Shipping Address')}:</span>
                             <div className="font-medium text-foreground">
                               {shippingData.address}
                               {shippingData.city && `, ${shippingData.city}`}
@@ -968,7 +987,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
             {validation.isValid ? (
               <Card className="unified-card">
                 <CardHeader>
-                  <CardTitle className="unified-card__title">Payment Options</CardTitle>
+                  <CardTitle className="unified-card__title">{getTranslation('paymentMethod', 'Payment Options')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -1027,10 +1046,10 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                             className="w-4 h-4 text-[var(--color-accent-500)]"
                           />
                           <Clock className="w-6 h-6 text-[var(--color-accent-500)]" />
-                          <h4 className="font-medium text-foreground">Pay Later</h4>
+                          <h4 className="font-medium text-foreground">{getTranslation('payLater', 'Pay Later')}</h4>
                         </div>
                         <p className="text-sm text-muted-foreground ml-7">
-                          Complete your order now and pay later. We will contact you to arrange payment.
+                          {getTranslation('payLaterDescription', 'Complete your order now and pay later. We will contact you to arrange payment.')}
                         </p>
                       </div>
                     </div>
@@ -1058,7 +1077,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                     {selectedPaymentMethod === 'paylater' && (
                     <div className="border-t pt-4">
                       <p className="text-sm text-muted-foreground mb-4">
-                        Complete your order now and pay later. We will contact you to arrange payment.
+                        {getTranslation('payLaterDescription', 'Complete your order now and pay later. We will contact you to arrange payment.')}
                       </p>
 
                       {/* Terms Acceptance */}
@@ -1071,12 +1090,12 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                             className="mt-1 w-4 h-4 text-primary border-border rounded focus:ring-primary"
                           />
                           <span className="text-sm text-foreground">
-                            I agree to the{' '}
+                            {getTranslation('iAgreeTo', 'I agree to the')}{' '}
                             <button
                               onClick={() => openTerms()}
                               className="text-[var(--color-accent-500)] hover:text-[var(--color-accent-600)] underline"
                             >
-                              Terms and Conditions
+                              {getTranslation('termsAndConditions', 'Terms and Conditions')}
                             </button>
                           </span>
                         </label>
@@ -1092,12 +1111,12 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                         }`}
                       >
                         <Clock className="w-5 h-5" />
-                        <span>Complete Order (Pay Later)</span>
+                        <span>{getTranslation('completeOrderPayLater', 'Complete Order (Pay Later)')}</span>
                       </button>
 
                       {!termsAccepted && (
                         <p className="text-xs text-muted-foreground mt-2 text-center">
-                          Please accept the Terms and Conditions to proceed
+                          {getTranslation('pleaseAcceptTerms', 'Please accept the Terms and Conditions to proceed')}
                         </p>
                       )}
                     </div>
@@ -1147,10 +1166,10 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
               🎉 Order Confirmed!
             </h3>
             <p className="mb-4" style={{ color: 'color-mix(in srgb, var(--color-status-success) 75%, black)' }}>
-              Your order has been confirmed. We will contact you to arrange payment.
+              {getTranslation('orderConfirmedContact', 'Your order has been confirmed. We will contact you to arrange payment.')}
             </p>
             <div className="text-sm text-[var(--color-status-success)]">
-              <p>Order #{orderData.orderNumber}</p>
+              <p>{getTranslation('orderNumber', 'Order #')}{orderData.orderNumber}</p>
               <p>Total: {cartItems.length > 0 && cartItems[0].currency} {orderData.total.toFixed(2)}</p>
             </div>
           </div>

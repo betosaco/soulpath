@@ -5,14 +5,73 @@ import { defaultTranslations } from '@/lib/data/translations';
 
 export function useLanguage() {
   const [language, setLanguage] = useState<'en' | 'es'>('en');
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Function to detect browser language
+  const detectBrowserLanguage = (): 'en' | 'es' => {
+    if (typeof window === 'undefined') return 'en';
+    
+    // Get all browser languages (preferred languages in order)
+    const languages = navigator.languages || [navigator.language || (navigator as any).userLanguage];
+    
+    // Check each language in order of preference
+    for (const lang of languages) {
+      const primaryLang = lang.split('-')[0].toLowerCase();
+      
+      // Check if Spanish is preferred
+      if (primaryLang === 'es') {
+        return 'es';
+      }
+    }
+    
+    // Default to English for all other languages
+    return 'en';
+  };
 
   useEffect(() => {
-    // Load language preference from localStorage
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && !isInitialized) {
       const savedLanguage = localStorage.getItem('language');
+      
       if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'es')) {
+        // User has a saved preference, use it
         setLanguage(savedLanguage as 'en' | 'es');
+      } else {
+        // No saved preference, detect from browser
+        const detectedLanguage = detectBrowserLanguage();
+        setLanguage(detectedLanguage);
+        
+        // Save the detected language for future visits
+        localStorage.setItem('language', detectedLanguage);
       }
+      
+      setIsInitialized(true);
+    }
+  }, [isInitialized]);
+
+  // Listen for storage changes (multiple tabs) and language change events
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'language' && e.newValue && (e.newValue === 'en' || e.newValue === 'es')) {
+        console.log('🔄 Language changed via localStorage:', e.newValue);
+        setLanguage(e.newValue as 'en' | 'es');
+      }
+    };
+
+    const handleLanguageChange = (event: CustomEvent) => {
+      if (event.detail && event.detail.language && (event.detail.language === 'en' || event.detail.language === 'es')) {
+        console.log('🔄 Language changed via event:', event.detail.language);
+        setLanguage(event.detail.language);
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', handleStorageChange);
+      window.addEventListener('languageChanged', handleLanguageChange as EventListener);
+      
+      return () => {
+        window.removeEventListener('storage', handleStorageChange);
+        window.removeEventListener('languageChanged', handleLanguageChange as EventListener);
+      };
     }
   }, []);
 
@@ -22,10 +81,19 @@ export function useLanguage() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('language', newLanguage);
       console.log('💾 Language saved to localStorage:', newLanguage);
+      
+      // Dispatch custom event to notify all components
+      window.dispatchEvent(new CustomEvent('languageChanged', { 
+        detail: { language: newLanguage } 
+      }));
     }
   }, []); // Remove language dependency to prevent infinite loop
 
-  return { language, setLanguage: changeLanguage };
+  return { 
+    language, 
+    setLanguage: changeLanguage, 
+    isInitialized 
+  };
 }
 
 export function useTranslations(initialContent?: Record<string, unknown>, language?: 'en' | 'es') {
@@ -123,15 +191,37 @@ export function useTranslations(initialContent?: Record<string, unknown>, langua
     } else {
       // Ensure we have default translations first
       setContent(defaultTranslations);
-      // Only fetch from backend if we haven't fetched yet and we're in the browser
-      // Temporarily disabled to test if this is causing the infinite loop
-      // if (!hasFetchedRef.current && typeof window !== 'undefined') {
-      //   console.log('🔄 Fetching fresh content from backend for language:', currentLanguage);
-      //   hasFetchedRef.current = true;
-      //   fetchTranslations();
-      // }
+      // Fetch from backend if we haven't fetched yet and we're in the browser
+      if (!hasFetchedRef.current && typeof window !== 'undefined') {
+        console.log('🔄 Fetching fresh content from backend for language:', currentLanguage);
+        hasFetchedRef.current = true;
+        fetchTranslations();
+      }
     }
   }, [initialContent, fetchTranslations, currentLanguage]); // Include currentLanguage dependency
+
+  // Force re-render when language changes
+  useEffect(() => {
+    console.log(`🔄 Language changed to: ${currentLanguage}`);
+    // Force a re-render by updating content state
+    setContent(prevContent => ({ ...prevContent }));
+  }, [currentLanguage]);
+
+  // Listen for language change events from other components
+  useEffect(() => {
+    const handleLanguageChange = (event: CustomEvent) => {
+      console.log('🔄 Received language change event:', event.detail.language);
+      // Force a re-render when language changes
+      setContent(prevContent => ({ ...prevContent }));
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('languageChanged', handleLanguageChange as EventListener);
+      return () => {
+        window.removeEventListener('languageChanged', handleLanguageChange as EventListener);
+      };
+    }
+  }, []);
 
   // Separate useEffect to handle language changes specifically
   useEffect(() => {

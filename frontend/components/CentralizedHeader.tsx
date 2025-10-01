@@ -154,7 +154,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                 whileTap={{ scale: 0.95 }}
                 className={`hidden sm:flex items-center space-x-1 header-button-account font-heading ${isActiveRoute('/products') ? 'text-[var(--color-primary-500)] font-semibold' : ''}`}
               >
-                <span>{getTranslation('nav.products', language === 'es' ? 'Productos' : 'Products')}</span>
+                <span>{getTranslation('nav.products', 'Products')}</span>
               </motion.button>
             </Link>
 
@@ -194,7 +194,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
           </div>
 
           {/* Cart Icon */}
-          <CartIcon className="hidden sm:block" />
+          <CartIcon key={language} className="hidden sm:block" />
 
           {/* Language Selector - Desktop */}
           <div className="hidden sm:flex items-center space-x-2">
@@ -223,7 +223,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
 
           {/* Mobile Cart Toggle Button */}
           <div className="flex sm:hidden items-center space-x-2">
-            <MobileCartToggle />
+            <MobileCartToggle key={language} />
           </div>
 
           {/* Mobile Menu Button */}
@@ -238,7 +238,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
             {/* Mobile: Show "Menu" text with icon */}
             <div className="flex sm:hidden items-center space-x-2">
               <span className="text-sm font-medium">
-                {isMenuOpen ? 'Close' : 'Menu'}
+                {isMenuOpen ? getTranslation('common.close', 'Close') : getTranslation('common.menu', 'Menu')}
               </span>
               <motion.div
                 animate={{ rotate: isMenuOpen ? 180 : 0 }}
@@ -346,7 +346,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                           : 'text-black hover:text-[#6ea058]'
                       }`}
                     >
-                      <span className="text-base sm:text-lg font-medium">{getTranslation('nav.products', language === 'es' ? 'Productos' : 'Products')}</span>
+                      <span className="text-base sm:text-lg font-medium">{getTranslation('nav.products', 'Products')}</span>
                     </motion.button>
                   </Link>
 
@@ -361,7 +361,7 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                           : 'text-black hover:text-[#6ea058]'
                       }`}
                     >
-                      <span className="text-base sm:text-lg font-medium">{getTranslation('nav.applyTeacher', language === 'es' ? 'Únete como Profesor' : 'Apply as Teacher')}</span>
+                      <span className="text-base sm:text-lg font-medium">{getTranslation('nav.applyTeacher', 'Apply as Teacher')}</span>
                     </motion.button>
                   </Link>
 
@@ -409,34 +409,34 @@ export function CentralizedHeader({ user = null, isAdmin = false }: CentralizedH
                       {user && isAdmin ? getTranslation('common.dashboard', 'Dashboard') : getTranslation('common.login', 'Login')}
                     </span>
                   </motion.button>
-                </nav>
 
-                {/* Language Selector */}
-                <div className="pt-4 border-t border-gray-200">
-                  <div className="flex items-center justify-center space-x-3">
-                    <button 
-                      onClick={() => setLanguage('en')}
-                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation min-h-[40px] min-w-[40px] flex items-center justify-center ${
-                        language === 'en' 
-                          ? 'bg-[#6ea058] text-white shadow-sm' 
-                          : 'text-black hover:text-[#6ea058] border border-gray-200'
-                      }`}
-                    >
-                      EN
-                    </button>
-                    <span className="text-gray-400">|</span>
-                    <button 
-                      onClick={() => setLanguage('es')}
-                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation min-h-[40px] min-w-[40px] flex items-center justify-center ${
-                        language === 'es' 
-                          ? 'bg-[#6ea058] text-white shadow-sm' 
-                          : 'text-black hover:text-[#6ea058] border border-gray-200'
-                      }`}
-                    >
-                      ES
-                    </button>
+                  {/* Language Selector - Moved to be just below Login button */}
+                  <div className="pt-4">
+                    <div className="flex items-center justify-center space-x-3">
+                      <button 
+                        onClick={() => setLanguage('en')}
+                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation min-h-[40px] min-w-[40px] flex items-center justify-center ${
+                          language === 'en' 
+                            ? 'bg-[#6ea058] text-white shadow-sm' 
+                            : 'text-black hover:text-[#6ea058] border border-gray-200'
+                        }`}
+                      >
+                        EN
+                      </button>
+                      <span className="text-gray-400">|</span>
+                      <button 
+                        onClick={() => setLanguage('es')}
+                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation min-h-[40px] min-w-[40px] flex items-center justify-center ${
+                          language === 'es' 
+                            ? 'bg-[#6ea058] text-white shadow-sm' 
+                            : 'text-black hover:text-[#6ea058] border border-gray-200'
+                        }`}
+                      >
+                        ES
+                      </button>
+                    </div>
                   </div>
-                </div>
+                </nav>
               </div>
             </motion.div>
           </>

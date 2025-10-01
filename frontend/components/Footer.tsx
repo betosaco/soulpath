@@ -74,7 +74,7 @@ export function Footer() {
                 {footer.bookSession || 'Book Session'}
               </Link>
               <Link href="/apply-teacher" className="block text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent-500)] transition-colors">
-                {footer.applyTeacher || (language === 'es' ? 'Únete como Profesor' : 'Apply as Teacher')}
+                {footer.applyTeacher || 'Apply as Teacher'}
               </Link>
             </nav>
           </div>
@@ -127,9 +127,9 @@ export function Footer() {
               {footer.copyright || '© 2024 Matmax Yoga Studio. All rights reserved.'}
             </p>
             <div className="flex items-center space-x-1 text-xs text-[var(--color-text-tertiary)]">
-              <span>Made with</span>
+              <span>{footer.madeWith || 'Made with'}</span>
               <Heart className="w-3 h-3 text-[var(--color-status-error)]" />
-              <span>in Lima, Peru</span>
+              <span>{footer.inLima || 'in Lima, Peru'}</span>
             </div>
           </div>
         </div>

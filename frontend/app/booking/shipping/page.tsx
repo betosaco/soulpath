@@ -28,6 +28,7 @@
 
 import { AppShell } from '@/components/AppShell';
 import { ShippingStep } from '@/components/booking/steps/ShippingStep';
+import { useLanguage } from '@/hooks/useTranslations';
 
 /**
  * BOOKING SHIPPING PAGE COMPONENT
@@ -37,10 +38,12 @@ import { ShippingStep } from '@/components/booking/steps/ShippingStep';
  * @returns React component
  */
 export default function ShippingPage() {
+  const { language } = useLanguage();
+  
   return (
     <AppShell>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <ShippingStep />
+        <ShippingStep key={language} />
       </div>
     </AppShell>
   );

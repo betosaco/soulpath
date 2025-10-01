@@ -7,6 +7,7 @@ import { CartSidebar } from './CartSidebar';
 import { MobileViewportHandler } from './MobileViewportHandler';
 import { QueryProvider } from './providers/QueryProvider';
 import { TermsModal } from './TermsModal';
+import { useLanguage } from '@/hooks/useTranslations';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -35,6 +36,8 @@ export function AppShell({
   showFooter = true,
   className = "min-h-screen bg-white"
 }: AppShellProps) {
+  const { language } = useLanguage();
+  
   return (
     <QueryProvider>
       {/* Enhanced mobile viewport and touch handling */}
@@ -56,7 +59,7 @@ export function AppShell({
         {showFooter && <Footer />}
         
         {/* Cart sidebar for e-commerce functionality */}
-        <CartSidebar />
+        <CartSidebar key={language} />
 
         {/* Global Terms & Conditions modal */}
         <TermsModal />

@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ShoppingCart, X } from 'lucide-react';
 import { useCart, useCartUI } from '@/store/appStore';
+import { useLanguage, useTranslations } from '@/hooks/useTranslations';
+import { defaultTranslations } from '@/lib/data/translations';
 
 interface MobileCartToggleProps {
   className?: string;
@@ -13,6 +15,25 @@ export function MobileCartToggle({ className = '' }: MobileCartToggleProps) {
   const { getTotalItems: _getTotalItems, items } = useCart();
   const { isCartOpen, toggleCart } = useCartUI();
   const [isHydrated, setIsHydrated] = useState(false);
+
+  /**
+   * TRANSLATION HOOKS
+   * -----------------
+   * Access to language and translation system
+   */
+  const { language } = useLanguage();
+  const { t } = useTranslations(undefined, language);
+  
+  // Helper function to get translations - reactive to language changes
+  const getTranslation = (key: string, fallback: string = ''): string => {
+    const paymentTranslations = defaultTranslations[language]?.checkout?.payment || defaultTranslations.en.checkout?.payment || {};
+    return (paymentTranslations as Record<string, any>)[key] || fallback;
+  };
+
+  // Force re-render when language changes
+  useEffect(() => {
+    // Language change detected - component will re-render
+  }, [language]);
 
   // Handle hydration safely
   useEffect(() => {
@@ -30,13 +51,13 @@ export function MobileCartToggle({ className = '' }: MobileCartToggleProps) {
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       className={`flex items-center justify-center rounded-lg header-button-menu touch-manipulation focus-visible px-4 py-2 min-h-[44px] min-w-[44px] relative overflow-hidden ${className}`}
-      aria-label={isCartOpen ? 'Close cart' : 'Open cart'}
+      aria-label={isCartOpen ? `${getTranslation('closeCart', 'Close')} cart` : `${getTranslation('openCart', 'Open')} cart`}
       aria-expanded={isCartOpen}
     >
       {/* Mobile: Show "Cart" text with icon */}
       <div className="flex items-center space-x-2 font-heading">
         <span className="text-sm font-medium">
-          {isCartOpen ? 'Close' : 'Cart'}
+          {isCartOpen ? getTranslation('closeCart', 'Close') : getTranslation('cart', 'Cart')}
         </span>
         <motion.div
           animate={{ rotate: isCartOpen ? 180 : 0 }}

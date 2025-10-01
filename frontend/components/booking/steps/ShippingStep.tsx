@@ -49,6 +49,8 @@ import { toast } from 'sonner';
 import { useBookingFlow } from '../hooks/useBookingFlow';
 import { useCart, useShipping } from '@/store/appStore';
 import { getDefaultPeruValues } from '@/lib/peru-shipping-data';
+import { useLanguage, useTranslations } from '@/hooks/useTranslations';
+import { defaultTranslations } from '@/lib/data/translations';
 
 /**
  * SHIPPING FORM DATA INTERFACE
@@ -91,6 +93,23 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
   // ============================================================================
   // HOOKS AND STATE MANAGEMENT
   // ============================================================================
+
+  /**
+   * TRANSLATION HOOKS
+   * -----------------
+   * Access to language and translation system
+   */
+  const { language } = useLanguage();
+  const { t } = useTranslations(undefined, language);
+  
+  // Use default translations directly to ensure checkout translations are always available
+  const checkoutTranslations = defaultTranslations[language]?.checkout || defaultTranslations.en.checkout || {};
+  const shippingTranslations = checkoutTranslations.shipping || {};
+
+  // Helper function to get translations
+  const getTranslation = (key: string, fallback: string = ''): string => {
+    return (shippingTranslations as Record<string, any>)[key] || fallback;
+  };
 
   /**
    * BOOKING FLOW STATE
@@ -333,11 +352,11 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
       <div className="max-w-2xl mx-auto h-full space-y-6">
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
-            Shipping Address
+            {getTranslation('title', 'Shipping Address')}
           </h2>
           <div className="mt-4">
             <div className="animate-spin rounded-full h-8 w-8 border-2 mx-auto" style={{ borderColor: 'color-mix(in srgb, var(--color-primary-500) 25%, transparent)', borderTopColor: 'var(--color-primary-500)' }}></div>
-            <p className="text-sm mt-2" style={{ color: 'var(--color-text-tertiary)' }}>Loading...</p>
+            <p className="text-sm mt-2" style={{ color: 'var(--color-text-tertiary)' }}>{getTranslation('loading', 'Loading...')}</p>
           </div>
         </div>
       </div>
@@ -350,14 +369,14 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
       <div className="max-w-2xl mx-auto h-full space-y-6">
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
-            Shipping Address
+            {getTranslation('title', 'Shipping Address')}
           </h2>
           <p style={{ color: 'var(--color-text-secondary)' }}>
-            No shipping required for your order
+            {getTranslation('noShippingRequired', 'No shipping required for your order')}
           </p>
           <div className="mt-4">
             <div className="animate-spin rounded-full h-8 w-8 border-2 mx-auto" style={{ borderColor: 'color-mix(in srgb, var(--color-primary-500) 25%, transparent)', borderTopColor: 'var(--color-primary-500)' }}></div>
-            <p className="text-sm mt-2" style={{ color: 'var(--color-text-tertiary)' }}>Continuing to payment...</p>
+            <p className="text-sm mt-2" style={{ color: 'var(--color-text-tertiary)' }}>{getTranslation('continuingToPayment', 'Continuing to payment...')}</p>
           </div>
         </div>
       </div>
@@ -368,10 +387,10 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
     <div className="max-w-2xl mx-auto h-full space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
-          Shipping Address
+          {getTranslation('title', 'Shipping Address')}
         </h2>
         <p style={{ color: 'var(--color-text-secondary)' }}>
-          Provide shipping address details for your physical products
+          {getTranslation('subtitle', 'Provide shipping address details for your physical products')}
         </p>
       </div>
 
@@ -380,17 +399,17 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
         {/* Address Field */}
         {renderFormField({
           name: 'address',
-          label: 'Address',
+          label: getTranslation('address', 'Address'),
           type: 'text',
           required: true,
-          placeholder: 'Enter your complete address',
+          placeholder: getTranslation('addressPlaceholder', 'Enter your complete address'),
           fullWidth: true
         })}
 
         {/* Department Field - Only for Peru (First Field) */}
         {formData.country === 'PE' && (
           <DepartmentInput
-            label="Department"
+            label={getTranslation('department', 'Department')}
             required={true}
             value={formData.peruDepartment || defaultValues.department}
             onChange={(departmentCode) => setFormData(prev => ({ 
@@ -401,7 +420,7 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
               peruDistrict: '', // Clear district when department changes
               postalCode: '' // Clear postal code when department changes
             }))}
-            placeholder="Select department"
+            placeholder={getTranslation('selectDepartment', 'Select department')}
             error={errors.peruDepartment}
             defaultDepartmentCode={defaultValues.department}
           />
@@ -543,7 +562,7 @@ export function ShippingStep({ initialData, onDataSaved }: ShippingStepProps) {
           }`}
           style={{ background: isFormValid ? 'var(--color-primary-500)' : 'var(--color-border-500)', color: isFormValid ? 'var(--primary-foreground)' : 'var(--color-text-tertiary)' }}
         >
-          Continue to Payment
+{getTranslation('continue', 'Continue to Payment')}
         </button>
       </div>
 

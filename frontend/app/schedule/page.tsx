@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation';
 import { AppShell } from '@/components/AppShell';
 import { EnhancedSchedule } from '@/components/EnhancedSchedule';
 import { useCart } from '@/store/appStore';
+import { useLanguage } from '@/hooks/useTranslations';
 
 // ULTRA-OPTIMIZATION: Memoized SchedulePage component with UI-first approach
 const SchedulePage = memo(function SchedulePage() {
   const router = useRouter();
   const { items: cartItems } = useCart();
+  const { language } = useLanguage();
 
   // ULTRA-OPTIMIZATION: Memoized cart monitoring
   const handleCartChange = useCallback(() => {
@@ -48,6 +50,7 @@ const SchedulePage = memo(function SchedulePage() {
       <div className="min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <EnhancedSchedule
+            key={language}
             onBookSlot={handleScheduleSelected}
             showFilters={true}
           />

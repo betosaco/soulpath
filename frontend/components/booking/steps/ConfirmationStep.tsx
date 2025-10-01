@@ -42,6 +42,8 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle, Download, Mail, Phone, Calendar, Package, Truck, User, Clock, MapPin } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCart, useAppStore, useOrder, useShipping } from '@/store/appStore';
+import { useLanguage, useTranslations } from '@/hooks/useTranslations';
+import { defaultTranslations } from '@/lib/data/translations';
 
 /**
  * CONFIRMATION STEP PROPS
@@ -89,6 +91,23 @@ export function ConfirmationStep({
   // ============================================================================
   // HOOKS AND STATE MANAGEMENT
   // ============================================================================
+
+  /**
+   * TRANSLATION HOOKS
+   * -----------------
+   * Access to language and translation system
+   */
+  const { language } = useLanguage();
+  const { t } = useTranslations(undefined, language);
+  
+  // Use default translations directly to ensure checkout translations are always available
+  const checkoutTranslations = defaultTranslations[language]?.checkout || defaultTranslations.en.checkout || {};
+  const confirmationTranslations = checkoutTranslations.confirmation || {};
+
+  // Helper function to get translations
+  const getTranslation = (key: string, fallback: string = ''): string => {
+    return (confirmationTranslations as Record<string, any>)[key] || fallback;
+  };
 
   /**
    * ROUTER FOR NAVIGATION
@@ -174,24 +193,24 @@ export function ConfirmationStep({
         <CardHeader>
           <CardTitle className="unified-card__title flex items-center">
             <CheckCircle className="w-5 h-5 text-[var(--color-status-success)] mr-2" />
-            Order Details
+{getTranslation('orderItems', 'Order Details')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <strong className="text-foreground">Order Number:</strong>
+                <strong className="text-foreground">{getTranslation('orderNumber', 'Order Number')}:</strong>
                 <p className="text-lg font-mono text-foreground">{orderData.orderNumber}</p>
               </div>
               <div>
-                <strong className="text-foreground">Total Amount:</strong>
+                <strong className="text-foreground">{getTranslation('total', 'Total Amount')}:</strong>
                 <p className="text-lg font-bold text-primary">S/ {orderData.total.toFixed(2)}</p>
               </div>
             </div>
 
             <div>
-              <strong className="text-foreground mb-2 block">Items Purchased:</strong>
+              <strong className="text-foreground mb-2 block">{getTranslation('orderItems', 'Items Purchased')}:</strong>
               <ul className="space-y-2">
                 {orderData.items.map((item, index) => (
                   <li key={index} className="flex justify-between items-center p-2 bg-secondary rounded">
@@ -222,7 +241,7 @@ export function ConfirmationStep({
         <CardHeader>
           <CardTitle className="unified-card__title flex items-center">
             <Calendar className="w-5 h-5 text-[var(--color-accent-500)] mr-2" />
-            Your Bookings
+{getTranslation('yourBookings', 'Your Bookings')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -340,7 +359,7 @@ export function ConfirmationStep({
         <CardHeader>
           <CardTitle className="unified-card__title flex items-center">
             <User className="w-5 h-5 text-[var(--color-accent-500)] mr-2" />
-            Customer Information
+{getTranslation('customerInfo', 'Customer Information')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -369,7 +388,7 @@ export function ConfirmationStep({
         <CardHeader>
           <CardTitle className="unified-card__title flex items-center">
             <Truck className="w-5 h-5 text-[var(--color-accent-500)] mr-2" />
-            Shipping Address
+{getTranslation('shippingAddress', 'Shipping Address')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -391,7 +410,7 @@ export function ConfirmationStep({
     <Card className="unified-card" style={{ background: 'color-mix(in srgb, var(--color-primary-500) 6%, transparent)', border: '1px solid color-mix(in srgb, var(--color-primary-500) 20%, transparent)' }}>
       <CardHeader>
         <CardTitle className="unified-card__title text-foreground">
-          What&apos;s Next?
+          {getTranslation('whatsNext', 'What\'s Next?')}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -399,24 +418,24 @@ export function ConfirmationStep({
           <div className="flex items-start space-x-3">
             <Mail className="w-5 h-5 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="font-medium">Email Confirmation</p>
-              <p className="text-sm">You&apos;ll receive a confirmation email with your booking details and receipt.</p>
+              <p className="font-medium">{getTranslation('emailConfirmation', 'Email Confirmation')}</p>
+              <p className="text-sm">{getTranslation('emailConfirmationDesc', "You'll receive a confirmation email with your booking details and receipt.")}</p>
             </div>
           </div>
 
           <div className="flex items-start space-x-3">
             <Calendar className="w-5 h-5 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="font-medium">Session Reminders</p>
-              <p className="text-sm">We&apos;ll send you reminders 24 hours and 1 hour before each session.</p>
+              <p className="font-medium">{getTranslation('sessionReminders', 'Session Reminders')}</p>
+              <p className="text-sm">{getTranslation('sessionRemindersDesc', "We'll send you reminders 24 hours and 1 hour before each session.")}</p>
             </div>
           </div>
 
           <div className="flex items-start space-x-3">
             <Phone className="w-5 h-5 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="font-medium">Questions?</p>
-              <p className="text-sm">Contact our support team if you need to make changes to your bookings.</p>
+              <p className="font-medium">{getTranslation('questions', 'Questions?')}</p>
+              <p className="text-sm">{getTranslation('contactSupport', 'Contact our support team if you need to make changes to your bookings.')}</p>
             </div>
           </div>
         </div>
@@ -437,7 +456,7 @@ export function ConfirmationStep({
         className="flex items-center"
       >
         <Calendar className="w-4 h-4 mr-2" />
-        View My Bookings
+        {getTranslation('viewMyBookings', 'View My Bookings')}
       </Button>
 
       <Button
@@ -445,7 +464,7 @@ export function ConfirmationStep({
         className="flex items-center bg-green-600 hover:bg-green-700"
       >
         <Package className="w-4 h-4 mr-2" />
-        Book More Sessions
+        {getTranslation('bookMoreSessions', 'Book More Sessions')}
       </Button>
 
       <Button
@@ -454,7 +473,7 @@ export function ConfirmationStep({
         className="flex items-center"
       >
         <Download className="w-4 h-4 mr-2" />
-        Print Confirmation
+        {getTranslation('printConfirmation', 'Print Confirmation')}
       </Button>
     </div>
   );
@@ -471,14 +490,14 @@ export function ConfirmationStep({
           <CheckCircle className="w-8 h-8 text-[var(--color-status-success)]" />
         </div>
         <h2 className="text-3xl font-bold text-foreground mb-2">
-          Order Confirmed!
+          {getTranslation('title', 'Order Confirmed!')}
         </h2>
         <p className="text-muted-foreground text-lg">
-          Thank you for your purchase. Your booking is confirmed.
+          {getTranslation('thankYouPurchase', 'Thank you for your purchase. Your booking is confirmed.')}
         </p>
         {orderData?.orderNumber && (
           <p className="text-lg font-semibold text-foreground mt-2">
-            Order Number: {orderData.orderNumber}
+            {getTranslation('orderNumber', 'Order Number')}: {orderData.orderNumber}
           </p>
         )}
       </div>

@@ -36,6 +36,8 @@ import { maskEmailForDisplay } from '@/lib/utils/email-mask';
 import { toast } from 'sonner';
 import { useBookingFlow } from '../hooks/useBookingFlow';
 import { useAppStore } from '@/store/appStore';
+import { useLanguage, useTranslations } from '@/hooks/useTranslations';
+import { defaultTranslations } from '@/lib/data/translations';
 
 /**
  * CUSTOMER FORM DATA INTERFACE
@@ -73,6 +75,34 @@ export function CustomerInfoStep({ initialData, onDataSaved }: CustomerInfoStepP
   // ============================================================================
   // HOOKS AND STATE MANAGEMENT
   // ============================================================================
+
+  /**
+   * TRANSLATION HOOKS
+   * -----------------
+   * Access to language and translation system
+   */
+  const { language } = useLanguage();
+  const { t } = useTranslations(undefined, language);
+  
+  // Use default translations directly to ensure checkout translations are always available
+  // Make it reactive to language changes by accessing it directly in the helper function
+  const getTranslation = (key: string, fallback: string = ''): string => {
+    const checkoutTranslations = defaultTranslations[language]?.checkout || defaultTranslations.en.checkout || {};
+    const customerInfoTranslations = checkoutTranslations.customerInfo || {};
+    return (customerInfoTranslations as Record<string, string>)[key] || fallback;
+  };
+
+  // Debug logging for troubleshooting
+  console.log('🔍 CustomerInfoStep - Language:', language);
+  console.log('🔍 CustomerInfoStep - Available checkout translations:', defaultTranslations[language]?.checkout);
+  console.log('🔍 CustomerInfoStep - Customer info translations:', defaultTranslations[language]?.checkout?.customerInfo);
+  console.log('🔍 CustomerInfoStep - Title translation:', getTranslation('title', 'Customer Information'));
+  console.log('🔍 CustomerInfoStep - Subtitle translation:', getTranslation('subtitle', 'Please provide your contact details'));
+
+  // Force re-render when language changes
+  React.useEffect(() => {
+    console.log('🔄 CustomerInfoStep - Language changed to:', language);
+  }, [language]);
 
   /**
    * BOOKING FLOW STATE
@@ -356,10 +386,10 @@ export function CustomerInfoStep({ initialData, onDataSaved }: CustomerInfoStepP
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
-          Customer Information
+          {getTranslation('title', 'Customer Information')}
         </h2>
         <p style={{ color: 'var(--color-text-secondary)' }}>
-          {isExistingCustomer ? 'Existing customer information' : 'Provide your details'}
+          {isExistingCustomer ? getTranslation('existingCustomerInfo', 'Existing customer information') : getTranslation('subtitle', 'Provide your details')}
         </p>
         
         {/* Existing Customer Indicator */}
@@ -371,7 +401,7 @@ export function CustomerInfoStep({ initialData, onDataSaved }: CustomerInfoStepP
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
               <span className="font-medium" style={{ color: 'color-mix(in srgb, var(--color-status-success) 80%, black)' }}>
-                Existing Customer: {existingCustomer.fullName || (existingCustomer.emailMasked || maskEmailForDisplay(existingCustomer.email))}
+                {getTranslation('existingCustomer', 'Existing Customer')}: {existingCustomer.fullName || (existingCustomer.emailMasked || maskEmailForDisplay(existingCustomer.email))}
               </span>
               </div>
               <button
@@ -380,11 +410,11 @@ export function CustomerInfoStep({ initialData, onDataSaved }: CustomerInfoStepP
                 style={{ color: 'var(--color-status-success)' }}
                 type="button"
               >
-                Use different info
+                {getTranslation('useDifferentInfo', 'Use different info')}
               </button>
             </div>
             <p className="text-sm mt-1" style={{ color: 'color-mix(in srgb, var(--color-status-success) 70%, black)' }}>
-              Name and email are locked. You can only modify other details.
+              {getTranslation('nameEmailLocked', 'Name and email are locked. You can only modify other details.')}
             </p>
           </div>
         )}
@@ -394,12 +424,12 @@ export function CustomerInfoStep({ initialData, onDataSaved }: CustomerInfoStepP
         {/* Phone Field with Lookup */}
         <div className="unified-form-group">
           <PhoneInputWithLookup
-            label="Phone Number"
+            label={getTranslation('phone', 'Phone Number')}
             required={false}
             value={formData.phone}
             onChange={handlePhoneChange}
             onCustomerFound={handleCustomerFound}
-            placeholder="Enter your phone number"
+            placeholder={getTranslation('phonePlaceholder', 'Enter your phone number')}
             defaultCountryCode={formData.countryCode}
             error={errors.phone}
             autoLookup={true}
@@ -410,19 +440,19 @@ export function CustomerInfoStep({ initialData, onDataSaved }: CustomerInfoStepP
         {/* Name Field */}
         {renderFormField({
           name: 'name',
-          label: 'Full Name',
+          label: getTranslation('fullName', 'Full Name'),
           type: 'text',
           required: true,
-          placeholder: 'Enter your full name'
+          placeholder: getTranslation('fullNamePlaceholder', 'Enter your full name')
         })}
 
         {/* Email Field */}
         {renderFormField({
           name: 'email',
-          label: 'Email',
+          label: getTranslation('email', 'Email'),
           type: 'email',
           required: true,
-          placeholder: 'Enter your email address'
+          placeholder: getTranslation('emailPlaceholder', 'Enter your email address')
         })}
 
         {/* Continue Button */}
@@ -437,7 +467,7 @@ export function CustomerInfoStep({ initialData, onDataSaved }: CustomerInfoStepP
             }`}
             style={{ backgroundColor: isFormValid ? 'var(--color-primary-500)' : 'var(--color-border-500)', color: isFormValid ? 'var(--primary-foreground)' : 'var(--color-text-tertiary)' }}
           >
-            Continue to Next Step
+{getTranslation('continue', 'Continue to Next Step')}
           </button>
         </div>
       </div>

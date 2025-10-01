@@ -2,9 +2,13 @@
 
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLanguage, useTranslations } from '@/hooks/useTranslations';
 
 export default function PackagesPage() {
   const router = useRouter();
+  const { language } = useLanguage();
+  const { t } = useTranslations(undefined, language);
+  const packages = (t && typeof t === 'object' && 'packages' in t) ? t.packages as Record<string, string> : {};
 
   useEffect(() => {
     // Redirect directly to enhanced packages flow
@@ -16,8 +20,8 @@ export default function PackagesPage() {
       <div className="space-y-6">
         {/* Minimal Loading Header */}
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-[var(--color-text-primary)] mb-2">Available Packages</h2>
-          <p className="text-[var(--color-text-secondary)]">Loading packages...</p>
+          <h2 className="text-2xl font-bold text-[var(--color-text-primary)] mb-2">{packages.title || 'Available Packages'}</h2>
+          <p className="text-[var(--color-text-secondary)]">{packages.loadingPackages || 'Loading packages...'}</p>
         </div>
         
         {/* Subtle Loading Animation - Same as other pages */}

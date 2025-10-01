@@ -18,6 +18,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AppShell } from '@/components/AppShell';
 import { useCart } from '@/store/appStore';
+import { useLanguage, useTranslations } from '@/hooks/useTranslations';
+import { defaultTranslations } from '@/lib/data/translations';
 
 interface OrderItem {
   id: string;
@@ -89,6 +91,23 @@ export default function OrderConfirmationPage() {
   const [error, setError] = useState<string | null>(null);
   const { clearCart } = useCart();
 
+  /**
+   * TRANSLATION HOOKS
+   * -----------------
+   * Access to language and translation system
+   */
+  const { language } = useLanguage();
+  const { t } = useTranslations(undefined, language);
+  
+  // Use default translations directly to ensure checkout translations are always available
+  const checkoutTranslations = defaultTranslations[language]?.checkout || defaultTranslations.en.checkout || {};
+  const confirmationTranslations = checkoutTranslations.confirmation || {};
+
+  // Helper function to get translations
+  const getTranslation = (key: string, fallback: string = ''): string => {
+    return (confirmationTranslations as Record<string, any>)[key] || fallback;
+  };
+
   useEffect(() => {
     if (orderId) {
       fetchOrderDetails(orderId);
@@ -150,15 +169,15 @@ export default function OrderConfirmationPage() {
   };
 
   const formatBillingDocument = (order: OrderDetails) => {
-    if (!order.billingDocumentType) return 'Not specified';
+    if (!order.billingDocumentType) return getTranslation('notSpecified', 'Not specified');
     
     switch (order.billingDocumentType) {
       case 'boleta':
-        return `Boleta (DNI: ${order.dni || 'Not provided'})`;
+        return `Boleta (DNI: ${order.dni || getTranslation('notProvided', 'Not provided')})`;
       case 'boleta_simple':
         return 'Boleta Simple';
       case 'factura':
-        return `Factura (RUC: ${order.ruc || 'Not provided'}${order.companyName ? ` - ${order.companyName}` : ''})`;
+        return `Factura (RUC: ${order.ruc || getTranslation('notProvided', 'Not provided')}${order.companyName ? ` - ${order.companyName}` : ''})`;
       default:
         return order.billingDocumentType;
     }
@@ -171,7 +190,7 @@ export default function OrderConfirmationPage() {
         <div className="min-h-screen flex items-center justify-center bg-background">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-2 mx-auto mb-4" style={{ borderColor: 'color-mix(in srgb, var(--color-primary-500) 25%, transparent)', borderTopColor: 'var(--color-primary-500)' }}></div>
-            <p className="text-muted-foreground">Loading order details...</p>
+            <p className="text-muted-foreground">{getTranslation('loadingOrderDetails', 'Loading order details...')}</p>
           </div>
         </div>
       </AppShell>
@@ -186,13 +205,13 @@ export default function OrderConfirmationPage() {
             <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'color-mix(in srgb, var(--color-status-error) 12%, transparent)' }}>
               <CheckCircle className="w-8 h-8 text-[var(--color-status-error)]" />
             </div>
-            <h1 className="text-2xl font-bold mb-2 text-foreground">Order Not Found</h1>
-            <p className="mb-6 text-muted-foreground">{error || 'The order you are looking for does not exist.'}</p>
+            <h1 className="text-2xl font-bold mb-2 text-foreground">{getTranslation('orderNotFound', 'Order Not Found')}</h1>
+            <p className="mb-6 text-muted-foreground">{error || getTranslation('orderNotFoundDesc', 'The order you are looking for does not exist.')}</p>
             <Button
               onClick={() => window.location.href = '/'}
               className="text-primary-foreground bg-primary"
             >
-              Return Home
+              {getTranslation('returnHome', 'Return Home')}
             </Button>
           </div>
         </div>
@@ -201,7 +220,7 @@ export default function OrderConfirmationPage() {
   }
 
   return (
-    <AppShell>
+    <AppShell key={language}>
       {/* No step indicators - clean order confirmation page */}
       <div className="min-h-screen py-8 bg-background">
         <div className="container mx-auto px-4 max-w-6xl">
@@ -215,19 +234,19 @@ export default function OrderConfirmationPage() {
               <CheckCircle className="w-10 h-10 text-[var(--color-status-success)]" />
             </div>
             <h1 className="text-4xl font-bold mb-4 text-foreground">
-              {order.paymentStatus === 'PENDING' ? 'Order Created!' : 'Order Confirmed!'}
+              {order.paymentStatus === 'PENDING' ? getTranslation('orderCreated', 'Order Created!') : getTranslation('title', 'Order Confirmed!')}
             </h1>
             <p className="text-xl mb-2 text-muted-foreground">
-              Thank you for your {order.paymentStatus === 'PENDING' ? 'order' : 'purchase'}, {order.customerName}!
+              {getTranslation('thankYou', 'Thank you for your')} {order.paymentStatus === 'PENDING' ? getTranslation('order', 'order') : getTranslation('purchase', 'purchase')}, {order.customerName}!
             </p>
             <p className="text-muted-foreground">
-              Order #{order.orderNumber} • {formatDate(order.createdAt)}
+              {getTranslation('orderNumber', 'Order')} #{order.orderNumber} • {formatDate(order.createdAt)}
             </p>
             {order.paymentStatus === 'PENDING' && (
               <div className="mt-4 p-4 rounded-lg" style={{ background: 'color-mix(in srgb, var(--color-status-warning) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--color-status-warning) 25%, transparent)' }}>
-                <p className="font-medium" style={{ color: 'color-mix(in srgb, var(--color-status-warning) 85%, black)' }}>Payment Pending</p>
+                <p className="font-medium" style={{ color: 'color-mix(in srgb, var(--color-status-warning) 85%, black)' }}>{getTranslation('paymentPending', 'Payment Pending')}</p>
                 <p className="text-sm" style={{ color: 'color-mix(in srgb, var(--color-status-warning) 75%, black)' }}>
-                  You&apos;ll receive payment instructions via email shortly. Your order is confirmed.
+                  {getTranslation('paymentPendingDesc', 'You\'ll receive payment instructions via email shortly. Your order is confirmed.')}
                 </p>
               </div>
             )}
@@ -241,7 +260,7 @@ export default function OrderConfirmationPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <ShoppingCart className="w-5 h-5" />
-                    Order Items
+{getTranslation('orderItems', 'Order Items')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -264,12 +283,12 @@ export default function OrderConfirmationPage() {
                         <div className="flex-1">
                           <h3 className="font-semibold text-lg text-foreground">{item.name}</h3>
                           <p className="text-muted-foreground">
-                            {item.type === 'package' ? 'Yoga Package' : 'Product'}
-                            {item.sessions && ` • ${item.sessions} sessions`}
+                            {item.type === 'package' ? getTranslation('yogaPackage', 'Yoga Package') : getTranslation('product', 'Product')}
+                            {item.sessions && ` • ${item.sessions} ${getTranslation('sessions', 'sessions')}`}
                             {item.duration && ` • ${item.duration} min each`}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            Quantity: {item.quantity}
+                            {getTranslation('quantity', 'Quantity')}: {item.quantity}
                           </p>
                         </div>
                         <div className="text-right">
@@ -277,7 +296,7 @@ export default function OrderConfirmationPage() {
                             {formatCurrency(item.price * item.quantity, order.currency)}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            {formatCurrency(item.price, order.currency)} each
+                            {formatCurrency(item.price, order.currency)} {getTranslation('each', 'each')}
                           </p>
                         </div>
                       </motion.div>
@@ -292,7 +311,7 @@ export default function OrderConfirmationPage() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Calendar className="w-5 h-5" />
-                      Scheduled Classes
+                      {getTranslation('scheduledClasses', 'Scheduled Classes')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -310,7 +329,7 @@ export default function OrderConfirmationPage() {
                           </div>
                           <div className="flex-1">
                             <h3 className="font-semibold text-lg text-foreground">
-                              {booking.serviceType || 'Yoga Class'}
+                              {booking.serviceType || getTranslation('yogaClass', 'Yoga Class')}
                             </h3>
                             <div className="space-y-1 text-sm text-muted-foreground">
                               <p className="flex items-center gap-2">
@@ -348,25 +367,25 @@ export default function OrderConfirmationPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <User className="w-5 h-5" />
-                    Customer Information
+{getTranslation('customerInfo', 'Customer Information')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-muted-foreground">Name</p>
+                      <p className="text-sm text-muted-foreground">{getTranslation('name', 'Name')}</p>
                       <p className="font-medium text-foreground">{order.customerName}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Email</p>
+                      <p className="text-sm text-muted-foreground">{getTranslation('email', 'Email')}</p>
                       <p className="font-medium text-foreground">{order.customerEmail}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Phone</p>
+                      <p className="text-sm text-muted-foreground">{getTranslation('phone', 'Phone')}</p>
                       <p className="font-medium text-foreground">{order.customerPhone}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Order Status</p>
+                      <p className="text-sm text-muted-foreground">{getTranslation('orderStatus', 'Order Status')}</p>
                       <p className="font-medium capitalize text-foreground">{order.status.toLowerCase()}</p>
                     </div>
                   </div>
@@ -375,7 +394,7 @@ export default function OrderConfirmationPage() {
                   <div className="mt-6 pt-4 border-t border-border">
                     <div className="flex items-center gap-2 mb-3">
                       <FileText className="w-4 h-4 text-muted-foreground" />
-                      <p className="text-sm font-medium text-foreground">Billing Document</p>
+                      <p className="text-sm font-medium text-foreground">{getTranslation('billingDocument', 'Billing Document')}</p>
                     </div>
                     <p className="text-sm text-muted-foreground">
                       {formatBillingDocument(order)}
@@ -390,7 +409,7 @@ export default function OrderConfirmationPage() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <MapPin className="w-5 h-5" />
-                      Shipping Address
+{getTranslation('shippingAddress', 'Shipping Address')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -412,13 +431,13 @@ export default function OrderConfirmationPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <CreditCard className="w-5 h-5" />
-                    Order Summary
+                    {getTranslation('orderSummary', 'Order Summary')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Subtotal</span>
+                      <span className="text-muted-foreground">{getTranslation('subtotal', 'Subtotal')}</span>
                       <span className="font-medium text-foreground">
                         {formatCurrency(order.subtotal, order.currency)}
                       </span>
@@ -433,7 +452,7 @@ export default function OrderConfirmationPage() {
                     )}
                     {order.shippingAmount > 0 && (
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Shipping</span>
+                        <span className="text-muted-foreground">{getTranslation('shipping', 'Shipping')}</span>
                         <span className="font-medium text-foreground">
                           {formatCurrency(order.shippingAmount, order.currency)}
                         </span>
@@ -441,7 +460,7 @@ export default function OrderConfirmationPage() {
                     )}
                     <div className="border-t pt-3">
                       <div className="flex justify-between text-lg font-semibold text-foreground">
-                        <span>Total</span>
+                        <span>{getTranslation('total', 'Total')}</span>
                         <span className="text-primary">
                           {formatCurrency(order.total, order.currency)}
                         </span>
@@ -459,14 +478,14 @@ export default function OrderConfirmationPage() {
                   variant="outline"
                   className="w-full"
                 >
-                  Book a Session
+                  {getTranslation('bookASession', 'Book a Session')}
                 </Button>
                 <Button
                   onClick={() => window.location.href = '/'}
                   variant="outline"
                   className="w-full"
                 >
-                  Continue Shopping
+{getTranslation('continueShopping', 'Continue Shopping')}
                 </Button>
               </div>
             </div>

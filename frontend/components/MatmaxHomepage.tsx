@@ -156,14 +156,14 @@ export function MatmaxHomepage() {
               className="sm:w-auto px-8 sm:px-10 py-3 text-center sm:min-w-[220px] md:min-w-[240px] bg-[var(--color-primary-500)] text-[var(--primary-foreground)] rounded-[var(--unified-radius-md)] hover:bg-[var(--color-primary-600)] transition-colors block"
               style={mobileTitleWidth ? { width: `${mobileTitleWidth}px` } : undefined}
             >
-              {typeof translations?.nav === 'object' && (translations.nav?.schedule || translations.nav?.session) || 'View Schedule'}
+              {typeof translations?.hero === 'object' && translations.hero?.ctaPrimary || 'Book Your Session'}
             </a>
             <a 
               href="/packages"
               className="sm:w-auto px-8 sm:px-10 py-3 text-center sm:min-w-[220px] md:min-w-[240px] bg-white text-[var(--color-text-primary)] border border-[var(--color-border-500)] rounded-[var(--unified-radius-md)] hover:bg-[var(--color-surface-secondary)] transition-colors block"
               style={mobileTitleWidth ? { width: `${mobileTitleWidth}px` } : undefined}
             >
-              {typeof translations?.nav === 'object' && translations.nav?.packages || 'View Packages'}
+              {typeof translations?.hero === 'object' && translations.hero?.ctaSecondary || 'Learn More'}
             </a>
           </div>
         </div>

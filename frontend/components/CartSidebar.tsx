@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation';
 import { useCart, useCartUI } from '@/store/appStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CartBookingDetails } from './CartBookingDetails';
+import { useLanguage, useTranslations } from '@/hooks/useTranslations';
+import { defaultTranslations } from '@/lib/data/translations';
 // import { toast } from 'sonner';
 
 export function CartSidebar() {
@@ -26,6 +28,25 @@ export function CartSidebar() {
     openCart,
     closeCart
   } = useCartUI();
+
+  /**
+   * TRANSLATION HOOKS
+   * -----------------
+   * Access to language and translation system
+   */
+  const { language } = useLanguage();
+  const { t } = useTranslations(undefined, language);
+  
+  // Helper function to get translations - reactive to language changes
+  const getTranslation = (key: string, fallback: string = ''): string => {
+    const paymentTranslations = defaultTranslations[language]?.checkout?.payment || defaultTranslations.en.checkout?.payment || {};
+    return (paymentTranslations as Record<string, any>)[key] || fallback;
+  };
+
+  // Force re-render when language changes
+  React.useEffect(() => {
+    // Language change detected - component will re-render
+  }, [language]);
 
   const totalPrice = getTotalPrice();
 
@@ -146,12 +167,12 @@ export function CartSidebar() {
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-[var(--color-border-500)]">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">Shopping Cart</h2>
+              <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">{getTranslation('shoppingCart', 'Shopping Cart')}</h2>
               {hasPackages && (
                 <div className="flex items-center gap-1">
                   {packagesWithBooking > 0 && (
                     <span className="unified-badge unified-badge--success text-xs">
-                      {packagesWithBooking} scheduled
+                      {packagesWithBooking} {getTranslation('scheduled', 'scheduled')}
                     </span>
                   )}
                   <span className="unified-badge unified-badge--accent text-xs">
@@ -177,8 +198,8 @@ export function CartSidebar() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
                   </svg>
                 </div>
-                <p className="text-[var(--color-text-secondary)]">Your cart is empty</p>
-                <p className="text-sm text-[var(--color-text-tertiary)] mt-1">Add some products to get started</p>
+                <p className="text-[var(--color-text-secondary)]">{getTranslation('yourCartIsEmpty', 'Your cart is empty')}</p>
+                <p className="text-sm text-[var(--color-text-tertiary)] mt-1">{getTranslation('addSomeProducts', 'Add some products to get started')}</p>
               </div>
             ) : (
               <motion.div 
@@ -232,11 +253,11 @@ export function CartSidebar() {
                           <div className="text-xs text-[var(--color-text-secondary)] mt-1 space-y-1">
                             <div className="flex items-center gap-2">
                               <span className="unified-badge unified-badge--secondary">
-                                {item.sessions} sessions
+                                {item.sessions} {getTranslation('sessions', 'sessions')}
                               </span>
                               {item.duration && (
                                 <span className="unified-badge unified-badge--secondary">
-                                  {item.duration} min each
+                                  {item.duration} {getTranslation('minEach', 'min each')}
                                 </span>
                               )}
                             </div>
@@ -379,7 +400,7 @@ export function CartSidebar() {
               transition={{ duration: 0.3, delay: 0.2 }}
             >
               <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold text-[var(--color-text-primary)]">Total:</span>
+                <span className="text-lg font-semibold text-[var(--color-text-primary)]">{getTranslation('total', 'Total')}:</span>
                 <span className="text-lg font-bold text-[var(--color-primary-500)]">
                   {cartItems.length > 0 && cartItems[0].currency === 'S/.' ? 'S/ ' : cartItems.length > 0 ? cartItems[0].currency + ' ' : ''}{totalPrice.toFixed(2)}
                 </span>
@@ -464,7 +485,7 @@ export function CartSidebar() {
                     ) : (
                       <CalendarDaysIcon className="h-5 w-5" />
                     )}
-                    {allSessionsBooked ? 'Proceed to Checkout' : 'Book a Class Now'}
+                    {allSessionsBooked ? getTranslation('proceedToCheckout', 'Proceed to Checkout') : getTranslation('bookAClassNow', 'Book a Class Now')}
                     {packageCount > 1 && !allSessionsBooked && (
                       <span className="unified-badge unified-badge--accent text-xs">
                         {packageCount} packages
@@ -510,7 +531,7 @@ export function CartSidebar() {
                       }
                     }}
                   >
-                    Proceed to Checkout
+                    {getTranslation('proceedToCheckout', 'Proceed to Checkout')}
                   </button>
                 )}
 
@@ -525,7 +546,7 @@ export function CartSidebar() {
                       router.push('/booking/customer-info?hasProducts=true');
                     }}
                   >
-                    Proceed to Checkout
+                    {getTranslation('proceedToCheckout', 'Proceed to Checkout')}
                   </button>
                 )}
 

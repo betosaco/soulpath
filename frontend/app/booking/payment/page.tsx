@@ -27,6 +27,7 @@
 
 import { AppShell } from '@/components/AppShell';
 import { PaymentStep } from '@/components/booking/steps/PaymentStep';
+import { useLanguage } from '@/hooks/useTranslations';
 
 /**
  * BOOKING PAYMENT PAGE COMPONENT
@@ -36,10 +37,12 @@ import { PaymentStep } from '@/components/booking/steps/PaymentStep';
  * @returns React component
  */
 export default function PaymentPage() {
+  const { language } = useLanguage();
+  
   return (
     <AppShell>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <PaymentStep />
+        <PaymentStep key={language} />
       </div>
     </AppShell>
   );

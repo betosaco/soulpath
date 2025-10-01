@@ -23,6 +23,7 @@
 import { AppShell } from '@/components/AppShell';
 import { ConfirmationStep } from '@/components/booking/steps/ConfirmationStep';
 import { BookingLayout } from '@/components/booking/layout/BookingLayout';
+import { useLanguage } from '@/hooks/useTranslations';
 
 /**
  * BOOKING CONFIRMATION PAGE COMPONENT
@@ -32,10 +33,12 @@ import { BookingLayout } from '@/components/booking/layout/BookingLayout';
  * @returns React component
  */
 export default function ConfirmationPage() {
+  const { language } = useLanguage();
+  
   return (
     <AppShell>
       <BookingLayout showStepIndicator={false}>
-        <ConfirmationStep />
+        <ConfirmationStep key={language} />
       </BookingLayout>
     </AppShell>
   );

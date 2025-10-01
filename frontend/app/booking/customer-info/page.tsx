@@ -26,7 +26,8 @@
 
 import { AppShell } from '@/components/AppShell';
 import { CustomerInfoStep } from '@/components/booking/steps/CustomerInfoStep';
-// import { BookingLayout } from '@/components/booking/layout/BookingLayout'; // Unused import
+import { BookingLayout } from '@/components/booking/layout/BookingLayout';
+import { useLanguage } from '@/hooks/useTranslations';
 
 /**
  * BOOKING CUSTOMER INFO PAGE COMPONENT
@@ -36,11 +37,13 @@ import { CustomerInfoStep } from '@/components/booking/steps/CustomerInfoStep';
  * @returns React component
  */
 export default function CustomerInfoPage() {
+  const { language } = useLanguage();
+  
   return (
-    <AppShell>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <CustomerInfoStep />
-      </div>
+    <AppShell key={language}>
+      <BookingLayout key={language}>
+        <CustomerInfoStep key={language} />
+      </BookingLayout>
     </AppShell>
   );
 }

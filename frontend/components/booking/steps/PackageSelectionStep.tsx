@@ -44,6 +44,12 @@ import { toast } from 'sonner';
 import { useBookingFlow } from '../hooks/useBookingFlow';
 import { useCart, useCartUI } from '@/store/appStore';
 import { usePackages } from '@/hooks/usePackages';
+import { useLanguage, useTranslations } from '@/hooks/useTranslations';
+import { defaultTranslations } from '@/lib/data/translations';
+
+// Debug the import
+console.log('🔍 Imported defaultTranslations:', defaultTranslations);
+console.log('🔍 Imported defaultTranslations keys:', Object.keys(defaultTranslations));
 
 /**
  * PACKAGE SELECTION STEP PROPS
@@ -82,6 +88,49 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
   // ============================================================================
   // HOOKS AND STATE MANAGEMENT
   // ============================================================================
+
+  /**
+   * TRANSLATION HOOKS
+   * -----------------
+   * Access to language and translation system
+   */
+  const { language } = useLanguage();
+  const { t } = useTranslations(undefined, language);
+  
+  // Debug the useLanguage hook
+  console.log('🔍 useLanguage hook result:', { language });
+  
+  // Use default translations directly to ensure packages translations are always available
+  // Make it reactive to language changes by accessing it directly
+  const packagesTranslations = defaultTranslations[language]?.packages || defaultTranslations.en.packages || {};
+  
+      // Debug logging for language switching (always show for troubleshooting)
+      console.log('🔍 PackageSelectionStep - Language:', language);
+      console.log('🔍 PackageSelectionStep - DefaultTranslations object:', defaultTranslations);
+      console.log('🔍 PackageSelectionStep - Available languages:', Object.keys(defaultTranslations));
+      console.log('🔍 PackageSelectionStep - English object:', defaultTranslations.en);
+      console.log('🔍 PackageSelectionStep - Spanish object:', defaultTranslations.es);
+      console.log('🔍 PackageSelectionStep - English packages:', defaultTranslations.en?.packages);
+      console.log('🔍 PackageSelectionStep - Spanish packages:', defaultTranslations.es?.packages);
+      console.log('🔍 PackageSelectionStep - Current language packages:', defaultTranslations[language]?.packages);
+      console.log('🔍 PackageSelectionStep - Final packages translations:', packagesTranslations);
+      console.log('🔍 PackageSelectionStep - Title:', packagesTranslations?.title);
+
+      // Helper function to translate package descriptions
+      const translatePackageDescription = useCallback((description: string): string => {
+        if (!description) return '';
+        
+        // Check if it matches the pattern "X sessions of Y hour each"
+        const sessionMatch = description.match(/(\d+)\s+sessions\s+of\s+(\d+)\s+hour\s+each/);
+        if (sessionMatch) {
+          const sessionCount = sessionMatch[1];
+          const hourCount = sessionMatch[2];
+          return `${sessionCount} ${packagesTranslations.sessionsOf || 'sessions of'} ${hourCount} ${packagesTranslations.hourEach || 'hour each'}`;
+        }
+        
+        // Return original description if no pattern match
+        return description;
+      }, [packagesTranslations, language]);
 
   /**
    * BOOKING FLOW STATE
@@ -371,7 +420,7 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
     if (preSelectedSchedules.length > 0) {
       // SCENARIO A: Schedule-first flow completion
       console.log('🎯 Schedule-first flow - package added with schedule');
-      toast.success(`${pkg.packageDefinition.name} added to cart with 1 scheduled session`);
+      toast.success(`${pkg.packageDefinition.name} ${packagesTranslations.packageAddedWithSchedule || 'added to cart with 1 scheduled session'}`);
 
       setPreSelectedSchedules([]); // Clear schedules (now in package)
       updateLockedTimeSlots(); // Update locked slots
@@ -411,7 +460,7 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
     } else {
       // SCENARIO B: Package-first flow - just add to cart, no automatic redirect
       console.log('🎯 Package added to cart - user can add more packages');
-      toast.success(`${pkg.packageDefinition.name} added to cart! You can add more packages or proceed to checkout.`);
+      toast.success(`${pkg.packageDefinition.name} ${packagesTranslations.packageAdded || 'added to cart! You can add more packages or proceed to checkout.'}`);
 
       // Open cart to show the added package
       setTimeout(() => {
@@ -429,14 +478,14 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
    */
   const handleBookNowClick = () => {
     if (isAtMaxSessions()) {
-      toast.error('All available sessions have been booked. Please proceed to checkout.');
+      toast.error(packagesTranslations.allSessionsBooked || 'All available sessions have been booked. Please proceed to checkout.');
       console.log('🚫 Book Now blocked - all sessions already booked');
       return;
     }
 
     // Navigate to schedule step for booking additional sessions
     goToNextStep();
-    toast.success('Ready to book sessions for your packages!');
+    toast.success(packagesTranslations.readyToBookSessions || 'Ready to book sessions for your packages!');
   };
 
   /**
@@ -472,10 +521,10 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
             </div>
             <div>
               <h3 className="text-xl font-semibold text-[var(--color-text-primary)]">
-                Your Selected Schedule
+                {packagesTranslations.selectedSchedule || 'Your Selected Schedule'}
               </h3>
               <p className="text-sm text-[var(--color-text-secondary)]">
-                You've selected 1 time slot. Now choose a package that matches your needs.
+                {packagesTranslations.selectedScheduleDescription || 'You\'ve selected 1 time slot. Now choose a package that matches your needs.'}
               </p>
             </div>
           </div>
@@ -501,14 +550,14 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
                     </p>
                     {schedule.teacher && (
                       <p className="text-xs text-[var(--color-text-tertiary)]">
-                        with {schedule.teacher}
+                        {packagesTranslations.with || 'with'} {schedule.teacher}
                       </p>
                     )}
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-medium text-[var(--color-status-success)]">Selected</p>
-                  <p className="text-xs text-[var(--color-text-tertiary)]">Ready to book</p>
+                  <p className="text-sm font-medium text-[var(--color-status-success)]">{packagesTranslations.selected || 'Selected'}</p>
+                  <p className="text-xs text-[var(--color-text-tertiary)]">{packagesTranslations.readyToBook || 'Ready to book'}</p>
                 </div>
               </div>
             ))}
@@ -569,12 +618,12 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
         {/* Packages Header - Always renders first */}
         <div className="text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <h2 className="text-2xl font-bold text-[var(--color-text-primary)]">Available Packages</h2>
+            <h2 className="text-2xl font-bold text-[var(--color-text-primary)]">{packagesTranslations.title || 'Available Packages'}</h2>
             {packagesLoading && hasLoadedOnce && (
               <div className="animate-spin rounded-full h-5 w-5 border-2 border-[var(--color-border-200)] border-t-[var(--color-primary-500)]"></div>
             )}
           </div>
-          <p className="text-[var(--color-text-secondary)]">Choose the perfect package for your yoga journey</p>
+          <p className="text-[var(--color-text-secondary)]">{packagesTranslations.subtitle || 'Choose the perfect package for your yoga journey'}</p>
         </div>
         
         {/* UI-first approach: Show skeleton while loading, then show content */}
@@ -591,8 +640,8 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
             <div className="text-[var(--color-text-tertiary)] mb-4">
               <Package className="h-16 w-16 mx-auto" />
             </div>
-            <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">No Packages Available</h3>
-            <p className="text-[var(--color-text-secondary)]">We're currently updating our package offerings. Please check back later.</p>
+            <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">{packagesTranslations.noPackagesAvailable || 'No Packages Available'}</h3>
+            <p className="text-[var(--color-text-secondary)]">{packagesTranslations.noPackagesDescription || 'We\'re currently updating our package offerings. Please check back later.'}</p>
           </div>
         ) : (
           // Packages loaded - show content
@@ -601,7 +650,7 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
               <div className="absolute inset-0 bg-[var(--color-background-primary)]/50 backdrop-blur-sm z-10 rounded-lg flex items-center justify-center">
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-2 border-[var(--color-border-200)] border-t-[var(--color-primary-500)] mx-auto mb-2"></div>
-                  <p className="text-sm text-[var(--color-text-secondary)]">Refreshing packages...</p>
+                  <p className="text-sm text-[var(--color-text-secondary)]">{packagesTranslations.refreshingPackages || 'Refreshing packages...'}</p>
                 </div>
               </div>
             )}
@@ -623,22 +672,31 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
                   />
                 </div>
                 <CardHeader>
-                  <CardTitle as="h2" className="unified-card__title">{pkg.packageDefinition.name}</CardTitle>
-                  <p className="unified-card__subtitle">{pkg.packageDefinition.description}</p>
+                  <CardTitle 
+                    as="h2" 
+                    className={`unified-card__title ${
+                      pkg.packageDefinition.name?.includes('MATPASS') || pkg.packageDefinition.packageType === 'matpass'
+                        ? '!text-[var(--color-accent-500)] !font-bold'
+                        : ''
+                    }`}
+                  >
+                    {pkg.packageDefinition.name}
+                  </CardTitle>
+                  <p className="unified-card__subtitle">{translatePackageDescription(pkg.packageDefinition.description)}</p>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="flex flex-col">
-                        <span className="text-2xl font-bold text-[var(--color-accent-500)]">
+                        <span className="text-2xl font-bold text-black">
                           S/ {pkg.price.toFixed(2)}
                         </span>
                         <span className="text-xs text-[var(--color-text-secondary)]">
-                          S/ {pkg.pricePerClass?.toFixed(2) || (pkg.price / (pkg.packageDefinition.sessionsCount || 1)).toFixed(2)} per class
+                          S/ {pkg.pricePerClass?.toFixed(2) || (pkg.price / (pkg.packageDefinition.sessionsCount || 1)).toFixed(2)} {packagesTranslations.perClass || 'per class'}
                         </span>
                       </div>
                       <span className="text-lg font-semibold text-[var(--color-text-primary)]">
-                        {pkg.packageDefinition.sessionsCount || 1} sessions
+                        {pkg.packageDefinition.sessionsCount || 1} {packagesTranslations.sessions || 'sessions'}
                       </span>
                     </div>
                     <Button
@@ -647,7 +705,7 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
                       className="w-full"
                     >
                       <Package className="w-4 h-4 mr-2" />
-                      Add to Cart
+                      {packagesTranslations.addToCart || 'Add to Cart'}
                     </Button>
                   </div>
                 </CardContent>

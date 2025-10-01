@@ -39,6 +39,8 @@ import {
 } from 'lucide-react';
 import { useBookingFlow } from '../hooks/useBookingFlow';
 import { useCart } from '@/store/appStore';
+import { useLanguage, useTranslations } from '@/hooks/useTranslations';
+import { defaultTranslations } from '@/lib/data/translations';
 
 /**
  * BOOKING LAYOUT PROPS
@@ -74,57 +76,7 @@ interface BookingStepConfig {
  * --------------------------
  * Defines the base steps that are always available in the booking flow
  */
-const STEP_CONFIGS: Record<string, BookingStepConfig> = {
-  packages: {
-    id: 'packages',
-    title: '',
-    description: 'Add items to your cart',
-    icon: ShoppingCart,
-    alwaysVisible: true
-  },
-  schedule: {
-    id: 'schedule',
-    title: 'Select Schedule',
-    description: 'Choose your preferred date and time',
-    icon: Calendar,
-    alwaysVisible: true
-  },
-  'multi-package': {
-    id: 'multi-package',
-    title: 'Select Schedule',
-    description: 'Choose dates and times for multiple packages',
-    icon: Calendar,
-    alwaysVisible: false // Only shown in multi-package scenario
-  },
-  customer: {
-    id: 'customer',
-    title: 'Customer Information',
-    description: 'Provide your details',
-    icon: User,
-    alwaysVisible: true
-  },
-  shipping: {
-    id: 'shipping',
-    title: 'Shipping Address',
-    description: 'Provide shipping details',
-    icon: Truck,
-    alwaysVisible: false // Conditionally shown based on cart contents
-  },
-  payment: {
-    id: 'payment',
-    title: 'Payment',
-    description: 'Complete your purchase',
-    icon: CreditCard,
-    alwaysVisible: true
-  },
-  confirmation: {
-    id: 'confirmation',
-    title: 'Confirmation',
-    description: 'Order confirmed',
-    icon: CheckCircle,
-    alwaysVisible: true
-  }
-};
+// Note: STEP_CONFIGS will be created dynamically with translations in the component
 
 /**
  * BOOKING LAYOUT COMPONENT
@@ -143,6 +95,18 @@ export function BookingLayout({
   // ============================================================================
   // HOOKS AND STATE
   // ============================================================================
+
+  /**
+   * TRANSLATION HOOKS
+   * -----------------
+   * Access to language and translation system
+   */
+  const { language } = useLanguage();
+  const { t } = useTranslations(undefined, language);
+  
+  // Use default translations directly to ensure booking flow translations are always available
+  // Make it reactive to language changes by accessing it directly
+  const bookingFlow = defaultTranslations[language]?.bookingFlow || defaultTranslations.en.bookingFlow || {};
 
   /**
    * BOOKING FLOW STATE
@@ -178,6 +142,59 @@ export function BookingLayout({
 
   // Build steps on client-side only to prevent hydration mismatch
   React.useEffect(() => {
+    // Create step configurations with translations
+    const STEP_CONFIGS: Record<string, BookingStepConfig> = {
+      packages: {
+        id: 'packages',
+        title: '',
+        description: bookingFlow.selectPackage || 'Add items to your cart',
+        icon: ShoppingCart,
+        alwaysVisible: true
+      },
+      schedule: {
+        id: 'schedule',
+        title: bookingFlow.selectSchedule || 'Select Schedule',
+        description: bookingFlow.selectScheduleDesc || 'Choose your preferred date and time',
+        icon: Calendar,
+        alwaysVisible: true
+      },
+      'multi-package': {
+        id: 'multi-package',
+        title: bookingFlow.selectSchedule || 'Select Schedule',
+        description: bookingFlow.selectScheduleDesc || 'Choose dates and times for multiple packages',
+        icon: Calendar,
+        alwaysVisible: false // Only shown in multi-package scenario
+      },
+      customer: {
+        id: 'customer',
+        title: bookingFlow.personalInfo || 'Customer Information',
+        description: bookingFlow.personalInfoDesc || 'Provide your details',
+        icon: User,
+        alwaysVisible: true
+      },
+      shipping: {
+        id: 'shipping',
+        title: 'Shipping Address',
+        description: 'Provide shipping details',
+        icon: Truck,
+        alwaysVisible: false // Conditionally shown based on cart contents
+      },
+      payment: {
+        id: 'payment',
+        title: 'Payment',
+        description: 'Complete your purchase',
+        icon: CreditCard,
+        alwaysVisible: true
+      },
+      confirmation: {
+        id: 'confirmation',
+        title: 'Confirmation',
+        description: 'Order confirmed',
+        icon: CheckCircle,
+        alwaysVisible: true
+      }
+    };
+
     const stepList: BookingStepConfig[] = [];
 
     // For direct checkout, skip packages and schedule steps
@@ -205,7 +222,7 @@ export function BookingLayout({
     stepList.push(STEP_CONFIGS.confirmation);
 
     setSteps(stepList);
-  }, [isMultiPackage, requiresAddress, isDirectCheckout]);
+  }, [isMultiPackage, requiresAddress, isDirectCheckout, bookingFlow]);
 
   /**
    * BUILD COMPLETED STEPS

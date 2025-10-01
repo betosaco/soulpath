@@ -16,6 +16,8 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import Image from 'next/image';
+import { useLanguage, useTranslations } from '@/hooks/useTranslations';
+import { defaultTranslations } from '@/lib/data/translations';
 // import './EnhancedSchedule.css'; // TODO: Re-enable CSS import after fixing SSR issues
 
 interface Teacher {
@@ -121,9 +123,54 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
   selectedSlot = null,
   cartPackages = []
 }: EnhancedScheduleProps) {
-  console.log('🔍 EnhancedSchedule render - startDate:', startDate, 'endDate:', endDate);
-  console.log('🔍 EnhancedSchedule - lockedTimeSlots:', lockedTimeSlots);
-  console.log('🔍 EnhancedSchedule - existingBookings:', existingBookings);
+  // Debug logging (only in development)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔍 EnhancedSchedule render - startDate:', startDate, 'endDate:', endDate);
+  }
+  
+  // Translation hooks
+  const { language } = useLanguage();
+  const { t } = useTranslations(undefined, language);
+  
+  // Use default translations directly to ensure schedule translations are always available
+  // Make it reactive to language changes by accessing it directly
+  const schedule = defaultTranslations[language]?.schedule || defaultTranslations.en.schedule;
+  const serviceTypes = defaultTranslations[language]?.serviceTypes || defaultTranslations.en.serviceTypes || {};
+  const serviceDescriptions = defaultTranslations[language]?.serviceDescriptions || defaultTranslations.en.serviceDescriptions || {};
+  
+  // Debug logging - always show for troubleshooting
+  console.log('🔍 EnhancedSchedule - Language:', language, '| Title:', schedule.title);
+  console.log('🔍 EnhancedSchedule - Available service type keys:', Object.keys(serviceTypes));
+  console.log('🔍 EnhancedSchedule - Available service description keys:', Object.keys(serviceDescriptions));
+  
+  // Helper function to get translations
+  const getTranslation = useCallback((key: string, fallback: string = ''): string => {
+    return (schedule as Record<string, string>)[key] || fallback;
+  }, [schedule, language]);
+
+  // Helper function to translate service types
+  const translateServiceType = useCallback((serviceName: string): string => {
+    try {
+      const translation = (serviceTypes as Record<string, string>)[serviceName];
+      console.log('🔍 Service type lookup:', { serviceName, translation, availableKeys: Object.keys(serviceTypes) });
+      return translation || serviceName;
+    } catch (error) {
+      console.warn('Error translating service type:', error);
+      return serviceName;
+    }
+  }, [serviceTypes, language]);
+
+  // Helper function to translate service descriptions
+  const translateServiceDescription = useCallback((serviceName: string): string => {
+    try {
+      const translation = (serviceDescriptions as Record<string, string>)[serviceName];
+      console.log('🔍 Service description lookup:', { serviceName, translation, availableKeys: Object.keys(serviceDescriptions) });
+      return translation || '';
+    } catch (error) {
+      console.warn('Error translating service description:', error);
+      return '';
+    }
+  }, [serviceDescriptions, language]);
   // Handle slot booking - redirect to account booking page
   const handleBookSlot = (slot: ScheduleSlot) => {
     try {
@@ -293,8 +340,9 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
       console.log('🌐 Fetching from:', `/api/teacher-schedule-slots?${params.toString()}`);
 
       const response = await fetch(`/api/teacher-schedule-slots?${params.toString()}`);
-      console.log('📡 Response status:', response.status);
-      console.log('📡 Response ok:', response.ok);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('📡 Response status:', response.status);
+      }
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -303,12 +351,14 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
       }
 
       const data = await response.json();
-      console.log('📊 Response data:', data);
-      console.log('📊 Response success:', data.success);
-      console.log('📊 Response slots length:', data.slots?.length || 0);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('📊 Response success:', data.success, 'slots:', data.slots?.length || 0);
+      }
       
       if (data.success) {
-        console.log('✅ Setting slots:', data.slots.length, 'slots');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('✅ Setting slots:', data.slots.length, 'slots');
+        }
         if (data.message && data.message.includes('mock data')) {
           console.log('📝 Using mock data - database unavailable');
         }
@@ -362,7 +412,9 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
         setError('Failed to fetch schedule. Please try again.');
       }
     } finally {
-      console.log('🏁 Setting loading to false');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🏁 Setting loading to false');
+      }
       setLoading(false);
     }
   }, [startDate, endDate, onSlotsChange]);
@@ -435,16 +487,20 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
   }, [groupedSlots]);
 
   // Format date for display
-  const formatDate = (dateString: string) => {
+  const formatDate = useCallback((dateString: string) => {
     // Parse the date string as local date to avoid timezone issues
     const [year, month, day] = dateString.split('-').map(Number);
     const date = new Date(year, month - 1, day); // month is 0-indexed
-    return date.toLocaleDateString('en-US', { 
+    
+    // Use the current language for date formatting
+    const locale = language === 'es' ? 'es-ES' : 'en-US';
+    
+    return date.toLocaleDateString(locale, { 
       weekday: 'long', 
       month: 'short', 
       day: 'numeric' 
     });
-  };
+  }, [language]);
 
   // Get service type icon
   const getServiceIcon = (serviceName: string) => {
@@ -476,8 +532,10 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
   };
 
 
-  // Debug logging
-  console.log('🔍 EnhancedSchedule render - loading:', loading, 'slots:', slots?.length || 0, 'error:', error);
+  // Debug logging (only in development)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔍 EnhancedSchedule render - loading:', loading, 'slots:', slots?.length || 0, 'error:', error);
+  }
 
   // Skeleton components for UI-first loading
   const ScheduleSlotSkeleton = () => (
@@ -561,8 +619,8 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
           <div className="enhanced-schedule__header">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
               <div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">Class Schedule</h2>
-                <p className="text-gray-600">Book your favorite classes with our expert instructors</p>
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">{getTranslation('title', 'Class Schedule')}</h2>
+                <p className="text-gray-600">{getTranslation('subtitle', 'Book your favorite classes with our expert instructors')}</p>
               </div>
             </div>
 
@@ -574,7 +632,7 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search classes..."
+                placeholder={getTranslation('searchPlaceholder', 'Search classes...')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 disabled={loading}
@@ -583,17 +641,17 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
             </div>
 
             {/* Date Filter */}
-            <label className="sr-only" htmlFor="schedule-date-filter">Filter by date</label>
+            <label className="sr-only" htmlFor="schedule-date-filter">{getTranslation('filterByDate', 'Filter by date')}</label>
             <select
               id="schedule-date-filter"
               name="date"
-              aria-label="Filter by date"
+              aria-label={getTranslation('filterByDate', 'Filter by date')}
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
               disabled={loading}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6ea058] focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <option value="">All Dates</option>
+              <option value="">{getTranslation('allDates', 'All Dates')}</option>
               {availableDates.map(date => (
                 <option key={date} value={date}>
                   {formatDate(date)}
@@ -602,17 +660,17 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
             </select>
 
             {/* Teacher Filter */}
-            <label className="sr-only" htmlFor="schedule-teacher-filter">Filter by teacher</label>
+            <label className="sr-only" htmlFor="schedule-teacher-filter">{getTranslation('filterByTeacher', 'Filter by teacher')}</label>
             <select
               id="schedule-teacher-filter"
               name="teacher"
-              aria-label="Filter by teacher"
+              aria-label={getTranslation('filterByTeacher', 'Filter by teacher')}
               value={selectedTeacher}
               onChange={(e) => setSelectedTeacher(e.target.value)}
               disabled={loading}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6ea058] focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <option value="all">All Teachers</option>
+              <option value="all">{getTranslation('allTeachers', 'All Teachers')}</option>
               {teachers.map(teacher => (
                 <option key={teacher} value={teacher}>
                   {teacher}
@@ -621,20 +679,20 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
             </select>
 
             {/* Service Filter */}
-            <label className="sr-only" htmlFor="schedule-service-filter">Filter by service</label>
+            <label className="sr-only" htmlFor="schedule-service-filter">{getTranslation('filterByService', 'Filter by service')}</label>
             <select
               id="schedule-service-filter"
               name="service"
-              aria-label="Filter by service"
+              aria-label={getTranslation('filterByService', 'Filter by service')}
               value={selectedService}
               onChange={(e) => setSelectedService(e.target.value)}
               disabled={loading}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6ea058] focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <option value="all">All Services</option>
+              <option value="all">{getTranslation('allServices', 'All Services')}</option>
               {services.map(service => (
                 <option key={service} value={service}>
-                  {service}
+                  {translateServiceType(service)}
                 </option>
               ))}
             </select>
@@ -658,13 +716,13 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
           <div className="flex items-center justify-center py-12 text-center">
             <div>
               <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No classes available</h3>
-              <p className="text-gray-600 mb-4">There are no classes scheduled for the selected period.</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{getTranslation('noClassesAvailable', 'No classes available')}</h3>
+              <p className="text-gray-600 mb-4">{getTranslation('noClassesDescription', 'There are no classes scheduled for the selected period.')}</p>
               <button 
                 onClick={() => fetchSlots()}
                 className="bg-[#6ea058] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#5a8a47] focus:ring-2 focus:ring-[#6ea058] focus:outline-none transition-colors"
               >
-                Refresh Schedule
+                {getTranslation('refreshSchedule', 'Refresh Schedule')}
               </button>
             </div>
           </div>
@@ -672,8 +730,8 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
           // No classes match filters
           <div className="text-center py-12">
             <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No classes found</h3>
-            <p className="text-gray-600">Try adjusting your filters or check back later for new classes.</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">{getTranslation('noClassesFound', 'No classes found')}</h3>
+            <p className="text-gray-600">{getTranslation('noClassesFoundDescription', 'Try adjusting your filters or check back later for new classes.')}</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -701,19 +759,23 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
                       {formatDate(date)}
                     </h3>
                     <span className="text-sm text-gray-600">
-                      {dateSlots.length} class{dateSlots.length !== 1 ? 'es' : ''}
+                      {dateSlots.length} {dateSlots.length === 1 ? getTranslation('class', 'class') : getTranslation('classes', 'classes')}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-4">
-                    {dateSlots.map((slot) => (
-                      <motion.div
-                        key={slot.id}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className={`schedule-slot card-base card-hover hover-scale ${!slot.isAvailable ? 'schedule-slot--unavailable' : ''} ${isSlotBooked(slot) ? 'schedule-slot--booked opacity-75' : ''} ${!hasMultiplePackages && isSlotLocked(slot) ? 'schedule-slot--locked opacity-75' : ''} ${isSlotBookedByAllPackages(slot) ? 'schedule-slot--fully-booked opacity-75' : ''} ${isSlotSelected(slot) ? 'schedule-slot--selected ring-2 ring-green-500 ring-opacity-75' : ''}`}
-                      >
-                        <div className="schedule-slot__header">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-4">
+                        {dateSlots.map((slot) => {
+                          // Debug logging for each slot
+                          console.log('🔍 Slot service type:', slot.serviceType.name, '| Description:', slot.serviceType.shortDescription);
+                          console.log('🔍 Translation lookup for:', slot.serviceType.name, '| Result:', translateServiceDescription(slot.serviceType.name));
+                          return (
+                            <motion.div
+                              key={slot.id}
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              className={`schedule-slot card-base card-hover hover-scale ${!slot.isAvailable ? 'schedule-slot--unavailable' : ''} ${isSlotBooked(slot) ? 'schedule-slot--booked opacity-75' : ''} ${!hasMultiplePackages && isSlotLocked(slot) ? 'schedule-slot--locked opacity-75' : ''} ${isSlotBookedByAllPackages(slot) ? 'schedule-slot--fully-booked opacity-75' : ''} ${isSlotSelected(slot) ? 'schedule-slot--selected ring-2 ring-green-500 ring-opacity-75' : ''}`}
+                            >
+                              <div className="schedule-slot__header">
                           <div className="flex items-start justify-between mb-2">
                             <div className="flex flex-col gap-1">
                               <div className="flex items-center gap-2">
@@ -721,7 +783,7 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
                                   {getServiceIcon(slot.serviceType.name)}
                                 </span>
                                 <h4 className="text-lg font-bold text-gray-900">
-                                  {slot.serviceType.name}
+                                  {translateServiceType(slot.serviceType.name)}
                                 </h4>
                               </div>
                               <div className="flex items-center gap-2">
@@ -794,9 +856,9 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
                         <div className="schedule-slot__content">
 
                           {/* Service Description */}
-                          {slot.serviceType.shortDescription && (
+                          {(translateServiceDescription(slot.serviceType.name) || slot.serviceType.shortDescription) && (
                             <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                              {slot.serviceType.shortDescription}
+                              {translateServiceDescription(slot.serviceType.name) || slot.serviceType.shortDescription}
                             </p>
                           )}
 
@@ -815,7 +877,7 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
                             <div className="flex items-center gap-1">
                               <div className={`w-2 h-2 rounded-full ${slot.isLate ? 'bg-yellow-500' : 'bg-green-500'}`}></div>
                               <span className="text-gray-600">
-                                {slot.capacity - slot.bookedCount} of {slot.capacity} spots available
+                                {slot.capacity - slot.bookedCount} of {slot.capacity} {slot.capacity - slot.bookedCount === 1 ? getTranslation('spotAvailable', 'spot available') : getTranslation('spotsAvailable', 'spots available')}
                               </span>
                             </div>
                             {slot.bookedCount > 0 && (
@@ -837,7 +899,7 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
                                 title="All packages have already booked this time slot"
                               >
                                 <Lock className="h-4 w-4" />
-                                Already Booked
+                                {getTranslation('alreadyBooked', 'Already Booked')}
                               </button>
                             ) : !hasMultiplePackages && isSlotLocked(slot) ? (
                               <button
@@ -846,7 +908,7 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
                                 title="This time slot was previously booked and is locked"
                               >
                                 <Lock className="h-4 w-4" />
-                                Previously Booked
+                                {getTranslation('previouslyBooked', 'Previously Booked')}
                               </button>
                             ) : !canBookMore(slot) ? (
                               <button
@@ -863,9 +925,9 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
                                 disabled={slot.bookedCount >= slot.capacity}
                               >
                                 <BookOpen className="h-4 w-4" />
-                                {slot.bookedCount >= slot.capacity ? 'Fully Booked' : 
-                                 isSlotBooked(slot) ? `Book More (${getSlotBookingCount(slot)}/${maxBookingsPerSlot})` : 
-                                 'Book Session'}
+                                {slot.bookedCount >= slot.capacity ? getTranslation('fullyBooked', 'Fully Booked') : 
+                                 isSlotBooked(slot) ? `${getTranslation('bookMore', 'Book More')} (${getSlotBookingCount(slot)}/${maxBookingsPerSlot})` : 
+                                 getTranslation('bookClass', 'Book Class')}
                               </button>
                             )
                           ) : (
@@ -880,7 +942,8 @@ export const EnhancedSchedule = memo(function EnhancedSchedule({
                           )}
                         </div>
                       </motion.div>
-                    ))}
+                          );
+                        })}
                   </div>
                 </motion.div>
               ))}
