@@ -74,16 +74,83 @@ export interface OrderEmailData {
 
 export class OrderEmailService {
   /**
-   * Send order confirmation email using the template system
+   * Send order confirmation email using the template system with intelligent routing
    */
   static async sendOrderConfirmationEmail(orderData: OrderEmailData, language: 'en' | 'es' = 'en'): Promise<boolean> {
     try {
+      console.log('📧 OrderEmailService: Starting intelligent email routing...');
+      
+      // Determine the appropriate template based on order type and customer status
+      const templateKey = this.determineTemplateKey(orderData);
+      console.log(`📧 OrderEmailService: Selected template: ${templateKey}`);
+      
+      return await this.sendTemplateEmail(templateKey, orderData, language);
+      
+    } catch (error) {
+      console.error('❌ Error in OrderEmailService.sendOrderConfirmationEmail:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Determine the appropriate template key based on order type and customer status
+   */
+  private static determineTemplateKey(orderData: OrderEmailData): string {
+    const hasMatpass = orderData.matpassItems && orderData.matpassItems.length > 0;
+    const hasBookings = orderData.bookings && orderData.bookings.length > 0;
+    const hasProducts = orderData.products && orderData.products.length > 0;
+    
+    console.log('📊 OrderEmailService: Analyzing order components:');
+    console.log(`  - Has MatPass: ${hasMatpass}`);
+    console.log(`  - Has Bookings: ${hasBookings}`);
+    console.log(`  - Has Products: ${hasProducts}`);
+    
+    // Decision Flow Implementation
+    if (hasMatpass) {
+      // MatPass Purchase - Check if new customer or renewal
+      const isNewCustomer = this.isNewCustomer(orderData);
+      console.log(`  - Is New Customer: ${isNewCustomer}`);
+      
+      if (isNewCustomer) {
+        return 'welcome_matpass'; // New customer with MatPass
+      } else {
+        return 'renewal_matpass'; // Existing customer renewal
+      }
+    } else if (hasProducts && !hasMatpass) {
+      // Products Only Purchase
+      return 'products_only';
+    } else if (hasBookings && !hasMatpass && !hasProducts) {
+      // Booking from existing account with MatPass
+      return 'booking_only';
+    } else {
+      // Fallback to comprehensive template
+      console.log('📧 OrderEmailService: Using fallback comprehensive template');
+      return 'order_confirmation_complete';
+    }
+  }
+
+  /**
+   * Check if this is a new customer (simplified logic)
+   * In a real implementation, this would check the database for previous orders
+   */
+  private static isNewCustomer(orderData: OrderEmailData): boolean {
+    // For now, we'll use a simple heuristic
+    // In production, this should check the database for previous orders
+    // This is a placeholder - you should implement proper customer history checking
+    return true; // Assume new customer for now
+  }
+
+  /**
+   * Send email using the specified template
+   */
+  private static async sendTemplateEmail(templateKey: string, orderData: OrderEmailData, language: 'en' | 'es'): Promise<boolean> {
+    try {
       console.log('📧 Sending order confirmation email using template system...');
       
-      // Get the order confirmation template
+      // Get the specified template
       const template = await prisma.communicationTemplate.findFirst({
         where: {
-          templateKey: 'order_confirmation_complete',
+          templateKey: templateKey,
           isActive: true
         },
         include: {
