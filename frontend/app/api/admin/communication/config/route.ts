@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,38 +14,35 @@ export async function GET(request: NextRequest) {
 
     console.log('✅ User authenticated:', user.email);
 
-    const supabase = createAdminClient();
     console.log('🔍 Fetching from communication_config table...');
     
     // Try to fetch from database first
-    const { data, error } = await supabase
-      .from('communication_config')
-      .select('*')
-      .single();
+    let config = await prisma.communicationConfig.findFirst();
 
-    if (error) {
-      console.log('⚠️ communication_config table might not exist, using default config:', error.message);
+    if (!config) {
+      console.log('⚠️ No communication config found, creating default...');
       
-      // Return default communication configuration if table doesn't exist
-      const defaultConfig = {
-        email_enabled: true,
-        brevo_api_key: '',
-        sender_email: 'noreply@matmax.store',
-        sender_name: 'MatMax Yoga Studio',
-        admin_email: 'admin@matmax.store',
-        sms_enabled: false,
-        sms_provider: 'labsmobile',
-        labsmobile_username: '',
-        labsmobile_token: '',
-        sms_sender_name: 'MatMax Yoga Studio'
-      };
+      // Create default communication configuration
+      config = await prisma.communicationConfig.create({
+        data: {
+          email_enabled: true,
+          brevo_api_key: '',
+          sender_email: 'noreply@matmax.world',
+          sender_name: 'MATMAX Wellness Studio',
+          admin_email: 'admin@matmax.world',
+          sms_enabled: false,
+          sms_provider: 'labsmobile',
+          labsmobile_username: '',
+          labsmobile_token: '',
+          sms_sender_name: 'MATMAX Wellness Studio'
+        }
+      });
       
-      console.log('✅ Returning default communication config');
-      return NextResponse.json({ config: defaultConfig });
+      console.log('✅ Default communication config created');
     }
 
-    console.log('✅ Communication config fetched successfully:', data);
-    return NextResponse.json({ config: data });
+    console.log('✅ Communication config fetched successfully:', config);
+    return NextResponse.json({ config });
   } catch (error) {
     console.error('❌ Unexpected error in GET /api/admin/communication/config:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -67,24 +64,18 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     console.log('📝 Request body:', body);
     
-    const supabase = createAdminClient();
-    
     // Try to update the table
-    const { data, error } = await supabase
-      .from('communication_config')
-      .upsert(body, { onConflict: 'id' })
-      .select()
-      .single();
+    const config = await prisma.communicationConfig.upsert({
+      where: { id: 1 },
+      update: body,
+      create: {
+        id: 1,
+        ...body
+      }
+    });
 
-    if (error) {
-      console.log('⚠️ communication_config table might not exist, cannot update:', error.message);
-      return NextResponse.json({ success: false, error: 'Communication configuration table does not exist. Please run the database setup first.',
-        details: error.message 
-      }, { status: 500 });
-    }
-
-    console.log('✅ Communication config updated successfully:', data);
-    return NextResponse.json({ config: data });
+    console.log('✅ Communication config updated successfully:', config);
+    return NextResponse.json({ config });
   } catch (error) {
     console.error('❌ Unexpected error in PUT /api/admin/communication/config:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';

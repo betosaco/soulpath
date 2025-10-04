@@ -216,49 +216,67 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
       const { createEmailService } = await import('@/lib/brevo-email-service');
       const emailService = await createEmailService();
       
-      if (emailService && packageData) {
-        // Get user details
-        const { data: userData, error: userError } = await supabase
-          .from('users')
-          .select('email, full_name')
-          .eq('id', customerId)
-          .single();
+        if (emailService && packageData) {
+          // Get user details
+          const { data: userData, error: userError } = await supabase
+            .from('users')
+            .select('email, full_name')
+            .eq('id', customerId)
+            .single();
 
-        if (!userError && userData) {
-          // Get template from database
-          const { CommunicationTemplateService } = await import('@/lib/communication/template-service');
-          const template = await CommunicationTemplateService.getTemplate(
-            'package_purchase_confirmation',
-            'es', // Spanish template
-            {
-              customer_name: userData.full_name || userData.email,
-              package_name: packageData.name,
-              package_price: totalAmount.toFixed(2),
-              quantity: quantity.toString(),
-              total_amount: `S/.${totalAmount.toFixed(2)}`,
-              payment_method: 'Stripe',
-              purchase_date: new Date().toLocaleDateString(),
-              sessions_count: packageData.sessions_count.toString(),
-              session_duration: '60', // Default duration
-              expiry_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString(),
-              booking_url: `${process.env.NEXT_PUBLIC_APP_URL}/schedule`,
-              website_url: process.env.NEXT_PUBLIC_APP_URL || 'https://matmax.store'
-            }
-          );
+          if (!userError && userData) {
+            // Use new OrderEmailService for consistent template handling
+            const { OrderEmailService } = await import('@/lib/communication/order-email-service');
+            
+            const templateEmailData = {
+              // Customer Information
+              customerName: userData.full_name || userData.email,
+              customerEmail: userData.email,
+              customerPhone: '',
+              
+              // Order Information
+              orderNumber: `STRIPE-${session.id}`,
+              orderDate: new Date().toISOString(),
+              totalAmount: totalAmount,
+              currency: 'PEN',
+              subtotal: totalAmount,
+              taxAmount: 0,
+              shippingAmount: 0,
+              
+              // Order Items
+              orderItems: [{
+                name: packageData.name,
+                type: 'MATPASS',
+                quantity: quantity,
+                unitPrice: totalAmount / quantity,
+                totalPrice: totalAmount,
+                description: packageData.description
+              }],
+              
+              // MATPASS Information
+              matpassItems: [{
+                name: packageData.name,
+                type: 'MATPASS',
+                quantity: quantity,
+                unitPrice: totalAmount / quantity,
+                totalPrice: totalAmount,
+                sessions: packageData.sessions_count,
+                expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()
+              }],
+              
+              // No bookings or products for Stripe webhook
+              bookings: [],
+              products: [],
+              
+              // URLs
+              orderUrl: `${process.env.NEXT_PUBLIC_APP_URL}/account/orders`,
+              websiteUrl: process.env.NEXT_PUBLIC_APP_URL || 'https://matmax.world'
+            };
 
-          if (template) {
-            await emailService.sendTemplateEmail(
-              userData.email,
-              template.content,
-              template.subject || 'Purchase Confirmation - MatMax Yoga Studio',
-              {}
-            );
-            console.log('✅ Stripe webhook: Purchase confirmation email sent');
-          } else {
-            console.warn('⚠️ Stripe webhook: Purchase confirmation template not found');
+            await OrderEmailService.sendOrderConfirmationEmail(templateEmailData);
+            console.log('✅ Stripe webhook: Purchase confirmation email sent using template system');
           }
         }
-      }
     } catch (emailError) {
       console.error('⚠️ Stripe webhook: Failed to send confirmation email:', emailError);
     }

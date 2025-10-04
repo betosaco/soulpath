@@ -34,6 +34,7 @@ import {
   Globe
 } from 'lucide-react';
 import { replacePlaceholders } from '../../lib/communication/placeholders';
+import { useAuth } from '../../hooks/useAuth';
 import { toast } from 'sonner';
 
 interface Template {
@@ -107,6 +108,7 @@ const EMAIL_THEMES = [
 ];
 
 export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplatePreviewProps) {
+  const { user } = useAuth();
   const [activeLanguage, setActiveLanguage] = useState('en');
   const [customData, setCustomData] = useState(SAMPLE_DATA);
   const [copied, setCopied] = useState<string | null>(null);
@@ -114,6 +116,10 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
   const [emailTheme, setEmailTheme] = useState('modern');
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [isLoading, setIsLoading] = useState(false);
+  const [showTestModal, setShowTestModal] = useState(false);
+  const [testEmail, setTestEmail] = useState('');
+  const [testSubject, setTestSubject] = useState('');
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
   const currentTranslation = template.translations.find(t => t.language === activeLanguage);
   const languages = template.translations.map(t => t.language);
@@ -141,35 +147,62 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
   };
 
   const handleSendTest = async () => {
-    const testEmail = prompt('Enter test email address:');
-    if (!testEmail) return;
+    if (!testEmail.trim()) {
+      setTestResult({ success: false, message: 'Please enter a valid email address' });
+      return;
+    }
 
     setIsLoading(true);
+    setTestResult(null);
+    
     try {
       const response = await fetch('/api/admin/communication/send-test', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user?.access_token}`
         },
         body: JSON.stringify({
-          templateKey: template.templateKey,
-          email: testEmail,
-          language: activeLanguage,
-          data: customData
+          to: testEmail,
+          subject: testSubject || getPreviewSubject(),
+          content: getPreviewContent()
         })
       });
 
-      if (response.ok) {
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        setTestResult({ 
+          success: true, 
+          message: `Test email sent successfully to ${testEmail}` 
+        });
         toast.success('Test email sent successfully');
+        setTestEmail('');
+        setTestSubject('');
       } else {
-        toast.error('Failed to send test email');
+        setTestResult({ 
+          success: false, 
+          message: result.message || 'Failed to send test email' 
+        });
+        toast.error(result.message || 'Failed to send test email');
       }
     } catch (error) {
       console.error('Error sending test email:', error);
+      setTestResult({ 
+        success: false, 
+        message: 'Network error. Please try again.' 
+      });
       toast.error('Failed to send test email');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const openTestModal = () => {
+    setTestEmail('');
+    setTestSubject(getPreviewSubject());
+    setTestResult(null);
+    setShowTestModal(true);
   };
 
   const getCategoryColor = (category: string) => {
@@ -222,7 +255,7 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
           <div className="flex items-center gap-3">
             <BaseButton
               variant="outline"
-              onClick={handleSendTest}
+              onClick={openTestModal}
               disabled={isLoading}
               className="border-gray-300 text-gray-700 hover:text-gray-900 hover:border-gray-400"
             >
@@ -561,6 +594,107 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
             </div>
           </div>
         </div>
+
+        {/* Test Email Modal */}
+        {showTestModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+            <div className="bg-white rounded-xl border border-gray-200 w-full max-w-md shadow-2xl">
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-green-500 to-blue-600">
+                    <Send className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Send Test Email</h3>
+                    <p className="text-sm text-gray-500">Test this template with real data</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowTestModal(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <div>
+                  <Label htmlFor="test-email" className="text-sm font-medium text-gray-700">
+                    Email Address *
+                  </Label>
+                  <BaseInput
+                    id="test-email"
+                    type="email"
+                    value={testEmail}
+                    onChange={(e) => setTestEmail(e.target.value)}
+                    placeholder="Enter test email address"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="test-subject" className="text-sm font-medium text-gray-700">
+                    Subject (Optional)
+                  </Label>
+                  <BaseInput
+                    id="test-subject"
+                    value={testSubject}
+                    onChange={(e) => setTestSubject(e.target.value)}
+                    placeholder="Email subject"
+                    className="mt-1"
+                  />
+                </div>
+
+                {testResult && (
+                  <div className={`p-4 rounded-lg border ${
+                    testResult.success 
+                      ? 'bg-green-50 border-green-200 text-green-800' 
+                      : 'bg-red-50 border-red-200 text-red-800'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      {testResult.success ? (
+                        <CheckCircle className="w-5 h-5" />
+                      ) : (
+                        <X className="w-5 h-5" />
+                      )}
+                      <span className="font-medium">
+                        {testResult.success ? 'Success!' : 'Error'}
+                      </span>
+                    </div>
+                    <p className="text-sm mt-1">{testResult.message}</p>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-3 pt-4">
+                  <BaseButton
+                    onClick={handleSendTest}
+                    disabled={isLoading || !testEmail.trim()}
+                    className="flex-1"
+                  >
+                    {isLoading ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4 mr-2" />
+                        Send Test Email
+                      </>
+                    )}
+                  </BaseButton>
+                  <BaseButton
+                    variant="outline"
+                    onClick={() => setShowTestModal(false)}
+                    className="border-gray-300 text-gray-700 hover:text-gray-900 hover:border-gray-400"
+                  >
+                    Cancel
+                  </BaseButton>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

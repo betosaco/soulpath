@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Mail, Smartphone, Settings, Tag } from 'lucide-react';
+import { Mail, Smartphone, Settings, Tag, Bot } from 'lucide-react';
 import { CommunicationConfig } from './CommunicationConfig';
 import { TemplateLibrary } from './TemplateLibrary';
 import { EnhancedTemplateLibrary } from './EnhancedTemplateLibrary';
@@ -38,6 +38,10 @@ export function CommunicationSettings() {
             <Smartphone size={16} className="mr-2" />
             SMS Templates
           </TabsTrigger>
+          <TabsTrigger value="telegram" className="dashboard-tab">
+            <Bot size={16} className="mr-2" />
+            Telegram Templates
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="config" className="space-y-6">
@@ -54,6 +58,10 @@ export function CommunicationSettings() {
 
         <TabsContent value="sms" className="space-y-6">
           <EnhancedTemplateLibrary type="sms" />
+        </TabsContent>
+
+        <TabsContent value="telegram" className="space-y-6">
+          <EnhancedTemplateLibrary type="telegram" />
         </TabsContent>
       </Tabs>
     </div>

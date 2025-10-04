@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
 interface TestEmailData {
@@ -37,15 +37,17 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ User authenticated:', user.email);
     const body = await request.json();
-    const { type } = body; // 'email' or 'sms'
+    const { type } = body; // 'email', 'sms', or 'telegram'
 
     if (type === 'email') {
       return await testEmail(request, body);
     } else if (type === 'sms') {
       return await testSms(request, body);
+    } else if (type === 'telegram') {
+      return await testTelegram(request, body);
     } else {
       return NextResponse.json({ success: false, error: 'Invalid test type',
-        message: 'Type must be either "email" or "sms"'
+        message: 'Type must be either "email", "sms", or "telegram"'
       }, { status: 400 });
     }
   } catch (error) {
@@ -68,13 +70,9 @@ async function testEmail(_request: NextRequest, body: TestEmailData) {
     const { to, subject, content } = validation.data;
 
     // Get email configuration
-    const supabase = createAdminClient();
-    const { data: config, error: configError } = await supabase
-      .from('communication_config')
-      .select('brevo_api_key, sender_email, sender_name')
-      .single();
+    const config = await prisma.communicationConfig.findFirst();
 
-    if (configError || !config?.brevo_api_key) {
+    if (!config || !config.brevo_api_key) {
       return NextResponse.json({ success: false, error: 'Email configuration not found',
         message: 'Please configure your Brevo API key first'
       }, { status: 400 });
@@ -83,15 +81,15 @@ async function testEmail(_request: NextRequest, body: TestEmailData) {
     // Send test email using Brevo API
     const emailData = {
       sender: {
-        name: config.sender_name || 'SoulPath',
-        email: config.sender_email || 'noreply@soulpath.lat'
+        name: config.sender_name || 'MATMAX Wellness Studio',
+        email: config.sender_email || 'noreply@matmax.world'
       },
       to: [{ email: to }],
       subject: subject,
       htmlContent: content
     };
 
-    const response = await fetch('https://api.brevo.com/v3/sendEmail', {
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -137,13 +135,9 @@ async function testSms(_request: NextRequest, body: TestSmsData) {
     const { phoneNumber, message } = validation.data;
 
     // Get SMS configuration
-    const supabase = createAdminClient();
-    const { data: config, error: configError } = await supabase
-      .from('communication_config')
-      .select('labsmobile_username, labsmobile_token, sms_sender_name')
-      .single();
+    const config = await prisma.communicationConfig.findFirst();
 
-    if (configError || !config?.labsmobile_username || !config?.labsmobile_token) {
+    if (!config || !config.labsmobile_username || !config.labsmobile_token) {
       return NextResponse.json({ success: false, error: 'SMS configuration not found',
         message: 'Please configure your Labsmobile credentials first'
       }, { status: 400 });
@@ -186,6 +180,58 @@ async function testSms(_request: NextRequest, body: TestSmsData) {
   } catch (error) {
     console.error('❌ Error sending test SMS:', error);
     return NextResponse.json({ success: false, error: 'Failed to send test SMS',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
+  }
+}
+
+async function testTelegram(_request: NextRequest, body: { chatId: string; message: string }) {
+  try {
+    const { chatId, message } = body;
+
+    // Get Telegram configuration
+    const config = await prisma.communicationConfig.findFirst();
+
+    if (!config || !config.telegram_bot_token) {
+      return NextResponse.json({ success: false, error: 'Telegram configuration not found',
+        message: 'Please configure your Telegram bot token first'
+      }, { status: 400 });
+    }
+
+    // Send test message using Telegram Bot API
+    const telegramData = {
+      chat_id: chatId,
+      text: message,
+      parse_mode: 'HTML'
+    };
+
+    const response = await fetch(`https://api.telegram.org/bot${config.telegram_bot_token}/sendMessage`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(telegramData)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Telegram API error:', errorData);
+      return NextResponse.json({ success: false, error: 'Failed to send test Telegram message',
+        details: errorData.description || 'Unknown error from Telegram API'
+      }, { status: 500 });
+    }
+
+    const result = await response.json();
+    console.log('✅ Test Telegram message sent successfully:', result.message_id);
+    
+    return NextResponse.json({
+      success: true,
+      message: 'Test Telegram message sent successfully',
+      messageId: result.message_id
+    });
+  } catch (error) {
+    console.error('❌ Error sending test Telegram message:', error);
+    return NextResponse.json({ success: false, error: 'Failed to send test Telegram message',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }

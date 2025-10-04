@@ -819,9 +819,88 @@ export async function POST(request: NextRequest) {
           })) || []
         };
 
+        // Send email using new template system
+        const { OrderEmailService } = await import('@/lib/communication/order-email-service');
+        
+        // Transform emailData to match new service format
+        const templateEmailData = {
+          // Customer Information
+          customerName: emailData.customerName,
+          customerEmail: emailData.customerEmail,
+          customerPhone: emailData.customerPhone,
+          
+          // Order Information
+          orderNumber: emailData.orderNumber,
+          orderDate: emailData.orderDate,
+          totalAmount: emailData.totalAmount,
+          currency: emailData.currency,
+          subtotal: emailData.subtotal,
+          taxAmount: emailData.taxAmount,
+          shippingAmount: emailData.shippingAmount,
+          
+          // Order Items
+          orderItems: emailData.orderItems.map(item => ({
+            name: item.name,
+            type: item.type_text,
+            quantity: item.quantity,
+            unitPrice: item.unit_price,
+            totalPrice: item.total_price,
+            description: item.description
+          })),
+          
+          // MATPASS Information (if applicable)
+          matpassItems: emailData.orderItems.filter(item => item.type_text === 'MATPASS').map(item => ({
+            name: item.name,
+            type: item.type_text,
+            quantity: item.quantity,
+            unitPrice: item.unit_price,
+            totalPrice: item.total_price,
+            sessions: item.sessions || 0,
+            expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()
+          })),
+          
+          // Booking Information (if applicable)
+          bookings: bookingResults?.map(booking => ({
+            bookingId: booking.id?.toString() || '',
+            bookingDate: booking.scheduleSlot?.startTime ? booking.scheduleSlot.startTime.toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            }) : '',
+            bookingTime: booking.scheduleSlot?.startTime ? booking.scheduleSlot.startTime.toLocaleTimeString('en-US', {
+              hour: '2-digit',
+              minute: '2-digit'
+            }) : '',
+            sessionType: booking.sessionType || booking.scheduleSlot?.scheduleTemplate?.serviceType?.name || 'Yoga',
+            teacherName: booking.scheduleSlot?.scheduleTemplate?.teacher?.fullName || 
+                        booking.scheduleSlot?.scheduleTemplate?.teacher?.firstName + ' ' + booking.scheduleSlot?.scheduleTemplate?.teacher?.lastName || 
+                        'To be assigned',
+            venue: booking.scheduleSlot?.scheduleTemplate?.venue?.name || 'MATMAX Yoga Studio',
+            duration: booking.scheduleSlot?.scheduleTemplate?.duration || 60
+          })) || [],
+          
+          // Product Information (if applicable)
+          products: emailData.orderItems.filter(item => item.type_text === 'PRODUCT').map(item => ({
+            name: item.name,
+            type: item.type_text,
+            quantity: item.quantity,
+            unitPrice: item.unit_price,
+            totalPrice: item.total_price,
+            description: item.description
+          })),
+          
+          // Shipping Information
+          shippingAddress: emailData.shipping_address,
+          
+          // URLs
+          orderUrl: emailData.order_url,
+          websiteUrl: process.env.NEXT_PUBLIC_BASE_URL || 'https://matmax.world'
+        };
+
         // Send email asynchronously (don't wait for it to complete)
-        sendOrderConfirmationEmail(emailData, 'client').catch(error => {
-          console.error('Failed to send order confirmation email:', error);
+        OrderEmailService.sendOrderConfirmationEmail(templateEmailData).catch(error => {
+          console.error('Failed to send order confirmation email using template system:', error);
           // Don't fail the order creation if email fails
         });
 
