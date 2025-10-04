@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Calendar, Clock, MapPin, User, Users } from 'lucide-react';
+import { useLanguage } from '@/hooks/useTranslations';
 
 interface BookingDetails {
   selectedDate?: string;
@@ -26,6 +27,8 @@ export function BookingDetailsDisplay({
   showTitle = true,
   compact = false 
 }: BookingDetailsDisplayProps) {
+  const { language } = useLanguage();
+  
   if (!bookingDetails || (!bookingDetails.selectedDate && !bookingDetails.selectedTime)) {
     return null;
   }
@@ -33,7 +36,8 @@ export function BookingDetailsDisplay({
   const formatDate = (dateString: string) => {
     try {
       const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', {
+      const locale = language === 'es' ? 'es-ES' : 'en-US';
+      return date.toLocaleDateString(locale, {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
@@ -49,7 +53,8 @@ export function BookingDetailsDisplay({
       const [hours, minutes] = timeString.split(':');
       const date = new Date();
       date.setHours(parseInt(hours), parseInt(minutes));
-      return date.toLocaleTimeString('en-US', {
+      const locale = language === 'es' ? 'es-ES' : 'en-US';
+      return date.toLocaleTimeString(locale, {
         hour: '2-digit',
         minute: '2-digit'
       });

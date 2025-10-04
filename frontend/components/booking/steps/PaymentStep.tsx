@@ -765,7 +765,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                   {item.type === 'package' && item.bookingDetails && item.bookingDetails.length > 0 && (
                     <div className="mt-3">
                       <p className="text-sm text-muted-foreground mb-3">
-                        Booked Sessions ({item.bookingDetails.length}):
+                        {getTranslation('bookedSessions', 'Booked Sessions')} ({item.bookingDetails.length}):
                       </p>
                       <div className="space-y-2">
                         {item.bookingDetails.map((booking, bookingIndex) => (
@@ -775,12 +775,12 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                               <div className="flex items-center space-x-2">
                                 <Calendar className="w-4 h-4 text-[var(--color-accent-500)]" />
                                 <span className="text-sm font-semibold text-foreground">
-                                  Session {bookingIndex + 1}
+                                  {getTranslation('session', 'Session')} {bookingIndex + 1}
                                 </span>
                               </div>
                               <div className="flex items-center space-x-1">
                                 <CheckCircle className="w-3 h-3 text-[var(--color-status-success)]" />
-                                <span className="text-xs text-[var(--color-status-success)] font-medium">Ready</span>
+                                <span className="text-xs text-[var(--color-status-success)] font-medium">{getTranslation('ready', 'Ready')}</span>
                               </div>
                             </div>
 
@@ -789,12 +789,12 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                               {/* Date & Time */}
                               <div className="flex items-center space-x-1">
                                 <Clock className="w-3 h-3" />
-                                <span>Date:</span>
+                                <span>{getTranslation('date', 'Date')}:</span>
                                 <span className="font-medium text-foreground">{booking.selectedDate}</span>
                               </div>
                               <div className="flex items-center space-x-1">
                                 <Clock className="w-3 h-3" />
-                                <span>Time:</span>
+                                <span>{getTranslation('time', 'Time')}:</span>
                                 <span className="font-medium text-foreground">{booking.selectedTime}</span>
                               </div>
 
@@ -802,14 +802,14 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                               {booking.teacher && (
                                 <div className="flex items-center space-x-1">
                                   <User className="w-3 h-3" />
-                                  <span>Teacher:</span>
+                                  <span>{getTranslation('teacher', 'Teacher')}:</span>
                                   <span className="font-medium text-foreground truncate">{booking.teacher}</span>
                                 </div>
                               )}
                               {booking.serviceType && (
                                 <div className="flex items-center space-x-1">
                                   <Calendar className="w-3 h-3" />
-                                  <span>Service:</span>
+                                  <span>{getTranslation('service', 'Service')}:</span>
                                   <span className="font-medium text-foreground truncate">{booking.serviceType}</span>
                                 </div>
                               )}
@@ -825,7 +825,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                               {booking.venue && (
                                 <div className="flex items-center space-x-1">
                                   <MapPin className="w-3 h-3" />
-                                  <span>Location:</span>
+                                  <span>{getTranslation('location', 'Location')}:</span>
                                   <span className="font-medium text-foreground truncate">{booking.venue}</span>
                                 </div>
                               )}

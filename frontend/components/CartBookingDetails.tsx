@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { Calendar, Clock, MapPin, User, X, Edit3 } from 'lucide-react';
+import { useLanguage, useTranslations } from '@/hooks/useTranslations';
+import { defaultTranslations } from '@/lib/data/translations';
 
 interface BookingDetails {
   selectedDate?: string;
@@ -32,6 +34,16 @@ export function CartBookingDetails({
   showActions = false,
   packageSessions = 0,
 }: CartBookingDetailsProps) {
+  const { language } = useLanguage();
+  const { t } = useTranslations(undefined, language);
+  
+  // Helper function to get translations
+  const getTranslation = (key: string, fallback: string = ''): string => {
+    const checkoutTranslations = defaultTranslations[language]?.checkout || defaultTranslations.en.checkout || {};
+    const paymentTranslations = checkoutTranslations.payment || {};
+    return (paymentTranslations as Record<string, any>)[key] || fallback;
+  };
+
   // Handle both single booking and array of bookings
   const bookings = Array.isArray(bookingDetails) ? bookingDetails : [bookingDetails];
   const hasBookings = bookings.length > 0 && bookings.some(booking => 
@@ -49,7 +61,8 @@ export function CartBookingDetails({
       // Parse the date string as local date to avoid timezone issues
       const [year, month, day] = dateString.split('-').map(Number);
       const date = new Date(year, month - 1, day); // month is 0-indexed
-      return date.toLocaleDateString('en-US', {
+      const locale = language === 'es' ? 'es-ES' : 'en-US';
+      return date.toLocaleDateString(locale, {
         weekday: 'long',
         month: 'short',
         day: 'numeric'
@@ -64,7 +77,8 @@ export function CartBookingDetails({
       const [hours, minutes] = timeString.split(':');
       const date = new Date();
       date.setHours(parseInt(hours), parseInt(minutes));
-      return date.toLocaleTimeString('en-US', {
+      const locale = language === 'es' ? 'es-ES' : 'en-US';
+      return date.toLocaleTimeString(locale, {
         hour: '2-digit',
         minute: '2-digit',
         hour12: true
@@ -81,7 +95,7 @@ export function CartBookingDetails({
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 bg-muted-foreground rounded-full"></div>
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-            Scheduled Classes ({bookings.length}{packageSessions > 0 ? `/${packageSessions}` : ''})
+            {getTranslation('scheduledClasses', 'Scheduled Classes')} ({bookings.length}{packageSessions > 0 ? `/${packageSessions}` : ''})
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -89,9 +103,9 @@ export function CartBookingDetails({
             <button
               onClick={onAddMore}
               className="px-2 py-1 bg-primary text-primary-foreground text-xs rounded-full hover:bg-primary/90 transition-colors"
-              title="Add more classes"
+              title={getTranslation('add', 'Add') + ' more classes'}
             >
-              + Add More
+              + {getTranslation('add', 'Add')} More
             </button>
           )}
         </div>
@@ -130,7 +144,7 @@ export function CartBookingDetails({
                   <div className="flex items-center gap-3 text-sm">
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <User className="w-3.5 h-3.5" />
-                      <span className="font-medium">Teacher:</span>
+                      <span className="font-medium">{getTranslation('teacher', 'Teacher')}:</span>
                     </div>
                     <span className="text-foreground font-medium">{booking.teacher}</span>
                   </div>
@@ -150,7 +164,7 @@ export function CartBookingDetails({
                   <div className="flex items-center gap-3 text-sm">
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <MapPin className="w-3.5 h-3.5" />
-                      <span className="font-medium">Location:</span>
+                      <span className="font-medium">{getTranslation('location', 'Location')}:</span>
                     </div>
                     <span className="text-foreground">{booking.venue}</span>
                   </div>

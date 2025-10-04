@@ -261,7 +261,7 @@ export function ConfirmationStep({
                         <div className="flex items-center space-x-2">
                           <Calendar className="w-4 h-4 text-[var(--color-accent-500)]" />
                           <span className="text-sm font-semibold text-foreground">
-                            Session {bookingIndex + 1}
+                            {getTranslation('session', 'Session')} {bookingIndex + 1}
                           </span>
                         </div>
                         <div className="flex items-center space-x-1">
