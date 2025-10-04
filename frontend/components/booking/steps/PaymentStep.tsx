@@ -828,7 +828,7 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                                   <div className="w-3 h-3 bg-muted rounded-full flex items-center justify-center">
                                     <span className="text-xs text-muted-foreground">#</span>
                                   </div>
-                                  <span>Slot ID:</span>
+                                  <span>{getTranslation('slotId', 'Slot ID')}:</span>
                                   <span className="font-mono text-xs text-foreground">{booking.scheduleSlotId}</span>
                                 </div>
                               )}

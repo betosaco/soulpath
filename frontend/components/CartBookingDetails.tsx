@@ -167,7 +167,7 @@ export function CartBookingDetails({
                       <div className="w-3.5 h-3.5 bg-muted rounded-full flex items-center justify-center">
                         <span className="text-xs text-muted-foreground">#</span>
                       </div>
-                      <span className="font-medium">Slot ID:</span>
+                      <span className="font-medium">{getTranslation('slotId', 'Slot ID')}:</span>
                     </div>
                     <span className="text-foreground font-mono text-xs">{booking.scheduleSlotId}</span>
                   </div>

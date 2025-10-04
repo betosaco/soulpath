@@ -275,12 +275,12 @@ export function ConfirmationStep({
                         {/* Date & Time */}
                         <div className="flex items-center space-x-1">
                           <Clock className="w-3 h-3" />
-                          <span>Date:</span>
+                          <span>{getTranslation('date', 'Date')}:</span>
                           <span className="font-medium text-foreground">{booking.selectedDate}</span>
                         </div>
                         <div className="flex items-center space-x-1">
                           <Clock className="w-3 h-3" />
-                          <span>Time:</span>
+                          <span>{getTranslation('time', 'Time')}:</span>
                           <span className="font-medium text-foreground">{booking.selectedTime}</span>
                         </div>
 
@@ -288,14 +288,14 @@ export function ConfirmationStep({
                         {booking.teacher && (
                           <div className="flex items-center space-x-1">
                             <User className="w-3 h-3" />
-                            <span>Teacher:</span>
+                            <span>{getTranslation('teacher', 'Teacher')}:</span>
                             <span className="font-medium text-foreground truncate">{booking.teacher}</span>
                           </div>
                         )}
                         {booking.serviceType && (
                           <div className="flex items-center space-x-1">
                             <Calendar className="w-3 h-3" />
-                            <span>Service:</span>
+                            <span>{getTranslation('service', 'Service')}:</span>
                             <span className="font-medium text-foreground truncate">{booking.serviceType}</span>
                           </div>
                         )}
@@ -303,7 +303,7 @@ export function ConfirmationStep({
                         {booking.venue && (
                           <div className="flex items-center space-x-1">
                             <MapPin className="w-3 h-3" />
-                            <span>Location:</span>
+                            <span>{getTranslation('location', 'Location')}:</span>
                             <span className="font-medium text-foreground truncate">{booking.venue}</span>
                           </div>
                         )}
@@ -314,7 +314,7 @@ export function ConfirmationStep({
                             <div className="w-3 h-3 bg-muted rounded-full flex items-center justify-center">
                               <span className="text-xs text-muted-foreground">#</span>
                             </div>
-                            <span>Slot ID:</span>
+                            <span>{getTranslation('slotId', 'Slot ID')}:</span>
                             <span className="font-mono text-xs text-foreground">{booking.scheduleSlotId}</span>
                           </div>
                         )}
