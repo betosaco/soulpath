@@ -76,7 +76,7 @@ export class OrderEmailService {
   /**
    * Send order confirmation email using the template system
    */
-  static async sendOrderConfirmationEmail(orderData: OrderEmailData): Promise<boolean> {
+  static async sendOrderConfirmationEmail(orderData: OrderEmailData, language: 'en' | 'es' = 'en'): Promise<boolean> {
     try {
       console.log('📧 Sending order confirmation email using template system...');
       
@@ -89,7 +89,7 @@ export class OrderEmailService {
         include: {
           translations: {
             where: {
-              language: 'en' // Default to English, can be made dynamic
+              language: language
             }
           }
         }

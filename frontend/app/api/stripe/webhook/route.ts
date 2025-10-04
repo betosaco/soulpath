@@ -273,7 +273,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
               websiteUrl: process.env.NEXT_PUBLIC_APP_URL || 'https://matmax.world'
             };
 
-            await OrderEmailService.sendOrderConfirmationEmail(templateEmailData);
+            await OrderEmailService.sendOrderConfirmationEmail(templateEmailData, 'es');
             console.log('✅ Stripe webhook: Purchase confirmation email sent using template system');
           }
         }

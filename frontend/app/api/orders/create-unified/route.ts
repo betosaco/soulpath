@@ -899,7 +899,8 @@ export async function POST(request: NextRequest) {
         };
 
         // Send email asynchronously (don't wait for it to complete)
-        OrderEmailService.sendOrderConfirmationEmail(templateEmailData).catch(error => {
+        // Use Spanish by default for Peruvian customers
+        OrderEmailService.sendOrderConfirmationEmail(templateEmailData, 'es').catch(error => {
           console.error('Failed to send order confirmation email using template system:', error);
           // Don't fail the order creation if email fails
         });
