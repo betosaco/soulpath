@@ -283,7 +283,7 @@ export function ConfirmationStep({
                         </div>
                         <div className="flex items-center space-x-1">
                           <CheckCircle className="w-3 h-3 text-[var(--color-status-success)]" />
-                          <span className="text-xs text-[var(--color-status-success)] font-medium">Confirmed</span>
+                          <span className="text-xs text-[var(--color-status-success)] font-medium">{getTranslation('confirmed', 'Confirmed')}</span>
                         </div>
                       </div>
 
@@ -342,7 +342,7 @@ export function ConfirmationStep({
 
                 <div className="mt-3 pt-3 border-t border-border">
                   <p className="text-sm text-muted-foreground">
-                    {item.bookingDetails?.length || 0} of {item.sessions || 1} sessions scheduled
+                    {item.bookingDetails?.length || 0} of {item.sessions || 1} {getTranslation('sessionsScheduled', 'sessions scheduled')}
                   </p>
                 </div>
               </div>

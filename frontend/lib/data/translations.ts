@@ -481,6 +481,8 @@ export const defaultTranslations = {
         continueShopping: 'Continue Shopping',
         notSpecified: 'Not specified',
         notProvided: 'Not provided',
+        confirmed: 'Confirmed',
+        sessionsScheduled: 'sessions scheduled',
         // Shopping Cart translations
         shoppingCart: 'Shopping Cart',
         cart: 'Cart',
@@ -1070,6 +1072,8 @@ export const defaultTranslations = {
         continueShopping: 'Continuar Comprando',
         notSpecified: 'No especificado',
         notProvided: 'No proporcionado',
+        confirmed: 'Confirmado',
+        sessionsScheduled: 'sesiones programadas',
         // Shopping Cart translations
         shoppingCart: 'Carrito de Compras',
         cart: 'Carrito',
