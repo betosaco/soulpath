@@ -814,14 +814,6 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
                                 </div>
                               )}
 
-                              {/* Day & Venue */}
-                              {booking.dayOfWeek && (
-                                <div className="flex items-center space-x-1">
-                                  <Clock className="w-3 h-3" />
-                                  <span>Day:</span>
-                                  <span className="font-medium text-foreground">{booking.dayOfWeek}</span>
-                                </div>
-                              )}
                               {booking.venue && (
                                 <div className="flex items-center space-x-1">
                                   <MapPin className="w-3 h-3" />

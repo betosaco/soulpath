@@ -30,10 +30,10 @@ export const WhatsAppBubble: React.FC<WhatsAppBubbleProps> = ({
   };
 
   return (
-    <div className={`fixed bottom-6 left-6 z-50 ${className}`}>
+    <div className={`fixed bottom-6 right-6 z-50 ${className}`}>
       {/* Tooltip */}
       {isHovered && (
-        <div className="absolute bottom-16 left-0 bg-gray-900 text-white text-sm rounded-lg px-3 py-2 whitespace-nowrap shadow-lg animate-in slide-in-from-bottom-2 duration-200">
+        <div className="absolute bottom-16 right-0 bg-gray-900 text-white text-sm rounded-lg px-3 py-2 whitespace-nowrap shadow-lg animate-in slide-in-from-bottom-2 duration-200">
           <div className="flex items-center space-x-2">
             <MessageCircle className="w-4 h-4" />
             <span>
@@ -41,7 +41,7 @@ export const WhatsAppBubble: React.FC<WhatsAppBubbleProps> = ({
             </span>
           </div>
           {/* Arrow pointing down */}
-          <div className="absolute top-full left-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900"></div>
+          <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900"></div>
         </div>
       )}
 

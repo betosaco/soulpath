@@ -150,15 +150,6 @@ export function CartBookingDetails({
                   </div>
                 )}
                 
-                {booking.dayOfWeek && (
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Clock className="w-3.5 h-3.5" />
-                      <span className="font-medium">Day:</span>
-                    </div>
-                    <span className="text-foreground">{booking.dayOfWeek}</span>
-                  </div>
-                )}
                 
                 {booking.venue && (
                   <div className="flex items-center gap-3 text-sm">
