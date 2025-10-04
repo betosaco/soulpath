@@ -311,19 +311,19 @@ export function EnhancedEmailTemplateEditor({ template, type, onSave, onClose }:
   const selectedCategory = TEMPLATE_CATEGORIES.find(cat => cat.value === formData.category);
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-xl border border-slate-700/50 w-full max-w-7xl max-h-[95vh] overflow-hidden shadow-2xl">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl border border-gray-200 w-full max-w-7xl max-h-[95vh] overflow-hidden shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-700/50 bg-gradient-to-r from-slate-800/50 to-slate-700/30">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50">
           <div className="flex items-center gap-4">
             <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600">
               <FileText className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white">
+              <h2 className="text-2xl font-bold text-gray-900">
                 {template ? 'Edit Template' : 'Create New Template'}
               </h2>
-              <p className="text-slate-400 text-sm">
+              <p className="text-gray-600 text-sm">
                 {type === 'email' ? 'Email Template Editor' : 'SMS Template Editor'}
               </p>
             </div>
@@ -343,7 +343,7 @@ export function EnhancedEmailTemplateEditor({ template, type, onSave, onClose }:
             <BaseButton
               variant="outline"
               onClick={() => setShowPreview(!showPreview)}
-              className="border-slate-600 text-slate-300 hover:text-white hover:border-slate-500"
+              className="border-gray-300 text-gray-700 hover:text-gray-900 hover:border-gray-400"
             >
               <Eye className="w-4 h-4 mr-2" />
               Preview
@@ -363,7 +363,7 @@ export function EnhancedEmailTemplateEditor({ template, type, onSave, onClose }:
             <BaseButton
               variant="outline"
               onClick={onClose}
-              className="border-slate-600 text-slate-300 hover:text-white hover:border-slate-500"
+              className="border-gray-300 text-gray-700 hover:text-gray-900 hover:border-gray-400"
             >
               <X className="w-4 h-4" />
             </BaseButton>
@@ -372,55 +372,55 @@ export function EnhancedEmailTemplateEditor({ template, type, onSave, onClose }:
 
         <div className="flex h-[calc(95vh-120px)]">
           {/* Sidebar */}
-          <div className="w-80 border-r border-slate-700/50 bg-slate-800/30 overflow-y-auto">
+          <div className="w-80 border-r border-gray-200 bg-gray-50 overflow-y-auto">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-slate-800/50 m-4">
-                <TabsTrigger value="content" className="text-xs">Content</TabsTrigger>
-                <TabsTrigger value="settings" className="text-xs">Settings</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 bg-white border border-gray-200 m-4">
+                <TabsTrigger value="content" className="text-xs text-gray-700 data-[state=active]:bg-blue-500 data-[state=active]:text-white">Content</TabsTrigger>
+                <TabsTrigger value="settings" className="text-xs text-gray-700 data-[state=active]:bg-blue-500 data-[state=active]:text-white">Settings</TabsTrigger>
               </TabsList>
 
               <TabsContent value="content" className="p-4 space-y-6">
                 {/* Template Settings */}
-                <Card className="bg-slate-800/50 border-slate-700/50">
+                <Card className="bg-white border border-gray-200 shadow-sm">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-white text-sm flex items-center gap-2">
+                    <CardTitle className="text-gray-900 text-sm flex items-center gap-2">
                       <Settings className="w-4 h-4" />
                       Template Settings
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
-                      <Label className="text-slate-300 text-sm">Template Name</Label>
+                      <Label className="text-gray-700 text-sm font-medium">Template Name</Label>
                       <BaseInput
                         value={formData.name}
                         onChange={(e) => handleInputChange('name', e.target.value)}
                         placeholder="Enter template name"
-                        className="bg-slate-700/50 border-slate-600 text-white placeholder-slate-400"
+                        className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
 
                     <div>
-                      <Label className="text-slate-300 text-sm">Template Key</Label>
+                      <Label className="text-gray-700 text-sm font-medium">Template Key</Label>
                       <BaseInput
                         value={formData.templateKey}
                         onChange={(e) => handleInputChange('templateKey', e.target.value)}
                         placeholder="template_key"
-                        className="bg-slate-700/50 border-slate-600 text-white placeholder-slate-400"
+                        className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
                       />
-                      <p className="text-xs text-slate-400 mt-1">
+                      <p className="text-xs text-gray-500 mt-1">
                         Used to reference this template in code
                       </p>
                     </div>
 
                     <div>
-                      <Label className="text-slate-300 text-sm">Category</Label>
+                      <Label className="text-gray-700 text-sm font-medium">Category</Label>
                       <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
-                        <SelectTrigger className="bg-slate-700/50 border-slate-600 text-white">
+                        <SelectTrigger className="bg-white border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500">
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
-                        <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectContent className="bg-white border-gray-200">
                           {TEMPLATE_CATEGORIES.map(category => (
-                            <SelectItem key={category.value} value={category.value} className="text-white hover:bg-slate-700">
+                            <SelectItem key={category.value} value={category.value} className="text-gray-900 hover:bg-gray-100">
                               <div className="flex items-center gap-2">
                                 <span>{category.icon}</span>
                                 <span>{category.label}</span>
@@ -439,18 +439,18 @@ export function EnhancedEmailTemplateEditor({ template, type, onSave, onClose }:
                     </div>
 
                     <div>
-                      <Label className="text-slate-300 text-sm">Description</Label>
+                      <Label className="text-gray-700 text-sm font-medium">Description</Label>
                       <Textarea
                         value={formData.description}
                         onChange={(e) => handleInputChange('description', e.target.value)}
                         placeholder="Describe when this template is used"
-                        className="bg-slate-700/50 border-slate-600 text-white placeholder-slate-400"
+                        className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
                         rows={3}
                       />
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <Label className="text-slate-300 text-sm">Active</Label>
+                      <Label className="text-gray-700 text-sm font-medium">Active</Label>
                       <Switch
                         checked={formData.isActive}
                         onCheckedChange={(checked) => handleInputChange('isActive', checked)}
@@ -460,9 +460,9 @@ export function EnhancedEmailTemplateEditor({ template, type, onSave, onClose }:
                 </Card>
 
                 {/* Language Selector */}
-                <Card className="bg-slate-800/50 border-slate-700/50">
+                <Card className="bg-white border border-gray-200 shadow-sm">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-white text-sm flex items-center gap-2">
+                    <CardTitle className="text-gray-900 text-sm flex items-center gap-2">
                       <Languages className="w-4 h-4" />
                       Languages
                     </CardTitle>
@@ -478,7 +478,7 @@ export function EnhancedEmailTemplateEditor({ template, type, onSave, onClose }:
                           className={`text-xs ${
                             activeLanguage === lang.code 
                               ? 'bg-blue-600 text-white' 
-                              : 'border-slate-600 text-slate-300 hover:text-white'
+                              : 'border-gray-300 text-gray-700 hover:text-gray-900 hover:border-gray-400'
                           }`}
                         >
                           <span className="mr-1">{lang.flag}</span>
@@ -490,31 +490,31 @@ export function EnhancedEmailTemplateEditor({ template, type, onSave, onClose }:
                 </Card>
 
                 {/* Placeholders */}
-                <Card className="bg-slate-800/50 border-slate-700/50">
+                <Card className="bg-white border border-gray-200 shadow-sm">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-white text-sm flex items-center gap-2">
+                    <CardTitle className="text-gray-900 text-sm flex items-center gap-2">
                       <Code className="w-4 h-4" />
                       Available Placeholders
                     </CardTitle>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-gray-600">
                       Click to insert placeholder into {activeLanguage.toUpperCase()} content
                     </p>
                     <BaseInput
                       value={placeholderSearch}
                       onChange={(e) => setPlaceholderSearch(e.target.value)}
                       placeholder="Search placeholders..."
-                      className="bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 text-xs"
+                      className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 text-xs focus:border-blue-500 focus:ring-blue-500"
                     />
                   </CardHeader>
                   <CardContent className="space-y-4 max-h-80 overflow-y-auto">
                     {Object.keys(filteredPlaceholders).length === 0 ? (
                       <div className="text-center py-4">
-                        <p className="text-slate-400 text-sm">No placeholders found matching your search.</p>
+                        <p className="text-gray-500 text-sm">No placeholders found matching your search.</p>
                       </div>
                     ) : (
                       Object.entries(filteredPlaceholders).map(([category, placeholderList]) => (
                         <div key={category}>
-                          <h4 className="text-sm font-medium text-white mb-2 capitalize flex items-center gap-2">
+                          <h4 className="text-sm font-medium text-gray-900 mb-2 capitalize flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-blue-500"></span>
                             {category}
                           </h4>
@@ -522,16 +522,16 @@ export function EnhancedEmailTemplateEditor({ template, type, onSave, onClose }:
                             {placeholderList.map(placeholder => (
                               <div
                                 key={placeholder.key}
-                                className="group flex items-center justify-between p-2 rounded border transition-all duration-200 cursor-pointer bg-slate-700/30 border-slate-600 hover:bg-slate-700/50 hover:border-slate-500"
+                                className="group flex items-center justify-between p-2 rounded border transition-all duration-200 cursor-pointer bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-gray-300"
                                 onClick={() => insertPlaceholderAtCursor(placeholder.key)}
                               >
                                 <div className="flex-1">
-                                  <code className="text-xs font-mono px-1 py-0.5 rounded bg-slate-600 text-blue-300">
+                                  <code className="text-xs font-mono px-1 py-0.5 rounded bg-gray-200 text-blue-600">
                                     {placeholder.key}
                                   </code>
-                                  <p className="text-xs text-slate-400 mt-1">{placeholder.description}</p>
+                                  <p className="text-xs text-gray-600 mt-1">{placeholder.description}</p>
                                   {placeholder.example && (
-                                    <p className="text-xs mt-1 italic text-slate-500">
+                                    <p className="text-xs mt-1 italic text-gray-500">
                                       Example: {placeholder.example}
                                     </p>
                                   )}
@@ -543,7 +543,7 @@ export function EnhancedEmailTemplateEditor({ template, type, onSave, onClose }:
                                     e.stopPropagation();
                                     insertPlaceholderAtCursor(placeholder.key);
                                   }}
-                                  className="text-xs opacity-0 group-hover:opacity-100 transition-opacity border-slate-500 text-slate-300"
+                                  className="text-xs opacity-0 group-hover:opacity-100 transition-opacity border-gray-300 text-gray-600 hover:text-gray-900"
                                 >
                                   <Plus className="w-3 h-3" />
                                 </BaseButton>
@@ -627,15 +627,15 @@ export function EnhancedEmailTemplateEditor({ template, type, onSave, onClose }:
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto bg-white">
             <div className="p-6">
               {validationErrors.length > 0 && (
-                <div className="mb-6 p-4 rounded-lg bg-red-900/20 border border-red-500/30">
+                <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200">
                   <div className="flex items-center gap-2 mb-2">
-                    <AlertCircle className="w-4 h-4 text-red-400" />
-                    <span className="font-medium text-red-400">Validation Errors</span>
+                    <AlertCircle className="w-4 h-4 text-red-600" />
+                    <span className="font-medium text-red-800">Validation Errors</span>
                   </div>
-                  <ul className="text-sm space-y-1 text-red-300">
+                  <ul className="text-sm space-y-1 text-red-700">
                     {validationErrors.map((error, index) => (
                       <li key={index}>• {error}</li>
                     ))}
@@ -644,18 +644,18 @@ export function EnhancedEmailTemplateEditor({ template, type, onSave, onClose }:
               )}
 
               {/* Content Editor */}
-              <Card className="bg-slate-800/50 border-slate-700/50">
+              <Card className="bg-white border border-gray-200 shadow-sm">
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-white text-lg flex items-center gap-2">
+                    <CardTitle className="text-gray-900 text-lg flex items-center gap-2">
                       <FileText className="w-5 h-5" />
                       Content Editor - {activeLanguage.toUpperCase()}
                     </CardTitle>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs border-slate-600 text-slate-300">
+                      <Badge variant="outline" className="text-xs border-gray-300 text-gray-700">
                         {type === 'email' ? 'HTML' : 'Plain Text'}
                       </Badge>
-                      <Badge variant="outline" className="text-xs border-slate-600 text-slate-300">
+                      <Badge variant="outline" className="text-xs border-gray-300 text-gray-700">
                         {currentTranslation?.content?.length || 0} characters
                       </Badge>
                     </div>
@@ -664,18 +664,18 @@ export function EnhancedEmailTemplateEditor({ template, type, onSave, onClose }:
                 <CardContent className="space-y-6">
                   {type === 'email' && (
                     <div>
-                      <Label className="text-slate-300 text-sm">Subject ({activeLanguage.toUpperCase()})</Label>
+                      <Label className="text-gray-700 text-sm font-medium">Subject ({activeLanguage.toUpperCase()})</Label>
                       <BaseInput
                         value={currentTranslation?.subject || ''}
                         onChange={(e) => handleTranslationChange(activeLanguage, 'subject', e.target.value)}
                         placeholder="Enter email subject"
-                        className="bg-slate-700/50 border-slate-600 text-white placeholder-slate-400"
+                        className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
                   )}
 
                   <div>
-                    <Label className="text-slate-300 text-sm">
+                    <Label className="text-gray-700 text-sm font-medium">
                       Content ({activeLanguage.toUpperCase()}) 
                       {type === 'email' ? ' - HTML' : ' - Plain Text'}
                     </Label>
@@ -687,11 +687,11 @@ export function EnhancedEmailTemplateEditor({ template, type, onSave, onClose }:
                         ? 'Enter HTML content...' 
                         : 'Enter plain text content...'
                       }
-                      className="bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 font-mono text-sm"
+                      className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 font-mono text-sm focus:border-blue-500 focus:ring-blue-500"
                       rows={16}
                     />
                     <div className="flex items-center justify-between mt-2">
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-gray-500">
                         {type === 'email' 
                           ? 'Use HTML tags for formatting. Placeholders will be replaced with actual data.'
                           : 'Plain text only. Placeholders will be replaced with actual data.'
@@ -706,7 +706,7 @@ export function EnhancedEmailTemplateEditor({ template, type, onSave, onClose }:
                             navigator.clipboard.writeText(content);
                             toast.success('Content copied to clipboard');
                           }}
-                          className="text-xs border-slate-600 text-slate-300 hover:text-white"
+                          className="text-xs border-gray-300 text-gray-700 hover:text-gray-900 hover:border-gray-400"
                         >
                           <Copy className="w-3 h-3 mr-1" />
                           Copy

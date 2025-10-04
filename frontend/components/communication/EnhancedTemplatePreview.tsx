@@ -189,18 +189,18 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
   const selectedTheme = EMAIL_THEMES.find(theme => theme.value === emailTheme);
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-xl border border-slate-700/50 w-full max-w-7xl max-h-[95vh] overflow-hidden shadow-2xl">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl border border-gray-200 w-full max-w-7xl max-h-[95vh] overflow-hidden shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-700/50 bg-gradient-to-r from-slate-800/50 to-slate-700/30">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50">
           <div className="flex items-center gap-4">
             <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600">
               {template.type === 'email' ? <Mail className="w-6 h-6 text-white" /> : <Smartphone className="w-6 h-6 text-white" />}
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white">{template.name}</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{template.name}</h2>
               <div className="flex items-center gap-2 mt-1">
-                <Badge variant="outline" className="text-xs border-slate-600 text-slate-300">
+                <Badge variant="outline" className="text-xs border-gray-300 text-gray-700">
                   {template.type.toUpperCase()}
                 </Badge>
                 {template.category && (
@@ -209,11 +209,11 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
                   </Badge>
                 )}
                 {template.isDefault && (
-                  <Badge variant="secondary" className="text-xs bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                  <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800 border-yellow-200">
                     Default
                   </Badge>
                 )}
-                <Badge variant="outline" className="text-xs border-slate-600 text-slate-300">
+                <Badge variant="outline" className="text-xs border-gray-300 text-gray-700">
                   {template.isActive ? 'Active' : 'Inactive'}
                 </Badge>
               </div>
@@ -224,7 +224,7 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
               variant="outline"
               onClick={handleSendTest}
               disabled={isLoading}
-              className="border-slate-600 text-slate-300 hover:text-white hover:border-slate-500"
+              className="border-gray-300 text-gray-700 hover:text-gray-900 hover:border-gray-400"
             >
               {isLoading ? (
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
@@ -236,7 +236,7 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
             <BaseButton
               variant="outline"
               onClick={() => copyToClipboard(getPreviewContent(), 'content')}
-              className="border-slate-600 text-slate-300 hover:text-white hover:border-slate-500"
+              className="border-gray-300 text-gray-700 hover:text-gray-900 hover:border-gray-400"
             >
               {copied === 'content' ? <CheckCircle className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
               Copy Content
@@ -244,7 +244,7 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
             <BaseButton
               variant="outline"
               onClick={onClose}
-              className="border-slate-600 text-slate-300 hover:text-white hover:border-slate-500"
+              className="border-gray-300 text-gray-700 hover:text-gray-900 hover:border-gray-400"
             >
               <X className="w-4 h-4" />
             </BaseButton>
@@ -253,12 +253,12 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
 
         <div className="flex h-[calc(95vh-120px)]">
           {/* Sidebar */}
-          <div className="w-80 border-r border-slate-700/50 bg-slate-800/30 overflow-y-auto">
+          <div className="w-80 border-r border-gray-200 bg-gray-50 overflow-y-auto">
             <div className="p-4 space-y-6">
               {/* Language Selector */}
-              <Card className="bg-slate-800/50 border-slate-700/50">
+              <Card className="bg-white border border-gray-200 shadow-sm">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-white text-sm flex items-center gap-2">
+                  <CardTitle className="text-gray-900 text-sm flex items-center gap-2">
                     <Globe className="w-4 h-4" />
                     Languages
                   </CardTitle>
@@ -274,7 +274,7 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
                         className={`text-xs ${
                           activeLanguage === lang 
                             ? 'bg-blue-600 text-white' 
-                            : 'border-slate-600 text-slate-300 hover:text-white'
+                            : 'border-gray-300 text-gray-700 hover:text-gray-900 hover:border-gray-400'
                         }`}
                       >
                         {lang.toUpperCase()}
@@ -286,23 +286,23 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
 
               {/* Preview Settings */}
               {template.type === 'email' && (
-                <Card className="bg-slate-800/50 border-slate-700/50">
+                <Card className="bg-white border border-gray-200 shadow-sm">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-white text-sm flex items-center gap-2">
+                    <CardTitle className="text-gray-900 text-sm flex items-center gap-2">
                       <Settings className="w-4 h-4" />
                       Preview Settings
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
-                      <Label className="text-slate-300 text-sm">Email Theme</Label>
+                      <Label className="text-gray-700 text-sm font-medium">Email Theme</Label>
                       <Select value={emailTheme} onValueChange={setEmailTheme}>
-                        <SelectTrigger className="bg-slate-700/50 border-slate-600 text-white">
+                        <SelectTrigger className="bg-white border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectContent className="bg-white border-gray-200">
                           {EMAIL_THEMES.map(theme => (
-                            <SelectItem key={theme.value} value={theme.value} className="text-white hover:bg-slate-700">
+                            <SelectItem key={theme.value} value={theme.value} className="text-gray-900 hover:bg-gray-100">
                               <div className="flex items-center gap-2">
                                 <div className="flex gap-1">
                                   {theme.colors.map((color, index) => (
@@ -318,7 +318,7 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
                     </div>
 
                     <div>
-                      <Label className="text-slate-300 text-sm">Preview Mode</Label>
+                      <Label className="text-gray-700 text-sm font-medium">Preview Mode</Label>
                       <div className="grid grid-cols-2 gap-2 mt-2">
                         <BaseButton
                           size="sm"
@@ -327,7 +327,7 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
                           className={`text-xs ${
                             previewMode === 'desktop' 
                               ? 'bg-blue-600 text-white' 
-                              : 'border-slate-600 text-slate-300 hover:text-white'
+                              : 'border-gray-300 text-gray-700 hover:text-gray-900 hover:border-gray-400'
                           }`}
                         >
                           Desktop
@@ -339,7 +339,7 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
                           className={`text-xs ${
                             previewMode === 'mobile' 
                               ? 'bg-blue-600 text-white' 
-                              : 'border-slate-600 text-slate-300 hover:text-white'
+                              : 'border-gray-300 text-gray-700 hover:text-gray-900 hover:border-gray-400'
                           }`}
                         >
                           Mobile
@@ -348,7 +348,7 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <Label className="text-slate-300 text-sm">Show Raw Content</Label>
+                      <Label className="text-gray-700 text-sm font-medium">Show Raw Content</Label>
                       <Switch
                         checked={showRawContent}
                         onCheckedChange={setShowRawContent}
@@ -359,9 +359,9 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
               )}
 
               {/* Sample Data */}
-              <Card className="bg-slate-800/50 border-slate-700/50">
+              <Card className="bg-white border border-gray-200 shadow-sm">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-white text-sm flex items-center gap-2">
+                  <CardTitle className="text-gray-900 text-sm flex items-center gap-2">
                     <User className="w-4 h-4" />
                     Sample Data
                   </CardTitle>
@@ -369,11 +369,11 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
                 <CardContent className="space-y-3 max-h-80 overflow-y-auto">
                   {Object.entries(customData).map(([key, value]) => (
                     <div key={key}>
-                      <Label className="text-slate-300 text-xs">{key}:</Label>
+                      <Label className="text-gray-700 text-xs font-medium">{key}:</Label>
                       <BaseInput
                         value={String(value)}
                         onChange={(e) => setCustomData(prev => ({ ...prev, [key]: e.target.value }))}
-                        className="bg-slate-700/50 border-slate-600 text-white text-xs"
+                        className="bg-white border-gray-300 text-gray-900 text-xs focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
                   ))}
@@ -381,44 +381,44 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
               </Card>
 
               {/* Template Info */}
-              <Card className="bg-slate-800/50 border-slate-700/50">
+              <Card className="bg-white border border-gray-200 shadow-sm">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-white text-sm flex items-center gap-2">
+                  <CardTitle className="text-gray-900 text-sm flex items-center gap-2">
                     <FileText className="w-4 h-4" />
                     Template Info
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div>
-                    <Label className="text-slate-300 text-xs">Template Key:</Label>
-                    <p className="text-white font-mono text-xs bg-slate-700/50 p-2 rounded">{template.templateKey}</p>
+                    <Label className="text-gray-700 text-xs font-medium">Template Key:</Label>
+                    <p className="text-gray-900 font-mono text-xs bg-gray-100 p-2 rounded">{template.templateKey}</p>
                   </div>
                   
                   {template.description && (
                     <div>
-                      <Label className="text-slate-300 text-xs">Description:</Label>
-                      <p className="text-white text-xs">{template.description}</p>
+                      <Label className="text-gray-700 text-xs font-medium">Description:</Label>
+                      <p className="text-gray-900 text-xs">{template.description}</p>
                     </div>
                   )}
 
                   <div className="flex items-center justify-between">
-                    <Label className="text-slate-300 text-xs">Status:</Label>
-                    <Badge variant="outline" className="text-xs border-slate-600 text-slate-300">
+                    <Label className="text-gray-700 text-xs font-medium">Status:</Label>
+                    <Badge variant="outline" className="text-xs border-gray-300 text-gray-700">
                       {template.isActive ? 'Active' : 'Inactive'}
                     </Badge>
                   </div>
 
                   {template.createdAt && (
                     <div>
-                      <Label className="text-slate-300 text-xs">Created:</Label>
-                      <p className="text-white text-xs">{new Date(template.createdAt).toLocaleDateString()}</p>
+                      <Label className="text-gray-700 text-xs font-medium">Created:</Label>
+                      <p className="text-gray-900 text-xs">{new Date(template.createdAt).toLocaleDateString()}</p>
                     </div>
                   )}
 
                   {template.version && (
                     <div>
-                      <Label className="text-slate-300 text-xs">Version:</Label>
-                      <p className="text-white text-xs">v{template.version}</p>
+                      <Label className="text-gray-700 text-xs font-medium">Version:</Label>
+                      <p className="text-gray-900 text-xs">v{template.version}</p>
                     </div>
                   )}
                 </CardContent>
@@ -427,12 +427,12 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
           </div>
 
           {/* Main Preview */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto bg-white">
             <div className="p-6">
               <Tabs value={activeLanguage} onValueChange={setActiveLanguage} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 bg-slate-800/50 mb-6">
+                <TabsList className="grid w-full grid-cols-2 bg-white border border-gray-200 mb-6">
                   {languages.map(lang => (
-                    <TabsTrigger key={lang} value={lang} className="flex items-center gap-2">
+                    <TabsTrigger key={lang} value={lang} className="flex items-center gap-2 text-gray-700 data-[state=active]:bg-blue-500 data-[state=active]:text-white">
                       {lang.toUpperCase()}
                     </TabsTrigger>
                   ))}
@@ -442,8 +442,8 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
                   {/* Preview Header */}
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-lg font-medium text-white">Preview</h3>
-                      <p className="text-slate-400 text-sm">
+                      <h3 className="text-lg font-medium text-gray-900">Preview</h3>
+                      <p className="text-gray-600 text-sm">
                         {template.type === 'email' ? 'Email Preview' : 'SMS Preview'} - {activeLanguage.toUpperCase()}
                       </p>
                     </div>
@@ -453,7 +453,7 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
                           size="sm"
                           variant="outline"
                           onClick={() => copyToClipboard(getPreviewSubject(), 'subject')}
-                          className="border-slate-600 text-slate-300 hover:text-white"
+                          className="border-gray-300 text-gray-700 hover:text-gray-900 hover:border-gray-400"
                         >
                           {copied === 'subject' ? <CheckCircle className="w-4 h-4 mr-1" /> : <Copy className="w-4 h-4 mr-1" />}
                           Copy Subject
@@ -463,7 +463,7 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
                         size="sm"
                         variant="outline"
                         onClick={() => copyToClipboard(getPreviewContent(), 'content')}
-                        className="border-slate-600 text-slate-300 hover:text-white"
+                        className="border-gray-300 text-gray-700 hover:text-gray-900 hover:border-gray-400"
                       >
                         {copied === 'content' ? <CheckCircle className="w-4 h-4 mr-1" /> : <Copy className="w-4 h-4 mr-1" />}
                         Copy Content
@@ -472,29 +472,29 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
                   </div>
 
                   {/* Preview Content */}
-                  <Card className="bg-slate-800/50 border-slate-700/50">
+                  <Card className="bg-white border border-gray-200 shadow-sm">
                     <CardContent className="p-6">
                       {template.type === 'email' ? (
                         <div className="space-y-6">
                           {getPreviewSubject() && (
                             <div>
-                              <Label className="text-slate-300 text-sm">Subject:</Label>
-                              <p className="text-white font-medium text-lg mt-1">{getPreviewSubject()}</p>
+                              <Label className="text-gray-700 text-sm font-medium">Subject:</Label>
+                              <p className="text-gray-900 font-medium text-lg mt-1">{getPreviewSubject()}</p>
                             </div>
                           )}
                           
                           <div>
-                            <Label className="text-slate-300 text-sm">Content:</Label>
+                            <Label className="text-gray-700 text-sm font-medium">Content:</Label>
                             <div className={`mt-4 ${previewMode === 'mobile' ? 'max-w-sm mx-auto' : 'max-w-4xl'}`}>
                               {showRawContent ? (
-                                <div className="bg-slate-900/50 p-4 rounded border border-slate-700">
-                                  <pre className="text-slate-300 text-sm whitespace-pre-wrap font-mono">
+                                <div className="bg-gray-100 p-4 rounded border border-gray-300">
+                                  <pre className="text-gray-900 text-sm whitespace-pre-wrap font-mono">
                                     {getPreviewContent()}
                                   </pre>
                                 </div>
                               ) : (
                                 <div 
-                                  className="bg-white rounded-lg shadow-lg p-6 text-gray-900"
+                                  className="bg-white rounded-lg shadow-lg p-6 text-gray-900 border border-gray-200"
                                   style={{
                                     background: `linear-gradient(135deg, ${selectedTheme?.colors[0]}10, ${selectedTheme?.colors[1]}10)`
                                   }}
@@ -506,10 +506,10 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
                         </div>
                       ) : (
                         <div>
-                          <Label className="text-slate-300 text-sm">SMS Content:</Label>
+                          <Label className="text-gray-700 text-sm font-medium">SMS Content:</Label>
                           <div className={`mt-4 ${previewMode === 'mobile' ? 'max-w-sm mx-auto' : 'max-w-2xl'}`}>
-                            <div className="bg-slate-900/50 p-4 rounded border border-slate-700">
-                              <p className="text-white whitespace-pre-wrap font-mono text-sm">
+                            <div className="bg-gray-100 p-4 rounded border border-gray-300">
+                              <p className="text-gray-900 whitespace-pre-wrap font-mono text-sm">
                                 {getPreviewContent()}
                               </p>
                             </div>
@@ -520,9 +520,9 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
                   </Card>
 
                   {/* Content Stats */}
-                  <Card className="bg-slate-800/50 border-slate-700/50">
+                  <Card className="bg-white border border-gray-200 shadow-sm">
                     <CardHeader className="pb-3">
-                      <CardTitle className="text-white text-sm flex items-center gap-2">
+                      <CardTitle className="text-gray-900 text-sm flex items-center gap-2">
                         <Code className="w-4 h-4" />
                         Content Statistics
                       </CardTitle>
@@ -530,28 +530,28 @@ export function EnhancedTemplatePreview({ template, onClose }: EnhancedTemplateP
                     <CardContent>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div className="text-center">
-                          <div className="text-2xl font-bold text-white">
+                          <div className="text-2xl font-bold text-gray-900">
                             {getPreviewContent().length}
                           </div>
-                          <div className="text-xs text-slate-400">Characters</div>
+                          <div className="text-xs text-gray-600">Characters</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-2xl font-bold text-white">
+                          <div className="text-2xl font-bold text-gray-900">
                             {getPreviewContent().split(' ').length}
                           </div>
-                          <div className="text-xs text-slate-400">Words</div>
+                          <div className="text-xs text-gray-600">Words</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-2xl font-bold text-white">
+                          <div className="text-2xl font-bold text-gray-900">
                             {getPreviewContent().split('\n').length}
                           </div>
-                          <div className="text-xs text-slate-400">Lines</div>
+                          <div className="text-xs text-gray-600">Lines</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-2xl font-bold text-white">
+                          <div className="text-2xl font-bold text-gray-900">
                             {template.type === 'email' ? 'HTML' : 'TXT'}
                           </div>
-                          <div className="text-xs text-slate-400">Format</div>
+                          <div className="text-xs text-gray-600">Format</div>
                         </div>
                       </div>
                     </CardContent>
