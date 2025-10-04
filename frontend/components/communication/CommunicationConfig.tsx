@@ -77,7 +77,6 @@ export function CommunicationConfig() {
       });
       const data = await response.json();
       if (data.success) {
-        const data = await response.json();
         setConfig(data.config);
       } else {
         console.error('Failed to load configuration:', response.status, response.statusText);
@@ -113,8 +112,7 @@ export function CommunicationConfig() {
       if (data.success) {
         setMessage({ type: 'success', text: 'Configuration saved successfully!' });
       } else {
-        const errorData = await response.json();
-        setMessage({ type: 'error', text: errorData.error || 'Failed to save configuration' });
+        setMessage({ type: 'error', text: data.error || 'Failed to save configuration' });
       }
     } catch (error) {
       console.error('Error saving configuration:', error);
@@ -147,8 +145,7 @@ export function CommunicationConfig() {
       if (data.success) {
         setMessage({ type: 'success', text: 'Test email sent successfully!' });
       } else {
-        const errorData = await response.json();
-        setMessage({ type: 'error', text: errorData.error || 'Failed to send test email' });
+        setMessage({ type: 'error', text: data.error || 'Failed to send test email' });
       }
     } catch (error) {
       console.error('Error sending test email:', error);
@@ -180,8 +177,7 @@ export function CommunicationConfig() {
       if (data.success) {
         setMessage({ type: 'success', text: 'Test SMS sent successfully!' });
       } else {
-        const errorData = await response.json();
-        setMessage({ type: 'error', text: errorData.error || 'Failed to send test SMS' });
+        setMessage({ type: 'error', text: data.error || 'Failed to send test SMS' });
       }
     } catch (error) {
       console.error('Error sending test SMS:', error);

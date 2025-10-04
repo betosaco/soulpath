@@ -34,6 +34,7 @@ import {
 import { getPlaceholdersGrouped, validatePlaceholders, Placeholder } from '../../lib/communication/placeholders';
 import { useAuth } from '../../hooks/useAuth';
 import { toast } from 'sonner';
+import { EnhancedTemplatePreview } from './EnhancedTemplatePreview';
 
 interface Template {
   id?: number;
@@ -720,6 +721,22 @@ export function EnhancedEmailTemplateEditor({ template, type, onSave, onClose }:
           </div>
         </div>
       </div>
+
+      {/* Preview Modal */}
+      {showPreview && (
+        <EnhancedTemplatePreview
+          template={{
+            ...formData,
+            type,
+            translations,
+            templateKey: formData.templateKey,
+            isDefault: isStarred,
+            createdAt: template?.createdAt || new Date().toISOString(),
+            version: template?.version || '1.0.0'
+          }}
+          onClose={() => setShowPreview(false)}
+        />
+      )}
     </div>
   );
 }
