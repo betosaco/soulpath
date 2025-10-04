@@ -391,7 +391,9 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
         items: cartItems.map(item => ({
           name: item.name,
           quantity: item.quantity,
-          price: item.price
+          price: item.price,
+          type: item.type,
+          bookingDetails: item.bookingDetails
         }))
       };
 
@@ -424,7 +426,9 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
         items: cartItems.map(item => ({
           name: item.name,
           quantity: item.quantity,
-          price: item.price
+          price: item.price,
+          type: item.type,
+          bookingDetails: item.bookingDetails
         }))
       };
 
@@ -499,7 +503,9 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
         items: cartItems.map(item => ({
           name: item.name,
           quantity: item.quantity,
-          price: item.price
+          price: item.price,
+          type: item.type,
+          bookingDetails: item.bookingDetails
         }))
       };
 
@@ -642,7 +648,9 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
         items: cartItems.map(item => ({
           name: item.name,
           quantity: item.quantity,
-          price: item.price
+          price: item.price,
+          type: item.type,
+          bookingDetails: item.bookingDetails
         }))
       };
 
@@ -672,7 +680,9 @@ export function PaymentStep({ onPaymentSuccess, onPaymentError }: PaymentStepPro
         items: cartItems.map(item => ({
           name: item.name,
           quantity: item.quantity,
-          price: item.price
+          price: item.price,
+          type: item.type,
+          bookingDetails: item.bookingDetails
         }))
       };
 

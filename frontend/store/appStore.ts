@@ -130,6 +130,16 @@ interface OrderData {
     name: string;
     quantity: number;
     price: number;
+    type?: 'product' | 'package';
+    bookingDetails?: {
+      selectedDate?: string;
+      selectedTime?: string;
+      teacher?: string;
+      dayOfWeek?: string;
+      serviceType?: string;
+      venue?: string;
+      scheduleSlotId?: number;
+    }[];
   }>;
 }
 

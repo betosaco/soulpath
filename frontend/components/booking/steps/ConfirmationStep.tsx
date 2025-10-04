@@ -249,9 +249,17 @@ export function ConfirmationStep({
    * Shows detailed booking information for packages
    */
   const renderBookingDetails = () => {
-    const packageItems = cartItems.filter(item => item.type === 'package' && item.bookingDetails);
+    // Use order data instead of cart data since cart is cleared after payment
+    const orderItems = orderData?.items || [];
+    console.log('🔍 ConfirmationStep - Order items:', orderItems);
+    
+    const packageItems = orderItems.filter(item => item.type === 'package' && item.bookingDetails);
+    console.log('🔍 ConfirmationStep - Package items with booking details:', packageItems);
 
-    if (packageItems.length === 0) return null;
+    if (packageItems.length === 0) {
+      console.log('❌ No package items with booking details found in order data');
+      return null;
+    }
 
     return (
       <Card className="unified-card">
