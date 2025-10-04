@@ -2,9 +2,11 @@
 
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Mail, Smartphone, Settings } from 'lucide-react';
+import { Mail, Smartphone, Settings, Tag } from 'lucide-react';
 import { CommunicationConfig } from './CommunicationConfig';
 import { TemplateLibrary } from './TemplateLibrary';
+import { EnhancedTemplateLibrary } from './EnhancedTemplateLibrary';
+import { TemplateCategoryManager } from './TemplateCategoryManager';
 
 export function CommunicationSettings() {
   const [activeTab, setActiveTab] = useState('config');
@@ -24,6 +26,10 @@ export function CommunicationSettings() {
             <Settings size={16} className="mr-2" />
             Configuration
           </TabsTrigger>
+          <TabsTrigger value="categories" className="dashboard-tab">
+            <Tag size={16} className="mr-2" />
+            Categories
+          </TabsTrigger>
           <TabsTrigger value="email" className="dashboard-tab">
             <Mail size={16} className="mr-2" />
             Email Templates
@@ -38,12 +44,16 @@ export function CommunicationSettings() {
           <CommunicationConfig />
         </TabsContent>
 
+        <TabsContent value="categories" className="space-y-6">
+          <TemplateCategoryManager />
+        </TabsContent>
+
         <TabsContent value="email" className="space-y-6">
-          <TemplateLibrary type="email" />
+          <EnhancedTemplateLibrary type="email" />
         </TabsContent>
 
         <TabsContent value="sms" className="space-y-6">
-          <TemplateLibrary type="sms" />
+          <EnhancedTemplateLibrary type="sms" />
         </TabsContent>
       </Tabs>
     </div>
