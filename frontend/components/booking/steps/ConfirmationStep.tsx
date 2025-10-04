@@ -109,6 +109,23 @@ export function ConfirmationStep({
     return (confirmationTranslations as Record<string, any>)[key] || fallback;
   };
 
+  // Helper function to format dates consistently with sidecart
+  const formatDate = (dateString: string) => {
+    try {
+      // Parse the date string as local date to avoid timezone issues
+      const [year, month, day] = dateString.split('-').map(Number);
+      const date = new Date(year, month - 1, day); // month is 0-indexed
+      const locale = language === 'es' ? 'es-ES' : 'en-US';
+      return date.toLocaleDateString(locale, {
+        weekday: 'long',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
   /**
    * ROUTER FOR NAVIGATION
    * --------------------
@@ -276,7 +293,7 @@ export function ConfirmationStep({
                         <div className="flex items-center space-x-1">
                           <Clock className="w-3 h-3" />
                           <span>{getTranslation('date', 'Date')}:</span>
-                          <span className="font-medium text-foreground">{booking.selectedDate}</span>
+                          <span className="font-medium text-foreground">{formatDate(booking.selectedDate || '')}</span>
                         </div>
                         <div className="flex items-center space-x-1">
                           <Clock className="w-3 h-3" />
