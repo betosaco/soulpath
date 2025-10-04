@@ -3,8 +3,8 @@ export const runtime = 'nodejs';
 import { PrismaClient } from '@prisma/client';
 import { CartItem } from '@/store/appStore';
 import Stripe from 'stripe';
-import { sendOrderConfirmationEmail } from '@/lib/send-order-confirmation-email';
-import { sendBookingConfirmationEmail } from '@/lib/send-booking-confirmation-email';
+// import { sendOrderConfirmationEmail } from '@/lib/send-order-confirmation-email';
+// import { sendBookingConfirmationEmail } from '@/lib/send-booking-confirmation-email';
 import { OrderDetails } from '@/lib/services/telegram-order-service';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -942,9 +942,52 @@ export async function POST(request: NextRequest) {
                 language: orderData.customerInfo.language || 'es'
               };
 
-              // Send booking confirmation email asynchronously
-              sendBookingConfirmationEmail(bookingEmailData, 'client').catch(error => {
-                console.error('Failed to send booking confirmation email:', error);
+              // Send booking confirmation email using new template system
+              const { OrderEmailService } = await import('@/lib/communication/order-email-service');
+              
+              const bookingTemplateData = {
+                // Customer Information
+                customerName: bookingEmailData.customerName,
+                customerEmail: bookingEmailData.customerEmail,
+                customerPhone: bookingEmailData.customerPhone,
+                
+                // Order Information (for booking context)
+                orderNumber: `BOOKING-${bookingResult.id}`,
+                orderDate: new Date().toISOString(),
+                totalAmount: 0, // Bookings don't have cost
+                currency: 'PEN',
+                subtotal: 0,
+                taxAmount: 0,
+                shippingAmount: 0,
+                
+                // Order Items (empty for bookings)
+                orderItems: [],
+                
+                // MATPASS Information (empty for bookings)
+                matpassItems: [],
+                
+                // Booking Information
+                bookings: [{
+                  bookingId: bookingResult.id?.toString() || '',
+                  bookingDate: bookingEmailData.bookingDate,
+                  bookingTime: bookingEmailData.bookingTime,
+                  sessionType: bookingEmailData.sessionType,
+                  teacherName: bookingEmailData.instructor,
+                  venue: bookingEmailData.venue,
+                  duration: bookingEmailData.duration || 60
+                }],
+                
+                // Product Information (empty for bookings)
+                products: [],
+                
+                // URLs
+                orderUrl: bookingEmailData.bookingUrl,
+                websiteUrl: process.env.NEXT_PUBLIC_BASE_URL || 'https://matmax.world'
+              };
+
+              // Send email asynchronously (don't wait for it to complete)
+              OrderEmailService.sendOrderConfirmationEmail(bookingTemplateData, 'es').catch(error => {
+                console.error('Failed to send booking confirmation email using template system:', error);
                 // Don't fail the order creation if email fails
               });
             }

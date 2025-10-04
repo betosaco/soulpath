@@ -3,7 +3,7 @@ import { requireAuth } from '@/lib/auth';
 import { z } from 'zod';
 import { PrismaClient } from '@prisma/client';
 // import { replacePlaceholders } from '@/lib/communication/placeholders';
-import { sendBookingConfirmationEmail } from '@/lib/send-booking-confirmation-email';
+// import { sendBookingConfirmationEmail } from '@/lib/send-booking-confirmation-email';
 
 
 // Zod schema for booking creation
@@ -487,9 +487,52 @@ export async function POST(request: NextRequest) {
             language: 'es'
           };
 
+          // Send email using new template system
+          const { OrderEmailService } = await import('@/lib/communication/order-email-service');
+          
+          const templateEmailData = {
+            // Customer Information
+            customerName: user.fullName || user.email,
+            customerEmail: user.email,
+            customerPhone: user.phone || '',
+            
+            // Order Information (for booking context)
+            orderNumber: `BOOKING-${booking.id}`,
+            orderDate: new Date().toISOString(),
+            totalAmount: 0, // Bookings don't have cost
+            currency: 'PEN',
+            subtotal: 0,
+            taxAmount: 0,
+            shippingAmount: 0,
+            
+            // Order Items (empty for bookings)
+            orderItems: [],
+            
+            // MATPASS Information (empty for bookings)
+            matpassItems: [],
+            
+            // Booking Information
+            bookings: [{
+              bookingId: booking.id.toString(),
+              bookingDate: bookingData.bookingDate,
+              bookingTime: bookingData.bookingTime,
+              sessionType: bookingData.sessionType,
+              teacherName: bookingData.instructor,
+              venue: 'MATMAX Yoga Studio',
+              duration: 60
+            }],
+            
+            // Product Information (empty for bookings)
+            products: [],
+            
+            // URLs
+            orderUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://matmax.world'}/bookings`,
+            websiteUrl: process.env.NEXT_PUBLIC_BASE_URL || 'https://matmax.world'
+          };
+
           // Send email asynchronously (don't wait for it to complete)
-          sendBookingConfirmationEmail(bookingData, 'client').catch(error => {
-            console.error('Failed to send booking confirmation email:', error);
+          OrderEmailService.sendOrderConfirmationEmail(templateEmailData, 'es').catch(error => {
+            console.error('Failed to send booking confirmation email using template system:', error);
             // Don't fail the booking creation if email fails
           });
         }
