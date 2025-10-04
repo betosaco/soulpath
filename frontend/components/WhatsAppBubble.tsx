@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { MessageCircle, X } from 'lucide-react';
 import { useLanguage } from '@/hooks/useTranslations';
+import { useCartUI } from '@/store/appStore';
 
 interface WhatsAppBubbleProps {
   phoneNumber?: string;
@@ -16,6 +17,7 @@ export const WhatsAppBubble: React.FC<WhatsAppBubbleProps> = ({
   className = ''
 }) => {
   const { language } = useLanguage();
+  const { isCartOpen } = useCartUI();
   const [isHovered, setIsHovered] = useState(false);
 
   const defaultMessage = language === 'es' 
@@ -28,6 +30,11 @@ export const WhatsAppBubble: React.FC<WhatsAppBubbleProps> = ({
     const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
   };
+
+  // Don't render if cart is open
+  if (isCartOpen) {
+    return null;
+  }
 
   return (
     <div className={`fixed bottom-6 right-6 z-50 ${className}`}>
