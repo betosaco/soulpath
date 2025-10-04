@@ -102,7 +102,7 @@ export class OrderEmailService {
 
       const templateTranslation = template.translations[0];
       
-      // Prepare template data
+      // Prepare template data with all required placeholders
       const templateData = {
         // Customer data
         userName: orderData.customerName,
@@ -112,11 +112,10 @@ export class OrderEmailService {
         // Order data
         orderNumber: orderData.orderNumber,
         submissionDate: orderData.orderDate,
-        totalAmount: orderData.totalAmount.toFixed(2),
+        orderTotal: orderData.totalAmount.toFixed(2),
+        subtotalBeforeTax: orderData.subtotal.toFixed(2),
+        igvAmount: orderData.taxAmount.toFixed(2),
         currency: orderData.currency,
-        subtotal: orderData.subtotal.toFixed(2),
-        taxAmount: orderData.taxAmount.toFixed(2),
-        shippingAmount: orderData.shippingAmount.toFixed(2),
         
         // URLs
         orderUrl: orderData.orderUrl,
@@ -125,17 +124,35 @@ export class OrderEmailService {
         
         // Conditional sections
         hasMatpass: orderData.matpassItems && orderData.matpassItems.length > 0,
-        hasBookings: orderData.bookings && orderData.bookings.length > 0,
+        hasBooking: orderData.bookings && orderData.bookings.length > 0,
         hasProducts: orderData.products && orderData.products.length > 0,
         
         // MATPASS data (if applicable)
         matpassItems: orderData.matpassItems || [],
+        matpassType: orderData.matpassItems?.[0]?.type || '',
+        matpassDescription: orderData.matpassItems?.[0]?.description || '',
+        matpassPrice: orderData.matpassItems?.[0]?.totalPrice?.toFixed(2) || '0.00',
+        matpassStartDate: orderData.orderDate,
+        matpassEndDate: orderData.matpassItems?.[0]?.expiryDate || '',
+        matpassSubtotal: orderData.matpassItems?.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2) || '0.00',
         
         // Booking data (if applicable)
         bookings: orderData.bookings || [],
+        bookingId: orderData.bookings?.[0]?.bookingId || '',
+        bookingDate: orderData.bookings?.[0]?.bookingDate || '',
+        bookingTime: orderData.bookings?.[0]?.bookingTime || '',
+        teacherName: orderData.bookings?.[0]?.teacherName || '',
+        className: orderData.bookings?.[0]?.sessionType || '',
+        venue: orderData.bookings?.[0]?.venue || 'MATMAX Yoga Studio',
         
         // Product data (if applicable)
         products: orderData.products || [],
+        productImage: '', // Not available in current data structure
+        productName: orderData.products?.[0]?.name || '',
+        productDescription: orderData.products?.[0]?.description || '',
+        productQuantity: orderData.products?.[0]?.quantity || 0,
+        productPrice: orderData.products?.[0]?.totalPrice?.toFixed(2) || '0.00',
+        productsSubtotal: orderData.products?.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2) || '0.00',
         
         // Shipping data (if applicable)
         shippingAddress: orderData.shippingAddress
