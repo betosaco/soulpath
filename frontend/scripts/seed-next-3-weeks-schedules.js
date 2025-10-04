@@ -95,8 +95,9 @@ async function seedNext3WeeksSchedules() {
           slots.push(slotData);
           totalSlots++;
 
-          // Convert to EST for display
-          const estTime = new Date(startTime.getTime() - (5 * 60 * 60 * 1000)); // UTC to EST
+          // Convert UTC time to EST for display
+          // The times are stored as UTC, so we need to subtract 5 hours to get EST
+          const estTime = new Date(startTime.getTime() - (5 * 60 * 60 * 1000));
           const timeStr = estTime.toLocaleTimeString('en-US', { 
             hour: '2-digit', 
             minute: '2-digit',
