@@ -117,6 +117,12 @@ export class OrderEmailService {
         igvAmount: orderData.taxAmount.toFixed(2),
         currency: orderData.currency,
         
+        // Additional order placeholders
+        subtotal: orderData.subtotal.toFixed(2),
+        taxAmount: orderData.taxAmount.toFixed(2),
+        shippingAmount: orderData.shippingAmount.toFixed(2),
+        totalAmount: orderData.totalAmount.toFixed(2),
+        
         // URLs
         orderUrl: orderData.orderUrl,
         websiteUrl: orderData.websiteUrl,
@@ -197,9 +203,9 @@ export class OrderEmailService {
   private static processTemplate(template: string, data: any): string {
     let processed = template;
     
-    // Replace simple placeholders
+    // Replace simple placeholders first
     Object.keys(data).forEach(key => {
-      if (typeof data[key] === 'string' || typeof data[key] === 'number') {
+      if (typeof data[key] === 'string' || typeof data[key] === 'number' || typeof data[key] === 'boolean') {
         const regex = new RegExp(`{{${key}}}`, 'g');
         processed = processed.replace(regex, String(data[key]));
       }
@@ -226,10 +232,16 @@ export class OrderEmailService {
       return data.hasMatpass ? content : '';
     });
 
-    // Handle {{#if hasBookings}} blocks
+    // Handle {{#if hasBooking}} blocks (note: singular, not plural)
+    const bookingRegex = /{{#if hasBooking}}([\s\S]*?){{\/if}}/g;
+    processed = processed.replace(bookingRegex, (match, content) => {
+      return data.hasBooking ? content : '';
+    });
+
+    // Handle {{#if hasBookings}} blocks (plural version)
     const bookingsRegex = /{{#if hasBookings}}([\s\S]*?){{\/if}}/g;
     processed = processed.replace(bookingsRegex, (match, content) => {
-      return data.hasBookings ? content : '';
+      return data.hasBooking ? content : '';
     });
 
     // Handle {{#if hasProducts}} blocks
@@ -254,9 +266,17 @@ export class OrderEmailService {
       
       return data.matpassItems.map((item: any) => {
         let itemContent = content;
-        Object.keys(item).forEach(key => {
+        // Map item properties to template placeholders
+        const itemData = {
+          name: item.name,
+          sessions: item.sessions,
+          totalPrice: item.totalPrice?.toFixed(2) || '0.00',
+          expiryDate: item.expiryDate
+        };
+        
+        Object.keys(itemData).forEach(key => {
           const regex = new RegExp(`{{${key}}}`, 'g');
-          itemContent = itemContent.replace(regex, String(item[key]));
+          itemContent = itemContent.replace(regex, String(itemData[key]));
         });
         return itemContent;
       }).join('');
@@ -269,9 +289,18 @@ export class OrderEmailService {
       
       return data.bookings.map((booking: any) => {
         let bookingContent = content;
-        Object.keys(booking).forEach(key => {
+        // Map booking properties to template placeholders
+        const bookingData = {
+          sessionType: booking.sessionType,
+          bookingDate: booking.bookingDate,
+          bookingTime: booking.bookingTime,
+          teacherName: booking.teacherName,
+          venue: booking.venue
+        };
+        
+        Object.keys(bookingData).forEach(key => {
           const regex = new RegExp(`{{${key}}}`, 'g');
-          bookingContent = bookingContent.replace(regex, String(booking[key]));
+          bookingContent = bookingContent.replace(regex, String(bookingData[key]));
         });
         return bookingContent;
       }).join('');
@@ -284,9 +313,17 @@ export class OrderEmailService {
       
       return data.products.map((product: any) => {
         let productContent = content;
-        Object.keys(product).forEach(key => {
+        // Map product properties to template placeholders
+        const productData = {
+          name: product.name,
+          quantity: product.quantity,
+          totalPrice: product.totalPrice?.toFixed(2) || '0.00',
+          description: product.description
+        };
+        
+        Object.keys(productData).forEach(key => {
           const regex = new RegExp(`{{${key}}}`, 'g');
-          productContent = productContent.replace(regex, String(product[key]));
+          productContent = productContent.replace(regex, String(productData[key]));
         });
         return productContent;
       }).join('');
