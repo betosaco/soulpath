@@ -373,10 +373,10 @@ export function ConfirmationStep({
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            <p><strong>Name:</strong> {displayCustomerData.name}</p>
-            <p><strong>Email:</strong> {displayCustomerData.email}</p>
+            <p><strong>{getTranslation('name', 'Name')}:</strong> {displayCustomerData.name}</p>
+            <p><strong>{getTranslation('email', 'Email')}:</strong> {displayCustomerData.email}</p>
             {displayCustomerData.phone && (
-              <p><strong>Phone:</strong> {displayCustomerData.phone}</p>
+              <p><strong>{getTranslation('phone', 'Phone')}:</strong> {displayCustomerData.phone}</p>
             )}
           </div>
         </CardContent>
