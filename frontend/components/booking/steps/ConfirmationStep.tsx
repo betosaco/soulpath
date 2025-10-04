@@ -102,11 +102,11 @@ export function ConfirmationStep({
   
   // Use default translations directly to ensure checkout translations are always available
   const checkoutTranslations = defaultTranslations[language]?.checkout || defaultTranslations.en.checkout || {};
-  const confirmationTranslations = checkoutTranslations.confirmation || {};
+  const paymentTranslations = checkoutTranslations.payment || {};
 
   // Helper function to get translations
   const getTranslation = (key: string, fallback: string = ''): string => {
-    return (confirmationTranslations as Record<string, any>)[key] || fallback;
+    return (paymentTranslations as Record<string, any>)[key] || fallback;
   };
 
   // Helper function to format dates consistently with sidecart
