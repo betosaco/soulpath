@@ -1596,6 +1596,7 @@ interface NodePropertiesPanelProps {
 }
 
 function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations: t, onOpenTelegramModal }: NodePropertiesPanelProps) {
+  console.log('🔧 NodePropertiesPanel: onOpenTelegramModal prop:', typeof onOpenTelegramModal);
   const renderNodeProperties = () => {
     switch (node.type) {
       case 'trigger':
@@ -1688,10 +1689,15 @@ function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations:
                   onClick={() => {
                     console.log('🔧 Opening Telegram user modal...', { 
                       nodeType: node.type,
-                      nodeId: node.id 
+                      nodeId: node.id,
+                      onOpenTelegramModal: typeof onOpenTelegramModal
                     });
-                    onOpenTelegramModal();
-                    console.log('🔧 Modal opening function called');
+                    if (onOpenTelegramModal) {
+                      onOpenTelegramModal();
+                      console.log('🔧 Modal opening function called');
+                    } else {
+                      console.error('❌ onOpenTelegramModal is not defined!');
+                    }
                   }}
                   className="w-full justify-start"
                   size="sm"
