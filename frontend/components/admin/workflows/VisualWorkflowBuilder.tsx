@@ -6,6 +6,7 @@ import { BaseButton } from '../../ui/BaseButton';
 import { BaseInput } from '../../ui/BaseInput';
 import { Label } from '../../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
+import { useAuth } from '../../../hooks/useAuth';
 import { Checkbox } from '../../ui/checkbox';
 import {
   Play,
@@ -1812,6 +1813,7 @@ function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations:
 
 // Simplified Telegram User Selector - Clean Implementation
 function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSelectorProps) {
+  const { user } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
   const [users, setUsers] = useState<TelegramUser[]>([]);
   const [loading, setLoading] = useState(false);
@@ -1829,7 +1831,12 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
     setError(null);
     try {
       console.log('🔧 Loading users from API...');
-      const response = await fetch('/api/admin/users/telegram');
+      const response = await fetch('/api/admin/users/telegram', {
+        headers: {
+          'Authorization': `Bearer ${user?.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       console.log('🔧 API response status:', response.status);
       console.log('🔧 API response ok:', response.ok);
 
