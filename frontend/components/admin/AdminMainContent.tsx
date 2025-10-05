@@ -7,7 +7,7 @@ import BookingsManagement from '../BookingsManagement';
 import { UnifiedScheduleManagement } from './UnifiedScheduleManagement';
 import PackagesAndPricing from '../PackagesAndPricing';
 import { ContentManagement } from '../ContentManagement';
-import { CommunicationSettings } from '../communication/CommunicationSettings';
+import { CommunicationDashboard } from './CommunicationDashboard';
 import { ImageManagement } from '../ImageManagement';
 import { SeoManagement } from '../SeoManagement';
 import PaymentMethodManagement from '../PaymentMethodManagement';
@@ -50,7 +50,7 @@ export function AdminMainContent({ activeTab, bugReportManagementRef }: AdminMai
             {activeTab === 'schedules' && <UnifiedScheduleManagement />}
             {activeTab === 'packages' && <PackagesAndPricing />}
             {activeTab === 'content' && <ContentManagement />}
-            {activeTab === 'email' && <CommunicationSettings />}
+            {activeTab === 'email' && <CommunicationDashboard />}
             {activeTab === 'live-session' && <LiveSessionConfigManagement />}
             {activeTab === 'images' && <ImageManagement />}
             {activeTab === 'external-apis' && <ExternalAPIManagement />}

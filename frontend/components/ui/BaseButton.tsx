@@ -12,8 +12,9 @@
  * </BaseButton>
  */
 
-import React from 'react';
-import { cn } from '@/lib/utils';
+import * as React from 'react';
+import { forwardRef } from 'react';
+import { cn } from '../../lib/utils';
 import { Loader2 } from 'lucide-react';
 import '@/styles/unified-component-styles.css';
 
@@ -25,10 +26,13 @@ export interface BaseButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEl
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'success' | 'warning' | 'info';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'login';
   loading?: boolean;
-  disabled?: boolean;
   children: React.ReactNode;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  className?: string;
+  onClick?: () => void;
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
 }
 
 // ============================================================================
@@ -98,6 +102,7 @@ export interface BaseButtonGroupProps extends React.HTMLAttributes<HTMLDivElemen
   children: React.ReactNode;
   orientation?: 'horizontal' | 'vertical';
   size?: 'sm' | 'md' | 'lg';
+  className?: string;
 }
 
 export function BaseButtonGroup({

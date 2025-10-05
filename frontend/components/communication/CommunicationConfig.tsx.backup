@@ -1,0 +1,1026 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { BaseButton } from '../ui/BaseButton';
+import { BaseInput } from '../ui/BaseInput';
+import { Label } from '../ui/label';
+import { Switch } from '../ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { 
+  Save, 
+  TestTube, 
+  Eye, 
+  EyeOff, 
+  Mail, 
+  Smartphone,
+  CheckCircle,
+  AlertCircle,
+  MessageSquare,
+  Bot,
+  MessageCircle,
+  Instagram,
+  X
+} from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
+
+interface CommunicationConfigData {
+  // Email Configuration
+  email_enabled: boolean;
+  email_provider: 'brevo' | 'resend';
+  brevo_api_key: string;
+  resend_api_key: string;
+  sender_email: string;
+  sender_name: string;
+  admin_email: string;
+  
+  // SMS Configuration
+  sms_enabled: boolean;
+  sms_provider: string;
+  labsmobile_username: string;
+  labsmobile_token: string;
+  sms_sender_name: string;
+  
+  // Telegram Configuration
+  telegram_enabled: boolean;
+  telegram_bot_token: string;
+  telegram_webhook_url: string;
+  telegram_chat_ids: string[];
+  telegram_username: string;
+
+  // WhatsApp Configuration
+  whatsapp_enabled: boolean;
+  whatsapp_business_account_id: string;
+  whatsapp_access_token: string;
+  whatsapp_phone_number_id: string;
+  whatsapp_webhook_verify_token: string;
+
+  // Instagram Configuration
+  instagram_enabled: boolean;
+  instagram_access_token: string;
+  instagram_business_account_id: string;
+  instagram_webhook_verify_token: string;
+}
+
+export function CommunicationConfig() {
+  const { user } = useAuth();
+  const [config, setConfig] = useState<CommunicationConfigData>({
+    email_enabled: true,
+    email_provider: 'brevo',
+    brevo_api_key: '',
+    resend_api_key: '',
+    sender_email: 'noreply@matmax.store',
+    sender_name: 'MatMax Yoga Studio',
+    admin_email: 'admin@matmax.store',
+    sms_enabled: false,
+    sms_provider: 'labsmobile',
+    labsmobile_username: '',
+    labsmobile_token: '',
+    sms_sender_name: 'MatMax Yoga Studio',
+    telegram_enabled: false,
+    telegram_bot_token: '',
+    telegram_webhook_url: '',
+    telegram_chat_ids: [],
+    telegram_username: 'MatMaxYogaBot',
+    whatsapp_enabled: false,
+    whatsapp_business_account_id: '',
+    whatsapp_access_token: '',
+    whatsapp_phone_number_id: '',
+    whatsapp_webhook_verify_token: '',
+    instagram_enabled: false,
+    instagram_access_token: '',
+    instagram_business_account_id: '',
+    instagram_webhook_verify_token: ''
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [showResendApiKey, setShowResendApiKey] = useState(false);
+  const [showSmsToken, setShowSmsToken] = useState(false);
+  const [showTelegramToken, setShowTelegramToken] = useState(false);
+  const [showWhatsAppToken, setShowWhatsAppToken] = useState(false);
+  const [showInstagramToken, setShowInstagramToken] = useState(false);
+  const [testEmail, setTestEmail] = useState('');
+  const [testPhone, setTestPhone] = useState('');
+  const [testTelegramChat, setTestTelegramChat] = useState('');
+  const [testMessage, setTestMessage] = useState('Test message from MatMax Yoga Studio');
+  const [isTestingEmail, setIsTestingEmail] = useState(false);
+  const [isTestingSms, setIsTestingSms] = useState(false);
+  const [isTestingTelegram, setIsTestingTelegram] = useState(false);
+  const [isTestingWhatsApp, setIsTestingWhatsApp] = useState(false);
+  const [isTestingInstagram, setIsTestingInstagram] = useState(false);
+  const [testInstagramUser, setTestInstagramUser] = useState('');
+  const [telegramUsers, setTelegramUsers] = useState<any[]>([]);
+  const [telegramUsersLoaded, setTelegramUsersLoaded] = useState(false);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [chatIdInput, setChatIdInput] = useState('');
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const loadConfiguration = useCallback(async () => {
+    if (!user?.access_token) {
+      console.log('❌ No access token available for communication config');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/admin/communication/config', {
+        headers: {
+          'Authorization': `Bearer ${user.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await response.json();
+      if (data.config) {
+        setConfig(data.config);
+        setMessage({ type: 'success', text: 'Configuration loaded successfully!' });
+      } else {
+        console.error('Failed to load configuration:', response.status, response.statusText);
+        setMessage({ type: 'error', text: 'Failed to load configuration' });
+      }
+    } catch (error) {
+      console.error('Failed to load configuration:', error);
+      setMessage({ type: 'error', text: 'Failed to load configuration' });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user?.access_token]);
+
+  useEffect(() => {
+    if (user?.access_token) {
+      loadConfiguration();
+    }
+  }, [user?.access_token, loadConfiguration]);
+
+  const saveConfiguration = async () => {
+    setIsSaving(true);
+    try {
+      const response = await fetch('/api/admin/communication/config', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${user?.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(config)
+      });
+      const data = await response.json();
+      if (data.success) {
+        setMessage({ type: 'success', text: 'Configuration saved successfully!' });
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Failed to save configuration' });
+      }
+    } catch (error) {
+      console.error('Error saving configuration:', error);
+      setMessage({ type: 'error', text: 'Failed to save configuration' });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const testEmailConnection = async () => {
+    setIsTestingEmail(true);
+    try {
+      const response = await fetch('/api/admin/communication/test', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user?.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          type: 'email',
+          to: testEmail,
+          subject: 'Test Email from MatMax Yoga Studio',
+          content: '<p>This is a test email to verify your email configuration.</p>'
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setMessage({ type: 'success', text: 'Test email sent successfully!' });
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Failed to send test email' });
+      }
+    } catch (error) {
+      console.error('Error sending test email:', error);
+      setMessage({ type: 'error', text: 'Failed to send test email' });
+    } finally {
+      setIsTestingEmail(false);
+    }
+  };
+
+  const testSmsConnection = async () => {
+    setIsTestingSms(true);
+    try {
+      const response = await fetch('/api/admin/communication/test', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user?.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          type: 'sms',
+          phoneNumber: testPhone,
+          message: testMessage
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setMessage({ type: 'success', text: 'Test SMS sent successfully!' });
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Failed to send test SMS' });
+      }
+    } catch (error) {
+      console.error('Error sending test SMS:', error);
+      setMessage({ type: 'error', text: 'Failed to send test SMS' });
+    } finally {
+      setIsTestingSms(false);
+    }
+  };
+
+  const testTelegramConnection = async () => {
+    setIsTestingTelegram(true);
+    try {
+      const response = await fetch('/api/admin/communication/test', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user?.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          type: 'telegram',
+          chatId: testTelegramChat,
+          message: testMessage
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setMessage({ type: 'success', text: 'Test Telegram message sent successfully!' });
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Failed to send test Telegram message' });
+      }
+    } catch (error) {
+      console.error('Error sending test Telegram message:', error);
+      setMessage({ type: 'error', text: 'Failed to send test Telegram message' });
+    } finally {
+      setIsTestingTelegram(false);
+    }
+  };
+
+  const fetchTelegramUsers = async () => {
+    console.log('🔄 Starting to fetch Telegram users...');
+    setIsLoadingUsers(true);
+    try {
+      const response = await fetch('/api/admin/users/telegram', {
+        headers: {
+          'Authorization': `Bearer ${user?.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ API Response data:', data);
+        setTelegramUsers(data.users || []);
+        setTelegramUsersLoaded(true);
+        setMessage({ type: 'success', text: `Loaded ${data.users?.length || 0} users` });
+      } else {
+        const errorText = await response.text();
+        console.error('❌ API Error response:', response.status, errorText);
+        setTelegramUsers([]);
+        setTelegramUsersLoaded(true);
+        setMessage({ type: 'error', text: `Failed to load users: ${response.status}` });
+      }
+    } catch (error) {
+      console.error('💥 Network error fetching Telegram users:', error);
+      setTelegramUsers([]);
+      setTelegramUsersLoaded(true);
+      setMessage({ type: 'error', text: 'Network error: Failed to load users' });
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  };
+
+  const attachChatIdToUser = async (userId: string, chatId: string) => {
+    try {
+      const response = await fetch('/api/admin/users/telegram', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user?.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId,
+          chatId,
+          action: 'attach'
+        })
+      });
+
+      if (response.ok) {
+        // Update local state
+        setTelegramUsers(prev => prev.map(user =>
+          user.id === userId ? { ...user, telegram_chat_id: chatId } : user
+        ));
+        setMessage({ type: 'success', text: 'Chat ID attached successfully' });
+      } else {
+        const error = await response.json();
+        setMessage({ type: 'error', text: error.error || 'Failed to attach chat ID' });
+      }
+    } catch (error) {
+      console.error('Error attaching chat ID:', error);
+      setMessage({ type: 'error', text: 'Failed to attach chat ID' });
+    }
+  };
+
+  const detachChatIdFromUser = async (userId: string) => {
+    try {
+      const response = await fetch('/api/admin/users/telegram', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user?.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId,
+          action: 'detach'
+        })
+      });
+
+      if (response.ok) {
+        // Update local state
+        setTelegramUsers(prev => prev.map(user =>
+          user.id === userId ? { ...user, telegram_chat_id: null } : user
+        ));
+        setMessage({ type: 'success', text: 'Chat ID detached successfully' });
+      } else {
+        const error = await response.json();
+        setMessage({ type: 'error', text: error.error || 'Failed to detach chat ID' });
+      }
+    } catch (error) {
+      console.error('Error detaching chat ID:', error);
+      setMessage({ type: 'error', text: 'Failed to detach chat ID' });
+    }
+  };
+
+  const openUserModal = async () => {
+    setShowUserModal(true);
+    if (!telegramUsersLoaded) {
+      await fetchTelegramUsers();
+    }
+  };
+
+  const closeUserModal = () => {
+    setShowUserModal(false);
+    setSearchQuery('');
+    setSelectedUser(null);
+    setChatIdInput('');
+  };
+
+  const handleUserSelect = (user: any) => {
+    setSelectedUser(user);
+    setChatIdInput(user.telegram_chat_id || '');
+  };
+
+  const saveUserChatId = async () => {
+    if (!selectedUser || !chatIdInput.trim()) return;
+    
+    await attachChatIdToUser(selectedUser.id, chatIdInput.trim());
+    closeUserModal();
+  };
+
+  const filteredUsers = telegramUsers.filter(user => 
+    user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Message Display */}
+      {message && (
+        <div className={`flex items-center gap-2 p-3 rounded-md ${
+          message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+        }`}>
+          {message.type === 'success' ? (
+            <CheckCircle size={20} className="text-green-400" />
+          ) : (
+            <AlertCircle size={20} className="text-red-400" />
+          )}
+          <span className={message.type === 'success' ? 'text-green-400' : 'text-red-400'}>
+            {message.text}
+          </span>
+        </div>
+      )}
+
+      <div className="flex justify-end">
+        <BaseButton
+          onClick={saveConfiguration}
+          disabled={isSaving}
+          className="dashboard-button-primary"
+        >
+          {isSaving ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              Saving...
+            </>
+          ) : (
+            <>
+              <Save size={16} className="mr-2" />
+              Save Configuration
+            </>
+          )}
+        </BaseButton>
+      </div>
+
+
+      {/* Main Content */}
+      <div className="space-y-8">
+          {/* Primary Communication Services */}
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Primary Communication Services</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Email Configuration */}
+        <Card className="dashboard-card">
+          <CardHeader>
+            <CardTitle className="dashboard-card-title flex items-center gap-2">
+              <Mail size={20} />
+                    <span>Email Service</span>
+            </CardTitle>
+          </CardHeader>
+                <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                      <Label className="dashboard-label">Enable Email</Label>
+                      <p className="text-xs text-gray-500">Email notifications & templates</p>
+              </div>
+              <Switch
+                checked={config.email_enabled}
+                onCheckedChange={(checked) => setConfig(prev => ({ ...prev, email_enabled: checked }))}
+              />
+            </div>
+
+                  {/* Email Provider Selector */}
+                  <div>
+                    <Label className="dashboard-label">Email Provider</Label>
+                    <Select
+                      value={config.email_provider}
+                      onValueChange={(value: 'brevo' | 'resend') => setConfig(prev => ({ ...prev, email_provider: value }))}
+                    >
+                      <SelectTrigger className="dashboard-input">
+                        <SelectValue placeholder="Select email provider" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="brevo">Brevo (Sendinblue) - Default</SelectItem>
+                        <SelectItem value="resend">Resend</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Brevo API Key */}
+                  {config.email_provider === 'brevo' && (
+              <div>
+                <Label className="dashboard-label">Brevo API Key</Label>
+                <div className="relative">
+                  <BaseInput
+                    type={showApiKey ? "text" : "password"}
+                    value={config.brevo_api_key}
+                    onChange={(e) => setConfig(prev => ({ ...prev, brevo_api_key: e.target.value }))}
+                          placeholder="Your Brevo API Key"
+                    className="dashboard-input pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowApiKey(!showApiKey)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#C0C0C0] hover:text-white"
+                  >
+                    {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+                  )}
+
+                  {/* Resend API Key */}
+                  {config.email_provider === 'resend' && (
+                    <div>
+                      <Label className="dashboard-label">Resend API Key</Label>
+                      <div className="relative">
+                        <BaseInput
+                          type={showResendApiKey ? "text" : "password"}
+                          value={config.resend_api_key}
+                          onChange={(e) => setConfig(prev => ({ ...prev, resend_api_key: e.target.value }))}
+                          placeholder="Your Resend API Key"
+                          className="dashboard-input pr-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowResendApiKey(!showResendApiKey)}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#C0C0C0] hover:text-white"
+                        >
+                          {showResendApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+              
+              <div>
+                <Label className="dashboard-label">Sender Email</Label>
+                <BaseInput
+                  type="email"
+                  value={config.sender_email}
+                  onChange={(e) => setConfig(prev => ({ ...prev, sender_email: e.target.value }))}
+                  placeholder="noreply@yourdomain.com"
+                  className="dashboard-input"
+                />
+              </div>
+
+              <div>
+                <Label className="dashboard-label">Sender Name</Label>
+                <BaseInput
+                      type="text"
+                  value={config.sender_name}
+                  onChange={(e) => setConfig(prev => ({ ...prev, sender_name: e.target.value }))}
+                      placeholder="Your Company Name"
+                  className="dashboard-input"
+                />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* SMS Configuration */}
+              <Card className="dashboard-card">
+          <CardHeader>
+                  <CardTitle className="dashboard-card-title flex items-center gap-2">
+              <Smartphone size={20} />
+                    <span>SMS Service</span>
+            </CardTitle>
+          </CardHeader>
+                <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                      <Label className="dashboard-label">Enable SMS</Label>
+                      <p className="text-xs text-gray-500">SMS notifications</p>
+              </div>
+              <Switch
+                checked={config.sms_enabled}
+                onCheckedChange={(checked) => setConfig(prev => ({ ...prev, sms_enabled: checked }))}
+              />
+            </div>
+
+              <div>
+                    <Label className="dashboard-label">LabsMobile Username</Label>
+                <BaseInput
+                      type="text"
+                  value={config.labsmobile_username}
+                  onChange={(e) => setConfig(prev => ({ ...prev, labsmobile_username: e.target.value }))}
+                      placeholder="Your LabsMobile username"
+                      className="dashboard-input"
+                />
+              </div>
+
+              <div>
+                    <Label className="dashboard-label">LabsMobile Token</Label>
+                <div className="relative">
+                  <BaseInput
+                    type={showSmsToken ? "text" : "password"}
+                    value={config.labsmobile_token}
+                    onChange={(e) => setConfig(prev => ({ ...prev, labsmobile_token: e.target.value }))}
+                        placeholder="Your LabsMobile token"
+                        className="dashboard-input pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowSmsToken(!showSmsToken)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#C0C0C0] hover:text-white"
+                  >
+                    {showSmsToken ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                    <Label className="dashboard-label">SMS Sender Name</Label>
+                <BaseInput
+                      type="text"
+                  value={config.sms_sender_name}
+                  onChange={(e) => setConfig(prev => ({ ...prev, sms_sender_name: e.target.value }))}
+                      placeholder="Your SMS sender name"
+                      className="dashboard-input"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Telegram Configuration */}
+              <Card className="dashboard-card">
+                <CardHeader>
+                  <CardTitle className="dashboard-card-title flex items-center gap-2">
+                    <Bot size={20} />
+                    <span>Telegram Bot</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="dashboard-label">Enable Telegram</Label>
+                      <p className="text-xs text-gray-500">Telegram notifications</p>
+                    </div>
+                    <Switch
+                      checked={config.telegram_enabled}
+                      onCheckedChange={(checked) => setConfig(prev => ({ ...prev, telegram_enabled: checked }))}
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="dashboard-label">Bot Token</Label>
+                    <div className="relative">
+                      <BaseInput
+                        type={showTelegramToken ? "text" : "password"}
+                        value={config.telegram_bot_token}
+                        onChange={(e) => setConfig(prev => ({ ...prev, telegram_bot_token: e.target.value }))}
+                        placeholder="Your Telegram Bot Token"
+                        className="dashboard-input pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowTelegramToken(!showTelegramToken)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#C0C0C0] hover:text-white"
+                      >
+                        {showTelegramToken ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="dashboard-label">Bot Username</Label>
+                    <BaseInput
+                      type="text"
+                      value={config.telegram_username}
+                      onChange={(e) => setConfig(prev => ({ ...prev, telegram_username: e.target.value }))}
+                      placeholder="@YourBotUsername"
+                      className="dashboard-input"
+                    />
+                  </div>
+
+                  {/* User Management Section */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label className="dashboard-label">User Chat ID Management</Label>
+                        <p className="text-xs text-gray-500">Manage Telegram chat IDs for users</p>
+                      </div>
+                      <BaseButton
+                        onClick={openUserModal}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm"
+                      >
+                        Manage Users
+                      </BaseButton>
+                    </div>
+
+                    {/* Display users with chat IDs */}
+                    {telegramUsersLoaded && telegramUsers.filter(u => u.telegram_chat_id).length > 0 && (
+                      <div className="space-y-2">
+                        <Label className="dashboard-label text-sm">Users with Chat IDs</Label>
+                        <div className="space-y-1 max-h-32 overflow-y-auto">
+                          {telegramUsers
+                            .filter(user => user.telegram_chat_id)
+                            .map((user) => (
+                              <div key={user.id} className="flex items-center justify-between p-2 bg-green-50 rounded border border-green-200">
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium">{user.fullName}</p>
+                                  <p className="text-xs text-gray-500">{user.email}</p>
+                                  <p className="text-xs text-green-600 font-medium">✓ Chat ID: {user.telegram_chat_id}</p>
+                                </div>
+                                <BaseButton
+                                  onClick={() => detachChatIdFromUser(user.id)}
+                                  className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 text-xs"
+                                >
+                                  Remove
+                                </BaseButton>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+
+                  </div>
+
+                  <div>
+                    <Label className="dashboard-label">Webhook URL</Label>
+                    <BaseInput
+                      type="url"
+                      value={config.telegram_webhook_url}
+                      onChange={(e) => setConfig(prev => ({ ...prev, telegram_webhook_url: e.target.value }))}
+                      placeholder="https://yourdomain.com/webhook/telegram"
+                      className="dashboard-input"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Social Media APIs Section */}
+          <div className="mt-8">
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Social Media APIs</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* WhatsApp Configuration */}
+              <Card className="dashboard-card">
+                <CardHeader>
+                  <CardTitle className="dashboard-card-title flex items-center gap-2">
+                    <MessageCircle size={18} />
+                    <span>WhatsApp Business</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="dashboard-label">Enable WhatsApp</Label>
+                      <p className="text-xs text-gray-500">WhatsApp Business API</p>
+                    </div>
+                    <Switch
+                      checked={config.whatsapp_enabled}
+                      onCheckedChange={(checked) => setConfig(prev => ({ ...prev, whatsapp_enabled: checked }))}
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="dashboard-label">Business Account ID</Label>
+                    <BaseInput
+                      type="text"
+                      value={config.whatsapp_business_account_id}
+                      onChange={(e) => setConfig(prev => ({ ...prev, whatsapp_business_account_id: e.target.value }))}
+                      placeholder="Account ID"
+                      className="dashboard-input"
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="dashboard-label">Access Token</Label>
+                    <div className="relative">
+                      <BaseInput
+                        type={showWhatsAppToken ? "text" : "password"}
+                        value={config.whatsapp_access_token}
+                        onChange={(e) => setConfig(prev => ({ ...prev, whatsapp_access_token: e.target.value }))}
+                        placeholder="Access Token"
+                        className="dashboard-input pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowWhatsAppToken(!showWhatsAppToken)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#C0C0C0] hover:text-white"
+                      >
+                        {showWhatsAppToken ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="dashboard-label">Phone Number ID</Label>
+                    <BaseInput
+                      type="text"
+                      value={config.whatsapp_phone_number_id}
+                      onChange={(e) => setConfig(prev => ({ ...prev, whatsapp_phone_number_id: e.target.value }))}
+                      placeholder="Phone Number ID"
+                      className="dashboard-input"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Instagram Configuration */}
+              <Card className="dashboard-card">
+                <CardHeader>
+                  <CardTitle className="dashboard-card-title flex items-center gap-2">
+                    <Instagram size={18} />
+                    <span>Instagram Business</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="dashboard-label">Enable Instagram</Label>
+                      <p className="text-xs text-gray-500">Instagram Business API</p>
+                    </div>
+                    <Switch
+                      checked={config.instagram_enabled}
+                      onCheckedChange={(checked) => setConfig(prev => ({ ...prev, instagram_enabled: checked }))}
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="dashboard-label">Business Account ID</Label>
+                    <BaseInput
+                      type="text"
+                      value={config.instagram_business_account_id}
+                      onChange={(e) => setConfig(prev => ({ ...prev, instagram_business_account_id: e.target.value }))}
+                      placeholder="Account ID"
+                      className="dashboard-input"
+                />
+              </div>
+
+                  <div>
+                    <Label className="dashboard-label">Access Token</Label>
+                    <div className="relative">
+                      <BaseInput
+                        type={showInstagramToken ? "text" : "password"}
+                        value={config.instagram_access_token}
+                        onChange={(e) => setConfig(prev => ({ ...prev, instagram_access_token: e.target.value }))}
+                        placeholder="Access Token"
+                        className="dashboard-input pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowInstagramToken(!showInstagramToken)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#C0C0C0] hover:text-white"
+                      >
+                        {showInstagramToken ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Testing Section */}
+          <div className="mt-8">
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Test Communications</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Email Test */}
+              <Card className="dashboard-card">
+                <CardHeader>
+                  <CardTitle className="dashboard-card-title flex items-center gap-2">
+                    <TestTube size={20} />
+                    <span>Test Email</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label className="dashboard-label">Test Email Address</Label>
+                    <BaseInput
+                      type="email"
+                      value={testEmail}
+                      onChange={(e) => setTestEmail(e.target.value)}
+                      placeholder="test@example.com"
+                      className="dashboard-input"
+                    />
+                  </div>
+                  <BaseButton
+                    onClick={testEmailConnection}
+                    disabled={isTestingEmail || !testEmail || !config.email_enabled}
+                    className="dashboard-button-success w-full"
+                  >
+                    {isTestingEmail ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    ) : (
+                      <>
+                        <TestTube size={16} className="mr-2" />
+                        Send Test Email
+                      </>
+                    )}
+                  </BaseButton>
+                </CardContent>
+              </Card>
+
+              {/* SMS Test */}
+              <Card className="dashboard-card">
+                <CardHeader>
+                  <CardTitle className="dashboard-card-title flex items-center gap-2">
+                    <TestTube size={20} />
+                    <span>Test SMS</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label className="dashboard-label">Test Phone Number</Label>
+                <BaseInput
+                      type="tel"
+                  value={testPhone}
+                  onChange={(e) => setTestPhone(e.target.value)}
+                  placeholder="+1234567890"
+                      className="dashboard-input"
+                    />
+                  </div>
+                <BaseButton
+                  onClick={testSmsConnection}
+                  disabled={isTestingSms || !testPhone || !config.sms_enabled}
+                    className="dashboard-button-success w-full"
+                >
+                  {isTestingSms ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  ) : (
+                    <>
+                      <TestTube size={16} className="mr-2" />
+                      Send Test SMS
+                    </>
+                  )}
+                </BaseButton>
+          </CardContent>
+        </Card>
+      </div>
+      </div>
+
+
+      {/* User Management Modal */}
+      {showUserModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-hidden">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Manage User Chat IDs</h3>
+              <button
+                onClick={closeUserModal}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Search Bar */}
+            <div className="mb-4">
+              <BaseInput
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search users by name or email..."
+                className="dashboard-input w-full"
+              />
+            </div>
+
+            {/* User List */}
+            <div className="space-y-2 max-h-60 overflow-y-auto mb-4">
+              {filteredUsers.map((user) => (
+                <div
+                  key={user.id}
+                  className={`p-3 rounded border cursor-pointer transition-colors ${
+                    selectedUser?.id === user.id
+                      ? 'bg-blue-50 border-blue-300'
+                      : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                  }`}
+                  onClick={() => handleUserSelect(user)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">{user.fullName}</p>
+                      <p className="text-xs text-gray-500">{user.email}</p>
+                      {user.telegram_chat_id && (
+                        <p className="text-xs text-green-600 font-medium">✓ Current Chat ID: {user.telegram_chat_id}</p>
+                      )}
+                    </div>
+                    {selectedUser?.id === user.id && (
+                      <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Chat ID Input */}
+            {selectedUser && (
+              <div className="mb-4">
+                <Label className="dashboard-label">Chat ID for {selectedUser.fullName}</Label>
+                <BaseInput
+                  type="text"
+                  value={chatIdInput}
+                  onChange={(e) => setChatIdInput(e.target.value)}
+                  placeholder="Enter Telegram chat ID"
+                  className="dashboard-input w-full"
+                />
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex gap-2 justify-end">
+              <BaseButton
+                onClick={closeUserModal}
+                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2"
+              >
+                Cancel
+              </BaseButton>
+              {selectedUser && (
+                <BaseButton
+                  onClick={saveUserChatId}
+                  disabled={!chatIdInput.trim()}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2"
+                >
+                  Save Chat ID
+                </BaseButton>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

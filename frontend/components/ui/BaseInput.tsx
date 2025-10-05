@@ -16,8 +16,9 @@
  * />
  */
 
-import React, { forwardRef } from 'react';
-import { cn } from '@/lib/utils';
+import * as React from 'react';
+import { forwardRef } from 'react';
+import { cn } from '../../lib/utils';
 import '@/styles/unified-component-styles.css';
 
 // ============================================================================
@@ -142,6 +143,7 @@ BaseInput.displayName = 'BaseInput';
 export interface BaseInputGroupProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   size?: 'sm' | 'md' | 'lg';
+  className?: string;
 }
 
 export function BaseInputGroup({

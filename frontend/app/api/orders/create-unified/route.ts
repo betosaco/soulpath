@@ -595,7 +595,7 @@ export async function POST(request: NextRequest) {
           });
           
           // Get ALL bookings for this customer that belong to user packages created in this order
-          const userPackageIds = userPackages.map(up => up.id);
+          const userPackageIds = result.userPackages.map(up => up.id);
           const bookingsWithRelations = await prisma.booking.findMany({
             where: {
               userPackageId: { in: userPackageIds },
@@ -859,8 +859,8 @@ export async function POST(request: NextRequest) {
           console.log(`  - ${item.name}: type_text=${item.type_text}, itemType=${item.itemType}`);
         }
         console.log('📅 Bookings found:', bookingResults?.length || 0);
-        console.log('👤 User packages created:', userPackages?.length || 0);
-        for (const up of userPackages || []) {
+        console.log('👤 User packages created:', result.userPackages?.length || 0);
+        for (const up of result.userPackages || []) {
           console.log(`  - UserPackage ${up.id}: ${up.packagePrice?.packageDefinition?.name}`);
         }
 
@@ -960,11 +960,23 @@ export async function POST(request: NextRequest) {
         console.log('📧 Has MatPass:', templateEmailData.matpassItems?.length > 0);
         console.log('📧 Has Products:', templateEmailData.products?.length > 0);
         console.log('📧 Has Bookings:', templateEmailData.bookings?.length > 0);
-        
-        OrderEmailService.sendOrderConfirmationEmail(templateEmailData, 'es').catch(error => {
-          console.error('Failed to send order confirmation email using template system:', error);
-          // Don't fail the order creation if email fails
-        });
+        console.log('📧 Order URL:', templateEmailData.orderUrl);
+        console.log('📧 Website URL:', templateEmailData.websiteUrl);
+
+        console.log('📧 Starting email send process...');
+        OrderEmailService.sendOrderConfirmationEmail(templateEmailData, 'es')
+          .then(result => {
+            console.log('📧 Email send result:', result ? 'SUCCESS' : 'FAILED');
+            if (!result) {
+              console.error('📧 Email sending returned false - check email service configuration');
+            }
+          })
+          .catch(error => {
+            console.error('📧 Failed to send order confirmation email:', error);
+            console.error('📧 Error details:', error.message);
+            console.error('📧 Error stack:', error.stack);
+            // Don't fail the order creation if email fails
+          });
 
         // Note: Booking information is already included in the main order confirmation email
         // No need to send separate booking confirmation emails to avoid double emails
@@ -987,6 +999,26 @@ export async function POST(request: NextRequest) {
           allTelegramUsers.forEach(user => {
             console.log(`   - ${user.user?.email || 'Unknown'} (Chat ID: ${user.telegramChatId})`);
           });
+
+          // Ensure admin always receives notifications (fallback to env var)
+          const adminChatId = process.env.TELEGRAM_CHAT_ID;
+          if (adminChatId && !allTelegramUsers.some(user => user.telegramChatId === adminChatId)) {
+            console.log('📱 Adding admin chat ID from environment variables:', adminChatId);
+            allTelegramUsers.push({
+              id: 'admin-fallback',
+              userId: null,
+              telegramChatId: adminChatId,
+              telegramUserId: null,
+              telegramUsername: null,
+              telegramFirstName: null,
+              telegramLastName: null,
+              isActive: true,
+              lastInteraction: new Date(),
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              user: { email: 'admin@matmax.world', fullName: 'Admin' }
+            });
+          }
 
           if (allTelegramUsers.length > 0) {
             // Send notification to each active Telegram user

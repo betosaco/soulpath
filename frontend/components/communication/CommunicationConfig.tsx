@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { BaseButton } from '../ui/BaseButton';
 import { BaseInput } from '../ui/BaseInput';
@@ -12,20 +12,24 @@ import {
   TestTube, 
   Eye, 
   EyeOff, 
-  Mail, 
+  Mail,
   Smartphone,
   CheckCircle,
   AlertCircle,
   MessageSquare,
-  Bot
+  Bot,
+  MessageCircle,
+  Instagram,
+  X
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
-import { NEW_PURCHASE_TEMPLATE } from './templates/NewPurchaseTemplate';
 
 interface CommunicationConfigData {
   // Email Configuration
   email_enabled: boolean;
+  email_provider: 'brevo' | 'resend';
   brevo_api_key: string;
+  resend_api_key: string;
   sender_email: string;
   sender_name: string;
   admin_email: string;
@@ -43,13 +47,28 @@ interface CommunicationConfigData {
   telegram_webhook_url: string;
   telegram_chat_ids: string[];
   telegram_username: string;
+
+  // WhatsApp Configuration
+  whatsapp_enabled: boolean;
+  whatsapp_business_account_id: string;
+  whatsapp_access_token: string;
+  whatsapp_phone_number_id: string;
+  whatsapp_webhook_verify_token: string;
+
+  // Instagram Configuration
+  instagram_enabled: boolean;
+  instagram_access_token: string;
+  instagram_business_account_id: string;
+  instagram_webhook_verify_token: string;
 }
 
 export function CommunicationConfig() {
   const { user } = useAuth();
   const [config, setConfig] = useState<CommunicationConfigData>({
     email_enabled: true,
+    email_provider: 'brevo',
     brevo_api_key: '',
+    resend_api_key: '',
     sender_email: 'noreply@matmax.store',
     sender_name: 'MatMax Yoga Studio',
     admin_email: 'admin@matmax.store',
@@ -62,15 +81,26 @@ export function CommunicationConfig() {
     telegram_bot_token: '',
     telegram_webhook_url: '',
     telegram_chat_ids: [],
-    telegram_username: 'MatMaxYogaBot'
+    telegram_username: 'MatMaxYogaBot',
+    whatsapp_enabled: false,
+    whatsapp_business_account_id: '',
+    whatsapp_access_token: '',
+    whatsapp_phone_number_id: '',
+    whatsapp_webhook_verify_token: '',
+    instagram_enabled: false,
+    instagram_access_token: '',
+    instagram_business_account_id: '',
+    instagram_webhook_verify_token: ''
   });
 
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
+  const [showResendApiKey, setShowResendApiKey] = useState(false);
   const [showSmsToken, setShowSmsToken] = useState(false);
   const [showTelegramToken, setShowTelegramToken] = useState(false);
-  const [activeTab, setActiveTab] = useState<'email' | 'sms' | 'telegram'>('email');
+  const [showWhatsAppToken, setShowWhatsAppToken] = useState(false);
+  const [showInstagramToken, setShowInstagramToken] = useState(false);
   const [testEmail, setTestEmail] = useState('');
   const [testPhone, setTestPhone] = useState('');
   const [testTelegramChat, setTestTelegramChat] = useState('');
@@ -78,11 +108,16 @@ export function CommunicationConfig() {
   const [isTestingEmail, setIsTestingEmail] = useState(false);
   const [isTestingSms, setIsTestingSms] = useState(false);
   const [isTestingTelegram, setIsTestingTelegram] = useState(false);
-  const [newChatId, setNewChatId] = useState('');
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
-  const [templateContent, setTemplateContent] = useState<string>('');
-  const [templateName, setTemplateName] = useState<string>('');
-  const [templateCategory, setTemplateCategory] = useState<string>('');
+  const [isTestingWhatsApp, setIsTestingWhatsApp] = useState(false);
+  const [isTestingInstagram, setIsTestingInstagram] = useState(false);
+  const [testInstagramUser, setTestInstagramUser] = useState('');
+  const [telegramUsers, setTelegramUsers] = useState<any[]>([]);
+  const [telegramUsersLoaded, setTelegramUsersLoaded] = useState(false);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [chatIdInput, setChatIdInput] = useState('');
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const loadConfiguration = useCallback(async () => {
@@ -102,6 +137,7 @@ export function CommunicationConfig() {
       const data = await response.json();
       if (data.config) {
         setConfig(data.config);
+        setMessage({ type: 'success', text: 'Configuration loaded successfully!' });
       } else {
         console.error('Failed to load configuration:', response.status, response.statusText);
         setMessage({ type: 'error', text: 'Failed to load configuration' });
@@ -126,14 +162,13 @@ export function CommunicationConfig() {
       const response = await fetch('/api/admin/communication/config', {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user?.access_token}`
+          'Authorization': `Bearer ${user?.access_token}`,
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(config)
       });
-
       const data = await response.json();
-      if (data.config) {
+      if (data.success) {
         setMessage({ type: 'success', text: 'Configuration saved successfully!' });
       } else {
         setMessage({ type: 'error', text: data.error || 'Failed to save configuration' });
@@ -147,15 +182,13 @@ export function CommunicationConfig() {
   };
 
   const testEmailConnection = async () => {
-    if (!testEmail) return;
-    
     setIsTestingEmail(true);
     try {
       const response = await fetch('/api/admin/communication/test', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user?.access_token}`
+          'Authorization': `Bearer ${user?.access_token}`,
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           type: 'email',
@@ -180,15 +213,13 @@ export function CommunicationConfig() {
   };
 
   const testSmsConnection = async () => {
-    if (!testPhone) return;
-    
     setIsTestingSms(true);
     try {
       const response = await fetch('/api/admin/communication/test', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user?.access_token}`
+          'Authorization': `Bearer ${user?.access_token}`,
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           type: 'sms',
@@ -212,15 +243,13 @@ export function CommunicationConfig() {
   };
 
   const testTelegramConnection = async () => {
-    if (!testTelegramChat) return;
-    
     setIsTestingTelegram(true);
     try {
       const response = await fetch('/api/admin/communication/test', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user?.access_token}`
+          'Authorization': `Bearer ${user?.access_token}`,
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           type: 'telegram',
@@ -243,68 +272,206 @@ export function CommunicationConfig() {
     }
   };
 
-  const addChatId = () => {
-    if (newChatId.trim() && !config.telegram_chat_ids.includes(newChatId.trim())) {
-      setConfig(prev => ({
-        ...prev,
-        telegram_chat_ids: [...prev.telegram_chat_ids, newChatId.trim()]
-      }));
-      setNewChatId('');
+  const testWhatsAppConnection = async () => {
+    setIsTestingWhatsApp(true);
+    try {
+      const response = await fetch('/api/admin/communication/test', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user?.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          type: 'whatsapp',
+          phoneNumber: testPhone,
+          message: testMessage
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setMessage({ type: 'success', text: 'Test WhatsApp message sent successfully!' });
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Failed to send test WhatsApp message' });
+      }
+    } catch (error) {
+      console.error('Error sending test WhatsApp message:', error);
+      setMessage({ type: 'error', text: 'Failed to send test WhatsApp message' });
+    } finally {
+      setIsTestingWhatsApp(false);
     }
   };
 
-  const removeChatId = (chatIdToRemove: string) => {
-    setConfig(prev => ({
-      ...prev,
-      telegram_chat_ids: prev.telegram_chat_ids.filter(id => id !== chatIdToRemove)
-    }));
+  const testInstagramConnection = async () => {
+    setIsTestingInstagram(true);
+    try {
+      const response = await fetch('/api/admin/communication/test', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user?.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          type: 'instagram',
+          username: testInstagramUser,
+          message: testMessage
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setMessage({ type: 'success', text: 'Test Instagram message sent successfully!' });
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Failed to send test Instagram message' });
+      }
+    } catch (error) {
+      console.error('Error sending test Instagram message:', error);
+      setMessage({ type: 'error', text: 'Failed to send test Instagram message' });
+    } finally {
+      setIsTestingInstagram(false);
+    }
   };
 
-  const loadTemplate = (templateName: string) => {
-    setSelectedTemplate(templateName);
-    setTemplateName(templateName);
+  const fetchTelegramUsers = async () => {
+    console.log('🔄 Starting to fetch Telegram users...');
+    setIsLoadingUsers(true);
+    try {
+      const response = await fetch('/api/admin/users/telegram', {
+        headers: {
+          'Authorization': `Bearer ${user?.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ API Response data:', data);
+        setTelegramUsers(data.users || []);
+        setTelegramUsersLoaded(true);
+        setMessage({ type: 'success', text: `Loaded ${data.users?.length || 0} users` });
+      } else {
+        const errorText = await response.text();
+        console.error('❌ API Error response:', response.status, errorText);
+        setTelegramUsers([]);
+        setTelegramUsersLoaded(true);
+        setMessage({ type: 'error', text: `Failed to load users: ${response.status}` });
+      }
+    } catch (error) {
+      console.error('💥 Network error fetching Telegram users:', error);
+      setTelegramUsers([]);
+      setTelegramUsersLoaded(true);
+      setMessage({ type: 'error', text: 'Network error: Failed to load users' });
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  };
+
+  const attachChatIdToUser = async (userId: string, chatId: string) => {
+    try {
+      const response = await fetch('/api/admin/users/telegram', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user?.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId,
+          chatId,
+          action: 'attach'
+        })
+      });
+
+      if (response.ok) {
+        // Update local state
+        setTelegramUsers(prev => prev.map(user =>
+          user.id === userId ? { ...user, telegram_chat_id: chatId } : user
+        ));
+        setMessage({ type: 'success', text: 'Chat ID attached successfully' });
+      } else {
+        const error = await response.json();
+        setMessage({ type: 'error', text: error.error || 'Failed to attach chat ID' });
+      }
+    } catch (error) {
+      console.error('Error attaching chat ID:', error);
+      setMessage({ type: 'error', text: 'Failed to attach chat ID' });
+    }
+  };
+
+  const detachChatIdFromUser = async (userId: string) => {
+    try {
+      const response = await fetch('/api/admin/users/telegram', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user?.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId,
+          action: 'detach'
+        })
+      });
+
+      if (response.ok) {
+        // Update local state
+        setTelegramUsers(prev => prev.map(user =>
+          user.id === userId ? { ...user, telegram_chat_id: null } : user
+        ));
+        setMessage({ type: 'success', text: 'Chat ID detached successfully' });
+      } else {
+        const error = await response.json();
+        setMessage({ type: 'error', text: error.error || 'Failed to detach chat ID' });
+      }
+    } catch (error) {
+      console.error('Error detaching chat ID:', error);
+      setMessage({ type: 'error', text: 'Failed to detach chat ID' });
+    }
+  };
+
+  const openUserModal = async () => {
+    setShowUserModal(true);
+    if (!telegramUsersLoaded) {
+      await fetchTelegramUsers();
+    }
+  };
+
+  const closeUserModal = () => {
+    setShowUserModal(false);
+    setSearchQuery('');
+    setSelectedUser(null);
+    setChatIdInput('');
+  };
+
+  const handleUserSelect = (user: any) => {
+    setSelectedUser(user);
+    setChatIdInput(user.telegram_chat_id || '');
+  };
+
+  const saveUserChatId = async () => {
+    if (!selectedUser || !chatIdInput.trim()) return;
     
-    switch (templateName) {
-      case 'New Purchase Confirmation':
-        setTemplateContent(NEW_PURCHASE_TEMPLATE);
-        setTemplateCategory('payment');
-        break;
-      case 'Welcome Message':
-        setTemplateContent(`Welcome to MatMax Yoga Studio! 🧘‍♀️\n\nWe're excited to have you join our community. Here you'll find information about our classes, schedules, and wellness programs.\n\nUse /help to see available commands.`);
-        setTemplateCategory('welcome');
-        break;
-      case 'Class Reminder':
-        setTemplateContent(`🧘‍♀️ Class Reminder\n\nYour {class_name} class is starting in {time_remaining}!\n\n📍 Location: {venue_name}\n⏰ Time: {class_time}\n\nSee you soon! 🙏`);
-        setTemplateCategory('reminder');
-        break;
-      case 'Payment Confirmation':
-        setTemplateContent(`💳 Payment Confirmed!\n\nAmount: {amount}\nPayment Method: {payment_method}\nTransaction ID: {transaction_id}\n\nThank you for your payment! Your booking is now confirmed.\n\n🙏 Namaste`);
-        setTemplateCategory('payment');
-        break;
-      default:
-        setTemplateContent('');
-        setTemplateCategory('');
-    }
+    await attachChatIdToUser(selectedUser.id, chatIdInput.trim());
+    closeUserModal();
   };
+
+  const filteredUsers = telegramUsers.filter(user => 
+    (user.fullName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (user.email || '').toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#ffd700] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="dashboard-text-secondary">Loading configuration...</p>
-        </div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
+      {/* Message Display */}
       {message && (
-        <div className={`p-4 rounded-lg flex items-center space-x-3 ${
-          message.type === 'success' 
-            ? 'bg-green-500/10 border border-green-500/20' 
-            : 'bg-red-500/10 border border-red-500/20'
+        <div className={`flex items-center gap-2 p-3 rounded-md ${
+          message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
         }`}>
           {message.type === 'success' ? (
             <CheckCircle size={20} className="text-green-400" />
@@ -337,319 +504,184 @@ export function CommunicationConfig() {
         </BaseButton>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="border-b border-[#C0C0C0]/20">
-        <nav className="flex space-x-8">
-          <button
-            onClick={() => setActiveTab('email')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'email'
-                ? 'border-[#ffd700] text-[#ffd700]'
-                : 'border-transparent text-[#C0C0C0] hover:text-white hover:border-[#C0C0C0]'
-            }`}
-          >
-            <Mail size={16} className="inline mr-2" />
-            Email
-          </button>
-          <button
-            onClick={() => setActiveTab('sms')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'sms'
-                ? 'border-[#ffd700] text-[#ffd700]'
-                : 'border-transparent text-[#C0C0C0] hover:text-white hover:border-[#C0C0C0]'
-            }`}
-          >
-            <Smartphone size={16} className="inline mr-2" />
-            SMS
-          </button>
-          <button
-            onClick={() => setActiveTab('telegram')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'telegram'
-                ? 'border-[#ffd700] text-[#ffd700]'
-                : 'border-transparent text-[#C0C0C0] hover:text-white hover:border-[#C0C0C0]'
-            }`}
-          >
-            <Bot size={16} className="inline mr-2" />
-            Telegram
-          </button>
-        </nav>
-      </div>
-
-      {/* Tab Content */}
-      {activeTab === 'email' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Email Configuration */}
-        <Card className="dashboard-card">
-          <CardHeader>
-            <CardTitle className="dashboard-card-title flex items-center gap-2">
-              <Mail size={20} />
-              <span>Email Configuration</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label className="dashboard-label">Enable Email Service</Label>
-                <p className="text-xs text-gray-500">Enable email notifications and templates</p>
-              </div>
-              <Switch
-                checked={config.email_enabled}
-                onCheckedChange={(checked) => setConfig(prev => ({ ...prev, email_enabled: checked }))}
-              />
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <Label className="dashboard-label">Brevo API Key</Label>
-                <div className="relative">
-                  <BaseInput
-                    type={showApiKey ? "text" : "password"}
-                    value={config.brevo_api_key}
-                    onChange={(e) => setConfig(prev => ({ ...prev, brevo_api_key: e.target.value }))}
-                    placeholder="Enter your Brevo API key"
-                    className="dashboard-input pr-10"
+      {/* Main Content */}
+      <div className="space-y-8">
+        {/* Primary Communication Services */}
+        <div>
+          <h3 className="text-xl font-bold text-gray-900 mb-6">Primary Communication Services</h3>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Email Configuration */}
+            <Card className="dashboard-card">
+              <CardHeader>
+                <CardTitle className="dashboard-card-title flex items-center gap-2">
+                  <Mail size={20} />
+                  <span>Email</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="dashboard-label">Enable Email</Label>
+                    <p className="text-xs text-gray-500">Email notifications</p>
+                  </div>
+                  <Switch
+                    checked={config.email_enabled}
+                    onCheckedChange={(checked) => setConfig(prev => ({ ...prev, email_enabled: checked }))}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowApiKey(!showApiKey)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#C0C0C0] hover:text-white"
-                  >
-                    {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
                 </div>
-              </div>
-              
-              <div>
-                <Label className="dashboard-label">Sender Email</Label>
-                <BaseInput
-                  type="email"
-                  value={config.sender_email}
-                  onChange={(e) => setConfig(prev => ({ ...prev, sender_email: e.target.value }))}
-                  placeholder="noreply@yourdomain.com"
-                  className="dashboard-input"
-                />
-              </div>
 
-              <div>
-                <Label className="dashboard-label">Sender Name</Label>
-                <BaseInput
-                  value={config.sender_name}
-                  onChange={(e) => setConfig(prev => ({ ...prev, sender_name: e.target.value }))}
-                  placeholder="SoulPath Astrology"
-                  className="dashboard-input"
-                />
-              </div>
-
-              <div>
-                <Label className="dashboard-label">Admin Email</Label>
-                <BaseInput
-                  type="email"
-                  value={config.admin_email}
-                  onChange={(e) => setConfig(prev => ({ ...prev, admin_email: e.target.value }))}
-                  placeholder="admin@yourdomain.com"
-                  className="dashboard-input"
-                />
-              </div>
-            </div>
-
-            {/* Test Email Section */}
-            <div className="border-t border-[#C0C0C0]/20 pt-6">
-              <h4 className="font-medium dashboard-text-primary mb-4">Test Email Configuration</h4>
-              <div className="space-y-3">
-                <BaseInput
-                  type="email"
-                  value={testEmail}
-                  onChange={(e) => setTestEmail(e.target.value)}
-                  placeholder="Enter test email address"
-                  className="dashboard-input"
-                />
-                <BaseButton
-                  onClick={testEmailConnection}
-                  disabled={isTestingEmail || !testEmail || !config.email_enabled}
-                  className="dashboard-button-success w-full"
-                >
-                  {isTestingEmail ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  ) : (
-                    <>
-                      <TestTube size={16} className="mr-2" />
-                      Send Test Email
-                    </>
-                  )}
-                </BaseButton>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* SMS Configuration */}
-        <Card className="bg-[#0A0A23]/30 border-[#C0C0C0]/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-[#EAEAEA]">
-              <Smartphone size={20} />
-              <span>SMS Configuration</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label className="text-[#C0C0C0]">Enable SMS Service</Label>
-                <p className="text-xs text-gray-500">Enable SMS OTP verification and notifications</p>
-              </div>
-              <Switch
-                checked={config.sms_enabled}
-                onCheckedChange={(checked) => setConfig(prev => ({ ...prev, sms_enabled: checked }))}
-              />
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <Label className="text-[#C0C0C0]">SMS Provider</Label>
-                <Select value={config.sms_provider} onValueChange={(value) => setConfig(prev => ({ ...prev, sms_provider: value }))}>
-                  <SelectTrigger className="bg-[#0A0A23]/50 border-[#C0C0C0]/30 text-[#EAEAEA]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="labsmobile">Labsmobile</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-gray-500">Currently only Labsmobile is supported</p>
-              </div>
-
-              <div>
-                <Label className="text-[#C0C0C0]">Labsmobile Username</Label>
-                <BaseInput
-                  value={config.labsmobile_username}
-                  onChange={(e) => setConfig(prev => ({ ...prev, labsmobile_username: e.target.value }))}
-                  placeholder="Your Labsmobile username"
-                  className="bg-[#0A0A23]/50 border-[#C0C0C0]/30 text-[#EAEAEA]"
-                />
-              </div>
-
-              <div>
-                <Label className="text-[#C0C0C0]">Labsmobile API Token</Label>
-                <div className="relative">
-                  <BaseInput
-                    type={showSmsToken ? "text" : "password"}
-                    value={config.labsmobile_token}
-                    onChange={(e) => setConfig(prev => ({ ...prev, labsmobile_token: e.target.value }))}
-                    placeholder="Your Labsmobile API token"
-                    className="bg-[#0A0A23]/50 border-[#C0C0C0]/30 text-[#EAEAEA] pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowSmsToken(!showSmsToken)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#C0C0C0] hover:text-white"
-                  >
-                    {showSmsToken ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <Label className="text-[#C0C0C0]">SMS Sender Name</Label>
-                <BaseInput
-                  value={config.sms_sender_name}
-                  onChange={(e) => setConfig(prev => ({ ...prev, sms_sender_name: e.target.value }))}
-                  placeholder="SMS sender name (e.g., SoulPath)"
-                  className="bg-[#0A0A23]/50 border-[#C0C0C0]/30 text-[#EAEAEA]"
-                />
-              </div>
-            </div>
-
-            {/* Test SMS Section */}
-            <div className="border-t border-[#C0C0C0]/20 pt-6">
-              <h4 className="font-medium text-[#EAEAEA] mb-4">Test SMS Configuration</h4>
-              <div className="space-y-3">
-                <BaseInput
-                  value={testPhone}
-                  onChange={(e) => setTestPhone(e.target.value)}
-                  placeholder="+1234567890"
-                  className="bg-[#0A0A23]/50 border-[#C0C0C0]/30 text-[#EAEAEA]"
-                />
-                <BaseInput
-                  value={testMessage}
-                  onChange={(e) => setTestMessage(e.target.value)}
-                  placeholder="Test SMS message"
-                  className="bg-[#0A0A23]/50 border-[#C0C0C0]/30 text-[#EAEAEA]"
-                />
-                <BaseButton
-                  onClick={testSmsConnection}
-                  disabled={isTestingSms || !testPhone || !config.sms_enabled}
-                  className="bg-[#10B981] hover:bg-[#059669] text-white px-4 w-full"
-                >
-                  {isTestingSms ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  ) : (
-                    <>
-                      <TestTube size={16} className="mr-2" />
-                      Send Test SMS
-                    </>
-                  )}
-                </BaseButton>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        </div>
-      )}
-
-      {activeTab === 'sms' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* SMS Configuration */}
-          <Card className="bg-[#0A0A23]/30 border-[#C0C0C0]/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-[#EAEAEA]">
-                <Smartphone size={20} />
-                <span>SMS Configuration</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-[#C0C0C0]">Enable SMS Service</Label>
-                  <p className="text-xs text-gray-500">Enable SMS OTP verification and notifications</p>
-                </div>
-                <Switch
-                  checked={config.sms_enabled}
-                  onCheckedChange={(checked) => setConfig(prev => ({ ...prev, sms_enabled: checked }))}
-                />
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <Label className="text-[#C0C0C0]">SMS Provider</Label>
-                  <Select value={config.sms_provider} onValueChange={(value) => setConfig(prev => ({ ...prev, sms_provider: value }))}>
-                    <SelectTrigger className="bg-[#0A0A23]/50 border-[#C0C0C0]/30 text-[#EAEAEA]">
+                  <Label className="dashboard-label">Email Provider</Label>
+                  <Select
+                    value={config.email_provider}
+                    onValueChange={(value) => setConfig(prev => ({ ...prev, email_provider: value as 'brevo' | 'resend' }))}
+                  >
+                    <SelectTrigger className="dashboard-input">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="labsmobile">Labsmobile</SelectItem>
+                      <SelectItem value="brevo">Brevo</SelectItem>
+                      <SelectItem value="resend">Resend</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-gray-500">Currently only Labsmobile is supported</p>
                 </div>
 
+                {/* Brevo API Key */}
+                {config.email_provider === 'brevo' && (
+                  <div>
+                    <Label className="dashboard-label">Brevo API Key</Label>
+                    <div className="relative">
+                      <BaseInput
+                        type={showApiKey ? "text" : "password"}
+                        value={config.brevo_api_key}
+                        onChange={(e) => setConfig(prev => ({ ...prev, brevo_api_key: e.target.value }))}
+                        placeholder="Your Brevo API Key"
+                        className="dashboard-input pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowApiKey(!showApiKey)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#C0C0C0] hover:text-white"
+                      >
+                        {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Resend API Key */}
+                {config.email_provider === 'resend' && (
+                  <div>
+                    <Label className="dashboard-label">Resend API Key</Label>
+                    <div className="relative">
+                      <BaseInput
+                        type={showResendApiKey ? "text" : "password"}
+                        value={config.resend_api_key}
+                        onChange={(e) => setConfig(prev => ({ ...prev, resend_api_key: e.target.value }))}
+                        placeholder="Your Resend API Key"
+                        className="dashboard-input pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowResendApiKey(!showResendApiKey)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#C0C0C0] hover:text-white"
+                      >
+                        {showResendApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 <div>
-                  <Label className="text-[#C0C0C0]">Labsmobile Username</Label>
+                  <Label className="dashboard-label">Sender Email</Label>
                   <BaseInput
-                    value={config.labsmobile_username}
-                    onChange={(e) => setConfig(prev => ({ ...prev, labsmobile_username: e.target.value }))}
-                    placeholder="Your Labsmobile username"
-                    className="bg-[#0A0A23]/50 border-[#C0C0C0]/30 text-[#EAEAEA]"
+                    type="email"
+                    value={config.sender_email}
+                    onChange={(e) => setConfig(prev => ({ ...prev, sender_email: e.target.value }))}
+                    placeholder="noreply@yourdomain.com"
+                    className="dashboard-input"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-[#C0C0C0]">Labsmobile API Token</Label>
+                  <Label className="dashboard-label">Sender Name</Label>
+                  <BaseInput
+                    type="text"
+                    value={config.sender_name}
+                    onChange={(e) => setConfig(prev => ({ ...prev, sender_name: e.target.value }))}
+                    placeholder="Your Company Name"
+                    className="dashboard-input"
+                  />
+                </div>
+
+                <div>
+                  <Label className="dashboard-label">Admin Email</Label>
+                  <BaseInput
+                    type="email"
+                    value={config.admin_email}
+                    onChange={(e) => setConfig(prev => ({ ...prev, admin_email: e.target.value }))}
+                    placeholder="admin@yourdomain.com"
+                    className="dashboard-input"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* SMS Configuration */}
+            <Card className="dashboard-card">
+              <CardHeader>
+                <CardTitle className="dashboard-card-title flex items-center gap-2">
+                  <Smartphone size={20} />
+                  <span>SMS</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="dashboard-label">Enable SMS</Label>
+                    <p className="text-xs text-gray-500">SMS notifications</p>
+                  </div>
+                  <Switch
+                    checked={config.sms_enabled}
+                    onCheckedChange={(checked) => setConfig(prev => ({ ...prev, sms_enabled: checked }))}
+                  />
+                </div>
+
+                <div>
+                  <Label className="dashboard-label">SMS Provider</Label>
+                  <Select
+                    value={config.sms_provider}
+                    onValueChange={(value) => setConfig(prev => ({ ...prev, sms_provider: value }))}
+                  >
+                    <SelectTrigger className="dashboard-input">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="labsmobile">LabsMobile</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="dashboard-label">Username</Label>
+                  <BaseInput
+                    type="text"
+                    value={config.labsmobile_username}
+                    onChange={(e) => setConfig(prev => ({ ...prev, labsmobile_username: e.target.value }))}
+                    placeholder="Your LabsMobile username"
+                    className="dashboard-input"
+                  />
+                </div>
+
+                <div>
+                  <Label className="dashboard-label">Token</Label>
                   <div className="relative">
                     <BaseInput
                       type={showSmsToken ? "text" : "password"}
                       value={config.labsmobile_token}
                       onChange={(e) => setConfig(prev => ({ ...prev, labsmobile_token: e.target.value }))}
-                      placeholder="Your Labsmobile API token"
-                      className="bg-[#0A0A23]/50 border-[#C0C0C0]/30 text-[#EAEAEA] pr-10"
+                      placeholder="Your LabsMobile token"
+                      className="dashboard-input pr-10"
                     />
                     <button
                       type="button"
@@ -662,84 +694,46 @@ export function CommunicationConfig() {
                 </div>
 
                 <div>
-                  <Label className="text-[#C0C0C0]">SMS Sender Name</Label>
+                  <Label className="dashboard-label">Sender Name</Label>
                   <BaseInput
+                    type="text"
                     value={config.sms_sender_name}
                     onChange={(e) => setConfig(prev => ({ ...prev, sms_sender_name: e.target.value }))}
-                    placeholder="SMS sender name (e.g., SoulPath)"
-                    className="bg-[#0A0A23]/50 border-[#C0C0C0]/30 text-[#EAEAEA]"
+                    placeholder="Your Company Name"
+                    className="dashboard-input"
                   />
                 </div>
-              </div>
+              </CardContent>
+            </Card>
 
-              {/* Test SMS Section */}
-              <div className="border-t border-[#C0C0C0]/20 pt-6">
-                <h4 className="font-medium text-[#EAEAEA] mb-4">Test SMS Configuration</h4>
-                <div className="space-y-3">
-                  <BaseInput
-                    value={testPhone}
-                    onChange={(e) => setTestPhone(e.target.value)}
-                    placeholder="+1234567890"
-                    className="bg-[#0A0A23]/50 border-[#C0C0C0]/30 text-[#EAEAEA]"
+            {/* Telegram Configuration */}
+            <Card className="dashboard-card">
+              <CardHeader>
+                <CardTitle className="dashboard-card-title flex items-center gap-2">
+                  <Bot size={20} />
+                  <span>Telegram Bot</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="dashboard-label">Enable Telegram</Label>
+                    <p className="text-xs text-gray-500">Telegram notifications</p>
+                  </div>
+                  <Switch
+                    checked={config.telegram_enabled}
+                    onCheckedChange={(checked) => setConfig(prev => ({ ...prev, telegram_enabled: checked }))}
                   />
-                  <BaseInput
-                    value={testMessage}
-                    onChange={(e) => setTestMessage(e.target.value)}
-                    placeholder="Test SMS message"
-                    className="bg-[#0A0A23]/50 border-[#C0C0C0]/30 text-[#EAEAEA]"
-                  />
-                  <BaseButton
-                    onClick={testSmsConnection}
-                    disabled={isTestingSms || !testPhone || !config.sms_enabled}
-                    className="bg-[#10B981] hover:bg-[#059669] text-white px-4 w-full"
-                  >
-                    {isTestingSms ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    ) : (
-                      <>
-                        <TestTube size={16} className="mr-2" />
-                        Send Test SMS
-                      </>
-                    )}
-                  </BaseButton>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
 
-      {activeTab === 'telegram' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Telegram Configuration */}
-          <Card className="dashboard-card">
-            <CardHeader>
-              <CardTitle className="dashboard-card-title flex items-center gap-2">
-                <Bot size={20} />
-                <span>Telegram Configuration</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
                 <div>
-                  <Label className="dashboard-label">Enable Telegram Service</Label>
-                  <p className="text-xs text-gray-500">Enable Telegram bot notifications and templates</p>
-                </div>
-                <Switch
-                  checked={config.telegram_enabled}
-                  onCheckedChange={(checked) => setConfig(prev => ({ ...prev, telegram_enabled: checked }))}
-                />
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <Label className="dashboard-label">Telegram Bot Token</Label>
+                  <Label className="dashboard-label">Bot Token</Label>
                   <div className="relative">
                     <BaseInput
                       type={showTelegramToken ? "text" : "password"}
                       value={config.telegram_bot_token}
                       onChange={(e) => setConfig(prev => ({ ...prev, telegram_bot_token: e.target.value }))}
-                      placeholder="Enter your Telegram bot token"
+                      placeholder="Your Telegram Bot Token"
                       className="dashboard-input pr-10"
                     />
                     <button
@@ -751,344 +745,498 @@ export function CommunicationConfig() {
                     </button>
                   </div>
                 </div>
-                
-                <div>
-                  <Label className="dashboard-label">Webhook URL</Label>
-                  <BaseInput
-                    value={config.telegram_webhook_url}
-                    onChange={(e) => setConfig(prev => ({ ...prev, telegram_webhook_url: e.target.value }))}
-                    placeholder="https://yourdomain.com/api/telegram/webhook"
-                    className="dashboard-input"
-                  />
-                </div>
-
-                <div>
-                  <Label className="dashboard-label">Notification Chat IDs</Label>
-                  <div className="space-y-3">
-                    {/* Add new chat ID */}
-                    <div className="flex gap-2">
-                      <BaseInput
-                        value={newChatId}
-                        onChange={(e) => setNewChatId(e.target.value)}
-                        placeholder="Enter chat ID or username"
-                        className="dashboard-input flex-1"
-                      />
-                      <BaseButton
-                        onClick={addChatId}
-                        disabled={!newChatId.trim()}
-                        className="dashboard-button-primary"
-                      >
-                        Add
-                      </BaseButton>
-                    </div>
-                    
-                    {/* List of chat IDs */}
-                    <div className="space-y-2">
-                      {config.telegram_chat_ids.map((chatId, index) => (
-                        <div key={index} className="flex items-center justify-between p-2 bg-[#0A0A23]/30 rounded border border-[#C0C0C0]/20">
-                          <span className="text-[#EAEAEA] text-sm">{chatId}</span>
-                          <button
-                            onClick={() => removeChatId(chatId)}
-                            className="text-red-400 hover:text-red-300 text-sm"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      ))}
-                      {config.telegram_chat_ids.length === 0 && (
-                        <p className="text-[#C0C0C0] text-sm">No chat IDs added yet</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
 
                 <div>
                   <Label className="dashboard-label">Bot Username</Label>
                   <BaseInput
+                    type="text"
                     value={config.telegram_username}
                     onChange={(e) => setConfig(prev => ({ ...prev, telegram_username: e.target.value }))}
-                    placeholder="Your bot username"
+                    placeholder="@YourBotUsername"
                     className="dashboard-input"
                   />
                 </div>
-              </div>
 
-              {/* Test Telegram Section */}
-              <div className="border-t border-[#C0C0C0]/20 pt-6">
-                <h4 className="font-medium dashboard-text-primary mb-4">Test Telegram Configuration</h4>
-                <div className="space-y-3">
+                <div>
+                  <Label className="dashboard-label">Webhook URL</Label>
                   <BaseInput
+                    type="url"
+                    value={config.telegram_webhook_url}
+                    onChange={(e) => setConfig(prev => ({ ...prev, telegram_webhook_url: e.target.value }))}
+                    placeholder="https://yourdomain.com/webhook/telegram"
+                    className="dashboard-input"
+                  />
+                </div>
+
+                {/* User Management */}
+                <div className="pt-4 border-t border-gray-200">
+                  <div className="flex items-center justify-between mb-3">
+                    <Label className="dashboard-label">User Management</Label>
+                    <BaseButton
+                      onClick={openUserModal}
+                      className="dashboard-button-secondary"
+                      size="sm"
+                    >
+                      Manage Users
+                    </BaseButton>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Attach Telegram chat IDs to specific users for targeted notifications.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Social Media APIs */}
+        <div>
+          <h3 className="text-xl font-bold text-gray-900 mb-6">Social Media APIs</h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* WhatsApp Business API */}
+            <Card className="dashboard-card">
+              <CardHeader>
+                <CardTitle className="dashboard-card-title flex items-center gap-2">
+                  <MessageCircle size={20} />
+                  <span>WhatsApp Business</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="dashboard-label">Enable WhatsApp</Label>
+                    <p className="text-xs text-gray-500">WhatsApp Business notifications</p>
+                  </div>
+                  <Switch
+                    checked={config.whatsapp_enabled}
+                    onCheckedChange={(checked) => setConfig(prev => ({ ...prev, whatsapp_enabled: checked }))}
+                  />
+                </div>
+
+                <div>
+                  <Label className="dashboard-label">Business Account ID</Label>
+                  <BaseInput
+                    type="text"
+                    value={config.whatsapp_business_account_id}
+                    onChange={(e) => setConfig(prev => ({ ...prev, whatsapp_business_account_id: e.target.value }))}
+                    placeholder="Your WhatsApp Business Account ID"
+                    className="dashboard-input"
+                  />
+                </div>
+
+                <div>
+                  <Label className="dashboard-label">Access Token</Label>
+                  <div className="relative">
+                    <BaseInput
+                      type={showWhatsAppToken ? "text" : "password"}
+                      value={config.whatsapp_access_token}
+                      onChange={(e) => setConfig(prev => ({ ...prev, whatsapp_access_token: e.target.value }))}
+                      placeholder="Your WhatsApp Access Token"
+                      className="dashboard-input pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowWhatsAppToken(!showWhatsAppToken)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#C0C0C0] hover:text-white"
+                    >
+                      {showWhatsAppToken ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="dashboard-label">Phone Number ID</Label>
+                  <BaseInput
+                    type="text"
+                    value={config.whatsapp_phone_number_id}
+                    onChange={(e) => setConfig(prev => ({ ...prev, whatsapp_phone_number_id: e.target.value }))}
+                    placeholder="Your WhatsApp Phone Number ID"
+                    className="dashboard-input"
+                  />
+                </div>
+
+                <div>
+                  <Label className="dashboard-label">Webhook Verify Token</Label>
+                  <BaseInput
+                    type="text"
+                    value={config.whatsapp_webhook_verify_token}
+                    onChange={(e) => setConfig(prev => ({ ...prev, whatsapp_webhook_verify_token: e.target.value }))}
+                    placeholder="Your WhatsApp Webhook Verify Token"
+                    className="dashboard-input"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Instagram Business API */}
+            <Card className="dashboard-card">
+              <CardHeader>
+                <CardTitle className="dashboard-card-title flex items-center gap-2">
+                  <Instagram size={20} />
+                  <span>Instagram Business</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="dashboard-label">Enable Instagram</Label>
+                    <p className="text-xs text-gray-500">Instagram Business notifications</p>
+                  </div>
+                  <Switch
+                    checked={config.instagram_enabled}
+                    onCheckedChange={(checked) => setConfig(prev => ({ ...prev, instagram_enabled: checked }))}
+                  />
+                </div>
+
+                <div>
+                  <Label className="dashboard-label">Access Token</Label>
+                  <div className="relative">
+                    <BaseInput
+                      type={showInstagramToken ? "text" : "password"}
+                      value={config.instagram_access_token}
+                      onChange={(e) => setConfig(prev => ({ ...prev, instagram_access_token: e.target.value }))}
+                      placeholder="Your Instagram Access Token"
+                      className="dashboard-input pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowInstagramToken(!showInstagramToken)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#C0C0C0] hover:text-white"
+                    >
+                      {showInstagramToken ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="dashboard-label">Business Account ID</Label>
+                  <BaseInput
+                    type="text"
+                    value={config.instagram_business_account_id}
+                    onChange={(e) => setConfig(prev => ({ ...prev, instagram_business_account_id: e.target.value }))}
+                    placeholder="Your Instagram Business Account ID"
+                    className="dashboard-input"
+                  />
+                </div>
+
+                <div>
+                  <Label className="dashboard-label">Webhook Verify Token</Label>
+                  <BaseInput
+                    type="text"
+                    value={config.instagram_webhook_verify_token}
+                    onChange={(e) => setConfig(prev => ({ ...prev, instagram_webhook_verify_token: e.target.value }))}
+                    placeholder="Your Instagram Webhook Verify Token"
+                    className="dashboard-input"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Testing Section */}
+        <div>
+          <h3 className="text-xl font-bold text-gray-900 mb-6">Test Communications</h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Email Testing */}
+            <Card className="dashboard-card">
+              <CardHeader>
+                <CardTitle className="dashboard-card-title flex items-center gap-2">
+                  <Mail size={20} />
+                  <span>Test Email</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label className="dashboard-label">Test Email Address</Label>
+                  <BaseInput
+                    type="email"
+                    value={testEmail}
+                    onChange={(e) => setTestEmail(e.target.value)}
+                    placeholder="test@example.com"
+                    className="dashboard-input"
+                  />
+                </div>
+                <BaseButton
+                  onClick={testEmailConnection}
+                  disabled={isTestingEmail || !testEmail}
+                  className="dashboard-button-primary w-full"
+                >
+                  {isTestingEmail ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Testing...
+                    </>
+                  ) : (
+                    <>
+                      <TestTube size={16} className="mr-2" />
+                      Send Test Email
+                    </>
+                  )}
+                </BaseButton>
+              </CardContent>
+            </Card>
+
+            {/* SMS Testing */}
+            <Card className="dashboard-card">
+              <CardHeader>
+                <CardTitle className="dashboard-card-title flex items-center gap-2">
+                  <Smartphone size={20} />
+                  <span>Test SMS</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label className="dashboard-label">Test Phone Number</Label>
+                  <BaseInput
+                    type="tel"
+                    value={testPhone}
+                    onChange={(e) => setTestPhone(e.target.value)}
+                    placeholder="+1234567890"
+                    className="dashboard-input"
+                  />
+                </div>
+                <BaseButton
+                  onClick={testSmsConnection}
+                  disabled={isTestingSms || !testPhone}
+                  className="dashboard-button-primary w-full"
+                >
+                  {isTestingSms ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Testing...
+                    </>
+                  ) : (
+                    <>
+                      <TestTube size={16} className="mr-2" />
+                      Send Test SMS
+                    </>
+                  )}
+                </BaseButton>
+              </CardContent>
+            </Card>
+
+            {/* Telegram Testing */}
+            <Card className="dashboard-card">
+              <CardHeader>
+                <CardTitle className="dashboard-card-title flex items-center gap-2">
+                  <Bot size={20} />
+                  <span>Test Telegram</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label className="dashboard-label">Test Chat ID</Label>
+                  <BaseInput
+                    type="text"
                     value={testTelegramChat}
                     onChange={(e) => setTestTelegramChat(e.target.value)}
-                    placeholder="Enter chat ID or username"
+                    placeholder="123456789"
                     className="dashboard-input"
                   />
+                </div>
+                <BaseButton
+                  onClick={testTelegramConnection}
+                  disabled={isTestingTelegram || !testTelegramChat}
+                  className="dashboard-button-primary w-full"
+                >
+                  {isTestingTelegram ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Testing...
+                    </>
+                  ) : (
+                    <>
+                      <TestTube size={16} className="mr-2" />
+                      Send Test Telegram
+                    </>
+                  )}
+                </BaseButton>
+              </CardContent>
+            </Card>
+
+            {/* WhatsApp Testing */}
+            <Card className="dashboard-card">
+              <CardHeader>
+                <CardTitle className="dashboard-card-title flex items-center gap-2">
+                  <MessageCircle size={20} />
+                  <span>Test WhatsApp</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label className="dashboard-label">Test Phone Number</Label>
                   <BaseInput
-                    value={testMessage}
-                    onChange={(e) => setTestMessage(e.target.value)}
-                    placeholder="Test Telegram message"
+                    type="tel"
+                    value={testPhone}
+                    onChange={(e) => setTestPhone(e.target.value)}
+                    placeholder="+1234567890"
                     className="dashboard-input"
                   />
-                  <BaseButton
-                    onClick={testTelegramConnection}
-                    disabled={isTestingTelegram || !testTelegramChat || !config.telegram_enabled}
-                    className="dashboard-button-success w-full"
-                  >
-                    {isTestingTelegram ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    ) : (
-                      <>
-                        <TestTube size={16} className="mr-2" />
-                        Send Test Message
-                      </>
-                    )}
-                  </BaseButton>
                 </div>
+                <BaseButton
+                  onClick={testWhatsAppConnection}
+                  disabled={isTestingWhatsApp || !testPhone}
+                  className="dashboard-button-primary w-full"
+                >
+                  {isTestingWhatsApp ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Testing...
+                    </>
+                  ) : (
+                    <>
+                      <TestTube size={16} className="mr-2" />
+                      Send Test WhatsApp
+                    </>
+                  )}
+                </BaseButton>
+              </CardContent>
+            </Card>
+
+            {/* Instagram Testing */}
+            <Card className="dashboard-card">
+              <CardHeader>
+                <CardTitle className="dashboard-card-title flex items-center gap-2">
+                  <Instagram size={20} />
+                  <span>Test Instagram</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label className="dashboard-label">Test Username</Label>
+                  <BaseInput
+                    type="text"
+                    value={testInstagramUser}
+                    onChange={(e) => setTestInstagramUser(e.target.value)}
+                    placeholder="@username"
+                    className="dashboard-input"
+                  />
+                </div>
+                <BaseButton
+                  onClick={testInstagramConnection}
+                  disabled={isTestingInstagram || !testInstagramUser}
+                  className="dashboard-button-primary w-full"
+                >
+                  {isTestingInstagram ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Testing...
+                    </>
+                  ) : (
+                    <>
+                      <TestTube size={16} className="mr-2" />
+                      Send Test Instagram
+                    </>
+                  )}
+                </BaseButton>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+
+      {/* Telegram User Management Modal */}
+      {showUserModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Manage Telegram Users</h3>
+              <button
+                onClick={closeUserModal}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <Label className="dashboard-label">Search Users</Label>
+                <BaseInput
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by name or email..."
+                  className="dashboard-input"
+                />
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Telegram Template Manager */}
-          <Card className="dashboard-card">
-            <CardHeader>
-              <CardTitle className="dashboard-card-title flex items-center gap-2">
-                <MessageSquare size={20} />
-                <span>Telegram Template Manager</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                {/* Template Categories */}
-                <div>
-                  <Label className="dashboard-label">Template Categories</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button className="p-3 text-left border border-[#C0C0C0]/30 rounded hover:bg-[#0A0A23]/30 transition-colors">
-                      <div className="font-medium text-[#EAEAEA]">Welcome Messages</div>
-                      <div className="text-xs text-[#C0C0C0]">User onboarding</div>
-                    </button>
-                    <button className="p-3 text-left border border-[#C0C0C0]/30 rounded hover:bg-[#0A0A23]/30 transition-colors">
-                      <div className="font-medium text-[#EAEAEA]">Class Reminders</div>
-                      <div className="text-xs text-[#C0C0C0]">Booking notifications</div>
-                    </button>
-                    <button className="p-3 text-left border border-[#C0C0C0]/30 rounded hover:bg-[#0A0A23]/30 transition-colors">
-                      <div className="font-medium text-[#EAEAEA]">Payment Confirmations</div>
-                      <div className="text-xs text-[#C0C0C0]">Transaction updates</div>
-                    </button>
-                    <button className="p-3 text-left border border-[#C0C0C0]/30 rounded hover:bg-[#0A0A23]/30 transition-colors">
-                      <div className="font-medium text-[#EAEAEA]">Promotional</div>
-                      <div className="text-xs text-[#C0C0C0]">Marketing messages</div>
-                    </button>
-                  </div>
+              {isLoadingUsers ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                 </div>
+              ) : (
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {filteredUsers.map((user) => (
+                    <div
+                      key={user.id}
+                      className={`p-3 border rounded-lg cursor-pointer ${
+                        selectedUser?.id === user.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                      }`}
+                      onClick={() => handleUserSelect(user)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">{user.fullName || 'No Name'}</p>
+                          <p className="text-sm text-gray-500">{user.email || 'No Email'}</p>
+                          {user.telegram_chat_id && (
+                            <p className="text-xs text-green-600">Chat ID: {user.telegram_chat_id}</p>
+                          )}
+                        </div>
+                        {user.telegram_chat_id && (
+                          <BaseButton
+                            onClick={() => detachChatIdFromUser(user.id)}
+                            className="dashboard-button-danger"
+                            size="sm"
+                          >
+                            Detach
+                          </BaseButton>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
 
-                {/* Template Editor */}
-                <div>
-                  <Label className="dashboard-label">Template Editor</Label>
+              {selectedUser && (
+                <div className="pt-4 border-t border-gray-200">
                   <div className="space-y-3">
-                    <div className="flex gap-2">
+                    <div>
+                      <Label className="dashboard-label">Selected User</Label>
+                      <p className="text-sm font-medium">{selectedUser.fullName || 'No Name'}</p>
+                      <p className="text-xs text-gray-500">{selectedUser.email || 'No Email'}</p>
+                    </div>
+                    <div>
+                      <Label className="dashboard-label">Telegram Chat ID</Label>
                       <BaseInput
-                        value={templateName}
-                        onChange={(e) => setTemplateName(e.target.value)}
-                        placeholder="Template name"
-                        className="dashboard-input flex-1"
+                        type="text"
+                        value={chatIdInput}
+                        onChange={(e) => setChatIdInput(e.target.value)}
+                        placeholder="Enter Telegram Chat ID"
+                        className="dashboard-input"
                       />
-                      <Select value={templateCategory} onValueChange={setTemplateCategory}>
-                        <SelectTrigger className="dashboard-input w-40">
-                          <SelectValue placeholder="Category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="welcome">Welcome</SelectItem>
-                          <SelectItem value="reminder">Reminder</SelectItem>
-                          <SelectItem value="payment">Payment</SelectItem>
-                          <SelectItem value="promotional">Promotional</SelectItem>
-                        </SelectContent>
-                      </Select>
                     </div>
-                    
-                    <textarea
-                      value={templateContent}
-                      onChange={(e) => setTemplateContent(e.target.value)}
-                      placeholder="Enter your template message here... Use variables like {userName}, {class_name}, {venue_name}, etc."
-                      className="dashboard-input h-48 resize-none"
-                    />
-                    
                     <div className="flex gap-2">
-                      <BaseButton className="dashboard-button-primary">
-                        Save Template
-                      </BaseButton>
-                      <BaseButton className="dashboard-button-secondary">
-                        Preview
-                      </BaseButton>
-                      <BaseButton 
-                        className="dashboard-button-success"
-                        onClick={() => {
-                          setTestMessage(templateContent);
-                          setTestTelegramChat(config.telegram_chat_ids[0] || '');
-                        }}
+                      <BaseButton
+                        onClick={saveUserChatId}
+                        disabled={!chatIdInput.trim()}
+                        className="dashboard-button-primary"
                       >
-                        Test Send
+                        Save Chat ID
+                      </BaseButton>
+                      <BaseButton
+                        onClick={closeUserModal}
+                        className="dashboard-button-secondary"
+                      >
+                        Cancel
                       </BaseButton>
                     </div>
                   </div>
                 </div>
-
-                {/* Available Variables */}
-                <div>
-                  <Label className="dashboard-label">Available Variables</Label>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="space-y-1">
-                      <div className="text-[#C0C0C0]">User Variables:</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{userName}'}</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{userEmail}'}</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{user_phone}'}</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{submissionDate}'}</div>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="text-[#C0C0C0]">MATPASS Variables:</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{matpassType}'}</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{matpassDescription}'}</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{matpassPrice}'}</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{matpassStartDate}'}</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{matpassEndDate}'}</div>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="text-[#C0C0C0]">Booking Variables:</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{bookingId}'}</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{bookingDate}'}</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{bookingTime}'}</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{teacherName}'}</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{className}'}</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{venue}'}</div>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="text-[#C0C0C0]">Product Variables:</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{productName}'}</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{productDescription}'}</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{productQuantity}'}</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{productPrice}'}</div>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="text-[#C0C0C0]">Order Variables:</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{matpassSubtotal}'}</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{productsSubtotal}'}</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{subtotalBeforeTax}'}</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{igvAmount}'}</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{orderTotal}'}</div>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="text-[#C0C0C0]">System Variables:</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{adminEmail}'}</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{date}'}</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{time}'}</div>
-                      <div className="text-[#EAEAEA] font-mono">{'{studio_name}'}</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Template Library */}
-                <div>
-                  <Label className="dashboard-label">Template Library</Label>
-                  <div className="space-y-2 max-h-60 overflow-y-auto">
-                    <div className="p-3 border border-[#C0C0C0]/30 rounded flex items-center justify-between">
-                      <div>
-                        <div className="font-medium text-[#EAEAEA]">🌿 New Purchase Confirmation</div>
-                        <div className="text-xs text-[#C0C0C0]">Complete order confirmation with MATPASS, bookings, and products</div>
-                      </div>
-                      <div className="flex gap-1">
-                        <BaseButton 
-                          size="sm" 
-                          className="dashboard-button-secondary"
-                          onClick={() => loadTemplate('New Purchase Confirmation')}
-                        >
-                          Edit
-                        </BaseButton>
-                        <BaseButton 
-                          size="sm" 
-                          className="dashboard-button-success"
-                          onClick={() => {
-                            loadTemplate('New Purchase Confirmation');
-                            setTestMessage(NEW_PURCHASE_TEMPLATE);
-                            setTestTelegramChat(config.telegram_chat_ids[0] || '');
-                          }}
-                        >
-                          Test
-                        </BaseButton>
-                      </div>
-                    </div>
-                    
-                    <div className="p-3 border border-[#C0C0C0]/30 rounded flex items-center justify-between">
-                      <div>
-                        <div className="font-medium text-[#EAEAEA]">Welcome Message</div>
-                        <div className="text-xs text-[#C0C0C0]">Welcome new users to the studio</div>
-                      </div>
-                      <div className="flex gap-1">
-                        <BaseButton 
-                          size="sm" 
-                          className="dashboard-button-secondary"
-                          onClick={() => loadTemplate('Welcome Message')}
-                        >
-                          Edit
-                        </BaseButton>
-                        <BaseButton 
-                          size="sm" 
-                          className="dashboard-button-success"
-                          onClick={() => loadTemplate('Welcome Message')}
-                        >
-                          Test
-                        </BaseButton>
-                      </div>
-                    </div>
-                    
-                    <div className="p-3 border border-[#C0C0C0]/30 rounded flex items-center justify-between">
-                      <div>
-                        <div className="font-medium text-[#EAEAEA]">Class Reminder</div>
-                        <div className="text-xs text-[#C0C0C0]">Remind users about upcoming classes</div>
-                      </div>
-                      <div className="flex gap-1">
-                        <BaseButton 
-                          size="sm" 
-                          className="dashboard-button-secondary"
-                          onClick={() => loadTemplate('Class Reminder')}
-                        >
-                          Edit
-                        </BaseButton>
-                        <BaseButton 
-                          size="sm" 
-                          className="dashboard-button-success"
-                          onClick={() => loadTemplate('Class Reminder')}
-                        >
-                          Test
-                        </BaseButton>
-                      </div>
-                    </div>
-                    
-                    <div className="p-3 border border-[#C0C0C0]/30 rounded flex items-center justify-between">
-                      <div>
-                        <div className="font-medium text-[#EAEAEA]">Payment Confirmation</div>
-                        <div className="text-xs text-[#C0C0C0]">Confirm successful payments</div>
-                      </div>
-                      <div className="flex gap-1">
-                        <BaseButton 
-                          size="sm" 
-                          className="dashboard-button-secondary"
-                          onClick={() => loadTemplate('Payment Confirmation')}
-                        >
-                          Edit
-                        </BaseButton>
-                        <BaseButton 
-                          size="sm" 
-                          className="dashboard-button-success"
-                          onClick={() => loadTemplate('Payment Confirmation')}
-                        >
-                          Test
-                        </BaseButton>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

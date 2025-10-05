@@ -10,7 +10,7 @@ import BookingsManagement from '../BookingsManagement';
 import { UnifiedScheduleManagement } from './UnifiedScheduleManagement';
 import PackagesAndPricing from '../PackagesAndPricing';
 import { ContentManagement } from '../ContentManagement';
-import { CommunicationSettings } from '../communication/CommunicationSettings';
+import { CommunicationDashboard } from './CommunicationDashboard';
 import { CommunicationsDashboard } from '../communications/CommunicationsDashboard';
 import { ImageManagement } from '../ImageManagement';
 import { SeoManagement } from '../SeoManagement';
@@ -55,7 +55,7 @@ export function AdminMainContentNew({ activeTab = 'dashboard', bugReportManageme
       case 'content':
         return <ContentManagement />;
       case 'email':
-        return <CommunicationSettings />;
+        return <CommunicationDashboard />;
       case 'communications':
         return <CommunicationsDashboard />;
       case 'live-session':

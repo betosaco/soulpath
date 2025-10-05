@@ -1,9 +1,7 @@
 'use client';
 
-import { AdminMainContentNew } from '@/components/admin/AdminMainContentNew';
+import { AdminDashboard } from '@/components/admin/AdminDashboard';
 
 export default function AdminPage() {
-  // The /(admin)/layout.tsx already provides the shell (sidebar/header).
-  // Render only the admin main content to avoid double layout nesting.
-  return <AdminMainContentNew activeTab="dashboard" />;
+  return <AdminDashboard />;
 }

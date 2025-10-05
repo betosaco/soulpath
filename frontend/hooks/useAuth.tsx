@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { safeApiCall } from '@/lib/api-utils';
+import { safeApiCall } from '../lib/api-utils';
 
 interface User {
   id: string;

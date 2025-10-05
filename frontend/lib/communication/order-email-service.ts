@@ -423,7 +423,12 @@ export class OrderEmailService {
         // Order data
         orderNumber: orderData.orderNumber,
         submissionDate: orderData.orderDate,
-        orderDate: new Date(orderData.orderDate).toLocaleDateString('es-ES', {
+        orderDate: orderData.orderDate ? new Date(orderData.orderDate).toLocaleDateString('es-ES', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }) : new Date().toLocaleDateString('es-ES', {
           weekday: 'long',
           year: 'numeric',
           month: 'long',
@@ -456,7 +461,12 @@ export class OrderEmailService {
         matpassType: orderData.matpassItems?.[0]?.name || 'MATPASS', // Use actual MatPass name (01 MATPASS, 04 MATPASS, etc.)
         matpassDescription: orderData.matpassItems?.[0]?.description || '',
         matpassPrice: `${currencySymbol} ${orderData.matpassItems?.[0]?.totalPrice?.toFixed(2) || '0.00'}`, // Currency symbol format
-        matpassStartDate: orderData.orderDate,
+        matpassStartDate: new Date().toLocaleDateString('es-ES', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }),
         matpassEndDate: orderData.matpassItems?.[0]?.expiryDate || '',
         matpassSubtotal: `${currencySymbol} ${orderData.matpassItems?.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2) || '0.00'}`, // Currency symbol format
         matpassSessions: orderData.matpassItems?.[0]?.sessions || 0, // Add sessions count
