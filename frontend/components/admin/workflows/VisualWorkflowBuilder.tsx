@@ -2115,6 +2115,8 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
 
 // Recipient Selector Component
 function RecipientSelector({ nodeType, selectedRecipients, onRecipientsChange }: RecipientSelectorProps) {
+  console.log('🚀 RecipientSelector component rendered for nodeType:', nodeType, 'with selectedRecipients:', selectedRecipients);
+
   const [availableUsers, setAvailableUsers] = useState<any[]>([]);
   const [availableGroups, setAvailableGroups] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -2183,18 +2185,24 @@ function RecipientSelector({ nodeType, selectedRecipients, onRecipientsChange }:
   };
 
   const addEventRecipient = (eventType: string, field: string) => {
+    console.log('🎯 Adding event recipient:', eventType, field);
     const eventRecipient: Recipient = {
       id: `event_${eventType}_${Date.now()}`,
       name: `${eventType.replace('_', ' ').toUpperCase()} (${field})`,
       type: "event_recipient",
       eventField: field
     };
-    onRecipientsChange([...selectedRecipients, eventRecipient]);
+    console.log('📧 New event recipient:', eventRecipient);
+    const newRecipients = [...selectedRecipients, eventRecipient];
+    console.log('📧 Updated recipients list:', newRecipients);
+    onRecipientsChange(newRecipients);
   };
 
   const removeRecipient = (recipientId: string) => {
     onRecipientsChange(selectedRecipients.filter(r => r.id !== recipientId));
   };
+
+  console.log('🔍 RecipientSelector render - selectedRecipients:', selectedRecipients);
 
   const renderUserSection = (roleData: any) => {
     const { role, users } = roleData;
@@ -2324,7 +2332,10 @@ function RecipientSelector({ nodeType, selectedRecipients, onRecipientsChange }:
           </div>
           <div className="grid grid-cols-1 gap-2">
             <button
-              onClick={() => addEventRecipient('customer', 'customer.email')}
+              onClick={() => {
+                console.log('🖱️ Customer email button clicked');
+                addEventRecipient('customer', 'customer.email');
+              }}
               className="flex items-center gap-2 p-2 bg-white border rounded hover:bg-yellow-100 text-sm"
             >
               <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
