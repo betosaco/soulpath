@@ -124,15 +124,28 @@ export function CommunicationDashboard({
   // Workflow handlers
   const handleWorkflowSave = async (workflow: WorkflowData) => {
     console.log('🚀 handleWorkflowSave called with workflow:', workflow);
+
+    // Ensure workflow has a name
+    const workflowToSave = {
+      ...workflow,
+      name: workflow.name?.trim() || `Workflow ${new Date().toLocaleDateString()}`
+    };
+
+    console.log('📋 Workflow data to send:', {
+      name: workflowToSave.name,
+      description: workflowToSave.description,
+      nodeCount: workflowToSave.nodes?.length || 0,
+      connectionCount: workflowToSave.connections?.length || 0
+    });
     try {
-      console.log('💾 Saving workflow:', workflow);
+      console.log('💾 Saving workflow:', workflowToSave);
 
       const response = await fetch('/api/admin/workflows', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(workflow),
+        body: JSON.stringify(workflowToSave),
       });
 
       console.log('📡 Save response status:', response.status);
@@ -143,7 +156,7 @@ export function CommunicationDashboard({
 
       if (data.success) {
         console.log('✅ Workflow saved successfully:', data);
-        alert(`✅ Flujo "${data.workflow.name}" guardado exitosamente!\n\n📊 ${data.workflow.nodeCount} nodos, ${data.workflow.connectionCount} conexiones`);
+        alert(`✅ Flujo "${workflowToSave.name}" guardado exitosamente!\n\n📊 ${workflowToSave.nodes?.length || 0} nodos, ${workflowToSave.connections?.length || 0} conexiones`);
       } else {
         console.error('❌ Failed to save workflow:', data);
         alert('❌ Error al guardar el flujo: ' + (data.error || 'Error desconocido'));

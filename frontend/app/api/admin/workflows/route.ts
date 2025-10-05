@@ -4,22 +4,37 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🔧 POST /api/admin/workflows - Starting request...');
+
     const user = getAuthenticatedUser(request);
+    console.log('👤 Auth result:', user ? { id: user.id, email: user.email, role: user.role } : 'null');
+
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      console.log('❌ No user found in authentication');
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication failed'
+      }, { status: 401 });
     }
 
     const workflowData = await request.json();
-    console.log('🔧 Saving workflow:', workflowData);
+    console.log('🔧 Received workflow data:', {
+      name: workflowData.name,
+      nodeCount: workflowData.nodes?.length || 0,
+      connectionCount: workflowData.connections?.length || 0
+    });
 
     // Validate required fields
     if (!workflowData.name || !workflowData.name.trim()) {
+      console.log('❌ Validation failed: Workflow name is required');
       return NextResponse.json({
+        success: false,
         error: 'Workflow name is required'
       }, { status: 400 });
     }
 
     // Save workflow to database
+    console.log('💾 Attempting to save workflow to database...');
     const workflow = await prisma.workflow.create({
       data: {
         name: workflowData.name.trim(),
