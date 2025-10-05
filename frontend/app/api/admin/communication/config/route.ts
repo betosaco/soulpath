@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     }
 
     console.log('✅ Communication config fetched successfully:', config);
-    return NextResponse.json({ config });
+    return NextResponse.json({ success: true, config });
   } catch (error) {
     console.error('❌ Unexpected error in GET /api/admin/communication/config:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -75,7 +75,7 @@ export async function PUT(request: NextRequest) {
     });
 
     console.log('✅ Communication config updated successfully:', config);
-    return NextResponse.json({ config });
+    return NextResponse.json({ success: true, config });
   } catch (error) {
     console.error('❌ Unexpected error in PUT /api/admin/communication/config:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';

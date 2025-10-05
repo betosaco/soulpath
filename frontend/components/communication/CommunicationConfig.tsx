@@ -181,6 +181,12 @@ export function CommunicationConfig() {
   const saveConfiguration = async () => {
     setIsSaving(true);
     try {
+      console.log('🔧 Saving communication configuration...', {
+        config,
+        userToken: user?.access_token ? 'Present' : 'Missing',
+        endpoint: '/api/admin/communication/config'
+      });
+
       const response = await fetch('/api/admin/communication/config', {
         method: 'PUT',
         headers: {
@@ -189,15 +195,23 @@ export function CommunicationConfig() {
         },
         body: JSON.stringify(config)
       });
+
+      console.log('📡 Save response status:', response.status);
+      console.log('📡 Save response headers:', Object.fromEntries(response.headers.entries()));
+
       const data = await response.json();
+      console.log('📊 Save response data:', data);
+
       if (data.success) {
         setMessage({ type: 'success', text: 'Configuration saved successfully!' });
+        console.log('✅ Configuration saved successfully');
       } else {
+        console.error('❌ Save failed:', data);
         setMessage({ type: 'error', text: data.error || 'Failed to save configuration' });
       }
     } catch (error) {
-      console.error('Error saving configuration:', error);
-      setMessage({ type: 'error', text: 'Failed to save configuration' });
+      console.error('❌ Error saving configuration:', error);
+      setMessage({ type: 'error', text: `Failed to save configuration: ${error.message}` });
     } finally {
       setIsSaving(false);
     }
