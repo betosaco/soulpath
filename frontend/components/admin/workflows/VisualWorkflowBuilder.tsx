@@ -320,6 +320,7 @@ export function VisualWorkflowBuilder({
   }, [initialWorkflow]);
 
   const [selectedNode, setSelectedNode] = useState<WorkflowNode | null>(null);
+  const [selectedConnection, setSelectedConnection] = useState<WorkflowConnection | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [showProperties, setShowProperties] = useState(true);
