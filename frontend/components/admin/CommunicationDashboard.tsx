@@ -123,6 +123,7 @@ export function CommunicationDashboard({
 
   // Workflow handlers
   const handleWorkflowSave = async (workflow: WorkflowData) => {
+    console.log('🚀 handleWorkflowSave called with workflow:', workflow);
     try {
       console.log('💾 Saving workflow:', workflow);
 
@@ -134,7 +135,11 @@ export function CommunicationDashboard({
         body: JSON.stringify(workflow),
       });
 
+      console.log('📡 Save response status:', response.status);
+      console.log('📡 Save response ok:', response.ok);
+
       const data = await response.json();
+      console.log('📊 Save response data:', data);
 
       if (data.success) {
         console.log('✅ Workflow saved successfully:', data);

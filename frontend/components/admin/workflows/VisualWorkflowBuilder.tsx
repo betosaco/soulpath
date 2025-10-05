@@ -1159,14 +1159,26 @@ export function VisualWorkflowBuilder({
   };
 
   const handleSave = () => {
+    console.log('🔧 VisualWorkflowBuilder handleSave called');
+    console.log('🔧 onSave prop exists:', !!onSave);
+    console.log('🔧 Current workflow:', workflow);
     if (onSave) {
+      console.log('🔧 Calling onSave with workflow');
       onSave(workflow);
+    } else {
+      console.log('❌ onSave prop is not defined');
     }
   };
 
   const handleTest = () => {
+    console.log('🧪 VisualWorkflowBuilder handleTest called');
+    console.log('🧪 onTest prop exists:', !!onTest);
+    console.log('🧪 Current workflow:', workflow);
     if (onTest) {
+      console.log('🧪 Calling onTest with workflow');
       onTest(workflow);
+    } else {
+      console.log('❌ onTest prop is not defined');
     }
   };
 
