@@ -1571,7 +1571,11 @@ export function VisualWorkflowBuilder({
               }}
               language={language}
               translations={t}
-              onOpenTelegramModal={() => setShowTelegramUserModal(true)}
+              onOpenTelegramModal={() => {
+                console.log('🔧 Parent: Opening modal, current state:', showTelegramUserModal);
+                setShowTelegramUserModal(true);
+                console.log('🔧 Parent: Modal state set to true');
+              }}
             />
           </div>
         )}
@@ -1963,6 +1967,7 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
 
       {/* Telegram User Selector Modal */}
       {console.log('🔧 Modal state:', { showTelegramUserModal, selectedNode: selectedNode?.id })}
+      {showTelegramUserModal && console.log('🔧 Modal should be rendering now...')}
       <TelegramUserSelectorModal
         isOpen={showTelegramUserModal}
         onClose={() => {

@@ -95,8 +95,15 @@ export function TelegramUserSelectorModal({
   console.log('🔧 TelegramUserSelectorModal: Modal is open, rendering...');
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      style={{ zIndex: 9999 }}
+    >
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col">
+        {/* Debug indicator */}
+        <div className="bg-red-500 text-white p-2 text-center font-bold">
+          🔧 MODAL IS RENDERING - DEBUG MODE
+        </div>
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div className="flex items-center gap-3">
