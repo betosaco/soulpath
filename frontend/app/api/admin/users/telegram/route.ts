@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth';
+import { getAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
     console.log('🔍 GET /api/admin/users/telegram - Starting request...');
 
-    const user = await requireAuth(request);
+    const user = getAuthenticatedUser(request);
     console.log('👤 Auth result:', user ? { id: user.id, email: user.email, role: user.role } : 'null');
 
     if (!user) {
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
   try {
     console.log('🔍 POST /api/admin/users/telegram - Starting request...');
 
-    const user = await requireAuth(request);
+    const user = getAuthenticatedUser(request);
     if (!user || user.role !== 'ADMIN') {
       console.log('❌ Unauthorized access attempt');
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
