@@ -1601,7 +1601,10 @@ interface TelegramUserSelectorProps {
 }
 
 function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations: t }: NodePropertiesPanelProps) {
+  console.log('🔧 NodePropertiesPanel: Received node:', { type: node.type, id: node.id, data: node.data });
+
   const renderNodeProperties = () => {
+    console.log('🔧 renderNodeProperties: node.type =', node.type);
     switch (node.type) {
       case 'trigger':
         return (
@@ -1666,6 +1669,7 @@ function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations:
         );
 
       case 'telegram':
+        console.log('🔧 renderNodeProperties: Rendering telegram case');
         return (
           <div className="space-y-4">
             <div>
