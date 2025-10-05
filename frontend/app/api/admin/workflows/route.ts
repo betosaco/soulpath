@@ -35,20 +35,38 @@ export async function POST(request: NextRequest) {
 
     // Save workflow to database
     console.log('💾 Attempting to save workflow to database...');
-    const workflow = await prisma.workflow.create({
-      data: {
-        name: workflowData.name.trim(),
-        description: workflowData.description || null,
-        data: workflowData, // Store the complete workflow structure
-        createdBy: user.id,
-        tags: workflowData.tags || [],
-        isActive: workflowData.isActive !== undefined ? workflowData.isActive : true,
-        isPublished: workflowData.isPublished || false,
-        version: workflowData.version || 1
-      }
+    console.log('📋 Prisma data to create:', {
+      name: workflowData.name.trim(),
+      description: workflowData.description || null,
+      createdBy: user.id,
+      // tags: workflowData.tags || [],
+      dataSize: JSON.stringify(workflowData).length
     });
 
-    console.log('✅ Workflow saved to database:', workflow.id);
+    let workflow;
+    try {
+      workflow = await prisma.workflow.create({
+        data: {
+          name: workflowData.name.trim(),
+          description: workflowData.description || null,
+          data: workflowData, // Store the complete workflow structure
+          createdBy: user.id,
+          // tags: workflowData.tags || [], // Temporarily commented out
+          isActive: workflowData.isActive !== undefined ? workflowData.isActive : true,
+          isPublished: workflowData.isPublished || false,
+          version: workflowData.version || 1
+        }
+      });
+
+      console.log('✅ Workflow saved to database:', workflow.id);
+    } catch (dbError) {
+      console.error('❌ Database error:', dbError);
+      return NextResponse.json({
+        success: false,
+        error: 'Database error',
+        details: dbError instanceof Error ? dbError.message : 'Unknown database error'
+      }, { status: 500 });
+    }
 
     return NextResponse.json({
       success: true,
@@ -60,7 +78,7 @@ export async function POST(request: NextRequest) {
         isActive: workflow.isActive,
         isPublished: workflow.isPublished,
         version: workflow.version,
-        tags: workflow.tags,
+        // tags: workflow.tags,
         createdAt: workflow.createdAt,
         updatedAt: workflow.updatedAt,
         // Don't return the full data object to keep response size manageable
