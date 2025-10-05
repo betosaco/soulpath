@@ -1552,8 +1552,10 @@ export function VisualWorkflowBuilder({
         </div>
 
         {/* Properties Panel */}
-        {selectedNode && showProperties && (
-          <div className="w-80 bg-white border-l p-4 overflow-y-auto">
+        {(() => {
+          console.log('🔧 Properties panel condition check:', { selectedNode: selectedNode?.id, showProperties, condition: selectedNode && showProperties });
+          return selectedNode && showProperties && (
+            <div className="w-80 bg-white border-l p-4 overflow-y-auto">
             <NodePropertiesPanel
               node={selectedNode}
               onUpdate={(updates) => handleNodeUpdate(selectedNode.id, updates)}
@@ -1571,7 +1573,8 @@ export function VisualWorkflowBuilder({
               translations={t}
             />
           </div>
-        )}
+          );
+        })()}
 
         {/* No mini panel - when properties are hidden, just show the canvas */}
       </div>
