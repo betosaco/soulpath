@@ -311,8 +311,13 @@ export function VisualWorkflowBuilder({
 
   // Force re-render when modal state changes
   useEffect(() => {
-    console.log('🔧 Modal state changed to:', showTelegramUserModal);
+    console.log('🔧 Modal state changed to:', showTelegramUserModal, 'at', new Date().toISOString());
     setForceRender(prev => prev + 1);
+
+    // If modal is true, log it prominently
+    if (showTelegramUserModal) {
+      console.log('🚨🚨🚨 MODAL STATE IS TRUE - SHOULD BE RENDERING 🚨🚨🚨');
+    }
   }, [showTelegramUserModal]);
 
   const translations = {
@@ -1969,13 +1974,11 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
       )}
 
       {/* Telegram User Selector Modal */}
-      {console.log('🔧 Rendering modal section, showTelegramUserModal:', showTelegramUserModal, 'forceRender:', forceRender)}
-      {showTelegramUserModal && (
-        console.log('🔧 Modal condition is true, rendering modal')
-      ) || (
-        console.log('🔧 Modal condition is false, not rendering modal')
-      )}
-      {showTelegramUserModal && (
+      {(() => {
+        console.log('🔧 Rendering modal section, showTelegramUserModal:', showTelegramUserModal, 'forceRender:', forceRender);
+        if (showTelegramUserModal) {
+          console.log('🔧 Modal condition is true, rendering modal');
+          return (
         <div style={{
           position: 'fixed',
           top: 0,
@@ -2008,7 +2011,12 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
             Close Modal
           </button>
         </div>
-      )}
+          );
+        } else {
+          console.log('🔧 Modal condition is false, not rendering modal');
+          return null;
+        }
+      })()}
     </div>
   );
 }
