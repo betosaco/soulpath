@@ -12,7 +12,7 @@ import {
   TestTube, 
   Eye, 
   EyeOff, 
-  Mail,
+  Mail, 
   Smartphone,
   CheckCircle,
   AlertCircle,
@@ -81,7 +81,7 @@ export function CommunicationConfig() {
     telegram_bot_token: '',
     telegram_webhook_url: '',
     telegram_chat_ids: [],
-    telegram_username: 'MatMaxYogaBot',
+    telegram_username: 'Matmaxcommerce_bot',
     whatsapp_enabled: false,
     whatsapp_business_account_id: '',
     whatsapp_access_token: '',
@@ -532,25 +532,25 @@ export function CommunicationConfig() {
         <div>
           <h3 className="text-xl font-bold text-gray-900 mb-6">Primary Communication Services</h3>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Email Configuration */}
-            <Card className="dashboard-card">
-              <CardHeader>
-                <CardTitle className="dashboard-card-title flex items-center gap-2">
-                  <Mail size={20} />
+        {/* Email Configuration */}
+        <Card className="dashboard-card">
+          <CardHeader>
+            <CardTitle className="dashboard-card-title flex items-center gap-2">
+              <Mail size={20} />
                   <span>Email</span>
-                </CardTitle>
-              </CardHeader>
+            </CardTitle>
+          </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
+            <div className="flex items-center justify-between">
+              <div>
                     <Label className="dashboard-label">Enable Email</Label>
                     <p className="text-xs text-gray-500">Email notifications</p>
-                  </div>
-                  <Switch
-                    checked={config.email_enabled}
-                    onCheckedChange={(checked) => setConfig(prev => ({ ...prev, email_enabled: checked }))}
-                  />
-                </div>
+              </div>
+              <Switch
+                checked={config.email_enabled}
+                onCheckedChange={(checked) => setConfig(prev => ({ ...prev, email_enabled: checked }))}
+              />
+            </div>
 
                 <div>
                   <Label className="dashboard-label">Email Provider</Label>
@@ -570,25 +570,25 @@ export function CommunicationConfig() {
 
                 {/* Brevo API Key */}
                 {config.email_provider === 'brevo' && (
-                  <div>
-                    <Label className="dashboard-label">Brevo API Key</Label>
-                    <div className="relative">
-                      <BaseInput
-                        type={showApiKey ? "text" : "password"}
-                        value={config.brevo_api_key}
-                        onChange={(e) => setConfig(prev => ({ ...prev, brevo_api_key: e.target.value }))}
+              <div>
+                <Label className="dashboard-label">Brevo API Key</Label>
+                <div className="relative">
+                  <BaseInput
+                    type={showApiKey ? "text" : "password"}
+                    value={config.brevo_api_key}
+                    onChange={(e) => setConfig(prev => ({ ...prev, brevo_api_key: e.target.value }))}
                         placeholder="Your Brevo API Key"
-                        className="dashboard-input pr-10"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowApiKey(!showApiKey)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#C0C0C0] hover:text-white"
-                      >
-                        {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
-                      </button>
-                    </div>
-                  </div>
+                    className="dashboard-input pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowApiKey(!showApiKey)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#C0C0C0] hover:text-white"
+                  >
+                    {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
                 )}
 
                 {/* Resend API Key */}
@@ -613,118 +613,169 @@ export function CommunicationConfig() {
                     </div>
                   </div>
                 )}
+              
+              <div>
+                <Label className="dashboard-label">Sender Email</Label>
+                <BaseInput
+                  type="email"
+                  value={config.sender_email}
+                  onChange={(e) => setConfig(prev => ({ ...prev, sender_email: e.target.value }))}
+                  placeholder="noreply@yourdomain.com"
+                  className="dashboard-input"
+                />
+              </div>
 
-                <div>
-                  <Label className="dashboard-label">Sender Email</Label>
-                  <BaseInput
-                    type="email"
-                    value={config.sender_email}
-                    onChange={(e) => setConfig(prev => ({ ...prev, sender_email: e.target.value }))}
-                    placeholder="noreply@yourdomain.com"
-                    className="dashboard-input"
-                  />
-                </div>
-
-                <div>
-                  <Label className="dashboard-label">Sender Name</Label>
-                  <BaseInput
+              <div>
+                <Label className="dashboard-label">Sender Name</Label>
+                <BaseInput
                     type="text"
-                    value={config.sender_name}
-                    onChange={(e) => setConfig(prev => ({ ...prev, sender_name: e.target.value }))}
+                  value={config.sender_name}
+                  onChange={(e) => setConfig(prev => ({ ...prev, sender_name: e.target.value }))}
                     placeholder="Your Company Name"
-                    className="dashboard-input"
-                  />
-                </div>
+                  className="dashboard-input"
+                />
+              </div>
 
-                <div>
-                  <Label className="dashboard-label">Admin Email</Label>
-                  <BaseInput
-                    type="email"
-                    value={config.admin_email}
-                    onChange={(e) => setConfig(prev => ({ ...prev, admin_email: e.target.value }))}
-                    placeholder="admin@yourdomain.com"
-                    className="dashboard-input"
-                  />
-                </div>
-              </CardContent>
-            </Card>
+              <div>
+                <Label className="dashboard-label">Admin Email</Label>
+                <BaseInput
+                  type="email"
+                  value={config.admin_email}
+                  onChange={(e) => setConfig(prev => ({ ...prev, admin_email: e.target.value }))}
+                  placeholder="admin@yourdomain.com"
+                  className="dashboard-input"
+                />
+            </div>
+          </CardContent>
+        </Card>
 
-            {/* SMS Configuration */}
+        {/* SMS Configuration */}
             <Card className="dashboard-card">
-              <CardHeader>
+          <CardHeader>
                 <CardTitle className="dashboard-card-title flex items-center gap-2">
-                  <Smartphone size={20} />
+              <Smartphone size={20} />
                   <span>SMS</span>
-                </CardTitle>
-              </CardHeader>
+            </CardTitle>
+          </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
+            <div className="flex items-center justify-between">
+              <div>
                     <Label className="dashboard-label">Enable SMS</Label>
                     <p className="text-xs text-gray-500">SMS notifications</p>
-                  </div>
-                  <Switch
-                    checked={config.sms_enabled}
-                    onCheckedChange={(checked) => setConfig(prev => ({ ...prev, sms_enabled: checked }))}
-                  />
-                </div>
+              </div>
+              <Switch
+                checked={config.sms_enabled}
+                onCheckedChange={(checked) => setConfig(prev => ({ ...prev, sms_enabled: checked }))}
+              />
+            </div>
 
-                <div>
+              <div>
                   <Label className="dashboard-label">SMS Provider</Label>
                   <Select
                     value={config.sms_provider}
                     onValueChange={(value) => setConfig(prev => ({ ...prev, sms_provider: value }))}
                   >
                     <SelectTrigger className="dashboard-input">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
                       <SelectItem value="labsmobile">LabsMobile</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                  </SelectContent>
+                </Select>
+              </div>
 
-                <div>
-                  <Label className="dashboard-label">Username</Label>
-                  <BaseInput
+              <div>
+                  <Label className="dashboard-label">LabsMobile Username</Label>
+                <BaseInput
                     type="text"
-                    value={config.labsmobile_username}
-                    onChange={(e) => setConfig(prev => ({ ...prev, labsmobile_username: e.target.value }))}
+                  value={config.labsmobile_username}
+                  onChange={(e) => setConfig(prev => ({ ...prev, labsmobile_username: e.target.value }))}
                     placeholder="Your LabsMobile username"
                     className="dashboard-input"
-                  />
-                </div>
+                />
+              </div>
 
-                <div>
-                  <Label className="dashboard-label">Token</Label>
-                  <div className="relative">
-                    <BaseInput
-                      type={showSmsToken ? "text" : "password"}
-                      value={config.labsmobile_token}
-                      onChange={(e) => setConfig(prev => ({ ...prev, labsmobile_token: e.target.value }))}
+              <div>
+                  <Label className="dashboard-label">LabsMobile Token</Label>
+                <div className="relative">
+                  <BaseInput
+                    type={showSmsToken ? "text" : "password"}
+                    value={config.labsmobile_token}
+                    onChange={(e) => setConfig(prev => ({ ...prev, labsmobile_token: e.target.value }))}
                       placeholder="Your LabsMobile token"
                       className="dashboard-input pr-10"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowSmsToken(!showSmsToken)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#C0C0C0] hover:text-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowSmsToken(!showSmsToken)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#C0C0C0] hover:text-white"
+                  >
+                    {showSmsToken ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                  <Label className="dashboard-label">SMS Sender Name</Label>
+                <BaseInput
+                    type="text"
+                  value={config.sms_sender_name}
+                  onChange={(e) => setConfig(prev => ({ ...prev, sms_sender_name: e.target.value }))}
+                    placeholder="MatMax Yoga Studio"
+                    className="dashboard-input"
+                />
+              </div>
+
+                {/* SMS Test Section */}
+                <div className="border-t pt-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <TestTube size={16} />
+                    <Label className="dashboard-label">Test SMS</Label>
+            </div>
+
+              <div className="space-y-3">
+                    <div>
+                      <Label className="text-sm text-gray-600">Phone Number</Label>
+                <BaseInput
+                        type="tel"
+                  value={testPhone}
+                  onChange={(e) => setTestPhone(e.target.value)}
+                  placeholder="+1234567890"
+                        className="dashboard-input"
+                />
+                    </div>
+                    
+                    <div>
+                      <Label className="text-sm text-gray-600">Test Message</Label>
+                <BaseInput
+                        type="text"
+                  value={testMessage}
+                  onChange={(e) => setTestMessage(e.target.value)}
+                        placeholder="Test message from MatMax Yoga Studio"
+                        className="dashboard-input"
+                      />
+                    </div>
+                    
+                    <BaseButton
+                      onClick={testSmsConnection}
+                      disabled={!testPhone || !config.labsmobile_username || !config.labsmobile_token || isTestingSms}
+                      className="dashboard-button-secondary w-full"
                     >
-                      {showSmsToken ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
+                      {isTestingSms ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Testing SMS...
+                        </>
+                      ) : (
+                        <>
+                          <TestTube size={16} className="mr-2" />
+                          Test SMS
+                        </>
+                      )}
+                    </BaseButton>
                   </div>
                 </div>
 
-                <div>
-                  <Label className="dashboard-label">Sender Name</Label>
-                  <BaseInput
-                    type="text"
-                    value={config.sms_sender_name}
-                    onChange={(e) => setConfig(prev => ({ ...prev, sms_sender_name: e.target.value }))}
-                    placeholder="Your Company Name"
-                    className="dashboard-input"
-                  />
-                </div>
               </CardContent>
             </Card>
 
@@ -1056,7 +1107,7 @@ export function CommunicationConfig() {
                     placeholder="123456789"
                     className="dashboard-input"
                   />
-                </div>
+              </div>
                 <BaseButton
                   onClick={testTelegramConnection}
                   disabled={isTestingTelegram || !testTelegramChat}
@@ -1095,7 +1146,7 @@ export function CommunicationConfig() {
                     placeholder="+1234567890"
                     className="dashboard-input"
                   />
-                </div>
+            </div>
                 <BaseButton
                   onClick={testWhatsAppConnection}
                   disabled={isTestingWhatsApp || !testPhone}
@@ -1113,8 +1164,8 @@ export function CommunicationConfig() {
                     </>
                   )}
                 </BaseButton>
-              </CardContent>
-            </Card>
+          </CardContent>
+        </Card>
 
             {/* Instagram Testing */}
             <Card className="dashboard-card">
@@ -1134,7 +1185,7 @@ export function CommunicationConfig() {
                     placeholder="@username"
                     className="dashboard-input"
                   />
-                </div>
+      </div>
                 <BaseButton
                   onClick={testInstagramConnection}
                   disabled={isTestingInstagram || !testInstagramUser}
