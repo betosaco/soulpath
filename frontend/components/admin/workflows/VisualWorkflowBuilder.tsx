@@ -1866,8 +1866,7 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
   };
 
   const selectAll = () => {
-    const selectableUsers = users.filter(u => u.telegram_chat_id);
-    onUsersChange(selectableUsers);
+    onUsersChange(users); // All users now have chat IDs
   };
 
   const clearAll = () => {
@@ -1923,31 +1922,25 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
             )}
             {users.map(user => {
               const isSelected = selectedUsers.some(u => u.id === user.id);
-              const canSelect = !!user.telegram_chat_id;
 
               return (
                 <div
                   key={user.id}
-                  onClick={() => canSelect && toggleUser(user)}
+                  onClick={() => toggleUser(user)}
                   className={`flex items-center gap-2 p-2 rounded cursor-pointer text-sm ${
                     isSelected ? 'bg-blue-100' : 'hover:bg-gray-100'
-                  } ${!canSelect ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  }`}
                 >
                   <input
                     type="checkbox"
                     checked={isSelected}
-                    disabled={!canSelect}
                     readOnly
                     className="w-3 h-3"
                   />
                   <div className="flex-1">
                     <div className="font-medium text-xs">{user.fullName || 'No Name'}</div>
                     <div className="text-xs text-gray-500">{user.email || 'No Email'}</div>
-                    {user.telegram_chat_id ? (
-                      <div className="text-xs text-green-600">ID: {user.telegram_chat_id}</div>
-                    ) : (
-                      <div className="text-xs text-red-500">No Chat ID</div>
-                    )}
+                    <div className="text-xs text-green-600">ID: {user.telegram_chat_id}</div>
                   </div>
                 </div>
               );

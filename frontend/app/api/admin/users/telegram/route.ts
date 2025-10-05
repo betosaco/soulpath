@@ -21,8 +21,13 @@ export async function GET(request: NextRequest) {
 
     console.log('✅ User authenticated:', user.email);
 
-    // Fetch users with their Telegram information
+    // Fetch users with their Telegram information (only those with chat IDs)
     const users = await prisma.user.findMany({
+      where: {
+        telegramChatId: {
+          not: null
+        }
+      },
       select: {
         id: true,
         fullName: true,
