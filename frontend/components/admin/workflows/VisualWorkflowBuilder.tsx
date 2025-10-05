@@ -273,7 +273,13 @@ export function VisualWorkflowBuilder({
   onTest,
   initialWorkflow
 }: VisualWorkflowBuilderProps) {
-  const [workflow, setWorkflow] = useState<WorkflowData>(initialWorkflow || {
+  const [workflow, setWorkflow] = useState<WorkflowData>(() => {
+    // If initialWorkflow is provided, use it; otherwise use default
+    if (initialWorkflow) {
+      console.log('🔧 Loading initial workflow for editing:', initialWorkflow.name);
+      return initialWorkflow;
+    }
+    return {
     id: '',
     name: '',
     description: '',
@@ -300,6 +306,17 @@ export function VisualWorkflowBuilder({
     createdAt: new Date(),
     updatedAt: new Date()
   });
+
+  // Handle initialWorkflow changes (for editing existing workflows)
+  useEffect(() => {
+    if (initialWorkflow) {
+      console.log('🔄 Updating workflow for editing:', initialWorkflow.name);
+      setWorkflow(initialWorkflow);
+      // Reset selected node when loading a new workflow
+      setSelectedNode(null);
+      setSelectedConnection(null);
+    }
+  }, [initialWorkflow]);
 
   const [selectedNode, setSelectedNode] = useState<WorkflowNode | null>(null);
   const [isDragging, setIsDragging] = useState(false);

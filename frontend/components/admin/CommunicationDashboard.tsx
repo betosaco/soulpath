@@ -496,6 +496,7 @@ function WorkflowDashboard({
 }) {
   const [activeWorkflows, setActiveWorkflows] = useState<any[]>([]);
   const [loadingWorkflows, setLoadingWorkflows] = useState(false);
+  const [editingWorkflow, setEditingWorkflow] = useState<any>(null);
 
   // Load active workflows
   useEffect(() => {
@@ -520,6 +521,7 @@ function WorkflowDashboard({
 
   const toggleWorkflowStatus = async (workflowId: string, currentStatus: boolean) => {
     try {
+      console.log('🔄 Toggling workflow status:', workflowId, 'from', currentStatus, 'to', !currentStatus);
       const response = await fetch(`/api/admin/workflows/${workflowId}`, {
         method: 'PUT',
         headers: {
@@ -531,6 +533,7 @@ function WorkflowDashboard({
       });
 
       const data = await response.json();
+      console.log('📡 Toggle response:', data);
 
       if (data.success) {
         // Update local state
@@ -539,9 +542,91 @@ function WorkflowDashboard({
             w.id === workflowId ? { ...w, isActive: !currentStatus } : w
           )
         );
+        console.log('✅ Workflow status updated locally');
+      } else {
+        console.error('❌ Failed to update workflow status:', data);
       }
     } catch (error) {
-      console.error('Error updating workflow status:', error);
+      console.error('❌ Error updating workflow status:', error);
+    }
+  };
+
+  const deleteWorkflow = async (workflowId: string, workflowName: string) => {
+    if (!confirm(`¿Estás seguro de que quieres eliminar el flujo "${workflowName}"? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+
+    try {
+      console.log('🗑️ Deleting workflow:', workflowId);
+      const response = await fetch(`/api/admin/workflows/${workflowId}`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+      console.log('📡 Delete response:', data);
+
+      if (data.success) {
+        // Remove from local state
+        setActiveWorkflows(prev => prev.filter(w => w.id !== workflowId));
+        console.log('✅ Workflow deleted successfully');
+      } else {
+        console.error('❌ Failed to delete workflow:', data);
+        alert('Error al eliminar el flujo: ' + (data.error || 'Error desconocido'));
+      }
+    } catch (error) {
+      console.error('❌ Error deleting workflow:', error);
+      alert('Error de conexión al eliminar el flujo');
+    }
+  };
+
+  const editWorkflow = async (workflowId: string) => {
+    try {
+      console.log('✏️ Loading workflow for editing:', workflowId);
+      const response = await fetch(`/api/admin/workflows/${workflowId}`);
+      const data = await response.json();
+
+      if (data.success && data.workflow) {
+        // Extract the workflow data from the database format
+        const workflowData = data.workflow.data;
+
+        // Create a workflow object that matches the VisualWorkflowBuilder format
+        const workflowForEditing = {
+          id: data.workflow.id,
+          name: data.workflow.name,
+          description: data.workflow.description,
+          nodes: workflowData.nodes || [],
+          connections: workflowData.connections || [],
+          settings: workflowData.settings || {
+            triggerOnOrder: true,
+            triggerOnBooking: false,
+            triggerOnPayment: false,
+            triggerOnUserRegistration: false,
+            triggerOnWebhook: false,
+            triggerOnSchedule: false,
+            enabled: true,
+            maxExecutionTime: 300,
+            maxRetries: 3,
+            retryDelay: 5,
+            continueOnError: false,
+            logLevel: 'info',
+            variables: {},
+            environment: 'development',
+            tags: [],
+            version: '1.0.0'
+          },
+          createdAt: new Date(data.workflow.createdAt),
+          updatedAt: new Date(data.workflow.updatedAt)
+        };
+
+        console.log('✅ Workflow loaded for editing:', data.workflow.name);
+        setEditingWorkflow(workflowForEditing);
+      } else {
+        console.error('❌ Failed to load workflow for editing:', data);
+        alert('Error al cargar el flujo para edición');
+      }
+    } catch (error) {
+      console.error('❌ Error loading workflow for editing:', error);
+      alert('Error de conexión al cargar el flujo');
     }
   };
 
@@ -588,7 +673,7 @@ function WorkflowDashboard({
                     <span>📅 {new Date(workflow.updatedAt).toLocaleDateString()}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                     workflow.isActive
                       ? 'bg-green-100 text-green-800'
@@ -596,16 +681,36 @@ function WorkflowDashboard({
                   }`}>
                     {workflow.isActive ? '🟢 Active' : '⚪ Inactive'}
                   </span>
-                  <button
-                    onClick={() => toggleWorkflowStatus(workflow.id, workflow.isActive)}
-                    className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
-                      workflow.isActive
-                        ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                        : 'bg-green-100 text-green-700 hover:bg-green-200'
-                    }`}
-                  >
-                    {workflow.isActive ? 'Disable' : 'Enable'}
-                  </button>
+
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => editWorkflow(workflow.id)}
+                      className="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
+                      title="Edit Workflow"
+                    >
+                      ✏️ Edit
+                    </button>
+
+                    <button
+                      onClick={() => toggleWorkflowStatus(workflow.id, workflow.isActive)}
+                      className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                        workflow.isActive
+                          ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                          : 'bg-green-100 text-green-700 hover:bg-green-200'
+                      }`}
+                      title={workflow.isActive ? 'Disable Workflow' : 'Enable Workflow'}
+                    >
+                      {workflow.isActive ? 'Disable' : 'Enable'}
+                    </button>
+
+                    <button
+                      onClick={() => deleteWorkflow(workflow.id, workflow.name)}
+                      className="px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
+                      title="Delete Workflow"
+                    >
+                      🗑️ Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -627,6 +732,7 @@ function WorkflowDashboard({
             language={language}
             onSave={onSave}
             onTest={onTest}
+            initialWorkflow={editingWorkflow}
           />
         </div>
       </div>
