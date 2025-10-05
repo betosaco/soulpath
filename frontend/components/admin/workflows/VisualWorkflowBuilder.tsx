@@ -1120,17 +1120,12 @@ export function VisualWorkflowBuilder({
   };
 
   const handleNodeUpdate = (nodeId: string, updates: Partial<WorkflowNode>) => {
-    console.log('🔄 handleNodeUpdate called:', { nodeId, updates });
-    if (updates.data && updates.data.selectedUsers) {
-      console.log('🔄 Updating node with selectedUsers:', updates.data.selectedUsers.length, 'users');
-    }
     setWorkflow(prev => ({
       ...prev,
       nodes: prev.nodes.map(node =>
         node.id === nodeId ? { ...node, ...updates } : node
       )
     }));
-    console.log('🔄 Workflow state updated');
   };
 
   const handleTelegramUsersChange = (users: any[]) => {
@@ -1164,33 +1159,14 @@ export function VisualWorkflowBuilder({
   };
 
   const handleSave = () => {
-    console.log('🔧 VisualWorkflowBuilder handleSave called');
-    console.log('🔧 onSave prop exists:', !!onSave);
-    console.log('🔧 Current workflow:', workflow);
-    console.log('🔧 Workflow nodes:', workflow.nodes?.length || 0);
-    workflow.nodes?.forEach((node, index) => {
-      console.log(`🔧 Node ${index}:`, { id: node.id, type: node.type, dataKeys: Object.keys(node.data || {}) });
-      if (node.type === 'telegram') {
-        console.log(`🔧 Telegram node ${node.id} data:`, node.data);
-      }
-    });
     if (onSave) {
-      console.log('🔧 Calling onSave with workflow');
       onSave(workflow);
-    } else {
-      console.log('❌ onSave prop is not defined');
     }
   };
 
   const handleTest = () => {
-    console.log('🧪 VisualWorkflowBuilder handleTest called');
-    console.log('🧪 onTest prop exists:', !!onTest);
-    console.log('🧪 Current workflow:', workflow);
     if (onTest) {
-      console.log('🧪 Calling onTest with workflow');
       onTest(workflow);
-    } else {
-      console.log('❌ onTest prop is not defined');
     }
   };
 

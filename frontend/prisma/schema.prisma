@@ -1957,3 +1957,23 @@ enum SatisfactionRatingType {
   RESOLUTION_QUALITY
   AGENT_HELPFULNESS
 }
+
+model Workflow {
+  id          String   @id @default(cuid())
+  name        String   @db.VarChar(255)
+  description String?  @db.Text
+  data        Json     // Store the complete workflow structure (nodes, connections, etc.)
+  isActive    Boolean  @default(true) @map("is_active")
+  isPublished Boolean  @default(false) @map("is_published")
+  version     Int      @default(1)
+  tags        String[] // Array of tags for categorization
+  createdBy   String   @map("created_by") // User ID who created the workflow
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([isActive], map: "idx_workflows_active")
+  @@index([isPublished], map: "idx_workflows_published")
+  @@index([createdBy], map: "idx_workflows_created_by")
+  @@index([tags], map: "idx_workflows_tags")
+  @@map("workflows")
+}

@@ -143,14 +143,14 @@ export function CommunicationDashboard({
 
       if (data.success) {
         console.log('✅ Workflow saved successfully:', data);
-        alert('Flujo guardado exitosamente');
+        alert(`✅ Flujo "${data.workflow.name}" guardado exitosamente!\n\n📊 ${data.workflow.nodeCount} nodos, ${data.workflow.connectionCount} conexiones`);
       } else {
         console.error('❌ Failed to save workflow:', data);
-        alert('Error al guardar el flujo: ' + (data.error || 'Unknown error'));
+        alert('❌ Error al guardar el flujo: ' + (data.error || 'Error desconocido'));
       }
     } catch (error) {
       console.error('❌ Error saving workflow:', error);
-      alert('Error al guardar el flujo: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      alert('❌ Error de conexión al guardar el flujo: ' + (error instanceof Error ? error.message : 'Error de red'));
     }
   };
 
@@ -187,14 +187,15 @@ export function CommunicationDashboard({
 
       if (data.success) {
         console.log('✅ Workflow test completed successfully:', data);
-        alert('Prueba del flujo completada exitosamente');
+        const executionTime = data.executionContext?.results?.length || 0;
+        alert(`✅ Prueba del flujo completada exitosamente!\n\n⚡ ${executionTime} pasos ejecutados\n📊 Resultados disponibles en consola`);
       } else {
         console.error('❌ Workflow test failed:', data);
-        alert('Error en la prueba del flujo: ' + (data.error || 'Unknown error'));
+        alert('❌ Error en la prueba del flujo: ' + (data.error || 'Error desconocido'));
       }
     } catch (error) {
       console.error('❌ Error testing workflow:', error);
-      alert('Error al probar el flujo: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      alert('❌ Error de conexión al probar el flujo: ' + (error instanceof Error ? error.message : 'Error de red'));
     }
   };
 
