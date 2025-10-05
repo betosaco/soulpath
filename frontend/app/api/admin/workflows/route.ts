@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('🔧 POST /api/admin/workflows - Starting request...');
+    console.log('🔧 POST /api/admin/workflows - Starting request (v2)...');
 
     const user = getAuthenticatedUser(request);
     console.log('👤 Auth result:', user ? { id: user.id, email: user.email, role: user.role } : 'null');
