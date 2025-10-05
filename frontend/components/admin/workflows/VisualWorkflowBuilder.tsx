@@ -1306,11 +1306,16 @@ export function VisualWorkflowBuilder({
                     handleLoadTemplate(value);
                   }}
                 >
-                  <SelectTrigger className="w-full h-8 text-sm border rounded-md px-3 py-1">
-                    <SelectValue 
-                      placeholder="📋 Load Template..." 
-                      className="truncate text-sm"
-                    />
+                  <SelectTrigger className="w-full h-8 text-sm border rounded-md px-3 py-1 overflow-hidden">
+                    <div className="flex items-center w-full min-w-0 max-w-full">
+                      {selectedTemplateId ? (
+                        <span className="truncate text-sm text-gray-900 max-w-full block">
+                          {workflowTemplates.find(t => t.id === selectedTemplateId)?.name || 'Template'}
+                        </span>
+                      ) : (
+                        <span className="text-sm text-gray-500">📋 Load Template...</span>
+                      )}
+                    </div>
                   </SelectTrigger>
                   <SelectContent className="max-h-80 w-full">
                     {workflowTemplates.map(template => (
