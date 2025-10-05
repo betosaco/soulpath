@@ -56,13 +56,21 @@ export function TelegramConfigManagement() {
   const loadConfig = useCallback(async () => {
     try {
       setLoading(true);
+      console.log('📡 Loading Telegram config...', {
+        userToken: user?.access_token ? 'Present' : 'Missing',
+        endpoint: '/api/admin/telegram-config'
+      });
+
       const response = await fetch('/api/admin/telegram-config', {
         headers: {
           'Authorization': `Bearer ${user?.access_token}`,
         },
       });
 
+      console.log('📡 Load response status:', response.status);
       const result = await response.json();
+      console.log('📊 Load response data:', result);
+
       if (result.success) {
         setConfig(result.config);
         setFormData({
@@ -70,11 +78,13 @@ export function TelegramConfigManagement() {
           webhook_url: result.config.webhook_url || '',
           is_active: result.config.is_active || false
         });
+        console.log('✅ Config loaded successfully');
       } else {
+        console.error('❌ Load failed:', result);
         toast.error('Failed to load Telegram configuration');
       }
     } catch (error) {
-      console.error('Error loading config:', error);
+      console.error('❌ Error loading config:', error);
       toast.error('Failed to load configuration');
     } finally {
       setLoading(false);
@@ -132,6 +142,12 @@ export function TelegramConfigManagement() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      console.log('🔧 Saving Telegram config...', {
+        formData,
+        userToken: user?.access_token ? 'Present' : 'Missing',
+        endpoint: '/api/admin/telegram-config'
+      });
+
       const response = await fetch('/api/admin/telegram-config', {
         method: 'POST',
         headers: {
@@ -141,18 +157,23 @@ export function TelegramConfigManagement() {
         body: JSON.stringify(formData)
       });
 
+      console.log('📡 Response status:', response.status);
+      console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
+
       const result = await response.json();
+      console.log('📊 Response data:', result);
       
       if (result.success) {
         setConfig(result.config);
         toast.success('Telegram configuration saved successfully!');
         await loadConfig(); // Reload to get updated info
       } else {
-        toast.error(result.details || 'Failed to save configuration');
+        console.error('❌ Save failed:', result);
+        toast.error(result.details || result.error || 'Failed to save configuration');
       }
     } catch (error) {
-      console.error('Error saving config:', error);
-      toast.error('Failed to save configuration');
+      console.error('❌ Error saving config:', error);
+      toast.error(`Failed to save configuration: ${error.message}`);
     } finally {
       setSaving(false);
     }
