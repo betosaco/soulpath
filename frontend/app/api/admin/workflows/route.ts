@@ -33,13 +33,18 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
+    // Determine if this should be saved as a template
+    const saveAsTemplate = workflowData.saveAsTemplate === true;
+    const isPublished = saveAsTemplate || workflowData.isPublished || false;
+
     // Save workflow to database
     console.log('💾 Attempting to save workflow to database...');
     console.log('📋 Prisma data to create:', {
       name: workflowData.name.trim(),
       description: workflowData.description || null,
       createdBy: user.id,
-      // tags: workflowData.tags || [],
+      isPublished,
+      saveAsTemplate,
       dataSize: JSON.stringify(workflowData).length
     });
 
@@ -53,7 +58,7 @@ export async function POST(request: NextRequest) {
           createdBy: user.id,
           // tags: workflowData.tags || [], // Temporarily commented out
           isActive: workflowData.isActive !== undefined ? workflowData.isActive : true,
-          isPublished: workflowData.isPublished || false,
+          isPublished,
           version: workflowData.version || 1
         }
       });
@@ -163,9 +168,29 @@ export async function GET(request: NextRequest) {
 
     console.log(`✅ Fetched ${workflowsWithCounts.length} workflows for user ${user.id}`);
 
+    // Also fetch published workflows (templates) for the template selector
+    const publishedWorkflows = await prisma.workflow.findMany({
+      where: {
+        isPublished: true,
+        isActive: true
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        data: false // Don't include full data for template list
+      },
+      orderBy: {
+        updatedAt: 'desc'
+      }
+    });
+
+    console.log(`✅ Fetched ${publishedWorkflows.length} published workflow templates`);
+
     return NextResponse.json({
       success: true,
       workflows: workflowsWithCounts,
+      templates: publishedWorkflows,
       pagination: {
         total: totalCount,
         limit,

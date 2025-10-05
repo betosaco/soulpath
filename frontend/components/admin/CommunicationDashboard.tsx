@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
 import { BaseButton } from '../ui/BaseButton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
@@ -145,7 +145,10 @@ export function CommunicationDashboard({
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(workflowToSave),
+        body: JSON.stringify({
+          ...workflowToSave,
+          saveAsTemplate: true // Always save as template for now
+        }),
       });
 
       console.log('📡 Save response status:', response.status);
@@ -491,6 +494,57 @@ function WorkflowDashboard({
   onSave: (workflow: WorkflowData) => void;
   onTest: (workflow: WorkflowData) => void;
 }) {
+  const [activeWorkflows, setActiveWorkflows] = useState<any[]>([]);
+  const [loadingWorkflows, setLoadingWorkflows] = useState(false);
+
+  // Load active workflows
+  useEffect(() => {
+    const loadWorkflows = async () => {
+      setLoadingWorkflows(true);
+      try {
+        const response = await fetch('/api/admin/workflows?includeInactive=false&limit=50');
+        const data = await response.json();
+
+        if (data.success) {
+          setActiveWorkflows(data.workflows || []);
+        }
+      } catch (error) {
+        console.error('Error loading workflows:', error);
+      } finally {
+        setLoadingWorkflows(false);
+      }
+    };
+
+    loadWorkflows();
+  }, []);
+
+  const toggleWorkflowStatus = async (workflowId: string, currentStatus: boolean) => {
+    try {
+      const response = await fetch(`/api/admin/workflows/${workflowId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          isActive: !currentStatus
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update local state
+        setActiveWorkflows(prev =>
+          prev.map(w =>
+            w.id === workflowId ? { ...w, isActive: !currentStatus } : w
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error updating workflow status:', error);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -504,11 +558,78 @@ function WorkflowDashboard({
         </BaseButton>
       </div>
 
-      <VisualWorkflowBuilder
-        language={language}
-        onSave={onSave}
-        onTest={onTest}
-      />
+      {/* Active Workflows Management */}
+      <div className="bg-white rounded-lg shadow-sm border p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          🏃 Active Workflows
+        </h3>
+
+        {loadingWorkflows ? (
+          <div className="text-center py-4">
+            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+            <p className="mt-2 text-sm text-gray-600">Loading workflows...</p>
+          </div>
+        ) : activeWorkflows.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            <Workflow size={48} className="mx-auto mb-4 opacity-50" />
+            <p>No active workflows yet</p>
+            <p className="text-sm">Save a workflow below to see it here</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {activeWorkflows.map(workflow => (
+              <div key={workflow.id} className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex-1">
+                  <h4 className="font-medium text-gray-900">{workflow.name}</h4>
+                  <p className="text-sm text-gray-600">{workflow.description}</p>
+                  <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                    <span>📊 {workflow.nodeCount} nodes</span>
+                    <span>🔗 {workflow.connectionCount} connections</span>
+                    <span>📅 {new Date(workflow.updatedAt).toLocaleDateString()}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                    workflow.isActive
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-gray-100 text-gray-800'
+                  }`}>
+                    {workflow.isActive ? '🟢 Active' : '⚪ Inactive'}
+                  </span>
+                  <button
+                    onClick={() => toggleWorkflowStatus(workflow.id, workflow.isActive)}
+                    className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                      workflow.isActive
+                        ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                        : 'bg-green-100 text-green-700 hover:bg-green-200'
+                    }`}
+                  >
+                    {workflow.isActive ? 'Disable' : 'Enable'}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Workflow Builder */}
+      <div className="bg-white rounded-lg shadow-sm border">
+        <div className="p-6 border-b">
+          <h3 className="text-lg font-semibold text-gray-900">
+            ⚙️ Workflow Builder
+          </h3>
+          <p className="text-gray-600 mt-1">Design and test your communication workflows</p>
+        </div>
+
+        <div className="p-6">
+          <VisualWorkflowBuilder
+            language={language}
+            onSave={onSave}
+            onTest={onTest}
+          />
+        </div>
+      </div>
     </div>
   );
 }

@@ -305,6 +305,9 @@ export function VisualWorkflowBuilder({
   const [isDragging, setIsDragging] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [showProperties, setShowProperties] = useState(true);
+  const [availableTemplates, setAvailableTemplates] = useState<any[]>([]);
+  const [saveAsTemplate, setSaveAsTemplate] = useState(false);
+  const [templatesLoading, setTemplatesLoading] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const translations = {
@@ -1223,16 +1226,100 @@ export function VisualWorkflowBuilder({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedNode]);
 
-  const handleLoadTemplate = (templateId: string) => {
-    const template = workflowTemplates.find(t => t.id === templateId);
-    if (template) {
+  // Load available templates
+  useEffect(() => {
+    const loadTemplates = async () => {
+      setTemplatesLoading(true);
+      try {
+        console.log('🔧 Loading workflow templates...');
+        const response = await fetch('/api/admin/workflows?limit=100');
+        const data = await response.json();
+
+        if (data.success && data.templates) {
+          // Merge static templates with database templates
+          const staticTemplates = [
+            {
+              id: 'order_confirmation',
+              name: 'Order Confirmation Flow',
+              description: 'Send confirmation emails and notifications for new orders',
+              category: 'ecommerce'
+            },
+            {
+              id: 'conditional_pricing',
+              name: 'Conditional Pricing Flow',
+              description: 'Apply different pricing logic based on order conditions',
+              category: 'ecommerce'
+            },
+            {
+              id: 'api_integration',
+              name: 'API Integration Flow',
+              description: 'Call external APIs and process responses',
+              category: 'integration'
+            },
+            {
+              id: 'retry_error_handling',
+              name: 'Retry & Error Handling Flow',
+              description: 'Handle failures with retry logic and error notifications',
+              category: 'error_handling'
+            }
+          ];
+
+          const allTemplates = [...staticTemplates, ...data.templates];
+          setAvailableTemplates(allTemplates);
+          console.log(`✅ Loaded ${allTemplates.length} workflow templates (${data.templates.length} from DB, ${staticTemplates.length} static)`);
+        } else {
+          console.error('❌ Failed to load templates:', data);
+          setAvailableTemplates([]);
+        }
+      } catch (error) {
+        console.error('❌ Error loading templates:', error);
+        setAvailableTemplates([]);
+      } finally {
+        setTemplatesLoading(false);
+      }
+    };
+
+    loadTemplates();
+  }, []);
+
+  const handleLoadTemplate = async (templateId: string) => {
+    // Check static templates first
+    const staticTemplate = workflowTemplates.find(t => t.id === templateId);
+    if (staticTemplate) {
       setWorkflow(prev => ({
         ...prev,
-        name: template.name,
-        description: template.description,
-        nodes: template.nodes,
-        connections: template.connections
+        name: staticTemplate.name,
+        description: staticTemplate.description,
+        nodes: staticTemplate.nodes,
+        connections: staticTemplate.connections
       }));
+      return;
+    }
+
+    // Check database templates
+    const dbTemplate = availableTemplates.find(t => t.id === templateId);
+    if (dbTemplate) {
+      try {
+        console.log(`🔧 Loading template from database: ${templateId}`);
+        const response = await fetch(`/api/admin/workflows/${templateId}`);
+        const data = await response.json();
+
+        if (data.success && data.workflow) {
+          const templateData = data.workflow.data;
+          setWorkflow(prev => ({
+            ...prev,
+            name: data.workflow.name,
+            description: data.workflow.description,
+            nodes: templateData.nodes || [],
+            connections: templateData.connections || []
+          }));
+          console.log(`✅ Loaded template: ${data.workflow.name}`);
+        } else {
+          console.error('❌ Failed to load template:', data);
+        }
+      } catch (error) {
+        console.error('❌ Error loading template:', error);
+      }
     }
   };
 
@@ -1312,13 +1399,27 @@ export function VisualWorkflowBuilder({
                 {t.test}
               </BaseButton>
 
+              {/* Save as Template Checkbox */}
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="saveAsTemplate"
+                  checked={saveAsTemplate}
+                  onChange={(e) => setSaveAsTemplate(e.target.checked)}
+                  className="w-3 h-3"
+                />
+                <label htmlFor="saveAsTemplate" className="text-xs text-gray-600">
+                  💾 Save as Template
+                </label>
+              </div>
+
               <BaseButton
                 onClick={handleSave}
                 className="px-2 py-1 text-xs h-7 bg-green-600 hover:bg-green-700 text-white"
                 size="sm"
               >
                 <Save size={14} className="mr-1" />
-                {t.save}
+                {saveAsTemplate ? 'Save Template' : t.save}
               </BaseButton>
             </div>
 
@@ -1344,14 +1445,21 @@ export function VisualWorkflowBuilder({
                     </div>
                   </SelectTrigger>
                   <SelectContent className="max-h-80 w-full">
-                    {workflowTemplates.map(template => (
+                    {availableTemplates.map(template => (
                       <SelectItem key={template.id} value={template.id} className="py-2">
                         <div className="flex flex-col w-full">
                           <span className="font-medium text-sm truncate">{template.name}</span>
                           <span className="text-xs text-gray-500 mt-1 truncate">{template.description}</span>
-                          <span className="text-xs text-blue-600 mt-1">
-                            {template.nodes.length} nodes • {template.connections.length} connections
-                          </span>
+                          {template.category && (
+                            <span className="text-xs text-purple-600 mt-1">
+                              {template.category}
+                            </span>
+                          )}
+                          {!template.category && (
+                            <span className="text-xs text-green-600 mt-1">
+                              💾 Saved Template
+                            </span>
+                          )}
                         </div>
                       </SelectItem>
                     ))}

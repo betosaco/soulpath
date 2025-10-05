@@ -20,10 +20,14 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     console.log(`🔍 GET /api/admin/workflows/${workflowId} - Starting request...`);
 
     // Fetch workflow from database
+    // Allow access to published templates even if not created by the user
     const workflow = await prisma.workflow.findUnique({
       where: {
         id: workflowId,
-        createdBy: user.id // Ensure user can only access their own workflows
+        OR: [
+          { createdBy: user.id }, // User's own workflows
+          { isPublished: true }   // Published templates
+        ]
       }
     });
 
@@ -33,7 +37,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       }, { status: 404 });
     }
 
-    console.log(`✅ Found workflow: ${workflow.name}`);
+    console.log(`✅ Found workflow: ${workflow.name} (published: ${workflow.isPublished})`);
 
     return NextResponse.json({
       success: true,
