@@ -280,31 +280,32 @@ export function VisualWorkflowBuilder({
       return initialWorkflow;
     }
     return {
-    id: '',
-    name: '',
-    description: '',
-    nodes: [],
-    connections: [],
-    settings: {
-      triggerOnOrder: true,
-      triggerOnBooking: false,
-      triggerOnPayment: false,
-      triggerOnUserRegistration: false,
-      triggerOnWebhook: false,
-      triggerOnSchedule: false,
-      enabled: true,
-      maxExecutionTime: 300,
-      maxRetries: 3,
-      retryDelay: 5,
-      continueOnError: false,
-      logLevel: 'info',
-      variables: {},
-      environment: 'development',
-      tags: [],
-      version: '1.0.0'
-    },
-    createdAt: new Date(),
-    updatedAt: new Date()
+      id: '',
+      name: '',
+      description: '',
+      nodes: [],
+      connections: [],
+      settings: {
+        triggerOnOrder: true,
+        triggerOnBooking: false,
+        triggerOnPayment: false,
+        triggerOnUserRegistration: false,
+        triggerOnWebhook: false,
+        triggerOnSchedule: false,
+        enabled: true,
+        maxExecutionTime: 300,
+        maxRetries: 3,
+        retryDelay: 5,
+        continueOnError: false,
+        logLevel: 'info',
+        variables: {},
+        environment: 'development',
+        tags: [],
+        version: '1.0.0'
+      },
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
   });
 
   // Handle initialWorkflow changes (for editing existing workflows)
@@ -1729,6 +1730,21 @@ interface TelegramUserSelectorProps {
   onUsersChange: (users: TelegramUser[]) => void;
 }
 
+interface Recipient {
+  id: string;
+  name: string;
+  email?: string;
+  telegramChatId?: string;
+  type: 'user' | 'group' | 'custom';
+  role?: string;
+}
+
+interface RecipientSelectorProps {
+  nodeType: 'email' | 'telegram' | 'sms' | 'whatsapp';
+  selectedRecipients: Recipient[];
+  onRecipientsChange: (recipients: Recipient[]) => void;
+}
+
 function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations: t }: NodePropertiesPanelProps) {
   console.log('🔧 NodePropertiesPanel: Received node:', { type: node.type, id: node.id, data: node.data });
 
@@ -1780,20 +1796,20 @@ function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations:
               </Select>
             </div>
 
-            <div>
-              <Label className="dashboard-label">Recipients</Label>
-              <BaseInput
-                value={node.data.recipients?.join(', ') || ''}
-                onChange={(e) => onUpdate({
-                  data: {
-                    ...node.data,
-                    recipients: e.target.value.split(',').map(s => s.trim())
-                  }
-                })}
-                className="dashboard-input"
-                placeholder="customer@example.com, admin@example.com"
-              />
-            </div>
+            <RecipientSelector
+              nodeType="email"
+              selectedRecipients={node.data.selectedRecipients || []}
+              onRecipientsChange={(recipients) => onUpdate({
+                data: {
+                  ...node.data,
+                  selectedRecipients: recipients,
+                  // Extract emails for backward compatibility
+                  recipients: recipients
+                    .filter(r => r.email)
+                    .map(r => r.email)
+                }
+              })}
+            />
           </div>
         );
 
@@ -1819,30 +1835,28 @@ function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations:
               </Select>
             </div>
 
-            <div>
-              <Label className="dashboard-label">Select Users</Label>
-              <div className="space-y-2">
-                <TelegramUserSelector
-                  selectedUsers={node.data.selectedUsers || []}
-                  onUsersChange={(users) => onUpdate({
-                    data: {
-                      ...node.data,
-                      selectedUsers: users,
-                      chatIds: users.map(u => u.telegram_chat_id).filter(Boolean)
-                    }
-                  })}
-                />
-
-                {node.data.selectedUsers?.length > 0 && (
-                  <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
-                    <div className="font-medium">Selected Users ({node.data.selectedUsers.length}):</div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      Chat IDs: {node.data.selectedUsers.map(u => u.telegram_chat_id).filter(Boolean).join(', ')}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+            <RecipientSelector
+              nodeType="telegram"
+              selectedRecipients={node.data.selectedRecipients || []}
+              onRecipientsChange={(recipients) => onUpdate({
+                data: {
+                  ...node.data,
+                  selectedRecipients: recipients,
+                  // Extract chat IDs for backward compatibility
+                  selectedUsers: recipients
+                    .filter(r => r.type === 'user' && r.telegramChatId)
+                    .map(r => ({
+                      id: r.id,
+                      fullName: r.name,
+                      email: r.email || '',
+                      telegram_chat_id: r.telegramChatId || ''
+                    })),
+                  chatIds: recipients
+                    .filter(r => r.telegramChatId)
+                    .map(r => r.telegramChatId)
+                }
+              })}
+            />
           </div>
         );
 
@@ -2096,3 +2110,233 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
   );
 }
 
+
+// Recipient Selector Component
+function RecipientSelector({ nodeType, selectedRecipients, onRecipientsChange }: RecipientSelectorProps) {
+  const [availableUsers, setAvailableUsers] = useState<any[]>([]);
+  const [availableGroups, setAvailableGroups] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const [customEmail, setCustomEmail] = useState("");
+
+  // Load available users and groups
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        // Load users by roles
+        const roles = ["CLIENT", "TEACHER", "ADMIN"];
+        const userPromises = roles.map(role =>
+          fetch(`/api/admin/users/by-role?role=${role}`)
+            .then(res => res.json())
+            .then(data => data.success ? data.users : [])
+        );
+
+        // Load recipient groups
+        const groupsPromise = fetch("/api/admin/recipient-groups")
+          .then(res => res.json())
+          .then(data => data.success ? data.groups : []);
+
+        const [clients, teachers, admins, groups] = await Promise.all([
+          ...userPromises,
+          groupsPromise
+        ]);
+
+        setAvailableUsers([
+          { role: "CLIENT", users: clients },
+          { role: "TEACHER", users: teachers },
+          { role: "ADMIN", users: admins }
+        ]);
+
+        setAvailableGroups(groups);
+      } catch (error) {
+        console.error("Error loading recipients:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const toggleRecipient = (recipient: Recipient) => {
+    const isSelected = selectedRecipients.some(r => r.id === recipient.id);
+    const newRecipients = isSelected
+      ? selectedRecipients.filter(r => r.id !== recipient.id)
+      : [...selectedRecipients, recipient];
+    onRecipientsChange(newRecipients);
+  };
+
+  const addCustomEmail = () => {
+    if (customEmail && customEmail.includes("@")) {
+      const customRecipient: Recipient = {
+        id: `custom_${Date.now()}`,
+        name: customEmail,
+        email: customEmail,
+        type: "custom"
+      };
+      onRecipientsChange([...selectedRecipients, customRecipient]);
+      setCustomEmail("");
+    }
+  };
+
+  const removeRecipient = (recipientId: string) => {
+    onRecipientsChange(selectedRecipients.filter(r => r.id !== recipientId));
+  };
+
+  const renderUserSection = (roleData: any) => {
+    const { role, users } = roleData;
+    const roleRecipients = selectedRecipients.filter(r => r.type === "user" && r.role === role);
+
+    return (
+      <div key={role} className="border rounded-lg p-3">
+        <button
+          onClick={() => setExpandedSection(expandedSection === role ? null : role)}
+          className="w-full flex items-center justify-between text-left"
+        >
+          <span className="font-medium capitalize">{role.toLowerCase()}s</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-500">({roleRecipients.length} selected)</span>
+            <span className={`transform transition-transform ${expandedSection === role ? "rotate-180" : ""}`}>
+              ▼
+            </span>
+          </div>
+        </button>
+
+        {expandedSection === role && (
+          <div className="mt-3 space-y-2 max-h-48 overflow-y-auto">
+            <div className="flex gap-2 mb-2">
+              <button
+                onClick={() => {
+                  // Select all users in this role
+                  const allUsers = users.map((user: any) => ({
+                    id: user.id,
+                    name: user.displayName,
+                    email: user.email,
+                    telegramChatId: user.telegramChatId,
+                    type: "user" as const,
+                    role
+                  }));
+                  const newRecipients = [...selectedRecipients.filter(r => !(r.type === "user" && r.role === role)), ...allUsers];
+                  onRecipientsChange(newRecipients);
+                }}
+                className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+              >
+                Select All
+              </button>
+              <button
+                onClick={() => {
+                  // Clear all users in this role
+                  onRecipientsChange(selectedRecipients.filter(r => !(r.type === "user" && r.role === role)));
+                }}
+                className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+              >
+                Clear All
+              </button>
+            </div>
+
+            {users.map((user: any) => {
+              const isSelected = selectedRecipients.some(r => r.id === user.id);
+              return (
+                <label key={user.id} className="flex items-center gap-2 p-2 rounded hover:bg-gray-50 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => toggleRecipient({
+                      id: user.id,
+                      name: user.displayName,
+                      email: user.email,
+                      telegramChatId: user.telegramChatId,
+                      type: "user",
+                      role
+                    })}
+                    className="w-3 h-3"
+                  />
+                  <div className="flex-1 text-sm">
+                    <div className="font-medium">{user.displayName}</div>
+                    <div className="text-xs text-gray-500">{user.email}</div>
+                  </div>
+                </label>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-4">
+      <Label className="dashboard-label">Recipients</Label>
+
+      {/* Selected Recipients Summary */}
+      {selectedRecipients.length > 0 && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="text-sm font-medium text-blue-900 mb-2">
+            Selected Recipients ({selectedRecipients.length})
+          </div>
+          <div className="space-y-1 max-h-32 overflow-y-auto">
+            {selectedRecipients.map(recipient => (
+              <div key={recipient.id} className="flex items-center justify-between text-xs">
+                <div>
+                  <span className="font-medium">{recipient.name}</span>
+                  {recipient.email && <span className="text-gray-500 ml-1">({recipient.email})</span>}
+                  <span className={`ml-2 px-1.5 py-0.5 rounded text-xs ${
+                    recipient.type === "user" ? "bg-green-100 text-green-800" :
+                    recipient.type === "group" ? "bg-purple-100 text-purple-800" :
+                    "bg-orange-100 text-orange-800"
+                  }`}>
+                    {recipient.type}
+                  </span>
+                </div>
+                <button
+                  onClick={() => removeRecipient(recipient.id)}
+                  className="text-red-500 hover:text-red-700 ml-2"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Users by Role */}
+      <div className="space-y-3">
+        <div className="text-sm font-medium text-gray-700">Select by Role:</div>
+        {loading ? (
+          <div className="text-center py-4">
+            <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+            <span className="ml-2 text-sm text-gray-600">Loading recipients...</span>
+          </div>
+        ) : (
+          availableUsers.map(renderUserSection)
+        )}
+      </div>
+
+      {/* Custom Email */}
+      <div className="border-t pt-3">
+        <div className="text-sm font-medium text-gray-700 mb-2">Add Custom Recipients:</div>
+        <div className="flex gap-2">
+          <input
+            type="email"
+            value={customEmail}
+            onChange={(e) => setCustomEmail(e.target.value)}
+            placeholder="custom@example.com"
+            className="flex-1 px-3 py-2 border rounded text-sm"
+            onKeyPress={(e) => e.key === "Enter" && addCustomEmail()}
+          />
+          <button
+            onClick={addCustomEmail}
+            disabled={!customEmail || !customEmail.includes("@")}
+            className="px-3 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+          >
+            Add
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export { VisualWorkflowBuilder };

@@ -1977,3 +1977,22 @@ model Workflow {
   @@index([tags], map: "idx_workflows_tags")
   @@map("workflows")
 }
+
+model RecipientGroup {
+  id          String   @id @default(cuid())
+  name        String   @db.VarChar(255)
+  description String?  @db.Text
+  role        String   @db.VarChar(50) // 'CLIENT', 'TEACHER', 'ADMIN', 'ALL'
+  scope       String   @db.VarChar(50) // 'ALL', 'SPECIFIC', 'CUSTOM'
+  recipientIds String[] // Array of user IDs for specific recipients
+  customEmails String[] // Array of custom email addresses
+  isActive    Boolean  @default(true) @map("is_active")
+  createdBy   String   @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([role], map: "idx_recipient_groups_role")
+  @@index([isActive], map: "idx_recipient_groups_active")
+  @@index([createdBy], map: "idx_recipient_groups_created_by")
+  @@map("recipient_groups")
+}
