@@ -1221,6 +1221,8 @@ export function VisualWorkflowBuilder({
     }
   };
 
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
+
   return (
     <div className="h-full flex flex-col bg-gray-50">
       {/* Header */}
@@ -1297,16 +1299,25 @@ export function VisualWorkflowBuilder({
             {/* Bottom Row - Template Selector */}
             <div className="flex items-center gap-3">
               <div className="flex-1">
-                <Select onValueChange={handleLoadTemplate}>
-                  <SelectTrigger className="w-full h-8 text-sm">
-                    <SelectValue placeholder="📋 Load Template..." />
+                <Select 
+                  value={selectedTemplateId} 
+                  onValueChange={(value) => {
+                    setSelectedTemplateId(value);
+                    handleLoadTemplate(value);
+                  }}
+                >
+                  <SelectTrigger className="w-full h-8 text-sm border rounded-md px-3 py-1">
+                    <SelectValue 
+                      placeholder="📋 Load Template..." 
+                      className="truncate text-sm"
+                    />
                   </SelectTrigger>
-                  <SelectContent className="max-h-80">
+                  <SelectContent className="max-h-80 w-full">
                     {workflowTemplates.map(template => (
                       <SelectItem key={template.id} value={template.id} className="py-2">
-                        <div className="flex flex-col">
-                          <span className="font-medium text-sm">{template.name}</span>
-                          <span className="text-xs text-gray-500 mt-1">{template.description}</span>
+                        <div className="flex flex-col w-full">
+                          <span className="font-medium text-sm truncate">{template.name}</span>
+                          <span className="text-xs text-gray-500 mt-1 truncate">{template.description}</span>
                           <span className="text-xs text-blue-600 mt-1">
                             {template.nodes.length} nodes • {template.connections.length} connections
                           </span>
@@ -1316,6 +1327,24 @@ export function VisualWorkflowBuilder({
                   </SelectContent>
                 </Select>
               </div>
+              {selectedTemplateId && (
+                <button
+                  onClick={() => {
+                    setSelectedTemplateId('');
+                    setWorkflow(prev => ({
+                      ...prev,
+                      name: '',
+                      description: '',
+                      nodes: [],
+                      connections: []
+                    }));
+                  }}
+                  className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+                  title="Clear Template"
+                >
+                  ✕ Clear
+                </button>
+              )}
             </div>
           </div>
         </div>
