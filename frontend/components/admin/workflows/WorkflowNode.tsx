@@ -135,22 +135,24 @@ export function WorkflowNode({
           {node.inputs.map((input) => (
             <div key={input.id} className="flex items-center gap-2 mb-1">
               <div
-                className="node-handle w-3 h-3 bg-blue-500 rounded-full border-2 border-white cursor-crosshair hover:bg-blue-600"
+                className="node-handle w-4 h-4 bg-blue-500 rounded-full border-2 border-white cursor-crosshair hover:bg-blue-600 hover:scale-110 transition-all duration-200 shadow-md"
                 onMouseDown={(e) => handleHandleMouseDown(e, input.id, false)}
                 onMouseUp={(e) => handleHandleMouseUp(e, input.id, false)}
+                title={`Connect to ${input.label}`}
               />
-              <span className="text-xs text-gray-600">{input.label}</span>
+              <span className="text-xs text-gray-600 font-medium">{input.label}</span>
             </div>
           ))}
 
           {/* Output Handles */}
           {node.outputs.map((output) => (
             <div key={output.id} className="flex items-center justify-end gap-2 mb-1">
-              <span className="text-xs text-gray-600">{output.label}</span>
+              <span className="text-xs text-gray-600 font-medium">{output.label}</span>
               <div
-                className="node-handle w-3 h-3 bg-green-500 rounded-full border-2 border-white cursor-crosshair hover:bg-green-600"
+                className="node-handle w-4 h-4 bg-green-500 rounded-full border-2 border-white cursor-crosshair hover:bg-green-600 hover:scale-110 transition-all duration-200 shadow-md"
                 onMouseDown={(e) => handleHandleMouseDown(e, output.id, true)}
                 onMouseUp={(e) => handleHandleMouseUp(e, output.id, true)}
+                title={`Connect from ${output.label}`}
               />
             </div>
           ))}

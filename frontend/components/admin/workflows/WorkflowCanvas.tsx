@@ -263,26 +263,58 @@ export function WorkflowCanvas({
               y: targetNode.position.y + 30
             };
 
+            // Calculate control points for curved connection
+            const dx = targetPos.x - sourcePos.x;
+            const dy = targetPos.y - sourcePos.y;
+            const controlPoint1 = {
+              x: sourcePos.x + dx * 0.5,
+              y: sourcePos.y
+            };
+            const controlPoint2 = {
+              x: targetPos.x - dx * 0.5,
+              y: targetPos.y
+            };
+
             return (
               <g key={connection.id}>
-                <line
-                  x1={sourcePos.x}
-                  y1={sourcePos.y}
-                  x2={targetPos.x}
-                  y2={targetPos.y}
+                {/* Connection path with curve */}
+                <path
+                  d={`M ${sourcePos.x} ${sourcePos.y} C ${controlPoint1.x} ${controlPoint1.y}, ${controlPoint2.x} ${controlPoint2.y}, ${targetPos.x} ${targetPos.y}`}
                   stroke="#4a7c2e"
-                  strokeWidth="2"
+                  strokeWidth="3"
+                  fill="none"
                   markerEnd="url(#arrowhead)"
-                  className="pointer-events-auto cursor-pointer"
+                  className="pointer-events-auto cursor-pointer hover:stroke-blue-500 transition-colors duration-200"
+                  onClick={() => onConnectionDelete(connection.id)}
+                />
+                
+                {/* Connection label */}
+                {connection.label && (
+                  <text
+                    x={(sourcePos.x + targetPos.x) / 2}
+                    y={(sourcePos.y + targetPos.y) / 2 - 5}
+                    textAnchor="middle"
+                    className="text-xs fill-gray-600 pointer-events-none"
+                  >
+                    {connection.label}
+                  </text>
+                )}
+                
+                {/* Connection control point */}
+                <circle
+                  cx={(sourcePos.x + targetPos.x) / 2}
+                  cy={(sourcePos.y + targetPos.y) / 2}
+                  r="6"
+                  fill="#4a7c2e"
+                  className="pointer-events-auto cursor-pointer hover:fill-blue-500 transition-colors duration-200"
                   onClick={() => onConnectionDelete(connection.id)}
                 />
                 <circle
                   cx={(sourcePos.x + targetPos.x) / 2}
                   cy={(sourcePos.y + targetPos.y) / 2}
-                  r="4"
-                  fill="#4a7c2e"
-                  className="pointer-events-auto cursor-pointer"
-                  onClick={() => onConnectionDelete(connection.id)}
+                  r="3"
+                  fill="white"
+                  className="pointer-events-none"
                 />
               </g>
             );
@@ -290,15 +322,14 @@ export function WorkflowCanvas({
 
           {/* Temporary connection during creation */}
           {connecting && (
-            <line
-              x1={connecting.startPos.x}
-              y1={connecting.startPos.y}
-              x2={connecting.currentPos.x}
-              y2={connecting.currentPos.y}
+            <path
+              d={`M ${connecting.startPos.x} ${connecting.startPos.y} Q ${(connecting.startPos.x + connecting.currentPos.x) / 2} ${connecting.startPos.y - 20} ${connecting.currentPos.x} ${connecting.currentPos.y}`}
               stroke="#4a7c2e"
-              strokeWidth="2"
-              strokeDasharray="5,5"
+              strokeWidth="3"
+              fill="none"
+              strokeDasharray="8,4"
               markerEnd="url(#arrowhead)"
+              className="animate-pulse"
             />
           )}
 
@@ -351,9 +382,20 @@ export function WorkflowCanvas({
       <div className="absolute bottom-4 left-4 bg-white px-3 py-2 rounded shadow-sm text-sm text-gray-600 max-w-xs">
         <div className="font-medium mb-1">Instructions:</div>
         <div>• Drag nodes from sidebar</div>
-        <div>• Connect nodes by dragging handles</div>
-        <div>• Middle-click to pan</div>
+        <div>• Click and drag connection handles to connect</div>
+        <div>• Middle-click to pan canvas</div>
         <div>• Delete key to remove selected</div>
+        <div>• Click connections to delete them</div>
+        <div>• Use zoom controls in header</div>
+      </div>
+
+      {/* Connection Help */}
+      <div className="absolute bottom-4 right-4 bg-blue-50 px-3 py-2 rounded shadow-sm text-sm text-blue-700 max-w-xs">
+        <div className="font-medium mb-1">Connection Tips:</div>
+        <div>• Blue handles = Input connections</div>
+        <div>• Green handles = Output connections</div>
+        <div>• Hover handles to see connection info</div>
+        <div>• Curved lines show data flow</div>
       </div>
     </div>
   );

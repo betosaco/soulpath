@@ -301,6 +301,7 @@ export function VisualWorkflowBuilder({
   const [selectedNode, setSelectedNode] = useState<WorkflowNode | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [zoom, setZoom] = useState(1);
+  const [showProperties, setShowProperties] = useState(true);
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const translations = {
@@ -1274,6 +1275,23 @@ export function VisualWorkflowBuilder({
               </SelectContent>
             </Select>
 
+            {/* Properties Toggle */}
+            <button
+              onClick={() => {
+                console.log('Toggle properties panel:', !showProperties);
+                setShowProperties(!showProperties);
+              }}
+              className={`px-3 py-2 rounded-md border text-sm font-medium transition-colors ${
+                showProperties 
+                  ? 'bg-blue-100 text-blue-700 border-blue-300' 
+                  : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
+              }`}
+              title={showProperties ? 'Hide Properties Panel' : 'Show Properties Panel'}
+            >
+              <Settings size={16} className="mr-2 inline" />
+              {showProperties ? 'Hide Props' : 'Show Props'}
+            </button>
+
             {/* Action Buttons */}
             <BaseButton
               onClick={handleTest}
@@ -1455,8 +1473,11 @@ export function VisualWorkflowBuilder({
         </div>
 
         {/* Properties Panel */}
-        {selectedNode && (
+        {selectedNode && showProperties && (
           <div className="w-80 bg-white border-l p-4 overflow-y-auto">
+            <div className="mb-2 text-xs text-green-600 bg-green-50 p-2 rounded">
+              ✅ Properties Panel Visible - selectedNode={!!selectedNode}, showProperties={showProperties.toString()}
+            </div>
             <NodePropertiesPanel
               node={selectedNode}
               onUpdate={(updates) => handleNodeUpdate(selectedNode.id, updates)}
@@ -1473,6 +1494,51 @@ export function VisualWorkflowBuilder({
               language={language}
               translations={t}
             />
+          </div>
+        )}
+
+        {/* Mini Properties Panel - when main panel is hidden */}
+        {selectedNode && !showProperties && (
+          <div className="absolute top-4 right-4 bg-white border rounded-lg shadow-lg p-3 max-w-xs">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="font-semibold text-gray-900 text-sm">Selected Node</h4>
+              <button
+                onClick={() => {
+                  console.log('Show properties panel');
+                  setShowProperties(true);
+                }}
+                className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+              >
+                <Settings size={12} className="inline mr-1" />
+                Show Props
+              </button>
+            </div>
+            <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded mb-2">
+              🔍 Mini Panel Visible - selectedNode={!!selectedNode}, showProperties={showProperties.toString()}
+            </div>
+            <div className="text-xs text-gray-600">
+              <div><strong>Type:</strong> {selectedNode.type}</div>
+              <div><strong>ID:</strong> {selectedNode.id}</div>
+              <div><strong>Position:</strong> ({Math.round(selectedNode.position.x)}, {Math.round(selectedNode.position.y)})</div>
+              <div><strong>Inputs:</strong> {selectedNode.inputs.length}</div>
+              <div><strong>Outputs:</strong> {selectedNode.outputs.length}</div>
+            </div>
+            <BaseButton
+              onClick={() => {
+                setWorkflow(prev => ({
+                  ...prev,
+                  nodes: prev.nodes.filter(n => n.id !== selectedNode.id),
+                  connections: prev.connections.filter(
+                    conn => conn.source !== selectedNode.id && conn.target !== selectedNode.id
+                  )
+                }));
+                setSelectedNode(null);
+              }}
+              className="mt-2 w-full dashboard-button-danger"
+              size="sm"
+            >
+              Delete Node
+            </BaseButton>
           </div>
         )}
       </div>
