@@ -1819,8 +1819,6 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  console.log('🔧 TelegramUserSelector rendered with selectedUsers:', selectedUsers?.length || 0, selectedUsers);
-  console.log('🔧 onUsersChange function:', typeof onUsersChange, !!onUsersChange);
 
   // Load users when expanded
   useEffect(() => {
@@ -1860,17 +1858,11 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
   };
 
   const toggleUser = (user: TelegramUser) => {
-    console.log('🔧 toggleUser called with user:', user.id, user.fullName);
-    console.log('🔧 Current selectedUsers:', selectedUsers.length, selectedUsers.map(u => u.id));
     const isSelected = selectedUsers.some(u => u.id === user.id);
-    console.log('🔧 User is currently selected:', isSelected);
     const newSelection = isSelected
       ? selectedUsers.filter(u => u.id !== user.id)
       : [...selectedUsers, user];
-    console.log('🔧 New selection will be:', newSelection.length, newSelection.map(u => u.id));
-    console.log('🔧 Calling onUsersChange with:', newSelection);
     onUsersChange(newSelection);
-    console.log('🔧 onUsersChange called successfully');
   };
 
   const selectAll = () => {
@@ -1934,10 +1926,7 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
               return (
                 <div
                   key={user.id}
-                  onClick={() => {
-                    console.log('🔧 Row clicked for user:', user.id, user.fullName);
-                    toggleUser(user);
-                  }}
+                  onClick={() => toggleUser(user)}
                   className={`flex items-center gap-2 p-2 rounded cursor-pointer text-sm ${
                     isSelected ? 'bg-blue-100' : 'hover:bg-gray-100'
                   }`}

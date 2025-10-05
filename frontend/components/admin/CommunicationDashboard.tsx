@@ -32,7 +32,7 @@ import {
 // Import all communication components
 import { CommunicationConfig } from '../communication/CommunicationConfig';
 import { ModularTemplateDashboard } from './templates/ModularTemplateDashboard';
-import { VisualWorkflowBuilder } from './workflows/VisualWorkflowBuilder';
+import { VisualWorkflowBuilder, WorkflowData } from './workflows/VisualWorkflowBuilder';
 
 interface CommunicationDashboardProps {
   className?: string;
@@ -118,6 +118,78 @@ export function CommunicationDashboard({
       buildWorkflow: 'Construir Flujo Visual',
       viewReports: 'Ver Reportes de Comunicación',
       manageUsers: 'Gestionar Usuarios de Comunicación'
+    }
+  };
+
+  // Workflow handlers
+  const handleWorkflowSave = async (workflow: WorkflowData) => {
+    try {
+      console.log('💾 Saving workflow:', workflow);
+
+      const response = await fetch('/api/admin/workflows', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(workflow),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        console.log('✅ Workflow saved successfully:', data);
+        alert('Flujo guardado exitosamente');
+      } else {
+        console.error('❌ Failed to save workflow:', data);
+        alert('Error al guardar el flujo: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('❌ Error saving workflow:', error);
+      alert('Error al guardar el flujo: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    }
+  };
+
+  const handleWorkflowTest = async (workflow: WorkflowData) => {
+    try {
+      console.log('🧪 Testing workflow:', workflow);
+
+      const response = await fetch('/api/admin/workflows/test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          workflow,
+          testData: {
+            userName: 'Usuario de Prueba',
+            userEmail: 'test@matmax.world',
+            orderId: 'TEST-123',
+            orderTotal: 150,
+            products: [],
+            matpassData: {
+              type: 'MatPass 8 clases',
+              description: 'Acceso ilimitado por 30 días',
+              price: 150,
+              startDate: new Date().toISOString(),
+              endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+            },
+            bookingData: null
+          }
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        console.log('✅ Workflow test completed successfully:', data);
+        alert('Prueba del flujo completada exitosamente');
+      } else {
+        console.error('❌ Workflow test failed:', data);
+        alert('Error en la prueba del flujo: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('❌ Error testing workflow:', error);
+      alert('Error al probar el flujo: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
   };
 
@@ -400,8 +472,8 @@ function WorkflowDashboard({ language, translations: t }: { language: 'en' | 'es
 
       <VisualWorkflowBuilder
         language={language}
-        onSave={(workflow) => console.log('Workflow saved:', workflow)}
-        onTest={(workflow) => console.log('Workflow tested:', workflow)}
+        onSave={handleWorkflowSave}
+        onTest={handleWorkflowTest}
       />
     </div>
   );
