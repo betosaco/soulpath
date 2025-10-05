@@ -95,185 +95,34 @@ export function TelegramUserSelectorModal({
   }
 
   console.log('🔧 TelegramUserSelectorModal: Modal is open, rendering...');
-
+  
+  // Simple test modal
   return (
-    <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-      style={{ zIndex: 9999 }}
-    >
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col">
-        {/* Debug indicator */}
-        <div className="bg-red-500 text-white p-2 text-center font-bold">
-          🔧 MODAL IS RENDERING - DEBUG MODE
-        </div>
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
-          <div className="flex items-center gap-3">
-            <Users size={24} className="text-blue-600" />
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">Select Telegram Users</h2>
-              <p className="text-sm text-gray-500">Choose users who will receive Telegram notifications</p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <X size={20} className="text-gray-500" />
-          </button>
-        </div>
-
-        {/* Search */}
-        <div className="p-6 border-b">
-          <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <BaseInput
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search users by name, email, or username..."
-              className="pl-10 w-full"
-            />
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="px-6 py-3 border-b bg-gray-50">
-          <div className="flex items-center justify-between">
-            <div className="flex gap-2">
-              <BaseButton
-                onClick={handleSelectAll}
-                size="sm"
-                className="text-xs"
-              >
-                Select All with Chat ID
-              </BaseButton>
-              <BaseButton
-                onClick={handleClearAll}
-                size="sm"
-                className="text-xs bg-gray-100 text-gray-700 hover:bg-gray-200"
-              >
-                Clear All
-              </BaseButton>
-            </div>
-            <div className="text-sm text-gray-600">
-              {selectedUsers.length} user{selectedUsers.length !== 1 ? 's' : ''} selected
-            </div>
-          </div>
-        </div>
-
-        {/* User List */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <span className="ml-3 text-gray-600">Loading users...</span>
-            </div>
-          ) : error ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="text-center">
-                <div className="text-red-500 mb-2">⚠️ {error}</div>
-                <BaseButton onClick={fetchUsers} size="sm">
-                  Retry
-                </BaseButton>
-              </div>
-            </div>
-          ) : filteredUsers.length === 0 ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="text-center text-gray-500">
-                <Users size={48} className="mx-auto mb-3 text-gray-300" />
-                <p>No users found</p>
-                {searchQuery && (
-                  <p className="text-sm">Try adjusting your search terms</p>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {filteredUsers.map((user) => {
-                const isSelected = selectedUsers.some(u => u.id === user.id);
-                const hasChatId = !!user.telegram_chat_id;
-                
-                return (
-                  <div
-                    key={user.id}
-                    className={`flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer ${
-                      isSelected 
-                        ? 'bg-blue-50 border-blue-200' 
-                        : 'hover:bg-gray-50 border-gray-200'
-                    } ${!hasChatId ? 'opacity-50' : ''}`}
-                    onClick={() => hasChatId && handleUserToggle(user)}
-                  >
-                    <Checkbox
-                      checked={isSelected}
-                      disabled={!hasChatId}
-                      onChange={() => hasChatId && handleUserToggle(user)}
-                    />
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <div className="text-sm font-medium truncate">
-                          {user.fullName || 'No Name'}
-                        </div>
-                        {isSelected && (
-                          <CheckCircle size={16} className="text-blue-600 flex-shrink-0" />
-                        )}
-                      </div>
-                      <div className="text-xs text-gray-500 truncate">
-                        {user.email || 'No Email'}
-                      </div>
-                      {user.telegram_username && (
-                        <div className="text-xs text-blue-600">
-                          @{user.telegram_username}
-                        </div>
-                      )}
-                      {user.telegram_chat_id && (
-                        <div className="text-xs text-green-600">
-                          Chat ID: {user.telegram_chat_id}
-                        </div>
-                      )}
-                      {!hasChatId && (
-                        <div className="text-xs text-red-500">
-                          No Telegram Chat ID
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="p-6 border-t bg-gray-50">
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-600">
-              {selectedUsers.length > 0 && (
-                <div>
-                  <strong>{selectedUsers.length}</strong> user{selectedUsers.length !== 1 ? 's' : ''} selected
-                  <div className="text-xs text-gray-500 mt-1">
-                    Chat IDs: {selectedUsers.map(u => u.telegram_chat_id).filter(Boolean).join(', ')}
-                  </div>
-                </div>
-              )}
-            </div>
-            <div className="flex gap-3">
-              <BaseButton
-                onClick={onClose}
-                className="bg-gray-100 text-gray-700 hover:bg-gray-200"
-              >
-                Cancel
-              </BaseButton>
-              <BaseButton
-                onClick={handleConfirm}
-                className="bg-blue-600 text-white hover:bg-blue-700"
-              >
-                Confirm Selection
-              </BaseButton>
-            </div>
-          </div>
-        </div>
+    <div style={{ 
+      position: 'fixed', 
+      top: 0, 
+      left: 0, 
+      width: '100%', 
+      height: '100%', 
+      background: 'rgba(0,0,0,0.5)', 
+      zIndex: 9999,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }}>
+      <div style={{ 
+        background: 'white', 
+        padding: '20px', 
+        borderRadius: '8px',
+        maxWidth: '500px',
+        width: '90%'
+      }}>
+        <h2>🔧 TEST MODAL</h2>
+        <p>If you can see this, the modal is working!</p>
+        <button onClick={onClose} style={{ padding: '10px', margin: '10px' }}>
+          Close Modal
+        </button>
       </div>
     </div>
   );
-}
+

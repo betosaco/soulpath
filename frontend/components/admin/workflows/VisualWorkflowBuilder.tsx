@@ -306,6 +306,11 @@ export function VisualWorkflowBuilder({
   const [zoom, setZoom] = useState(1);
   const [showProperties, setShowProperties] = useState(true);
   const [showTelegramUserModal, setShowTelegramUserModal] = useState(false);
+  
+  // Debug modal state changes
+  useEffect(() => {
+    console.log('🔧 Modal state changed:', showTelegramUserModal);
+  }, [showTelegramUserModal]);
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const translations = {
@@ -1981,6 +1986,7 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
           </div>
         </div>
       )}
+      {console.log('🔧 About to render modal with isOpen:', showTelegramUserModal)}
       <TelegramUserSelectorModal
         isOpen={showTelegramUserModal}
         onClose={() => {
