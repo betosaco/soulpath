@@ -1842,8 +1842,6 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
 
       if (response.ok) {
         const data = await response.json();
-        console.log('🔧 API response data:', data);
-        console.log('🔧 Users returned:', data.users?.length || 0, data.users);
         setUsers(data.users || []);
       } else {
         const errorText = await response.text();
@@ -1859,13 +1857,10 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
   };
 
   const toggleUser = (user: TelegramUser) => {
-    console.log('🔧 toggleUser called for user:', user.id, user.fullName);
     const isSelected = selectedUsers.some(u => u.id === user.id);
-    console.log('🔧 User was selected:', isSelected);
     const newSelection = isSelected
       ? selectedUsers.filter(u => u.id !== user.id)
       : [...selectedUsers, user];
-    console.log('🔧 New selection:', newSelection.length, 'users');
     onUsersChange(newSelection);
   };
 
@@ -1937,7 +1932,10 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
                   <input
                     type="checkbox"
                     checked={isSelected}
-                    onChange={() => toggleUser(user)}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      toggleUser(user);
+                    }}
                     className="w-3 h-3"
                   />
                   <div className="flex-1">
@@ -1949,6 +1947,25 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
               );
             })}
           </div>
+
+          {/* Action Buttons */}
+          {users.length > 0 && (
+            <div className="border-t pt-3 flex gap-2">
+              <button
+                onClick={() => onUsersChange([])}
+                className="flex-1 px-3 py-2 border border-gray-300 text-gray-700 text-sm rounded hover:bg-gray-50"
+              >
+                Clear
+              </button>
+              <button
+                onClick={() => setIsExpanded(false)}
+                disabled={selectedUsers.length === 0}
+                className="flex-1 px-3 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                Add ({selectedUsers.length})
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
