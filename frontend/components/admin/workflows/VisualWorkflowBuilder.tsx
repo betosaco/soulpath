@@ -1231,113 +1231,136 @@ export function VisualWorkflowBuilder({
             <p className="text-gray-600 mt-1">{t.description}</p>
           </div>
 
-          <div className="flex items-center gap-3">
-            {/* Zoom Controls */}
-            <div className="flex items-center gap-1 border rounded">
+          <div className="flex flex-col gap-3">
+            {/* Top Row - Controls */}
+            <div className="flex items-center gap-3">
+              {/* Zoom Controls */}
+              <div className="flex items-center gap-1 border rounded bg-white">
+                <button
+                  onClick={handleZoomOut}
+                  className="px-1.5 py-1 hover:bg-gray-100 rounded-l text-xs"
+                  title="Zoom Out"
+                >
+                  <ZoomOut size={12} />
+                </button>
+                <span className="px-2 text-xs font-mono bg-gray-50">{Math.round(zoom * 100)}%</span>
+                <button
+                  onClick={handleZoomIn}
+                  className="px-1.5 py-1 hover:bg-gray-100 text-xs"
+                  title="Zoom In"
+                >
+                  <ZoomIn size={12} />
+                </button>
+                <button
+                  onClick={handleResetZoom}
+                  className="px-1.5 py-1 hover:bg-gray-100 rounded-r text-xs"
+                  title="Reset Zoom"
+                >
+                  <RotateCcw size={12} />
+                </button>
+              </div>
+
+              {/* Properties Toggle */}
+              <button
+                onClick={() => setShowProperties(!showProperties)}
+                className={`px-2 py-1 rounded border text-xs font-medium transition-colors ${
+                  showProperties 
+                    ? 'bg-blue-100 text-blue-700 border-blue-300' 
+                    : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
+                }`}
+                title={showProperties ? 'Hide Properties Panel' : 'Show Properties Panel'}
+              >
+                <Settings size={14} className="mr-1 inline" />
+                {showProperties ? 'Hide' : 'Show'}
+              </button>
+
+              {/* Action Buttons */}
               <BaseButton
-                onClick={handleZoomOut}
-                className="px-2 py-1"
+                onClick={handleTest}
+                className="px-2 py-1 text-xs h-7"
                 size="sm"
               >
-                <ZoomOut size={14} />
+                <TestTube size={14} className="mr-1" />
+                {t.test}
               </BaseButton>
-              <span className="px-2 text-sm">{Math.round(zoom * 100)}%</span>
+
               <BaseButton
-                onClick={handleZoomIn}
-                className="px-2 py-1"
+                onClick={handleSave}
+                className="px-2 py-1 text-xs h-7 bg-green-600 hover:bg-green-700 text-white"
                 size="sm"
               >
-                <ZoomIn size={14} />
-              </BaseButton>
-              <BaseButton
-                onClick={handleResetZoom}
-                className="px-2 py-1"
-                size="sm"
-              >
-                <RotateCcw size={14} />
+                <Save size={14} className="mr-1" />
+                {t.save}
               </BaseButton>
             </div>
 
-            {/* Template Selector */}
-            <Select onValueChange={handleLoadTemplate}>
-              <SelectTrigger className="w-48 dashboard-input">
-                <SelectValue placeholder="Load Template..." />
-              </SelectTrigger>
-              <SelectContent>
-                {workflowTemplates.map(template => (
-                  <SelectItem key={template.id} value={template.id}>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{template.name}</span>
-                      <span className="text-xs text-gray-500">{template.description}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Properties Toggle */}
-            <button
-              onClick={() => {
-                console.log('Toggle properties panel:', !showProperties);
-                setShowProperties(!showProperties);
-              }}
-              className={`px-3 py-2 rounded-md border text-sm font-medium transition-colors ${
-                showProperties 
-                  ? 'bg-blue-100 text-blue-700 border-blue-300' 
-                  : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
-              }`}
-              title={showProperties ? 'Hide Properties Panel' : 'Show Properties Panel'}
-            >
-              <Settings size={16} className="mr-2 inline" />
-              {showProperties ? 'Hide Props' : 'Show Props'}
-            </button>
-
-            {/* Action Buttons */}
-            <BaseButton
-              onClick={handleTest}
-              className="dashboard-button-secondary"
-            >
-              <TestTube size={16} className="mr-2" />
-              {t.test}
-            </BaseButton>
-
-            <BaseButton
-              onClick={handleSave}
-              className="dashboard-button-primary"
-            >
-              <Save size={16} className="mr-2" />
-              {t.save}
-            </BaseButton>
+            {/* Bottom Row - Template Selector */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1">
+                <Select onValueChange={handleLoadTemplate}>
+                  <SelectTrigger className="w-full h-8 text-sm">
+                    <SelectValue placeholder="📋 Load Template..." />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-80">
+                    {workflowTemplates.map(template => (
+                      <SelectItem key={template.id} value={template.id} className="py-2">
+                        <div className="flex flex-col">
+                          <span className="font-medium text-sm">{template.name}</span>
+                          <span className="text-xs text-gray-500 mt-1">{template.description}</span>
+                          <span className="text-xs text-blue-600 mt-1">
+                            {template.nodes.length} nodes • {template.connections.length} connections
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Workflow Settings */}
-        <div className="mt-4 grid grid-cols-2 gap-4">
+        <div className="mt-3 grid grid-cols-3 gap-3">
           <div>
-            <Label className="dashboard-label">{t.workflowName}</Label>
+            <Label className="text-xs font-medium text-gray-700">{t.workflowName}</Label>
             <BaseInput
               value={workflow.name}
               onChange={(e) => setWorkflow(prev => ({ ...prev, name: e.target.value }))}
-              className="dashboard-input"
-              placeholder="Enter workflow name..."
+              className="h-7 text-sm"
+              placeholder="Workflow name..."
             />
           </div>
           <div>
-            <Label className="dashboard-label">{t.description}</Label>
+            <Label className="text-xs font-medium text-gray-700">{t.description}</Label>
             <BaseInput
               value={workflow.description}
               onChange={(e) => setWorkflow(prev => ({ ...prev, description: e.target.value }))}
-              className="dashboard-input"
-              placeholder="Enter workflow description..."
+              className="h-7 text-sm"
+              placeholder="Description..."
             />
+          </div>
+          <div className="flex items-end">
+            <label className="flex items-center gap-2 text-xs">
+              <input
+                type="checkbox"
+                checked={workflow.settings.enabled}
+                onChange={(e) => setWorkflow(prev => ({
+                  ...prev,
+                  settings: { ...prev.settings, enabled: e.target.checked }
+                }))}
+                className="rounded"
+              />
+              <span className="text-gray-700">{t.enabled}</span>
+            </label>
           </div>
         </div>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar - Node Palette */}
-        <div className="w-64 bg-white border-r p-4 overflow-y-auto">
-          <h3 className="font-semibold text-gray-900 mb-4">{t.nodes}</h3>
+        <div className="w-56 bg-white border-r p-3 overflow-y-auto">
+          <h3 className="font-semibold text-gray-900 mb-3 text-sm">{t.nodes}</h3>
 
           <div className="space-y-4">
             {['trigger', 'communication', 'logic', 'data', 'error', 'advanced'].map((category) => {
@@ -1355,7 +1378,7 @@ export function VisualWorkflowBuilder({
 
               return (
                 <div key={category}>
-                  <h4 className="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+                  <h4 className="text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">
                     {categoryLabels[category as keyof typeof categoryLabels]}
                   </h4>
                   <div className="space-y-1">
@@ -1364,7 +1387,7 @@ export function VisualWorkflowBuilder({
                       return (
                         <div
                           key={nodeType.type}
-                          className={`p-2 border rounded cursor-move hover:shadow-md transition-all duration-200 ${nodeType.color} text-white text-sm`}
+                          className={`p-1.5 border rounded cursor-move hover:shadow-sm transition-all duration-200 ${nodeType.color} text-white text-xs`}
                           draggable
                           onDragStart={(e) => {
                             e.dataTransfer.setData('application/node-type', nodeType.type);
@@ -1373,8 +1396,8 @@ export function VisualWorkflowBuilder({
                           onDragEnd={() => setIsDragging(false)}
                           title={nodeType.label}
                         >
-                          <div className="flex items-center gap-2">
-                            <IconComponent size={14} />
+                          <div className="flex items-center gap-1.5">
+                            <IconComponent size={12} />
                             <span className="truncate">{nodeType.label}</span>
                           </div>
                         </div>
@@ -1387,15 +1410,12 @@ export function VisualWorkflowBuilder({
           </div>
 
           {/* Keyboard Shortcuts */}
-          <div className="mt-6 pt-4 border-t">
-            <h4 className="font-semibold text-gray-900 mb-3">Keyboard Shortcuts</h4>
+          <div className="mt-4 pt-3 border-t">
+            <h4 className="font-semibold text-gray-900 mb-2 text-xs">Shortcuts</h4>
             <div className="space-y-1 text-xs text-gray-600">
-              <div><kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Ctrl</kbd> + <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">+</kbd> Zoom In</div>
-              <div><kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Ctrl</kbd> + <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">-</kbd> Zoom Out</div>
-              <div><kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Ctrl</kbd> + <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">0</kbd> Reset Zoom</div>
-              <div><kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Ctrl</kbd> + <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">S</kbd> Save</div>
-              <div><kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Ctrl</kbd> + <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">T</kbd> Test</div>
-              <div><kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Del</kbd> Delete Selected</div>
+              <div><kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Ctrl</kbd>+<kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">+/-</kbd> Zoom</div>
+              <div><kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Ctrl</kbd>+<kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">S</kbd> Save</div>
+              <div><kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Del</kbd> Delete</div>
             </div>
           </div>
 
@@ -1475,9 +1495,6 @@ export function VisualWorkflowBuilder({
         {/* Properties Panel */}
         {selectedNode && showProperties && (
           <div className="w-80 bg-white border-l p-4 overflow-y-auto">
-            <div className="mb-2 text-xs text-green-600 bg-green-50 p-2 rounded">
-              ✅ Properties Panel Visible - selectedNode={!!selectedNode}, showProperties={showProperties.toString()}
-            </div>
             <NodePropertiesPanel
               node={selectedNode}
               onUpdate={(updates) => handleNodeUpdate(selectedNode.id, updates)}
@@ -1497,50 +1514,7 @@ export function VisualWorkflowBuilder({
           </div>
         )}
 
-        {/* Mini Properties Panel - when main panel is hidden */}
-        {selectedNode && !showProperties && (
-          <div className="absolute top-4 right-4 bg-white border rounded-lg shadow-lg p-3 max-w-xs">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="font-semibold text-gray-900 text-sm">Selected Node</h4>
-              <button
-                onClick={() => {
-                  console.log('Show properties panel');
-                  setShowProperties(true);
-                }}
-                className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-              >
-                <Settings size={12} className="inline mr-1" />
-                Show Props
-              </button>
-            </div>
-            <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded mb-2">
-              🔍 Mini Panel Visible - selectedNode={!!selectedNode}, showProperties={showProperties.toString()}
-            </div>
-            <div className="text-xs text-gray-600">
-              <div><strong>Type:</strong> {selectedNode.type}</div>
-              <div><strong>ID:</strong> {selectedNode.id}</div>
-              <div><strong>Position:</strong> ({Math.round(selectedNode.position.x)}, {Math.round(selectedNode.position.y)})</div>
-              <div><strong>Inputs:</strong> {selectedNode.inputs.length}</div>
-              <div><strong>Outputs:</strong> {selectedNode.outputs.length}</div>
-            </div>
-            <BaseButton
-              onClick={() => {
-                setWorkflow(prev => ({
-                  ...prev,
-                  nodes: prev.nodes.filter(n => n.id !== selectedNode.id),
-                  connections: prev.connections.filter(
-                    conn => conn.source !== selectedNode.id && conn.target !== selectedNode.id
-                  )
-                }));
-                setSelectedNode(null);
-              }}
-              className="mt-2 w-full dashboard-button-danger"
-              size="sm"
-            >
-              Delete Node
-            </BaseButton>
-          </div>
-        )}
+        {/* No mini panel - when properties are hidden, just show the canvas */}
       </div>
     </div>
   );
