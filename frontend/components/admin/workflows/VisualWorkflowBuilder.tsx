@@ -6,6 +6,7 @@ import { BaseButton } from '../../ui/BaseButton';
 import { BaseInput } from '../../ui/BaseInput';
 import { Label } from '../../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
+import { Checkbox } from '../../ui/checkbox';
 import {
   Play,
   Save,
@@ -42,6 +43,7 @@ import {
 import { WorkflowCanvas } from './WorkflowCanvas';
 import { WorkflowNode } from './WorkflowNode';
 import { WorkflowEngine } from './WorkflowEngine';
+import { TelegramUserSelector } from './TelegramUserSelector';
 
 interface VisualWorkflowBuilderProps {
   language: 'en' | 'es';
@@ -1649,17 +1651,16 @@ function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations:
             </div>
 
             <div>
-              <Label className="dashboard-label">Chat IDs</Label>
-              <BaseInput
-                value={node.data.chatIds?.join(', ') || ''}
-                onChange={(e) => onUpdate({
+              <Label className="dashboard-label">Select Users</Label>
+              <TelegramUserSelector
+                selectedUsers={node.data.selectedUsers || []}
+                onUsersChange={(users) => onUpdate({
                   data: {
                     ...node.data,
-                    chatIds: e.target.value.split(',').map(s => s.trim())
+                    selectedUsers: users,
+                    chatIds: users.map(u => u.telegram_chat_id).filter(Boolean)
                   }
                 })}
-                className="dashboard-input"
-                placeholder="123456789, 987654321"
               />
             </div>
           </div>
@@ -1751,6 +1752,161 @@ function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations:
 
         {renderNodeProperties()}
       </div>
+    </div>
+  );
+}
+
+// Telegram User Selector Component
+interface TelegramUser {
+  id: string;
+  fullName: string;
+  email: string;
+  telegram_chat_id: string | null;
+  telegram_username: string | null;
+}
+
+interface TelegramUserSelectorProps {
+  selectedUsers: TelegramUser[];
+  onUsersChange: (users: TelegramUser[]) => void;
+}
+
+function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSelectorProps) {
+  const [users, setUsers] = useState<TelegramUser[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Fetch users with Telegram chat IDs
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch('/api/admin/users/telegram');
+        if (response.ok) {
+          const data = await response.json();
+          setUsers(data.users || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch Telegram users:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  const filteredUsers = users.filter(user => 
+    (user.fullName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (user.email || '').toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleUserToggle = (user: TelegramUser) => {
+    const isSelected = selectedUsers.some(u => u.id === user.id);
+    if (isSelected) {
+      onUsersChange(selectedUsers.filter(u => u.id !== user.id));
+    } else {
+      onUsersChange([...selectedUsers, user]);
+    }
+  };
+
+  const handleSelectAll = () => {
+    const usersWithChatIds = filteredUsers.filter(user => user.telegram_chat_id);
+    onUsersChange(usersWithChatIds);
+  };
+
+  const handleClearAll = () => {
+    onUsersChange([]);
+  };
+
+  return (
+    <div className="space-y-3">
+      {/* Search */}
+      <BaseInput
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        placeholder="Search users..."
+        className="w-full"
+      />
+
+      {/* Actions */}
+      <div className="flex gap-2">
+        <BaseButton
+          onClick={handleSelectAll}
+          size="sm"
+          className="text-xs"
+        >
+          Select All with Chat ID
+        </BaseButton>
+        <BaseButton
+          onClick={handleClearAll}
+          size="sm"
+          className="text-xs bg-gray-100 text-gray-700 hover:bg-gray-200"
+        >
+          Clear All
+        </BaseButton>
+      </div>
+
+      {/* User List */}
+      <div className="max-h-48 overflow-y-auto border rounded-md">
+        {loading ? (
+          <div className="p-3 text-center text-sm text-gray-500">Loading users...</div>
+        ) : filteredUsers.length === 0 ? (
+          <div className="p-3 text-center text-sm text-gray-500">No users found</div>
+        ) : (
+          <div className="space-y-1 p-2">
+            {filteredUsers.map((user) => {
+              const isSelected = selectedUsers.some(u => u.id === user.id);
+              const hasChatId = !!user.telegram_chat_id;
+              
+              return (
+                <div
+                  key={user.id}
+                  className={`flex items-center gap-2 p-2 rounded cursor-pointer transition-colors ${
+                    isSelected ? 'bg-blue-50 border border-blue-200' : 'hover:bg-gray-50'
+                  } ${!hasChatId ? 'opacity-50' : ''}`}
+                  onClick={() => hasChatId && handleUserToggle(user)}
+                >
+                  <Checkbox
+                    checked={isSelected}
+                    disabled={!hasChatId}
+                    onChange={() => hasChatId && handleUserToggle(user)}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium truncate">
+                      {user.fullName || 'No Name'}
+                    </div>
+                    <div className="text-xs text-gray-500 truncate">
+                      {user.email || 'No Email'}
+                    </div>
+                    {user.telegram_chat_id && (
+                      <div className="text-xs text-green-600">
+                        Chat ID: {user.telegram_chat_id}
+                      </div>
+                    )}
+                    {!hasChatId && (
+                      <div className="text-xs text-red-500">
+                        No Telegram Chat ID
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Selected Users Summary */}
+      {selectedUsers.length > 0 && (
+        <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+          <strong>{selectedUsers.length}</strong> user{selectedUsers.length !== 1 ? 's' : ''} selected
+          {selectedUsers.length > 0 && (
+            <div className="mt-1">
+              Chat IDs: {selectedUsers.map(u => u.telegram_chat_id).filter(Boolean).join(', ')}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
