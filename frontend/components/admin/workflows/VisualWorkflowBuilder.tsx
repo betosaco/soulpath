@@ -7,7 +7,6 @@ import { BaseInput } from '../../ui/BaseInput';
 import { Label } from '../../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { Checkbox } from '../../ui/checkbox';
-import { TelegramUserSelectorModal } from './TelegramUserSelectorModal';
 import {
   Play,
   Save,
@@ -305,20 +304,7 @@ export function VisualWorkflowBuilder({
   const [isDragging, setIsDragging] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [showProperties, setShowProperties] = useState(true);
-  const [showTelegramUserModal, setShowTelegramUserModal] = useState(false);
-  const [forceRender, setForceRender] = useState(0);
   const canvasRef = useRef<HTMLDivElement>(null);
-
-  // Force re-render when modal state changes
-  useEffect(() => {
-    console.log('🔧 Modal state changed to:', showTelegramUserModal, 'at', new Date().toISOString());
-    setForceRender(prev => prev + 1);
-
-    // If modal is true, log it prominently
-    if (showTelegramUserModal) {
-      console.log('🚨🚨🚨 MODAL STATE IS TRUE - SHOULD BE RENDERING 🚨🚨🚨');
-    }
-  }, [showTelegramUserModal]);
 
   const translations = {
     en: {
@@ -1252,7 +1238,7 @@ export function VisualWorkflowBuilder({
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
 
   return (
-    <div key={forceRender} className="h-full flex flex-col bg-gray-50">
+    <div className="h-full flex flex-col bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b p-4">
         <div className="flex items-center justify-between">
@@ -1583,10 +1569,6 @@ export function VisualWorkflowBuilder({
               }}
               language={language}
               translations={t}
-              onOpenTelegramModal={() => {
-                alert('Modal function called from parent!');
-                setShowTelegramUserModal(true);
-              }}
             />
           </div>
         )}
@@ -1603,11 +1585,22 @@ interface NodePropertiesPanelProps {
   onDelete: () => void;
   language: 'en' | 'es';
   translations: any;
-  onOpenTelegramModal: () => void;
 }
 
-function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations: t, onOpenTelegramModal }: NodePropertiesPanelProps) {
-  console.log('🔧 NodePropertiesPanel: onOpenTelegramModal prop:', typeof onOpenTelegramModal);
+interface TelegramUser {
+  id: string;
+  fullName: string;
+  email: string;
+  telegram_chat_id: string | null;
+  telegram_username: string | null;
+}
+
+interface TelegramUserSelectorProps {
+  selectedUsers: TelegramUser[];
+  onUsersChange: (users: TelegramUser[]) => void;
+}
+
+function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations: t }: NodePropertiesPanelProps) {
   const renderNodeProperties = () => {
     switch (node.type) {
       case 'trigger':
@@ -1696,34 +1689,23 @@ function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations:
             <div>
               <Label className="dashboard-label">Select Users</Label>
               <div className="space-y-2">
-                <BaseButton
-                  onClick={() => {
-                    console.log('BUTTON CLICK - calling onOpenTelegramModal');
-                    onOpenTelegramModal();
-                  }}
-                  className="w-full justify-start"
-                  size="sm"
-                >
-                  <Users size={16} className="mr-2" />
-                  {node.data.selectedUsers?.length > 0 
-                    ? `${node.data.selectedUsers.length} user${node.data.selectedUsers.length !== 1 ? 's' : ''} selected`
-                    : 'Select Users'
-                  }
-                </BaseButton>
-                
+                <TelegramUserSelector
+                  selectedUsers={node.data.selectedUsers || []}
+                  onUsersChange={(users) => onUpdate({
+                    data: {
+                      ...node.data,
+                      selectedUsers: users,
+                      chatIds: users.map(u => u.telegram_chat_id).filter(Boolean)
+                    }
+                  })}
+                />
+
                 {node.data.selectedUsers?.length > 0 && (
                   <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
-                    <div className="font-medium">Selected Users:</div>
-                    {node.data.selectedUsers.map((user, index) => (
-                      <div key={user.id} className="mt-1">
-                        {user.fullName || 'No Name'} 
-                        {user.telegram_chat_id && (
-                          <span className="text-green-600 ml-2">
-                            (Chat ID: {user.telegram_chat_id})
-                          </span>
-                        )}
-                      </div>
-                    ))}
+                    <div className="font-medium">Selected Users ({node.data.selectedUsers.length}):</div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      Chat IDs: {node.data.selectedUsers.map(u => u.telegram_chat_id).filter(Boolean).join(', ')}
+                    </div>
                   </div>
                 )}
               </div>
@@ -1821,19 +1803,175 @@ function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations:
   );
 }
 
-// Telegram User Selector Component
-interface TelegramUser {
-  id: string;
-  fullName: string;
-  email: string;
-  telegram_chat_id: string | null;
-  telegram_username: string | null;
+// Inline Telegram User Selector Component
+function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSelectorProps) {
+  const [users, setUsers] = useState<TelegramUser[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // Fetch users when expanded
+  useEffect(() => {
+    if (isExpanded && users.length === 0) {
+      fetchUsers();
+    }
+  }, [isExpanded]);
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/admin/users/telegram');
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data.users || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch Telegram users:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredUsers = users.filter(user =>
+    (user.fullName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (user.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (user.telegram_username || '').toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleUserToggle = (user: TelegramUser) => {
+    const isSelected = selectedUsers.some(u => u.id === user.id);
+    if (isSelected) {
+      onUsersChange(selectedUsers.filter(u => u.id !== user.id));
+    } else {
+      onUsersChange([...selectedUsers, user]);
+    }
+  };
+
+  const handleSelectAll = () => {
+    const usersWithChatIds = filteredUsers.filter(user => user.telegram_chat_id);
+    onUsersChange(usersWithChatIds);
+  };
+
+  const handleClearAll = () => {
+    onUsersChange([]);
+  };
+
+  return (
+    <div className="space-y-2">
+      {/* Toggle Button */}
+      <BaseButton
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full justify-between text-left"
+        size="sm"
+        variant="outline"
+      >
+        <div className="flex items-center gap-2">
+          <Users size={14} />
+          <span>
+            {selectedUsers.length > 0
+              ? `${selectedUsers.length} user${selectedUsers.length !== 1 ? 's' : ''} selected`
+              : 'Select Users'
+            }
+          </span>
+        </div>
+        <ChevronDown size={14} className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+      </BaseButton>
+
+      {/* Expanded Content */}
+      {isExpanded && (
+        <div className="border rounded-md p-3 space-y-3 bg-gray-50">
+          {/* Search */}
+          <div className="relative">
+            <Search size={12} className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <BaseInput
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search users..."
+              className="pl-7 text-sm h-8"
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-2">
+            <BaseButton
+              onClick={handleSelectAll}
+              size="sm"
+              className="text-xs h-7"
+            >
+              Select All
+            </BaseButton>
+            <BaseButton
+              onClick={handleClearAll}
+              size="sm"
+              className="text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 h-7"
+            >
+              Clear All
+            </BaseButton>
+          </div>
+
+          {/* User List */}
+          <div className="max-h-48 overflow-y-auto space-y-1">
+            {loading ? (
+              <div className="flex items-center justify-center py-4">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                <span className="ml-2 text-sm text-gray-600">Loading users...</span>
+              </div>
+            ) : filteredUsers.length === 0 ? (
+              <div className="text-center py-4 text-sm text-gray-500">
+                No users found
+              </div>
+            ) : (
+              filteredUsers.map((user) => {
+                const isSelected = selectedUsers.some(u => u.id === user.id);
+                const hasChatId = !!user.telegram_chat_id;
+
+                return (
+                  <div
+                    key={user.id}
+                    className={`flex items-center gap-2 p-2 rounded cursor-pointer transition-colors text-sm ${
+                      isSelected
+                        ? 'bg-blue-100 border border-blue-200'
+                        : 'hover:bg-gray-100'
+                    } ${!hasChatId ? 'opacity-60' : ''}`}
+                    onClick={() => hasChatId && handleUserToggle(user)}
+                  >
+                    <Checkbox
+                      checked={isSelected}
+                      disabled={!hasChatId}
+                      onChange={() => hasChatId && handleUserToggle(user)}
+                      className="h-3 w-3"
+                    />
+
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-xs truncate">
+                        {user.fullName || 'No Name'}
+                      </div>
+                      <div className="text-xs text-gray-500 truncate">
+                        {user.email || 'No Email'}
+                      </div>
+                      {user.telegram_chat_id && (
+                        <div className="text-xs text-green-600">
+                          ID: {user.telegram_chat_id}
+                        </div>
+                      )}
+                      {!hasChatId && (
+                        <div className="text-xs text-red-500">
+                          No Chat ID
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
-interface TelegramUserSelectorProps {
-  selectedUsers: TelegramUser[];
-  onUsersChange: (users: TelegramUser[]) => void;
-}
+// Legacy Modal Component (can be removed later)
 
 function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSelectorProps) {
   const [users, setUsers] = useState<TelegramUser[]>([]);
@@ -1973,50 +2111,6 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
         </div>
       )}
 
-      {/* Telegram User Selector Modal */}
-      {(() => {
-        console.log('🔧 Rendering modal section, showTelegramUserModal:', showTelegramUserModal, 'forceRender:', forceRender);
-        if (showTelegramUserModal) {
-          console.log('🔧 Modal condition is true, rendering modal');
-          return (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundColor: 'rgba(255, 0, 0, 0.8)',
-          zIndex: 9999,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white',
-          fontSize: '24px',
-          fontWeight: 'bold'
-        }}>
-          MODAL IS WORKING! 🎉
-          <br />
-          <button
-            onClick={() => setShowTelegramUserModal(false)}
-            style={{
-              marginTop: '20px',
-              padding: '10px 20px',
-              backgroundColor: 'white',
-              color: 'black',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer'
-            }}
-          >
-            Close Modal
-          </button>
-        </div>
-          );
-        } else {
-          console.log('🔧 Modal condition is false, not rendering modal');
-          return null;
-        }
-      })()}
     </div>
   );
 }
