@@ -306,10 +306,12 @@ export function VisualWorkflowBuilder({
   const [zoom, setZoom] = useState(1);
   const [showProperties, setShowProperties] = useState(true);
   const [showTelegramUserModal, setShowTelegramUserModal] = useState(false);
+  const [modalToggleCount, setModalToggleCount] = useState(0);
   
   // Debug modal state changes
   useEffect(() => {
-    console.log('🔧 Modal state changed:', showTelegramUserModal);
+    console.log('🔧 Modal state changed:', showTelegramUserModal, 'Toggle count:', modalToggleCount);
+    setModalToggleCount(prev => prev + 1);
   }, [showTelegramUserModal]);
   const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -1578,7 +1580,10 @@ export function VisualWorkflowBuilder({
               translations={t}
               onOpenTelegramModal={() => {
                 console.log('🔧 Parent: Opening modal, current state:', showTelegramUserModal);
-                setShowTelegramUserModal(true);
+                setShowTelegramUserModal(prev => {
+                  console.log('🔧 Parent: State update function called, prev:', prev);
+                  return true;
+                });
                 console.log('🔧 Parent: Modal state set to true');
               }}
             />
@@ -1975,6 +1980,26 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
           )}
         </div>
       )}
+
+      {/* Debug Modal Toggle Button */}
+      <div style={{ position: 'fixed', top: '10px', right: '10px', zIndex: 10000 }}>
+        <button 
+          onClick={() => {
+            console.log('🔧 Manual toggle clicked, current state:', showTelegramUserModal);
+            setShowTelegramUserModal(!showTelegramUserModal);
+          }}
+          style={{ 
+            background: 'blue', 
+            color: 'white', 
+            padding: '10px', 
+            border: 'none', 
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          Toggle Modal (Debug)
+        </button>
+      </div>
 
       {/* Telegram User Selector Modal */}
       {console.log('🔧 Modal state:', { showTelegramUserModal, selectedNode: selectedNode?.id })}
