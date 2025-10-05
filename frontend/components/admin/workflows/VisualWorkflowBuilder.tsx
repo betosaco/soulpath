@@ -7,6 +7,7 @@ import { BaseInput } from '../../ui/BaseInput';
 import { Label } from '../../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { Checkbox } from '../../ui/checkbox';
+import { TelegramUserSelectorModal } from './TelegramUserSelectorModal';
 import {
   Play,
   Save,
@@ -38,12 +39,12 @@ import {
   RefreshCw,
   Shield,
   Brain,
-  Webhook
+  Webhook,
+  Users
 } from 'lucide-react';
 import { WorkflowCanvas } from './WorkflowCanvas';
 import { WorkflowNode } from './WorkflowNode';
 import { WorkflowEngine } from './WorkflowEngine';
-import { TelegramUserSelector } from './TelegramUserSelector';
 
 interface VisualWorkflowBuilderProps {
   language: 'en' | 'es';
@@ -304,6 +305,7 @@ export function VisualWorkflowBuilder({
   const [isDragging, setIsDragging] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [showProperties, setShowProperties] = useState(true);
+  const [showTelegramUserModal, setShowTelegramUserModal] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const translations = {
@@ -1127,6 +1129,18 @@ export function VisualWorkflowBuilder({
     }));
   };
 
+  const handleTelegramUsersChange = (users: any[]) => {
+    if (selectedNode) {
+      handleNodeUpdate(selectedNode.id, {
+        data: {
+          ...selectedNode.data,
+          selectedUsers: users,
+          chatIds: users.map(u => u.telegram_chat_id).filter(Boolean)
+        }
+      });
+    }
+  };
+
   const handleConnectionCreate = (connection: Omit<WorkflowConnection, 'id'>) => {
     const newConnection: WorkflowConnection = {
       ...connection,
@@ -1652,16 +1666,35 @@ function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations:
 
             <div>
               <Label className="dashboard-label">Select Users</Label>
-              <TelegramUserSelector
-                selectedUsers={node.data.selectedUsers || []}
-                onUsersChange={(users) => onUpdate({
-                  data: {
-                    ...node.data,
-                    selectedUsers: users,
-                    chatIds: users.map(u => u.telegram_chat_id).filter(Boolean)
+              <div className="space-y-2">
+                <BaseButton
+                  onClick={() => setShowTelegramUserModal(true)}
+                  className="w-full justify-start"
+                  size="sm"
+                >
+                  <Users size={16} className="mr-2" />
+                  {node.data.selectedUsers?.length > 0 
+                    ? `${node.data.selectedUsers.length} user${node.data.selectedUsers.length !== 1 ? 's' : ''} selected`
+                    : 'Select Users'
                   }
-                })}
-              />
+                </BaseButton>
+                
+                {node.data.selectedUsers?.length > 0 && (
+                  <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                    <div className="font-medium">Selected Users:</div>
+                    {node.data.selectedUsers.map((user, index) => (
+                      <div key={user.id} className="mt-1">
+                        {user.fullName || 'No Name'} 
+                        {user.telegram_chat_id && (
+                          <span className="text-green-600 ml-2">
+                            (Chat ID: {user.telegram_chat_id})
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         );
@@ -1907,6 +1940,14 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
           )}
         </div>
       )}
+
+      {/* Telegram User Selector Modal */}
+      <TelegramUserSelectorModal
+        isOpen={showTelegramUserModal}
+        onClose={() => setShowTelegramUserModal(false)}
+        selectedUsers={selectedNode?.data?.selectedUsers || []}
+        onUsersChange={handleTelegramUsersChange}
+      />
     </div>
   );
 }
