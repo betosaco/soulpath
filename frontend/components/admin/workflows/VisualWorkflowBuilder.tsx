@@ -306,7 +306,14 @@ export function VisualWorkflowBuilder({
   const [zoom, setZoom] = useState(1);
   const [showProperties, setShowProperties] = useState(true);
   const [showTelegramUserModal, setShowTelegramUserModal] = useState(false);
+  const [forceRender, setForceRender] = useState(0);
   const canvasRef = useRef<HTMLDivElement>(null);
+
+  // Force re-render when modal state changes
+  useEffect(() => {
+    console.log('🔧 Modal state changed to:', showTelegramUserModal);
+    setForceRender(prev => prev + 1);
+  }, [showTelegramUserModal]);
 
   const translations = {
     en: {
@@ -1240,7 +1247,7 @@ export function VisualWorkflowBuilder({
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
 
   return (
-    <div className="h-full flex flex-col bg-gray-50">
+    <div key={forceRender} className="h-full flex flex-col bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b p-4">
         <div className="flex items-center justify-between">
@@ -1962,6 +1969,12 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
       )}
 
       {/* Telegram User Selector Modal */}
+      {console.log('🔧 Rendering modal section, showTelegramUserModal:', showTelegramUserModal, 'forceRender:', forceRender)}
+      {showTelegramUserModal && (
+        console.log('🔧 Modal condition is true, rendering modal')
+      ) || (
+        console.log('🔧 Modal condition is false, not rendering modal')
+      )}
       {showTelegramUserModal && (
         <div style={{
           position: 'fixed',
