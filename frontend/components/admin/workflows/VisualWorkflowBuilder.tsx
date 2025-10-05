@@ -1968,6 +1968,13 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
       {/* Telegram User Selector Modal */}
       {console.log('🔧 Modal state:', { showTelegramUserModal, selectedNode: selectedNode?.id })}
       {showTelegramUserModal && console.log('🔧 Modal should be rendering now...')}
+      {showTelegramUserModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'red', zIndex: 9999 }}>
+          <div style={{ color: 'white', fontSize: '24px', padding: '20px' }}>
+            🔧 DEBUG: Modal should be visible now!
+          </div>
+        </div>
+      )}
       <TelegramUserSelectorModal
         isOpen={showTelegramUserModal}
         onClose={() => {
