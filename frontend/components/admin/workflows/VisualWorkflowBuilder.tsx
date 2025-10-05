@@ -306,13 +306,6 @@ export function VisualWorkflowBuilder({
   const [zoom, setZoom] = useState(1);
   const [showProperties, setShowProperties] = useState(true);
   const [showTelegramUserModal, setShowTelegramUserModal] = useState(false);
-  const [modalToggleCount, setModalToggleCount] = useState(0);
-  
-  // Debug modal state changes
-  useEffect(() => {
-    console.log('🔧 Modal state changed:', showTelegramUserModal, 'Toggle count:', modalToggleCount);
-    setModalToggleCount(prev => prev + 1);
-  }, [showTelegramUserModal]);
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const translations = {
@@ -1579,12 +1572,8 @@ export function VisualWorkflowBuilder({
               language={language}
               translations={t}
               onOpenTelegramModal={() => {
-                console.log('🔧 Parent: Opening modal, current state:', showTelegramUserModal);
-                setShowTelegramUserModal(prev => {
-                  console.log('🔧 Parent: State update function called, prev:', prev);
-                  return true;
-                });
-                console.log('🔧 Parent: Modal state set to true');
+                alert('Modal function called from parent!');
+                setShowTelegramUserModal(true);
               }}
             />
           </div>
@@ -1697,17 +1686,8 @@ function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations:
               <div className="space-y-2">
                 <BaseButton
                   onClick={() => {
-                    console.log('🔧 Opening Telegram user modal...', { 
-                      nodeType: node.type,
-                      nodeId: node.id,
-                      onOpenTelegramModal: typeof onOpenTelegramModal
-                    });
-                    if (onOpenTelegramModal) {
-                      onOpenTelegramModal();
-                      console.log('🔧 Modal opening function called');
-                    } else {
-                      console.error('❌ onOpenTelegramModal is not defined!');
-                    }
+                    console.log('BUTTON CLICK - calling onOpenTelegramModal');
+                    onOpenTelegramModal();
                   }}
                   className="w-full justify-start"
                   size="sm"
@@ -1981,46 +1961,41 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
         </div>
       )}
 
-      {/* Debug Modal Toggle Button */}
-      <div style={{ position: 'fixed', top: '10px', right: '10px', zIndex: 10000 }}>
-        <button 
-          onClick={() => {
-            console.log('🔧 Manual toggle clicked, current state:', showTelegramUserModal);
-            setShowTelegramUserModal(!showTelegramUserModal);
-          }}
-          style={{ 
-            background: 'blue', 
-            color: 'white', 
-            padding: '10px', 
-            border: 'none', 
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          Toggle Modal (Debug)
-        </button>
-      </div>
-
       {/* Telegram User Selector Modal */}
-      {console.log('🔧 Modal state:', { showTelegramUserModal, selectedNode: selectedNode?.id })}
-      {showTelegramUserModal && console.log('🔧 Modal should be rendering now...')}
       {showTelegramUserModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'red', zIndex: 9999 }}>
-          <div style={{ color: 'white', fontSize: '24px', padding: '20px' }}>
-            🔧 DEBUG: Modal should be visible now!
-          </div>
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(255, 0, 0, 0.8)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'white',
+          fontSize: '24px',
+          fontWeight: 'bold'
+        }}>
+          MODAL IS WORKING! 🎉
+          <br />
+          <button
+            onClick={() => setShowTelegramUserModal(false)}
+            style={{
+              marginTop: '20px',
+              padding: '10px 20px',
+              backgroundColor: 'white',
+              color: 'black',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer'
+            }}
+          >
+            Close Modal
+          </button>
         </div>
       )}
-      {console.log('🔧 About to render modal with isOpen:', showTelegramUserModal)}
-      <TelegramUserSelectorModal
-        isOpen={showTelegramUserModal}
-        onClose={() => {
-          console.log('🔧 Closing Telegram user modal...');
-          setShowTelegramUserModal(false);
-        }}
-        selectedUsers={selectedNode?.data?.selectedUsers || []}
-        onUsersChange={handleTelegramUsersChange}
-      />
     </div>
   );
 }

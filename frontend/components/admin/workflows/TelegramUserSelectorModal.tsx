@@ -22,18 +22,19 @@ interface TelegramUserSelectorModalProps {
   onUsersChange: (users: TelegramUser[]) => void;
 }
 
-export function TelegramUserSelectorModal({ 
-  isOpen, 
-  onClose, 
-  selectedUsers, 
-  onUsersChange 
+export function TelegramUserSelectorModal({
+  isOpen,
+  onClose,
+  selectedUsers,
+  onUsersChange
 }: TelegramUserSelectorModalProps) {
+  console.log('🔧 TelegramUserSelectorModal CALLED with isOpen:', isOpen);
+
   const [users, setUsers] = useState<TelegramUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [error, setError] = useState<string | null>(null);
 
-  // Fetch users with Telegram chat IDs
+  // Fetch users when modal opens
   useEffect(() => {
     if (isOpen) {
       fetchUsers();
@@ -42,24 +43,20 @@ export function TelegramUserSelectorModal({
 
   const fetchUsers = async () => {
     setLoading(true);
-    setError(null);
     try {
       const response = await fetch('/api/admin/users/telegram');
       if (response.ok) {
         const data = await response.json();
         setUsers(data.users || []);
-      } else {
-        setError('Failed to fetch users');
       }
     } catch (error) {
       console.error('Failed to fetch Telegram users:', error);
-      setError('Failed to fetch users');
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredUsers = users.filter(user => 
+  const filteredUsers = users.filter(user =>
     (user.fullName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
     (user.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
     (user.telegram_username || '').toLowerCase().includes(searchQuery.toLowerCase())
@@ -83,46 +80,50 @@ export function TelegramUserSelectorModal({
     onUsersChange([]);
   };
 
-  const handleConfirm = () => {
-    onClose();
-  };
-
-  console.log('🔧 TelegramUserSelectorModal: Component called with isOpen:', isOpen);
-  
   if (!isOpen) {
-    console.log('🔧 TelegramUserSelectorModal: Modal is closed, returning null');
+    console.log('🔧 Modal returning null (isOpen is false)');
     return null;
   }
 
-  console.log('🔧 TelegramUserSelectorModal: Modal is open, rendering...');
-  
-  // Simple test modal
+  console.log('🔧 Modal rendering (isOpen is true)');
+
   return (
-    <div style={{ 
-      position: 'fixed', 
-      top: 0, 
-      left: 0, 
-      width: '100%', 
-      height: '100%', 
-      background: 'rgba(0,0,0,0.5)', 
-      zIndex: 9999,
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'rgba(0,0,0,0.5)',
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center'
+      justifyContent: 'center',
+      zIndex: 9999
     }}>
-      <div style={{ 
-        background: 'white', 
-        padding: '20px', 
+      <div style={{
+        backgroundColor: 'white',
+        padding: '20px',
         borderRadius: '8px',
         maxWidth: '500px',
         width: '90%'
       }}>
         <h2>🔧 TEST MODAL</h2>
-        <p>If you can see this, the modal is working!</p>
-        <button onClick={onClose} style={{ padding: '10px', margin: '10px' }}>
+        <p>Modal is rendering! If you see this, the modal is working.</p>
+        <button
+          onClick={onClose}
+          style={{
+            padding: '10px',
+            margin: '10px',
+            backgroundColor: '#3B82F6',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
           Close Modal
         </button>
       </div>
     </div>
   );
-
+}
