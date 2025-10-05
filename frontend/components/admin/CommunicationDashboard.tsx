@@ -282,7 +282,12 @@ export function CommunicationDashboard({
 
           {/* Workflows Tab */}
           <TabsContent value="workflows" className="space-y-6">
-            <WorkflowDashboard language={language} translations={t} />
+            <WorkflowDashboard
+              language={language}
+              translations={t}
+              onSave={handleWorkflowSave}
+              onTest={handleWorkflowTest}
+            />
           </TabsContent>
 
           {/* Analytics Tab */}
@@ -456,7 +461,17 @@ function APIDashboard({ language, translations: t }: { language: 'en' | 'es'; tr
 }
 
 // Workflow Dashboard Component
-function WorkflowDashboard({ language, translations: t }: { language: 'en' | 'es'; translations: any }) {
+function WorkflowDashboard({
+  language,
+  translations: t,
+  onSave,
+  onTest
+}: {
+  language: 'en' | 'es';
+  translations: any;
+  onSave: (workflow: WorkflowData) => void;
+  onTest: (workflow: WorkflowData) => void;
+}) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -472,8 +487,8 @@ function WorkflowDashboard({ language, translations: t }: { language: 'en' | 'es
 
       <VisualWorkflowBuilder
         language={language}
-        onSave={handleWorkflowSave}
-        onTest={handleWorkflowTest}
+        onSave={onSave}
+        onTest={onTest}
       />
     </div>
   );
