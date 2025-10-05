@@ -105,22 +105,50 @@ export class OrderEmailService {
     console.log(`  - Has Bookings: ${hasBookings}`);
     console.log(`  - Has Products: ${hasProducts}`);
     
-    // Decision Flow Implementation
+    // Decision Flow Implementation - Handle all combinations
     if (hasMatpass) {
       // MatPass Purchase - Check if new customer or renewal
       const isNewCustomer = this.isNewCustomer(orderData);
       console.log(`  - Is New Customer: ${isNewCustomer}`);
       
       if (isNewCustomer) {
-        return 'welcome_matpass'; // New customer with MatPass
+        // New customer with MatPass - check for additional components
+        if (hasBookings && hasProducts) {
+          console.log('📧 OrderEmailService: New customer with MatPass + Booking + Products');
+          return 'welcome_matpass'; // Welcome template handles all components
+        } else if (hasBookings) {
+          console.log('📧 OrderEmailService: New customer with MatPass + Booking');
+          return 'welcome_matpass'; // Welcome template handles MatPass + booking
+        } else if (hasProducts) {
+          console.log('📧 OrderEmailService: New customer with MatPass + Products');
+          return 'welcome_matpass'; // Welcome template handles MatPass + products
+        } else {
+          console.log('📧 OrderEmailService: New customer with MatPass only');
+          return 'welcome_matpass'; // New customer with MatPass only
+        }
       } else {
-        return 'renewal_matpass'; // Existing customer renewal
+        // Existing customer renewal - check for additional components
+        if (hasBookings && hasProducts) {
+          console.log('📧 OrderEmailService: Existing customer with MatPass + Booking + Products');
+          return 'renewal_matpass'; // Renewal template handles all components
+        } else if (hasBookings) {
+          console.log('📧 OrderEmailService: Existing customer with MatPass + Booking');
+          return 'renewal_matpass'; // Renewal template handles MatPass + booking
+        } else if (hasProducts) {
+          console.log('📧 OrderEmailService: Existing customer with MatPass + Products');
+          return 'renewal_matpass'; // Renewal template handles MatPass + products
+        } else {
+          console.log('📧 OrderEmailService: Existing customer with MatPass only');
+          return 'renewal_matpass'; // Existing customer with MatPass only
+        }
       }
     } else if (hasProducts && !hasMatpass) {
       // Products Only Purchase
+      console.log('📧 OrderEmailService: Products only purchase');
       return 'products_only';
     } else if (hasBookings && !hasMatpass && !hasProducts) {
       // Booking from existing account with MatPass
+      console.log('📧 OrderEmailService: Booking only from existing account');
       return 'booking_only';
     } else {
       // Fallback to comprehensive template
