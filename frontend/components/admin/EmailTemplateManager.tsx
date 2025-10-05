@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
-import { Save, Send, Eye, Edit } from 'lucide-react';
+import { Save, Send, Eye, Edit, Mail, Settings, Info } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface EmailTemplate {
@@ -237,6 +237,93 @@ export default function EmailTemplateManager() {
         </Card>
       )}
 
+      {/* Dynamic Title Management */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Mail className="w-5 h-5" />
+            <span>Dynamic Email Titles</span>
+          </CardTitle>
+          <CardDescription>
+            Manage dynamic email titles that change based on order contents (MatPass + Products)
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-start space-x-3">
+              <Info className="w-5 h-5 text-blue-600 mt-0.5" />
+              <div>
+                <h4 className="font-semibold text-blue-900">How Dynamic Titles Work</h4>
+                <p className="text-blue-800 text-sm mt-1">
+                  Email titles automatically change based on what the customer purchased:
+                </p>
+                <ul className="text-blue-800 text-sm mt-2 space-y-1">
+                  <li>• <strong>MatPass only:</strong> "Tu MatPass ha sido Renovado"</li>
+                  <li>• <strong>MatPass + Products:</strong> "Tu MatPass y Productos han sido Renovados"</li>
+                  <li>• <strong>New customer MatPass:</strong> "¡Bienvenido! Tu MatPass está listo"</li>
+                  <li>• <strong>New customer MatPass + Products:</strong> "¡Bienvenido! Tu MatPass y Productos están listos"</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <h4 className="font-semibold">Templates with Dynamic Titles</h4>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <div>
+                    <p className="font-medium text-green-900">Renewal MatPass</p>
+                    <p className="text-sm text-green-700">renewal_matpass</p>
+                  </div>
+                  <Badge className="bg-green-100 text-green-800">Active</Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <div>
+                    <p className="font-medium text-green-900">Welcome MatPass</p>
+                    <p className="text-sm text-green-700">welcome_matpass</p>
+                  </div>
+                  <Badge className="bg-green-100 text-green-800">Active</Badge>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h4 className="font-semibold">Title Logic Examples</h4>
+              <div className="space-y-2 text-sm">
+                <div className="p-3 bg-gray-50 border rounded-lg">
+                  <p className="font-medium">Spanish (ES):</p>
+                  <code className="text-xs bg-white p-1 rounded block mt-1">
+                    {"{{#if hasProducts}}Tu MatPass y Productos han sido Renovados{{else}}Tu MatPass ha sido Renovado{{/if}}"}
+                  </code>
+                </div>
+                <div className="p-3 bg-gray-50 border rounded-lg">
+                  <p className="font-medium">English (EN):</p>
+                  <code className="text-xs bg-white p-1 rounded block mt-1">
+                    {"{{#if hasProducts}}Your MatPass and Products have been Renewed{{else}}Your MatPass has been Renewed{{/if}}"}
+                  </code>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between pt-4 border-t">
+            <div className="text-sm text-gray-600">
+              Dynamic titles are automatically applied based on order contents
+            </div>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                toast.info('Dynamic titles are managed automatically based on order data');
+              }}
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              View Template Logic
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Email Test */}
       <Card>
         <CardHeader>
@@ -335,6 +422,55 @@ export default function EmailTemplateManager() {
           </Card>
         ))}
       </div>
+
+      {/* Dynamic Title Status */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Settings className="w-5 h-5" />
+            <span>Dynamic Title Status</span>
+          </CardTitle>
+          <CardDescription>
+            Current status of dynamic title functionality
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-center space-x-2 mb-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="font-semibold text-green-900">renewal_matpass</span>
+              </div>
+              <p className="text-sm text-green-700">Dynamic titles active</p>
+              <p className="text-xs text-green-600 mt-1">
+                ES: {"{{#if hasProducts}}Tu MatPass y Productos han sido Renovados{{else}}Tu MatPass ha sido Renovado{{/if}}"}
+              </p>
+            </div>
+            
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-center space-x-2 mb-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="font-semibold text-green-900">welcome_matpass</span>
+              </div>
+              <p className="text-sm text-green-700">Dynamic titles active</p>
+              <p className="text-xs text-green-600 mt-1">
+                ES: {"{{#if hasProducts}}¡Bienvenido! Tu MatPass y Productos están listos{{else}}¡Bienvenido! Tu MatPass está listo{{/if}}"}
+              </p>
+            </div>
+            
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center space-x-2 mb-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span className="font-semibold text-blue-900">System Status</span>
+              </div>
+              <p className="text-sm text-blue-700">Dynamic detection working</p>
+              <p className="text-xs text-blue-600 mt-1">
+                Order data automatically analyzed for hasProducts flag
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Template Editor Modal */}
       {selectedTemplate && (

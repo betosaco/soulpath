@@ -67,6 +67,10 @@ export interface OrderEmailData {
     country: string;
   };
   
+  // Payment Information
+  paymentMethod?: string;
+  isPayLater?: boolean;
+  
   // URLs
   orderUrl: string;
   websiteUrl: string;
@@ -79,12 +83,22 @@ export class OrderEmailService {
   static async sendOrderConfirmationEmail(orderData: OrderEmailData, language: 'en' | 'es' = 'en'): Promise<boolean> {
     try {
       console.log('📧 OrderEmailService: Starting intelligent email routing...');
+      console.log('📧 OrderEmailService: Order data received:', {
+        customerEmail: orderData.customerEmail,
+        hasMatpass: orderData.matpassItems?.length > 0,
+        hasProducts: orderData.products?.length > 0,
+        hasBookings: orderData.bookings?.length > 0,
+        paymentMethod: orderData.paymentMethod
+      });
       
       // Determine the appropriate template based on order type and customer status
-      const templateKey = this.determineTemplateKey(orderData);
+      const templateKey = await this.determineTemplateKey(orderData);
       console.log(`📧 OrderEmailService: Selected template: ${templateKey}`);
       
-      return await this.sendTemplateEmail(templateKey, orderData, language);
+      const result = await this.sendTemplateEmail(templateKey, orderData, language);
+      console.log(`📧 OrderEmailService: Email sending result: ${result}`);
+      
+      return result;
       
     } catch (error) {
       console.error('❌ Error in OrderEmailService.sendOrderConfirmationEmail:', error);
@@ -93,79 +107,274 @@ export class OrderEmailService {
   }
 
   /**
-   * Determine the appropriate template key based on order type and customer status
+   * Get currency symbol from currency code
    */
-  private static determineTemplateKey(orderData: OrderEmailData): string {
-    const hasMatpass = orderData.matpassItems && orderData.matpassItems.length > 0;
-    const hasBookings = orderData.bookings && orderData.bookings.length > 0;
-    const hasProducts = orderData.products && orderData.products.length > 0;
+  private static getCurrencySymbol(currencyCode: string): string {
+    const currencyMap: { [key: string]: string } = {
+      'PEN': 'S/.',
+      'USD': '$',
+      'EUR': '€',
+      'GBP': '£',
+      'CAD': 'C$',
+      'AUD': 'A$',
+      'JPY': '¥',
+      'CHF': 'CHF',
+      'CNY': '¥',
+      'MXN': '$',
+      'BRL': 'R$',
+      'ARS': '$',
+      'CLP': '$',
+      'COP': '$',
+      'UYU': '$U',
+      'BOB': 'Bs',
+      'VES': 'Bs.S',
+      'PYG': '₲',
+      'DOP': 'RD$',
+      'GTQ': 'Q',
+      'HNL': 'L',
+      'NIO': 'C$',
+      'CRC': '₡',
+      'PAB': 'B/.',
+      'TTD': 'TT$',
+      'JMD': 'J$',
+      'BBD': 'Bds$',
+      'BZD': 'BZ$',
+      'XCD': 'EC$',
+      'AWG': 'ƒ',
+      'ANG': 'ƒ',
+      'SRD': '$',
+      'GYD': 'G$',
+      'BMD': 'BD$',
+      'KYD': 'CI$',
+      'BHD': 'د.ب',
+      'KWD': 'د.ك',
+      'QAR': 'ر.ق',
+      'SAR': 'ر.س',
+      'AED': 'د.إ',
+      'OMR': 'ر.ع.',
+      'YER': '﷼',
+      'JOD': 'د.ا',
+      'LBP': 'ل.ل',
+      'SYP': 'ل.س',
+      'IQD': 'د.ع',
+      'IRR': '﷼',
+      'AFN': '؋',
+      'PKR': '₨',
+      'INR': '₹',
+      'BDT': '৳',
+      'LKR': '₨',
+      'NPR': '₨',
+      'BTN': 'Nu.',
+      'MVR': 'ރ',
+      'SCR': '₨',
+      'MMK': 'K',
+      'THB': '฿',
+      'LAK': '₭',
+      'KHR': '៛',
+      'VND': '₫',
+      'IDR': 'Rp',
+      'MYR': 'RM',
+      'SGD': 'S$',
+      'BND': 'B$',
+      'PHP': '₱',
+      'TWD': 'NT$',
+      'HKD': 'HK$',
+      'MOP': 'MOP$',
+      'KRW': '₩',
+      'MNT': '₮',
+      'KZT': '₸',
+      'UZS': 'лв',
+      'KGS': 'лв',
+      'TJS': 'SM',
+      'TMT': 'T',
+      'AZN': '₼',
+      'AMD': '֏',
+      'GEL': '₾',
+      'TRY': '₺',
+      'RUB': '₽',
+      'BYN': 'Br',
+      'UAH': '₴',
+      'MDL': 'L',
+      'RON': 'lei',
+      'BGN': 'лв',
+      'HRK': 'kn',
+      'RSD': 'дин',
+      'MKD': 'ден',
+      'ALL': 'L',
+      'BAM': 'КМ',
+      'CZK': 'Kč',
+      'HUF': 'Ft',
+      'PLN': 'zł',
+      'SKK': 'Sk',
+      'SIT': 'SIT',
+      'EEK': 'kr',
+      'LVL': 'Ls',
+      'LTL': 'Lt',
+      'ISK': 'kr',
+      'DKK': 'kr',
+      'NOK': 'kr',
+      'SEK': 'kr',
+      'FIM': 'mk',
+      'IEP': '£',
+      'ITL': 'L',
+      'ESP': '₧',
+      'PTE': '$',
+      'FRF': '₣',
+      'BEF': 'fr',
+      'NLG': 'ƒ',
+      'DEM': 'DM',
+      'ATS': 'S',
+      'CHF': 'CHF',
+      'LIE': 'CHF',
+      'MCO': '₣',
+      'SMR': '₣',
+      'VAT': '₣',
+      'ADP': '₣',
+      'GRD': '₯',
+      'CYP': '£',
+      'MTL': '₤',
+      'LUF': 'fr',
+      'BGL': 'лв',
+      'ROL': 'lei',
+      'SIT': 'SIT',
+      'SKK': 'Sk',
+      'EEK': 'kr',
+      'LVL': 'Ls',
+      'LTL': 'Lt',
+      'ZAR': 'R',
+      'NAD': 'N$',
+      'BWP': 'P',
+      'SZL': 'L',
+      'LSL': 'L',
+      'ZMW': 'ZK',
+      'ZWL': 'Z$',
+      'AOA': 'Kz',
+      'MZN': 'MT',
+      'MGA': 'Ar',
+      'MUR': '₨',
+      'SCR': '₨',
+      'KES': 'KSh',
+      'TZS': 'TSh',
+      'UGX': 'USh',
+      'RWF': 'RF',
+      'BIF': 'FBu',
+      'DJF': 'Fdj',
+      'SOS': 'S',
+      'ETB': 'Br',
+      'ERN': 'Nfk',
+      'SDG': 'ج.س',
+      'SSP': '£',
+      'EGP': '£',
+      'LYD': 'ل.د',
+      'TND': 'د.ت',
+      'DZD': 'د.ج',
+      'MAD': 'د.م.',
+      'MRO': 'UM',
+      'MRU': 'UM',
+      'XOF': 'CFA',
+      'XAF': 'FCFA',
+      'KMF': 'CF',
+      'DJF': 'Fdj',
+      'SOS': 'S',
+      'ETB': 'Br',
+      'ERN': 'Nfk',
+      'SDG': 'ج.س',
+      'SSP': '£',
+      'EGP': '£',
+      'LYD': 'ل.د',
+      'TND': 'د.ت',
+      'DZD': 'د.ج',
+      'MAD': 'د.م.',
+      'MRO': 'UM',
+      'MRU': 'UM',
+      'XOF': 'CFA',
+      'XAF': 'FCFA',
+      'KMF': 'CF'
+    };
     
-    console.log('📊 OrderEmailService: Analyzing order components:');
-    console.log(`  - Has MatPass: ${hasMatpass}`);
-    console.log(`  - Has Bookings: ${hasBookings}`);
-    console.log(`  - Has Products: ${hasProducts}`);
-    
-    // Decision Flow Implementation - Handle all combinations
-    if (hasMatpass) {
-      // MatPass Purchase - Check if new customer or renewal
-      const isNewCustomer = this.isNewCustomer(orderData);
-      console.log(`  - Is New Customer: ${isNewCustomer}`);
-      
-      if (isNewCustomer) {
-        // New customer with MatPass - check for additional components
-        if (hasBookings && hasProducts) {
-          console.log('📧 OrderEmailService: New customer with MatPass + Booking + Products');
-          return 'welcome_matpass'; // Welcome template handles all components
-        } else if (hasBookings) {
-          console.log('📧 OrderEmailService: New customer with MatPass + Booking');
-          return 'welcome_matpass'; // Welcome template handles MatPass + booking
-        } else if (hasProducts) {
-          console.log('📧 OrderEmailService: New customer with MatPass + Products');
-          return 'welcome_matpass'; // Welcome template handles MatPass + products
-        } else {
-          console.log('📧 OrderEmailService: New customer with MatPass only');
-          return 'welcome_matpass'; // New customer with MatPass only
-        }
-      } else {
-        // Existing customer renewal - check for additional components
-        if (hasBookings && hasProducts) {
-          console.log('📧 OrderEmailService: Existing customer with MatPass + Booking + Products');
-          return 'renewal_matpass'; // Renewal template handles all components
-        } else if (hasBookings) {
-          console.log('📧 OrderEmailService: Existing customer with MatPass + Booking');
-          return 'renewal_matpass'; // Renewal template handles MatPass + booking
-        } else if (hasProducts) {
-          console.log('📧 OrderEmailService: Existing customer with MatPass + Products');
-          return 'renewal_matpass'; // Renewal template handles MatPass + products
-        } else {
-          console.log('📧 OrderEmailService: Existing customer with MatPass only');
-          return 'renewal_matpass'; // Existing customer with MatPass only
-        }
-      }
-    } else if (hasProducts && !hasMatpass) {
-      // Products Only Purchase
-      console.log('📧 OrderEmailService: Products only purchase');
-      return 'products_only';
-    } else if (hasBookings && !hasMatpass && !hasProducts) {
-      // Booking from existing account with MatPass
-      console.log('📧 OrderEmailService: Booking only from existing account');
-      return 'booking_only';
-    } else {
-      // Fallback to comprehensive template
-      console.log('📧 OrderEmailService: Using fallback comprehensive template');
-      return 'order_confirmation_complete';
-    }
+    return currencyMap[currencyCode] || currencyCode;
   }
 
   /**
-   * Check if this is a new customer (simplified logic)
-   * In a real implementation, this would check the database for previous orders
+   * Determine the appropriate template key based on order type and customer status
+   * SIMPLIFIED LOGIC - NO MORE COMPLEX FALLBACKS
    */
-  private static isNewCustomer(orderData: OrderEmailData): boolean {
-    // For now, we'll use a simple heuristic
-    // In production, this should check the database for previous orders
-    // This is a placeholder - you should implement proper customer history checking
-    return true; // Assume new customer for now
+  private static async determineTemplateKey(orderData: OrderEmailData): Promise<string> {
+    console.log('🔍 OrderEmailService: Starting template selection...');
+    console.log('📊 Order data received:', {
+      customerEmail: orderData.customerEmail,
+      matpassItems: orderData.matpassItems?.length || 0,
+      bookings: orderData.bookings?.length || 0,
+      products: orderData.products?.length || 0
+    });
+
+    // DEBUG: Log the actual matpassItems content
+    if (orderData.matpassItems && orderData.matpassItems.length > 0) {
+      console.log('📦 MatPass items details:', orderData.matpassItems);
+    } else {
+      console.log('❌ No MatPass items found in order data');
+    }
+
+    // STEP 1: Check if this order has MatPass items
+    const hasMatpass = orderData.matpassItems && orderData.matpassItems.length > 0;
+    console.log(`📦 Has MatPass items: ${hasMatpass}`);
+
+    if (hasMatpass) {
+      // STEP 2: If has MatPass, check if customer is new or existing
+      const isNewCustomer = await this.isNewCustomer(orderData);
+      console.log(`👤 Is new customer: ${isNewCustomer}`);
+
+      if (isNewCustomer) {
+        console.log('✅ SELECTED: welcome_matpass (New customer with MatPass)');
+        return 'welcome_matpass';
+      } else {
+        console.log('✅ SELECTED: renewal_matpass (Existing customer with MatPass)');
+        return 'renewal_matpass';
+      }
+    }
+
+    // STEP 3: If no MatPass, check for products only
+    const hasProducts = orderData.products && orderData.products.length > 0;
+    if (hasProducts && !hasMatpass) {
+      console.log('✅ SELECTED: products_only (Products only)');
+      return 'products_only';
+    }
+
+    // STEP 4: If no MatPass and no products, check for bookings only
+    const hasBookings = orderData.bookings && orderData.bookings.length > 0;
+    if (hasBookings && !hasMatpass && !hasProducts) {
+      console.log('✅ SELECTED: booking_only (Booking only)');
+      return 'booking_only';
+    }
+
+    // STEP 5: Fallback (should not happen in normal flow)
+    console.log('⚠️ FALLBACK: order_confirmation_complete');
+    return 'order_confirmation_complete';
+  }
+
+  /**
+   * Check if this is a new customer by checking database for previous orders
+   */
+  private static async isNewCustomer(orderData: OrderEmailData): Promise<boolean> {
+    try {
+      // Check if customer has previous orders in the database
+      const previousOrders = await prisma.order.findMany({
+        where: {
+          customerEmail: orderData.customerEmail,
+          status: {
+            not: 'CANCELLED'
+          }
+        },
+        take: 1
+      });
+      
+      // If no previous orders found, this is a new customer
+      return previousOrders.length === 0;
+    } catch (error) {
+      console.error('Error checking customer history:', error);
+      // If there's an error, assume new customer to be safe
+      return true;
+    }
   }
 
   /**
@@ -197,6 +406,13 @@ export class OrderEmailService {
 
       const templateTranslation = template.translations[0];
       
+      // Use booking data as provided in order data (simplified)
+      const bookingData = orderData.bookings || [];
+      console.log(`📧 OrderEmailService: Using ${bookingData.length} bookings from order data`);
+
+      // Get currency symbol
+      const currencySymbol = this.getCurrencySymbol(orderData.currency);
+      
       // Prepare template data with all required placeholders
       const templateData = {
         // Customer data
@@ -207,16 +423,23 @@ export class OrderEmailService {
         // Order data
         orderNumber: orderData.orderNumber,
         submissionDate: orderData.orderDate,
-        orderTotal: orderData.totalAmount.toFixed(2),
-        subtotalBeforeTax: orderData.subtotal.toFixed(2),
-        igvAmount: orderData.taxAmount.toFixed(2),
-        currency: orderData.currency,
+        orderDate: new Date(orderData.orderDate).toLocaleDateString('es-ES', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }),
+        orderTotal: `${currencySymbol} ${orderData.totalAmount.toFixed(2)}`, // Currency symbol format
+        subtotalBeforeTax: `${currencySymbol} ${orderData.subtotal.toFixed(2)}`, // Currency symbol format
+        igvAmount: `${currencySymbol} ${orderData.taxAmount.toFixed(2)}`, // Currency symbol format
+        currency: currencySymbol, // Currency symbol
         
         // Additional order placeholders
-        subtotal: orderData.subtotal.toFixed(2),
-        taxAmount: orderData.taxAmount.toFixed(2),
-        shippingAmount: orderData.shippingAmount.toFixed(2),
-        totalAmount: orderData.totalAmount.toFixed(2),
+        subtotal: `${currencySymbol} ${orderData.subtotal.toFixed(2)}`, // Currency symbol format
+        taxAmount: `${currencySymbol} ${orderData.taxAmount.toFixed(2)}`, // Currency symbol format
+        taxRate: '18', // IGV rate in Peru
+        shippingAmount: `${currencySymbol} ${orderData.shippingAmount.toFixed(2)}`, // Currency symbol format
+        totalAmount: `${currencySymbol} ${orderData.totalAmount.toFixed(2)}`, // Currency symbol format
         
         // URLs
         orderUrl: orderData.orderUrl,
@@ -225,26 +448,28 @@ export class OrderEmailService {
         
         // Conditional sections
         hasMatpass: orderData.matpassItems && orderData.matpassItems.length > 0,
-        hasBooking: orderData.bookings && orderData.bookings.length > 0,
+        hasBooking: bookingData.length > 0,
         hasProducts: orderData.products && orderData.products.length > 0,
         
         // MATPASS data (if applicable)
         matpassItems: orderData.matpassItems || [],
-        matpassType: orderData.matpassItems?.[0]?.type || '',
+        matpassType: orderData.matpassItems?.[0]?.name || 'MATPASS', // Use actual MatPass name (01 MATPASS, 04 MATPASS, etc.)
         matpassDescription: orderData.matpassItems?.[0]?.description || '',
-        matpassPrice: orderData.matpassItems?.[0]?.totalPrice?.toFixed(2) || '0.00',
+        matpassPrice: `${currencySymbol} ${orderData.matpassItems?.[0]?.totalPrice?.toFixed(2) || '0.00'}`, // Currency symbol format
         matpassStartDate: orderData.orderDate,
         matpassEndDate: orderData.matpassItems?.[0]?.expiryDate || '',
-        matpassSubtotal: orderData.matpassItems?.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2) || '0.00',
+        matpassSubtotal: `${currencySymbol} ${orderData.matpassItems?.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2) || '0.00'}`, // Currency symbol format
+        matpassSessions: orderData.matpassItems?.[0]?.sessions || 0, // Add sessions count
         
         // Booking data (if applicable)
-        bookings: orderData.bookings || [],
-        bookingId: orderData.bookings?.[0]?.bookingId || '',
-        bookingDate: orderData.bookings?.[0]?.bookingDate || '',
-        bookingTime: orderData.bookings?.[0]?.bookingTime || '',
-        teacherName: orderData.bookings?.[0]?.teacherName || '',
-        className: orderData.bookings?.[0]?.sessionType || '',
-        venue: orderData.bookings?.[0]?.venue || 'MATMAX Yoga Studio',
+        bookings: bookingData,
+        bookingId: bookingData?.[0]?.bookingId || '',
+        bookingDate: bookingData?.[0]?.bookingDate || '',
+        bookingTime: bookingData?.[0]?.bookingTime || '',
+        sessionType: bookingData?.[0]?.sessionType || '',
+        teacherName: bookingData?.[0]?.teacherName || '',
+        venue: bookingData?.[0]?.venue || 'MATMAX Yoga Studio',
+        bookingPrice: '0.00', // Booking is included in MatPass
         
         // Product data (if applicable)
         products: orderData.products || [],
@@ -252,39 +477,68 @@ export class OrderEmailService {
         productName: orderData.products?.[0]?.name || '',
         productDescription: orderData.products?.[0]?.description || '',
         productQuantity: orderData.products?.[0]?.quantity || 0,
-        productPrice: orderData.products?.[0]?.totalPrice?.toFixed(2) || '0.00',
-        productsSubtotal: orderData.products?.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2) || '0.00',
+        productPrice: `${currencySymbol} ${orderData.products?.[0]?.totalPrice?.toFixed(2) || '0.00'}`, // Currency symbol format
+        productsPrice: `${currencySymbol} ${orderData.products?.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2) || '0.00'}`, // Currency symbol format
+        productsSubtotal: `${currencySymbol} ${orderData.products?.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2) || '0.00'}`, // Currency symbol format
         
         // Shipping data (if applicable)
-        shippingAddress: orderData.shippingAddress
+        shippingAddress: orderData.shippingAddress,
+        
+        // Payment data (if applicable)
+        paymentMethod: orderData.paymentMethod,
+        isPayLater: orderData.isPayLater
       };
 
       // Process template with Handlebars-like replacement
+      console.log('📧 OrderEmailService: Processing template with data:', {
+        hasMatpass: templateData.hasMatpass,
+        hasProducts: templateData.hasProducts,
+        hasBooking: templateData.hasBooking,
+        productsCount: templateData.products?.length || 0,
+        matpassCount: templateData.matpassItems?.length || 0
+      });
+      
       const processedContent = this.processTemplate(templateTranslation.content, templateData);
       const processedSubject = this.processTemplate(templateTranslation.subject, templateData);
+      
+      console.log('📧 OrderEmailService: Template processing completed');
+      console.log('📧 OrderEmailService: Subject length:', processedSubject.length);
+      console.log('📧 OrderEmailService: Content length:', processedContent.length);
 
       // Send email using Brevo service
+      console.log('📧 OrderEmailService: Creating email service...');
       const emailService = await createEmailService();
       if (!emailService) {
-        console.error('❌ Email service not available');
+        console.error('❌ Email service not available - check Brevo API key configuration');
         return false;
       }
+      console.log('📧 OrderEmailService: Email service created successfully');
 
-      const emailResult = await emailService.sendEmailWithBCC({
-        to: orderData.customerEmail,
-        bcc: 'alberto@matmax.world',
-        subject: processedSubject,
-        html: processedContent,
-        text: this.generateTextVersion(templateData)
-      });
+      console.log('📧 OrderEmailService: Sending email to:', orderData.customerEmail);
+      console.log('📧 OrderEmailService: Email subject:', processedSubject.substring(0, 100) + '...');
+      
+      try {
+        const emailResult = await emailService.sendEmailWithBCC({
+          to: orderData.customerEmail,
+          bcc: 'alberto@matmax.world',
+          subject: processedSubject,
+          html: processedContent,
+          text: this.generateTextVersion(templateData)
+        });
 
-      if (!emailResult) {
-        console.error('❌ Failed to send order confirmation email');
+        console.log('📧 OrderEmailService: Email sending result:', emailResult);
+
+        if (!emailResult) {
+          console.error('❌ Failed to send order confirmation email - Brevo API returned false');
+          return false;
+        }
+
+        console.log('✅ Order confirmation email sent successfully using template system');
+        return true;
+      } catch (emailError) {
+        console.error('❌ Exception during email sending:', emailError);
         return false;
       }
-
-      console.log('✅ Order confirmation email sent successfully using template system');
-      return true;
 
     } catch (error) {
       console.error('❌ Error sending order confirmation email:', error);
@@ -306,6 +560,16 @@ export class OrderEmailService {
       }
     });
 
+    // Handle shipping address object placeholders
+    if (data.shippingAddress && typeof data.shippingAddress === 'object') {
+      const shipping = data.shippingAddress;
+      processed = processed.replace(/\{\{shippingAddress\.address\}\}/g, shipping.address || '');
+      processed = processed.replace(/\{\{shippingAddress\.city\}\}/g, shipping.city || '');
+      processed = processed.replace(/\{\{shippingAddress\.state\}\}/g, shipping.state || '');
+      processed = processed.replace(/\{\{shippingAddress\.zipCode\}\}/g, shipping.zipCode || '');
+      processed = processed.replace(/\{\{shippingAddress\.country\}\}/g, shipping.country || '');
+    }
+
     // Handle conditional sections
     processed = this.processConditionalSections(processed, data);
     
@@ -316,33 +580,45 @@ export class OrderEmailService {
   }
 
   /**
-   * Process conditional sections ({{#if}} blocks)
+   * Process conditional sections ({{#if}} blocks with {{else}} support)
    */
   private static processConditionalSections(template: string, data: any): string {
     let processed = template;
     
-    // Handle {{#if hasMatpass}} blocks
-    const matpassRegex = /{{#if hasMatpass}}([\s\S]*?){{\/if}}/g;
-    processed = processed.replace(matpassRegex, (match, content) => {
-      return data.hasMatpass ? content : '';
+    // Handle {{#if hasMatpass}}...{{else}}...{{/if}} blocks
+    const matpassRegex = /{{#if hasMatpass}}([\s\S]*?)(?:{{else}}([\s\S]*?))?{{\/if}}/g;
+    processed = processed.replace(matpassRegex, (match, ifContent, elseContent) => {
+      return data.hasMatpass ? ifContent : (elseContent || '');
     });
 
-    // Handle {{#if hasBooking}} blocks (note: singular, not plural)
-    const bookingRegex = /{{#if hasBooking}}([\s\S]*?){{\/if}}/g;
-    processed = processed.replace(bookingRegex, (match, content) => {
-      return data.hasBooking ? content : '';
+    // Handle {{#if hasBooking}}...{{else}}...{{/if}} blocks
+    const bookingRegex = /{{#if hasBooking}}([\s\S]*?)(?:{{else}}([\s\S]*?))?{{\/if}}/g;
+    processed = processed.replace(bookingRegex, (match, ifContent, elseContent) => {
+      return data.hasBooking ? ifContent : (elseContent || '');
     });
 
-    // Handle {{#if hasBookings}} blocks (plural version)
-    const bookingsRegex = /{{#if hasBookings}}([\s\S]*?){{\/if}}/g;
-    processed = processed.replace(bookingsRegex, (match, content) => {
-      return data.hasBooking ? content : '';
+    // Handle {{#if hasBookings}}...{{else}}...{{/if}} blocks (plural version)
+    const bookingsRegex = /{{#if hasBookings}}([\s\S]*?)(?:{{else}}([\s\S]*?))?{{\/if}}/g;
+    processed = processed.replace(bookingsRegex, (match, ifContent, elseContent) => {
+      return data.hasBooking ? ifContent : (elseContent || '');
     });
 
-    // Handle {{#if hasProducts}} blocks
-    const productsRegex = /{{#if hasProducts}}([\s\S]*?){{\/if}}/g;
-    processed = processed.replace(productsRegex, (match, content) => {
-      return data.hasProducts ? content : '';
+    // Handle {{#if hasProducts}}...{{else}}...{{/if}} blocks
+    const productsRegex = /{{#if hasProducts}}([\s\S]*?)(?:{{else}}([\s\S]*?))?{{\/if}}/g;
+    processed = processed.replace(productsRegex, (match, ifContent, elseContent) => {
+      return data.hasProducts ? ifContent : (elseContent || '');
+    });
+
+    // Handle {{#if paymentMethod}}...{{/if}} blocks
+    const paymentMethodRegex = /{{#if paymentMethod}}([\s\S]*?){{\/if}}/g;
+    processed = processed.replace(paymentMethodRegex, (match, content) => {
+      return data.paymentMethod ? content : '';
+    });
+
+    // Handle {{#if isPayLater}}...{{else}}...{{/if}} blocks
+    const payLaterRegex = /{{#if isPayLater}}([\s\S]*?)(?:{{else}}([\s\S]*?))?{{\/if}}/g;
+    processed = processed.replace(payLaterRegex, (match, ifContent, elseContent) => {
+      return data.isPayLater ? ifContent : (elseContent || '');
     });
 
     return processed;

@@ -644,34 +644,27 @@ export function CustomerBookingFlow({ initialSlotData }: CustomerBookingFlowProp
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {todayClasses.length === 0 ? (
-                    <div className="text-center py-6 sm:py-8">
-                      <AlertCircle size={40} className="mx-auto text-gray-400/50 mb-4 sm:w-12 sm:h-12" />
-                      <p className="text-gray-400 text-sm sm:text-base">No classes available today</p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                      {todayClasses.map((schedule) => (
-                        <BaseButton
-                          key={schedule.id}
-                          variant="outline"
-                          onClick={() => handleScheduleSelect(schedule)}
-                          className={`mobile-touch-target mobile-tap-highlight min-h-[44px] ${
-                            formData.selectedSchedule?.id === schedule.id 
-                              ? 'border-[#ffd700] bg-[#ffd700]/10 text-[#ffd700]' 
-                              : 'border-[#2a2a4a] text-gray-400 hover:bg-[#2a2a4a] hover:text-white'
-                          }`}
-                        >
-                          <div className="text-center">
-                            <div className="font-medium text-xs sm:text-sm">{formatTime(schedule.time)}</div>
-                            <div className="text-xs opacity-75">
-                              {schedule.bookedCount}/{schedule.capacity} booked
-                            </div>
-                          </div>
-                        </BaseButton>
-                      ))}
-                    </div>
-                  )}
+                  <EnhancedSchedule
+                    onBookSlot={(slot) => {
+                      // Convert EnhancedSchedule slot to CustomerBookingFlow format
+                      const scheduleData = {
+                        id: slot.id,
+                        date: slot.date,
+                        time: slot.time,
+                        isAvailable: true,
+                        capacity: slot.capacity || 1,
+                        bookedCount: slot.bookedCount || 0,
+                        sessionType: slot.serviceType?.name || 'Yoga Session',
+                        price: 0, // Free for existing customers
+                        teacher: slot.teacher,
+                        serviceType: slot.serviceType,
+                        venue: slot.venue
+                      };
+                      handleScheduleSelect(scheduleData);
+                    }}
+                    showBookingButton={false}
+                    className="max-w-full"
+                  />
                 </CardContent>
               </Card>
 

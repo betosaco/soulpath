@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Confirmación de Reserva - MATMAX</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #2d5016 0%, #4a7c2e 100%); color: white; padding: 40px 30px; text-align: center; border-radius: 12px 12px 0 0; }
+        .content { padding: 30px 20px; background: #f9f9f9; }
+        .booking-section { background: white; padding: 25px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #4a7c2e; }
+        .booking-info { background: #e8f5e9; padding: 20px; margin: 15px 0; border-radius: 5px; }
+        .reminders { background: #fff3e0; padding: 20px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #ff9800; }
+        .footer { text-align: center; padding: 20px; color: #666; background: #f8f9fa; border-radius: 0 0 12px 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧘‍♀️ MATMAX WELLNESS STUDIO</h1>
+            <h2>Confirmación de Reserva</h2>
+        </div>
+        
+        <div class="content">
+            <div class="booking-section">
+                <h3>📅 ¡Reserva Confirmada {{userName}}!</h3>
+                <p>Tu clase ha sido reservada exitosamente usando tu MatPass existente.</p>
+                
+                <div class="booking-info">
+                    <h4>📋 Detalles de tu Reserva:</h4>
+                    <p><strong>Fecha:</strong> {{bookingDate}}</p>
+                    <p><strong>Hora:</strong> {{bookingTime}}</p>
+                    <p><strong>Tipo de Clase:</strong> {{sessionType}}</p>
+                    <p><strong>Instructor:</strong> {{teacherName}}</p>
+                    <p><strong>Ubicación:</strong> {{venue}}</p>
+                </div>
+                
+                <div class="reminders">
+                    <h4>⚠️ Recordatorios Importantes:</h4>
+                    <ul>
+                        <li>📅 Llega 10 minutos antes</li>
+                        <li>🧘‍♀️ Trae ropa cómoda</li>
+                        <li>📱 Mantén el teléfono en silencio</li>
+                        <li>💧 Mantente hidratado</li>
+                    </ul>
+                </div>
+                
+                <p><strong>¿Necesitas cancelar o reprogramar?</strong></p>
+                <p>Contáctanos: {{adminEmail}}</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>MATMAX Wellness Studio</strong></p>
+            <p>📧 info@matmax.world | 📱 +51 916 172 368</p>
+        </div>
+    </div>
+</body>
+</html>

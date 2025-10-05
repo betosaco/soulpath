@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { withCache } from '@/lib/cache';
+import { createClient } from '@supabase/supabase-js';
 
 // Cache the Supabase client to avoid creating new connections
 let supabaseClient: SupabaseClient | null = null;

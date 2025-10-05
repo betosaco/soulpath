@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { PrismaClient } from '@prisma/client';
 import Stripe from 'stripe';
 import { headers } from 'next/headers';
 
@@ -25,6 +25,8 @@ const getEndpointSecret = () => {
 };
 
 export async function POST(request: NextRequest) {
+  const prisma = new PrismaClient();
+  
   try {
     const body = await request.text();
     const headersList = await headers();
@@ -58,31 +60,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    console.log('Processing webhook event:', event.type);
 
     // Handle the event
     switch (event.type) {
       case 'checkout.session.completed':
-        await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session, supabase);
+        await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session, prisma);
         break;
       
       case 'payment_intent.succeeded':
-        await handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent, supabase);
+        await handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent, prisma);
         break;
       
       case 'payment_intent.payment_failed':
-        await handlePaymentIntentFailed(event.data.object as Stripe.PaymentIntent, supabase);
+        await handlePaymentIntentFailed(event.data.object as Stripe.PaymentIntent, prisma);
         break;
       
       case 'invoice.payment_succeeded':
         await handleInvoicePaymentSucceeded(event.data.object as Stripe.Invoice);
-        break;
-      
-      case 'invoice.payment_failed':
-        await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
         break;
       
       default:
@@ -97,10 +92,12 @@ export async function POST(request: NextRequest) {
       { error: 'Webhook handler failed' },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
-async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, supabase: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, prisma: PrismaClient) {
   try {
     console.log('Processing checkout session completed:', session.id);
 
@@ -110,105 +107,66 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
       return;
     }
 
-    const customerId = metadata.customer_id;
-    const packageId = metadata.package_id;
-    // const paymentMethodId = metadata.payment_method_id; // Unused for now
+    const customerId = metadata.userId;
+    const packageId = parseInt(metadata.packageId);
     const quantity = parseInt(metadata.quantity || '1');
-    const totalAmount = parseFloat(metadata.total_amount || '0');
 
-    // Update purchase record to completed
-    const { error: purchaseUpdateError } = await supabase
-      .from('purchases')
-      .update({
-        status: 'completed',
-        transaction_id: session.payment_intent as string,
-        updated_at: new Date().toISOString(),
-        metadata: {
-          ...session.metadata,
-          stripe_payment_intent: session.payment_intent,
-          stripe_customer: session.customer
-        }
-      })
-      .eq('stripe_session_id', session.id);
-
-    if (purchaseUpdateError) {
-      console.error('Error updating purchase record:', purchaseUpdateError);
+    if (!customerId || !packageId) {
+      console.error('Missing required metadata:', { customerId, packageId });
+      return;
     }
 
     // Get package details
-    const { data: packageData, error: packageError } = await supabase
-      .from('package_definitions')
-      .select(`
-        id,
-        name,
-        description,
-        sessions_count,
-        session_duration_id,
-        package_type,
-        max_group_size
-      `)
-      .eq('id', packageId)
-      .single();
+    const packageDefinition = await prisma.packageDefinition.findUnique({
+      where: { id: packageId },
+      include: {
+        packagePrices: {
+          where: { isActive: true },
+          take: 1
+        }
+      }
+    });
 
-    if (packageError || !packageData) {
+    if (!packageDefinition) {
       console.error('Package not found:', packageId);
       return;
     }
 
-    // Create purchase record
-    const { data: purchaseData, error: purchaseError } = await supabase
-      .from('purchases')
-      .insert({
-        user_id: customerId,
-        total_amount: totalAmount,
-        currency_code: 'USD', // Assuming USD, you may want to get this from metadata
-        payment_method: 'stripe',
-        payment_status: 'completed',
-        transaction_id: session.payment_intent as string,
-        purchased_at: new Date().toISOString(),
-        confirmed_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .select()
-      .single();
-
-    if (purchaseError || !purchaseData) {
-      console.error('Error creating purchase:', purchaseError);
+    const packagePrice = packageDefinition.packagePrices[0];
+    if (!packagePrice) {
+      console.error('No active price found for package:', packageId);
       return;
     }
 
+    const totalAmount = Number(packagePrice.price) * quantity;
+
+    // Create purchase record
+    const purchase = await prisma.purchase.create({
+      data: {
+        userId: customerId,
+        totalAmount: totalAmount,
+        currency: packagePrice.currency.code,
+        paymentMethod: 'stripe',
+        paymentStatus: 'COMPLETED',
+        transactionId: session.payment_intent as string,
+        purchasedAt: new Date()
+      }
+    });
+
     // Create user packages for each quantity
     for (let i = 0; i < quantity; i++) {
-      // First get the package price for this package definition
-      const { data: packagePrice, error: priceError } = await supabase
-        .from('package_prices')
-        .select('id')
-        .eq('package_definition_id', packageId)
-        .single();
-
-      if (priceError || !packagePrice) {
-        console.error('Error finding package price:', priceError);
-        continue;
-      }
-
-      const { error: userPackageError } = await supabase
-        .from('user_packages')
-        .insert({
-          user_id: customerId,
-          purchase_id: purchaseData.id,
-          package_price_id: packagePrice.id,
+      await prisma.userPackage.create({
+        data: {
+          userId: customerId,
+          orderItemId: `stripe-${purchase.id}-${packagePrice.id}-${i}`,
+          purchaseId: purchase.id,
+          packagePriceId: packagePrice.id,
           quantity: 1,
-          sessions_used: 0,
-          is_active: true,
-          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        });
-
-      if (userPackageError) {
-        console.error('Error creating user package:', userPackageError);
-      }
+          sessionsUsed: 0,
+          isActive: true,
+          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
+        }
+      });
     }
 
     // Send confirmation email
@@ -216,122 +174,98 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
       const { createEmailService } = await import('@/lib/brevo-email-service');
       const emailService = await createEmailService();
       
-        if (emailService && packageData) {
-          // Get user details
-          const { data: userData, error: userError } = await supabase
-            .from('users')
-            .select('email, full_name')
-            .eq('id', customerId)
-            .single();
+      if (emailService) {
+        // Get user details
+        const user = await prisma.user.findUnique({
+          where: { id: customerId },
+          select: { email: true, fullName: true }
+        });
 
-          if (!userError && userData) {
-            // Use new OrderEmailService for consistent template handling
-            const { OrderEmailService } = await import('@/lib/communication/order-email-service');
-            
-            const templateEmailData = {
-              // Customer Information
-              customerName: userData.full_name || userData.email,
-              customerEmail: userData.email,
-              customerPhone: '',
-              
-              // Order Information
-              orderNumber: `STRIPE-${session.id}`,
-              orderDate: new Date().toISOString(),
-              totalAmount: totalAmount,
-              currency: 'PEN',
-              subtotal: totalAmount,
-              taxAmount: 0,
-              shippingAmount: 0,
-              
-              // Order Items
-              orderItems: [{
-                name: packageData.name,
-                type: 'MATPASS',
-                quantity: quantity,
-                unitPrice: totalAmount / quantity,
-                totalPrice: totalAmount,
-                description: packageData.description
-              }],
-              
-              // MATPASS Information
-              matpassItems: [{
-                name: packageData.name,
-                type: 'MATPASS',
-                quantity: quantity,
-                unitPrice: totalAmount / quantity,
-                totalPrice: totalAmount,
-                sessions: packageData.sessions_count,
-                expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()
-              }],
-              
-              // No bookings or products for Stripe webhook
-              bookings: [],
-              products: [],
-              
-              // URLs
-              orderUrl: `${process.env.NEXT_PUBLIC_APP_URL}/account/orders`,
-              websiteUrl: process.env.NEXT_PUBLIC_APP_URL || 'https://matmax.world'
-            };
+        if (user?.email) {
+          // Send welcome email for new MatPass
+          const { OrderEmailService } = await import('@/lib/communication/order-email-service');
+          
+          const templateEmailData = {
+            customerName: user.fullName || user.email,
+            customerEmail: user.email,
+            customerPhone: '',
+            orderNumber: `PURCHASE-${purchase.id}`,
+            orderDate: new Date().toISOString(),
+            totalAmount: totalAmount,
+            currency: packagePrice.currency.code,
+            subtotal: totalAmount,
+            taxAmount: totalAmount * 0.18,
+            shippingAmount: 0,
+            paymentMethod: 'Credit Card',
+            paymentStatus: 'COMPLETED',
+            orderItems: [],
+            matpassItems: [{
+              name: packageDefinition.name,
+              type: 'MatPass',
+              quantity: 1,
+              unitPrice: Number(packagePrice.price),
+              totalPrice: Number(packagePrice.price),
+              sessions: packageDefinition.sessionsCount,
+              expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+            }],
+            bookings: [],
+            products: [],
+            orderUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://matmax.world'}/packages`,
+            websiteUrl: process.env.NEXT_PUBLIC_BASE_URL || 'https://matmax.world'
+          };
 
-            await OrderEmailService.sendOrderConfirmationEmail(templateEmailData, 'es');
-            console.log('✅ Stripe webhook: Purchase confirmation email sent using template system');
-          }
+          await OrderEmailService.sendOrderConfirmationEmail(templateEmailData, 'en');
         }
+      }
     } catch (emailError) {
-      console.error('⚠️ Stripe webhook: Failed to send confirmation email:', emailError);
+      console.error('Error sending confirmation email:', emailError);
     }
 
-    console.log(`Successfully processed payment for customer ${customerId}, package ${packageId}`);
+    console.log('Checkout session completed successfully');
 
   } catch (error) {
     console.error('Error handling checkout session completed:', error);
   }
 }
 
-async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent, supabase: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent, prisma: PrismaClient) {
   try {
     console.log('Processing payment intent succeeded:', paymentIntent.id);
 
     // Update any pending purchases with this payment intent
-    const { error: updateError } = await supabase
-      .from('purchases')
-      .update({
-        status: 'completed',
-        transaction_id: paymentIntent.id,
-        updated_at: new Date().toISOString()
-      })
-      .eq('transaction_id', paymentIntent.id)
-      .eq('status', 'pending');
+    await prisma.purchase.updateMany({
+      where: {
+        transactionId: paymentIntent.id,
+        paymentStatus: 'PENDING'
+      },
+      data: {
+        paymentStatus: 'COMPLETED'
+      }
+    });
 
-    if (updateError) {
-      console.error('Error updating purchase with payment intent:', updateError);
-    }
+    console.log('Payment intent succeeded processed');
 
   } catch (error) {
     console.error('Error handling payment intent succeeded:', error);
   }
 }
 
-async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent, supabase: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent, prisma: PrismaClient) {
   try {
     console.log('Processing payment intent failed:', paymentIntent.id);
 
     // Update purchase record to failed
-    const { error: updateError } = await supabase
-      .from('purchases')
-      .update({
-        status: 'failed',
-        updated_at: new Date().toISOString(),
-        metadata: {
-          failure_reason: paymentIntent.last_payment_error?.message,
-          failure_code: paymentIntent.last_payment_error?.code
-        }
-      })
-      .eq('transaction_id', paymentIntent.id);
+    await prisma.purchase.updateMany({
+      where: {
+        transactionId: paymentIntent.id,
+        paymentStatus: 'PENDING'
+      },
+      data: {
+        paymentStatus: 'FAILED'
+      }
+    });
 
-    if (updateError) {
-      console.error('Error updating failed purchase:', updateError);
-    }
+    console.log('Payment intent failed processed');
 
   } catch (error) {
     console.error('Error handling payment intent failed:', error);
@@ -341,28 +275,8 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent, su
 async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   try {
     console.log('Processing invoice payment succeeded:', invoice.id);
-
-    // Handle subscription payments if needed
-    if ('subscription' in invoice && invoice.subscription) {
-      // Update subscription status
-      console.log('Subscription payment processed:', invoice.subscription);
-    }
-
+    // Handle invoice payment logic here if needed
   } catch (error) {
     console.error('Error handling invoice payment succeeded:', error);
-  }
-}
-
-async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
-  try {
-    console.log('Processing invoice payment failed:', invoice.id);
-
-    // Handle failed subscription payments
-    if ('subscription' in invoice && invoice.subscription) {
-      console.log('Subscription payment failed:', invoice.subscription);
-    }
-
-  } catch (error) {
-    console.error('Error handling invoice payment failed:', error);
   }
 }

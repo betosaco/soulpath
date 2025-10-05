@@ -260,6 +260,7 @@ export async function POST(request: NextRequest) {
           shippingAmount: shipping,
           total: total,
           currency: orderData.currency,
+          paymentMethod: orderData.paymentMethod || 'credit_card',
           paymentId: paymentIntent?.id || null,
           notes: orderData.notes,
           shippingAddress: orderData.shippingAddress ? {
@@ -458,6 +459,8 @@ export async function POST(request: NextRequest) {
         orderItems,
         userPackages
       };
+      }, {
+        timeout: 15000, // 15 seconds timeout
       });
       
       console.log('Database transaction completed, order created:', result.order.id);
@@ -591,10 +594,11 @@ export async function POST(request: NextRequest) {
             data: { bookedCount: { increment: 1 } }
           });
           
-          // Get the created bookings with minimal relations for response
+          // Get ALL bookings for this customer that belong to user packages created in this order
+          const userPackageIds = userPackages.map(up => up.id);
           const bookingsWithRelations = await prisma.booking.findMany({
             where: {
-              userPackageId: userPackage.id,
+              userPackageId: { in: userPackageIds },
               userId: result.order.customerId!
             },
             include: {
@@ -611,6 +615,32 @@ export async function POST(request: NextRequest) {
                         }
                       },
                       venue: {
+                        select: {
+                          name: true
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              teacherScheduleSlot: {
+                select: {
+                  id: true,
+                  startTime: true,
+                  endTime: true,
+                  teacherSchedule: {
+                    select: {
+                      venue: {
+                        select: {
+                          name: true
+                        }
+                      },
+                      serviceType: {
+                        select: {
+                          name: true
+                        }
+                      },
+                      teacher: {
                         select: {
                           name: true
                         }
@@ -703,7 +733,7 @@ export async function POST(request: NextRequest) {
             return {
               name: item.packagePrice.packageDefinition.name,
               description: item.packagePrice.packageDefinition.description || undefined,
-              type_text: 'Paquete de Yoga',
+              type_text: 'MATPASS', // FIXED: Changed from 'Paquete de Yoga' to 'MATPASS'
               quantity: item.quantity,
               unit_price: Number(item.price),
               total_price: Number(item.price) * item.quantity,
@@ -822,6 +852,18 @@ export async function POST(request: NextRequest) {
         // Send email using new template system
         const { OrderEmailService } = await import('@/lib/communication/order-email-service');
         
+        // DEBUG: Log the email data being passed
+        console.log('🔍 DEBUG: Email data being passed to template service:');
+        console.log('📦 Order items:', emailData.orderItems?.length || 0);
+        for (const item of emailData.orderItems || []) {
+          console.log(`  - ${item.name}: type_text=${item.type_text}, itemType=${item.itemType}`);
+        }
+        console.log('📅 Bookings found:', bookingResults?.length || 0);
+        console.log('👤 User packages created:', userPackages?.length || 0);
+        for (const up of userPackages || []) {
+          console.log(`  - UserPackage ${up.id}: ${up.packagePrice?.packageDefinition?.name}`);
+        }
+
         // Transform emailData to match new service format
         const templateEmailData = {
           // Customer Information
@@ -849,39 +891,48 @@ export async function POST(request: NextRequest) {
           })),
           
           // MATPASS Information (if applicable)
-          matpassItems: emailData.orderItems.filter(item => item.type_text === 'MATPASS').map(item => ({
+          matpassItems: emailData.orderItems.filter(item => item.type_text === 'MATPASS' || item.itemType === 'PACKAGE').map(item => ({
             name: item.name,
-            type: item.type_text,
+            type: item.type_text || 'MATPASS',
             quantity: item.quantity,
             unitPrice: item.unit_price,
             totalPrice: item.total_price,
             sessions: item.sessions || 0,
-            expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()
-          })),
-          
-          // Booking Information (if applicable)
-          bookings: bookingResults?.map(booking => ({
-            bookingId: booking.id?.toString() || '',
-            bookingDate: booking.scheduleSlot?.startTime ? booking.scheduleSlot.startTime.toLocaleDateString('en-US', {
+            expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('es-ES', {
               weekday: 'long',
               year: 'numeric',
               month: 'long',
               day: 'numeric'
-            }) : '',
-            bookingTime: booking.scheduleSlot?.startTime ? booking.scheduleSlot.startTime.toLocaleTimeString('en-US', {
-              hour: '2-digit',
-              minute: '2-digit'
-            }) : '',
-            sessionType: booking.sessionType || booking.scheduleSlot?.scheduleTemplate?.serviceType?.name || 'Yoga',
-            teacherName: booking.scheduleSlot?.scheduleTemplate?.teacher?.fullName || 
-                        booking.scheduleSlot?.scheduleTemplate?.teacher?.firstName + ' ' + booking.scheduleSlot?.scheduleTemplate?.teacher?.lastName || 
-                        'To be assigned',
-            venue: booking.scheduleSlot?.scheduleTemplate?.venue?.name || 'MATMAX Yoga Studio',
-            duration: booking.scheduleSlot?.scheduleTemplate?.duration || 60
-          })) || [],
+            })
+          })),
+          
+          // Booking Information (if applicable)
+          bookings: bookingResults?.map(booking => {
+            // Use Teacher Schedule Slot data if available, otherwise fall back to regular Schedule Slot
+            const slotData = booking.teacherScheduleSlot || booking.scheduleSlot;
+            const scheduleData = booking.teacherScheduleSlot?.teacherSchedule || booking.scheduleSlot?.scheduleTemplate;
+            
+            return {
+              bookingId: booking.id?.toString() || '',
+              bookingDate: slotData?.startTime ? slotData.startTime.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              }) : '',
+              bookingTime: slotData?.startTime ? slotData.startTime.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit'
+              }) : '',
+              sessionType: booking.sessionType || scheduleData?.serviceType?.name || 'Yoga',
+              teacherName: scheduleData?.teacher?.name || 'To be assigned',
+              venue: scheduleData?.venue?.name || 'MATMAX Yoga Studio',
+              duration: scheduleData?.sessionDuration?.duration_minutes || 60
+            };
+          }) || [],
           
           // Product Information (if applicable)
-          products: emailData.orderItems.filter(item => item.type_text === 'PRODUCT').map(item => ({
+          products: emailData.orderItems.filter(item => item.type_text === 'Producto' || item.itemType === 'PRODUCT').map(item => ({
             name: item.name,
             type: item.type_text,
             quantity: item.quantity,
@@ -893,6 +944,10 @@ export async function POST(request: NextRequest) {
           // Shipping Information
           shippingAddress: emailData.shipping_address,
           
+          // Payment Information
+          paymentMethod: orderData.paymentMethod,
+          isPayLater: orderData.paymentMethod === 'pay_later',
+          
           // URLs
           orderUrl: emailData.order_url,
           websiteUrl: process.env.NEXT_PUBLIC_BASE_URL || 'https://matmax.world'
@@ -900,6 +955,12 @@ export async function POST(request: NextRequest) {
 
         // Send email asynchronously (don't wait for it to complete)
         // Use Spanish by default for Peruvian customers
+        console.log('📧 DEBUG: About to send email with template data:');
+        console.log('📧 Customer:', templateEmailData.customerName, templateEmailData.customerEmail);
+        console.log('📧 Has MatPass:', templateEmailData.matpassItems?.length > 0);
+        console.log('📧 Has Products:', templateEmailData.products?.length > 0);
+        console.log('📧 Has Bookings:', templateEmailData.bookings?.length > 0);
+        
         OrderEmailService.sendOrderConfirmationEmail(templateEmailData, 'es').catch(error => {
           console.error('Failed to send order confirmation email using template system:', error);
           // Don't fail the order creation if email fails

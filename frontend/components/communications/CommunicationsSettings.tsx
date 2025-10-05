@@ -1,15 +1,40 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { BaseButton } from '../ui/BaseButton';
-import { ArrowLeft, Settings } from 'lucide-react';
+import { ArrowLeft, Settings, Mail, Save, RefreshCw } from 'lucide-react';
 
 interface CommunicationsSettingsProps {
   onBackClick: () => void;
 }
 
+interface EmailTemplate {
+  id: number;
+  templateKey: string;
+  name: string;
+  isActive: boolean;
+  translations: {
+    id: number;
+    language: string;
+    subject: string;
+    content: string;
+  }[];
+}
+
+interface DynamicTitleConfig {
+  templateKey: string;
+  language: string;
+  hasProductsTitle: string;
+  noProductsTitle: string;
+}
+
 export function CommunicationsSettings({ onBackClick }: CommunicationsSettingsProps) {
+  const [activeTab, setActiveTab] = useState<'channels' | 'templates'>('channels');
+  const [templates, setTemplates] = useState<EmailTemplate[]>([]);
+  const [dynamicConfigs, setDynamicConfigs] = useState<DynamicTitleConfig[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   return (
     <div className="space-y-6">
       {/* Header */}

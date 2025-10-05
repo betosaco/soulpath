@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>MatPass Renovado - MATMAX</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #2d5016 0%, #4a7c2e 100%); color: white; padding: 40px 30px; text-align: center; border-radius: 12px 12px 0 0; }
+        .content { padding: 30px 20px; background: #f9f9f9; }
+        .renewal-section { background: white; padding: 25px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #4a7c2e; }
+        .matpass-info { background: #e8f5e9; padding: 20px; margin: 15px 0; border-radius: 5px; }
+        .booking-info { background: #e8f5e9; padding: 20px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #4a7c2e; }
+        .product-info { background: #e8f5e9; padding: 20px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #4a7c2e; }
+        .order-summary { background: #f8f9fa; padding: 20px; margin: 15px 0; border-radius: 5px; border: 2px solid #4a7c2e; }
+        .price-breakdown { background: #ffffff; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 3px solid #4a7c2e; }
+        .footer { text-align: center; padding: 20px; color: #666; background: #f8f9fa; border-radius: 0 0 12px 12px; }
+        .total-amount { font-size: 18px; font-weight: bold; color: #2d5016; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: 300; letter-spacing: 3px;">MATMAX</h1>
+            <p style="margin: 8px 0 0 0; color: #e8f5e9; font-size: 14px; letter-spacing: 1px;">WELLNESS STUDIO</p>
+            <h2 style="margin: 20px 0 0 0; color: #ffffff; font-size: 24px;">MatPass Renovado Exitosamente</h2>
+        </div>
+        
+        <div class="content">
+            <div class="renewal-section">
+                <h3>🔄 ¡MatPass Renovado {{userName}}!</h3>
+                <p>¡Gracias por continuar tu viaje con MATMAX! Tu MatPass ha sido renovado exitosamente.</p>
+                
+                <div class="matpass-info">
+                    <h4>📱 Tu MatPass Renovado:</h4>
+                    <p><strong>Tipo:</strong> {{matpassType}}</p>
+                    <p><strong>Descripción:</strong> {{matpassDescription}}</p>
+                    <p><strong>Válido desde:</strong> {{matpassStartDate}}</p>
+                    <p><strong>Válido hasta:</strong> {{matpassEndDate}}</p>
+                    <p><strong>Total de sesiones:</strong> {{matpassSessions}} sesiones</p>
+                </div>
+                
+                {{#if hasBooking}}
+                <div class="booking-info">
+                    <h4>📅 Tu Nueva Reserva:</h4>
+                    <p><strong>Fecha:</strong> {{bookingDate}}</p>
+                    <p><strong>Hora:</strong> {{bookingTime}}</p>
+                    <p><strong>Tipo de Clase:</strong> {{sessionType}}</p>
+                    <p><strong>Instructor:</strong> {{teacherName}}</p>
+                    <p><strong>Ubicación:</strong> {{venue}}</p>
+                </div>
+                {{/if}}
+                
+                {{#if hasProducts}}
+                <div class="product-info">
+                    <h4>📦 Tus Productos:</h4>
+                    <p><strong>Producto:</strong> {{productName}}</p>
+                    <p><strong>Descripción:</strong> {{productDescription}}</p>
+                    <p><strong>Cantidad:</strong> {{productQuantity}}</p>
+                    <p><strong>Precio:</strong> ${{productPrice}}</p>
+                </div>
+                {{/if}}
+                
+                <div class="order-summary">
+                    <h4>💰 Resumen de la Orden:</h4>
+                    <div class="price-breakdown">
+                        <p><strong>MatPass:</strong> ${{matpassPrice}}</p>
+                        {{#if hasBooking}}
+                        <p><strong>Tarifa de Reserva:</strong> ${{bookingPrice}}</p>
+                        {{/if}}
+                        {{#if hasProducts}}
+                        <p><strong>Productos:</strong> ${{productsPrice}}</p>
+                        {{/if}}
+                        <p><strong>Subtotal:</strong> ${{subtotal}}</p>
+                        <p><strong>Impuestos ({{taxRate}}%):</strong> ${{taxAmount}}</p>
+                        <p><strong>Monto Total:</strong> <span class="total-amount">${{totalAmount}}</span></p>
+                    </div>
+                    <p><strong>Número de Orden:</strong> {{orderNumber}}</p>
+                    <p><strong>Método de Pago:</strong> {{paymentMethod}}</p>
+                    <p><strong>Fecha de Orden:</strong> {{orderDate}}</p>
+                </div>
+                
+                <p><strong>¡Sigue disfrutando tu viaje de bienestar!</strong></p>
+                <ul>
+                    <li>📅 Reserva tu próxima clase</li>
+                    <li>🏃‍♀️ Prueba nuevos tipos de clases</li>
+                    <li>👥 Conecta con nuestra comunidad</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>MATMAX Wellness Studio</strong></p>
+            <p>📧 info@matmax.world | 📱 +51 916 172 368</p>
+        </div>
+    </div>
+</body>
+</html>

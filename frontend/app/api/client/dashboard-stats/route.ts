@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { requireAuth } from '@/lib/auth';
 import { withCache } from '@/lib/cache';
 import { withApiOptimization } from '@/lib/middleware/performance';
+import { createClient } from '@supabase/supabase-js';
 
 interface BookingData {
   id: string;
