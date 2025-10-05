@@ -13,26 +13,36 @@ export async function POST(request: NextRequest) {
     console.log('🧪 Testing workflow:', workflow);
     console.log('🧪 Test data:', testData);
 
-    // Create a mock execution context for testing
-    const executionContext = {
-      workflow,
-      orderData: testData || {
-        userName: 'Test User',
-        userEmail: 'test@example.com',
-        orderId: 'TEST-123',
-        orderTotal: 100,
-        products: [],
-        matpassData: null,
-        bookingData: null
+    // Create mock order data and event context for testing
+    const mockOrderData = testData?.orderData || {
+      userName: 'Test User',
+      userEmail: 'test@example.com',
+      orderId: 'TEST-123',
+      orderTotal: 100,
+      products: [],
+      matpassData: null,
+      bookingData: null
+    };
+
+    const mockEventContext = testData?.eventContext || {
+      eventType: 'purchase' as const,
+      user: {
+        id: 'test-user-1',
+        email: 'test@example.com',
+        fullName: 'Test User'
       },
-      variables: {},
-      results: []
+      customer: {
+        id: 'test-customer-1',
+        email: 'test@example.com',
+        name: 'Test User',
+        telegramChatId: '123456789'
+      }
     };
 
     try {
-      // Execute the workflow using the WorkflowEngine
+      // Execute the workflow using the WorkflowEngine with event context
       const engine = new WorkflowEngine();
-      const results = await engine.executeWorkflow(executionContext);
+      const results = await engine.executeWorkflow(workflow, mockOrderData, mockEventContext);
 
       console.log('✅ Workflow test completed successfully');
       console.log('📊 Test results:', results);

@@ -1736,8 +1736,9 @@ interface Recipient {
   name: string;
   email?: string;
   telegramChatId?: string;
-  type: 'user' | 'group' | 'custom';
+  type: 'user' | 'group' | 'custom' | 'event_recipient' | 'event_user';
   role?: string;
+  eventField?: string; // For dynamic field mapping (e.g., 'customer.email', 'user.telegramChatId')
 }
 
 interface RecipientSelectorProps {
@@ -2181,6 +2182,16 @@ function RecipientSelector({ nodeType, selectedRecipients, onRecipientsChange }:
     }
   };
 
+  const addEventRecipient = (eventType: string, field: string) => {
+    const eventRecipient: Recipient = {
+      id: `event_${eventType}_${Date.now()}`,
+      name: `${eventType.replace('_', ' ').toUpperCase()} (${field})`,
+      type: "event_recipient",
+      eventField: field
+    };
+    onRecipientsChange([...selectedRecipients, eventRecipient]);
+  };
+
   const removeRecipient = (recipientId: string) => {
     onRecipientsChange(selectedRecipients.filter(r => r.id !== recipientId));
   };
@@ -2285,9 +2296,11 @@ function RecipientSelector({ nodeType, selectedRecipients, onRecipientsChange }:
                   <span className={`ml-2 px-1.5 py-0.5 rounded text-xs ${
                     recipient.type === "user" ? "bg-green-100 text-green-800" :
                     recipient.type === "group" ? "bg-purple-100 text-purple-800" :
-                    "bg-orange-100 text-orange-800"
+                    recipient.type === "custom" ? "bg-orange-100 text-orange-800" :
+                    recipient.type === "event_recipient" ? "bg-yellow-100 text-yellow-800" :
+                    "bg-gray-100 text-gray-800"
                   }`}>
-                    {recipient.type}
+                    {recipient.type === "event_recipient" ? "event" : recipient.type}
                   </span>
                 </div>
                 <button
@@ -2302,9 +2315,49 @@ function RecipientSelector({ nodeType, selectedRecipients, onRecipientsChange }:
         </div>
       )}
 
+      {/* Event-Based Recipients */}
+      <div className="space-y-3">
+        <div className="text-sm font-medium text-gray-700">Event Recipients:</div>
+        <div className="border rounded-lg p-3 bg-yellow-50 border-yellow-200">
+          <div className="text-sm text-yellow-800 mb-3">
+            Recipients based on the event that triggered this workflow:
+          </div>
+          <div className="grid grid-cols-1 gap-2">
+            <button
+              onClick={() => addEventRecipient('customer', 'customer.email')}
+              className="flex items-center gap-2 p-2 bg-white border rounded hover:bg-yellow-100 text-sm"
+            >
+              <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
+              <span>🛒 Customer who made purchase (customer.email)</span>
+            </button>
+            <button
+              onClick={() => addEventRecipient('customer', 'customer.telegramChatId')}
+              className="flex items-center gap-2 p-2 bg-white border rounded hover:bg-yellow-100 text-sm"
+            >
+              <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+              <span>📱 Customer Telegram (customer.telegramChatId)</span>
+            </button>
+            <button
+              onClick={() => addEventRecipient('user', 'user.email')}
+              className="flex items-center gap-2 p-2 bg-white border rounded hover:bg-yellow-100 text-sm"
+            >
+              <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+              <span>👤 User who triggered event (user.email)</span>
+            </button>
+            <button
+              onClick={() => addEventRecipient('booking', 'booking.customer.email')}
+              className="flex items-center gap-2 p-2 bg-white border rounded hover:bg-yellow-100 text-sm"
+            >
+              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+              <span>📅 Booking customer (booking.customer.email)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Users by Role */}
       <div className="space-y-3">
-        <div className="text-sm font-medium text-gray-700">Select by Role:</div>
+        <div className="text-sm font-medium text-gray-700">Additional Recipients by Role:</div>
         {loading ? (
           <div className="text-center py-4">
             <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>

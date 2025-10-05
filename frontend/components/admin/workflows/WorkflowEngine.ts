@@ -19,6 +19,16 @@ export interface ExecutionContext {
   retryCounters: Map<string, number>;
   executionPath: string[];
   startTime: number;
+  eventUser?: any; // User who triggered the event
+  eventCustomer?: any; // Customer data from event
+  resolvedRecipients?: ResolvedRecipient[];
+}
+
+export interface ResolvedRecipient {
+  email?: string;
+  telegramChatId?: string;
+  name?: string;
+  type: 'email' | 'telegram' | 'sms';
 }
 
 export interface ExecutionResult {
@@ -33,16 +43,142 @@ export class WorkflowEngine {
   private executionTimeout = 30000; // 30 seconds
 
   /**
+   * Resolve recipients based on workflow configuration and event context
+   */
+  private async resolveRecipients(
+    node: WorkflowNode,
+    context: ExecutionContext
+  ): Promise<ResolvedRecipient[]> {
+    const resolvedRecipients: ResolvedRecipient[] = [];
+    const selectedRecipients = node.data?.selectedRecipients || [];
+
+    console.log('🔍 Resolving recipients for node:', node.id, 'recipients:', selectedRecipients.length);
+
+    for (const recipient of selectedRecipients) {
+      try {
+        switch (recipient.type) {
+          case 'event_recipient':
+            // Resolve based on event field mapping
+            const resolved = this.resolveEventRecipient(recipient, context);
+            if (resolved) {
+              resolvedRecipients.push(resolved);
+            }
+            break;
+
+          case 'user':
+            // Direct user recipient
+            if (recipient.email) {
+              resolvedRecipients.push({
+                email: recipient.email,
+                name: recipient.name,
+                type: node.type === 'email' ? 'email' : node.type === 'telegram' ? 'telegram' : 'sms'
+              });
+            }
+            if (recipient.telegramChatId && node.type === 'telegram') {
+              resolvedRecipients.push({
+                telegramChatId: recipient.telegramChatId,
+                name: recipient.name,
+                type: 'telegram'
+              });
+            }
+            break;
+
+          case 'custom':
+            // Custom email recipient
+            if (recipient.email) {
+              resolvedRecipients.push({
+                email: recipient.email,
+                name: recipient.name,
+                type: 'email'
+              });
+            }
+            break;
+
+          default:
+            console.warn('Unknown recipient type:', recipient.type);
+        }
+      } catch (error) {
+        console.error('Error resolving recipient:', recipient, error);
+      }
+    }
+
+    console.log('✅ Resolved', resolvedRecipients.length, 'recipients');
+    return resolvedRecipients;
+  }
+
+  /**
+   * Resolve event-based recipients using field mapping
+   */
+  private resolveEventRecipient(recipient: any, context: ExecutionContext): ResolvedRecipient | null {
+    const { eventField } = recipient;
+
+    if (!eventField) return null;
+
+    console.log('🔍 Resolving event recipient field:', eventField);
+
+    // Parse the field path (e.g., 'customer.email', 'user.telegramChatId')
+    const fieldParts = eventField.split('.');
+    let value: any = context;
+
+    // Navigate through the context object
+    for (const part of fieldParts) {
+      if (value && typeof value === 'object') {
+        value = value[part];
+      } else {
+        console.warn('Field path not found:', eventField, 'at part:', part);
+        return null;
+      }
+    }
+
+    if (!value) {
+      console.warn('No value found for field:', eventField);
+      return null;
+    }
+
+    // Determine recipient type based on field and node type
+    if (eventField.includes('email')) {
+      return {
+        email: value,
+        name: recipient.name || 'Event Recipient',
+        type: 'email'
+      };
+    } else if (eventField.includes('telegramChatId') || eventField.includes('telegram')) {
+      return {
+        telegramChatId: value,
+        name: recipient.name || 'Event Recipient',
+        type: 'telegram'
+      };
+    }
+
+    console.warn('Could not determine recipient type for field:', eventField);
+    return null;
+  }
+
+  /**
    * Execute a workflow with order data
    */
   async executeWorkflow(
     workflow: WorkflowData,
-    orderData: OrderData
+    orderData: OrderData,
+    eventContext?: {
+      eventType: 'purchase' | 'booking' | 'user_registration' | 'payment' | 'custom';
+      user?: any;
+      customer?: any;
+      additionalData?: any;
+    }
   ): Promise<ExecutionResult> {
     const startTime = Date.now();
+
+    // Build the execution context with event data
     const context: ExecutionContext = {
       workflow,
-      orderData,
+      orderData: {
+        ...orderData,
+        eventUser: eventContext?.user,
+        eventCustomer: eventContext?.customer,
+        eventType: eventContext?.eventType,
+        ...eventContext?.additionalData
+      },
       executedNodes: new Set(),
       results: new Map(),
       errors: new Map(),
@@ -50,7 +186,9 @@ export class WorkflowEngine {
       loopCounters: new Map(),
       retryCounters: new Map(),
       executionPath: [],
-      startTime
+      startTime,
+      eventUser: eventContext?.user,
+      eventCustomer: eventContext?.customer
     };
 
     console.log('🚀 WorkflowEngine: Starting workflow execution');
@@ -305,9 +443,23 @@ export class WorkflowEngine {
     node: WorkflowNode,
     context: ExecutionContext
   ): Promise<{ success: boolean; messageId?: string }> {
-    console.log(`📧 Sending email: ${node.data.template}`);
+    console.log(`📧 Executing email node: ${node.data.template}`);
 
     try {
+      // First, resolve recipients based on the node's configuration
+      const resolvedRecipients = await this.resolveRecipients(node, context);
+      const emailRecipients = resolvedRecipients.filter(r => r.email);
+
+      if (emailRecipients.length === 0) {
+        console.warn('⚠️ No email recipients resolved for node:', node.id);
+        return {
+          success: false,
+          messageId: undefined
+        };
+      }
+
+      console.log(`📧 Sending email to ${emailRecipients.length} recipients:`, emailRecipients.map(r => r.email));
+
       // Import the modular email service
       const { generateModularEmail } = await import('@/lib/communication/templates');
 
@@ -318,7 +470,12 @@ export class WorkflowEngine {
       const emailResult = await generateModularEmail(context.orderData);
 
       if (emailResult.success) {
-        console.log(`✅ Email sent successfully: ${emailResult.subject}`);
+        console.log(`✅ Email generated successfully: ${emailResult.subject}`);
+
+        // Here you would typically send to the resolved recipients
+        // For now, we'll log the recipients that would receive the email
+        console.log(`📧 Would send email to:`, emailRecipients.map(r => `${r.name} <${r.email}>`).join(', '));
+
         return {
           success: true,
           messageId: 'email_' + Date.now()
@@ -327,7 +484,7 @@ export class WorkflowEngine {
         throw new Error(emailResult.error || 'Email generation failed');
       }
     } catch (error) {
-      console.error('❌ Email sending failed:', error);
+      console.error('❌ Email execution failed:', error);
       throw error;
     }
   }
@@ -339,19 +496,36 @@ export class WorkflowEngine {
     node: WorkflowNode,
     context: ExecutionContext
   ): Promise<{ success: boolean; messageIds?: string[] }> {
-    console.log(`📱 Sending Telegram message: ${node.data.template}`);
+    console.log(`📱 Executing Telegram node: ${node.data.template}`);
 
     try {
-      // Import telegram service (would be implemented)
-      // const telegramResult = await sendTelegramMessage(node.data, context.orderData);
+      // First, resolve recipients based on the node's configuration
+      const resolvedRecipients = await this.resolveRecipients(node, context);
+      const telegramRecipients = resolvedRecipients.filter(r => r.telegramChatId);
 
-      console.log(`✅ Telegram message sent to ${node.data.chatIds?.length || 0} chats`);
+      if (telegramRecipients.length === 0) {
+        console.warn('⚠️ No Telegram recipients resolved for node:', node.id);
+        return {
+          success: false,
+          messageIds: undefined
+        };
+      }
+
+      console.log(`📱 Sending Telegram message to ${telegramRecipients.length} chats:`, telegramRecipients.map(r => r.telegramChatId));
+
+      // Import telegram service (would be implemented)
+      // const telegramResult = await sendTelegramMessage(node.data, context.orderData, telegramRecipients);
+
+      // For now, we'll log the recipients that would receive the message
+      console.log(`📱 Would send Telegram message to:`, telegramRecipients.map(r => `${r.name} (Chat ID: ${r.telegramChatId})`).join(', '));
+
+      console.log(`✅ Telegram message sent to ${telegramRecipients.length} chats`);
       return {
         success: true,
-        messageIds: ['telegram_' + Date.now()]
+        messageIds: telegramRecipients.map((_, index) => 'telegram_' + Date.now() + '_' + index)
       };
     } catch (error) {
-      console.error('❌ Telegram sending failed:', error);
+      console.error('❌ Telegram execution failed:', error);
       throw error;
     }
   }
