@@ -1810,181 +1810,133 @@ function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations:
   );
 }
 
-// Inline Telegram User Selector Component
+// Simplified Telegram User Selector - Clean Implementation
 function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSelectorProps) {
-  console.log('🔧 TelegramUserSelector: Component rendered with selectedUsers:', selectedUsers?.length || 0);
-
+  const [isExpanded, setIsExpanded] = useState(false);
   const [users, setUsers] = useState<TelegramUser[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  console.log('🔧 TelegramUserSelector: isExpanded state:', isExpanded);
-
-  // Fetch users when expanded
+  // Load users when expanded
   useEffect(() => {
     if (isExpanded && users.length === 0) {
-      fetchUsers();
+      loadUsers();
     }
   }, [isExpanded]);
 
-  const fetchUsers = async () => {
+  const loadUsers = async () => {
     setLoading(true);
+    setError(null);
     try {
       const response = await fetch('/api/admin/users/telegram');
       if (response.ok) {
         const data = await response.json();
         setUsers(data.users || []);
+      } else {
+        setError('Failed to load users');
       }
-    } catch (error) {
-      console.error('Failed to fetch Telegram users:', error);
+    } catch (err) {
+      setError('Network error');
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredUsers = users.filter(user =>
-    (user.fullName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (user.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (user.telegram_username || '').toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleUserToggle = (user: TelegramUser) => {
+  const toggleUser = (user: TelegramUser) => {
     const isSelected = selectedUsers.some(u => u.id === user.id);
-    if (isSelected) {
-      onUsersChange(selectedUsers.filter(u => u.id !== user.id));
-    } else {
-      onUsersChange([...selectedUsers, user]);
-    }
+    const newSelection = isSelected
+      ? selectedUsers.filter(u => u.id !== user.id)
+      : [...selectedUsers, user];
+    onUsersChange(newSelection);
   };
 
-  const handleSelectAll = () => {
-    const usersWithChatIds = filteredUsers.filter(user => user.telegram_chat_id);
-    onUsersChange(usersWithChatIds);
+  const selectAll = () => {
+    const selectableUsers = users.filter(u => u.telegram_chat_id);
+    onUsersChange(selectableUsers);
   };
 
-  const handleClearAll = () => {
+  const clearAll = () => {
     onUsersChange([]);
   };
 
   return (
     <div className="space-y-2">
-      {/* Toggle Button */}
-      <BaseButton
-        onClick={() => {
-          console.log('🔧 TelegramUserSelector: Button clicked, current isExpanded:', isExpanded);
-          setIsExpanded(!isExpanded);
-          console.log('🔧 TelegramUserSelector: setIsExpanded called with:', !isExpanded);
-        }}
-        className="w-full justify-between text-left"
-        size="sm"
-        variant="outline"
+      {/* Simple Toggle Button */}
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full flex items-center justify-between p-2 border rounded text-sm hover:bg-gray-50"
       >
-        <div className="flex items-center gap-2">
-          <Users size={14} />
+        <span className="flex items-center gap-2">
+          <span>👥</span>
           <span>
             {selectedUsers.length > 0
               ? `${selectedUsers.length} user${selectedUsers.length !== 1 ? 's' : ''} selected`
               : 'Select Users'
             }
           </span>
-        </div>
-        <ChevronDown size={14} className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-      </BaseButton>
+        </span>
+        <span className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+          ▼
+        </span>
+      </button>
 
-      {/* Expanded Content */}
-      {console.log('🔧 TelegramUserSelector: About to render expanded content, isExpanded:', isExpanded)}
+      {/* Simple Expanded Panel */}
       {isExpanded && (
-        console.log('🔧 TelegramUserSelector: Rendering expanded content')
-      ) || (
-        console.log('🔧 TelegramUserSelector: Not rendering expanded content')
-      )}
-      {isExpanded && (
-        <div className="border rounded-md p-3 space-y-3 bg-gray-50">
-          {/* Search */}
-          <div className="relative">
-            <Search size={12} className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <BaseInput
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search users..."
-              className="pl-7 text-sm h-8"
-            />
-          </div>
-
-          {/* Actions */}
+        <div className="border rounded p-3 bg-gray-50 space-y-2">
+          {/* Action Buttons */}
           <div className="flex gap-2">
-            <BaseButton
-              onClick={handleSelectAll}
-              size="sm"
-              className="text-xs h-7"
+            <button
+              onClick={selectAll}
+              className="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
             >
               Select All
-            </BaseButton>
-            <BaseButton
-              onClick={handleClearAll}
-              size="sm"
-              className="text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 h-7"
+            </button>
+            <button
+              onClick={clearAll}
+              className="px-3 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600"
             >
               Clear All
-            </BaseButton>
+            </button>
           </div>
 
           {/* User List */}
-          <div className="max-h-48 overflow-y-auto space-y-1">
-            {loading ? (
-              <div className="flex items-center justify-center py-4">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                <span className="ml-2 text-sm text-gray-600">Loading users...</span>
-              </div>
-            ) : filteredUsers.length === 0 ? (
-              <div className="text-center py-4 text-sm text-gray-500">
-                No users found
-              </div>
-            ) : (
-              filteredUsers.map((user) => {
-                const isSelected = selectedUsers.some(u => u.id === user.id);
-                const hasChatId = !!user.telegram_chat_id;
-
-                return (
-                  <div
-                    key={user.id}
-                    className={`flex items-center gap-2 p-2 rounded cursor-pointer transition-colors text-sm ${
-                      isSelected
-                        ? 'bg-blue-100 border border-blue-200'
-                        : 'hover:bg-gray-100'
-                    } ${!hasChatId ? 'opacity-60' : ''}`}
-                    onClick={() => hasChatId && handleUserToggle(user)}
-                  >
-                    <Checkbox
-                      checked={isSelected}
-                      disabled={!hasChatId}
-                      onChange={() => hasChatId && handleUserToggle(user)}
-                      className="h-3 w-3"
-                    />
-
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-xs truncate">
-                        {user.fullName || 'No Name'}
-                      </div>
-                      <div className="text-xs text-gray-500 truncate">
-                        {user.email || 'No Email'}
-                      </div>
-                      {user.telegram_chat_id && (
-                        <div className="text-xs text-green-600">
-                          ID: {user.telegram_chat_id}
-                        </div>
-                      )}
-                      {!hasChatId && (
-                        <div className="text-xs text-red-500">
-                          No Chat ID
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })
+          <div className="max-h-48 overflow-y-auto">
+            {loading && <div className="text-center py-2">Loading...</div>}
+            {error && <div className="text-center py-2 text-red-500">{error}</div>}
+            {!loading && !error && users.length === 0 && (
+              <div className="text-center py-2 text-gray-500">No users found</div>
             )}
+            {users.map(user => {
+              const isSelected = selectedUsers.some(u => u.id === user.id);
+              const canSelect = !!user.telegram_chat_id;
+
+              return (
+                <div
+                  key={user.id}
+                  onClick={() => canSelect && toggleUser(user)}
+                  className={`flex items-center gap-2 p-2 rounded cursor-pointer text-sm ${
+                    isSelected ? 'bg-blue-100' : 'hover:bg-gray-100'
+                  } ${!canSelect ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    disabled={!canSelect}
+                    readOnly
+                    className="w-3 h-3"
+                  />
+                  <div className="flex-1">
+                    <div className="font-medium text-xs">{user.fullName || 'No Name'}</div>
+                    <div className="text-xs text-gray-500">{user.email || 'No Email'}</div>
+                    {user.telegram_chat_id ? (
+                      <div className="text-xs text-green-600">ID: {user.telegram_chat_id}</div>
+                    ) : (
+                      <div className="text-xs text-red-500">No Chat ID</div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
