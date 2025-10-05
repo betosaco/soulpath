@@ -1819,6 +1819,9 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  console.log('🔧 TelegramUserSelector rendered with selectedUsers:', selectedUsers?.length || 0, selectedUsers);
+  console.log('🔧 onUsersChange function:', typeof onUsersChange, !!onUsersChange);
+
   // Load users when expanded
   useEffect(() => {
     if (isExpanded && users.length === 0) {
@@ -1857,11 +1860,17 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
   };
 
   const toggleUser = (user: TelegramUser) => {
+    console.log('🔧 toggleUser called with user:', user.id, user.fullName);
+    console.log('🔧 Current selectedUsers:', selectedUsers.length, selectedUsers.map(u => u.id));
     const isSelected = selectedUsers.some(u => u.id === user.id);
+    console.log('🔧 User is currently selected:', isSelected);
     const newSelection = isSelected
       ? selectedUsers.filter(u => u.id !== user.id)
       : [...selectedUsers, user];
+    console.log('🔧 New selection will be:', newSelection.length, newSelection.map(u => u.id));
+    console.log('🔧 Calling onUsersChange with:', newSelection);
     onUsersChange(newSelection);
+    console.log('🔧 onUsersChange called successfully');
   };
 
   const selectAll = () => {
@@ -1923,8 +1932,12 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
               const isSelected = selectedUsers.some(u => u.id === user.id);
 
               return (
-                <label
+                <div
                   key={user.id}
+                  onClick={() => {
+                    console.log('🔧 Row clicked for user:', user.id, user.fullName);
+                    toggleUser(user);
+                  }}
                   className={`flex items-center gap-2 p-2 rounded cursor-pointer text-sm ${
                     isSelected ? 'bg-blue-100' : 'hover:bg-gray-100'
                   }`}
@@ -1932,10 +1945,7 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
                   <input
                     type="checkbox"
                     checked={isSelected}
-                    onChange={(e) => {
-                      e.stopPropagation();
-                      toggleUser(user);
-                    }}
+                    readOnly
                     className="w-3 h-3"
                   />
                   <div className="flex-1">
@@ -1943,7 +1953,7 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
                     <div className="text-xs text-gray-500">{user.email || 'No Email'}</div>
                     <div className="text-xs text-green-600">ID: {user.telegram_chat_id}</div>
                   </div>
-                </label>
+                </div>
               );
             })}
           </div>
