@@ -136,7 +136,29 @@ export function CommunicationConfig() {
       });
       const data = await response.json();
       if (data.config) {
-        setConfig(data.config);
+        // Ensure all string values are properly initialized to prevent controlled/uncontrolled input errors
+        const safeConfig = {
+          ...data.config,
+          brevo_api_key: data.config.brevo_api_key || '',
+          resend_api_key: data.config.resend_api_key || '',
+          sender_email: data.config.sender_email || '',
+          sender_name: data.config.sender_name || '',
+          admin_email: data.config.admin_email || '',
+          labsmobile_username: data.config.labsmobile_username || '',
+          labsmobile_token: data.config.labsmobile_token || '',
+          sms_sender_name: data.config.sms_sender_name || '',
+          telegram_bot_token: data.config.telegram_bot_token || '',
+          telegram_webhook_url: data.config.telegram_webhook_url || '',
+          telegram_username: data.config.telegram_username || '',
+          whatsapp_business_account_id: data.config.whatsapp_business_account_id || '',
+          whatsapp_access_token: data.config.whatsapp_access_token || '',
+          whatsapp_phone_number_id: data.config.whatsapp_phone_number_id || '',
+          whatsapp_webhook_verify_token: data.config.whatsapp_webhook_verify_token || '',
+          instagram_access_token: data.config.instagram_access_token || '',
+          instagram_business_account_id: data.config.instagram_business_account_id || '',
+          instagram_webhook_verify_token: data.config.instagram_webhook_verify_token || ''
+        };
+        setConfig(safeConfig);
         setMessage({ type: 'success', text: 'Configuration loaded successfully!' });
       } else {
         console.error('Failed to load configuration:', response.status, response.statusText);
