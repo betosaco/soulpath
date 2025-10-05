@@ -2338,5 +2338,3 @@ function RecipientSelector({ nodeType, selectedRecipients, onRecipientsChange }:
     </div>
   );
 }
-
-export { VisualWorkflowBuilder };
