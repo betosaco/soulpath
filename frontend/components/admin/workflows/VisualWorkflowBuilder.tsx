@@ -1843,6 +1843,7 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
       if (response.ok) {
         const data = await response.json();
         console.log('🔧 API response data:', data);
+        console.log('🔧 Users returned:', data.users?.length || 0, data.users);
         setUsers(data.users || []);
       } else {
         const errorText = await response.text();
@@ -1858,10 +1859,13 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
   };
 
   const toggleUser = (user: TelegramUser) => {
+    console.log('🔧 toggleUser called for user:', user.id, user.fullName);
     const isSelected = selectedUsers.some(u => u.id === user.id);
+    console.log('🔧 User was selected:', isSelected);
     const newSelection = isSelected
       ? selectedUsers.filter(u => u.id !== user.id)
       : [...selectedUsers, user];
+    console.log('🔧 New selection:', newSelection.length, 'users');
     onUsersChange(newSelection);
   };
 
@@ -1924,9 +1928,8 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
               const isSelected = selectedUsers.some(u => u.id === user.id);
 
               return (
-                <div
+                <label
                   key={user.id}
-                  onClick={() => toggleUser(user)}
                   className={`flex items-center gap-2 p-2 rounded cursor-pointer text-sm ${
                     isSelected ? 'bg-blue-100' : 'hover:bg-gray-100'
                   }`}
@@ -1934,7 +1937,7 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
                   <input
                     type="checkbox"
                     checked={isSelected}
-                    readOnly
+                    onChange={() => toggleUser(user)}
                     className="w-3 h-3"
                   />
                   <div className="flex-1">
@@ -1942,7 +1945,7 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
                     <div className="text-xs text-gray-500">{user.email || 'No Email'}</div>
                     <div className="text-xs text-green-600">ID: {user.telegram_chat_id}</div>
                   </div>
-                </div>
+                </label>
               );
             })}
           </div>
