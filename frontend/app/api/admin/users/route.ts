@@ -9,8 +9,9 @@ const createUserSchema = z.object({
   email: z.string().email('Invalid email format'),
   fullName: z.string().min(1, 'Full name is required'),
   phone: z.string().optional(),
-  role: z.enum(['user', 'admin']).default('user'),
-  status: z.enum(['active', 'inactive', 'suspended']).default('active'),
+  role: z.enum(['USER', 'ADMIN', 'TEACHER']).default('USER'),
+  status: z.enum(['ACTIVE', 'INACTIVE', 'PENDING']).default('ACTIVE'),
+  telegramChatId: z.string().optional(),
   birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)').optional(),
   birthTime: z.string().regex(/^\d{2}:\d{2}$/, 'Invalid time format (HH:MM)').optional(),
   birthPlace: z.string().optional(),
@@ -253,8 +254,9 @@ export async function POST(request: NextRequest) {
     const newUser = await prisma.user.create({
       data: {
         ...userData,
-        role: userData.role.toUpperCase() as 'ADMIN' | 'USER',
-        status: userData.status.toUpperCase() as 'ACTIVE' | 'INACTIVE' | 'PENDING',
+        role: userData.role as 'ADMIN' | 'USER' | 'TEACHER',
+        status: userData.status as 'ACTIVE' | 'INACTIVE' | 'PENDING',
+        telegramChatId: userData.telegramChatId,
         birthDate: userData.birthDate ? new Date(userData.birthDate) : null,
         scheduledDate: userData.scheduledDate ? new Date(userData.scheduledDate) : null
       }

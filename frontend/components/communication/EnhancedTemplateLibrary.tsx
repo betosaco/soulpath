@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { BaseButton } from '../ui/BaseButton';
 import { Badge } from '../ui/badge';
@@ -8,11 +8,11 @@ import { BaseInput } from '../ui/BaseInput';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Switch } from '../ui/switch';
 import { Separator } from '../ui/separator';
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Eye, 
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
   Copy,
   Mail,
   Smartphone,
@@ -45,6 +45,7 @@ import {
 import { EnhancedEmailTemplateEditor } from './EnhancedEmailTemplateEditor';
 import { EnhancedTemplatePreview } from './EnhancedTemplatePreview';
 import { useAuth } from '../../hooks/useAuth';
+import { useTemplatesQuery, useCreateTemplateMutation, useUpdateTemplateMutation, useDeleteTemplateMutation } from '../../hooks/useTemplatesQuery';
 import { toast } from 'sonner';
 
 interface Template {
@@ -97,8 +98,18 @@ const SORT_OPTIONS = [
 
 export function EnhancedTemplateLibrary({ type }: EnhancedTemplateLibraryProps) {
   const { user } = useAuth();
-  const [templates, setTemplates] = useState<Template[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+
+  // Use TanStack Query for data fetching
+  const { data: templatesData, isLoading } = useTemplatesQuery({
+    type: type as 'email' | 'sms',
+    isActive: true
+  });
+
+  const createTemplateMutation = useCreateTemplateMutation();
+  const updateTemplateMutation = useUpdateTemplateMutation();
+  const deleteTemplateMutation = useDeleteTemplateMutation();
+
+  // Local UI state
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState('name');
@@ -113,30 +124,7 @@ export function EnhancedTemplateLibrary({ type }: EnhancedTemplateLibraryProps) 
   const [showFilters, setShowFilters] = useState(false);
   const [showStats, setShowStats] = useState(false);
 
-  const loadTemplates = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`/api/admin/communication/templates?type=${type}`, {
-        headers: {
-          'Authorization': `Bearer ${user?.access_token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setTemplates(data.templates || []);
-      }
-    } catch (error) {
-      console.error('Failed to load templates:', error);
-      toast.error('Failed to load templates');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [type, user?.access_token]);
-
-  useEffect(() => {
-    loadTemplates();
-  }, [type, loadTemplates]);
+  const templates = templatesData?.templates || [];
 
   const filteredTemplates = templates
     .filter(template => {
@@ -201,21 +189,8 @@ export function EnhancedTemplateLibrary({ type }: EnhancedTemplateLibraryProps) 
         }))
       };
 
-      const response = await fetch('/api/admin/communication/templates', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user?.access_token}`
-        },
-        body: JSON.stringify(newTemplate)
-      });
-
-      if (response.ok) {
-        toast.success('Template duplicated successfully');
-        loadTemplates();
-      } else {
-        toast.error('Failed to duplicate template');
-      }
+      await createTemplateMutation.mutateAsync(newTemplate);
+      toast.success('Template duplicated successfully');
     } catch (error) {
       console.error('Failed to duplicate template:', error);
       toast.error('Failed to duplicate template');
@@ -230,19 +205,8 @@ export function EnhancedTemplateLibrary({ type }: EnhancedTemplateLibraryProps) 
 
     if (confirm(`Are you sure you want to delete "${template.name}"?`)) {
       try {
-        const response = await fetch(`/api/admin/communication/templates/${template.id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${user?.access_token}`
-          }
-        });
-
-        if (response.ok) {
-          toast.success('Template deleted successfully');
-          loadTemplates();
-        } else {
-          toast.error('Failed to delete template');
-        }
+        await deleteTemplateMutation.mutateAsync(template.id);
+        toast.success('Template deleted successfully');
       } catch (error) {
         console.error('Failed to delete template:', error);
         toast.error('Failed to delete template');
@@ -294,7 +258,7 @@ export function EnhancedTemplateLibrary({ type }: EnhancedTemplateLibraryProps) 
   const handleTemplateSaved = () => {
     setShowEditor(false);
     setEditingTemplate(null);
-    loadTemplates();
+    // Templates will be automatically refetched by TanStack Query mutations
   };
 
   const getCategoryColor = (category: string) => {

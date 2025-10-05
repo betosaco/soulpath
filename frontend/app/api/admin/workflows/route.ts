@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
+// Note: Workflows use getAuthenticatedUser instead of handleAdminAuth
+// because workflows can be created/managed by regular authenticated users
+
 export async function POST(request: NextRequest) {
   try {
     console.log('🔧 POST /api/admin/workflows - Starting request (v2)...');
@@ -114,7 +117,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(url.searchParams.get('limit') || '50');
     const offset = parseInt(url.searchParams.get('offset') || '0');
 
-    // Fetch workflows from database
+    // Fetch workflows from database with data field to compute counts efficiently
     const workflows = await prisma.workflow.findMany({
       where: {
         createdBy: user.id,
@@ -130,8 +133,7 @@ export async function GET(request: NextRequest) {
         tags: true,
         createdAt: true,
         updatedAt: true,
-        // Include node/connection counts from the data JSON
-        data: false // Don't include full data in list view
+        data: true // Include data to compute counts without additional queries
       },
       orderBy: {
         updatedAt: 'desc'
@@ -140,23 +142,23 @@ export async function GET(request: NextRequest) {
       skip: offset
     });
 
-    // Add computed fields for each workflow
-    const workflowsWithCounts = await Promise.all(
-      workflows.map(async (workflow) => {
-        // Get the full workflow data to count nodes/connections
-        const fullWorkflow = await prisma.workflow.findUnique({
-          where: { id: workflow.id },
-          select: { data: true }
-        });
-
-        const workflowData = fullWorkflow?.data as any || {};
-        return {
-          ...workflow,
-          nodeCount: workflowData.nodes?.length || 0,
-          connectionCount: workflowData.connections?.length || 0
-        };
-      })
-    );
+    // Compute node and connection counts from the data field
+    const workflowsWithCounts = workflows.map((workflow) => {
+      const workflowData = workflow.data as any || {};
+      return {
+        id: workflow.id,
+        name: workflow.name,
+        description: workflow.description,
+        isActive: workflow.isActive,
+        isPublished: workflow.isPublished,
+        version: workflow.version,
+        tags: workflow.tags,
+        createdAt: workflow.createdAt,
+        updatedAt: workflow.updatedAt,
+        nodeCount: workflowData.nodes?.length || 0,
+        connectionCount: workflowData.connections?.length || 0
+      };
+    });
 
     // Get total count for pagination
     const totalCount = await prisma.workflow.count({

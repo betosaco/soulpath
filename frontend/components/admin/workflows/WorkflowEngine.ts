@@ -6,10 +6,12 @@
 
 import { WorkflowData, WorkflowNode, WorkflowConnection } from './VisualWorkflowBuilder';
 import { OrderData } from '@/lib/communication/templates/types';
+import { RecipientService, ResolvedRecipient } from '@/lib/services/recipient-service';
 
 export interface ExecutionContext {
   workflow: WorkflowData;
   orderData: OrderData;
+  eventContext?: any; // Full event context including testMode
   currentNode?: WorkflowNode;
   executedNodes: Set<string>;
   results: Map<string, any>;
@@ -41,6 +43,7 @@ export interface ExecutionResult {
 
 export class WorkflowEngine {
   private executionTimeout = 30000; // 30 seconds
+  private maxExecutionAttempts = 3; // Prevent infinite loops
 
   /**
    * Resolve recipients based on workflow configuration and event context
@@ -59,27 +62,40 @@ export class WorkflowEngine {
         switch (recipient.type) {
           case 'event_recipient':
             // Resolve based on event field mapping
-            const resolved = this.resolveEventRecipient(recipient, context);
-            if (resolved) {
+            const resolved = await this.resolveEventRecipient(recipient, context, node.type);
+            if (resolved && Array.isArray(resolved)) {
+              resolvedRecipients.push(...resolved);
+            } else if (resolved) {
               resolvedRecipients.push(resolved);
             }
             break;
 
           case 'user':
-            // Direct user recipient
-            if (recipient.email) {
+            // Direct user recipient - prioritize telegramChatId for Telegram nodes
+            if (node.type === 'telegram') {
+              if (recipient.telegramChatId) {
+                resolvedRecipients.push({
+                  telegramChatId: recipient.telegramChatId,
+                  name: recipient.name,
+                  type: 'telegram'
+                });
+              } else if (recipient.email) {
+                // Fall back to email if no telegramChatId for Telegram nodes
               resolvedRecipients.push({
                 email: recipient.email,
                 name: recipient.name,
-                type: node.type === 'email' ? 'email' : node.type === 'telegram' ? 'telegram' : 'sms'
+                  type: 'email'
               });
             }
-            if (recipient.telegramChatId && node.type === 'telegram') {
+            } else {
+              // For non-Telegram nodes, use email
+              if (recipient.email) {
               resolvedRecipients.push({
-                telegramChatId: recipient.telegramChatId,
+                  email: recipient.email,
                 name: recipient.name,
-                type: 'telegram'
+                  type: node.type === 'email' ? 'email' : 'sms'
               });
+              }
             }
             break;
 
@@ -109,14 +125,87 @@ export class WorkflowEngine {
   /**
    * Resolve event-based recipients using field mapping
    */
-  private resolveEventRecipient(recipient: any, context: ExecutionContext): ResolvedRecipient | null {
+  private async resolveEventRecipient(recipient: any, context: ExecutionContext, nodeType?: string): Promise<ResolvedRecipient[] | null> {
     const { eventField } = recipient;
 
     if (!eventField) return null;
 
-    console.log('🔍 Resolving event recipient field:', eventField);
+    console.log('🔍 Resolving event recipient field:', eventField, 'for node type:', nodeType);
 
-    // Parse the field path (e.g., 'customer.email', 'user.telegramChatId')
+    // Check if this is a role-based event field (e.g., 'admin.telegramChatId', 'admin.email')
+    const roleBasedFields = [
+      'admin.telegramChatId', 'teacher.telegramChatId', 'user.telegramChatId',
+      'admin.email', 'teacher.email', 'user.email'
+    ];
+
+    // Check if we're in test mode (context has test user data)
+    const isTestMode = context.eventContext?.user && context.eventContext.testMode;
+    console.log('🔍 Test mode detection:', { isTestMode, testMode: context.eventContext?.testMode, user: context.eventContext?.user });
+
+    // Remove customer-based fields from role-based handling (only allow role-based)
+    if (eventField.startsWith('customer.')) {
+      return null; // Don't handle customer-based event fields as role-based
+    }
+
+    if (roleBasedFields.includes(eventField)) {
+      // Handle role-based event recipients
+      const role = eventField.split('.')[0].toUpperCase(); // 'admin' -> 'ADMIN'
+      console.log('🎯 Role-based event recipient detected for role:', role);
+
+      // In test mode, return only the test user if their role matches
+      if (isTestMode && context.eventContext?.user) {
+        const testUser = context.eventContext.user;
+        const testUserRole = context.eventContext.userRole || 'USER';
+
+        console.log('🧪 Test mode detected! User role:', testUserRole, 'Required role:', role);
+
+        if (testUserRole.toUpperCase() === role) {
+          console.log('🧪 Test mode: Using test user instead of all users with role', role);
+
+          const recipient: ResolvedRecipient = {
+            id: testUser.id,
+            email: testUser.email,
+            name: testUser.fullName || testUser.email,
+            type: eventField.includes('telegramChatId') ? 'telegram' : 'email'
+          };
+
+          // For telegram, we need the chat ID from context or test data
+          if (eventField.includes('telegramChatId')) {
+            recipient.telegramChatId = context.eventContext.telegramChatId || testUser.telegramChatId;
+            console.log('🧪 Test mode: Telegram chat ID:', recipient.telegramChatId);
+          }
+
+          console.log('🧪 Test mode: Returning single recipient:', recipient);
+          return [recipient];
+        } else {
+          console.log('🧪 Test mode: Test user role', testUserRole, 'does not match required role', role, '- returning empty recipients');
+          return [];
+        }
+      }
+
+      // Use RecipientService for normal operation
+      try {
+        const recipients = await RecipientService.resolveRecipients({
+          type: 'user',
+          role: role as 'ADMIN' | 'TEACHER' | 'USER'
+        });
+
+        // Filter by communication type
+        const filteredRecipients = RecipientService.filterByType(
+          recipients,
+          eventField.includes('telegramChatId') ? 'telegram' : 'email'
+        );
+
+        console.log(`✅ Found ${filteredRecipients.length} users with ${eventField.includes('telegramChatId') ? 'telegram' : 'email'} for role ${role}`);
+        return filteredRecipients;
+      } catch (error) {
+        console.error('Error resolving role-based recipients:', error);
+        return [];
+      }
+
+    }
+
+    // Handle regular event field mapping (e.g., 'customer.email', 'user.telegramChatId')
     const fieldParts = eventField.split('.');
     let value: any = context;
 
@@ -135,19 +224,58 @@ export class WorkflowEngine {
       return null;
     }
 
-    // Determine recipient type based on field and node type
+    // For Telegram nodes, prioritize telegramChatId over email
+    if (nodeType === 'telegram') {
+      if (eventField.includes('telegramChatId') || eventField.includes('telegram')) {
+        return [{
+          telegramChatId: value,
+          name: recipient.name || 'Event Recipient',
+          type: 'telegram'
+        }];
+      } else if (eventField.includes('email')) {
+        // For Telegram nodes, try to find the corresponding telegramChatId
+        // by replacing 'email' with 'telegramChatId' in the field path
+        const telegramField = eventField.replace('email', 'telegramChatId');
+        const telegramFieldParts = telegramField.split('.');
+        let telegramValue: any = context;
+
+        for (const part of telegramFieldParts) {
+          if (telegramValue && typeof telegramValue === 'object') {
+            telegramValue = telegramValue[part];
+          } else {
+            break;
+          }
+        }
+
+        if (telegramValue) {
+          return [{
+            telegramChatId: telegramValue,
+            name: recipient.name || 'Event Recipient',
+            type: 'telegram'
+          }];
+        }
+        // Fall back to email if no telegramChatId found
+        return [{
+          email: value,
+          name: recipient.name || 'Event Recipient',
+          type: 'email'
+        }];
+      }
+    }
+
+    // Default logic for non-Telegram nodes
     if (eventField.includes('email')) {
-      return {
+      return [{
         email: value,
         name: recipient.name || 'Event Recipient',
         type: 'email'
-      };
+      }];
     } else if (eventField.includes('telegramChatId') || eventField.includes('telegram')) {
-      return {
+      return [{
         telegramChatId: value,
         name: recipient.name || 'Event Recipient',
         type: 'telegram'
-      };
+      }];
     }
 
     console.warn('Could not determine recipient type for field:', eventField);
@@ -179,17 +307,17 @@ export class WorkflowEngine {
         eventType: eventContext?.eventType,
         ...eventContext?.additionalData
       },
+      eventContext: eventContext, // Include full eventContext for test mode detection
       executedNodes: new Set(),
       results: new Map(),
       errors: new Map(),
       variables: new Map(),
-      loopCounters: new Map(),
-      retryCounters: new Map(),
       executionPath: [],
       startTime,
-      eventUser: eventContext?.user,
-      eventCustomer: eventContext?.customer
     };
+
+    // Track execution attempts to prevent infinite loops
+    const executionAttempts = new Map<string, number>();
 
     console.log('🚀 WorkflowEngine: Starting workflow execution');
     console.log(`📊 Workflow: ${workflow.name}`);
@@ -204,7 +332,7 @@ export class WorkflowEngine {
       }
 
       // Execute workflow starting from triggers
-      await this.executeFromNodes(triggerNodes, context, startTime);
+      await this.executeFromNodes(triggerNodes, context, executionAttempts);
 
       const duration = Date.now() - startTime;
       const executedNodes = Array.from(context.executedNodes);
@@ -240,11 +368,11 @@ export class WorkflowEngine {
   private async executeFromNodes(
     nodes: WorkflowNode[],
     context: ExecutionContext,
-    startTime: number
+    executionAttempts: Map<string, number>
   ): Promise<void> {
     const executionQueue: WorkflowNode[] = [...nodes];
 
-    while (executionQueue.length > 0 && (Date.now() - startTime) < this.executionTimeout) {
+    while (executionQueue.length > 0 && (Date.now() - context.startTime) < this.executionTimeout) {
       const currentNode = executionQueue.shift()!;
 
       // Skip if already executed
@@ -255,12 +383,24 @@ export class WorkflowEngine {
       console.log(`⚡ Executing node: ${currentNode.id} (${currentNode.type})`);
 
       try {
+        // Check execution attempts to prevent infinite loops
+        const attempts = executionAttempts.get(currentNode.id) || 0;
+        if (attempts >= this.maxExecutionAttempts) {
+          console.error(`❌ Node ${currentNode.id} exceeded maximum execution attempts (${this.maxExecutionAttempts})`);
+          context.errors.set(currentNode.id, new Error(`Maximum execution attempts exceeded`));
+          continue;
+        }
+
         // Check if node can be executed (all dependencies met)
         if (!this.canExecuteNode(currentNode, context)) {
-          console.log(`⏳ Node ${currentNode.id} waiting for dependencies`);
+          console.log(`⏳ Node ${currentNode.id} waiting for dependencies (attempt ${attempts + 1}/${this.maxExecutionAttempts})`);
+          executionAttempts.set(currentNode.id, attempts + 1);
           executionQueue.push(currentNode); // Re-queue for later
           continue;
         }
+
+        // Reset attempts counter on successful dependency check
+        executionAttempts.set(currentNode.id, 0);
 
         // Execute the node
         const result = await this.executeNode(currentNode, context);
@@ -295,7 +435,7 @@ export class WorkflowEngine {
     }
 
     // Check for timeout
-    if ((Date.now() - startTime) >= this.executionTimeout) {
+    if ((Date.now() - context.startTime) >= this.executionTimeout) {
       throw new Error(`Workflow execution timed out after ${this.executionTimeout}ms`);
     }
   }
@@ -351,9 +491,9 @@ export class WorkflowEngine {
 
       // Communication
       case 'email':
-        return this.executeEmailNode(node, context);
+        return this.executeEmailNode(node, context, options);
       case 'telegram':
-        return this.executeTelegramNode(node, context);
+        return this.executeTelegramNode(node, context, options);
       case 'sms':
         return this.executeSmsNode(node, context);
       case 'whatsapp':
@@ -902,7 +1042,7 @@ export class WorkflowEngine {
     console.log(`🔄 Executing data transformer: ${node.data.label}`);
 
     const transformations = node.data.transformations || [];
-    let data = context.orderData; // Start with order data
+    const data = context.orderData; // Start with order data
 
     for (const transformation of transformations) {
       switch (transformation.type) {

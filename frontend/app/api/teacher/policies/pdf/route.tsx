@@ -58,7 +58,7 @@ export async function GET(req: NextRequest) {
             ) : null}
             {p.summary ? <Text style={styles.body}>{p.summary}</Text> : null}
             {p.contentUrl ? (
-              // @ts-ignore react-pdf Link
+              // @ts-expect-error react-pdf Link
               <Link src={p.contentUrl} style={styles.link}>Material: {p.contentUrl}</Link>
             ) : null}
           </View>

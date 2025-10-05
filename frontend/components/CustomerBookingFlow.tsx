@@ -39,6 +39,7 @@ import { formatDate, formatTime } from '@/lib/utils';
 import { StripeInlineForm } from './stripe/StripeInlineForm';
 import { CreditCard, ChevronDown, Check } from 'lucide-react';
 import { validateEmailWithMessage } from '@/lib/email-validation';
+import { EnhancedSchedule } from './EnhancedSchedule';
 
 interface CustomerPackage {
   id: string;

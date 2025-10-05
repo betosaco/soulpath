@@ -1,5 +1,5 @@
 // Debug email sending
-import { sendOrderConfirmationEmail } from './lib/send-order-confirmation-email.js';
+import { OrderConfirmationService } from './lib/services/order-confirmation-service.js';
 
 const testData = {
   customerName: "Test User",
@@ -56,13 +56,34 @@ async function debugEmail() {
   try {
     console.log('🔍 Debugging email sending...');
     console.log('📧 Sending to:', testData.customerEmail);
-    
-    const result = await sendOrderConfirmationEmail(testData);
-    
-    if (result) {
+
+    // Transform test data to match OrderConfirmationService format
+    const orderData = {
+      id: testData.orderId,
+      orderNumber: testData.orderNumber,
+      customerName: testData.customerName,
+      customerEmail: testData.customerEmail,
+      customerPhone: testData.customerPhone,
+      status: testData.orderStatus,
+      paymentStatus: testData.paymentStatus,
+      total: testData.totalAmount,
+      currency: testData.currency,
+      createdAt: testData.orderDate,
+      items: testData.orderItems.map(item => ({
+        name: item.name,
+        quantity: item.quantity,
+        price: item.unit_price,
+        total: item.total_price
+      })),
+      scheduleDetails: testData.scheduleDetails
+    };
+
+    const result = await OrderConfirmationService.sendOrderConfirmation(orderData);
+
+    if (result.success) {
       console.log('✅ Email sent successfully!');
     } else {
-      console.log('❌ Email failed to send');
+      console.log('❌ Email failed to send:', result.error);
     }
   } catch (error) {
     console.error('❌ Error:', error);

@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
       'CLIENT': 'CLIENT',
       'TEACHER': 'TEACHER',
       'ADMIN': 'ADMIN',
+      'USER': 'USER',
       'ALL': 'ALL' // Special case for all users
     };
 
@@ -50,6 +51,7 @@ export async function GET(request: NextRequest) {
           fullName: true,
           role: true,
           status: true,
+          telegramChatId: true,
           createdAt: true
         },
         orderBy: {
@@ -69,6 +71,7 @@ export async function GET(request: NextRequest) {
           fullName: true,
           role: true,
           status: true,
+          telegramChatId: true,
           createdAt: true
         },
         orderBy: {
@@ -88,6 +91,7 @@ export async function GET(request: NextRequest) {
         fullName: user.fullName || user.email,
         role: user.role,
         status: user.status,
+        telegramChatId: user.telegramChatId,
         displayName: user.fullName ? `${user.fullName} (${user.email})` : user.email
       }))
     });

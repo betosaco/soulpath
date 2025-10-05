@@ -176,7 +176,6 @@ model User {
   satisfactionRatingsAsAgent    SatisfactionRating[]     @relation("SatisfactionRatingAgent")
   satisfactionRatingsAsCustomer SatisfactionRating[]     @relation("SatisfactionRatingCustomer")
   teacherProfile                Teacher?
-  telegramUsers                 TelegramUser[]
   ticketNotesAuthored           TicketNote[]             @relation("TicketNoteAuthor")
   ticketsAsAgent                Ticket[]                 @relation("TicketAgent")
   ticketsAssignedBy             Ticket[]                 @relation("TicketAssignedBy")
@@ -836,39 +835,66 @@ model Section {
 }
 
 model CommunicationConfig {
-  id                               Int       @id @default(autoincrement())
-  createdAt                        DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt                        DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  email_enabled                    Boolean?  @default(true) @map("email_enabled")
-  email_provider                   String?   @default("brevo") @map("email_provider")
-  brevo_api_key                    String?   @default("") @map("brevo_api_key")
-  resend_api_key                   String?   @default("") @map("resend_api_key")
-  sender_email                     String?   @default("noreply@soulpath.lat") @map("sender_email")
-  sender_name                      String?   @default("SOULPATH") @map("sender_name")
-  admin_email                      String?   @default("admin@soulpath.lat") @map("admin_email")
-  sms_enabled                      Boolean?  @default(false) @map("sms_enabled")
-  sms_provider                     String?   @default("labsmobile") @map("sms_provider")
-  labsmobile_username              String?   @default("") @map("labsmobile_username")
-  labsmobile_token                 String?   @default("") @map("labsmobile_token")
-  sms_sender_name                  String?   @default("SoulPath") @map("sms_sender_name")
-  telegram_enabled                 Boolean?  @default(false) @map("telegram_enabled")
-  telegram_bot_token               String?   @default("") @map("telegram_bot_token")
-  telegram_webhook_url             String?   @default("") @map("telegram_webhook_url")
-  telegram_chat_ids                Json?     @default("[]") @map("telegram_chat_ids")
-  telegram_username                String?   @default("MatMaxYogaBot") @map("telegram_username")
-  whatsapp_enabled                 Boolean?  @default(false) @map("whatsapp_enabled")
-  whatsapp_business_account_id     String?   @default("") @map("whatsapp_business_account_id")
-  whatsapp_access_token            String?   @default("") @map("whatsapp_access_token")
-  whatsapp_phone_number_id         String?   @default("") @map("whatsapp_phone_number_id")
-  whatsapp_webhook_verify_token    String?   @default("") @map("whatsapp_webhook_verify_token")
-  instagram_enabled                Boolean?  @default(false) @map("instagram_enabled")
-  instagram_access_token           String?   @default("") @map("instagram_access_token")
-  instagram_business_account_id    String?   @default("") @map("instagram_business_account_id")
-  instagram_webhook_verify_token   String?   @default("") @map("instagram_webhook_verify_token")
-  order_confirmation_template_id   Int?      @default(1) @map("order_confirmation_template_id")
-  booking_confirmation_template_id Int?      @default(2) @map("booking_confirmation_template_id")
+  id Int @id @default(1)
+
+  // General
+  adminEmail String @default("admin@matmax.world")
+
+  // Email Settings
+  emailEnabled  Boolean  @default(true) @map("email_enabled")
+  emailProvider String   @default("brevo") @map("email_provider")
+  senderEmail   String   @default("noreply@matmax.world") @map("sender_email")
+  senderName    String   @default("MatMax Wellness Studio") @map("sender_name")
+  brevoApiKey   String?  @map("brevo_api_key")
+  resendApiKey  String?  @map("resend_api_key")
+
+  // SMS Settings
+  smsEnabled       Boolean  @default(false) @map("sms_enabled")
+  smsProvider      String   @default("labsmobile") @map("sms_provider")
+  smsSenderName    String?  @map("sms_sender_name")
+  labsmobileUsername String? @map("labsmobile_username")
+  labsmobileToken  String?  @map("labsmobile_token")
+
+  // Telegram Settings
+  telegramEnabled     Boolean  @default(false) @map("telegram_enabled")
+  telegramBotToken    String?  @map("telegram_bot_token")
+  telegramWebhookUrl  String?  @map("telegram_webhook_url")
+  telegramBotUsername String?  @map("telegram_bot_username")
+
+  // WhatsApp Settings
+  whatsappEnabled             Boolean @default(false) @map("whatsapp_enabled")
+  whatsappAccessToken         String? @map("whatsapp_access_token")
+  whatsappPhoneNumberId       String? @map("whatsapp_phone_number_id")
+  whatsappBusinessAccountId   String? @map("whatsapp_business_account_id")
+  whatsappWebhookVerifyToken  String? @map("whatsapp_webhook_verify_token")
+
+  // Instagram Settings
+  instagramEnabled            Boolean @default(false) @map("instagram_enabled")
+  instagramAccessToken        String? @map("instagram_access_token")
+  instagramBusinessAccountId  String? @map("instagram_business_account_id")
+  instagramWebhookVerifyToken String? @map("instagram_webhook_verify_token")
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@map("communication_config")
+}
+
+model CommunicationLog {
+  id            String      @id @default(cuid())
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+  type          String      // 'email', 'sms', 'telegram', 'whatsapp', 'instagram'
+  recipients    String[]    // Array of recipient identifiers (emails, phone numbers, IDs)
+  content       String      // Message content
+  subject       String?     // Email subject (null for other types)
+  templateId    String?     // Template used (null for custom messages)
+  status        String      // 'sent', 'failed', 'partial'
+  sentBy        String      // User ID who sent the message
+  metadata      Json?       // Additional data like results, error details, etc.
+
+  @@map("communication_logs")
 }
 
 model CommunicationTemplate {
@@ -985,18 +1011,6 @@ model payment_methods {
   currencies  Currency  @relation(fields: [currency_id], references: [id], onDelete: Cascade, onUpdate: Restrict)
 }
 
-model SmsConfiguration {
-  id         Int      @id @default(autoincrement())
-  provider   String   @default("labsmobile")
-  username   String
-  tokenApi   String   @map("token_api")
-  senderName String?  @map("sender_name")
-  isActive   Boolean  @default(true) @map("is_active")
-  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  @@map("sms_configurations")
-}
 
 model OtpVerification {
   id          Int      @id @default(autoincrement())
@@ -1371,25 +1385,6 @@ model PasswordResetToken {
   @@map("password_reset_tokens")
 }
 
-model TelegramUser {
-  id                String    @id @default(cuid())
-  userId            String?   @map("user_id")
-  telegramChatId    String    @map("telegram_chat_id") @db.VarChar(50)
-  telegramUserId    String?   @map("telegram_user_id") @db.VarChar(50)
-  telegramUsername  String?   @map("telegram_username") @db.VarChar(100)
-  telegramFirstName String?   @map("telegram_first_name") @db.VarChar(100)
-  telegramLastName  String?   @map("telegram_last_name") @db.VarChar(100)
-  isActive          Boolean   @default(true) @map("is_active")
-  lastInteraction   DateTime? @map("last_interaction") @db.Timestamptz(6)
-  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  user              User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId], map: "idx_telegram_users_user_id")
-  @@index([telegramChatId], map: "idx_telegram_users_telegram_chat_id")
-  @@index([isActive], map: "idx_telegram_users_active")
-  @@map("telegram_users")
-}
 
 model CommunicationChannel {
   id            Int              @id @default(autoincrement())

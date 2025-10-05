@@ -2,7 +2,7 @@
  * Script to add email provider columns to the database
  */
 
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
 
 async function addEmailColumns() {
   const prisma = new PrismaClient();

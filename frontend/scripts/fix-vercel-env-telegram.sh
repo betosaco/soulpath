@@ -65,3 +65,4 @@ vercel env ls | grep TELEGRAM || echo "No Telegram environment variables found"
 
 echo ""
 echo "✅ Setup complete! Follow the steps above to finish configuration."
+

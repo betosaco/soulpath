@@ -3,7 +3,7 @@
  * This safely adds the new columns without resetting the database
  */
 
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
 
 async function runMigration() {
   const prisma = new PrismaClient();

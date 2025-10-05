@@ -28,3 +28,4 @@ console.log('\n🔧 RECOMMENDED FIXES:');
 console.log('1. Set NEXT_PUBLIC_BASE_URL=https://matmax.world (or your production domain)');
 console.log('2. Ensure BREVO_API_KEY is properly configured');
 console.log('3. Check Vercel environment variables if deploying there');
+

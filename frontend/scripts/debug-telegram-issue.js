@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import fs from 'fs';
 
 const prisma = new PrismaClient();
 
@@ -58,7 +59,6 @@ async function debugTelegramIssue() {
 
     // Check if there's a Telegram service file
     console.log('\n📁 Telegram Service Files:');
-    const fs = require('fs');
     const telegramServicePath = './lib/communication/telegram-service.ts';
     const telegramServiceExists = fs.existsSync(telegramServicePath);
     console.log(`Telegram service file exists: ${telegramServiceExists ? '✅' : '❌'}`);
@@ -113,3 +113,4 @@ async function debugTelegramIssue() {
 }
 
 debugTelegramIssue();
+

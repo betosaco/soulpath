@@ -7,7 +7,7 @@ async function updateTemplatesDirect() {
     
     // Update Products Only template
     console.log('🔧 Updating Products Only template...');
-    await prisma.$executeRaw`
+    void await prisma.$executeRaw`
       UPDATE "CommunicationTemplateTranslation" 
       SET content = $1
       WHERE "templateId" = (
@@ -70,7 +70,7 @@ async function updateTemplatesDirect() {
     
     // Update Booking Only template
     console.log('🔧 Updating Booking Only template...');
-    await prisma.$executeRaw`
+    void await prisma.$executeRaw`
       UPDATE "CommunicationTemplateTranslation" 
       SET content = $1
       WHERE "templateId" = (

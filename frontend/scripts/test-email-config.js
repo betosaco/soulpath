@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+
 // Test email configuration
 console.log('🔍 Email Configuration Test');
 
@@ -6,8 +9,6 @@ console.log('Current working directory:', process.cwd());
 console.log('Node version:', process.version);
 
 // Check for environment files
-const fs = require('fs');
-const path = require('path');
 
 const envFiles = [
   '.env',
@@ -48,3 +49,4 @@ console.log('❌ BREVO_API_KEY is not configured in the deployment environment')
 console.log('❌ Email service cannot authenticate with Brevo API');
 console.log('❌ Emails fail silently, order creation succeeds');
 console.log('❌ No error logs visible to user');
+

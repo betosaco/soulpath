@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { BaseButton } from '@/components/ui/BaseButton';
 import { CheckCircle, FileText, PlayCircle, Download } from 'lucide-react';
 import { FullScreenModal } from '@/components/ui/FullScreenModal';
-// @ts-ignore - react-player has no types in our setup
+// @ts-expect-error - react-player has no types in our setup
 import ReactPlayer from 'react-player';
 
 interface PolicyItem {

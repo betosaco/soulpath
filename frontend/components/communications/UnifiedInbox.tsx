@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { BaseButton } from '../ui/BaseButton';
 import { BaseInput } from '../ui/BaseInput';
@@ -287,9 +288,11 @@ export function UnifiedInbox({ onConversationSelect, onBackClick, compact = fals
                       {/* Avatar/Channel Icon */}
                       <div className="flex-shrink-0">
                         {conversation.customer?.avatarUrl ? (
-                          <img
+                          <Image
                             src={conversation.customer.avatarUrl}
                             alt={conversation.customer.fullName || 'Customer'}
+                            width={compact ? 32 : 40}
+                            height={compact ? 32 : 40}
                             className={compact ? 'w-8 h-8 rounded-full object-cover' : 'w-10 h-10 rounded-full object-cover'}
                           />
                         ) : (

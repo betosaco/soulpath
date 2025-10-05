@@ -6,8 +6,13 @@
     node scripts/seed-communications.js [--reset] [--customers=3] [--conversations=2] [--messages=6]
 */
 
-require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
-const { PrismaClient } = require('@prisma/client');
+import dotenv from 'dotenv';
+import path from 'path';
+import { PrismaClient } from '@prisma/client';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
 const prisma = new PrismaClient();
 
 function parseArgs() {

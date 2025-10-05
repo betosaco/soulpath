@@ -273,6 +273,7 @@ export function VisualWorkflowBuilder({
   onTest,
   initialWorkflow
 }: VisualWorkflowBuilderProps) {
+  const { user } = useAuth();
   const [workflow, setWorkflow] = useState<WorkflowData>(() => {
     // If initialWorkflow is provided, use it; otherwise use default
     if (initialWorkflow) {
@@ -1163,6 +1164,12 @@ export function VisualWorkflowBuilder({
   };
 
   const handleConnectionCreate = (connection: Omit<WorkflowConnection, 'id'>) => {
+    // Prevent self-connections
+    if (connection.source === connection.target) {
+      console.warn('Cannot create connection: source and target nodes are the same');
+      return;
+    }
+
     const newConnection: WorkflowConnection = {
       ...connection,
       id: `connection_${Date.now()}`
@@ -1180,15 +1187,27 @@ export function VisualWorkflowBuilder({
     }));
   };
 
+  // Clean up invalid connections (self-connections, etc.)
+  const cleanupInvalidConnections = (workflowData: WorkflowData) => {
+    return {
+      ...workflowData,
+      connections: workflowData.connections.filter(conn =>
+        conn.source !== conn.target // Remove self-connections
+      )
+    };
+  };
+
   const handleSave = () => {
     if (onSave) {
-      onSave(workflow);
+      const cleanedWorkflow = cleanupInvalidConnections(workflow);
+      onSave(cleanedWorkflow);
     }
   };
 
   const handleTest = () => {
     if (onTest) {
-      onTest(workflow);
+      const cleanedWorkflow = cleanupInvalidConnections(workflow);
+      onTest(cleanedWorkflow);
     }
   };
 
@@ -1697,6 +1716,7 @@ export function VisualWorkflowBuilder({
                 }));
                 setSelectedNode(null);
               }}
+              user={user}
               language={language}
               translations={t}
             />
@@ -1716,6 +1736,7 @@ interface NodePropertiesPanelProps {
   onDelete: () => void;
   language: 'en' | 'es';
   translations: any;
+  user: any; // Add user prop for authentication
 }
 
 interface TelegramUser {
@@ -1745,9 +1766,10 @@ interface RecipientSelectorProps {
   nodeType: 'email' | 'telegram' | 'sms' | 'whatsapp';
   selectedRecipients: Recipient[];
   onRecipientsChange: (recipients: Recipient[]) => void;
+  user: any; // Add user prop for authentication
 }
 
-function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations: t }: NodePropertiesPanelProps) {
+function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations: t, user }: NodePropertiesPanelProps) {
   console.log('🔧 NodePropertiesPanel: Received node:', { type: node.type, id: node.id, data: node.data });
 
   const renderNodeProperties = () => {
@@ -1811,12 +1833,13 @@ function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations:
                     .map(r => r.email)
                 }
               })}
+              user={user}
             />
           </div>
         );
 
       case 'telegram':
-        console.log('🔧 renderNodeProperties: Rendering telegram case');
+        console.log('🔧 renderNodeProperties: Rendering telegram case for node:', node.id, 'type:', node.type);
         return (
           <div className="space-y-4">
             <div>
@@ -1858,6 +1881,7 @@ function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations:
                     .map(r => r.telegramChatId)
                 }
               })}
+              user={user}
             />
           </div>
         );
@@ -2114,8 +2138,8 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
 
 
 // Recipient Selector Component
-function RecipientSelector({ nodeType, selectedRecipients, onRecipientsChange }: RecipientSelectorProps) {
-  console.log('🚀 RecipientSelector component rendered for nodeType:', nodeType, 'with selectedRecipients:', selectedRecipients);
+function RecipientSelector({ nodeType, selectedRecipients, onRecipientsChange, user }: RecipientSelectorProps) {
+  console.log('🔐 RecipientSelector auth check:', { user: !!user, access_token: !!user?.access_token, token: user?.access_token?.substring(0, 20) + '...' });
 
   const [availableUsers, setAvailableUsers] = useState<any[]>([]);
   const [availableGroups, setAvailableGroups] = useState<any[]>([]);
@@ -2129,27 +2153,61 @@ function RecipientSelector({ nodeType, selectedRecipients, onRecipientsChange }:
       setLoading(true);
       try {
         // Load users by roles
-        const roles = ["CLIENT", "TEACHER", "ADMIN"];
+        const roles = ["ADMIN", "TEACHER", "USER"];
         const userPromises = roles.map(role =>
-          fetch(`/api/admin/users/by-role?role=${role}`)
+          fetch(`/api/admin/users/by-role?role=${role}`, {
+            headers: {
+              'Authorization': `Bearer ${user?.access_token}`,
+              'Content-Type': 'application/json'
+            }
+          })
             .then(res => res.json())
             .then(data => data.success ? data.users : [])
         );
 
         // Load recipient groups
-        const groupsPromise = fetch("/api/admin/recipient-groups")
+        const groupsPromise = fetch("/api/admin/recipient-groups", {
+          headers: {
+            'Authorization': `Bearer ${user?.access_token}`,
+            'Content-Type': 'application/json'
+          }
+        })
           .then(res => res.json())
           .then(data => data.success ? data.groups : []);
 
-        const [clients, teachers, admins, groups] = await Promise.all([
+        const [admins, teachers, users, groups] = await Promise.all([
           ...userPromises,
           groupsPromise
         ]);
 
+        console.log(`🔍 Loaded data for nodeType ${nodeType}:`, {
+          admins: admins.length,
+          teachers: teachers.length,
+          users: users.length,
+          groups: groups.length
+        });
+
+        // Filter users based on nodeType
+        const filteredAdmins = nodeType === 'telegram'
+          ? admins.filter((user: any) => user.telegramChatId)
+          : admins;
+        const filteredTeachers = nodeType === 'telegram'
+          ? teachers.filter((user: any) => user.telegramChatId)
+          : teachers;
+        const filteredUsers = nodeType === 'telegram'
+          ? users.filter((user: any) => user.telegramChatId)
+          : users;
+
+        console.log(`🔍 Filtered data for nodeType ${nodeType}:`, {
+          filteredAdmins: filteredAdmins.length,
+          filteredTeachers: filteredTeachers.length,
+          filteredUsers: filteredUsers.length
+        });
+
         setAvailableUsers([
-          { role: "CLIENT", users: clients },
-          { role: "TEACHER", users: teachers },
-          { role: "ADMIN", users: admins }
+          { role: "ADMIN", users: filteredAdmins },
+          { role: "TEACHER", users: filteredTeachers },
+          { role: "USER", users: filteredUsers }
         ]);
 
         setAvailableGroups(groups);
@@ -2161,7 +2219,7 @@ function RecipientSelector({ nodeType, selectedRecipients, onRecipientsChange }:
     };
 
     loadData();
-  }, []);
+  }, [nodeType]);
 
   const toggleRecipient = (recipient: Recipient) => {
     const isSelected = selectedRecipients.some(r => r.id === recipient.id);
@@ -2208,6 +2266,18 @@ function RecipientSelector({ nodeType, selectedRecipients, onRecipientsChange }:
     const { role, users } = roleData;
     const roleRecipients = selectedRecipients.filter(r => r.type === "user" && r.role === role);
 
+    // For Telegram nodes, show different messaging when no users are available
+    if (nodeType === 'telegram' && users.length === 0) {
+      return (
+        <div key={role} className="border rounded-lg p-3 bg-gray-50">
+          <div className="text-sm font-medium capitalize text-gray-700">{role.toLowerCase()}s</div>
+          <div className="text-xs text-gray-500 mt-1">
+            No {role.toLowerCase()}s with Telegram chat IDs found
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div key={role} className="border rounded-lg p-3">
         <button
@@ -2228,7 +2298,7 @@ function RecipientSelector({ nodeType, selectedRecipients, onRecipientsChange }:
             <div className="flex gap-2 mb-2">
               <button
                 onClick={() => {
-                  // Select all users in this role
+                  // Select all users in this role (already filtered by chat ID for Telegram nodes)
                   const allUsers = users.map((user: any) => ({
                     id: user.id,
                     name: user.displayName,
@@ -2274,7 +2344,12 @@ function RecipientSelector({ nodeType, selectedRecipients, onRecipientsChange }:
                   />
                   <div className="flex-1 text-sm">
                     <div className="font-medium">{user.displayName}</div>
-                    <div className="text-xs text-gray-500">{user.email}</div>
+                    <div className="text-xs text-gray-500">
+                      {nodeType === 'telegram'
+                        ? `Chat ID: ${user.telegramChatId}`
+                        : user.email
+                      }
+                    </div>
                   </div>
                 </label>
               );
@@ -2300,7 +2375,11 @@ function RecipientSelector({ nodeType, selectedRecipients, onRecipientsChange }:
               <div key={recipient.id} className="flex items-center justify-between text-xs">
                 <div>
                   <span className="font-medium">{recipient.name}</span>
-                  {recipient.email && <span className="text-gray-500 ml-1">({recipient.email})</span>}
+                  {nodeType === 'telegram' ? (
+                    recipient.telegramChatId && <span className="text-gray-500 ml-1">(Chat ID: {recipient.telegramChatId})</span>
+                  ) : (
+                    recipient.email && <span className="text-gray-500 ml-1">({recipient.email})</span>
+                  )}
                   <span className={`ml-2 px-1.5 py-0.5 rounded text-xs ${
                     recipient.type === "user" ? "bg-green-100 text-green-800" :
                     recipient.type === "group" ? "bg-purple-100 text-purple-800" :
@@ -2331,44 +2410,69 @@ function RecipientSelector({ nodeType, selectedRecipients, onRecipientsChange }:
             Recipients based on the event that triggered this workflow:
           </div>
           <div className="grid grid-cols-1 gap-2">
-            <button
-              onClick={() => {
-                console.log('🖱️ Customer email button clicked');
-                addEventRecipient('customer', 'customer.email');
-              }}
-              className="flex items-center gap-2 p-2 bg-white border rounded hover:bg-yellow-100 text-sm"
-            >
-              <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-              <span>🛒 Customer who made purchase (customer.email)</span>
-            </button>
-            <button
-              onClick={() => addEventRecipient('customer', 'customer.telegramChatId')}
-              className="flex items-center gap-2 p-2 bg-white border rounded hover:bg-yellow-100 text-sm"
-            >
-              <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-              <span>📱 Customer Telegram (customer.telegramChatId)</span>
-            </button>
-            <button
-              onClick={() => addEventRecipient('user', 'user.email')}
-              className="flex items-center gap-2 p-2 bg-white border rounded hover:bg-yellow-100 text-sm"
-            >
-              <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-              <span>👤 User who triggered event (user.email)</span>
-            </button>
-            <button
-              onClick={() => addEventRecipient('booking', 'booking.customer.email')}
-              className="flex items-center gap-2 p-2 bg-white border rounded hover:bg-yellow-100 text-sm"
-            >
-              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-              <span>📅 Booking customer (booking.customer.email)</span>
-            </button>
+            {nodeType === 'telegram' ? (
+              // Telegram-specific event recipients (role-based)
+              <>
+                <button
+                  onClick={() => addEventRecipient('admin', 'admin.telegramChatId')}
+                  className="flex items-center gap-2 p-2 bg-white border rounded hover:bg-blue-100 text-sm"
+                >
+                  <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                  <span>👑 Admin Telegram Chat (admin.telegramChatId)</span>
+                </button>
+                <button
+                  onClick={() => addEventRecipient('teacher', 'teacher.telegramChatId')}
+                  className="flex items-center gap-2 p-2 bg-white border rounded hover:bg-blue-100 text-sm"
+                >
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  <span>👨‍🏫 Teacher Telegram Chat (teacher.telegramChatId)</span>
+                </button>
+                <button
+                  onClick={() => addEventRecipient('user', 'user.telegramChatId')}
+                  className="flex items-center gap-2 p-2 bg-white border rounded hover:bg-blue-100 text-sm"
+                >
+                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                  <span>👤 User Telegram Chat (user.telegramChatId)</span>
+                </button>
+              </>
+            ) : (
+              // Email/SMS specific event recipients (role-based)
+              <>
+                <button
+                  onClick={() => addEventRecipient('admin', 'admin.email')}
+                  className="flex items-center gap-2 p-2 bg-white border rounded hover:bg-yellow-100 text-sm"
+                >
+                  <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                  <span>👑 Admin Email (admin.email)</span>
+                </button>
+                <button
+                  onClick={() => addEventRecipient('teacher', 'teacher.email')}
+                  className="flex items-center gap-2 p-2 bg-white border rounded hover:bg-yellow-100 text-sm"
+                >
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  <span>👨‍🏫 Teacher Email (teacher.email)</span>
+                </button>
+                <button
+                  onClick={() => addEventRecipient('user', 'user.email')}
+                  className="flex items-center gap-2 p-2 bg-white border rounded hover:bg-yellow-100 text-sm"
+                >
+                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                  <span>👤 User Email (user.email)</span>
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
 
       {/* Users by Role */}
       <div className="space-y-3">
-        <div className="text-sm font-medium text-gray-700">Additional Recipients by Role:</div>
+        <div className="text-sm font-medium text-gray-700">
+          {nodeType === 'telegram'
+            ? 'Telegram Recipients by Role (Chat ID Required):'
+            : 'Recipients by Role:'
+          }
+        </div>
         {loading ? (
           <div className="text-center py-4">
             <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
@@ -2379,27 +2483,29 @@ function RecipientSelector({ nodeType, selectedRecipients, onRecipientsChange }:
         )}
       </div>
 
-      {/* Custom Email */}
-      <div className="border-t pt-3">
-        <div className="text-sm font-medium text-gray-700 mb-2">Add Custom Recipients:</div>
-        <div className="flex gap-2">
-          <input
-            type="email"
-            value={customEmail}
-            onChange={(e) => setCustomEmail(e.target.value)}
-            placeholder="custom@example.com"
-            className="flex-1 px-3 py-2 border rounded text-sm"
-            onKeyPress={(e) => e.key === "Enter" && addCustomEmail()}
-          />
-          <button
-            onClick={addCustomEmail}
-            disabled={!customEmail || !customEmail.includes("@")}
-            className="px-3 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-          >
-            Add
-          </button>
+      {/* Custom Recipients - Only show for non-Telegram nodes */}
+      {(nodeType !== 'telegram' && false) && (
+        <div className="border-t pt-3">
+          <div className="text-sm font-medium text-gray-700 mb-2">Add Custom Recipients:</div>
+          <div className="flex gap-2">
+            <input
+              type="email"
+              value={customEmail}
+              onChange={(e) => setCustomEmail(e.target.value)}
+              placeholder="custom@example.com"
+              className="flex-1 px-3 py-2 border rounded text-sm"
+              onKeyPress={(e) => e.key === "Enter" && addCustomEmail()}
+            />
+            <button
+              onClick={addCustomEmail}
+              disabled={!customEmail || !customEmail.includes("@")}
+              className="px-3 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+            >
+              Add
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

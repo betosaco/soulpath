@@ -3,17 +3,19 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import { 
-  Bot, 
-  TestTube, 
-  CheckCircle, 
-  XCircle, 
+import {
+  Bot,
+  TestTube,
+  CheckCircle,
+  XCircle,
   AlertCircle,
   Webhook,
   Key,
   Save,
   Trash2,
-  RefreshCw
+  RefreshCw,
+  UserPlus,
+  Users
 } from 'lucide-react';
 
 interface TelegramConfig {
@@ -46,6 +48,17 @@ export function TelegramConfigManagement() {
   const [testing, setTesting] = useState(false);
   const [botInfo, setBotInfo] = useState<BotInfo | null>(null);
   const [showToken, setShowToken] = useState(false);
+  const [showRoleModal, setShowRoleModal] = useState(false);
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<string>('ADMIN');
+  const [roleUsers, setRoleUsers] = useState<any[]>([]);
+  const [loadingRoleUsers, setLoadingRoleUsers] = useState(false);
+  const [newUserData, setNewUserData] = useState({
+    email: '',
+    fullName: '',
+    telegramChatId: '',
+    role: 'USER'
+  });
 
   const [formData, setFormData] = useState({
     bot_token: '',
@@ -194,7 +207,7 @@ export function TelegramConfigManagement() {
       });
 
       const result = await response.json();
-      
+
       if (result.success) {
         setConfig(null);
         setFormData({
@@ -212,6 +225,101 @@ export function TelegramConfigManagement() {
       toast.error('Failed to delete configuration');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const loadUsersByRole = async (role: string) => {
+    setLoadingRoleUsers(true);
+    try {
+      const response = await fetch(`/api/admin/users/by-role?role=${role}`, {
+        headers: {
+          'Authorization': `Bearer ${user?.access_token}`,
+        }
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setRoleUsers(result.users || []);
+      } else {
+        toast.error('Failed to load users');
+        setRoleUsers([]);
+      }
+    } catch (error) {
+      console.error('Error loading users by role:', error);
+      toast.error('Failed to load users');
+      setRoleUsers([]);
+    } finally {
+      setLoadingRoleUsers(false);
+    }
+  };
+
+  const handleRoleChange = (role: string) => {
+    setSelectedRole(role);
+    loadUsersByRole(role);
+  };
+
+  const openRoleModal = () => {
+    setShowRoleModal(true);
+    loadUsersByRole(selectedRole);
+  };
+
+  const closeRoleModal = () => {
+    setShowRoleModal(false);
+    setRoleUsers([]);
+  };
+
+  const openAddUserModal = () => {
+    setShowAddUserModal(true);
+    setNewUserData({
+      email: '',
+      fullName: '',
+      telegramChatId: '',
+      role: 'USER'
+    });
+  };
+
+  const closeAddUserModal = () => {
+    setShowAddUserModal(false);
+  };
+
+  const handleAddUser = async () => {
+    if (!newUserData.email || !newUserData.fullName || !newUserData.telegramChatId) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user?.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: newUserData.email,
+          fullName: newUserData.fullName,
+          telegramChatId: newUserData.telegramChatId,
+          role: newUserData.role,
+          status: 'ACTIVE'
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success('User added successfully with Telegram Chat ID!');
+        closeAddUserModal();
+        // Refresh the role modal if it's open
+        if (showRoleModal && selectedRole === newUserData.role) {
+          loadUsersByRole(selectedRole);
+        }
+      } else {
+        toast.error(result.error || 'Failed to add user');
+      }
+    } catch (error) {
+      console.error('Error adding user:', error);
+      toast.error('Failed to add user');
     }
   };
 
@@ -315,6 +423,22 @@ export function TelegramConfigManagement() {
             >
               <Save className="h-4 w-4" />
               <span>{saving ? 'Saving...' : 'Save Configuration'}</span>
+            </button>
+
+            <button
+              onClick={openRoleModal}
+              className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+            >
+              <Users className="h-4 w-4" />
+              <span>Assign Chat IDs by Role</span>
+            </button>
+
+            <button
+              onClick={openAddUserModal}
+              className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+            >
+              <UserPlus className="h-4 w-4" />
+              <span>Add New User Chat ID</span>
             </button>
 
             {config && (
@@ -444,6 +568,248 @@ export function TelegramConfigManagement() {
           </div>
         </div>
       </div>
+
+      {/* Role Assignment Modal */}
+      {showRoleModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Users className="h-6 w-6 text-purple-500" />
+                  <h3 className="text-lg font-semibold text-gray-900">Assign Chat IDs by Role</h3>
+                </div>
+                <button
+                  onClick={closeRoleModal}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <XCircle className="h-6 w-6" />
+                </button>
+              </div>
+              <p className="text-sm text-gray-600 mt-1">
+                Manage Telegram chat ID assignments for users by role
+              </p>
+            </div>
+
+            <div className="p-6">
+              {/* Role Selection */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Role
+                </label>
+                <select
+                  value={selectedRole}
+                  onChange={(e) => handleRoleChange(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                >
+                  <option value="ADMIN">Admin</option>
+                  <option value="TEACHER">Teacher</option>
+                  <option value="USER">User</option>
+                </select>
+              </div>
+
+              {/* Users List */}
+              <div className="space-y-4">
+                <h4 className="text-md font-medium text-gray-900">
+                  {selectedRole} Users ({roleUsers.length})
+                </h4>
+
+                {loadingRoleUsers ? (
+                  <div className="flex items-center justify-center py-8">
+                    <RefreshCw className="h-6 w-6 animate-spin text-purple-500" />
+                    <span className="ml-2 text-gray-600">Loading users...</span>
+                  </div>
+                ) : roleUsers.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    No users found for this role
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {roleUsers.map((user) => (
+                      <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900">{user.displayName}</div>
+                          <div className="text-sm text-gray-500">{user.email}</div>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <div className="text-sm">
+                            {user.telegramChatId ? (
+                              <span className="text-green-600 font-medium">
+                                Chat ID: {user.telegramChatId}
+                              </span>
+                            ) : (
+                              <span className="text-gray-400">
+                                No Chat ID
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex space-x-2">
+                            {user.telegramChatId ? (
+                              <button
+                                className="px-3 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200"
+                                onClick={() => {
+                                  // TODO: Implement detach chat ID functionality
+                                  toast.info('Detach functionality not yet implemented');
+                                }}
+                              >
+                                Detach
+                              </button>
+                            ) : (
+                              <button
+                                className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                                onClick={() => {
+                                  // TODO: Implement attach chat ID functionality
+                                  toast.info('Attach functionality not yet implemented');
+                                }}
+                              >
+                                Assign
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Instructions */}
+              <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                <h5 className="text-sm font-medium text-blue-900 mb-2">How to assign chat IDs:</h5>
+                <ol className="text-sm text-blue-800 space-y-1">
+                  <li>1. Have users start a chat with your Telegram bot</li>
+                  <li>2. The bot will automatically register their chat IDs</li>
+                  <li>3. Refresh this list to see updated chat ID assignments</li>
+                </ol>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={closeRoleModal}
+                  className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => loadUsersByRole(selectedRole)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  <span>Refresh</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add New User Modal */}
+      {showAddUserModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <UserPlus className="h-6 w-6 text-green-500" />
+                  <h3 className="text-lg font-semibold text-gray-900">Add New User with Chat ID</h3>
+                </div>
+                <button
+                  onClick={closeAddUserModal}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <XCircle className="h-6 w-6" />
+                </button>
+              </div>
+              <p className="text-sm text-gray-600 mt-1">
+                Create a new user account with Telegram chat ID
+              </p>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* Role Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Role
+                </label>
+                <select
+                  value={newUserData.role}
+                  onChange={(e) => setNewUserData(prev => ({ ...prev, role: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+                  <option value="USER">User</option>
+                  <option value="TEACHER">Teacher</option>
+                  <option value="ADMIN">Admin</option>
+                </select>
+              </div>
+
+              {/* Full Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  value={newUserData.fullName}
+                  onChange={(e) => setNewUserData(prev => ({ ...prev, fullName: e.target.value }))}
+                  placeholder="Enter full name"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={newUserData.email}
+                  onChange={(e) => setNewUserData(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder="Enter email address"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Telegram Chat ID */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Telegram Chat ID
+                </label>
+                <input
+                  type="text"
+                  value={newUserData.telegramChatId}
+                  onChange={(e) => setNewUserData(prev => ({ ...prev, telegramChatId: e.target.value }))}
+                  placeholder="Enter Telegram chat ID (e.g., 123456789)"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Users need to start a chat with your bot first to get their chat ID
+                </p>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={closeAddUserModal}
+                  className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAddUser}
+                  className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  <span>Add User</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

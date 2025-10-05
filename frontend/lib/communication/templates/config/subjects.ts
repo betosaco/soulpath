@@ -51,6 +51,28 @@ export const SUBJECT_TEMPLATES: { [key: string]: SubjectTemplate } = {
     maxLength: 60
   },
 
+  // CONTACT FORM SUBJECTS
+  contact_form_admin: {
+    template: 'Nuevo mensaje de contacto de {{customerName}} - MatMax Yoga',
+    placeholders: ['customerName'],
+    maxLength: 60
+  },
+  contact_form_confirmation: {
+    template: 'Gracias por contactarnos - MatMax Yoga',
+    placeholders: [],
+    maxLength: 60
+  },
+  order_confirmation: {
+    template: 'Confirmación de Pedido - {{orderNumber}}',
+    placeholders: ['orderNumber'],
+    maxLength: 60
+  },
+  order_admin_notification: {
+    template: 'Nuevo Pedido - {{orderNumber}} - {{customerName}}',
+    placeholders: ['orderNumber', 'customerName'],
+    maxLength: 60
+  },
+
   // FALLBACK SUBJECTS
   generic: {
     template: 'Confirmación de Pedido - {{orderNumber}}',

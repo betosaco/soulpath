@@ -163,6 +163,75 @@ export const EMAIL_SCENARIOS: EmailScenario[] = [
     isActive: true
   },
 
+  // CONTACT FORM SCENARIOS
+  {
+    id: 'contact_form_admin',
+    name: 'Contact Form - Admin Notification',
+    description: 'Notification email sent to admin when someone submits contact form',
+    customerType: 'both',
+    orderTypes: [],
+    components: [
+      { id: 'contact_admin_header', order: 1 },
+      { id: 'contact_details', order: 2 },
+      { id: 'contact_message', order: 3 },
+      { id: 'standard_footer', order: 4 }
+    ],
+    subjectTemplate: 'contact_form_admin',
+    priority: 50,
+    isActive: true
+  },
+  {
+    id: 'contact_form_confirmation',
+    name: 'Contact Form - User Confirmation',
+    description: 'Confirmation email sent to user after submitting contact form',
+    customerType: 'both',
+    orderTypes: [],
+    components: [
+      { id: 'contact_user_header', order: 1 },
+      { id: 'contact_confirmation_message', order: 2 },
+      { id: 'contact_user_footer', order: 3 }
+    ],
+    subjectTemplate: 'contact_form_confirmation',
+    priority: 50,
+    isActive: true
+  },
+
+  // ORDER CONFIRMATION SCENARIOS
+  {
+    id: 'order_confirmation',
+    name: 'Order Confirmation - Customer',
+    description: 'Order confirmation email sent to customer after successful purchase',
+    customerType: 'both',
+    orderTypes: ['matpass', 'booking', 'product'],
+    components: [
+      { id: 'order_header', order: 1 },
+      { id: 'order_details', order: 2 },
+      { id: 'order_items', order: 3 },
+      { id: 'order_next_steps', order: 4 },
+      { id: 'standard_footer', order: 5 }
+    ],
+    subjectTemplate: 'order_confirmation',
+    priority: 100,
+    isActive: true
+  },
+  {
+    id: 'order_admin_notification',
+    name: 'Order Notification - Admin',
+    description: 'Notification email sent to admin when a new order is placed',
+    customerType: 'both',
+    orderTypes: ['matpass', 'booking', 'product'],
+    components: [
+      { id: 'admin_order_header', order: 1 },
+      { id: 'order_details', order: 2 },
+      { id: 'order_items', order: 3 },
+      { id: 'admin_order_actions', order: 4 },
+      { id: 'standard_footer', order: 5 }
+    ],
+    subjectTemplate: 'order_admin_notification',
+    priority: 100,
+    isActive: true
+  },
+
   // FALLBACK SCENARIOS
   {
     id: 'fallback_generic',

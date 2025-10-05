@@ -444,7 +444,7 @@ export function PackageSelectionStep({ onPackageAdded }: PackageSelectionStepPro
           // Avoid duplicate navigation if already on target
           const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
           if (!currentPath.startsWith('/booking/customer-info')) {
-            (window as any).next?.router?.push?.('/booking/customer-info?isDirectCheckout=true') || (window.location.href = '/booking/customer-info?isDirectCheckout=true');
+            void ((window as any).next?.router?.push?.('/booking/customer-info?isDirectCheckout=true') || window.location.assign('/booking/customer-info?isDirectCheckout=true'));
           }
         } catch (err) {
           console.warn('⚠️ Navigation fallback to window.location', err);

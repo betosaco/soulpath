@@ -7,21 +7,22 @@ import { Badge } from '../ui/badge';
 import { BaseInput } from '../ui/BaseInput';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
-import { 
-  History, 
-  Clock, 
-  User, 
-  GitBranch, 
-  GitCommit, 
-  RotateCcw, 
-  Eye, 
-  Download, 
+import {
+  History,
+  Clock,
+  User,
+  GitBranch,
+  GitCommit,
+  RotateCcw,
+  Eye,
+  Download,
   Trash2,
   CheckCircle,
   AlertCircle,
   Info,
   Calendar,
   Tag,
+  RefreshCw,
   Code,
   FileText,
   Save,

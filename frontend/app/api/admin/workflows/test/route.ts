@@ -18,9 +18,14 @@ export async function POST(request: NextRequest) {
       userName: 'Test User',
       userEmail: 'test@example.com',
       orderId: 'TEST-123',
-      orderTotal: 100,
+      orderTotal: 150,
+      totalAmount: 150,
       products: [],
-      matpassData: null,
+      matpassData: {
+        type: 'MatPass 8 clases',
+        description: 'Acceso ilimitado por 30 días',
+        price: 150
+      },
       bookingData: null
     };
 
@@ -36,7 +41,10 @@ export async function POST(request: NextRequest) {
         email: 'test@example.com',
         name: 'Test User',
         telegramChatId: '123456789'
-      }
+      },
+      testMode: true,
+      userRole: testData?.userRole || 'USER',
+      telegramChatId: testData?.telegramChatId || null
     };
 
     try {
@@ -50,8 +58,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         message: 'Workflow test completed successfully',
-        results,
-        executionContext
+        results
       });
 
     } catch (executionError) {
@@ -59,8 +66,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: false,
         error: 'Workflow execution failed',
-        details: executionError instanceof Error ? executionError.message : 'Unknown execution error',
-        partialResults: executionContext.results
+        details: executionError instanceof Error ? executionError.message : 'Unknown execution error'
       }, { status: 400 });
     }
 

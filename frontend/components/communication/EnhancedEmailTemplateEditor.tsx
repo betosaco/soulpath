@@ -35,6 +35,8 @@ import { getPlaceholdersGrouped, validatePlaceholders, Placeholder } from '../..
 import { useAuth } from '../../hooks/useAuth';
 import { toast } from 'sonner';
 import { EnhancedTemplatePreview } from './EnhancedTemplatePreview';
+import { RichTextEditor } from './RichTextEditor';
+import { usePlaceholderAutocomplete, PlaceholderAutocomplete } from './PlaceholderAutocomplete';
 
 interface Template {
   id?: number;
@@ -116,8 +118,60 @@ export function EnhancedEmailTemplateEditor({ template, type, onSave, onClose }:
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [templateHistory, setTemplateHistory] = useState<any[]>([]);
   const [isStarred, setIsStarred] = useState(false);
-  
+  const [splitRatio, setSplitRatio] = useState(60); // Percentage for editor width
+  const [isResizing, setIsResizing] = useState(false);
+  const [previewMode, setPreviewMode] = useState<'split' | 'editor' | 'preview'>('split');
+  const [editorMode, setEditorMode] = useState<'richtext' | 'plaintext'>('richtext'); // New: editor mode
+
   const contentRef = useRef<HTMLTextAreaElement>(null);
+  const splitContainerRef = useRef<HTMLDivElement>(null);
+
+  // Placeholder autocomplete for plain text mode
+  const {
+    isOpen: autocompleteOpen,
+    position: autocompletePosition,
+    searchTerm: autocompleteSearchTerm,
+    openAutocomplete,
+    closeAutocomplete,
+    insertPlaceholder,
+    setSearchTerm: setAutocompleteSearchTerm
+  } = usePlaceholderAutocomplete(contentRef);
+
+  // Split-pane resize functionality
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsResizing(true);
+    e.preventDefault();
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isResizing || !splitContainerRef.current) return;
+
+    const container = splitContainerRef.current;
+    const rect = container.getBoundingClientRect();
+    const newRatio = ((e.clientX - rect.left) / rect.width) * 100;
+    const clampedRatio = Math.max(30, Math.min(70, newRatio)); // Between 30% and 70%
+    setSplitRatio(clampedRatio);
+  };
+
+  const handleMouseUp = () => {
+    setIsResizing(false);
+  };
+
+  useEffect(() => {
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      };
+    }
+  }, [isResizing]);
 
   useEffect(() => {
     if (template) {
@@ -161,12 +215,43 @@ export function EnhancedEmailTemplateEditor({ template, type, onSave, onClose }:
       const currentContent = translations.find(t => t.language === activeLanguage)?.content || '';
       const newContent = currentContent.substring(0, start) + placeholder + currentContent.substring(end);
       handleTranslationChange(activeLanguage, 'content', newContent);
-      
+
       // Focus back to textarea
       setTimeout(() => {
         textarea.focus();
         textarea.setSelectionRange(start + placeholder.length, start + placeholder.length);
       }, 0);
+    }
+  };
+
+  // Handle keyboard events for plain text autocomplete
+  const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (!contentRef.current) return;
+
+    const textarea = contentRef.current;
+    const cursorPosition = textarea.selectionStart;
+    const textBeforeCursor = textarea.value.substring(0, cursorPosition);
+
+    // Check for {{ trigger
+    const placeholderMatch = textBeforeCursor.match(/\{\{([^}]*)$/);
+    if (placeholderMatch) {
+      if (e.key === ' ') {
+        // Space closes autocomplete
+        closeAutocomplete();
+      } else if (e.key === 'Escape') {
+        closeAutocomplete();
+      } else if (e.key === 'Backspace' && placeholderMatch[1].length === 0) {
+        // Backspace on empty {{ closes autocomplete
+        closeAutocomplete();
+      } else {
+        // Update search term
+        setAutocompleteSearchTerm(placeholderMatch[1]);
+        if (!autocompleteOpen) {
+          openAutocomplete(cursorPosition, placeholderMatch[1]);
+        }
+      }
+    } else if (autocompleteOpen && e.key === 'Escape') {
+      closeAutocomplete();
     }
   };
 
@@ -341,14 +426,35 @@ export function EnhancedEmailTemplateEditor({ template, type, onSave, onClose }:
             >
               {isStarred ? <Star className="w-4 h-4 fill-current" /> : <StarOff className="w-4 h-4" />}
             </BaseButton>
-            <BaseButton
-              variant="outline"
-              onClick={() => setShowPreview(!showPreview)}
-              className="border-gray-300 text-gray-700 hover:text-gray-900 hover:border-gray-400"
-            >
-              <Eye className="w-4 h-4 mr-2" />
-              Preview
-            </BaseButton>
+            <div className="flex items-center gap-1 border border-gray-300 rounded-md p-1">
+              <BaseButton
+                size="sm"
+                variant={previewMode === 'editor' ? 'default' : 'ghost'}
+                onClick={() => setPreviewMode('editor')}
+                className="text-xs px-3 py-1"
+              >
+                <Code className="w-3 h-3 mr-1" />
+                Editor
+              </BaseButton>
+              <BaseButton
+                size="sm"
+                variant={previewMode === 'split' ? 'default' : 'ghost'}
+                onClick={() => setPreviewMode('split')}
+                className="text-xs px-3 py-1"
+              >
+                <Eye className="w-3 h-3 mr-1" />
+                Split
+              </BaseButton>
+              <BaseButton
+                size="sm"
+                variant={previewMode === 'preview' ? 'default' : 'ghost'}
+                onClick={() => setPreviewMode('preview')}
+                className="text-xs px-3 py-1"
+              >
+                <Eye className="w-3 h-3 mr-1" />
+                Preview
+              </BaseButton>
+            </div>
             <BaseButton
               onClick={handleSave}
               disabled={isSaving}
@@ -627,10 +733,11 @@ export function EnhancedEmailTemplateEditor({ template, type, onSave, onClose }:
             </Tabs>
           </div>
 
-          {/* Main Content */}
-          <div className="flex-1 overflow-y-auto bg-white">
-            <div className="p-6">
-              {validationErrors.length > 0 && (
+          {/* Main Content - Split Pane */}
+          <div className="flex-1 bg-white">
+            {/* Validation Errors */}
+            {validationErrors.length > 0 && (
+              <div className="p-6 pb-0">
                 <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200">
                   <div className="flex items-center gap-2 mb-2">
                     <AlertCircle className="w-4 h-4 text-red-600" />
@@ -642,81 +749,203 @@ export function EnhancedEmailTemplateEditor({ template, type, onSave, onClose }:
                     ))}
                   </ul>
                 </div>
+              </div>
+            )}
+
+            {/* Split Pane Container */}
+            <div
+              ref={splitContainerRef}
+              className="flex h-[calc(100%-80px)]"
+              style={{ height: validationErrors.length > 0 ? 'calc(100% - 140px)' : 'calc(100% - 60px)' }}
+            >
+              {/* Editor Panel */}
+              {(previewMode === 'editor' || previewMode === 'split') && (
+                <div
+                  className="overflow-y-auto border-r border-gray-200"
+                  style={{ width: previewMode === 'split' ? `${splitRatio}%` : '100%' }}
+                >
+                  <div className="p-6">
+                    {/* Content Editor */}
+                    <Card className="bg-white border border-gray-200 shadow-sm">
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-gray-900 text-lg flex items-center gap-2">
+                            <FileText className="w-5 h-5" />
+                            Content Editor - {activeLanguage.toUpperCase()}
+                          </CardTitle>
+                          <div className="flex items-center gap-2">
+                            {/* Editor Mode Toggle */}
+                            <div className="flex items-center gap-1 border border-gray-300 rounded-md p-1">
+                              <BaseButton
+                                size="sm"
+                                variant={editorMode === 'richtext' ? 'default' : 'ghost'}
+                                onClick={() => setEditorMode('richtext')}
+                                className="text-xs px-2 py-1 h-7"
+                              >
+                                <Palette className="w-3 h-3 mr-1" />
+                                Rich Text
+                              </BaseButton>
+                              <BaseButton
+                                size="sm"
+                                variant={editorMode === 'plaintext' ? 'default' : 'ghost'}
+                                onClick={() => setEditorMode('plaintext')}
+                                className="text-xs px-2 py-1 h-7"
+                              >
+                                <Code className="w-3 h-3 mr-1" />
+                                Plain Text
+                              </BaseButton>
+                            </div>
+                            <Badge variant="outline" className="text-xs border-gray-300 text-gray-700">
+                              {editorMode === 'richtext' ? 'Rich Text Editor' : 'Plain Text'}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs border-gray-300 text-gray-700">
+                              {currentTranslation?.content?.length || 0} characters
+                            </Badge>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        {type === 'email' && (
+                          <div>
+                            <Label className="text-gray-700 text-sm font-medium">Subject ({activeLanguage.toUpperCase()})</Label>
+                            <BaseInput
+                              value={currentTranslation?.subject || ''}
+                              onChange={(e) => handleTranslationChange(activeLanguage, 'subject', e.target.value)}
+                              placeholder="Enter email subject"
+                              className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
+                            />
+                          </div>
+                        )}
+
+                        <div>
+                          <Label className="text-gray-700 text-sm font-medium">
+                            Content ({activeLanguage.toUpperCase()})
+                            {editorMode === 'richtext' ? ' - Rich Text Editor' : ' - Plain Text'}
+                          </Label>
+
+                          {editorMode === 'richtext' ? (
+                            <div className="space-y-2">
+                              <RichTextEditor
+                                content={currentTranslation?.content || ''}
+                                onChange={(value) => handleTranslationChange(activeLanguage, 'content', value)}
+                                placeholder={type === 'email'
+                                  ? 'Start creating your email content...'
+                                  : 'Start writing your message...'
+                                }
+                                language={activeLanguage}
+                                type={type}
+                                rows={previewMode === 'split' ? 12 : 20}
+                                showToolbar={true}
+                              />
+                              <p className="text-xs text-gray-500">
+                                Rich text editor with formatting. Placeholders will be replaced with actual data.
+                                Use the HTML toggle in the toolbar to edit raw HTML if needed.
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              <Textarea
+                                ref={contentRef}
+                                value={currentTranslation?.content || ''}
+                                onChange={(e) => handleTranslationChange(activeLanguage, 'content', e.target.value)}
+                                onKeyDown={handleTextareaKeyDown}
+                                placeholder={type === 'email'
+                                  ? 'Enter HTML content... Type {{ to see placeholders'
+                                  : 'Enter plain text content... Type {{ to see placeholders'
+                                }
+                                className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 font-mono text-sm focus:border-blue-500 focus:ring-blue-500"
+                                rows={previewMode === 'split' ? 12 : 20}
+                              />
+                              <div className="flex items-center justify-between">
+                                <p className="text-xs text-gray-500">
+                                  {type === 'email'
+                                    ? 'Use HTML tags for formatting. Placeholders will be replaced with actual data.'
+                                    : 'Plain text only. Placeholders will be replaced with actual data.'
+                                  }
+                                </p>
+                                <div className="flex items-center gap-2">
+                                  <BaseButton
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      const content = currentTranslation?.content || '';
+                                      navigator.clipboard.writeText(content);
+                                      toast.success('Content copied to clipboard');
+                                    }}
+                                    className="text-xs border-gray-300 text-gray-700 hover:text-gray-900 hover:border-gray-400"
+                                  >
+                                    <Copy className="w-3 h-3 mr-1" />
+                                    Copy
+                                  </BaseButton>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
               )}
 
-              {/* Content Editor */}
-              <Card className="bg-white border border-gray-200 shadow-sm">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-gray-900 text-lg flex items-center gap-2">
-                      <FileText className="w-5 h-5" />
-                      Content Editor - {activeLanguage.toUpperCase()}
-                    </CardTitle>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs border-gray-300 text-gray-700">
-                        {type === 'email' ? 'HTML' : 'Plain Text'}
-                      </Badge>
-                      <Badge variant="outline" className="text-xs border-gray-300 text-gray-700">
-                        {currentTranslation?.content?.length || 0} characters
-                      </Badge>
+              {/* Resize Handle */}
+              {previewMode === 'split' && (
+                <div
+                  className="w-1 bg-gray-200 hover:bg-gray-300 cursor-col-resize transition-colors relative group"
+                  onMouseDown={handleMouseDown}
+                >
+                  <div className="absolute inset-y-0 left-1/2 transform -translate-x-1/2 flex items-center">
+                    <div className="w-6 h-6 bg-gray-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <div className="w-3 h-0.5 bg-white"></div>
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {type === 'email' && (
-                    <div>
-                      <Label className="text-gray-700 text-sm font-medium">Subject ({activeLanguage.toUpperCase()})</Label>
-                      <BaseInput
-                        value={currentTranslation?.subject || ''}
-                        onChange={(e) => handleTranslationChange(activeLanguage, 'subject', e.target.value)}
-                        placeholder="Enter email subject"
-                        className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
-                      />
-                    </div>
-                  )}
+                </div>
+              )}
 
-                  <div>
-                    <Label className="text-gray-700 text-sm font-medium">
-                      Content ({activeLanguage.toUpperCase()}) 
-                      {type === 'email' ? ' - HTML' : ' - Plain Text'}
-                    </Label>
-                    <Textarea
-                      ref={contentRef}
-                      value={currentTranslation?.content || ''}
-                      onChange={(e) => handleTranslationChange(activeLanguage, 'content', e.target.value)}
-                      placeholder={type === 'email' 
-                        ? 'Enter HTML content...' 
-                        : 'Enter plain text content...'
-                      }
-                      className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 font-mono text-sm focus:border-blue-500 focus:ring-blue-500"
-                      rows={16}
-                    />
-                    <div className="flex items-center justify-between mt-2">
-                      <p className="text-xs text-gray-500">
-                        {type === 'email' 
-                          ? 'Use HTML tags for formatting. Placeholders will be replaced with actual data.'
-                          : 'Plain text only. Placeholders will be replaced with actual data.'
-                        }
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <BaseButton
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            const content = currentTranslation?.content || '';
-                            navigator.clipboard.writeText(content);
-                            toast.success('Content copied to clipboard');
-                          }}
-                          className="text-xs border-gray-300 text-gray-700 hover:text-gray-900 hover:border-gray-400"
-                        >
-                          <Copy className="w-3 h-3 mr-1" />
-                          Copy
-                        </BaseButton>
-                      </div>
-                    </div>
+              {/* Preview Panel */}
+              {(previewMode === 'preview' || previewMode === 'split') && (
+                <div
+                  className="overflow-y-auto bg-gray-50"
+                  style={{ width: previewMode === 'split' ? `${100 - splitRatio}%` : '100%' }}
+                >
+                  <div className="p-6">
+                    {/* Live Preview */}
+                    <Card className="bg-white border border-gray-200 shadow-sm">
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-gray-900 text-lg flex items-center gap-2">
+                            <Eye className="w-5 h-5" />
+                            Live Preview - {activeLanguage.toUpperCase()}
+                          </CardTitle>
+                          <Badge variant="outline" className="text-xs border-gray-300 text-gray-700">
+                            Real-time
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="border border-gray-200 rounded-lg overflow-hidden">
+                          <EnhancedTemplatePreview
+                            template={{
+                              ...formData,
+                              translations: translations.map(t => ({
+                                ...t,
+                                content: t.content || '',
+                                subject: t.subject || ''
+                              }))
+                            }}
+                            language={activeLanguage}
+                            showFullPreview={false}
+                            className="max-h-96"
+                          />
+                        </div>
+                        <p className="text-xs text-gray-500 mt-2">
+                          Preview updates automatically as you type. This shows how the template will appear to recipients.
+                        </p>
+                      </CardContent>
+                    </Card>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -737,6 +966,20 @@ export function EnhancedEmailTemplateEditor({ template, type, onSave, onClose }:
           onClose={() => setShowPreview(false)}
         />
       )}
+
+      {/* Placeholder Autocomplete for Plain Text */}
+      <PlaceholderAutocomplete
+        isOpen={autocompleteOpen && editorMode === 'plaintext'}
+        onSelect={(placeholder) => {
+          insertPlaceholder(placeholder);
+          closeAutocomplete();
+        }}
+        onClose={closeAutocomplete}
+        position={autocompletePosition}
+        searchTerm={autocompleteSearchTerm}
+        onSearchChange={setAutocompleteSearchTerm}
+        type={type}
+      />
     </div>
   );
 }

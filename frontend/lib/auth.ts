@@ -100,18 +100,65 @@ export async function requireAuthResponse(request: NextRequest): Promise<NextRes
   return null; // Continue with the request
 }
 
+/**
+ * Require admin authentication - combines authentication and ADMIN role check
+ * This is the standardized method for all admin API routes
+ */
+export async function requireAdminAuth(request: NextRequest): Promise<{ user: AuthenticatedUser; response: null } | { user: null; response: NextResponse }> {
+  // First, authenticate the user
+  const user = await requireAuth(request);
+
+  if (!user) {
+    return {
+      user: null,
+      response: NextResponse.json({
+        code: 401,
+        message: 'Missing or invalid authorization',
+        error: 'Authorization required'
+      }, { status: 401 })
+    };
+  }
+
+  // Then check for ADMIN role
+  if (user.role !== 'ADMIN') {
+    console.log('Auth: User does not have ADMIN role:', user.email, 'Role:', user.role);
+    return {
+      user: null,
+      response: NextResponse.json({
+        code: 403,
+        message: 'Admin access required',
+        error: 'Insufficient permissions'
+      }, { status: 403 })
+    };
+  }
+
+  return { user, response: null };
+}
+
+/**
+ * Helper function to handle admin auth in API routes
+ * Usage: const auth = await requireAdminAuth(request);
+ *        if (auth.response) return auth.response;
+ *        const { user } = auth;
+ */
+export async function handleAdminAuth(request: NextRequest): Promise<{ user: AuthenticatedUser } | NextResponse> {
+  const auth = await requireAdminAuth(request);
+  if (auth.response) return auth.response;
+  return { user: auth.user };
+}
+
 export function createAuthMiddleware(handler: (request: NextRequest, user: AuthenticatedUser) => Promise<NextResponse>) {
   return async (request: NextRequest) => {
     const user = await requireAuth(request);
-    
+
     if (!user) {
-      return NextResponse.json({ 
-        code: 401, 
+      return NextResponse.json({
+        code: 401,
         message: 'Missing or invalid authorization',
-        error: 'Authorization required' 
+        error: 'Authorization required'
       }, { status: 401 });
     }
-    
+
     return handler(request, user);
   };
 }

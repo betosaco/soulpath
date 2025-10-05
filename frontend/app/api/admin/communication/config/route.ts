@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth';
+import { handleAdminAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
     console.log('🔍 GET /api/admin/communication/config - Starting request...');
-    
-    const user = await requireAuth(request);
-    if (!user || user.role !== 'ADMIN') {
-      console.log('❌ Unauthorized access attempt');
-      return NextResponse.json({ success: false, error: 'Unauthorized', message: 'Admin access required' }, { status: 401 });
-    }
+
+    const auth = await handleAdminAuth(request);
+    if (auth instanceof NextResponse) return auth;
+    const { user } = auth;
 
     console.log('✅ User authenticated:', user.email);
 
@@ -53,12 +51,10 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     console.log('🔍 PUT /api/admin/communication/config - Starting request...');
-    
-    const user = await requireAuth(request);
-    if (!user || user.role !== 'ADMIN') {
-      console.log('❌ Unauthorized access attempt');
-      return NextResponse.json({ success: false, error: 'Unauthorized', message: 'Admin access required' }, { status: 401 });
-    }
+
+    const auth = await handleAdminAuth(request);
+    if (auth instanceof NextResponse) return auth;
+    const { user } = auth;
 
     console.log('✅ User authenticated:', user.email);
     const body = await request.json();
