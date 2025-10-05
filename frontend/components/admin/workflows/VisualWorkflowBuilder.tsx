@@ -1805,10 +1805,14 @@ function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations:
 
 // Inline Telegram User Selector Component
 function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSelectorProps) {
+  console.log('🔧 TelegramUserSelector: Component rendered with selectedUsers:', selectedUsers?.length || 0);
+
   const [users, setUsers] = useState<TelegramUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
+
+  console.log('🔧 TelegramUserSelector: isExpanded state:', isExpanded);
 
   // Fetch users when expanded
   useEffect(() => {
@@ -1860,7 +1864,11 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
     <div className="space-y-2">
       {/* Toggle Button */}
       <BaseButton
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={() => {
+          console.log('🔧 TelegramUserSelector: Button clicked, current isExpanded:', isExpanded);
+          setIsExpanded(!isExpanded);
+          console.log('🔧 TelegramUserSelector: setIsExpanded called with:', !isExpanded);
+        }}
         className="w-full justify-between text-left"
         size="sm"
         variant="outline"
@@ -1878,6 +1886,12 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
       </BaseButton>
 
       {/* Expanded Content */}
+      {console.log('🔧 TelegramUserSelector: About to render expanded content, isExpanded:', isExpanded)}
+      {isExpanded && (
+        console.log('🔧 TelegramUserSelector: Rendering expanded content')
+      ) || (
+        console.log('🔧 TelegramUserSelector: Not rendering expanded content')
+      )}
       {isExpanded && (
         <div className="border rounded-md p-3 space-y-3 bg-gray-50">
           {/* Search */}
