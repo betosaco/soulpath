@@ -1278,19 +1278,30 @@ export function VisualWorkflowBuilder({
                 </button>
               </div>
 
-              {/* Properties Toggle */}
-              <button
-                onClick={() => setShowProperties(!showProperties)}
-                className={`px-2 py-1 rounded border text-xs font-medium transition-colors ${
-                  showProperties 
-                    ? 'bg-blue-100 text-blue-700 border-blue-300' 
-                    : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
-                }`}
-                title={showProperties ? 'Hide Properties Panel' : 'Show Properties Panel'}
-              >
-                <Settings size={14} className="mr-1 inline" />
-                {showProperties ? 'Hide' : 'Show'}
-              </button>
+        {/* Properties Toggle */}
+        <button
+          onClick={() => setShowProperties(!showProperties)}
+          className={`px-2 py-1 rounded border text-xs font-medium transition-colors ${
+            showProperties 
+              ? 'bg-blue-100 text-blue-700 border-blue-300' 
+              : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
+          }`}
+          title={showProperties ? 'Hide Properties Panel' : 'Show Properties Panel'}
+        >
+          <Settings size={14} className="mr-1 inline" />
+          {showProperties ? 'Hide' : 'Show'}
+        </button>
+
+        {/* Test Modal Button */}
+        <button
+          onClick={() => {
+            console.log('🧪 Test modal button clicked');
+            setShowTelegramUserModal(true);
+          }}
+          className="px-2 py-1 rounded border text-xs font-medium bg-green-100 text-green-700 border-green-300 hover:bg-green-200"
+        >
+          Test Modal
+        </button>
 
               {/* Action Buttons */}
               <BaseButton
@@ -1560,6 +1571,7 @@ export function VisualWorkflowBuilder({
               }}
               language={language}
               translations={t}
+              onOpenTelegramModal={() => setShowTelegramUserModal(true)}
             />
           </div>
         )}
@@ -1576,9 +1588,10 @@ interface NodePropertiesPanelProps {
   onDelete: () => void;
   language: 'en' | 'es';
   translations: any;
+  onOpenTelegramModal: () => void;
 }
 
-function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations: t }: NodePropertiesPanelProps) {
+function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations: t, onOpenTelegramModal }: NodePropertiesPanelProps) {
   const renderNodeProperties = () => {
     switch (node.type) {
       case 'trigger':
@@ -1668,7 +1681,14 @@ function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations:
               <Label className="dashboard-label">Select Users</Label>
               <div className="space-y-2">
                 <BaseButton
-                  onClick={() => setShowTelegramUserModal(true)}
+                  onClick={() => {
+                    console.log('🔧 Opening Telegram user modal...', { 
+                      nodeType: node.type,
+                      nodeId: node.id 
+                    });
+                    onOpenTelegramModal();
+                    console.log('🔧 Modal opening function called');
+                  }}
                   className="w-full justify-start"
                   size="sm"
                 >
@@ -1942,9 +1962,13 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
       )}
 
       {/* Telegram User Selector Modal */}
+      {console.log('🔧 Modal state:', { showTelegramUserModal, selectedNode: selectedNode?.id })}
       <TelegramUserSelectorModal
         isOpen={showTelegramUserModal}
-        onClose={() => setShowTelegramUserModal(false)}
+        onClose={() => {
+          console.log('🔧 Closing Telegram user modal...');
+          setShowTelegramUserModal(false);
+        }}
         selectedUsers={selectedNode?.data?.selectedUsers || []}
         onUsersChange={handleTelegramUsersChange}
       />

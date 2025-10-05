@@ -87,7 +87,12 @@ export function TelegramUserSelectorModal({
     onClose();
   };
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    console.log('🔧 TelegramUserSelectorModal: Modal is closed');
+    return null;
+  }
+
+  console.log('🔧 TelegramUserSelectorModal: Modal is open, rendering...');
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
