@@ -1828,14 +1828,22 @@ function TelegramUserSelector({ selectedUsers, onUsersChange }: TelegramUserSele
     setLoading(true);
     setError(null);
     try {
+      console.log('🔧 Loading users from API...');
       const response = await fetch('/api/admin/users/telegram');
+      console.log('🔧 API response status:', response.status);
+      console.log('🔧 API response ok:', response.ok);
+
       if (response.ok) {
         const data = await response.json();
+        console.log('🔧 API response data:', data);
         setUsers(data.users || []);
       } else {
-        setError('Failed to load users');
+        const errorText = await response.text();
+        console.error('🔧 API error response:', response.status, errorText);
+        setError(`Failed to load users (${response.status})`);
       }
     } catch (err) {
+      console.error('🔧 Network error:', err);
       setError('Network error');
     } finally {
       setLoading(false);
