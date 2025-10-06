@@ -19,7 +19,6 @@ import {
   Trash2,
   Copy,
   Settings,
-  Eye,
   TestTube,
   Workflow,
   Mail,
@@ -28,6 +27,8 @@ import {
   Send,
   MessageCircle,
   Globe,
+  CheckCircle,
+  Eye,
   Code,
   Database,
   FileText,
@@ -1811,47 +1812,74 @@ function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations:
       case 'email':
         return (
           <div className="space-y-4">
-            <div>
-              <Label className="dashboard-label">Email Scenario</Label>
-              <Select
-                value={node.data.scenarioId || ''}
-                onValueChange={(value) => onUpdate({
-                  data: { ...node.data, scenarioId: value, template: value }
-                })}
-              >
-                <SelectTrigger className="dashboard-input">
-                  <SelectValue placeholder="Select scenario..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="new_customer_matpass_only">New Customer - MatPass Only</SelectItem>
-                  <SelectItem value="existing_customer_matpass_only">Existing Customer - MatPass Only</SelectItem>
-                  <SelectItem value="new_customer_matpass_booking">New Customer - MatPass + Booking</SelectItem>
-                  <SelectItem value="existing_customer_matpass_booking">Existing Customer - MatPass + Booking</SelectItem>
-                  <SelectItem value="new_customer_matpass_products">New Customer - MatPass + Products</SelectItem>
-                  <SelectItem value="existing_customer_matpass_products">Existing Customer - MatPass + Products</SelectItem>
-                  <SelectItem value="contact_form_admin">Contact Form - Admin Notification</SelectItem>
-                  <SelectItem value="contact_form_confirmation">Contact Form - User Confirmation</SelectItem>
-                  <SelectItem value="order_confirmation">Order Confirmation - Customer</SelectItem>
-                  <SelectItem value="order_admin_notification">Order Notification - Admin</SelectItem>
-                  <SelectItem value="fallback_generic">Generic Fallback</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Scenario Information Display */}
-            {node.data.scenarioId && (
-              <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <Mail className="w-4 h-4 text-blue-600" />
-                  <span className="text-sm font-medium text-blue-900">Scenario Details</span>
-                </div>
-                <div className="text-xs text-blue-800 space-y-1">
-                  <div><strong>Scenario:</strong> {node.data.scenarioId}</div>
-                  <div><strong>Type:</strong> Email Communication</div>
-                  <div><strong>Template:</strong> Dynamic based on scenario</div>
-                </div>
+            {/* Email Template Section */}
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Mail className="w-5 h-5 text-blue-600" />
+                <h4 className="text-sm font-semibold text-gray-900">Email Template</h4>
               </div>
-            )}
+              
+              <div className="space-y-3">
+                <div>
+                  <Label className="dashboard-label">Select Email Scenario</Label>
+                  <Select
+                    value={node.data.scenarioId || ''}
+                    onValueChange={(value) => onUpdate({
+                      data: { ...node.data, scenarioId: value, template: value }
+                    })}
+                  >
+                    <SelectTrigger className="dashboard-input">
+                      <SelectValue placeholder="Choose an email scenario..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="new_customer_matpass_only">New Customer - MatPass Only</SelectItem>
+                      <SelectItem value="existing_customer_matpass_only">Existing Customer - MatPass Only</SelectItem>
+                      <SelectItem value="new_customer_matpass_booking">New Customer - MatPass + Booking</SelectItem>
+                      <SelectItem value="existing_customer_matpass_booking">Existing Customer - MatPass + Booking</SelectItem>
+                      <SelectItem value="new_customer_matpass_products">New Customer - MatPass + Products</SelectItem>
+                      <SelectItem value="existing_customer_matpass_products">Existing Customer - MatPass + Products</SelectItem>
+                      <SelectItem value="new_customer_matpass_booking_products">New Customer - MatPass + Booking + Products</SelectItem>
+                      <SelectItem value="existing_customer_matpass_booking_products">Existing Customer - MatPass + Booking + Products</SelectItem>
+                      <SelectItem value="contact_form_admin">Contact Form - Admin Notification</SelectItem>
+                      <SelectItem value="contact_form_confirmation">Contact Form - User Confirmation</SelectItem>
+                      <SelectItem value="order_confirmation">Order Confirmation - Customer</SelectItem>
+                      <SelectItem value="order_admin_notification">Order Notification - Admin</SelectItem>
+                      <SelectItem value="fallback_generic">Generic Fallback</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Selected Scenario Information */}
+                {node.data.scenarioId && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle className="w-4 h-4 text-blue-600" />
+                      <span className="text-sm font-medium text-blue-900">Selected Scenario</span>
+                    </div>
+                    <div className="text-xs text-blue-800 space-y-1">
+                      <div><strong>Scenario:</strong> {node.data.scenarioId}</div>
+                      <div><strong>Type:</strong> Email Communication</div>
+                      <div><strong>Template:</strong> Dynamic based on scenario</div>
+                      <div><strong>Status:</strong> <span className="text-green-600 font-medium">Active</span></div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Template Preview */}
+                {node.data.scenarioId && (
+                  <div className="bg-white border border-gray-200 rounded-md p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Eye className="w-4 h-4 text-gray-600" />
+                      <span className="text-sm font-medium text-gray-900">Template Preview</span>
+                    </div>
+                    <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded border">
+                      <div className="font-medium mb-1">Subject: Dynamic based on scenario</div>
+                      <div className="text-gray-500">Content: Modular components will be assembled based on the selected scenario and order data.</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
 
             <RecipientSelector
               nodeType="email"
