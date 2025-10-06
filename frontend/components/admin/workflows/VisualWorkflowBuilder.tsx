@@ -124,18 +124,27 @@ export interface NodeData {
 
   // Trigger specific
   triggerType?: 'order_created' | 'payment_received' | 'booking_confirmed' | 'user_registered';
+  eventType?: 'order_created' | 'payment_received' | 'booking_confirmed' | 'user_registered';
   scheduleExpression?: string; // cron expression
   webhookUrl?: string;
 
   // Communication specific
   templateId?: string;
+  template?: string;
+  scenarioId?: string;
   recipientType?: 'customer' | 'admin' | 'custom';
   customRecipients?: string[];
+  selectedRecipients?: any[];
+  selectedUsers?: any[];
+  recipients?: string[];
+  chatIds?: string[];
   templateData?: Record<string, any>;
 
   // Condition specific
   conditions?: ConditionRule[];
   operator?: 'AND' | 'OR';
+  field?: string;
+  value?: string;
 
   // Switch specific
   switchExpression?: string;
@@ -1783,7 +1792,7 @@ function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations:
               <Select
                 value={node.data.eventType}
                 onValueChange={(value) => onUpdate({
-                  data: { ...node.data, eventType: value }
+                  data: { ...node.data, eventType: value as 'order_created' | 'payment_received' | 'booking_confirmed' | 'user_registered' }
                 })}
               >
                 <SelectTrigger className="dashboard-input">
@@ -1803,22 +1812,46 @@ function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations:
         return (
           <div className="space-y-4">
             <div>
-              <Label className="dashboard-label">Email Template</Label>
+              <Label className="dashboard-label">Email Scenario</Label>
               <Select
-                value={node.data.template}
+                value={node.data.scenarioId || ''}
                 onValueChange={(value) => onUpdate({
-                  data: { ...node.data, template: value }
+                  data: { ...node.data, scenarioId: value, template: value }
                 })}
               >
                 <SelectTrigger className="dashboard-input">
-                  <SelectValue placeholder="Select template..." />
+                  <SelectValue placeholder="Select scenario..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="welcome_matpass">Welcome MatPass</SelectItem>
-                  <SelectItem value="renewal_matpass">Renewal MatPass</SelectItem>
+                  <SelectItem value="new_customer_matpass_only">New Customer - MatPass Only</SelectItem>
+                  <SelectItem value="existing_customer_matpass_only">Existing Customer - MatPass Only</SelectItem>
+                  <SelectItem value="new_customer_matpass_booking">New Customer - MatPass + Booking</SelectItem>
+                  <SelectItem value="existing_customer_matpass_booking">Existing Customer - MatPass + Booking</SelectItem>
+                  <SelectItem value="new_customer_matpass_products">New Customer - MatPass + Products</SelectItem>
+                  <SelectItem value="existing_customer_matpass_products">Existing Customer - MatPass + Products</SelectItem>
+                  <SelectItem value="contact_form_admin">Contact Form - Admin Notification</SelectItem>
+                  <SelectItem value="contact_form_confirmation">Contact Form - User Confirmation</SelectItem>
+                  <SelectItem value="order_confirmation">Order Confirmation - Customer</SelectItem>
+                  <SelectItem value="order_admin_notification">Order Notification - Admin</SelectItem>
+                  <SelectItem value="fallback_generic">Generic Fallback</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Scenario Information Display */}
+            {node.data.scenarioId && (
+              <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Mail className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-900">Scenario Details</span>
+                </div>
+                <div className="text-xs text-blue-800 space-y-1">
+                  <div><strong>Scenario:</strong> {node.data.scenarioId}</div>
+                  <div><strong>Type:</strong> Email Communication</div>
+                  <div><strong>Template:</strong> Dynamic based on scenario</div>
+                </div>
+              </div>
+            )}
 
             <RecipientSelector
               nodeType="email"
@@ -1831,6 +1864,7 @@ function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations:
                   recipients: recipients
                     .filter(r => r.email)
                     .map(r => r.email)
+                    .filter((email): email is string => email !== undefined)
                 }
               })}
               user={user}
@@ -1843,22 +1877,42 @@ function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations:
         return (
           <div className="space-y-4">
             <div>
-              <Label className="dashboard-label">Telegram Template</Label>
+              <Label className="dashboard-label">Telegram Scenario</Label>
               <Select
-                value={node.data.template}
+                value={node.data.scenarioId || node.data.template || ''}
                 onValueChange={(value) => onUpdate({
-                  data: { ...node.data, template: value }
+                  data: { ...node.data, scenarioId: value, template: value }
                 })}
               >
                 <SelectTrigger className="dashboard-input">
-                  <SelectValue placeholder="Select template..." />
+                  <SelectValue placeholder="Select scenario..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="new_purchase_confirmation">New Purchase</SelectItem>
+                  <SelectItem value="new_customer_matpass_only">New Customer - MatPass Only</SelectItem>
+                  <SelectItem value="existing_customer_matpass_only">Existing Customer - MatPass Only</SelectItem>
+                  <SelectItem value="new_customer_matpass_booking">New Customer - MatPass + Booking</SelectItem>
+                  <SelectItem value="existing_customer_matpass_booking">Existing Customer - MatPass + Booking</SelectItem>
                   <SelectItem value="booking_reminder">Booking Reminder</SelectItem>
+                  <SelectItem value="order_confirmation">Order Confirmation</SelectItem>
+                  <SelectItem value="contact_form_confirmation">Contact Form Confirmation</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Scenario Information Display */}
+            {(node.data.scenarioId || node.data.template) && (
+              <div className="bg-green-50 border border-green-200 rounded-md p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <MessageSquare className="w-4 h-4 text-green-600" />
+                  <span className="text-sm font-medium text-green-900">Telegram Scenario</span>
+                </div>
+                <div className="text-xs text-green-800 space-y-1">
+                  <div><strong>Scenario:</strong> {node.data.scenarioId || node.data.template}</div>
+                  <div><strong>Type:</strong> Telegram Communication</div>
+                  <div><strong>Template:</strong> Dynamic based on scenario</div>
+                </div>
+              </div>
+            )}
 
             <RecipientSelector
               nodeType="telegram"
@@ -1913,7 +1967,7 @@ function NodePropertiesPanel({ node, onUpdate, onDelete, language, translations:
               <Select
                 value={node.data.operator}
                 onValueChange={(value) => onUpdate({
-                  data: { ...node.data, operator: value }
+                  data: { ...node.data, operator: value as 'AND' | 'OR' }
                 })}
               >
                 <SelectTrigger className="dashboard-input">
