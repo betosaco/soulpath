@@ -39,7 +39,7 @@ export class LabsMobileSmsService {
     try {
       // Try to load from communication_config table first (unified communication settings)
       const commConfig = await prisma.communicationConfig.findFirst({
-        where: { sms_enabled: true }
+        where: { smsEnabled: true }
       });
 
       if (commConfig && commConfig.labsmobile_username && commConfig.labsmobile_token) {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { AdminSidebarNew } from './AdminSidebarNew';
 import { AdminHeaderNew } from './AdminHeaderNew';
@@ -16,10 +16,22 @@ interface AdminLayoutNewProps {
 export function AdminLayoutNew({ onClose, isModal = true }: AdminLayoutNewProps) {
   const { user, isAdmin, isLoading } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const pathname = usePathname();
+
+  // Extract tab from URL pathname (e.g., /admin/template-studio -> template-studio)
+  const urlTab = pathname.split('/').pop();
+  const initialTab = urlTab && urlTab !== 'admin' ? urlTab : 'dashboard';
+
+  const [activeTab, setActiveTab] = useState(initialTab);
   const bugReportManagementRef = useRef<any>(null);
 
-  console.log('🎯 AdminLayoutNew: activeTab =', activeTab);
+
+  // Handle tab changes and update URL
+  const handleTabChange = (newTab: string) => {
+    setActiveTab(newTab);
+    // Update URL to reflect the current tab
+    router.push(`/admin/${newTab}`);
+  };
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -30,6 +42,15 @@ export function AdminLayoutNew({ onClose, isModal = true }: AdminLayoutNewProps)
       router.push('/account');
     }
   }, [user, isLoading, isAdmin, router]);
+
+  // Update activeTab when URL changes (for browser navigation)
+  useEffect(() => {
+    const urlTab = pathname.split('/').pop();
+    const newTab = urlTab && urlTab !== 'admin' ? urlTab : 'dashboard';
+    if (newTab !== activeTab) {
+      setActiveTab(newTab);
+    }
+  }, [pathname, activeTab]);
 
   // Show loading state while authentication is being checked
   if (isLoading) {
@@ -78,7 +99,7 @@ export function AdminLayoutNew({ onClose, isModal = true }: AdminLayoutNewProps)
     <div className={containerClasses}>
       <AdminSidebarNew 
         activeTab={activeTab} 
-        onTabChange={setActiveTab}
+        onTabChange={handleTabChange}
         user={user as unknown as any}
       />
       

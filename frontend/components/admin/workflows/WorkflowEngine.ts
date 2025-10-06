@@ -7,6 +7,7 @@
 import { WorkflowData, WorkflowNode, WorkflowConnection } from './VisualWorkflowBuilder';
 import { OrderData } from '@/lib/communication/templates/types';
 import { RecipientService, ResolvedRecipient } from '@/lib/services/recipient-service';
+import { executors } from '@/lib/workflows/executors';
 
 export interface ExecutionContext {
   workflow: WorkflowData;
@@ -16,7 +17,7 @@ export interface ExecutionContext {
   executedNodes: Set<string>;
   results: Map<string, any>;
   errors: Map<string, Error>;
-  variables: Map<string, any>;
+  variables: Record<string, any>; // Changed from Map to Record for easier use in executors
   loopCounters: Map<string, number>;
   retryCounters: Map<string, number>;
   executionPath: string[];
@@ -24,6 +25,8 @@ export interface ExecutionContext {
   eventUser?: any; // User who triggered the event
   eventCustomer?: any; // Customer data from event
   resolvedRecipients?: ResolvedRecipient[];
+  executionId?: string; // ID of the workflow execution (for stateful execution)
+  emit: (event: string, data: any) => void; // Event emitter for debugging
 }
 
 export interface ResolvedRecipient {
@@ -297,6 +300,18 @@ export class WorkflowEngine {
   ): Promise<ExecutionResult> {
     const startTime = Date.now();
 
+    // Initialize live debugging if executionId is provided
+    let debugInitialized = false;
+    if (this.executionId) {
+      // Dynamic import to avoid circular dependencies
+      import('@/lib/workflows/live-debug').then(({ liveWorkflowDebugger }) => {
+        liveWorkflowDebugger.startExecutionDebug(this.executionId!, workflow, orderData);
+        debugInitialized = true;
+      }).catch(error => {
+        console.warn('Live debugging not available:', error);
+      });
+    }
+
     // Build the execution context with event data
     const context: ExecutionContext = {
       workflow,
@@ -311,9 +326,13 @@ export class WorkflowEngine {
       executedNodes: new Set(),
       results: new Map(),
       errors: new Map(),
-      variables: new Map(),
+      variables: {}, // Changed from Map to Record
       executionPath: [],
       startTime,
+      emit: (event: string, data: any) => {
+        // Simple event emitter for debugging - can be enhanced to use WebSockets/SSE later
+        console.log(`🔍 Workflow Event [${event}]:`, data);
+      },
     };
 
     // Track execution attempts to prevent infinite loops
@@ -481,6 +500,43 @@ export class WorkflowEngine {
       return { skipped: true, reason: 'node_disabled' };
     }
 
+    // Emit node start event for debugging
+    context.emit('node:start', {
+      nodeId: node.id,
+      nodeType: node.type,
+      inputData: context.variables,
+      timestamp: Date.now()
+    });
+
+    // Look up the executor for this node type
+    const executor = executors[node.type];
+
+    if (executor) {
+      try {
+        const result = await executor(node, context);
+
+        // Emit node success event for debugging
+        context.emit('node:success', {
+          nodeId: node.id,
+          nodeType: node.type,
+          outputData: result,
+          timestamp: Date.now()
+        });
+
+        return result;
+      } catch (error) {
+        // Emit error event for debugging
+        context.emit('node:error', {
+          nodeId: node.id,
+          nodeType: node.type,
+          error: error instanceof Error ? error.message : 'Unknown error',
+          timestamp: Date.now()
+        });
+        throw error;
+      }
+    }
+
+    // Fallback to legacy execution methods for nodes not yet migrated
     switch (node.type) {
       // Triggers
       case 'trigger':
@@ -489,11 +545,9 @@ export class WorkflowEngine {
       case 'event_trigger':
         return this.executeTriggerNode(node, context);
 
-      // Communication
-      case 'email':
-        return this.executeEmailNode(node, context, options);
+      // Communication (not yet migrated)
       case 'telegram':
-        return this.executeTelegramNode(node, context, options);
+        return this.executeTelegramNode(node, context);
       case 'sms':
         return this.executeSmsNode(node, context);
       case 'whatsapp':
@@ -501,9 +555,7 @@ export class WorkflowEngine {
       case 'instagram':
         return this.executeInstagramNode(node, context);
 
-      // Logic & Flow Control
-      case 'condition':
-        return this.executeConditionNode(node, context);
+      // Logic & Flow Control (not yet migrated)
       case 'switch':
         return this.executeSwitchNode(node, context);
       case 'loop':
@@ -512,11 +564,8 @@ export class WorkflowEngine {
         return this.executeMergeNode(node, context);
       case 'split':
         return this.executeSplitNode(node, context);
-      case 'delay':
-      case 'wait':
-        return this.executeDelayNode(node, context);
 
-      // Data & API
+      // Data & API (not yet migrated)
       case 'api_call':
         return this.executeApiCallNode(node, context);
       case 'data_transformer':
@@ -530,7 +579,7 @@ export class WorkflowEngine {
       case 'webhook':
         return this.executeWebhookNode(node, context);
 
-      // Error Handling
+      // Error Handling (not yet migrated)
       case 'error_handler':
         return this.executeErrorHandlerNode(node, context);
       case 'retry':
@@ -538,7 +587,7 @@ export class WorkflowEngine {
       case 'fallback':
         return this.executeFallbackNode(node, context);
 
-      // Advanced
+      // Advanced (not yet migrated)
       case 'ai_processor':
         return this.executeAiProcessorNode(node, context);
       case 'database_query':
@@ -547,7 +596,7 @@ export class WorkflowEngine {
         return this.executeFileProcessorNode(node, context);
 
       default:
-        throw new Error(`Unknown node type: ${node.type}`);
+        throw new Error(`Unknown node type: ${node.type}. No executor found and no legacy handler available.`);
     }
   }
 

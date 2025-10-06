@@ -60,13 +60,13 @@ export class CommunicationService {
       if (!this.config) {
         this.config = await prisma.communicationConfig.create({
           data: {
-            email_enabled: true,
-            email_provider: 'brevo',
-            sms_enabled: false,
-            sms_provider: 'labsmobile',
-            telegram_enabled: false,
-            whatsapp_enabled: false,
-            instagram_enabled: false,
+            emailEnabled: true,
+            emailProvider: 'brevo',
+            smsEnabled: false,
+            smsProvider: 'labsmobile',
+            telegramEnabled: false,
+            whatsappEnabled: false,
+            instagramEnabled: false,
           }
         });
       }
@@ -74,11 +74,11 @@ export class CommunicationService {
       console.error('Failed to load communication config:', error);
       // Use default config if database fails
       this.config = {
-        email_enabled: false,
-        sms_enabled: false,
-        telegram_enabled: false,
-        whatsapp_enabled: false,
-        instagram_enabled: false,
+        emailEnabled: false,
+        smsEnabled: false,
+        telegramEnabled: false,
+        whatsappEnabled: false,
+        instagramEnabled: false,
       };
     }
   }
@@ -98,7 +98,7 @@ export class CommunicationService {
   async sendEmail(params: EmailParams): Promise<CommunicationResult> {
     await this.ensureConfig();
 
-    if (!this.config.email_enabled) {
+    if (!this.config.emailEnabled) {
       return {
         success: false,
         error: 'Email is not enabled in configuration'
@@ -106,7 +106,7 @@ export class CommunicationService {
     }
 
     try {
-      switch (this.config.email_provider) {
+      switch (this.config.emailProvider) {
         case 'brevo':
           return await this.sendBrevoEmail(params);
         case 'resend':
@@ -129,7 +129,7 @@ export class CommunicationService {
   async sendSms(params: SmsParams): Promise<CommunicationResult> {
     await this.ensureConfig();
 
-    if (!this.config.sms_enabled) {
+    if (!this.config.smsEnabled) {
       return {
         success: false,
         error: 'SMS is not enabled in configuration'
@@ -137,7 +137,7 @@ export class CommunicationService {
     }
 
     try {
-      switch (this.config.sms_provider) {
+      switch (this.config.smsProvider) {
         case 'labsmobile':
           return await this.sendLabsMobileSms(params);
         default:
@@ -158,7 +158,7 @@ export class CommunicationService {
   async sendTelegramMessage(params: TelegramParams): Promise<CommunicationResult> {
     await this.ensureConfig();
 
-    if (!this.config.telegram_enabled) {
+    if (!this.config.telegramEnabled) {
       return {
         success: false,
         error: 'Telegram is not enabled in configuration'
@@ -182,7 +182,7 @@ export class CommunicationService {
   async sendWhatsAppMessage(params: WhatsAppParams): Promise<CommunicationResult> {
     await this.ensureConfig();
 
-    if (!this.config.whatsapp_enabled) {
+    if (!this.config.whatsappEnabled) {
       return {
         success: false,
         error: 'WhatsApp is not enabled in configuration'
@@ -204,7 +204,7 @@ export class CommunicationService {
    * Send email via Brevo (Sendinblue)
    */
   private async sendBrevoEmail(params: EmailParams): Promise<CommunicationResult> {
-    const apiKey = this.config.brevo_api_key;
+    const apiKey = this.config.brevoApiKey;
     if (!apiKey) {
       return { success: false, error: 'Brevo API key not configured' };
     }
@@ -213,8 +213,8 @@ export class CommunicationService {
 
     const emailData = {
       sender: {
-        name: this.config.sender_name || 'SOULPATH',
-        email: this.config.sender_email || 'noreply@soulpath.lat'
+        name: this.config.senderName || 'SOULPATH',
+        email: this.config.senderEmail || 'noreply@soulpath.lat'
       },
       to: recipients.map(email => ({ email })),
       subject: params.subject,
@@ -254,7 +254,7 @@ export class CommunicationService {
    * Send email via Resend
    */
   private async sendResendEmail(params: EmailParams): Promise<CommunicationResult> {
-    const apiKey = this.config.resend_api_key;
+    const apiKey = this.config.resendApiKey;
     if (!apiKey) {
       return { success: false, error: 'Resend API key not configured' };
     }
@@ -263,7 +263,7 @@ export class CommunicationService {
     const recipients = Array.isArray(params.to) ? params.to : [params.to];
 
     const result = await resend.emails.send({
-      from: params.from || `${this.config.sender_name || 'SOULPATH'} <${this.config.sender_email || 'noreply@soulpath.lat'}>`,
+      from: params.from || `${this.config.senderName || 'SOULPATH'} <${this.config.senderEmail || 'noreply@soulpath.lat'}>`,
       to: recipients,
       subject: params.subject,
       html: params.html,
@@ -290,8 +290,8 @@ export class CommunicationService {
    * Send SMS via LabsMobile
    */
   private async sendLabsMobileSms(params: SmsParams): Promise<CommunicationResult> {
-    const username = this.config.labsmobile_username;
-    const token = this.config.labsmobile_token;
+    const username = this.config.labsmobileUsername;
+    const token = this.config.labsmobileToken;
 
     if (!username || !token) {
       return { success: false, error: 'LabsMobile credentials not configured' };
@@ -302,7 +302,7 @@ export class CommunicationService {
     formData.append('password', token);
     formData.append('msisdn', params.to);
     formData.append('message', params.message);
-    formData.append('sender', params.from || this.config.sms_sender_name || 'SoulPath');
+    formData.append('sender', params.from || this.config.smsSenderName || 'SoulPath');
 
     const response = await fetch('https://api.labsmobile.com/get/send.php', {
       method: 'POST',
@@ -331,42 +331,89 @@ export class CommunicationService {
   }
 
   /**
-   * Send Telegram message via Bot API
+   * Send Telegram message via Webhook API
    */
   private async sendTelegramBotMessage(params: TelegramParams): Promise<CommunicationResult> {
-    const botToken = this.config.telegram_bot_token;
-    if (!botToken) {
-      return { success: false, error: 'Telegram bot token not configured' };
-    }
+    // Use deployed webhook service instead of direct bot API
+    const webhookUrl = process.env.TELEGRAM_WEBHOOK_URL || 'https://telemax.vercel.app/api/telegram/webhook';
+    
+    try {
+      // Send message via webhook using Telegram update format
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          update_id: Date.now(),
+          message: {
+            message_id: Math.floor(Math.random() * 1000000),
+            from: {
+              id: parseInt(params.chatId),
+              is_bot: false,
+              first_name: 'System',
+              username: 'system'
+            },
+            chat: {
+              id: parseInt(params.chatId),
+              first_name: 'User',
+              type: 'private'
+            },
+            date: Math.floor(Date.now() / 1000),
+            text: params.message
+          }
+        })
+      });
 
-    const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        chat_id: params.chatId,
-        text: params.message,
-        parse_mode: params.parseMode
-      })
-    });
+      const result = await response.json();
 
-    const result = await response.json();
-
-    if (response.ok && result.ok) {
-      return {
-        success: true,
-        messageId: result.result.message_id.toString(),
-        provider: 'telegram'
-      };
-    } else {
+      if (response.ok && result.status === 'ok') {
+        return {
+          success: true,
+          messageId: `webhook_${Date.now()}`,
+          provider: 'telegram-webhook'
+        };
+      } else {
+        return {
+          success: false,
+          error: result.error || 'Webhook API error',
+          provider: 'telegram-webhook'
+        };
+      }
+    } catch (error) {
+      console.error('Webhook Telegram sending failed:', error);
       return {
         success: false,
-        error: result.description || 'Telegram API error',
-        provider: 'telegram'
+        error: error instanceof Error ? error.message : 'Webhook connection error',
+        provider: 'telegram-webhook'
       };
     }
+  }
+
+  /**
+   * Send Telegram message to multiple chat IDs
+   */
+  async sendTelegramToMultipleChats(chatIds: string[], message: string, parseMode?: 'Markdown' | 'HTML'): Promise<CommunicationResult[]> {
+    const results: CommunicationResult[] = [];
+    
+    for (const chatId of chatIds) {
+      try {
+        const result = await this.sendTelegramMessage({
+          chatId,
+          message,
+          parseMode
+        });
+        results.push(result);
+      } catch (error) {
+        results.push({
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
+          provider: 'telegram-webhook'
+        });
+      }
+    }
+    
+    return results;
   }
 
   /**
@@ -430,25 +477,25 @@ export class CommunicationService {
 
     switch (provider) {
       case 'email':
-        if (!this.config.email_enabled) {
+        if (!this.config.emailEnabled) {
           return { success: false, message: 'Email is not enabled' };
         }
         return await this.testEmailConnection();
 
       case 'sms':
-        if (!this.config.sms_enabled) {
+        if (!this.config.smsEnabled) {
           return { success: false, message: 'SMS is not enabled' };
         }
         return await this.testSmsConnection();
 
       case 'telegram':
-        if (!this.config.telegram_enabled) {
+        if (!this.config.telegramEnabled) {
           return { success: false, message: 'Telegram is not enabled' };
         }
         return await this.testTelegramConnection();
 
       case 'whatsapp':
-        if (!this.config.whatsapp_enabled) {
+        if (!this.config.whatsappEnabled) {
           return { success: false, message: 'WhatsApp is not enabled' };
         }
         return await this.testWhatsAppConnection();
@@ -462,7 +509,7 @@ export class CommunicationService {
     try {
       // Send a simple test email
       const result = await this.sendEmail({
-        to: this.config.admin_email || 'test@example.com',
+        to: this.config.adminEmail || 'test@example.com',
         subject: 'Communication Service Test',
         html: '<p>This is a test email from the Communication Service.</p>',
         text: 'This is a test email from the Communication Service.'
@@ -484,7 +531,7 @@ export class CommunicationService {
 
   private async testTelegramConnection(): Promise<{ success: boolean; message: string }> {
     try {
-      const botToken = this.config.telegram_bot_token;
+      const botToken = this.config.telegramBotToken;
       if (!botToken) {
         return { success: false, message: 'Bot token not configured' };
       }

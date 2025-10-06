@@ -931,6 +931,100 @@ model CommunicationTemplateTranslation {
   @@map("communication_template_translations")
 }
 
+model EmailScenario {
+  id            Int                   @id @default(autoincrement())
+  scenarioKey   String                @unique @map("scenario_key")
+  name          String
+  description   String?
+  customerType  String                @map("customer_type")
+  orderTypes    String[]              @map("order_types")
+  components    EmailScenarioComponent[]
+  subjectTemplateId Int?              @map("subject_template_id")
+  subjectTemplate EmailSubjectTemplate? @relation(fields: [subjectTemplateId], references: [id])
+  priority      Int                   @default(0)
+  isActive      Boolean               @default(true) @map("is_active")
+  createdAt     DateTime              @default(now()) @map("created_at")
+  updatedAt     DateTime              @updatedAt @map("updated_at")
+
+  @@index([isActive, priority], map: "idx_email_scenarios_active_priority")
+  @@map("email_scenarios")
+}
+
+model EmailScenarioComponent {
+  id         Int           @id @default(autoincrement())
+  scenarioId Int           @map("scenario_id")
+  componentId Int          @map("component_id")
+  order      Int
+  scenario   EmailScenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  component  EmailComponent @relation(fields: [componentId], references: [id])
+
+  @@unique([scenarioId, componentId], map: "idx_scenario_components_unique")
+  @@map("email_scenario_components")
+}
+
+model EmailComponent {
+  id          Int                       @id @default(autoincrement())
+  componentKey String                   @unique @map("component_key")
+  name        String
+  type        String
+  template    String                    @db.Text
+  conditions  Json                      // Condition[]
+  dataMapping Json                      // DataMapping
+  required    Boolean                   @default(false)
+  isActive    Boolean                   @default(true) @map("is_active")
+  createdAt   DateTime                  @default(now()) @map("created_at")
+  updatedAt   DateTime                  @updatedAt @map("updated_at")
+  scenarios   EmailScenarioComponent[]
+
+  @@index([type, isActive], map: "idx_email_components_type_active")
+  @@map("email_components")
+}
+
+model EmailSubjectTemplate {
+  id          Int                        @id @default(autoincrement())
+  templateKey String                     @unique @map("template_key")
+  template    String                     @db.Text
+  placeholders String[]                  // Available placeholders
+  maxLength   Int?                       @default(60)
+  isActive    Boolean                    @default(true) @map("is_active")
+  createdAt   DateTime                   @default(now()) @map("created_at")
+  updatedAt   DateTime                   @updatedAt @map("updated_at")
+  scenarios   EmailScenario[]
+
+  @@index([isActive], map: "idx_email_subject_templates_active")
+  @@map("email_subject_templates")
+}
+
+model WorkflowExecution {
+  id            String             @id @default(cuid())
+  workflowId    String             @map("workflow_id")
+  status        ExecutionStatus    @default(RUNNING)
+  currentNodeId String?            @map("current_node_id")
+  input         Json?
+  output        Json?
+  variables     Json?
+  results       Json?              // Map<string, any>
+  errors        Json?              // Map<string, Error>
+  executionPath String[]           @default([]) @map("execution_path")
+  startedAt     DateTime           @default(now()) @map("started_at")
+  completedAt   DateTime?          @map("completed_at")
+  resumeAt      DateTime?          @map("resume_at")
+  createdAt     DateTime           @default(now()) @map("created_at")
+  updatedAt     DateTime           @updatedAt @map("updated_at")
+
+  @@index([status, resumeAt], map: "idx_workflow_executions_status_resume")
+  @@index([workflowId, status], map: "idx_workflow_executions_workflow_status")
+  @@map("workflow_executions")
+}
+
+enum ExecutionStatus {
+  RUNNING
+  PAUSED
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
 model BugReport {
   id          String          @id @default(dbgenerated("(gen_random_uuid())::text"))
   title       String          @db.VarChar(255)
@@ -1990,4 +2084,37 @@ model RecipientGroup {
   @@index([isActive], map: "idx_recipient_groups_active")
   @@index([createdBy], map: "idx_recipient_groups_created_by")
   @@map("recipient_groups")
+}
+
+model TelegramMessage {
+  id          String    @id @default(cuid())
+  chatId      String    @map("chat_id") @db.VarChar(50)
+  userId      String?   @map("user_id") @db.VarChar(50)
+  messageText String?   @map("message_text") @db.Text
+  messageType String   @default("text") @map("message_type") @db.VarChar(20)
+  receivedAt  DateTime  @default(now()) @map("received_at") @db.Timestamptz(6)
+  processedAt DateTime? @map("processed_at") @db.Timestamptz(6)
+  status      String    @default("pending") @db.VarChar(20)
+  metadata    Json?     // Additional message data
+
+  @@index([chatId], map: "idx_telegram_messages_chat_id")
+  @@index([status], map: "idx_telegram_messages_status")
+  @@index([receivedAt], map: "idx_telegram_messages_received_at")
+  @@map("telegram_messages")
+}
+
+model TelegramResponse {
+  id           String    @id @default(cuid())
+  chatId       String    @map("chat_id") @db.VarChar(50)
+  responseText String    @map("response_text") @db.Text
+  responseType String    @default("text") @map("response_type") @db.VarChar(20)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  sentAt       DateTime? @map("sent_at") @db.Timestamptz(6)
+  status       String    @default("pending") @db.VarChar(20)
+  metadata     Json?     // Additional response data
+
+  @@index([chatId], map: "idx_telegram_responses_chat_id")
+  @@index([status], map: "idx_telegram_responses_status")
+  @@index([createdAt], map: "idx_telegram_responses_created_at")
+  @@map("telegram_responses")
 }

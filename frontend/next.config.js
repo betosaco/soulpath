@@ -6,14 +6,16 @@ const __dirname = path.dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Explicitly enable App Router (Next.js 13+ default, but being explicit)
+  experimental: {
+    appDir: true,
+    optimizeCss: true,
+  },
   typescript: {
     ignoreBuildErrors: true,
   },
   eslint: {
     ignoreDuringBuilds: true,
-  },
-  experimental: {
-    optimizeCss: true,
   },
   // Modern JS targets are handled via browserslist; avoid legacy polyfills
   // Prefer modern JS output and avoid legacy polyfills

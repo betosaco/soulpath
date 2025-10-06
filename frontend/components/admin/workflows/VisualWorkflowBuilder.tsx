@@ -40,7 +40,8 @@ import {
   Shield,
   Brain,
   Webhook,
-  Users
+  Users,
+  Activity
 } from 'lucide-react';
 import { WorkflowCanvas } from './WorkflowCanvas';
 import { WorkflowNode } from './WorkflowNode';
@@ -274,6 +275,8 @@ export function VisualWorkflowBuilder({
   initialWorkflow
 }: VisualWorkflowBuilderProps) {
   const { user } = useAuth();
+
+
   const [workflow, setWorkflow] = useState<WorkflowData>(() => {
     // If initialWorkflow is provided, use it; otherwise use default
     if (initialWorkflow) {
@@ -1483,7 +1486,7 @@ export function VisualWorkflowBuilder({
                     </div>
                   </SelectTrigger>
                   <SelectContent className="max-h-80 w-full">
-                    {availableTemplates.map(template => (
+                    {availableTemplates.filter(template => template.id).map(template => (
                       <SelectItem key={template.id} value={template.id} className="py-2">
                         <div className="flex flex-col w-full">
                           <span className="font-medium text-sm truncate">{template.name}</span>
@@ -1699,10 +1702,8 @@ export function VisualWorkflowBuilder({
         </div>
 
         {/* Properties Panel */}
-        {(() => {
-          console.log('🔧 Properties panel condition check:', { selectedNode: selectedNode?.id, showProperties, condition: selectedNode && showProperties });
-          return selectedNode && showProperties && (
-            <div className="w-80 bg-white border-l p-4 overflow-y-auto">
+        {selectedNode && showProperties && (
+          <div className="w-80 bg-white border-l p-4 overflow-y-auto">
             <NodePropertiesPanel
               node={selectedNode}
               onUpdate={(updates) => handleNodeUpdate(selectedNode.id, updates)}
@@ -1721,8 +1722,7 @@ export function VisualWorkflowBuilder({
               translations={t}
             />
           </div>
-          );
-        })()}
+        )}
 
         {/* No mini panel - when properties are hidden, just show the canvas */}
       </div>

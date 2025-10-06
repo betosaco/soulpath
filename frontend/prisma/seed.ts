@@ -12,16 +12,16 @@ async function main() {
     where: { id: 1 },
     update: {},
     create: {
-      email_enabled: true,
-      brevo_api_key: '',
-      sender_email: 'noreply@matmax.store',
-      sender_name: 'MatMax Yoga Studio',
-      admin_email: 'admin@matmax.store',
-      sms_enabled: false,
-      sms_provider: 'labsmobile',
-      labsmobile_username: '',
-      labsmobile_token: '',
-      sms_sender_name: 'MatMax Yoga Studio'
+      emailEnabled: true,
+      brevoApiKey: '',
+      senderEmail: 'noreply@matmax.store',
+      senderName: 'MatMax Yoga Studio',
+      adminEmail: 'admin@matmax.store',
+      smsEnabled: false,
+      smsProvider: 'labsmobile',
+      labsmobileUsername: '',
+      labsmobileToken: '',
+      smsSenderName: 'MatMax Yoga Studio'
     }
   });
   console.log('✅ Communication config created:', communicationConfig.id);

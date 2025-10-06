@@ -58,7 +58,7 @@ export function UniversalComposer({
   const { user } = useAuth();
   const { config } = useCommunicationConfig();
   const [selectedChannel, setSelectedChannel] = useState<'email' | 'sms' | 'telegram' | 'whatsapp' | 'instagram'>(initialChannel);
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('custom');
   const [selectedRecipients, setSelectedRecipients] = useState<Recipient[]>([]);
   const [messageContent, setMessageContent] = useState('');
   const [subject, setSubject] = useState('');
@@ -104,7 +104,7 @@ export function UniversalComposer({
       id: 'email' as const,
       name: 'Email',
       icon: Mail,
-      enabled: config?.email_enabled,
+      enabled: config?.emailEnabled,
       color: 'bg-blue-100 text-blue-800'
     },
     {
@@ -118,7 +118,7 @@ export function UniversalComposer({
       id: 'telegram' as const,
       name: 'Telegram',
       icon: Bot,
-      enabled: config?.telegram_enabled,
+      enabled: config?.telegramEnabled,
       color: 'bg-purple-100 text-purple-800'
     },
     {
@@ -188,7 +188,7 @@ export function UniversalComposer({
           recipients: selectedRecipients.map(r => r.id),
           content: messageContent,
           subject: selectedChannel === 'email' ? subject : undefined,
-          templateId: selectedTemplate || undefined
+          templateId: selectedTemplate === 'custom' ? undefined : selectedTemplate
         })
       });
 
@@ -255,8 +255,8 @@ export function UniversalComposer({
                     <SelectValue placeholder="Choose a template or write custom" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Custom Message</SelectItem>
-                    {templatesData?.templates.map(template => (
+                    <SelectItem value="custom">Custom Message</SelectItem>
+                    {templatesData?.templates.filter(template => template.id).map(template => (
                       <SelectItem key={template.id} value={template.id.toString()}>
                         {template.name}
                       </SelectItem>

@@ -8,15 +8,16 @@ import { Bot, Eye, EyeOff, TestTube, UserPlus } from 'lucide-react';
 
 interface TelegramConfigCardProps {
   config: {
-    telegram_enabled: boolean;
-    telegram_bot_token: string;
-    telegram_webhook_url: string;
-    telegram_chat_ids: string[];
-    telegram_username: string;
+    telegramEnabled: boolean;
+    telegramBotToken: string;
+    telegramWebhookUrl: string;
+    telegramChatIds: string[];
+    telegramUsername: string;
   };
   onConfigChange: (key: string, value: any) => void;
   onTestConnection: () => Promise<void>;
   onManageUsers: () => void;
+  onAddUsers: () => void;
   isTesting: boolean;
 }
 
@@ -25,6 +26,7 @@ export function TelegramConfigCard({
   onConfigChange,
   onTestConnection,
   onManageUsers,
+  onAddUsers,
   isTesting
 }: TelegramConfigCardProps) {
   const [showTelegramToken, setShowTelegramToken] = useState(false);
@@ -42,27 +44,27 @@ export function TelegramConfigCard({
       <CardContent className="space-y-6">
         {/* Enable/Disable Toggle */}
         <div className="flex items-center justify-between">
-          <Label htmlFor="telegram_enabled" className="text-sm font-medium">
+          <Label htmlFor="telegramEnabled" className="text-sm font-medium">
             Enable Telegram Bot
           </Label>
           <Switch
-            id="telegram_enabled"
-            checked={config.telegram_enabled}
-            onCheckedChange={(checked) => onConfigChange('telegram_enabled', checked)}
+            id="telegramEnabled"
+            checked={config.telegramEnabled}
+            onCheckedChange={(checked) => onConfigChange('telegramEnabled', checked)}
           />
         </div>
 
-        {config.telegram_enabled && (
+        {config.telegramEnabled && (
           <>
             {/* Bot Token */}
             <div className="space-y-2">
-              <Label htmlFor="telegram_bot_token">Bot Token</Label>
+              <Label htmlFor="telegramBotToken">Bot Token</Label>
               <div className="relative">
                 <BaseInput
-                  id="telegram_bot_token"
+                  id="telegramBotToken"
                   type={showTelegramToken ? 'text' : 'password'}
-                  value={config.telegram_bot_token}
-                  onChange={(e) => onConfigChange('telegram_bot_token', e.target.value)}
+                  value={config.telegramBotToken}
+                  onChange={(e) => onConfigChange('telegramBotToken', e.target.value)}
                   placeholder="Enter your Telegram bot token"
                 />
                 <button
@@ -84,11 +86,11 @@ export function TelegramConfigCard({
 
             {/* Bot Username */}
             <div className="space-y-2">
-              <Label htmlFor="telegram_username">Bot Username</Label>
+              <Label htmlFor="telegramUsername">Bot Username</Label>
               <BaseInput
-                id="telegram_username"
-                value={config.telegram_username}
-                onChange={(e) => onConfigChange('telegram_username', e.target.value)}
+                id="telegramUsername"
+                value={config.telegramUsername}
+                onChange={(e) => onConfigChange('telegramUsername', e.target.value)}
                 placeholder="your_bot_username"
               />
               <div className="text-xs text-gray-500">
@@ -98,11 +100,11 @@ export function TelegramConfigCard({
 
             {/* Webhook URL */}
             <div className="space-y-2">
-              <Label htmlFor="telegram_webhook_url">Webhook URL</Label>
+              <Label htmlFor="telegramWebhookUrl">Webhook URL</Label>
               <BaseInput
-                id="telegram_webhook_url"
-                value={config.telegram_webhook_url}
-                onChange={(e) => onConfigChange('telegram_webhook_url', e.target.value)}
+                id="telegramWebhookUrl"
+                value={config.telegramWebhookUrl}
+                onChange={(e) => onConfigChange('telegramWebhookUrl', e.target.value)}
                 placeholder="https://yourdomain.com/api/telegram/webhook"
               />
               <div className="text-xs text-gray-500">
@@ -114,7 +116,7 @@ export function TelegramConfigCard({
             <div className="space-y-2">
               <Label>Connected Users</Label>
               <div className="text-sm text-gray-600 mb-2">
-                {config.telegram_chat_ids?.length || 0} users connected
+                {config.telegramChatIds?.length || 0} users connected
               </div>
               <BaseButton
                 onClick={onManageUsers}
@@ -123,6 +125,14 @@ export function TelegramConfigCard({
               >
                 <UserPlus className="h-4 w-4 mr-2" />
                 Manage Telegram Users
+              </BaseButton>
+              <BaseButton
+                onClick={onAddUsers}
+                variant="outline"
+                className="w-full mt-2"
+              >
+                <UserPlus className="h-4 w-4 mr-2" />
+                Add Telegram Users
               </BaseButton>
             </div>
 

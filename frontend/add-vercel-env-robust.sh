@@ -24,7 +24,7 @@ add_env_var() {
         echo "🔄 Adding $key to $env (attempt $((retry_count + 1))/$max_retries)..."
         
         if echo "$value" | vercel env add "$key" "$env" 2>/dev/null; then
-            echo "✅ $key added to $env successfully"
+             echo "✅ $key added to $env successfully"
             return 0
         else
             echo "⚠️  Attempt $((retry_count + 1)) failed, retrying..."

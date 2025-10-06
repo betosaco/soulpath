@@ -93,10 +93,22 @@ export function AdminSidebarNew({ activeTab, onTabChange, user }: AdminSidebarNe
       current: activeTab === 'content'
     },
     {
-      name: 'Communication',
+      name: 'Communication Hub',
       id: 'email',
       icon: EnvelopeIcon,
       current: activeTab === 'email'
+    },
+    {
+      name: 'Template Studio',
+      id: 'template-studio',
+      icon: DocumentTextIcon,
+      current: activeTab === 'template-studio'
+    },
+    {
+      name: 'Workflow Studio',
+      id: 'workflow-debug',
+      icon: WrenchScrewdriverIcon,
+      current: activeTab === 'workflow-debug'
     },
     {
       name: 'Payment Methods',
@@ -117,6 +129,7 @@ export function AdminSidebarNew({ activeTab, onTabChange, user }: AdminSidebarNe
       current: activeTab === 'settings'
     }
   ];
+
 
   const advancedNavigation = [
     {
@@ -259,6 +272,7 @@ export function AdminSidebarNew({ activeTab, onTabChange, user }: AdminSidebarNe
           })}
         </div>
       </nav>
+
 
       {/* Advanced Navigation Section */}
       <div className="px-4 py-2">

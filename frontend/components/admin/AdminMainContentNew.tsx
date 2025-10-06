@@ -32,13 +32,17 @@ import PoliciesAdmin from './PoliciesAdmin';
 // Import dashboard components
 import { AdminDashboardStats } from './AdminDashboardStats';
 
+// Import new communication components
+import { TemplateStudio } from '@/components/admin/templates/TemplateStudio';
+import { WorkflowExecutionsManager } from '@/components/admin/workflows/WorkflowExecutionsManager';
+import { WorkflowBuilderWithDebug } from '@/components/admin/workflows/WorkflowBuilderWithDebug';
+
 interface AdminMainContentNewProps {
   activeTab?: string;
   bugReportManagementRef?: React.RefObject<BugReportManagementRef>;
 }
 
 export function AdminMainContentNew({ activeTab = 'dashboard', bugReportManagementRef }: AdminMainContentNewProps) {
-  console.log('🎯 AdminMainContentNew: activeTab =', activeTab);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -58,6 +62,10 @@ export function AdminMainContentNew({ activeTab = 'dashboard', bugReportManageme
         return <CommunicationDashboard />;
       case 'communications':
         return <CommunicationsDashboard />;
+      case 'template-studio':
+        return <TemplateStudio />;
+      case 'workflow-debug':
+        return <WorkflowBuilderWithDebug />;
       case 'live-session':
         return <LiveSessionConfigManagement />;
       case 'images':

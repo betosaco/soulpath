@@ -78,8 +78,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const workflowData = await request.json();
     console.log(`🔧 PUT /api/admin/workflows/${workflowId} - Updating workflow:`, workflowData);
 
-    // Validate required fields
-    if (!workflowData.name || !workflowData.name.trim()) {
+    // Check if this is a partial update (e.g., just toggling isActive)
+    const isPartialUpdate = Object.keys(workflowData).length === 1 && workflowData.isActive !== undefined;
+
+    // Validate required fields only for full updates
+    if (!isPartialUpdate && (!workflowData.name || !workflowData.name.trim())) {
       return NextResponse.json({
         error: 'Workflow name is required'
       }, { status: 400 });
@@ -99,22 +102,48 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       }, { status: 404 });
     }
 
+    // Prepare update data based on whether it's a partial or full update
+    const updateData: any = {};
+
+    if (isPartialUpdate) {
+      // Partial update: only update isActive
+      updateData.isActive = workflowData.isActive;
+    } else {
+      // Full update: update all fields
+      updateData.name = workflowData.name.trim();
+      updateData.description = workflowData.description || null;
+      updateData.data = workflowData; // Store the complete workflow structure
+      updateData.tags = workflowData.tags || [];
+      updateData.version = workflowData.version || existingWorkflow.version;
+      updateData.isPublished = workflowData.isPublished !== undefined ? workflowData.isPublished : existingWorkflow.isPublished;
+    }
+
+    // Always allow updating isActive
+    if (workflowData.isActive !== undefined) {
+      updateData.isActive = workflowData.isActive;
+    }
+
     // Update workflow in database
     const updatedWorkflow = await prisma.workflow.update({
       where: { id: workflowId },
-      data: {
-        name: workflowData.name.trim(),
-        description: workflowData.description || null,
-        data: workflowData, // Store the complete workflow structure
-        tags: workflowData.tags || [],
-        isActive: workflowData.isActive !== undefined ? workflowData.isActive : existingWorkflow.isActive,
-        isPublished: workflowData.isPublished !== undefined ? workflowData.isPublished : existingWorkflow.isPublished,
-        version: workflowData.version || existingWorkflow.version
-      }
+      data: updateData
     });
 
     console.log('✅ Workflow updated in database:', updatedWorkflow.id);
 
+    // For partial updates, return minimal response
+    if (isPartialUpdate) {
+      return NextResponse.json({
+        success: true,
+        message: 'Workflow status updated successfully',
+        workflow: {
+          id: updatedWorkflow.id,
+          isActive: updatedWorkflow.isActive
+        }
+      });
+    }
+
+    // For full updates, return complete workflow data
     return NextResponse.json({
       success: true,
       message: 'Workflow updated successfully',

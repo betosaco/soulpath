@@ -7,6 +7,8 @@ import { CommunicationConfigHeader } from './CommunicationConfigHeader';
 import { EmailConfigCard } from './EmailConfigCard';
 import { SmsConfigCard } from './SmsConfigCard';
 import { TelegramConfigCard } from './TelegramConfigCard';
+import { TelegramUserManagement } from './TelegramUserManagement';
+import { AddTelegramUsers } from './AddTelegramUsers';
 
 
 export function CommunicationConfigRefactored() {
@@ -22,6 +24,10 @@ export function CommunicationConfigRefactored() {
   const [isTestingEmail, setIsTestingEmail] = useState(false);
   const [isTestingSms, setIsTestingSms] = useState(false);
   const [isTestingTelegram, setIsTestingTelegram] = useState(false);
+
+  // Modal states
+  const [isTelegramUserManagementOpen, setIsTelegramUserManagementOpen] = useState(false);
+  const [isAddTelegramUsersOpen, setIsAddTelegramUsersOpen] = useState(false);
 
   // Handle saving configuration
   const handleSaveConfiguration = async () => {
@@ -39,7 +45,7 @@ export function CommunicationConfigRefactored() {
   };
 
   // Test functions
-  const testEmailConnection = async () => {
+  const testEmailConnection = async (testEmailAddress?: string) => {
     setIsTestingEmail(true);
     try {
       const response = await fetch('/api/admin/communication/test', {
@@ -50,7 +56,7 @@ export function CommunicationConfigRefactored() {
         },
         body: JSON.stringify({
           type: 'email',
-          to: 'test@example.com',
+          to: testEmailAddress || 'test@example.com',
           subject: 'Test Email from MatMax Yoga Studio',
           content: '<p>This is a test email to verify your email configuration.</p>'
         })
@@ -58,7 +64,7 @@ export function CommunicationConfigRefactored() {
 
       const data = await response.json();
       setMessage(data.success
-        ? { type: 'success', text: 'Test email sent successfully!' }
+        ? { type: 'success', text: `Test email sent successfully to ${testEmailAddress || 'test@example.com'}!` }
         : { type: 'error', text: data.error || 'Failed to send test email' }
       );
     } catch (error) {
@@ -130,7 +136,11 @@ export function CommunicationConfigRefactored() {
   };
 
   const handleManageTelegramUsers = () => {
-    setMessage({ type: 'error', text: 'Telegram user management feature coming soon!' });
+    setIsTelegramUserManagementOpen(true);
+  };
+
+  const handleAddTelegramUsers = () => {
+    setIsAddTelegramUsersOpen(true);
   };
 
   return (
@@ -146,13 +156,13 @@ export function CommunicationConfigRefactored() {
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         <EmailConfigCard
           config={{
-            email_enabled: config.email_enabled,
-            email_provider: config.email_provider,
-            brevo_api_key: config.brevo_api_key,
-            resend_api_key: config.resend_api_key,
-            sender_email: config.sender_email,
-            sender_name: config.sender_name,
-            admin_email: config.admin_email
+            emailEnabled: config.emailEnabled,
+            emailProvider: config.emailProvider,
+            brevoApiKey: config.brevoApiKey,
+            resendApiKey: config.resendApiKey,
+            senderEmail: config.senderEmail,
+            senderName: config.senderName,
+            adminEmail: config.adminEmail
           }}
           onConfigChange={handleConfigChange}
           onTestConnection={testEmailConnection}
@@ -174,15 +184,16 @@ export function CommunicationConfigRefactored() {
 
         <TelegramConfigCard
           config={{
-            telegram_enabled: config.telegram_enabled,
-            telegram_bot_token: config.telegram_bot_token,
-            telegram_webhook_url: config.telegram_webhook_url,
-            telegram_chat_ids: config.telegram_chat_ids,
-            telegram_username: config.telegram_username
+            telegramEnabled: config.telegramEnabled,
+            telegramBotToken: config.telegramBotToken,
+            telegramWebhookUrl: config.telegramWebhookUrl,
+            telegramChatIds: config.telegramChatIds,
+            telegramUsername: config.telegramUsername
           }}
           onConfigChange={handleConfigChange}
           onTestConnection={testTelegramConnection}
           onManageUsers={handleManageTelegramUsers}
+          onAddUsers={handleAddTelegramUsers}
           isTesting={isTestingTelegram}
         />
       </div>
@@ -205,6 +216,20 @@ export function CommunicationConfigRefactored() {
           </div>
         </div>
       </div>
+
+      {/* Telegram User Management Modal */}
+      <TelegramUserManagement
+        isOpen={isTelegramUserManagementOpen}
+        onClose={() => setIsTelegramUserManagementOpen(false)}
+        user={user}
+      />
+
+      {/* Add Telegram Users Modal */}
+      <AddTelegramUsers
+        isOpen={isAddTelegramUsersOpen}
+        onClose={() => setIsAddTelegramUsersOpen(false)}
+        user={user}
+      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedUser } from '@/lib/auth';
-import { WorkflowEngine } from '@/components/admin/workflows/WorkflowEngine';
+// import { WorkflowEngine } from '@/components/admin/workflows/WorkflowEngine';
 
 export async function POST(request: NextRequest) {
   try {
@@ -48,17 +48,13 @@ export async function POST(request: NextRequest) {
     };
 
     try {
-      // Execute the workflow using the WorkflowEngine with event context
-      const engine = new WorkflowEngine();
-      const results = await engine.executeWorkflow(workflow, mockOrderData, mockEventContext);
-
-      console.log('✅ Workflow test completed successfully');
-      console.log('📊 Test results:', results);
+      // TODO: Re-enable workflow testing once WorkflowEngine import issues are resolved
+      console.log('⚠️ Workflow testing temporarily disabled due to import issues');
 
       return NextResponse.json({
-        success: true,
-        message: 'Workflow test completed successfully',
-        results
+        success: false,
+        message: 'Workflow testing temporarily disabled',
+        error: 'WorkflowEngine import issues need to be resolved'
       });
 
     } catch (executionError) {

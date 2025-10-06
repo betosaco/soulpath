@@ -10,16 +10,16 @@ import { useAuth } from '../../hooks/useAuth';
 
 interface EmailConfigCardProps {
   config: {
-    email_enabled: boolean;
-    email_provider: 'brevo' | 'resend';
-    brevo_api_key: string;
-    resend_api_key: string;
-    sender_email: string;
-    sender_name: string;
-    admin_email: string;
+    emailEnabled: boolean;
+    emailProvider: 'brevo' | 'resend';
+    brevoApiKey: string;
+    resendApiKey: string;
+    senderEmail: string;
+    senderName: string;
+    adminEmail: string;
   };
   onConfigChange: (key: string, value: any) => void;
-  onTestConnection: () => Promise<void>;
+  onTestConnection: (testEmailAddress?: string) => Promise<void>;
   isTesting: boolean;
 }
 
@@ -102,24 +102,24 @@ export function EmailConfigCard({ config, onConfigChange, onTestConnection, isTe
   // Debounced effect for Brevo API key validation
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (config.email_provider === 'brevo' && config.brevo_api_key) {
-        validateApiKey('brevo', config.brevo_api_key);
+      if (config.emailProvider === 'brevo' && config.brevoApiKey) {
+        validateApiKey('brevo', config.brevoApiKey);
       }
     }, 1000); // 1 second debounce
 
     return () => clearTimeout(timeoutId);
-  }, [config.brevo_api_key, config.email_provider, validateApiKey]);
+  }, [config.brevoApiKey, config.emailProvider, validateApiKey]);
 
   // Debounced effect for Resend API key validation
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (config.email_provider === 'resend' && config.resend_api_key) {
-        validateApiKey('resend', config.resend_api_key);
+      if (config.emailProvider === 'resend' && config.resendApiKey) {
+        validateApiKey('resend', config.resendApiKey);
       }
     }, 1000); // 1 second debounce
 
     return () => clearTimeout(timeoutId);
-  }, [config.resend_api_key, config.email_provider, validateApiKey]);
+  }, [config.resendApiKey, config.emailProvider, validateApiKey]);
 
   const getValidationIcon = (validation: typeof brevoValidation) => {
     switch (validation.status) {
@@ -156,24 +156,24 @@ export function EmailConfigCard({ config, onConfigChange, onTestConnection, isTe
       <CardContent className="space-y-6">
         {/* Enable/Disable Toggle */}
         <div className="flex items-center justify-between">
-          <Label htmlFor="email_enabled" className="text-sm font-medium">
+          <Label htmlFor="emailEnabled" className="text-sm font-medium">
             Enable Email Service
           </Label>
           <Switch
-            id="email_enabled"
-            checked={config.email_enabled}
-            onCheckedChange={(checked) => onConfigChange('email_enabled', checked)}
+            id="emailEnabled"
+            checked={config.emailEnabled}
+            onCheckedChange={(checked) => onConfigChange('emailEnabled', checked)}
           />
         </div>
 
-        {config.email_enabled && (
+        {config.emailEnabled && (
           <>
             {/* Provider Selection */}
             <div className="space-y-2">
-              <Label htmlFor="email_provider">Email Provider</Label>
+              <Label htmlFor="emailProvider">Email Provider</Label>
               <Select
-                value={config.email_provider}
-                onValueChange={(value: 'brevo' | 'resend') => onConfigChange('email_provider', value)}
+                value={config.emailProvider}
+                onValueChange={(value: 'brevo' | 'resend') => onConfigChange('emailProvider', value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select provider" />
@@ -186,7 +186,7 @@ export function EmailConfigCard({ config, onConfigChange, onTestConnection, isTe
             </div>
 
             {/* Brevo Configuration */}
-            {config.email_provider === 'brevo' && (
+            {config.emailProvider === 'brevo' && (
               <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
                 <div className="flex items-center justify-between">
                   <h4 className="font-medium text-sm text-gray-900">Brevo Configuration</h4>
@@ -210,16 +210,16 @@ export function EmailConfigCard({ config, onConfigChange, onTestConnection, isTe
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="brevo_api_key" className="flex items-center gap-2">
+                  <Label htmlFor="brevoApiKey" className="flex items-center gap-2">
                     API Key
                     {getValidationIcon(brevoValidation)}
                   </Label>
                   <div className="relative">
                     <BaseInput
-                      id="brevo_api_key"
+                      id="brevoApiKey"
                       type={showApiKey ? 'text' : 'password'}
-                      value={config.brevo_api_key}
-                      onChange={(e) => onConfigChange('brevo_api_key', e.target.value)}
+                      value={config.brevoApiKey}
+                      onChange={(e) => onConfigChange('brevoApiKey', e.target.value)}
                       placeholder="Enter your Brevo API key"
                       className={getValidationColor(brevoValidation)}
                     />
@@ -246,7 +246,7 @@ export function EmailConfigCard({ config, onConfigChange, onTestConnection, isTe
             )}
 
             {/* Resend Configuration */}
-            {config.email_provider === 'resend' && (
+            {config.emailProvider === 'resend' && (
               <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
                 <div className="flex items-center justify-between">
                   <h4 className="font-medium text-sm text-gray-900">Resend Configuration</h4>
@@ -270,16 +270,16 @@ export function EmailConfigCard({ config, onConfigChange, onTestConnection, isTe
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="resend_api_key" className="flex items-center gap-2">
+                  <Label htmlFor="resendApiKey" className="flex items-center gap-2">
                     API Key
                     {getValidationIcon(resendValidation)}
                   </Label>
                   <div className="relative">
                     <BaseInput
-                      id="resend_api_key"
+                      id="resendApiKey"
                       type={showResendApiKey ? 'text' : 'password'}
-                      value={config.resend_api_key}
-                      onChange={(e) => onConfigChange('resend_api_key', e.target.value)}
+                      value={config.resendApiKey}
+                      onChange={(e) => onConfigChange('resendApiKey', e.target.value)}
                       placeholder="Enter your Resend API key"
                       className={getValidationColor(resendValidation)}
                     />
@@ -308,21 +308,21 @@ export function EmailConfigCard({ config, onConfigChange, onTestConnection, isTe
             {/* Sender Configuration */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="sender_email">Sender Email</Label>
+                <Label htmlFor="senderEmail">Sender Email</Label>
                 <BaseInput
-                  id="sender_email"
+                  id="senderEmail"
                   type="email"
-                  value={config.sender_email}
-                  onChange={(e) => onConfigChange('sender_email', e.target.value)}
+                  value={config.senderEmail}
+                  onChange={(e) => onConfigChange('senderEmail', e.target.value)}
                   placeholder="noreply@yourdomain.com"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="sender_name">Sender Name</Label>
+                <Label htmlFor="senderName">Sender Name</Label>
                 <BaseInput
-                  id="sender_name"
-                  value={config.sender_name}
-                  onChange={(e) => onConfigChange('sender_name', e.target.value)}
+                  id="senderName"
+                  value={config.senderName}
+                  onChange={(e) => onConfigChange('senderName', e.target.value)}
                   placeholder="Your Company Name"
                 />
               </div>
@@ -330,12 +330,12 @@ export function EmailConfigCard({ config, onConfigChange, onTestConnection, isTe
 
             {/* Admin Email */}
             <div className="space-y-2">
-              <Label htmlFor="admin_email">Admin Email (for notifications)</Label>
+              <Label htmlFor="adminEmail">Admin Email (for notifications)</Label>
               <BaseInput
-                id="admin_email"
+                id="adminEmail"
                 type="email"
-                value={config.admin_email}
-                onChange={(e) => onConfigChange('admin_email', e.target.value)}
+                value={config.adminEmail}
+                onChange={(e) => onConfigChange('adminEmail', e.target.value)}
                 placeholder="admin@yourdomain.com"
               />
             </div>
@@ -357,7 +357,7 @@ export function EmailConfigCard({ config, onConfigChange, onTestConnection, isTe
                 />
               </div>
               <BaseButton
-                onClick={onTestConnection}
+                onClick={() => onTestConnection(testEmail)}
                 disabled={isTesting || !testEmail.trim()}
                 className="w-full"
                 variant="outline"
