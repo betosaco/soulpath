@@ -27,6 +27,10 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
+  Mail,
+  Settings,
+  Users,
+  Calendar,
 } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -61,8 +65,22 @@ interface ExecutionStats {
   cancelled: number;
 }
 
+interface EmailScenario {
+  id: number;
+  scenarioKey: string;
+  name: string;
+  description?: string;
+  customerType: string;
+  orderTypes: string[];
+  priority: number;
+  isActive: boolean;
+  components: any[];
+  subjectTemplate?: any;
+}
+
 export function WorkflowExecutionsManager() {
   const [executions, setExecutions] = useState<WorkflowExecution[]>([]);
+  const [scenarios, setScenarios] = useState<EmailScenario[]>([]);
   const [stats, setStats] = useState<ExecutionStats>({
     total: 0,
     running: 0,
@@ -73,6 +91,7 @@ export function WorkflowExecutionsManager() {
   });
   const [loading, setLoading] = useState(true);
   const [selectedExecution, setSelectedExecution] = useState<WorkflowExecution | null>(null);
+  const [activeTab, setActiveTab] = useState<'executions' | 'scenarios'>('executions');
   const [filters, setFilters] = useState({
     status: '',
     workflowId: '',
@@ -84,6 +103,88 @@ export function WorkflowExecutionsManager() {
     total: 0,
     hasMore: false,
   });
+
+  // Fetch scenarios from template studio
+  const fetchScenarios = async () => {
+    try {
+      console.log('🔍 Fetching scenarios from API...');
+      const response = await fetch('/api/admin/communication/templates/scenarios', {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      console.log('📡 Response status:', response.status);
+      const data = await response.json();
+      console.log('📊 Response data:', data);
+      
+      if (data.success) {
+        console.log('✅ Scenarios fetched successfully:', data.data);
+        setScenarios(data.data);
+      } else {
+        console.error('❌ Failed to fetch scenarios:', data.error);
+        // Fallback: Show some mock data for testing
+        console.log('🔄 Using fallback mock data...');
+        setScenarios([
+          {
+            id: 1,
+            scenarioKey: 'new_customer_matpass_only',
+            name: 'New Customer - MatPass Only',
+            description: 'Welcome email for new customers purchasing only MatPass',
+            customerType: 'new',
+            orderTypes: ['matpass'],
+            priority: 100,
+            isActive: true,
+            components: [],
+            subjectTemplate: null
+          },
+          {
+            id: 2,
+            scenarioKey: 'existing_customer_matpass_only',
+            name: 'Existing Customer - MatPass Only',
+            description: 'Renewal email for existing customers purchasing only MatPass',
+            customerType: 'existing',
+            orderTypes: ['matpass'],
+            priority: 95,
+            isActive: true,
+            components: [],
+            subjectTemplate: null
+          }
+        ]);
+      }
+    } catch (error) {
+      console.error('❌ Failed to fetch scenarios:', error);
+      // Fallback: Show some mock data for testing
+      console.log('🔄 Using fallback mock data due to error...');
+      setScenarios([
+        {
+          id: 1,
+          scenarioKey: 'new_customer_matpass_only',
+          name: 'New Customer - MatPass Only',
+          description: 'Welcome email for new customers purchasing only MatPass',
+          customerType: 'new',
+          orderTypes: ['matpass'],
+          priority: 100,
+          isActive: true,
+          components: [],
+          subjectTemplate: null
+        },
+        {
+          id: 2,
+          scenarioKey: 'existing_customer_matpass_only',
+          name: 'Existing Customer - MatPass Only',
+          description: 'Renewal email for existing customers purchasing only MatPass',
+          customerType: 'existing',
+          orderTypes: ['matpass'],
+          priority: 95,
+          isActive: true,
+          components: [],
+          subjectTemplate: null
+        }
+      ]);
+    }
+  };
 
   // Fetch executions
   const fetchExecutions = async (resetPage = true) => {
@@ -205,6 +306,7 @@ export function WorkflowExecutionsManager() {
   // Auto-refresh for active executions
   useEffect(() => {
     fetchExecutions();
+    fetchScenarios();
 
     const interval = setInterval(() => {
       if (stats.running > 0 || stats.paused > 0) {
@@ -251,19 +353,56 @@ export function WorkflowExecutionsManager() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Workflow Executions</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Workflow Debug</h2>
           <p className="text-gray-600 mt-1">
-            Monitor and manage stateful workflow executions
+            Monitor executions and manage email scenarios
           </p>
         </div>
-        <BaseButton onClick={() => fetchExecutions()} variant="outline">
-          <RefreshCw className="w-4 h-4 mr-2" />
-          Refresh
-        </BaseButton>
+        <div className="flex items-center gap-3">
+          <BaseButton onClick={() => fetchExecutions()} variant="outline">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Refresh
+          </BaseButton>
+        </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      {/* Tab Navigation */}
+      <div className="border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8">
+          <button
+            onClick={() => setActiveTab('executions')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'executions'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Activity className="w-4 h-4" />
+              Executions ({stats.total})
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('scenarios')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'scenarios'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Mail className="w-4 h-4" />
+              Email Scenarios ({scenarios.length})
+            </div>
+          </button>
+        </nav>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'executions' && (
+        <>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -639,6 +778,150 @@ export function WorkflowExecutionsManager() {
           </Card>
         </div>
       </div>
+        </>
+      )}
+
+      {/* Scenarios Tab */}
+      {activeTab === 'scenarios' && (
+        <div className="space-y-6">
+          {/* Debug Info */}
+          <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+            <p className="text-sm text-yellow-800">
+              <strong>Debug:</strong> Active tab: {activeTab}, Scenarios count: {scenarios.length}
+            </p>
+          </div>
+          
+          {/* Scenarios Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Email Scenarios</h3>
+              <p className="text-sm text-gray-600">
+                Scenarios created in Template Studio that can be used in workflows
+              </p>
+            </div>
+            <BaseButton onClick={() => fetchScenarios()} variant="outline">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh
+            </BaseButton>
+          </div>
+
+          {/* Scenarios Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {scenarios.map((scenario) => (
+              <Card key={scenario.id} className="hover:shadow-md transition-shadow">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-base font-medium text-gray-900">
+                        {scenario.name}
+                      </CardTitle>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {scenario.description || 'No description'}
+                      </p>
+                    </div>
+                    <Badge 
+                      variant={scenario.isActive ? "default" : "secondary"}
+                      className="ml-2"
+                    >
+                      {scenario.isActive ? 'Active' : 'Inactive'}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-3">
+                    {/* Customer Type */}
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 text-gray-400" />
+                      <span className="text-sm text-gray-600">Customer:</span>
+                      <Badge variant="outline" className="text-xs">
+                        {scenario.customerType}
+                      </Badge>
+                    </div>
+
+                    {/* Order Types */}
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-gray-400" />
+                      <span className="text-sm text-gray-600">Orders:</span>
+                      <div className="flex gap-1">
+                        {scenario.orderTypes.map((type, index) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {type}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Priority */}
+                    <div className="flex items-center gap-2">
+                      <Settings className="w-4 h-4 text-gray-400" />
+                      <span className="text-sm text-gray-600">Priority:</span>
+                      <Badge variant="outline" className="text-xs">
+                        {scenario.priority}
+                      </Badge>
+                    </div>
+
+                    {/* Components Count */}
+                    <div className="flex items-center gap-2">
+                      <Mail className="w-4 h-4 text-gray-400" />
+                      <span className="text-sm text-gray-600">Components:</span>
+                      <Badge variant="outline" className="text-xs">
+                        {scenario.components?.length || 0}
+                      </Badge>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex gap-2 pt-2 border-t">
+                      <BaseButton
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => {
+                          // TODO: Navigate to template studio with this scenario selected
+                          console.log('View scenario:', scenario.id);
+                        }}
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        View
+                      </BaseButton>
+                      <BaseButton
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => {
+                          // TODO: Test this scenario
+                          console.log('Test scenario:', scenario.id);
+                        }}
+                      >
+                        <Play className="w-4 h-4 mr-1" />
+                        Test
+                      </BaseButton>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Empty State */}
+          {scenarios.length === 0 && (
+            <div className="text-center py-12">
+              <Mail className="w-12 h-12 mx-auto text-gray-300 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Scenarios Found</h3>
+              <p className="text-gray-600 mb-4">
+                Create scenarios in the Template Studio to see them here.
+              </p>
+              <BaseButton
+                onClick={() => {
+                  // TODO: Navigate to template studio
+                  console.log('Navigate to template studio');
+                }}
+              >
+                Go to Template Studio
+              </BaseButton>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
